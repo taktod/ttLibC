@@ -1,0 +1,13 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: @PACKAGE@
+Description: @TTLIBC_DESCRIPTION@
+Version: @VERSION@
+Requires: 
+Requires.private: 
+
+Cflags: -I${includedir}
+Libs: -L${libdir} -lttLibC

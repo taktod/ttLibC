@@ -1,0 +1,219 @@
+dnl Process this file with autoconf to produce a configure script.
+
+AC_PREREQ(2.59)
+AC_INIT(ttLibC, 1.0)
+
+TTLIBC_DESCRIPTION="ttLibC library."
+
+AC_CANONICAL_SYSTEM
+AC_PROG_RANLIB
+AM_INIT_AUTOMAKE()
+
+AC_PROG_CC
+AC_PROG_CXX
+AC_PROG_CC_STDC
+AM_PROG_CC_C_O
+
+# user input flg
+lgpl_flg=no
+gpl_flg=no
+debug_flg=0
+test_flg=no
+
+opencv_flg=no
+openal_flg=no
+
+# check result
+cute_check=no 
+opencv_check=no
+openal_check=no
+
+AC_ARG_ENABLE(
+	[lgpl],
+	AS_HELP_STRING([--enable-lgpl], [enable lgpl code. license will be LGPLv3.]),
+	[lgpl_flg=$enableval]
+)
+AC_ARG_ENABLE(
+	[gpl],
+	AS_HELP_STRING([--enable-gpl], [enable gpl code. license will be GPLv3.]),
+	[gpl_flg=$enableval]
+)
+if test x$gpl_flg = "xyes"; then
+	lgpl_flg=yes
+fi
+
+AC_ARG_ENABLE(
+	[debug],
+	AS_HELP_STRING([--enable-debug], [enable debug log output.]),
+	[
+		if test x$enableval = "xyes"; then
+			debug_flg=1
+		fi
+	]
+)
+AC_SUBST(debug_flg)
+
+AC_ARG_ENABLE(
+	[test],
+	AS_HELP_STRING([--enable-test], [enable test code. require cute_lib in /usr/local/include, license will be gpl, and debug flg is on.]),
+	[
+		test_flg=$enableval
+		if test x$test_flg="xyes"; then
+			debug_flg=1
+			gpl_flg=yes
+			lgpl_flg=yes
+		fi
+	]
+)
+
+if test x$test_flg = "xyes"; then
+	# check cute library
+	if test -f /usr/local/include/cute_lib/cute.h; then
+		cute_check=yes
+	else
+		cute_check=no
+	fi
+fi
+
+# library flag
+AC_ARG_ENABLE(
+	[all],
+	AS_HELP_STRING([--enable-all], [enable all extra library support.]),
+	[
+		opencv_flg=$enableval
+		openal_flg=$enableval
+	]
+)
+
+AC_ARG_ENABLE(
+	[opencv],
+	AS_HELP_STRING([--enable-opencv/--disable-opencv], [enable/disable opencv code.]),
+	[opencv_flg=$enableval]
+)
+
+AC_ARG_ENABLE(
+	[openal],
+	AS_HELP_STRING([--enable-openal/--disable-openal], [enable/disable openal code.]),
+	[openal_flg=$enableval]
+)
+
+if test x$opencv_flg = "xyes"; then
+	PKG_CHECK_MODULES(
+		[OPENCV],
+		[opencv],
+		[opencv_check=yes],
+		[opencv_check=no]
+	)
+fi
+if test x$openal_flg$gpl_flg = "xyesyes"; then
+	PKG_CHECK_MODULES(
+		[OPENAL],
+		[openal],
+		[openal_check=yes],
+		[openal_check=no]
+	)
+fi
+
+if test x$gpl_flg = "xyes"; then
+	AC_DEFINE([__ENABLE_GPL__])
+else
+	if test x$lgpl_flg = "xyes"; then
+		AC_DEFINE([__ENABLE_LGPL__])
+	fi
+fi
+
+# test & gpl & cute
+if test x$test_flg$cute_check$gpl_flg = "xyesyesyes"; then
+	TEST_CFLAGS='-I/usr/local/include/cute_lib'
+	TEST_LIBS=''
+	AC_SUBST([TEST_CFLAGS])
+	AC_SUBST([TEST_LIBS])
+fi
+AM_CONDITIONAL(ENABLE_TEST, test x$test_flg$cute_check$gpl_flg = "xyesyesyes")
+
+if test x$opencv_flg$opencv_check = "xyesyes"; then
+	AC_DEFINE([__ENABLE_OPENCV__])
+fi
+AM_CONDITIONAL(ENABLE_OPENCV, test x$opencv_flg$opencv_check = "xyesyes")
+
+if test x$opencv_flg$gpl_flg$openal_check = "xyesyesyes"; then
+	AC_DEFINE([__ENABLE_OPENAL__])
+fi
+AM_CONDITIONAL(ENABLE_OPENAL, test x$openal_flg$gpl_flg$openal_check = "xyesyesyes")
+
+AC_ARG_WITH(pkgconfigdir,
+	AS_HELP_STRING([--with-pkgconfigdir], [Use the specified pkgconfig dir.(default is $libdir/pkgconfig)]),
+	[pkgconfigdir=${withval}], # withoutでやるとwithvalがnoになるっぽい。なるほどねぇ
+	[pkgconfigdir='${libdir}/pkgconfig'])
+
+AC_SUBST([pkgconfigdir])
+
+AC_SUBST(TTLIBC_DESCRIPTION)
+
+AC_CONFIG_FILES(
+	Makefile
+	[ttLibC/log.h:ttLibC/log.h.in]
+	ttLibC/Makefile
+	cuteSrc/Makefile
+	[ttLibC.pc:ttLibC.pc.in])
+AC_OUTPUT
+
+echo ""
+echo "Result ..."
+
+# about license
+if test x$gpl_flg = "xyes"; then
+	echo "license: GPLv3"
+	cp gpl-3.0.txt LICENSE
+else
+	if test x$lgpl_flg = "xyes"; then
+		echo "license: LGPLv3"
+		cp lgpl-3.0.txt LICENSE
+	else
+		echo "license: The 3 Cause BSD."
+		cp 3causeBSD.txt LICENSE
+	fi
+fi
+# about debug flg
+if test x$debug_flg = "x1"; then
+	echo "debug: on"
+else
+	echo "debug: off"
+fi
+# about test code.
+if test x$test_flg = "xyes"; then
+	if test x$gpl_flg = "xyes"; then
+		if test x$cute_check = "xyes"; then
+			echo "test: on"
+		else
+			echo "test: off(cause of no cute library.)"
+		fi
+	else
+		echo "test: off(under gpl only.)"
+	fi
+else
+	echo "test: off"
+fi
+# about library support
+if test x$opencv_flg = "xyes"; then
+	if test x$opencv_check = "xyes"; then
+		echo "opencv: on"
+	else
+		echo "opencv: off(opencv library is missing.)"
+	fi
+else
+	echo "opencv: off"
+fi
+if test x$openal_flg = "xyes"; then
+	if test x$gpl_flg = "xyes"; then
+		if test x$openal_check = "xyes"; then
+			echo "openal: on"
+		else
+			echo "openal: off(openal library is missing.)"
+		fi
+	else
+		echo "openal: off(under gpl only.)"
+	fi
+else
+	echo "openal: off"
+fi

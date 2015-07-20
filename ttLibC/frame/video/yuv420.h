@@ -1,0 +1,109 @@
+/**
+ * @file   yuv420.h
+ * @brief  yuv420 image frame information.
+ *
+ * this code is under 3-Cause BSD license.
+ *
+ * @author taktod
+ * @date   2015/07/18
+ */
+
+#ifndef TTLIBC_FRAME_VIDEO_YUV420_H_
+#define TTLIBC_FRAME_VIDEO_YUV420_H_
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "video.h"
+
+/**
+ * yuv420 type
+ */
+typedef enum {
+	/** planar data. yyy... uu... vv...*/
+	Yuv420Type_planar,
+	/** semiPlanar data. yyy... uvuv... */
+	Yuv420Type_semiPlanar,
+	/** planar data for yvu. yyy... vv... uu... */
+	Yvu420Type_planar,
+	/** semiPlanar data for yvu. yyy... vuvu... */
+	Yvu420Type_semiPlanar,
+} ttLibC_Yuv420_Type;
+
+/**
+ * yuv420 frame definition.
+ */
+typedef struct {
+	/** inherit data from ttLibC_Video */
+	ttLibC_Video inherit_super;
+	/** yuv420 type */
+	ttLibC_Yuv420_Type type;
+	/** ref pointer for y_data. */
+	uint8_t *y_data;
+	/** stride data for y-width */
+	uint32_t y_stride;
+	/** step for next y pixel. */
+	uint32_t y_step;
+	/** ref pointer for u_data. */
+	uint8_t *u_data;
+	/** stride data for u-width */
+	uint32_t u_stride;
+	/** step for next u pixel. */
+	uint32_t u_step;
+	/** ref pointer for v_data. */
+	uint8_t *v_data;
+	/** stride data for v-width */
+	uint32_t v_stride;
+	/** step for next v pixel. */
+	uint32_t v_step;
+} ttLibC_Frame_Video_Yuv420;
+
+typedef ttLibC_Frame_Video_Yuv420 ttLibC_Yuv420;
+
+/**
+ * make yuv420 frame
+ * @param prev_frame    reuse frame object. if NULL, create new one.
+ * @param type          type of yuv420
+ * @param width         width of image
+ * @param height        height of image
+ * @param data          yuv420 data
+ * @param data_size     data size
+ * @param y_data        pointer for y_data
+ * @param y_stride      stride for each line for y_data
+ * @param u_data        pointer for u_data
+ * @param u_stride      stride for each line for u_data
+ * @param v_data        pointer for v_data
+ * @param v_stride      stride for each line for v_data
+ * @param non_copy_mode true:hold the data pointer. false:data will copy
+ * @param pts           pts for image
+ * @param timebase      timebase number for pts.
+ */
+ttLibC_Yuv420 *ttLibC_Yuv420_make(
+		ttLibC_Yuv420 *prev_frame,
+		ttLibC_Yuv420_Type type,
+		uint32_t width,
+		uint32_t height,
+		void *data,
+		size_t data_size,
+		void *y_data,
+		uint32_t y_stride,
+		void *u_data,
+		uint32_t u_stride,
+		void *v_data,
+		uint32_t v_stride,
+		bool non_copy_mode,
+		uint64_t pts,
+		uint32_t timebase);
+
+/**
+ * close frame
+ * @param frame
+ */
+void ttLibC_Yuv420_close(ttLibC_Yuv420 **frame);
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
+
+#endif /* TTLIBC_FRAME_VIDEO_YUV420_H_ */

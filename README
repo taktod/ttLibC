@@ -1,0 +1,82 @@
+name:
+
+  ttLibC
+
+license:
+
+  dual license among The 3Cause BSD, LGPLv3, and GPLv3
+
+about:
+
+  this library is taktod's C-language library.
+
+instruction:
+
+  for OSX
+
+  cute test code will be good example to use.
+
+  1st. get the cute 2.0.0 standalone.
+  http://cute-test.com/projects/cute/wiki/CUTE_standalone
+  
+  extract cute2_0_0.tar.gz
+  
+  copy cute_lib/* in /usr/local/include/cute_lib/
+
+  2nd get the boost.
+
+  in my case. I use brew.
+
+  $ brew install boost
+  
+  finally try to compile and run.
+
+  $ autoreconf
+
+  $ ./configure --enable-all --enable-test
+
+  $ make
+
+  $ cuteSrc/cuteTest
+
+  will run all test.
+
+
+  camera with opencv.
+  
+  $ brew tap homebrew/science
+  
+  $ brew install opencv
+  
+  sound play with openal.
+  
+  $ brew install openal
+  
+  $ ./configure --enable-all --enable-test
+  
+  $ make clean
+  
+  $ make
+  
+  $ cuteSrc/cuteTest
+
+  will run camera test and beep play test.
+
+  if you want to run specific test. for instance, hexUtilTest in utilTests.
+
+  $ cuteSrc/cuteTest utilTests#hexUtilTest
+  
+  will work.
+
+  
+  if you want docs. doxygen will work.
+  
+  $ brew install doxygen graphviz
+  
+  cd docs
+  
+  $ doxygen ttLibC.doxygen
+  
+  $ open html/index.html
+  
+  will display the docs.
