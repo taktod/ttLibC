@@ -22,11 +22,14 @@ test_flg=no
 
 opencv_flg=no
 openal_flg=no
+mp3lame_flg=no
 
 # check result
 cute_check=no 
 opencv_check=no
 openal_check=no
+mp3lame_encode_check=no
+mp3lame_decode_check=no
 
 AC_ARG_ENABLE(
 	[lgpl],
@@ -82,6 +85,7 @@ AC_ARG_ENABLE(
 	[
 		opencv_flg=$enableval
 		openal_flg=$enableval
+		mp3lame_flg=$enableval
 	]
 )
 
@@ -97,21 +101,46 @@ AC_ARG_ENABLE(
 	[openal_flg=$enableval]
 )
 
+AC_ARG_ENABLE(
+	[mp3lame],
+	AS_HELP_STRING([--enable-mp3lame/--disable-mp3lame], [enable/disable mp3lame code.]),
+	[mp3lame_flg=$enableval]
+)
+
 if test x$opencv_flg = "xyes"; then
 	PKG_CHECK_MODULES(
 		[OPENCV],
 		[opencv],
-		[opencv_check=yes],
-		[opencv_check=no]
+		[opencv_check=yes]
 	)
 fi
 if test x$openal_flg$gpl_flg = "xyesyes"; then
 	PKG_CHECK_MODULES(
 		[OPENAL],
 		[openal],
-		[openal_check=yes],
-		[openal_check=no]
+		[openal_check=yes]
 	)
+fi
+if test x$mp3lame_flg = "xyes"; then
+	if test -f /usr/local/include/lame/lame.h; then
+		AC_CHECK_LIB(
+			mp3lame,
+			get_lame_version,
+			[
+				MP3LAME_CFLAGS='-I/usr/local/include'
+				MP3LAME_LIBS='-L/usr/local/lib -lmp3lame'
+				AC_SUBST([MP3LAME_CFLAGS])
+				AC_SUBST([MP3LAME_LIBS])
+				AC_DEFINE([__ENABLE_MP3LAME__])
+				if test x$gpl_flg = "xyes"; then
+					mp3lame_decode_check=yes
+				fi
+				if test x$lgpl_flg = "xyes"; then
+					mp3lame_encode_check=yes
+				fi
+			]
+		)
+	fi
 fi
 
 if test x$gpl_flg = "xyes"; then
@@ -141,9 +170,19 @@ if test x$opencv_flg$gpl_flg$openal_check = "xyesyesyes"; then
 fi
 AM_CONDITIONAL(ENABLE_OPENAL, test x$openal_flg$gpl_flg$openal_check = "xyesyesyes")
 
+if test x$mp3lame_flg$gpl_flg$mp3lame_decode_check = "xyesyesyes"; then
+	AC_DEFINE([__ENABLE_MP3LAME_DECODE__])
+fi
+AM_CONDITIONAL(ENABLE_MP3LAME_DECODE, test x$mp3lame_flg$gpl_flg$mp3lame_decode_check = "xyesyesyes")
+
+if test x$mp3lame_flg$lgpl_flg$mp3lame_encode_check = "xyesyesyes"; then
+	AC_DEFINE([__ENABLE_MP3LAME_ENCODE__])
+fi
+AM_CONDITIONAL(ENABLE_MP3LAME_ENCODE, test x$mp3lame_flg$lgpl_flg$mp3lame_encode_check = "xyesyesyes")
+
 AC_ARG_WITH(pkgconfigdir,
 	AS_HELP_STRING([--with-pkgconfigdir], [Use the specified pkgconfig dir.(default is $libdir/pkgconfig)]),
-	[pkgconfigdir=${withval}], # withoutでやるとwithvalがnoになるっぽい。なるほどねぇ
+	[pkgconfigdir=${withval}],
 	[pkgconfigdir='${libdir}/pkgconfig'])
 
 AC_SUBST([pkgconfigdir])
@@ -216,4 +255,30 @@ if test x$openal_flg = "xyes"; then
 	fi
 else
 	echo "openal: off"
+fi
+if test x$mp3lame_flg = "xyes"; then
+	if test x$gpl_flg = "xyes"; then
+		if test x$mp3lame_decode_check = "xyes"; then
+			echo "mp3lame(decoder): on"
+		else
+			echo "mp3lame(decoder): off(mp3lame library is missing.)"
+		fi
+	else
+		echo "mp3lame(decoder): off(under gpl only.)"
+	fi
+else
+	echo "mp3lame(decoder): off"
+fi
+if test x$mp3lame_flg = "xyes"; then
+	if test x$lgpl_flg = "xyes"; then
+		if test x$mp3lame_encode_check = "xyes"; then
+			echo "mp3lame(encoder): on"
+		else
+			echo "mp3lame(encoder): off(mp3lame library is missing.)"
+		fi
+	else
+		echo "mp3lame(encoder): off(under lgpl only.)"
+	fi
+else
+	echo "mp3lame(encoder): off"
 fi
