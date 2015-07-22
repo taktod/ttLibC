@@ -58,7 +58,7 @@ ttLibC_PcmS16 *ttLibC_PcmS16_make(
 	}
 	else {
 		if(!pcms16->inherit_super.inherit_super.is_non_copy) {
-			if(pcms16->inherit_super.inherit_super.data_size < data_size) {
+			if(non_copy_mode || pcms16->inherit_super.inherit_super.data_size < data_size) {
 				free(pcms16->inherit_super.inherit_super.data);
 				pcms16->inherit_super.inherit_super.data = NULL;
 			}
