@@ -29,6 +29,8 @@ typedef enum {
 	frameType_yuv420,
 	/** ttLibC_PcmS16 audio frame */
 	frameType_pcmS16,
+	/** ttLibC_Mp3 audio frame */
+	frameType_mp3,
 } ttLibC_Frame_Type;
 
 /**

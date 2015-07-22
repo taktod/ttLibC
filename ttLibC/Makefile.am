@@ -4,9 +4,11 @@ lib_LIBRARIES=libttLibC.a
 
 libttLibC_a_SOURCES= \
 	ttLibC.c \
+	encoder/mp3lameEncoder.c \
 	frame/frame.c \
 	frame/audio/audio.c \
 	frame/audio/pcms16.c \
+	frame/audio/mp3.c \
 	frame/video/video.c \
 	frame/video/bgr.c \
 	frame/video/yuv420.c \

@@ -18,6 +18,8 @@
 #	include <lame/lame.h>
 #endif
 
+#include <ttLibC/frame/audio/mp3.h>
+
 static void mp3LameTest() {
 	LOG_PRINT("mp3LameTest");
 #ifdef __ENABLE_MP3LAME_ENCODE__
@@ -31,8 +33,8 @@ static void mp3LameTest() {
 		return;
 	}
 
-	lame_set_num_channels(gflags, 1);
-	lame_set_mode(gflags, MONO);
+	lame_set_num_channels(gflags, 2);
+	lame_set_mode(gflags, STEREO);
 	lame_set_in_samplerate(gflags, 22050);
 	lame_set_out_samplerate(gflags, 22050);
 
@@ -41,12 +43,14 @@ static void mp3LameTest() {
 	lame_set_VBR_quality(gflags, 5);
 	lame_set_bWriteVbrTag(gflags, 0);
 
+	lame_get_quality(gflags);
+	lame_get_mode(gflags);
 	if(lame_init_params(gflags) < 0) {
 		ERR_PRINT("failed to setup lame.");
 		return;
 	}
-	FILE *fp = fopen("output.mp3", "wb");
-	ttLibC_BeepGenerator *generator = ttLibC_BeepGenerator_make(PcmS16Type_littleEndian_planar, 440, 22050, 1);
+	FILE *fp = fopen("output_jstereo.mp3", "wb");
+	ttLibC_BeepGenerator *generator = ttLibC_BeepGenerator_make(PcmS16Type_littleEndian_planar, 440, 22050, 2);
 	ttLibC_PcmS16 *pcm = NULL, *p;
 	for(int i = 0;i < 10;i ++) {
 		p = ttLibC_BeepGenerator_makeBeepByMiliSec(generator, pcm, 1000);
@@ -55,9 +59,11 @@ static void mp3LameTest() {
 		}
 		pcm = p;
 		uint8_t buf[65536];
-		uint32_t size = lame_encode_buffer(gflags, (const short *)pcm->inherit_super.inherit_super.data, NULL, pcm->inherit_super.sample_num, buf, sizeof(buf));
+		short *right_buf = (short *)pcm->inherit_super.inherit_super.data;
+		uint32_t size = lame_encode_buffer(gflags, (const short *)pcm->inherit_super.inherit_super.data, (const short *)(right_buf + pcm->inherit_super.sample_num), pcm->inherit_super.sample_num, buf, sizeof(buf));
 		fwrite(buf, size, 1, fp);
 		ttLibC_HexUtil_dump(buf, size, true);
+		break;
 	}
 	ttLibC_BeepGenerator_close(&generator);
 	fclose(fp);
