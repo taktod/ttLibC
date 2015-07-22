@@ -34,6 +34,7 @@
  * @param non_copy_mode true:hold the data pointer. false:data will copy
  * @param pts           pts for image
  * @param timebase      timebase number for pts.
+ * @return yuv420 object.
  */
 ttLibC_Yuv420 *ttLibC_Yuv420_make(
 		ttLibC_Yuv420 *prev_frame,

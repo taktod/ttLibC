@@ -57,6 +57,7 @@ typedef ttLibC_Frame_Audio_PcmS16 ttLibC_PcmS16;
  * @param non_copy_mode true:hold the data pointer. false:data will copy.
  * @param pts           pts for pcm data.
  * @param timebase      timebase number for pts.
+ * @return pcms16 object.
  */
 ttLibC_PcmS16 *ttLibC_PcmS16_make(
 		ttLibC_PcmS16 *prev_frame,

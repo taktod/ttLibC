@@ -26,6 +26,7 @@
  * @param non_copy_mode true:hold the data pointer. false:data will copy.
  * @param pts           pts for image.
  * @param timebase      timebase number for pts.
+ * @return bgr object.
  */
 ttLibC_Bgr *ttLibC_Bgr_make(
 		ttLibC_Bgr *prev_frame,
