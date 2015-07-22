@@ -10,6 +10,7 @@
 
 #include "audio.h"
 #include "pcms16.h"
+#include "mp3.h"
 #include "../../log.h"
 
 /*
