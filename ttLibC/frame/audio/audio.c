@@ -25,6 +25,9 @@ void ttLibC_Audio_close(ttLibC_Audio **frame) {
 	case frameType_pcmS16:
 		ttLibC_PcmS16_close((ttLibC_PcmS16 **)frame);
 		break;
+	case frameType_mp3:
+		ttLibC_Mp3_close((ttLibC_Mp3 **)frame);
+		break;
 	default:
 		ERR_PRINT("unknown type:%d", target->inherit_super.type);
 		break;
