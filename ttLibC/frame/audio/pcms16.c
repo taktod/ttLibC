@@ -1,6 +1,6 @@
 /*
  * @file   pcms16.c
- * @brief  
+ * @brief  pcms16 frame information.
  *
  * this code is under 3-Cause BSD license.
  *
@@ -58,7 +58,10 @@ ttLibC_PcmS16 *ttLibC_PcmS16_make(
 	}
 	else {
 		if(!pcms16->inherit_super.inherit_super.is_non_copy) {
-			free(pcms16->inherit_super.inherit_super.data);
+			if(pcms16->inherit_super.inherit_super.data_size < data_size) {
+				free(pcms16->inherit_super.inherit_super.data);
+				pcms16->inherit_super.inherit_super.data = NULL;
+			}
 		}
 	}
 	pcms16->type                                    = type;
@@ -75,13 +78,15 @@ ttLibC_PcmS16 *ttLibC_PcmS16_make(
 		pcms16->inherit_super.inherit_super.data = data;
 	}
 	else {
-		pcms16->inherit_super.inherit_super.data = malloc(data_size);
 		if(pcms16->inherit_super.inherit_super.data == NULL) {
-			ERR_PRINT("failed to allocate memory for data.");
-			if(prev_frame == NULL) {
-				free(pcms16);
+			pcms16->inherit_super.inherit_super.data = malloc(data_size);
+			if(pcms16->inherit_super.inherit_super.data == NULL) {
+				ERR_PRINT("failed to allocate memory for data.");
+				if(prev_frame == NULL) {
+					free(pcms16);
+				}
+				return NULL;
 			}
-			return NULL;
 		}
 		memcpy(pcms16->inherit_super.inherit_super.data, data, data_size);
 	}

@@ -1,6 +1,6 @@
 /**
  * @file   pcms16.h
- * @brief  
+ * @brief  pcms16 frame information.
  *
  * this code is under 3-Cause BSD license.
  *
