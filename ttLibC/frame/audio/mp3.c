@@ -63,7 +63,7 @@ ttLibC_Mp3 *ttLibC_Mp3_make(
 		bool non_copy_mode,
 		uint64_t pts,
 		uint32_t timebase) {
-	ttLibC_Mp3 *mp3 = prev_frame;
+	ttLibC_Mp3_ *mp3 = (ttLibC_Mp3_ *)prev_frame;
 	switch(type) {
 	case Mp3Type_frame:
 	case Mp3Type_id3:
@@ -74,37 +74,37 @@ ttLibC_Mp3 *ttLibC_Mp3_make(
 		return NULL;
 	}
 	if(mp3 == NULL) {
-		mp3 = (ttLibC_Mp3 *)malloc(sizeof(ttLibC_Mp3_));
+		mp3 = malloc(sizeof(ttLibC_Mp3_));
 		if(mp3 == NULL) {
 			ERR_PRINT("failed to allocate memory for mp3 frame.");
 			return NULL;
 		}
 	}
 	else {
-		if(!mp3->inherit_super.inherit_super.is_non_copy) {
-			if(non_copy_mode || mp3->inherit_super.inherit_super.data_size < data_size) {
-				free(mp3->inherit_super.inherit_super.data);
-				mp3->inherit_super.inherit_super.data = NULL;
+		if(!mp3->inherit_super.inherit_super.inherit_super.is_non_copy) {
+			if(non_copy_mode || mp3->inherit_super.inherit_super.inherit_super.data_size < data_size) {
+				free(mp3->inherit_super.inherit_super.inherit_super.data);
+				mp3->inherit_super.inherit_super.inherit_super.data = NULL;
 			}
 		}
 	}
-	mp3->type                                    = type;
-	mp3->inherit_super.channel_num               = channel_num;
-	mp3->inherit_super.sample_num                = sample_num;
-	mp3->inherit_super.sample_rate               = sample_rate;
-	mp3->inherit_super.inherit_super.buffer_size = data_size;
-	mp3->inherit_super.inherit_super.data_size   = data_size;
-	mp3->inherit_super.inherit_super.is_non_copy = non_copy_mode;
-	mp3->inherit_super.inherit_super.pts         = pts;
-	mp3->inherit_super.inherit_super.timebase    = timebase;
-	mp3->inherit_super.inherit_super.type        = frameType_mp3;
+	mp3->inherit_super.type                                    = type;
+	mp3->inherit_super.inherit_super.channel_num               = channel_num;
+	mp3->inherit_super.inherit_super.sample_num                = sample_num;
+	mp3->inherit_super.inherit_super.sample_rate               = sample_rate;
+	mp3->inherit_super.inherit_super.inherit_super.buffer_size = data_size;
+	mp3->inherit_super.inherit_super.inherit_super.data_size   = data_size;
+	mp3->inherit_super.inherit_super.inherit_super.is_non_copy = non_copy_mode;
+	mp3->inherit_super.inherit_super.inherit_super.pts         = pts;
+	mp3->inherit_super.inherit_super.inherit_super.timebase    = timebase;
+	mp3->inherit_super.inherit_super.inherit_super.type        = frameType_mp3;
 	if(non_copy_mode) {
-		mp3->inherit_super.inherit_super.data = data;
+		mp3->inherit_super.inherit_super.inherit_super.data = data;
 	}
 	else {
-		if(mp3->inherit_super.inherit_super.data == NULL) {
-			mp3->inherit_super.inherit_super.data = malloc(data_size);
-			if(mp3->inherit_super.inherit_super.data == NULL) {
+		if(mp3->inherit_super.inherit_super.inherit_super.data == NULL) {
+			mp3->inherit_super.inherit_super.inherit_super.data = malloc(data_size);
+			if(mp3->inherit_super.inherit_super.inherit_super.data == NULL) {
 				ERR_PRINT("failed to allocate memory for data.");
 				if(prev_frame == NULL) {
 					free(mp3);
@@ -112,9 +112,9 @@ ttLibC_Mp3 *ttLibC_Mp3_make(
 				return NULL;
 			}
 		}
-		memcpy(mp3->inherit_super.inherit_super.data, data, data_size);
+		memcpy(mp3->inherit_super.inherit_super.inherit_super.data, data, data_size);
 	}
-	return mp3;
+	return (ttLibC_Mp3 *)mp3;
 }
 
 /*
