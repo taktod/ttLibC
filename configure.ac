@@ -23,6 +23,7 @@ test_flg=no
 opencv_flg=no
 openal_flg=no
 mp3lame_flg=no
+faac_flg=no
 
 # check result
 cute_check=no 
@@ -30,6 +31,7 @@ opencv_check=no
 openal_check=no
 mp3lame_encode_check=no
 mp3lame_decode_check=no
+faac_encode_check=no
 
 AC_ARG_ENABLE(
 	[lgpl],
@@ -86,6 +88,7 @@ AC_ARG_ENABLE(
 		opencv_flg=$enableval
 		openal_flg=$enableval
 		mp3lame_flg=$enableval
+		faac_flg=$enableval
 	]
 )
 
@@ -105,6 +108,12 @@ AC_ARG_ENABLE(
 	[mp3lame],
 	AS_HELP_STRING([--enable-mp3lame/--disable-mp3lame], [enable/disable mp3lame code.]),
 	[mp3lame_flg=$enableval]
+)
+
+AC_ARG_ENABLE(
+	[faac],
+	AS_HELP_STRING([--enable-faac/--disable-faac], [enable/disable faac code.]),
+	[faac_flg=$enableval]
 )
 
 if test x$opencv_flg = "xyes"; then
@@ -141,6 +150,27 @@ if test x$mp3lame_flg = "xyes"; then
 			]
 		)
 	fi
+fi
+if test x$faac_flg = "xyes"; then
+	AC_CHECK_HEADER(
+		faac.h,
+		[
+			AC_CHECK_LIB(
+				faac,
+				faacEncGetVersion,
+				[
+					FAAC_CFLAGS='-I/usr/local/include'
+					FAAC_LIBS='-L/usr/local/lib -lfaac'
+					AC_SUBST([FAAC_CFLAGS])
+					AC_SUBST([FAAC_LIBS])
+					AC_DEFINE([__ENABLE_FAAC__])
+					if test x$lgpl_flg = "xyes"; then
+						faac_encode_check=yes
+					fi
+				]
+			)
+		],
+	)
 fi
 
 if test x$gpl_flg = "xyes"; then
@@ -179,6 +209,11 @@ if test x$mp3lame_flg$lgpl_flg$mp3lame_encode_check = "xyesyesyes"; then
 	AC_DEFINE([__ENABLE_MP3LAME_ENCODE__])
 fi
 AM_CONDITIONAL(ENABLE_MP3LAME_ENCODE, test x$mp3lame_flg$lgpl_flg$mp3lame_encode_check = "xyesyesyes")
+
+if test x$faac_flg$lgpl_flg$faac_encode_check = "xyesyesyes"; then
+	AC_DEFINE([__ENABLE_FAAC_ENCODE__])
+fi
+AM_CONDITIONAL(ENABLE_FAAC_ENCODE, test x$faac_flg$lgpl_flg$faac_encode_check = "xyesyesyes")
 
 AC_ARG_WITH(pkgconfigdir,
 	AS_HELP_STRING([--with-pkgconfigdir], [Use the specified pkgconfig dir.(default is $libdir/pkgconfig)]),
@@ -281,4 +316,17 @@ if test x$mp3lame_flg = "xyes"; then
 	fi
 else
 	echo "mp3lame(encoder): off"
+fi
+if test x$faac_flg = "xyes"; then
+	if test x$lgpl_flg = "xyes"; then
+		if test x$faac_encode_check = "xyes"; then
+			echo "faac(encoder): on"
+		else
+			echo "faac(encoder): off(faac library is missing.)"
+		fi
+	else
+		echo "faac(encoder): off(under lgpl only.)"
+	fi
+else
+	echo "faac(encode): off"
 fi
