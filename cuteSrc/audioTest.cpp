@@ -59,7 +59,7 @@ static void faacTest() {
 		else {
 			uint8_t buf[65536];
 			for(int i = 0;i < 200;i ++) {
-				p = ttLibC_BeepGenerator_makeBeepBySampleNum(generator, pcm, samples_input / channel); // ここでとるサンプルって、左右別で1サンプル計算になってるわけか・・なるほど・・・
+				p = ttLibC_BeepGenerator_makeBeepBySampleNum(generator, pcm, samples_input / channel);
 				if(p == NULL) {
 					break;
 				}
