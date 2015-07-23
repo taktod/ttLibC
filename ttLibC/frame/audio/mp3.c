@@ -397,7 +397,17 @@ ttLibC_Mp3 *ttLibC_Mp3_makeFrame(ttLibC_Mp3 *prev_frame, void *data, size_t data
  * @param frame
  */
 void ttLibC_Mp3_close(ttLibC_Mp3 **frame) {
-	if(*frame == NULL) {
+	ttLibC_Mp3_ *target = (ttLibC_Mp3_ *)*frame;
+	if(target == NULL) {
 		return;
 	}
+	if(target->inherit_super.inherit_super.inherit_super.type != frameType_mp3) {
+		ERR_PRINT("found non mp3 frame in mp3_close.");
+		return;
+	}
+	if(!target->inherit_super.inherit_super.inherit_super.is_non_copy) {
+		free(target->inherit_super.inherit_super.inherit_super.data);
+	}
+	free(target);
+	*frame = NULL;
 }
