@@ -24,6 +24,7 @@ opencv_flg=no
 openal_flg=no
 mp3lame_flg=no
 faac_flg=no
+openh264_flg=no
 
 # check result
 cute_check=no 
@@ -32,6 +33,7 @@ openal_check=no
 mp3lame_encode_check=no
 mp3lame_decode_check=no
 faac_encode_check=no
+openh264_check=no
 
 AC_ARG_ENABLE(
 	[lgpl],
@@ -89,6 +91,7 @@ AC_ARG_ENABLE(
 		openal_flg=$enableval
 		mp3lame_flg=$enableval
 		faac_flg=$enableval
+		openh264_flg=$enableval
 	]
 )
 
@@ -114,6 +117,12 @@ AC_ARG_ENABLE(
 	[faac],
 	AS_HELP_STRING([--enable-faac/--disable-faac], [enable/disable faac code.]),
 	[faac_flg=$enableval]
+)
+
+AC_ARG_ENABLE(
+	[openh264],
+	AS_HELP_STRING([--enable-openh264/--disable-openh264], [enable/disable openh264 code.]),
+	[openh264_flg=$enableval]
 )
 
 if test x$opencv_flg = "xyes"; then
@@ -172,6 +181,14 @@ if test x$faac_flg = "xyes"; then
 		],
 	)
 fi
+if test x$openh264_flg = "xyes"; then
+	PKG_CHECK_MODULES(
+		[OPENH264],
+		[openh264],
+		[openh264_check=yes]
+	)
+
+fi
 
 if test x$gpl_flg = "xyes"; then
 	AC_DEFINE([__ENABLE_GPL__])
@@ -214,6 +231,11 @@ if test x$faac_flg$lgpl_flg$faac_encode_check = "xyesyesyes"; then
 	AC_DEFINE([__ENABLE_FAAC_ENCODE__])
 fi
 AM_CONDITIONAL(ENABLE_FAAC_ENCODE, test x$faac_flg$lgpl_flg$faac_encode_check = "xyesyesyes")
+
+if test x$openh264_flg$openh264_check = "xyesyes"; then
+	AC_DEFINE([__ENABLE_OPENH264__])
+fi
+AM_CONDITIONAL(ENABLE_OPENH264, test x$openh264_flg$openh264_check = "xyesyes")
 
 AC_ARG_WITH(pkgconfigdir,
 	AS_HELP_STRING([--with-pkgconfigdir], [Use the specified pkgconfig dir.(default is $libdir/pkgconfig)]),
@@ -329,4 +351,13 @@ if test x$faac_flg = "xyes"; then
 	fi
 else
 	echo "faac(encode): off"
+fi
+if test x$openh264_flg = "xyes"; then
+	if test x$openh264_check = "xyes"; then
+		echo "openh264: on"
+	else
+		echo "openh264: off(openh264 library is missing.)"
+	fi
+else
+	echo "openh264: off"
 fi
