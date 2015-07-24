@@ -1,6 +1,9 @@
 /*
  * @file   faacEncoder.c
- * @brief  
+ * @brief  encode pcms16 with faac.
+ *
+ * this code is under LGPLv3 license.
+ *
  * @author taktod
  * @date   2015/07/23
  */
