@@ -72,7 +72,7 @@ ttLibC_Mp3lameEncoder *ttLibC_Mp3lameEncoder_make_ex();
  * @param encoder  mp3lame encoder object.
  * @param pcm      source pcm data.
  * @param callback callback func for mp3 creation.
- * @param ptr      pointer for use def value, which will call in callback.
+ * @param ptr      pointer for user def value, which will call in callback.
  */
 void ttLibC_Mp3lameEncoder_encode(
 		ttLibC_Mp3lameEncoder *encoder,

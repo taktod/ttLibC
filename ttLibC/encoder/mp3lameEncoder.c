@@ -104,10 +104,10 @@ ttLibC_Mp3lameEncoder *ttLibC_Mp3lameEncoder_make(
 
 /*
  * handle encoded data after encode.
- * @param encoder encoder object.
- * @encode_size   size of encode data.
- * @callback      callback func.
- * @ptr           user def data pointer.
+ * @param encoder     encoder object.
+ * @param encode_size size of encode data.
+ * @param callback    callback func.
+ * @param ptr         user def data pointer.
  */
 static void checkEncodedData(ttLibC_Mp3lameEncoder_ *encoder, uint32_t encode_size, ttLibC_Mp3lameEncodeFunc callback, void *ptr) {
 	uint8_t *data = encoder->data;
@@ -145,7 +145,7 @@ static void checkEncodedData(ttLibC_Mp3lameEncoder_ *encoder, uint32_t encode_si
  * @param encoder  mp3lame encoder object.
  * @param pcm      source pcm data.
  * @param callback callback func for mp3 creation.
- * @param ptr      pointer for use def value, which will call in callback.
+ * @param ptr      pointer for user def value, which will call in callback.
  */
 void ttLibC_Mp3lameEncoder_encode(ttLibC_Mp3lameEncoder *encoder, ttLibC_PcmS16 *pcm, ttLibC_Mp3lameEncodeFunc callback, void *ptr) {
 	if(encoder == NULL) {
