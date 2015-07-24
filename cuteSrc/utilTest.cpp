@@ -50,8 +50,8 @@ static void hexUtilTest() {
 static void opencvUtilTest() {
 	LOG_PRINT("opencvUtilTest");
 #ifdef __ENABLE_OPENCV__
-	ttLibC_CvCapture *capture = ttLibC_CvCapture_makeCapture(0, 320, 240);
-	ttLibC_CvWindow *window = ttLibC_CvWindow_makeWindow("opencvTest");
+	ttLibC_CvCapture *capture = ttLibC_CvCapture_make(0, 320, 240);
+	ttLibC_CvWindow *window = ttLibC_CvWindow_make("opencvTest");
 	ttLibC_Bgr *bgr = NULL;
 	while(true) {
 		ttLibC_Bgr *b = ttLibC_CvCapture_queryFrame(capture, bgr);

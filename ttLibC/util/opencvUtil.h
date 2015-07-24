@@ -40,6 +40,8 @@ typedef ttLibC_Util_OpencvUtil_CvWindow ttLibC_CvWindow;
  * @param name window name
  * @return ttLibC_CvWindow object
  */
+ttLibC_CvWindow *ttLibC_CvWindow_make(const char *name);
+/** @deprected */
 ttLibC_CvWindow *ttLibC_CvWindow_makeWindow(const char *name);
 
 /**
@@ -83,6 +85,11 @@ typedef ttLibC_Util_OpencvUtil_CvCapture ttLibC_CvCapture;
  * @param height     capture height
  * @return ttLibC_CvCapture object.
  */
+ttLibC_CvCapture *ttLibC_CvCapture_make(
+		uint32_t camera_num,
+		uint32_t width,
+		uint32_t height);
+/** @deprected */
 ttLibC_CvCapture *ttLibC_CvCapture_makeCapture(
 		uint32_t camera_num,
 		uint32_t width,

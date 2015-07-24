@@ -92,9 +92,9 @@ static void mp3lameEncoderTest() {
 static void imageResamplerTest() {
 	LOG_PRINT("imageResamplerTest");
 #ifdef __ENABLE_OPENCV__
-	ttLibC_CvCapture *capture = ttLibC_CvCapture_makeCapture(0, 320, 240);
-	ttLibC_CvWindow *window = ttLibC_CvWindow_makeWindow("opencvTest");
-	ttLibC_CvWindow *resampled_window = ttLibC_CvWindow_makeWindow("resampled");
+	ttLibC_CvCapture *capture = ttLibC_CvCapture_make(0, 320, 240);
+	ttLibC_CvWindow *window = ttLibC_CvWindow_make("opencvTest");
+	ttLibC_CvWindow *resampled_window = ttLibC_CvWindow_make("resampled");
 	ttLibC_Bgr *bgr = NULL;
 	ttLibC_Yuv420 *yuv420 = NULL;
 	ttLibC_Bgr *resampled_bgr = NULL;

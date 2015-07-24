@@ -35,7 +35,7 @@ typedef ttLibC_Util_OpencvUtil_CvWindow_ ttLibC_CvWindow_;
  * @param name window name
  * @return ttLibC_CvWindow object
  */
-ttLibC_CvWindow *ttLibC_CvWindow_makeWindow(const char *name) {
+ttLibC_CvWindow *ttLibC_CvWindow_make(const char *name) {
 	ttLibC_CvWindow_ *window = malloc(sizeof(ttLibC_CvWindow_));
 	if(window == NULL) {
 		ERR_PRINT("failed to allocate memory for window.");
@@ -47,6 +47,9 @@ ttLibC_CvWindow *ttLibC_CvWindow_makeWindow(const char *name) {
 	cvNamedWindow(window->inherit_super.name, CV_WINDOW_NORMAL);
 	window->image = NULL;
 	return (ttLibC_CvWindow* )window;
+}
+ttLibC_CvWindow *ttLibC_CvWindow_makeWindow(const char *name) {
+	return ttLibC_CvWindow_make(name);
 }
 
 /*
@@ -174,7 +177,7 @@ typedef ttLibC_Util_OpencvUtil_CvCapture_ ttLibC_CvCapture_;
  * @param height     capture height
  * @return ttLibC_CvCapture object.
  */
-ttLibC_CvCapture *ttLibC_CvCapture_makeCapture(
+ttLibC_CvCapture *ttLibC_CvCapture_make(
 		uint32_t camera_num,
 		uint32_t width,
 		uint32_t height) {
@@ -196,6 +199,13 @@ ttLibC_CvCapture *ttLibC_CvCapture_makeCapture(
 	capture->inherit_super.height     = height;
 	capture->inherit_super.camera_num = camera_num;
 	return (ttLibC_CvCapture *)capture;
+}
+
+ttLibC_CvCapture *ttLibC_CvCapture_makeCapture(
+		uint32_t camera_num,
+		uint32_t width,
+		uint32_t height) {
+	return ttLibC_CvCapture_make(camera_num, width, height);
 }
 
 /**
