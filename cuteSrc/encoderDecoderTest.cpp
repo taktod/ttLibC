@@ -20,14 +20,44 @@
 #	include <ttLibC/encoder/mp3lameEncoder.h>
 #endif
 
+#ifdef __ENABLE_FAAC_ENCODE__
+#	include <ttLibC/encoder/faacEncoder.h>
+#endif
+
 #include <ttLibC/util/beepUtil.h>
 #include <ttLibC/frame/audio/pcms16.h>
 #include <ttLibC/frame/audio/mp3.h>
+#include <ttLibC/frame/audio/aac.h>
 
 #include <ttLibC/frame/video/bgr.h>
 #include <ttLibC/frame/video/yuv420.h>
 
 #include <ttLibC/resampler/imageResampler.h>
+
+void faacEncoderTestCallback(void *ptr, ttLibC_Aac *aac) {
+	LOG_PRINT("encoded. pts:%llu size:%lu", aac->inherit_super.inherit_super.pts, aac->inherit_super.inherit_super.buffer_size);
+}
+
+static void faacEncoderTest() {
+	LOG_PRINT("faacEncoderTest");
+	ttLibC_FaacEncoder *encoder = ttLibC_FaacEncoder_make(22050, 2, 96000);
+	ttLibC_BeepGenerator *generator = ttLibC_BeepGenerator_make(PcmS16Type_littleEndian, 440, 22050, 2);
+	ttLibC_PcmS16 *pcm = NULL, *p;
+
+	for(int i = 0;i < 3; ++ i) {
+		// make 1sec beep.
+		p = ttLibC_BeepGenerator_makeBeepByMiliSec(generator, pcm, 1000);
+		if(p == NULL) {
+			break;
+		}
+		pcm = p;
+		// encode data.
+		ttLibC_FaacEncoder_encode(encoder, pcm, faacEncoderTestCallback, NULL);
+	}
+	ttLibC_PcmS16_close(&pcm);
+	ttLibC_BeepGenerator_close(&generator);
+	ttLibC_FaacEncoder_close(&encoder);
+}
 
 void mp3lameEncoderTestCallback(void *ptr, ttLibC_Mp3 *mp3) {
 	LOG_PRINT("encoded. pts:%llu size:%lu", mp3->inherit_super.inherit_super.pts, mp3->inherit_super.inherit_super.buffer_size);
@@ -107,6 +137,7 @@ static void imageResamplerTest() {
  */
 cute::suite encoderDecoderTests(cute::suite s) {
 	s.clear();
+	s.push_back(CUTE(faacEncoderTest));
 	s.push_back(CUTE(mp3lameEncoderTest));
 	s.push_back(CUTE(imageResamplerTest));
 	return s;

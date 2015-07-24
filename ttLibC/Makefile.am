@@ -3,7 +3,9 @@ AUTOMAKE_OPTIONS=subdir-objects
 lib_LIBRARIES=libttLibC.a
 
 libttLibC_a_SOURCES= \
+	encoder/faacEncoder.c \
 	encoder/mp3lameEncoder.c \
+	frame/audio/aac.c \
 	frame/audio/audio.c \
 	frame/audio/pcms16.c \
 	frame/audio/mp3.c \

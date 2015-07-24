@@ -11,6 +11,7 @@
 #include "audio.h"
 #include "pcms16.h"
 #include "mp3.h"
+#include "aac.h"
 #include "../../log.h"
 
 /*
@@ -28,6 +29,9 @@ void ttLibC_Audio_close(ttLibC_Audio **frame) {
 		break;
 	case frameType_mp3:
 		ttLibC_Mp3_close((ttLibC_Mp3 **)frame);
+		break;
+	case frameType_aac:
+		ttLibC_Aac_close((ttLibC_Aac **)frame);
 		break;
 	default:
 		ERR_PRINT("unknown type:%d", target->inherit_super.type);

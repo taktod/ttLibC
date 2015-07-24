@@ -31,6 +31,7 @@ void ttLibC_Frame_close(ttLibC_Frame **frame) {
 		break;
 	case frameType_pcmS16:
 	case frameType_mp3:
+	case frameType_aac:
 		ttLibC_Audio_close((ttLibC_Audio **)frame);
 		break;
 	default:
