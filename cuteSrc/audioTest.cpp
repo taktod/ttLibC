@@ -51,7 +51,7 @@ static void faacTest() {
 		faacConfig->useTns = 0;
 		faacConfig->allowMidside = 1;
 		faacConfig->bitRate = 96000;
-		faacConfig->outputFormat = 1; // 0:raw 1:adts
+		faacConfig->outputFormat = 1; // 0:raw 1:adts raw for data with global header.
 		faacConfig->inputFormat = FAAC_INPUT_16BIT;
 		if(!faacEncSetConfiguration(faacHandle, faacConfig)) {
 			ERR_PRINT("failed to set configuration.");
@@ -70,6 +70,7 @@ static void faacTest() {
 						fwrite(buf, 1, res, fp);
 					}
 				}
+				ttLibC_HexUtil_dump(buf, res, true);
 			}
 		}
 	}
