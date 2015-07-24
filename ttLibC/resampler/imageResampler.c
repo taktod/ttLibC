@@ -338,7 +338,6 @@ ttLibC_Bgr *ttLibC_ImageResampler_makeBgrFromYuv420(
 		break;
 	}
 	// yuv420 data
-	uint8_t *src_data = src_frame->inherit_super.inherit_super.data;
 	uint8_t *src_y_data = src_frame->y_data;
 	uint8_t *src_u_data = src_frame->u_data;
 	uint8_t *src_v_data = src_frame->v_data;
