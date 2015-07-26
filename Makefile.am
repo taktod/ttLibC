@@ -1,8 +1,10 @@
 nobase_include_HEADERS= \
+	ttLibC/frame/audio/aac.h \
 	ttLibC/frame/audio/audio.h \
-	ttLibC/frame/audio/pcms16.h \
 	ttLibC/frame/audio/mp3.h \
+	ttLibC/frame/audio/pcms16.h \
 	ttLibC/frame/video/bgr.h \
+	ttLibC/frame/video/h264.h \
 	ttLibC/frame/video/video.h \
 	ttLibC/frame/video/yuv420.h \
 	ttLibC/frame/frame.h \
@@ -36,6 +38,11 @@ if ENABLE_OPENH264
 nobase_include_HEADERS += \
 	ttLibC/encoder/openh264Encoder.h \
 	ttLibC/decoder/openh264Decoder.h
+endif
+
+if ENABLE_SPEEXDSP
+nobase_include_HEADERS += \
+	ttLibC/resampler/speexdspResampler.h
 endif
 
 pkgconfigdir=@pkgconfigdir@
