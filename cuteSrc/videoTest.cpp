@@ -91,7 +91,7 @@ static void openh264Test() {
 	encoder->SetOption(ENCODER_OPTION_ENABLE_SPS_PPS_ID_ADDITION, &bval);
 
 	SFrameBSInfo info;
-	memset(&info, 0, sizeof(SFrameBSInfo));
+/*	memset(&info, 0, sizeof(SFrameBSInfo));
 	res = encoder->EncodeParameterSets(&info);
 	if(res != 0) {
 		ERR_PRINT("failed to set encode parameter set");
@@ -107,7 +107,7 @@ static void openh264Test() {
 	for(uint32_t i = 0;i < layerInfo.iNalCount;++ i) {
 		ttLibC_HexUtil_dump(data, layerInfo.pNalLengthInByte[i], true);
 		data += layerInfo.pNalLengthInByte[i];
-	}
+	}*/
 
 	// setup decoder...
 	SBufferInfo bufInfo;
@@ -180,13 +180,16 @@ static void openh264Test() {
 		if(res == cmResultSuccess) {
 			switch(info.eFrameType) {
 			case videoFrameTypeI:
-				LOG_PRINT("type I");
+				LOG_PRINT("type I"); // possible to call?
+				break;
 			case videoFrameTypeIPMixed:
-				LOG_PRINT("type IPMixed"); // 呼ばれる可能性ある？
+				LOG_PRINT("type IPMixed"); // posible to call?
+				break;
 			case videoFrameTypeInvalid:
 				LOG_PRINT("type invalid");
+				break;
 			case videoFrameTypeSkip:
-				// 呼ばれる可能性があるっぽい。
+				// possible to call.
 				LOG_PRINT("type skip");
 				break;
 			case videoFrameTypeIDR:
