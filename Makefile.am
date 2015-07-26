@@ -27,6 +27,17 @@ nobase_include_HEADERS += \
 	ttLibC/encoder/mp3lameEncoder.h
 endif
 
+if ENABLE_FAAC_ENCODE
+nobase_include_HEADERS += \
+	ttLibC/encoder/faacEncoder.h
+endif
+
+if ENABLE_OPENH264
+nobase_include_HEADERS += \
+	ttLibC/encoder/openh264Encoder.h \
+	ttLibC/decoder/openh264Decoder.h
+endif
+
 pkgconfigdir=@pkgconfigdir@
 pkgconfig_DATA=ttLibC.pc
 CLEANFILES=ttLibC.pc
