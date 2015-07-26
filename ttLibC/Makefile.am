@@ -5,6 +5,7 @@ lib_LIBRARIES=libttLibC.a
 libttLibC_a_SOURCES= \
 	encoder/faacEncoder.c \
 	encoder/mp3lameEncoder.c \
+	encoder/openh264Encoder.cpp \
 	frame/audio/aac.c \
 	frame/audio/audio.c \
 	frame/audio/pcms16.c \
@@ -12,6 +13,7 @@ libttLibC_a_SOURCES= \
 	frame/video/video.c \
 	frame/video/bgr.c \
 	frame/video/yuv420.c \
+	frame/video/h264.c \
 	frame/frame.c \
 	resampler/imageResampler.c \
 	util/hexUtil.c \

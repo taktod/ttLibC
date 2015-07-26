@@ -27,6 +27,8 @@ typedef enum {
 	frameType_bgr,
 	/** ttLibC_Yuv420 video frame */
 	frameType_yuv420,
+	/** ttLibC_H264 video frame */
+	frameType_h264,
 	/** ttLibC_PcmS16 audio frame */
 	frameType_pcmS16,
 	/** ttLibC_Mp3 audio frame */

@@ -24,13 +24,10 @@
  * @param data_size     data size
  * @param y_data        pointer for y_data
  * @param y_stride      stride for each line for y_data
- * @param y_step        step for each element of y_data
  * @param u_data        pointer for u_data
  * @param u_stride      stride for each line for u_data
- * @param u_step        step for each element of u_data
  * @param v_data        pointer for v_data
  * @param v_stride      stride for each line for v_data
- * @param v_step        step for each element of v_data
  * @param non_copy_mode true:hold the data pointer. false:data will copy
  * @param pts           pts for image
  * @param timebase      timebase number for pts.

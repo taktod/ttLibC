@@ -24,7 +24,9 @@ typedef enum {
 	/** key frame */
 	videoType_key,
 	/** inter frame */
-	videoType_inter
+	videoType_inter,
+	/** information frame */
+	videoType_info
 } ttLibC_Video_Type;
 
 /**

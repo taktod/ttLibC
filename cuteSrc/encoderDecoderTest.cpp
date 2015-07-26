@@ -24,6 +24,10 @@
 #	include <ttLibC/encoder/faacEncoder.h>
 #endif
 
+#ifdef __ENABLE_OPENH264__
+#	include <ttLibC/encoder/openh264Encoder.h>
+#endif
+
 #include <ttLibC/util/beepUtil.h>
 #include <ttLibC/frame/audio/pcms16.h>
 #include <ttLibC/frame/audio/mp3.h>
@@ -31,8 +35,63 @@
 
 #include <ttLibC/frame/video/bgr.h>
 #include <ttLibC/frame/video/yuv420.h>
+#include <ttLibC/frame/video/h264.h>
 
 #include <ttLibC/resampler/imageResampler.h>
+
+void openh264EncoderTestCallback(void *ptr, ttLibC_H264 *h264) {
+	switch(h264->type) {
+	case H264Type_configData:
+		LOG_PRINT("encoded. config:   pts:%llu size:%lu", h264->inherit_super.inherit_super.pts, h264->inherit_super.inherit_super.buffer_size);
+		break;
+	case H264Type_slice:
+		LOG_PRINT("encoded. slice:    pts:%llu size:%lu", h264->inherit_super.inherit_super.pts, h264->inherit_super.inherit_super.buffer_size);
+		break;
+	case H264Type_sliceIDR:
+		LOG_PRINT("encoded. sliceIDR: pts:%llu size:%lu", h264->inherit_super.inherit_super.pts, h264->inherit_super.inherit_super.buffer_size);
+		break;
+	default:
+		LOG_PRINT("encoded. unknown:  pts:%llu size:%lu", h264->inherit_super.inherit_super.pts, h264->inherit_super.inherit_super.buffer_size);
+		break;
+	}
+}
+
+static void openh264EncoderTest() {
+	LOG_PRINT("openh264EncoderTest");
+#if defined(__ENABLE_OPENH264__) && defined(__ENABLE_OPENCV__)
+	uint32_t width = 320, height = 240;
+	ttLibC_CvCapture       *capture = ttLibC_CvCapture_make(0, width, height);
+	ttLibC_CvWindow        *window  = ttLibC_CvWindow_make("original");
+	ttLibC_Openh264Encoder *encoder = ttLibC_Openh264Encoder_make(width, height);
+	ttLibC_Bgr    *bgr = NULL, *dbgr = NULL, *b;
+	ttLibC_Yuv420 *yuv = NULL, *dyuv = NULL, *y;
+	while(true) {
+		b = ttLibC_CvCapture_queryFrame(capture, bgr);
+		if(b == NULL) {
+			break;
+		}
+		bgr = b;
+		ttLibC_CvWindow_showBgr(window, bgr);
+		y = ttLibC_ImageResampler_makeYuv420FromBgr(yuv, Yuv420Type_planar, bgr);
+		if(y == NULL) {
+			break;
+		}
+		yuv = y;
+		ttLibC_Openh264Encoder_encode(encoder, yuv, openh264EncoderTestCallback, NULL);
+		uint8_t key = ttLibC_CvWindow_waitForKeyInput(10);
+		if(key == Keychar_Esc) {
+			break;
+		}
+	}
+	ttLibC_Bgr_close(&bgr);
+	ttLibC_Bgr_close(&dbgr);
+	ttLibC_Yuv420_close(&yuv);
+	ttLibC_Yuv420_close(&dyuv);
+	ttLibC_Openh264Encoder_close(&encoder);
+	ttLibC_CvWindow_close(&window);
+	ttLibC_CvCapture_close(&capture);
+#endif
+}
 
 void faacEncoderTestCallback(void *ptr, ttLibC_Aac *aac) {
 	LOG_PRINT("encoded. pts:%llu size:%lu", aac->inherit_super.inherit_super.pts, aac->inherit_super.inherit_super.buffer_size);
@@ -40,6 +99,7 @@ void faacEncoderTestCallback(void *ptr, ttLibC_Aac *aac) {
 
 static void faacEncoderTest() {
 	LOG_PRINT("faacEncoderTest");
+#ifdef __ENABLE_FAAC_ENCODE__
 	ttLibC_FaacEncoder *encoder = ttLibC_FaacEncoder_make(22050, 2, 96000);
 	ttLibC_BeepGenerator *generator = ttLibC_BeepGenerator_make(PcmS16Type_littleEndian, 440, 22050, 2);
 	ttLibC_PcmS16 *pcm = NULL, *p;
@@ -57,6 +117,7 @@ static void faacEncoderTest() {
 	ttLibC_PcmS16_close(&pcm);
 	ttLibC_BeepGenerator_close(&generator);
 	ttLibC_FaacEncoder_close(&encoder);
+ #endif
 }
 
 void mp3lameEncoderTestCallback(void *ptr, ttLibC_Mp3 *mp3) {
@@ -137,6 +198,7 @@ static void imageResamplerTest() {
  */
 cute::suite encoderDecoderTests(cute::suite s) {
 	s.clear();
+	s.push_back(CUTE(openh264EncoderTest));
 	s.push_back(CUTE(faacEncoderTest));
 	s.push_back(CUTE(mp3lameEncoderTest));
 	s.push_back(CUTE(imageResamplerTest));

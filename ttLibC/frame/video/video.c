@@ -11,6 +11,7 @@
 #include "video.h"
 #include "bgr.h"
 #include "yuv420.h"
+#include "h264.h"
 #include "../../log.h"
 
 /*
@@ -28,6 +29,9 @@ void ttLibC_Video_close(ttLibC_Video **frame) {
 		break;
 	case frameType_yuv420:
 		ttLibC_Yuv420_close((ttLibC_Yuv420 **)frame);
+		break;
+	case frameType_h264:
+		ttLibC_H264_close((ttLibC_H264 **)frame);
 		break;
 	default:
 		ERR_PRINT("unknown type:%d", target->inherit_super.type);

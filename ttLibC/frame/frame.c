@@ -27,6 +27,7 @@ void ttLibC_Frame_close(ttLibC_Frame **frame) {
 	switch(target->type) {
 	case frameType_bgr:
 	case frameType_yuv420:
+	case frameType_h264:
 		ttLibC_Video_close((ttLibC_Video **)frame);
 		break;
 	case frameType_pcmS16:
