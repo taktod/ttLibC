@@ -6,6 +6,8 @@
  *
  * @author taktod
  * @date   2015/07/23
+ * TODO need to make adts analyze task.
+ * TODO need to make dsi analyze task. (needed for flv.)
  */
 
 #include "aac.h"
