@@ -17,6 +17,7 @@ libttLibC_a_SOURCES= \
 	frame/video/h264.c \
 	frame/frame.c \
 	resampler/imageResampler.c \
+	resampler/speexdspResampler.c \
 	util/hexUtil.c \
 	util/opencvUtil.c \
 	util/openalUtil.c \

@@ -16,6 +16,10 @@
 #	include <ttLibC/util/opencvUtil.h>
 #endif
 
+#ifdef __ENABLE_OPENAL__
+#	include <ttLibC/util/openalUtil.h>
+#endif
+
 #ifdef __ENABLE_MP3LAME_ENCODE__
 #	include <ttLibC/encoder/mp3lameEncoder.h>
 #endif
@@ -29,6 +33,10 @@
 #	include <ttLibC/decoder/openh264Decoder.h>
 #endif
 
+#ifdef __ENABLE_SPEEXDSP__
+#	include <ttLibC/resampler/speexdspResampler.h>
+#endif
+
 #include <ttLibC/util/beepUtil.h>
 #include <ttLibC/frame/audio/pcms16.h>
 #include <ttLibC/frame/audio/mp3.h>
@@ -39,6 +47,39 @@
 #include <ttLibC/frame/video/h264.h>
 
 #include <ttLibC/resampler/imageResampler.h>
+
+static void speexdspResamplerTest() {
+	LOG_PRINT("speexdspResamplerTest");
+#if defined(__ENABLE_SPEEXDSP__) && defined(__ENABLE_OPENAL__)
+	uint32_t channel = 2;
+	uint32_t in_sample_rate = 44100;
+	uint32_t out_sample_rate = 48000;
+	ttLibC_BeepGenerator *generator = ttLibC_BeepGenerator_make(PcmS16Type_littleEndian, 440, in_sample_rate, channel);
+	ttLibC_AlDevice *device = ttLibC_AlDevice_make(10);
+	ttLibC_SpeexdspResampler *resampler = ttLibC_SpeexdspResampler_make(channel, in_sample_rate, out_sample_rate, 5);
+
+	ttLibC_PcmS16 *pcm = NULL, *resampled_pcm = NULL, *p;
+	for(int i = 0;i < 5;i ++) {
+		p = ttLibC_BeepGenerator_makeBeepByMiliSec(generator, pcm, 500);
+		if(p == NULL) {
+			break;
+		}
+		pcm = p;
+		p = ttLibC_SpeexdspResampler_resample(resampler, resampled_pcm, pcm);
+		if(p == NULL) {
+			break;
+		}
+		resampled_pcm = p;
+		ttLibC_AlDevice_queue(device, resampled_pcm);
+	}
+	ttLibC_AlDevice_proceed(device, -1);
+	ttLibC_PcmS16_close(&pcm);
+	ttLibC_PcmS16_close(&resampled_pcm);
+	ttLibC_SpeexdspResampler_close(&resampler);
+	ttLibC_AlDevice_close(&device);
+	ttLibC_BeepGenerator_close(&generator);
+#endif
+}
 
 typedef struct {
 	ttLibC_Openh264Decoder *decoder;
@@ -226,6 +267,7 @@ static void imageResamplerTest() {
  */
 cute::suite encoderDecoderTests(cute::suite s) {
 	s.clear();
+	s.push_back(CUTE(speexdspResamplerTest));
 	s.push_back(CUTE(openh264Test));
 	s.push_back(CUTE(faacEncoderTest));
 	s.push_back(CUTE(mp3lameEncoderTest));
