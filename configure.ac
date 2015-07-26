@@ -25,6 +25,7 @@ openal_flg=no
 mp3lame_flg=no
 faac_flg=no
 openh264_flg=no
+speexdsp_flg=no
 
 # check result
 cute_check=no 
@@ -34,6 +35,7 @@ mp3lame_encode_check=no
 mp3lame_decode_check=no
 faac_encode_check=no
 openh264_check=no
+speexdsp_check=no
 
 AC_ARG_ENABLE(
 	[lgpl],
@@ -92,6 +94,7 @@ AC_ARG_ENABLE(
 		mp3lame_flg=$enableval
 		faac_flg=$enableval
 		openh264_flg=$enableval
+		speexdsp_flg=$enableval
 	]
 )
 
@@ -123,6 +126,12 @@ AC_ARG_ENABLE(
 	[openh264],
 	AS_HELP_STRING([--enable-openh264/--disable-openh264], [enable/disable openh264 code.]),
 	[openh264_flg=$enableval]
+)
+
+AC_ARG_ENABLE(
+	[speexdsp],
+	AS_HELP_STRING([--enable-speexdsp/--disable-speexdsp], [enable/disable speexdsp code.]),
+	[speexdsp_flg=$enableval]
 )
 
 if test x$opencv_flg = "xyes"; then
@@ -189,6 +198,13 @@ if test x$openh264_flg = "xyes"; then
 	)
 
 fi
+if test x$speexdsp_flg = "xyes"; then
+	PKG_CHECK_MODULES(
+		[SPEEXDSP],
+		[speexdsp],
+		[speexdsp_check=yes]
+	)
+fi
 
 if test x$gpl_flg = "xyes"; then
 	AC_DEFINE([__ENABLE_GPL__])
@@ -236,6 +252,11 @@ if test x$openh264_flg$openh264_check = "xyesyes"; then
 	AC_DEFINE([__ENABLE_OPENH264__])
 fi
 AM_CONDITIONAL(ENABLE_OPENH264, test x$openh264_flg$openh264_check = "xyesyes")
+
+if test x$speexdsp_flg$speexdsp_check = "xyesyes"; then
+	AC_DEFINE([__ENABLE_SPEEXDSP__])
+fi
+AM_CONDITIONAL(ENABLE_SPEEXDSP, test x$speexdsp_flg$speexdsp_check = "xyesyes")
 
 AC_ARG_WITH(pkgconfigdir,
 	AS_HELP_STRING([--with-pkgconfigdir], [Use the specified pkgconfig dir.(default is $libdir/pkgconfig)]),
@@ -360,4 +381,13 @@ if test x$openh264_flg = "xyes"; then
 	fi
 else
 	echo "openh264: off"
+fi
+if test x$speexdsp_flg = "xyes"; then
+	if test x$speexdsp_check = "xyes"; then
+		echo "speexdsp: on"
+	else
+		echo "speexdsp: off(speexdsp library is missing.)"
+	fi
+else
+	echo "speexdsp: off"
 fi

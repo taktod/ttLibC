@@ -23,7 +23,69 @@
 #	include <faaccfg.h>
 #endif
 
+#ifdef __ENABLE_SPEEXDSP__
+#	include <speex/speex_resampler.h>
+#endif
+
+#ifdef __ENABLE_OPENAL__
+#	include <ttLibC/util/openalUtil.h>
+#endif
+
 #include <ttLibC/frame/audio/mp3.h>
+
+static void speexdspResampleTest() {
+	LOG_PRINT("speexdspResampleTest");
+#if defined(__ENABLE_SPEEXDSP__) && defined(__ENABLE_OPENAL__)
+
+	SpeexResamplerState *resampler = NULL;
+	uint32_t channel = 2;
+	uint32_t input_sample_rate = 44100;
+	uint32_t output_sample_rate = 48000;
+	int error_num;
+	resampler = speex_resampler_init(channel, input_sample_rate, output_sample_rate, 5, &error_num);
+	if(error_num != 0) {
+		ERR_PRINT("failed to initialize speex resampler.");
+		return;
+	}
+	int input_latency = speex_resampler_get_input_latency(resampler);
+	LOG_PRINT("input latency:%d", input_latency);
+	int output_latency = speex_resampler_get_output_latency(resampler);
+	LOG_PRINT("output latency:%d", output_latency);
+
+	ttLibC_BeepGenerator *generator = ttLibC_BeepGenerator_make(PcmS16Type_littleEndian, 440, input_sample_rate, channel);
+	ttLibC_AlDevice *device = ttLibC_AlDevice_make(10);
+	ttLibC_PcmS16 *pcm = NULL, *p;
+	int16_t resampled_data[100000];
+	uint32_t out_size;
+	uint32_t in_size;
+	for(int i = 0;i < 5;i ++) {
+		p = ttLibC_BeepGenerator_makeBeepByMiliSec(generator, pcm, 500);
+		if(p == NULL) {
+			break;
+		}
+		pcm = p;
+		in_size = pcm->inherit_super.sample_num;
+		out_size = 100000;
+		int res = speex_resampler_process_interleaved_int(resampler, (const spx_int16_t *)pcm->inherit_super.inherit_super.data, &in_size, resampled_data, &out_size);
+		if(res != 0) {
+			LOG_PRINT("error happens:%s", speex_resampler_strerror(res));
+		}
+		else {
+			LOG_PRINT("in_size:%d, out_size:%d", in_size, out_size);
+		}
+		ttLibC_PcmS16 *resampled_pcm = ttLibC_PcmS16_make(NULL, PcmS16Type_littleEndian, output_sample_rate, out_size, channel, resampled_data, out_size * sizeof(int16_t) * 2, true, 0, 1000);
+		LOG_PRINT("sample_num:%d rate:%d", resampled_pcm->inherit_super.sample_num, resampled_pcm->inherit_super.sample_rate);
+		LOG_PRINT("sample_num:%d rate:%d", pcm->inherit_super.sample_num, pcm->inherit_super.sample_rate);
+		ttLibC_AlDevice_queue(device, resampled_pcm);
+//		ttLibC_AlDevice_proceed(device, 1);
+		ttLibC_PcmS16_close(&resampled_pcm);
+	}
+	ttLibC_AlDevice_proceed(device, -1);
+	ttLibC_AlDevice_close(&device);
+	ttLibC_BeepGenerator_close(&generator);
+	speex_resampler_destroy(resampler);
+#endif
+}
 
 static void faacTest() {
 	LOG_PRINT("faacTest");
@@ -142,6 +204,7 @@ static void mp3lameTest() {
  */
 cute::suite audioTests(cute::suite s) {
 	s.clear();
+	s.push_back(CUTE(speexdspResampleTest));
 	s.push_back(CUTE(faacTest));
 	s.push_back(CUTE(mp3lameTest));
 	return s;
