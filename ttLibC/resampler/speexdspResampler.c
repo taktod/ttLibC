@@ -130,7 +130,8 @@ ttLibC_PcmS16 *ttLibC_SpeexdspResampler_resample(ttLibC_SpeexdspResampler *resam
 		}
 		return NULL;
 	}
-	pcms16 = ttLibC_PcmS16_make(pcms16, src_pcms16->type, resampler_->inherit_super.output_sample_rate, out_sample_num, resampler_->inherit_super.channel_num, data, data_size, true, 0, 1000);
+	uint64_t pts = src_pcms16->inherit_super.inherit_super.pts * resampler_->inherit_super.output_sample_rate / resampler_->inherit_super.input_sample_rate;
+	pcms16 = ttLibC_PcmS16_make(pcms16, src_pcms16->type, resampler_->inherit_super.output_sample_rate, out_sample_num, resampler_->inherit_super.channel_num, data, data_size, true, pts, resampler_->inherit_super.output_sample_rate);
 	if(pcms16 == NULL) {
 		if(is_alloc_flg) {
 			free(data);

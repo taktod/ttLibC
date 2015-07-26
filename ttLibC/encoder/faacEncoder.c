@@ -96,16 +96,17 @@ ttLibC_FaacEncoder *ttLibC_FaacEncoder_make(
 		free(encoder);
 		return NULL;
 	}
-	encoder->aac = NULL;
-	encoder->data_size = max_bytes_output;
-	encoder->data = malloc(encoder->data_size);
-	encoder->samples_input = samples_input;
-	encoder->samples_length = samples_input * 2; // pcmS16 is 2byte for each sample.
-	encoder->pcm_buffer_next_pos = 0;
-	encoder->pcm_buffer = malloc(samples_input * sizeof(int16_t));
+	encoder->aac                       = NULL;
+	encoder->data_size                 = max_bytes_output;
+	encoder->data                      = malloc(encoder->data_size);
+	encoder->samples_input             = samples_input;
+	encoder->samples_length            = samples_input * 2; // pcmS16 is 2byte for each sample.
+	encoder->pcm_buffer_next_pos       = 0;
+	encoder->pcm_buffer                = malloc(samples_input * sizeof(int16_t));
+	encoder->pts                       = 0;
 	encoder->inherit_super.channel_num = channel_num;
 	encoder->inherit_super.sample_rate = sample_rate;
-	encoder->inherit_super.bitrate = bitrate;
+	encoder->inherit_super.bitrate     = bitrate;
 	// now ready to go.
 	return (ttLibC_FaacEncoder *)encoder;
 }
