@@ -3,6 +3,7 @@ AUTOMAKE_OPTIONS=subdir-objects
 lib_LIBRARIES=libttLibC.a
 
 libttLibC_a_SOURCES= \
+	decoder/openh264Decoder.cpp \
 	encoder/faacEncoder.c \
 	encoder/mp3lameEncoder.c \
 	encoder/openh264Encoder.cpp \

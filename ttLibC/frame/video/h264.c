@@ -1,6 +1,9 @@
 /*
  * @file   h264.c
- * @brief  
+ * @brief  h264 image frame information
+ *
+ * this code is under 3-Cause BSD license.
+ *
  * @author taktod
  * @date   2015/07/24
  */

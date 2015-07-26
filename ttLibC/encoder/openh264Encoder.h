@@ -1,6 +1,9 @@
 /**
  * @file   openh264Encoder.h
- * @brief  
+ * @brief  encode h264 with openh264.
+ *
+ * this code is under 3-Cause BSD license.
+ *
  * @author taktod
  * @date   2015/07/24
  */
@@ -66,7 +69,7 @@ ttLibC_Openh264Encoder *ttLibC_Openh264Encoder_make(
  * @param ptr      pointer for user def value, which will call in callback.
  */
 void ttLibC_Openh264Encoder_encode(
-		ttLibC_Openh264Encoder* encoder,
+		ttLibC_Openh264Encoder *encoder,
 		ttLibC_Yuv420 *yuv420,
 		ttLibC_Openh264EncodeFunc callback,
 		void *ptr);

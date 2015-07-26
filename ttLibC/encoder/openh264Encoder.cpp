@@ -1,6 +1,9 @@
 /*
  * @file   openh264Encoder.cpp
- * @brief  
+ * @brief  encode h264 with openh264.
+ *
+ * this code is under 3-Cause BSD license.
+ *
  * @author taktod
  * @date   2015/07/24
  */
@@ -10,14 +13,12 @@
 #include "openh264Encoder.h"
 #include "../log.h"
 
-#include "../util/hexUtil.h"
-
 #include <wels/codec_api.h>
 #include <stdlib.h>
 #include <string.h>
 
 /*
- * h264 encoder defailt definition.
+ * h264 encoder detail definition.
  */
 typedef struct {
 	/** inherit data from ttLibC_Openh264Encoder */
@@ -394,6 +395,6 @@ void ttLibC_Openh264Encoder_close(ttLibC_Openh264Encoder **encoder) {
 	Openh264Encoder_close(encoder);
 }
 
-}
+} /* extern "C" */
 
 #endif
