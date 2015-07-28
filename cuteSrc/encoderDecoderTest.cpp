@@ -24,6 +24,10 @@
 #	include <ttLibC/encoder/mp3lameEncoder.h>
 #endif
 
+#ifdef __ENABLE_MP3LAME_DECODE__
+#	include <ttLibC/decoder/mp3lameDecoder.h>
+#endif
+
 #ifdef __ENABLE_FAAC_ENCODE__
 #	include <ttLibC/encoder/faacEncoder.h>
 #endif
@@ -186,18 +190,33 @@ static void faacEncoderTest() {
 	ttLibC_PcmS16_close(&pcm);
 	ttLibC_BeepGenerator_close(&generator);
 	ttLibC_FaacEncoder_close(&encoder);
- #endif
+#endif
+}
+
+typedef struct {
+	ttLibC_Mp3lameDecoder *decoder;
+	ttLibC_AlDevice *device;
+} mp3lameTest_TestData_t;
+
+void mp3lameDecoderTestCallback(void *ptr, ttLibC_PcmS16 *pcm) {
+	mp3lameTest_TestData_t *testData = (mp3lameTest_TestData_t *)ptr;
+	ttLibC_AlDevice_queue(testData->device, pcm);
 }
 
 void mp3lameEncoderTestCallback(void *ptr, ttLibC_Mp3 *mp3) {
 	LOG_PRINT("encoded. pts:%llu size:%lu", mp3->inherit_super.inherit_super.pts, mp3->inherit_super.inherit_super.buffer_size);
+	LOG_PRINT("sample_num:%d", mp3->inherit_super.sample_num);
+	mp3lameTest_TestData_t *testData = (mp3lameTest_TestData_t *)ptr;
+	ttLibC_Mp3lameDecoder_decode(testData->decoder, mp3, mp3lameDecoderTestCallback, ptr);
 }
 
-static void mp3lameEncoderTest() {
-	LOG_PRINT("mp3lameEncoderTest");
-#ifdef __ENABLE_MP3LAME_ENCODE__
+static void mp3lameTest() {
+	LOG_PRINT("mp3lameTest");
+#if defined(__ENABLE_MP3LAME_ENCODE__) && defined(__ENABLE_MP3LAME_DECODE__) && (__ENABLE_OPENAL__)
 	ttLibC_Mp3lameEncoder *encoder = ttLibC_Mp3lameEncoder_make(22050, 1, 10);
+	ttLibC_Mp3lameDecoder *decoder = ttLibC_Mp3lameDecoder_make();
 	ttLibC_BeepGenerator *generator = ttLibC_BeepGenerator_make(PcmS16Type_littleEndian_planar, 440, 22050, 1);
+	ttLibC_AlDevice *device = ttLibC_AlDevice_make(255);
 	ttLibC_PcmS16 *pcm = NULL, *p;
 
 	for(int i = 0;i < 3; ++ i) {
@@ -208,10 +227,16 @@ static void mp3lameEncoderTest() {
 		}
 		pcm = p;
 		// encode data.
-		ttLibC_Mp3lameEncoder_encode(encoder, pcm, mp3lameEncoderTestCallback, NULL);
+		mp3lameTest_TestData_t testData;
+		testData.decoder = decoder;
+		testData.device  = device;
+		ttLibC_Mp3lameEncoder_encode(encoder, pcm, mp3lameEncoderTestCallback, &testData);
 	}
+	ttLibC_AlDevice_proceed(device, -1);
+	ttLibC_AlDevice_close(&device);
 	ttLibC_PcmS16_close(&pcm);
 	ttLibC_BeepGenerator_close(&generator);
+	ttLibC_Mp3lameDecoder_close(&decoder);
 	ttLibC_Mp3lameEncoder_close(&encoder);
 #endif
 }
@@ -270,7 +295,7 @@ cute::suite encoderDecoderTests(cute::suite s) {
 	s.push_back(CUTE(speexdspResamplerTest));
 	s.push_back(CUTE(openh264Test));
 	s.push_back(CUTE(faacEncoderTest));
-	s.push_back(CUTE(mp3lameEncoderTest));
+	s.push_back(CUTE(mp3lameTest));
 	s.push_back(CUTE(imageResamplerTest));
 	return s;
 }

@@ -62,6 +62,7 @@ void mp3EncodeProc(void *ptr, ttLibC_Mp3 *mp3) {
 		(*buf) = right[i];
 		buf ++;
 	}
+	LOG_PRINT("mp3 sample_num:%d");
 	ttLibC_PcmS16 *p = ttLibC_PcmS16_make(
 			decoded_pcm, PcmS16Type_littleEndian,
 			44100, 1152, 2, data, num * 4, true, mp3->inherit_super.inherit_super.pts, mp3->inherit_super.inherit_super.timebase);

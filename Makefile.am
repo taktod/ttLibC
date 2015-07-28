@@ -29,6 +29,11 @@ nobase_include_HEADERS += \
 	ttLibC/encoder/mp3lameEncoder.h
 endif
 
+if ENABLE_MP3LAME_DECODE
+nobase_include_HEADERS += \
+	ttLibC/decoder/mp3lameDecoder.h
+endif
+
 if ENABLE_FAAC_ENCODE
 nobase_include_HEADERS += \
 	ttLibC/encoder/faacEncoder.h
