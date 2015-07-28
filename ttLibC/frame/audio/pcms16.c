@@ -40,6 +40,8 @@ ttLibC_PcmS16 *ttLibC_PcmS16_make(
 		uint64_t pts,
 		uint32_t timebase) {
 	ttLibC_PcmS16 *pcms16 = prev_frame;
+	size_t data_size_ = data_size;
+	size_t buffer_size_ = data_size;
 	switch(type) {
 	case PcmS16Type_littleEndian:
 	case PcmS16Type_bigEndian:
@@ -63,6 +65,9 @@ ttLibC_PcmS16 *ttLibC_PcmS16_make(
 				free(pcms16->inherit_super.inherit_super.data);
 				pcms16->inherit_super.inherit_super.data = NULL;
 			}
+			else {
+				data_size_ = pcms16->inherit_super.inherit_super.data_size;
+			}
 		}
 	}
 	pcms16->type                                    = type;
@@ -70,7 +75,7 @@ ttLibC_PcmS16 *ttLibC_PcmS16_make(
 	pcms16->inherit_super.sample_num                = sample_num;
 	pcms16->inherit_super.sample_rate               = sample_rate;
 	pcms16->inherit_super.inherit_super.buffer_size = channel_num * sample_num * 2;
-	pcms16->inherit_super.inherit_super.data_size   = data_size;
+	pcms16->inherit_super.inherit_super.data_size   = data_size_;
 	pcms16->inherit_super.inherit_super.is_non_copy = non_copy_mode;
 	pcms16->inherit_super.inherit_super.pts         = pts;
 	pcms16->inherit_super.inherit_super.timebase    = timebase;

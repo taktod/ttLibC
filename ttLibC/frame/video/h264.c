@@ -48,6 +48,8 @@ ttLibC_H264 *ttLibC_H264_make(
 		uint64_t pts,
 		uint32_t timebase) {
 	ttLibC_H264_ *h264 = (ttLibC_H264_ *)prev_frame;
+	size_t buffer_size_ = data_size;
+	size_t data_size_ = data_size;
 	switch(type) {
 	case H264Type_configData:
 	case H264Type_slice:
@@ -70,9 +72,12 @@ ttLibC_H264 *ttLibC_H264_make(
 	}
 	else {
 		if(!h264->inherit_super.inherit_super.inherit_super.is_non_copy) {
-			if(non_copy_mode || h264->inherit_super.inherit_super.inherit_super.data_size < data_size) {
+			if(non_copy_mode || h264->inherit_super.inherit_super.inherit_super.data_size < data_size_) {
 				free(h264->inherit_super.inherit_super.inherit_super.data);
 				h264->inherit_super.inherit_super.inherit_super.data = NULL;
+			}
+			else {
+				data_size_ = h264->inherit_super.inherit_super.inherit_super.data_size;
 			}
 		}
 	}
@@ -95,8 +100,8 @@ ttLibC_H264 *ttLibC_H264_make(
 		}
 		return NULL;
 	}
-	h264->inherit_super.inherit_super.inherit_super.buffer_size = data_size;
-	h264->inherit_super.inherit_super.inherit_super.data_size   = data_size;
+	h264->inherit_super.inherit_super.inherit_super.buffer_size = buffer_size_;
+	h264->inherit_super.inherit_super.inherit_super.data_size   = data_size_;
 	h264->inherit_super.inherit_super.inherit_super.is_non_copy = non_copy_mode;
 	h264->inherit_super.inherit_super.inherit_super.pts         = pts;
 	h264->inherit_super.inherit_super.inherit_super.timebase    = timebase;

@@ -50,6 +50,8 @@ ttLibC_Yuv420 *ttLibC_Yuv420_make(
 		uint64_t pts,
 		uint32_t timebase) {
 	ttLibC_Yuv420 *yuv420 = prev_frame;
+	size_t buffer_size_ = data_size;
+	size_t data_size_ = data_size;
 	uint32_t y_step = 1;
 	uint32_t u_step = 1;
 	uint32_t v_step = 1;
@@ -75,7 +77,13 @@ ttLibC_Yuv420 *ttLibC_Yuv420_make(
 	}
 	else {
 		if(!yuv420->inherit_super.inherit_super.is_non_copy) {
-			free(yuv420->inherit_super.inherit_super.data);
+			if(non_copy_mode || yuv420->inherit_super.inherit_super.data_size < data_size_) {
+				free(yuv420->inherit_super.inherit_super.data);
+				yuv420->inherit_super.inherit_super.data = NULL;
+			}
+			else {
+				data_size_ = yuv420->inherit_super.inherit_super.data_size;
+			}
 		}
 	}
 	yuv420->inherit_super.inherit_super.data = NULL;
@@ -97,20 +105,22 @@ ttLibC_Yuv420 *ttLibC_Yuv420_make(
 	yuv420->inherit_super.inherit_super.pts         = pts;
 	yuv420->inherit_super.inherit_super.timebase    = timebase;
 	yuv420->inherit_super.inherit_super.type        = frameType_yuv420;
-	yuv420->inherit_super.inherit_super.data_size   = data_size;
-	yuv420->inherit_super.inherit_super.buffer_size = data_size;
+	yuv420->inherit_super.inherit_super.data_size   = data_size_;
+	yuv420->inherit_super.inherit_super.buffer_size = buffer_size_;
 
 	if(non_copy_mode) {
 		yuv420->inherit_super.inherit_super.data = data;
 	}
 	else {
-		yuv420->inherit_super.inherit_super.data = malloc(data_size);
 		if(yuv420->inherit_super.inherit_super.data == NULL) {
-			ERR_PRINT("failed to allocate memory for data.");
-			if(prev_frame == NULL) {
-				free(yuv420);
+			yuv420->inherit_super.inherit_super.data = malloc(data_size);
+			if(yuv420->inherit_super.inherit_super.data == NULL) {
+				ERR_PRINT("failed to allocate memory for data.");
+				if(prev_frame == NULL) {
+					free(yuv420);
+				}
+				return NULL;
 			}
-			return NULL;
 		}
 		memcpy(yuv420->inherit_super.inherit_super.data, data, data_size);
 	}

@@ -44,6 +44,8 @@ ttLibC_Aac *ttLibC_Aac_make(
 		uint64_t pts,
 		uint32_t timebase) {
 	ttLibC_Aac_ *aac = (ttLibC_Aac *)prev_frame;
+	size_t data_size_ = data_size;
+	size_t buffer_size_ = data_size;
 	switch(type) {
 	case AacType_adts:
 	case AacType_raw:
@@ -65,14 +67,17 @@ ttLibC_Aac *ttLibC_Aac_make(
 				free(aac->inherit_super.inherit_super.data);
 				aac->inherit_super.inherit_super.data = NULL;
 			}
+			else {
+				data_size_ = aac->inherit_super.inherit_super.data_size;
+			}
 		}
 	}
 	aac->type                                    = type;
 	aac->inherit_super.channel_num               = channel_num;
 	aac->inherit_super.sample_rate               = sample_rate;
 	aac->inherit_super.sample_num                = sample_num;
-	aac->inherit_super.inherit_super.buffer_size = data_size;
-	aac->inherit_super.inherit_super.data_size   = data_size;
+	aac->inherit_super.inherit_super.buffer_size = buffer_size_;
+	aac->inherit_super.inherit_super.data_size   = data_size_;
 	aac->inherit_super.inherit_super.is_non_copy = non_copy_mode;
 	aac->inherit_super.inherit_super.pts         = pts;
 	aac->inherit_super.inherit_super.timebase    = timebase;

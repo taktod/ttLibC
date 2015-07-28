@@ -64,6 +64,8 @@ ttLibC_Mp3 *ttLibC_Mp3_make(
 		uint64_t pts,
 		uint32_t timebase) {
 	ttLibC_Mp3_ *mp3 = (ttLibC_Mp3_ *)prev_frame;
+	size_t data_size_ = data_size;
+	size_t buffer_size_ = data_size;
 	switch(type) {
 	case Mp3Type_frame:
 	case Mp3Type_id3:
@@ -86,14 +88,17 @@ ttLibC_Mp3 *ttLibC_Mp3_make(
 				free(mp3->inherit_super.inherit_super.inherit_super.data);
 				mp3->inherit_super.inherit_super.inherit_super.data = NULL;
 			}
+			else {
+				data_size_ = mp3->inherit_super.inherit_super.inherit_super.data_size;
+			}
 		}
 	}
 	mp3->inherit_super.type                                    = type;
 	mp3->inherit_super.inherit_super.channel_num               = channel_num;
 	mp3->inherit_super.inherit_super.sample_num                = sample_num;
 	mp3->inherit_super.inherit_super.sample_rate               = sample_rate;
-	mp3->inherit_super.inherit_super.inherit_super.buffer_size = data_size;
-	mp3->inherit_super.inherit_super.inherit_super.data_size   = data_size;
+	mp3->inherit_super.inherit_super.inherit_super.buffer_size = buffer_size_;
+	mp3->inherit_super.inherit_super.inherit_super.data_size   = data_size_;
 	mp3->inherit_super.inherit_super.inherit_super.is_non_copy = non_copy_mode;
 	mp3->inherit_super.inherit_super.inherit_super.pts         = pts;
 	mp3->inherit_super.inherit_super.inherit_super.timebase    = timebase;
