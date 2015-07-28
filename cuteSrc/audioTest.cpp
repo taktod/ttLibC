@@ -18,6 +18,10 @@
 #	include <lame/lame.h>
 #endif
 
+#ifdef __ENABLE_MP3LAME_ENCODE__
+#	include <ttLibC/encoder/mp3lameEncoder.h>
+#endif
+
 #ifdef __ENABLE_FAAC__
 #	include <faac.h>
 #	include <faaccfg.h>
@@ -31,7 +35,195 @@
 #	include <ttLibC/util/openalUtil.h>
 #endif
 
+#ifdef __ENABLE_SPEEX__
+#	include <speex/speex.h>
+#	include <speex/speex_header.h>
+#	include <speex/speex_stereo.h>
+#endif
+
 #include <ttLibC/frame/audio/mp3.h>
+
+static hip_t hip_gflags;
+static ttLibC_PcmS16 *decoded_pcm;
+static ttLibC_AlDevice *device;
+
+void mp3EncodeProc(void *ptr, ttLibC_Mp3 *mp3) {
+	LOG_PRINT("mp3できた");
+	short left[65536], right[65536];
+	short data[65536];
+	short *buf = data;
+	// デコードします。
+//	hip_decode(hip_gflags, mp3->inherit_super.inherit_super.data, mp3->inherit_super.inherit_super.buffer_size);
+	int num = hip_decode(hip_gflags, (unsigned char *)mp3->inherit_super.inherit_super.data, (size_t)mp3->inherit_super.inherit_super.buffer_size, (short *)left, (short *)right);
+	LOG_PRINT("num:%d", num);
+	for(int i = 0;i < num;++ i) {
+		(*buf) = left[i];
+		buf ++;
+		(*buf) = right[i];
+		buf ++;
+	}
+	ttLibC_PcmS16 *p = ttLibC_PcmS16_make(
+			decoded_pcm, PcmS16Type_littleEndian,
+			44100, 1152, 2, data, num * 4, true, mp3->inherit_super.inherit_super.pts, mp3->inherit_super.inherit_super.timebase);
+	if(p == NULL) {
+		ERR_PRINT("pcm作成失敗");
+		return;
+	}
+	decoded_pcm = p;
+	ttLibC_AlDevice_queue(device, decoded_pcm);
+	ttLibC_AlDevice_proceed(device, 10);
+}
+
+static void mp3DecodeTest() {
+	LOG_PRINT("mp3decodeTest");
+#if defined(__ENABLE_MP3LAME__) && defined(__ENABLE_MP3LAME_ENCODE__) && defined(__ENABLE_OPENAL__)
+	hip_gflags = NULL;
+	decoded_pcm = NULL;
+	uint32_t sample_rate = 44100;
+	uint32_t channel_num = 2;
+	ttLibC_BeepGenerator *generator = ttLibC_BeepGenerator_make(PcmS16Type_littleEndian, 440, sample_rate, channel_num);
+	device = ttLibC_AlDevice_make(100);
+	ttLibC_Mp3lameEncoder *encoder = ttLibC_Mp3lameEncoder_make(sample_rate, channel_num, 2);
+	hip_gflags = hip_decode_init();
+	if(!hip_gflags) {
+		ERR_PRINT("failed to initialize hip.");
+	}
+	ttLibC_PcmS16 *pcm = NULL, *p;
+	for(int i = 0;i < 10;i ++) {
+		p = ttLibC_BeepGenerator_makeBeepByMiliSec(generator, pcm, 500);
+		if(p == NULL) {
+			break;
+		}
+		pcm = p;
+		ttLibC_Mp3lameEncoder_encode(encoder, pcm, mp3EncodeProc, NULL);
+//		ttLibC_AlDevice_queue(device, pcm);
+//		ttLibC_AlDevice_proceed(device, 10);
+	}
+	ttLibC_AlDevice_proceed(device, -1);
+	ttLibC_AlDevice_close(&device);
+	ttLibC_PcmS16_close(&pcm);
+	ttLibC_PcmS16_close(&decoded_pcm);
+	if(hip_gflags) {
+		hip_decode_exit(hip_gflags);
+	}
+	ttLibC_BeepGenerator_close(&generator);
+#endif
+}
+
+static void speexTest() {
+	LOG_PRINT("speexTest");
+#if defined(__ENABLE_SPEEX__) && defined(__ENABLE_OPENAL__)
+	uint32_t sample_rate = 8000;
+	uint32_t channel_num = 1;
+	ttLibC_BeepGenerator *generator = ttLibC_BeepGenerator_make(PcmS16Type_littleEndian, 440, sample_rate, channel_num);
+	ttLibC_PcmS16 *pcm = NULL, *p;
+
+	// encoder
+		SpeexBits bits;
+		SpeexHeader header;
+	uint8_t *header_data = NULL;
+	int header_size;
+		void *enc_state;
+
+	// decoder
+		SpeexBits bits_dec;
+//		SpeexStereoState stereo;
+		void *dec_state;
+
+	LOG_PRINT("encoder_init");
+	const SpeexMode *mode;
+	switch(sample_rate) {
+	case 8000:
+		mode = &speex_nb_mode;
+		break;
+	case 16000:
+		mode = &speex_wb_mode;
+		break;
+	case 32000:
+		mode = &speex_uwb_mode;
+		break;
+	default:
+		LOG_PRINT("support only 8k 16k 32kHz.");
+		return;
+	}
+	// encode
+	enc_state = speex_encoder_init(mode);
+	if(!enc_state) {
+		LOG_PRINT("failed to initialize libspeex.");
+		return;
+	}
+	speex_init_header(&header, 8000, 1, mode);
+	LOG_PRINT("frame_size:%d", header.frame_size);
+	// init bit writer.
+	LOG_PRINT("bits_init");
+	speex_bits_init(&bits);
+
+	header_data = (uint8_t *)speex_header_to_packet(&header, &header_size);
+	ttLibC_HexUtil_dump(header_data, header_size, true);
+	speex_header_free(header_data);
+
+	// decode
+	speex_bits_init(&bits_dec);
+	dec_state = speex_decoder_init(mode);
+
+	uint8_t encoded_buf[65536];
+	int16_t decoded_buf[65536];
+//	int16_t *decoded_buf;
+	// ここまでで準備OKっぽい。
+	for(int i = 0;i < 10;i ++) {
+		p = ttLibC_BeepGenerator_makeBeepByMiliSec(generator, pcm, 1000);
+		if(p == NULL) {
+			break;
+		}
+		pcm = p;
+		// dataは20ミリsecごとに入れていく必要があるみたい。
+		// 出力は20ミリsec分だけでてくるっぽい。
+		// なるほどね。
+		speex_encode_int(enc_state, (int16_t *)pcm->inherit_super.inherit_super.data, &bits);
+		int write_size = speex_bits_write(&bits, (char *)encoded_buf, 65536);
+		LOG_PRINT("write_size:%d", write_size);
+		ttLibC_HexUtil_dump(encoded_buf, write_size, true);
+		speex_bits_read_from(&bits_dec, (char *)encoded_buf, write_size);
+
+		LOG_PRINT("read ok");
+		// こっちも同じ。20ミリsec分だけデコードされてでてくる。
+		// 8k:160サンプル
+		// 16k:320サンプル
+		// 32k:640サンプル
+		// となる模様。
+		// というわけで、speexのencode,decodeはとりあえずこれでいけるっぽいです。
+		int decode_size = speex_decode_int(dec_state, &bits_dec, decoded_buf);
+
+//		LOG_PRINT("ptr:%d", decoded_buf);
+		LOG_PRINT("decode_size:%d", decode_size);
+		ttLibC_HexUtil_dump(decoded_buf, 10000, true);
+
+		write_size = speex_bits_write(&bits, (char *)encoded_buf, 65536);
+		LOG_PRINT("write_size:%d", write_size);
+		ttLibC_HexUtil_dump(encoded_buf, write_size, true);
+		speex_bits_read_from(&bits_dec, (char *)encoded_buf, write_size);
+
+		LOG_PRINT("read ok");
+		decode_size = speex_decode_int(dec_state, &bits_dec, decoded_buf);
+
+//		LOG_PRINT("ptr:%d", decoded_buf);
+		LOG_PRINT("decode_size:%d", decode_size);
+		ttLibC_HexUtil_dump(decoded_buf, 10000, true);
+		break;
+	}
+
+	LOG_PRINT("bits destroy");
+	speex_bits_destroy(&bits_dec);
+	speex_decoder_destroy(dec_state);
+	// destroy bit write.
+	speex_bits_destroy(&bits);
+	LOG_PRINT("encoder destroy");
+	// destroy libspeex.
+	speex_encoder_destroy(enc_state);
+	ttLibC_BeepGenerator_close(&generator);
+	LOG_PRINT("all end.");
+#endif
+}
 
 static void speexdspResampleTest() {
 	LOG_PRINT("speexdspResampleTest");
@@ -204,6 +396,8 @@ static void mp3lameTest() {
  */
 cute::suite audioTests(cute::suite s) {
 	s.clear();
+	s.push_back(CUTE(mp3DecodeTest));
+	s.push_back(CUTE(speexTest));
 	s.push_back(CUTE(speexdspResampleTest));
 	s.push_back(CUTE(faacTest));
 	s.push_back(CUTE(mp3lameTest));
