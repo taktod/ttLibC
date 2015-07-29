@@ -165,6 +165,12 @@ void ttLibC_FaacEncoder_encode(
 	size_t left_size = pcm->inherit_super.inherit_super.buffer_size;
 	uint8_t *data = pcm->inherit_super.inherit_super.data;
 	if(encoder_->pcm_buffer_next_pos != 0) {
+		if(left_size < encoder_->samples_length - encoder_->pcm_buffer_next_pos) {
+			// append data is not enough for encode. just add.
+			memcpy(encoder_->pcm_buffer + encoder_->pcm_buffer_next_pos, data, left_size);
+			encoder_->pcm_buffer_next_pos += left_size;
+			return;
+		}
 		memcpy(encoder_->pcm_buffer + encoder_->pcm_buffer_next_pos, data, encoder_->samples_length - encoder_->pcm_buffer_next_pos);
 		data += encoder_->samples_length - encoder_->pcm_buffer_next_pos;
 		left_size -= encoder_->samples_length - encoder_->pcm_buffer_next_pos;
