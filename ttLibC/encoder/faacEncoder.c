@@ -55,6 +55,7 @@ typedef ttLibC_Encoder_FaacEncoder_ ttLibC_FaacEncoder_;
  * @param bitrate
  */
 ttLibC_FaacEncoder *ttLibC_FaacEncoder_make(
+		ttLibC_FaacEncoder_Type type,
 		uint32_t sample_rate,
 		uint32_t channel_num,
 		uint32_t bitrate) {
@@ -83,7 +84,24 @@ ttLibC_FaacEncoder *ttLibC_FaacEncoder_make(
 		free(encoder);
 		return NULL;
 	}
-	encoder->config->aacObjectType = MAIN;
+	switch(type) {
+	case FaacEncoderType_Main:
+		encoder->config->aacObjectType = MAIN;
+		break;
+	case FaacEncoderType_Low:
+		encoder->config->aacObjectType = LOW;
+		break;
+	case FaacEncoderType_SSR:
+		encoder->config->aacObjectType = SSR;
+		break;
+	case FaacEncoderType_LTP:
+		encoder->config->aacObjectType = LTP;
+		break;
+	default:
+		ERR_PRINT("unknown faac encoder type:%d", type);
+		encoder->config->aacObjectType = LOW;
+		break;
+	}
 	encoder->config->mpegVersion   = MPEG4;
 	encoder->config->useTns        = 0; // noise sharping
 	encoder->config->allowMidside  = 1; // 5.1ch's .1ch is allowed.

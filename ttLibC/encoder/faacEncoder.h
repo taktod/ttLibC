@@ -53,6 +53,7 @@ typedef ttLibC_Encoder_FaacEncoder ttLibC_FaacEncoder;
  * @param bitrate
  */
 ttLibC_FaacEncoder *ttLibC_FaacEncoder_make(
+		ttLibC_FaacEncoder_Type type,
 		uint32_t sample_rate,
 		uint32_t channel_num,
 		uint32_t bitrate);

@@ -41,16 +41,52 @@
 #	include <ttLibC/resampler/speexdspResampler.h>
 #endif
 
+#ifdef __ENABLE_SPEEX__
+#	include <ttLibC/encoder/speexEncoder.h>
+#endif
+
 #include <ttLibC/util/beepUtil.h>
 #include <ttLibC/frame/audio/pcms16.h>
 #include <ttLibC/frame/audio/mp3.h>
 #include <ttLibC/frame/audio/aac.h>
+#include <ttLibC/frame/audio/speex.h>
 
 #include <ttLibC/frame/video/bgr.h>
 #include <ttLibC/frame/video/yuv420.h>
 #include <ttLibC/frame/video/h264.h>
 
 #include <ttLibC/resampler/imageResampler.h>
+
+void speexEncoderCallback(void *ptr, ttLibC_Speex *speex) {
+	LOG_PRINT("speexできた。");
+}
+
+static void speexTest() {
+	LOG_PRINT("speexTest");
+#if defined(__ENABLE_SPEEX__) && defined(__ENABLE_OPENAL__)
+	uint32_t sample_rate = 8000;
+	uint32_t channel_num = 1;
+	ttLibC_BeepGenerator *generator = ttLibC_BeepGenerator_make(PcmS16Type_littleEndian, 440, sample_rate, channel_num);
+	ttLibC_AlDevice *device = ttLibC_AlDevice_make(256);
+	ttLibC_SpeexEncoder *encoder = ttLibC_SpeexEncoder_make(sample_rate, channel_num, 5);
+	ttLibC_PcmS16 *pcm = NULL, *p;
+	for(int i = 0;i < 10;++ i) {
+		p = ttLibC_BeepGenerator_makeBeepByMiliSec(generator, pcm, 500);
+		if(p == NULL) {
+			break;
+		}
+		pcm = p;
+		ttLibC_SpeexEncoder_encode(encoder, pcm, speexEncoderCallback, NULL);
+		ttLibC_AlDevice_queue(device, pcm);
+//		break;
+	}
+	ttLibC_AlDevice_proceed(device, -1);
+	ttLibC_SpeexEncoder_close(&encoder);
+	ttLibC_AlDevice_close(&device);
+	ttLibC_PcmS16_close(&pcm);
+	ttLibC_BeepGenerator_close(&generator);
+#endif
+}
 
 static void speexdspResamplerTest() {
 	LOG_PRINT("speexdspResamplerTest");
@@ -167,17 +203,25 @@ static void openh264Test() {
 }
 
 void faacEncoderTestCallback(void *ptr, ttLibC_Aac *aac) {
+	FILE* fp = (FILE *)ptr;
 	LOG_PRINT("encoded. pts:%llu size:%lu", aac->inherit_super.inherit_super.pts, aac->inherit_super.inherit_super.buffer_size);
+	if(fp) {
+		fwrite(aac->inherit_super.inherit_super.data, 1, aac->inherit_super.inherit_super.buffer_size, fp);
+	}
 }
 
 static void faacEncoderTest() {
 	LOG_PRINT("faacEncoderTest");
 #ifdef __ENABLE_FAAC_ENCODE__
-	ttLibC_FaacEncoder *encoder = ttLibC_FaacEncoder_make(22050, 2, 96000);
-	ttLibC_BeepGenerator *generator = ttLibC_BeepGenerator_make(PcmS16Type_littleEndian, 440, 22050, 2);
+	uint32_t sample_rate = 44100;
+	uint32_t channel_num = 2;
+	ttLibC_FaacEncoder *encoder = ttLibC_FaacEncoder_make(FaacEncoderType_Main, sample_rate, channel_num, 96000);
+	ttLibC_BeepGenerator *generator = ttLibC_BeepGenerator_make(PcmS16Type_littleEndian, 440, sample_rate, channel_num);
+	generator->amplitude = 32000;
 	ttLibC_PcmS16 *pcm = NULL, *p;
+	FILE *fp = fopen("output.aac", "wb");
 
-	for(int i = 0;i < 3; ++ i) {
+	for(int i = 0;i < 5; ++ i) {
 		// make 1sec beep.
 		p = ttLibC_BeepGenerator_makeBeepByMiliSec(generator, pcm, 1000);
 		if(p == NULL) {
@@ -185,7 +229,10 @@ static void faacEncoderTest() {
 		}
 		pcm = p;
 		// encode data.
-		ttLibC_FaacEncoder_encode(encoder, pcm, faacEncoderTestCallback, NULL);
+		ttLibC_FaacEncoder_encode(encoder, pcm, faacEncoderTestCallback, fp);
+	}
+	if(fp) {
+		fclose(fp);
 	}
 	ttLibC_PcmS16_close(&pcm);
 	ttLibC_BeepGenerator_close(&generator);
@@ -292,6 +339,7 @@ static void imageResamplerTest() {
  */
 cute::suite encoderDecoderTests(cute::suite s) {
 	s.clear();
+	s.push_back(CUTE(speexTest));
 	s.push_back(CUTE(speexdspResamplerTest));
 	s.push_back(CUTE(openh264Test));
 	s.push_back(CUTE(faacEncoderTest));
