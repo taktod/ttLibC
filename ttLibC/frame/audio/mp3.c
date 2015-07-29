@@ -81,6 +81,7 @@ ttLibC_Mp3 *ttLibC_Mp3_make(
 			ERR_PRINT("failed to allocate memory for mp3 frame.");
 			return NULL;
 		}
+		mp3->inherit_super.inherit_super.inherit_super.data = NULL;
 	}
 	else {
 		if(!mp3->inherit_super.inherit_super.inherit_super.is_non_copy) {

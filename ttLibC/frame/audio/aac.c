@@ -43,7 +43,7 @@ ttLibC_Aac *ttLibC_Aac_make(
 		bool non_copy_mode,
 		uint64_t pts,
 		uint32_t timebase) {
-	ttLibC_Aac_ *aac = (ttLibC_Aac *)prev_frame;
+	ttLibC_Aac_ *aac = (ttLibC_Aac_ *)prev_frame;
 	size_t data_size_ = data_size;
 	size_t buffer_size_ = data_size;
 	switch(type) {
@@ -60,6 +60,7 @@ ttLibC_Aac *ttLibC_Aac_make(
 			ERR_PRINT("failed to allocate memory for aac frame.");
 			return NULL;
 		}
+		aac->inherit_super.inherit_super.data = NULL;
 	}
 	else {
 		if(!aac->inherit_super.inherit_super.is_non_copy) {

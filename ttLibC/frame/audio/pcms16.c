@@ -58,6 +58,7 @@ ttLibC_PcmS16 *ttLibC_PcmS16_make(
 			ERR_PRINT("failed to allocate memory for pcms16 frame.");
 			return NULL;
 		}
+		pcms16->inherit_super.inherit_super.data = NULL;
 	}
 	else {
 		if(!pcms16->inherit_super.inherit_super.is_non_copy) {

@@ -60,6 +60,7 @@ ttLibC_Bgr *ttLibC_Bgr_make(
 			ERR_PRINT("failed to allocate memory for bgr frame.");
 			return NULL;
 		}
+		bgr->inherit_super.inherit_super.data = NULL;
 	}
 	else {
 		if(!bgr->inherit_super.inherit_super.is_non_copy) {

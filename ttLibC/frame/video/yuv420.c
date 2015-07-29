@@ -74,6 +74,7 @@ ttLibC_Yuv420 *ttLibC_Yuv420_make(
 			ERR_PRINT("failed to allocate memory for yuv420 frame");
 			return NULL;
 		}
+		yuv420->inherit_super.inherit_super.data = NULL;
 	}
 	else {
 		if(!yuv420->inherit_super.inherit_super.is_non_copy) {
