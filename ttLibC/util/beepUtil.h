@@ -29,6 +29,8 @@ typedef struct {
 	uint32_t sample_rate;
 	/** channel_num 1:monoral 2:stereo */
 	uint32_t channel_num;
+	/** amplitude for generate sound */
+	uint32_t amplitude;
 	/** beep position. */
 	uint64_t pos;
 } ttLibC_Util_BeepUtil_BeepGenerator;

@@ -34,6 +34,7 @@ ttLibC_BeepGenerator *ttLibC_BeepGenerator_make(
 	generator->sample_rate = sample_rate;
 	generator->channel_num = channel_num;
 	generator->target_Hz   = target_Hz;
+	generator->amplitude   = 32767;
 	generator->pos = 0;
 	return generator;
 }
@@ -155,7 +156,7 @@ ttLibC_PcmS16 *ttLibC_BeepGenerator_makeBeepBySampleNum(
 	switch(generator->channel_num) {
 	case 1:
 		for(uint32_t i = 0;i < sample_num;++ i) {
-			beep = sin(generator->pos * 3.14159 * 2 * generator->target_Hz / generator->sample_rate) * 32767;
+			beep = sin(generator->pos * 3.14159 * 2 * generator->target_Hz / generator->sample_rate) * generator->amplitude;
 			++ generator->pos;
 			(*left_u_data) = ((beep >> 8) & 0xFF);
 			(*left_l_data) = (beep & 0xFF);
@@ -165,7 +166,7 @@ ttLibC_PcmS16 *ttLibC_BeepGenerator_makeBeepBySampleNum(
 		break;
 	case 2:
 		for(uint32_t i = 0;i < sample_num;++ i) {
-			beep = sin(generator->pos * 3.14159 * 2 * generator->target_Hz / generator->sample_rate) * 32767;
+			beep = sin(generator->pos * 3.14159 * 2 * generator->target_Hz / generator->sample_rate) * generator->amplitude;
 			++ generator->pos;
 			(*left_u_data)  = ((beep >> 8) & 0xFF);
 			(*left_l_data)  = (beep & 0xFF);
