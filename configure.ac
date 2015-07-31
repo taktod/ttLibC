@@ -27,6 +27,7 @@ faac_flg=no
 openh264_flg=no
 speexdsp_flg=no
 speex_flg=no
+file_flg=no
 
 # check result
 cute_check=no 
@@ -98,6 +99,7 @@ AC_ARG_ENABLE(
 		openh264_flg=$enableval
 		speexdsp_flg=$enableval
 		speex_flg=$enableval
+		file_flg=$enableval
 	]
 )
 
@@ -141,6 +143,12 @@ AC_ARG_ENABLE(
 	[speex],
 	AS_HELP_STRING([--enable-speex/--disable-speex], [enable/disable speex code.]),
 	[speex_flg=$enableval]
+)
+
+AC_ARG_ENABLE(
+	[file],
+	AS_HELP_STRING([--enable-file/--disable-file], [enable/disable FILE* code.]),
+	[file_flg=$enableval]
 )
 
 if test x$opencv_flg = "xyes"; then
@@ -278,6 +286,11 @@ if test x$speex_flg$speex_check = "xyesyes"; then
 	AC_DEFINE([__ENABLE_SPEEX__])
 fi
 AM_CONDITIONAL(ENABLE_SPEEX, test x$speex_flg$speex_check = "xyesyes")
+
+if test x$file_flg = "xyes"; then
+	AC_DEFINE([__ENABLE_FILE__])
+fi
+AM_CONDITIONAL(ENABLE_FILE, test x$file_flg = "xyes")
 
 AC_ARG_WITH(pkgconfigdir,
 	AS_HELP_STRING([--with-pkgconfigdir], [Use the specified pkgconfig dir.(default is $libdir/pkgconfig)]),
@@ -420,4 +433,9 @@ if test x$speex_flg = "xyes"; then
 	fi
 else
 	echo "speex: off"
+fi
+if test x$file_flg = "xyes"; then
+	echo "file feature: on"
+else
+	echo "file feature: off"
 fi

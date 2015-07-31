@@ -19,13 +19,6 @@ extern "C" {
 #include "../frame/audio/pcms16.h"
 
 /**
- * callback function for mp3lame encoder.
- * @param ptr user def value pointer.
- * @param mp3 encoded mp3 frame.
- */
-typedef void (* ttLibC_Mp3lameEncodeFunc)(void *ptr, ttLibC_Mp3 *mp3);
-
-/**
  * mp3lame encoder type
  */
 typedef enum {
@@ -49,6 +42,13 @@ typedef struct {
 } ttLibC_Encoder_Mp3lameEncoder;
 
 typedef ttLibC_Encoder_Mp3lameEncoder ttLibC_Mp3lameEncoder;
+
+/**
+ * callback function for mp3lame encoder.
+ * @param ptr user def value pointer.
+ * @param mp3 encoded mp3 frame.
+ */
+typedef void (* ttLibC_Mp3lameEncodeFunc)(void *ptr, ttLibC_Mp3 *mp3);
 
 /**
  * make mp3lame encoder (cbr)

@@ -19,13 +19,6 @@ extern "C" {
 #include "../frame/audio/pcms16.h"
 
 /**
- * callback function for faac encoder.
- * @param ptr user def value pointer.
- * @param aac encoded aac frame.
- */
-typedef void (* ttLibC_FaacEncodeFunc)(void *ptr, ttLibC_Aac *aac);
-
-/**
  * faac encoder type
  */
 typedef enum {
@@ -45,6 +38,13 @@ typedef struct {
 } ttLibC_Encoder_FaacEncoder;
 
 typedef ttLibC_Encoder_FaacEncoder ttLibC_FaacEncoder;
+
+/**
+ * callback function for faac encoder.
+ * @param ptr user def value pointer.
+ * @param aac encoded aac frame.
+ */
+typedef void (* ttLibC_FaacEncodeFunc)(void *ptr, ttLibC_Aac *aac);
 
 /**
  * make faac encoder(Main)

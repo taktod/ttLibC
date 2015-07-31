@@ -19,13 +19,6 @@ extern "C" {
 #include "../frame/video/yuv420.h"
 
 /**
- * callback funtion for openh264 decoder.
- * @param ptr    user def value pointer.
- * @param yuv420 decoded yuv420 frame.
- */
-typedef void (* ttLibC_Openh264DecodeFunc)(void *ptr, ttLibC_Yuv420 *yuv420);
-
-/**
  * openh264 decoder definition.
  */
 typedef struct {
@@ -34,6 +27,13 @@ typedef struct {
 } ttLibC_Decoder_Openh264Decoder;
 
 typedef ttLibC_Decoder_Openh264Decoder ttLibC_Openh264Decoder;
+
+/**
+ * callback funtion for openh264 decoder.
+ * @param ptr    user def value pointer.
+ * @param yuv420 decoded yuv420 frame.
+ */
+typedef void (* ttLibC_Openh264DecodeFunc)(void *ptr, ttLibC_Yuv420 *yuv420);
 
 /**
  * make openh264 decoder (maybe add more params later.)

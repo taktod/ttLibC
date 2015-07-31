@@ -19,10 +19,12 @@ libttLibC_a_SOURCES= \
 	frame/frame.c \
 	resampler/imageResampler.c \
 	resampler/speexdspResampler.c \
-	util/hexUtil.c \
-	util/opencvUtil.c \
-	util/openalUtil.c \
 	util/beepUtil.c \
+	util/bit.c \
+	util/hexUtil.c \
+	util/httpUtil.c \
+	util/openalUtil.c \
+	util/opencvUtil.c \
 	ttLibC.c
 
 libttLibC_a_CFLAGS=$(OPENCV_CFLAGS) $(OPENAL_CFLAGS) $(MP3LAME_CFLAGS) $(FAAC_CFLAGS) $(OPENH264_CFLAGS) $(SPEEXDSP_CFLAGS) $(SPEEX_CFLAGS)

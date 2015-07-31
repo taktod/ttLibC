@@ -74,6 +74,7 @@ ttLibC_PcmS16 *ttLibC_BeepGenerator_makeBeepBySampleNum(
 
 /**
  * close the generator object.
+ * @param generator
  */
 void ttLibC_BeepGenerator_close(ttLibC_BeepGenerator **generator);
 

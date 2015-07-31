@@ -1,0 +1,98 @@
+/**
+ * @file   httpUtil.h
+ * @brief  library for http access.
+ *
+ * this code is under 3-Cause BSD license.
+ *
+ * @author taktod
+ * @date   2015/07/30
+ */
+
+#ifndef TTLIBC_UTIL_HTTPUTIL_H_
+#define TTLIBC_UTIL_HTTPUTIL_H_
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include <stdio.h>
+#include <stdint.h>
+
+/**
+ * data for httpClient
+ */
+typedef struct {
+	/** ETag value. */
+	char ETag[256];
+	/** size of download. */
+	size_t content_length;
+	/** size of target file. */
+	size_t file_length;
+	/** wait interval for each read access. */
+	uint32_t wait_interval; // mili sec.
+	/** hold buffer size for download. */
+	size_t buffer_size;
+} ttLibC_Util_HttpUtil_HttpClient;
+
+typedef ttLibC_Util_HttpUtil_HttpClient ttLibC_HttpClient;
+
+/**
+ * callback function for http client.
+ * @param ptr       user def value pointer.
+ * @param client    httpClient object.
+ * @param data      downloaded data.
+ * @param data_size downloaded data_size.
+ */
+typedef void (* ttLibC_HttpClientFunc)(void *ptr, ttLibC_HttpClient *client, void *data, size_t data_size);
+
+/**
+ * make http client
+ * @param buffer_size   download buffer size.
+ * @param wait_interval interval for each download.
+ * @return http client object.
+ */
+ttLibC_HttpClient *ttLibC_HttpClient_make(
+		size_t buffer_size,
+		uint32_t wait_interval);
+
+/**
+ * get method download.
+ * @param client         http client object
+ * @param target_address address for download.
+ * @param callback       callback for download data.
+ * @param ptr            user def data pointer.
+ */
+void ttLibC_HttpClient_get(
+		ttLibC_HttpClient *client,
+		const char *target_address,
+		ttLibC_HttpClientFunc callback,
+		void *ptr);
+
+/**
+ * get method download.
+ * @param client         http client object
+ * @param target_address address for download.
+ * @param range_start    begin point for download. if 0, ignore
+ * @param range_length   download size for download. if 0, ignore
+ * @param callback       callback for download data.
+ * @param ptr            user def data pointer.
+ */
+void ttLibC_HttpClient_getRange(
+		ttLibC_HttpClient *client,
+		const char *target_address,
+		size_t range_start,
+		size_t range_length,
+		ttLibC_HttpClientFunc callback,
+		void *ptr);
+
+/**
+ * close http client
+ * @param client
+ */
+void ttLibC_HttpClient_close(ttLibC_HttpClient **client);
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
+
+#endif /* TTLIBC_UTIL_HTTPUTIL_H_ */

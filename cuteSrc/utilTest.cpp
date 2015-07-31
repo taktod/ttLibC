@@ -28,6 +28,35 @@
 #	include <ttLibC/util/openalUtil.h>
 #endif
 
+#ifdef __ENABLE_FILE__
+#	include <ttLibC/util/httpUtil.h>
+#endif
+
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <sys/param.h>
+#include <sys/uio.h>
+#include <unistd.h>
+
+void httpClientCallback(void *ptr, ttLibC_HttpClient *client, void *data, size_t data_size) {
+	LOG_PRINT("callback is called.");
+	ttLibC_HexUtil_dump(data, data_size, true);
+}
+
+static void httpClientTest() {
+	LOG_PRINT("httpClientTest");
+#ifdef __ENABLE_FILE__
+	ttLibC_HttpClient *client = ttLibC_HttpClient_make(256, 10);
+	ttLibC_HttpClient_getRange(client, "http://www.google.com/", 0, 500, httpClientCallback, NULL);
+	ttLibC_HttpClient_close(&client);
+#endif
+}
+
 /**
  * how to use hexUtil
  */
@@ -80,15 +109,16 @@ static void openalUtilTest() {
 	ttLibC_BeepGenerator *generator = ttLibC_BeepGenerator_make(PcmS16Type_littleEndian, 440, 44100, 2);
 	ttLibC_PcmS16 *pcm = NULL;
 	ttLibC_AlDevice *device = ttLibC_AlDevice_make(100);
-	for(int i = 0;i < 10;i ++) {
-		ttLibC_PcmS16 *p = ttLibC_BeepGenerator_makeBeepByMiliSec(generator, pcm, 1000);
+	for(int i = 0;i < 50;i ++) {
+//		ttLibC_PcmS16 *p = ttLibC_BeepGenerator_makeBeepByMiliSec(generator, pcm, 1000);
+		ttLibC_PcmS16 *p = ttLibC_BeepGenerator_makeBeepBySampleNum(generator, pcm, 1024);
 		if(p == NULL) {
 			break;
 		}
 		pcm = p;
 		LOG_PRINT("pts:%lld timebase:%d", pcm->inherit_super.inherit_super.pts, pcm->inherit_super.inherit_super.timebase);
 		ttLibC_AlDevice_queue(device, pcm);
-		ttLibC_AlDevice_proceed(device, 100);
+//		ttLibC_AlDevice_proceed(device, 10);
 	}
 	ttLibC_AlDevice_proceed(device, -1);
 	ttLibC_AlDevice_proceed(device, -1);
@@ -105,6 +135,7 @@ static void openalUtilTest() {
  */
 cute::suite utilTests(cute::suite s) {
 	s.clear();
+	s.push_back(CUTE(httpClientTest));
 	s.push_back(CUTE(hexUtilTest));
 	s.push_back(CUTE(opencvUtilTest));
 	s.push_back(CUTE(openalUtilTest));

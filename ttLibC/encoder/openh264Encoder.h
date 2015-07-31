@@ -19,13 +19,6 @@ extern "C" {
 #include "../frame/video/yuv420.h"
 
 /**
- * callback function for openh264 encoder.
- * @param ptr  user def value pointer.
- * @param h264 encoded h264 frame.
- */
-typedef void (* ttLibC_Openh264EncodeFunc)(void *ptr, ttLibC_H264 *h264);
-
-/**
  * openh264 encoder type
  */
 typedef enum {
@@ -51,6 +44,13 @@ typedef struct {
 } ttLibC_Encoder_Openh264Encoder;
 
 typedef ttLibC_Encoder_Openh264Encoder ttLibC_Openh264Encoder;
+
+/**
+ * callback function for openh264 encoder.
+ * @param ptr  user def value pointer.
+ * @param h264 encoded h264 frame.
+ */
+typedef void (* ttLibC_Openh264EncodeFunc)(void *ptr, ttLibC_H264 *h264);
 
 /**
  * make openh264 encoder(baseline only.) (maybe add more params later)

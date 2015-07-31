@@ -10,6 +10,7 @@ nobase_include_HEADERS= \
 	ttLibC/frame/frame.h \
 	ttLibC/resampler/imageResampler.h \
 	ttLibC/util/beepUtil.h \
+	ttLibC/util/bit.h \
 	ttLibC/util/hexUtil.h \
 	ttLibC/log.h \
 	ttLibC/ttLibC.h
@@ -48,6 +49,11 @@ endif
 if ENABLE_SPEEXDSP
 nobase_include_HEADERS += \
 	ttLibC/resampler/speexdspResampler.h
+endif
+
+if ENABLE_FILE
+nobase_include_HEADERS += \
+	ttLibC/util/httpUtil.h
 endif
 
 pkgconfigdir=@pkgconfigdir@
