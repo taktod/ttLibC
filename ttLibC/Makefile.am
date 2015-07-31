@@ -20,7 +20,7 @@ libttLibC_a_SOURCES= \
 	resampler/imageResampler.c \
 	resampler/speexdspResampler.c \
 	util/beepUtil.c \
-	util/bit.c \
+	util/bitUtil.c \
 	util/hexUtil.c \
 	util/httpUtil.c \
 	util/openalUtil.c \

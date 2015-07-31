@@ -1,5 +1,5 @@
 /*
- * @file   bit.c
+ * @file   bitUtil.c
  * @brief  bit work support.
  *
  * this code is under 3-Cause BSD license
@@ -8,7 +8,8 @@
  * @date   2015/08/01
  */
 
-#include "bit.h"
+#include "bitUtil.h"
+
 #include <stdlib.h>
 
 #include "../log.h"

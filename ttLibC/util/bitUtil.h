@@ -1,5 +1,5 @@
 /**
- * @file   bit.h
+ * @file   bitUtil.h
  * @brief  bit work support.
  *
  * this code is under 3-Cause BSD license
@@ -8,8 +8,8 @@
  * @date   2015/08/01
  */
 
-#ifndef TTLIBC_UTIL_BIT_H_
-#define TTLIBC_UTIL_BIT_H_
+#ifndef TTLIBC_UTIL_BITUTIL_H_
+#define TTLIBC_UTIL_BITUTIL_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -69,4 +69,4 @@ void ttLibC_BitReader_close(ttLibC_BitReader **reader);
 } /* extern "C" */
 #endif
 
-#endif /* TTLIBC_UTIL_BIT_H_ */
+#endif /* TTLIBC_UTIL_BITUTIL_H_ */
