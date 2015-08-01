@@ -86,7 +86,7 @@ static void speexTest() {
 	ttLibC_BeepGenerator *generator = ttLibC_BeepGenerator_make(PcmS16Type_littleEndian, 440, sample_rate, channel_num);
 	testData.device = ttLibC_AlDevice_make(256);
 	testData.decoder = ttLibC_SpeexDecoder_make(sample_rate, channel_num);
-	ttLibC_SpeexEncoder *encoder = ttLibC_SpeexEncoder_make(sample_rate, channel_num, 5);
+	ttLibC_SpeexEncoder *encoder = ttLibC_SpeexEncoder_make(sample_rate, channel_num, 10);
 	ttLibC_PcmS16 *pcm = NULL, *p;
 	for(int i = 0;i < 10;++ i) {
 		p = ttLibC_BeepGenerator_makeBeepByMiliSec(generator, pcm, 510);
