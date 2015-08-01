@@ -3,6 +3,7 @@ nobase_include_HEADERS= \
 	ttLibC/frame/audio/audio.h \
 	ttLibC/frame/audio/mp3.h \
 	ttLibC/frame/audio/pcms16.h \
+	ttLibC/frame/audio/speex.h \
 	ttLibC/frame/video/bgr.h \
 	ttLibC/frame/video/h264.h \
 	ttLibC/frame/video/video.h \
@@ -49,6 +50,12 @@ endif
 if ENABLE_SPEEXDSP
 nobase_include_HEADERS += \
 	ttLibC/resampler/speexdspResampler.h
+endif
+
+if ENABLE_SPEEX
+nobase_include_HEADERS += \
+	ttLibC/encoder/speexEncoder.h \
+	ttLibC/decoder/speexDecoder.h
 endif
 
 if ENABLE_FILE

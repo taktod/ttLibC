@@ -103,6 +103,25 @@ ttLibC_Aac *ttLibC_Aac_make(
 }
 
 /*
+ * analyze aac frame and make data.
+ * @param prev_frame reuse frame
+ * @param data       aac binary data.
+ * @param data_size  data size
+ * @param pts        pts for aac frame.
+ * @param timebase   timebase for pts.
+ * @return aac object
+ */
+ttLibC_Aac *ttLibC_Aac_makeFrame(
+		ttLibC_Aac *prev_frame,
+		void *data,
+		size_t data_size,
+		uint64_t pts,
+		uint32_t timebase) {
+	// TODO make this.
+	return NULL;
+}
+
+/*
  * close frame
  * @param frame
  */

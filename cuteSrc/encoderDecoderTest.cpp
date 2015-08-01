@@ -41,16 +41,71 @@
 #	include <ttLibC/resampler/speexdspResampler.h>
 #endif
 
+#ifdef __ENABLE_SPEEX__
+#	include <ttLibC/encoder/speexEncoder.h>
+#	include <ttLibC/decoder/speexDecoder.h>
+#endif
+
 #include <ttLibC/util/beepUtil.h>
 #include <ttLibC/frame/audio/pcms16.h>
 #include <ttLibC/frame/audio/mp3.h>
 #include <ttLibC/frame/audio/aac.h>
+#include <ttLibC/frame/audio/speex.h>
 
 #include <ttLibC/frame/video/bgr.h>
 #include <ttLibC/frame/video/yuv420.h>
 #include <ttLibC/frame/video/h264.h>
 
 #include <ttLibC/resampler/imageResampler.h>
+
+#if defined(__ENABLE_SPEEX__) && defined(__ENABLE_OPENAL__)
+typedef struct {
+	ttLibC_AlDevice *device;
+	ttLibC_SpeexDecoder *decoder;
+} speexTest_t;
+
+void speexDecoderCallback(void *ptr, ttLibC_PcmS16 *pcms16) {
+//	LOG_PRINT("decoded.");
+	speexTest_t *testData = (speexTest_t *)ptr;
+	// play with openal.
+	ttLibC_AlDevice_queue(testData->device, pcms16);
+}
+
+void speexEncoderCallback(void *ptr, ttLibC_Speex *speex) {
+	speexTest_t *testData = (speexTest_t *)ptr;
+	ttLibC_SpeexDecoder_decode(testData->decoder, speex, speexDecoderCallback, ptr);
+}
+#endif
+
+static void speexTest() {
+	LOG_PRINT("speexTest");
+#if defined(__ENABLE_SPEEX__) && defined(__ENABLE_OPENAL__)
+	uint32_t sample_rate = 32000;
+	uint32_t channel_num = 1;
+	speexTest_t testData;
+	ttLibC_BeepGenerator *generator = ttLibC_BeepGenerator_make(PcmS16Type_littleEndian, 440, sample_rate, channel_num);
+	testData.device = ttLibC_AlDevice_make(256);
+	testData.decoder = ttLibC_SpeexDecoder_make(sample_rate, channel_num);
+	ttLibC_SpeexEncoder *encoder = ttLibC_SpeexEncoder_make(sample_rate, channel_num, 5);
+	ttLibC_PcmS16 *pcm = NULL, *p;
+	for(int i = 0;i < 10;++ i) {
+		p = ttLibC_BeepGenerator_makeBeepByMiliSec(generator, pcm, 510);
+		if(p == NULL) {
+			break;
+		}
+		pcm = p;
+		ttLibC_SpeexEncoder_encode(encoder, pcm, speexEncoderCallback, &testData);
+//		ttLibC_AlDevice_queue(testData.device, pcm);
+//		break;
+	}
+	ttLibC_AlDevice_proceed(testData.device, -1);
+	ttLibC_SpeexDecoder_close(&testData.decoder);
+	ttLibC_SpeexEncoder_close(&encoder);
+	ttLibC_AlDevice_close(&testData.device);
+	ttLibC_PcmS16_close(&pcm);
+	ttLibC_BeepGenerator_close(&generator);
+#endif
+}
 
 static void speexdspResamplerTest() {
 	LOG_PRINT("speexdspResamplerTest");
@@ -308,6 +363,7 @@ static void imageResamplerTest() {
  */
 cute::suite encoderDecoderTests(cute::suite s) {
 	s.clear();
+	s.push_back(CUTE(speexTest));
 	s.push_back(CUTE(speexdspResamplerTest));
 	s.push_back(CUTE(openh264Test));
 	s.push_back(CUTE(faacEncoderTest));

@@ -47,10 +47,12 @@ typedef ttLibC_Encoder_FaacEncoder ttLibC_FaacEncoder;
 typedef void (* ttLibC_FaacEncodeFunc)(void *ptr, ttLibC_Aac *aac);
 
 /**
- * make faac encoder(Main)
- * @param sample_rate,
- * @param channel_num
- * @param bitrate
+ * make faac encoder
+ * @param type        target type of aac
+ * @param sample_rate target sample_rate
+ * @param channel_num target channel_num
+ * @param bitrate     target bitrate
+ * @return faac encoder object.
  */
 ttLibC_FaacEncoder *ttLibC_FaacEncoder_make(
 		ttLibC_FaacEncoder_Type type,

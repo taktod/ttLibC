@@ -5,13 +5,16 @@ lib_LIBRARIES=libttLibC.a
 libttLibC_a_SOURCES= \
 	decoder/mp3lameDecoder.c \
 	decoder/openh264Decoder.cpp \
+	decoder/speexDecoder.c \
 	encoder/faacEncoder.c \
 	encoder/mp3lameEncoder.c \
 	encoder/openh264Encoder.cpp \
+	encoder/speexEncoder.c \
 	frame/audio/aac.c \
 	frame/audio/audio.c \
 	frame/audio/pcms16.c \
 	frame/audio/mp3.c \
+	frame/audio/speex.c \
 	frame/video/video.c \
 	frame/video/bgr.c \
 	frame/video/yuv420.c \
