@@ -308,7 +308,6 @@ static void imageResamplerTest() {
  */
 cute::suite encoderDecoderTests(cute::suite s) {
 	s.clear();
-	s.push_back(CUTE(speexTest));
 	s.push_back(CUTE(speexdspResamplerTest));
 	s.push_back(CUTE(openh264Test));
 	s.push_back(CUTE(faacEncoderTest));
