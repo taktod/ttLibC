@@ -41,7 +41,81 @@
 #	include <speex/speex_stereo.h>
 #endif
 
+#ifdef __ENABLE_OPUS__
+#	include <opus/opus.h>
+#endif
+
 #include <ttLibC/frame/audio/mp3.h>
+
+static void opusTest() {
+	LOG_PRINT("opusTest");
+#if defined(__ENABLE_OPUS__) && defined(__ENABLE_OPENAL__)
+	uint32_t sample_rate = 48000, channel_num = 2;
+	ttLibC_BeepGenerator *generator = ttLibC_BeepGenerator_make(PcmS16Type_littleEndian, 440, sample_rate, channel_num);
+	ttLibC_AlDevice *device = ttLibC_AlDevice_make(256);
+	ttLibC_PcmS16 *pcm = NULL, *p, *dpcm = NULL;
+	OpusEncoder *encoder = NULL;
+	OpusDecoder *decoder = NULL;
+	int error;
+	encoder = opus_encoder_create(sample_rate, channel_num, OPUS_APPLICATION_RESTRICTED_LOWDELAY, &error);
+	if(error != OPUS_OK) {
+		ERR_PRINT("error happen during opus encoder create:%s", opus_strerror(error));
+		encoder = NULL;
+	}
+	else if(encoder == NULL) {
+		ERR_PRINT("failed to make opusEncoder");
+	}
+	decoder = opus_decoder_create(sample_rate, channel_num, &error);
+	if(error != OPUS_OK) {
+		ERR_PRINT("error happen during opus decoder create:%s", opus_strerror(error));
+		decoder = NULL;
+	}
+	else if(decoder == NULL){
+		ERR_PRINT("failed to make opusDecoder");
+	}
+	for(int i = 0;i < 100;i ++) {
+		if(encoder == NULL || decoder == NULL) {
+			break;
+		}
+		p = ttLibC_BeepGenerator_makeBeepBySampleNum(generator, pcm, 480);
+		if(p == NULL) {
+			break;
+		}
+		pcm = p;
+		// generator opus, decode, and play.
+//		ttLibC_AlDevice_queue(device, pcm);
+		uint8_t opus[48000];
+		int size = opus_encode(encoder, (int16_t *)pcm->inherit_super.inherit_super.data, 480, opus, 48000);
+		if(size == 0) {
+			ERR_PRINT("failed to make opus.");
+			break;
+		}
+		int16_t data[4800];
+		size = opus_decode(decoder, opus, size, data, 4800, 0);
+		LOG_PRINT("decode size:%d", size);
+		if(size == 0) {
+			break;
+		}
+		p = ttLibC_PcmS16_make(dpcm, PcmS16Type_littleEndian, sample_rate, 480, channel_num, data, size * channel_num * sizeof(int16_t), true, 0, 1000);
+		if(p == NULL) {
+			break;
+		}
+		dpcm = p;
+		ttLibC_AlDevice_queue(device, dpcm);
+	}
+	if(encoder != NULL) {
+		opus_encoder_destroy(encoder);
+	}
+	if(decoder != NULL) {
+		opus_decoder_destroy(decoder);
+	}
+	ttLibC_PcmS16_close(&dpcm);
+	ttLibC_PcmS16_close(&pcm);
+	ttLibC_AlDevice_proceed(device, -1);
+	ttLibC_AlDevice_close(&device);
+	ttLibC_BeepGenerator_close(&generator);
+#endif
+}
 
 #if defined(__ENABLE_MP3LAME__) && defined(__ENABLE_MP3LAME_ENCODE__) && defined(__ENABLE_OPENAL__)
 static hip_t hip_gflags;
@@ -396,6 +470,7 @@ static void mp3lameTest() {
  */
 cute::suite audioTests(cute::suite s) {
 	s.clear();
+	s.push_back(CUTE(opusTest));
 	s.push_back(CUTE(mp3DecodeTest));
 	s.push_back(CUTE(speexTest));
 	s.push_back(CUTE(speexdspResampleTest));

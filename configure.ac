@@ -19,6 +19,7 @@ lgpl_flg=no
 gpl_flg=no
 debug_flg=0
 test_flg=no
+file_flg=no
 
 opencv_flg=no
 openal_flg=no
@@ -27,7 +28,7 @@ faac_flg=no
 openh264_flg=no
 speexdsp_flg=no
 speex_flg=no
-file_flg=no
+opus_flg=no
 
 # check result
 cute_check=no 
@@ -39,6 +40,7 @@ faac_encode_check=no
 openh264_check=no
 speexdsp_check=no
 speex_check=no
+opus_check=no
 
 AC_ARG_ENABLE(
 	[lgpl],
@@ -92,6 +94,7 @@ AC_ARG_ENABLE(
 	[all],
 	AS_HELP_STRING([--enable-all], [enable all extra library support.]),
 	[
+		file_flg=$enableval
 		opencv_flg=$enableval
 		openal_flg=$enableval
 		mp3lame_flg=$enableval
@@ -99,7 +102,7 @@ AC_ARG_ENABLE(
 		openh264_flg=$enableval
 		speexdsp_flg=$enableval
 		speex_flg=$enableval
-		file_flg=$enableval
+		opus_flg=$enableval
 	]
 )
 
@@ -149,6 +152,12 @@ AC_ARG_ENABLE(
 	[file],
 	AS_HELP_STRING([--enable-file/--disable-file], [enable/disable FILE* code.]),
 	[file_flg=$enableval]
+)
+
+AC_ARG_ENABLE(
+	[opus],
+	AS_HELP_STRING([--enable-opus/--disable-opus], [enable/disable opus code.]),
+	[opus_flg=$enableval]
 )
 
 if test x$opencv_flg = "xyes"; then
@@ -222,11 +231,18 @@ if test x$speexdsp_flg = "xyes"; then
 		[speexdsp_check=yes]
 	)
 fi
-if test x$speex_flg = "xyes";then
+if test x$speex_flg = "xyes"; then
 	PKG_CHECK_MODULES(
 		[SPEEX],
 		[speex],
 		[speex_check=yes]
+	)
+fi
+if test x$opus_flg = "xyes"; then
+	PKG_CHECK_MODULES(
+		[OPUS],
+		[opus],
+		[opus_check=yes]
 	)
 fi
 
@@ -292,6 +308,11 @@ if test x$file_flg = "xyes"; then
 fi
 AM_CONDITIONAL(ENABLE_FILE, test x$file_flg = "xyes")
 
+if test x$opus_flg$opus_check = "xyesyes"; then
+	AC_DEFINE([__ENABLE_OPUS__])
+fi
+AM_CONDITIONAL(ENABLE_OPUS, test x$opus_flg$opus_check = "xyesyes")
+
 AC_ARG_WITH(pkgconfigdir,
 	AS_HELP_STRING([--with-pkgconfigdir], [Use the specified pkgconfig dir.(default is $libdir/pkgconfig)]),
 	[pkgconfigdir=${withval}],
@@ -346,6 +367,11 @@ else
 	echo "test: off"
 fi
 # about library support
+if test x$file_flg = "xyes"; then
+	echo "file feature: on"
+else
+	echo "file feature: off"
+fi
 if test x$opencv_flg = "xyes"; then
 	if test x$opencv_check = "xyes"; then
 		echo "opencv: on"
@@ -434,8 +460,12 @@ if test x$speex_flg = "xyes"; then
 else
 	echo "speex: off"
 fi
-if test x$file_flg = "xyes"; then
-	echo "file feature: on"
+if test x$opus_flg = "xyes"; then
+	if test x$opus_check = "xyes"; then
+		echo "opus: on"
+	else
+		echo "opus: off(opus library is missing.)"
+	fi
 else
-	echo "file feature: off"
+	echo "opus: off"
 fi
