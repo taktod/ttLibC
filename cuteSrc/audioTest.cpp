@@ -43,16 +43,17 @@
 
 #include <ttLibC/frame/audio/mp3.h>
 
+#if defined(__ENABLE_MP3LAME__) && defined(__ENABLE_MP3LAME_ENCODE__) && defined(__ENABLE_OPENAL__)
 static hip_t hip_gflags;
 static ttLibC_PcmS16 *decoded_pcm;
 static ttLibC_AlDevice *device;
 
 void mp3EncodeProc(void *ptr, ttLibC_Mp3 *mp3) {
-	LOG_PRINT("mp3できた");
+	LOG_PRINT("success to make mp3");
 	short left[65536], right[65536];
 	short data[65536];
 	short *buf = data;
-	// デコードします。
+	// do decode.
 //	hip_decode(hip_gflags, mp3->inherit_super.inherit_super.data, mp3->inherit_super.inherit_super.buffer_size);
 	int num = hip_decode(hip_gflags, (unsigned char *)mp3->inherit_super.inherit_super.data, (size_t)mp3->inherit_super.inherit_super.buffer_size, (short *)left, (short *)right);
 	LOG_PRINT("num:%d", num);
@@ -66,13 +67,14 @@ void mp3EncodeProc(void *ptr, ttLibC_Mp3 *mp3) {
 			decoded_pcm, PcmS16Type_littleEndian,
 			44100, 1152, 2, data, num * 4, true, mp3->inherit_super.inherit_super.pts, mp3->inherit_super.inherit_super.timebase);
 	if(p == NULL) {
-		ERR_PRINT("pcm作成失敗");
+		ERR_PRINT("failed to make pcm data.");
 		return;
 	}
 	decoded_pcm = p;
 	ttLibC_AlDevice_queue(device, decoded_pcm);
 	ttLibC_AlDevice_proceed(device, 10);
 }
+#endif
 
 static void mp3DecodeTest() {
 	LOG_PRINT("mp3decodeTest");

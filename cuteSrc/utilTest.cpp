@@ -43,10 +43,12 @@
 #include <sys/uio.h>
 #include <unistd.h>
 
+#ifdef __ENABLE_FILE__
 void httpClientCallback(void *ptr, ttLibC_HttpClient *client, void *data, size_t data_size) {
 	LOG_PRINT("callback is called.");
 	ttLibC_HexUtil_dump(data, data_size, true);
 }
+#endif
 
 static void httpClientTest() {
 	LOG_PRINT("httpClientTest");
