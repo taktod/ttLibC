@@ -115,6 +115,7 @@ static void mp3DecodeTest() {
 static void speexTest() {
 	LOG_PRINT("speexTest");
 #if defined(__ENABLE_SPEEX__) && defined(__ENABLE_OPENAL__)
+//	speex_lib_get_mode();
 	uint32_t sample_rate = 8000;
 	uint32_t channel_num = 1;
 	ttLibC_BeepGenerator *generator = ttLibC_BeepGenerator_make(PcmS16Type_littleEndian, 440, sample_rate, channel_num);
@@ -133,21 +134,23 @@ static void speexTest() {
 		void *dec_state;
 
 	LOG_PRINT("encoder_init");
+	int spx_mode = 0;
 	const SpeexMode *mode;
 	switch(sample_rate) {
 	case 8000:
-		mode = &speex_nb_mode;
+		spx_mode = 0;
 		break;
 	case 16000:
-		mode = &speex_wb_mode;
+		spx_mode = 1;
 		break;
 	case 32000:
-		mode = &speex_uwb_mode;
+		spx_mode = 2;
 		break;
 	default:
 		LOG_PRINT("support only 8k 16k 32kHz.");
 		return;
 	}
+	mode = speex_lib_get_mode(spx_mode);
 	// encode
 	enc_state = speex_encoder_init(mode);
 	if(!enc_state) {
@@ -171,16 +174,13 @@ static void speexTest() {
 	uint8_t encoded_buf[65536];
 	int16_t decoded_buf[65536];
 //	int16_t *decoded_buf;
-	// ここまでで準備OKっぽい。
 	for(int i = 0;i < 10;i ++) {
 		p = ttLibC_BeepGenerator_makeBeepByMiliSec(generator, pcm, 1000);
 		if(p == NULL) {
 			break;
 		}
 		pcm = p;
-		// dataは20ミリsecごとに入れていく必要があるみたい。
-		// 出力は20ミリsec分だけでてくるっぽい。
-		// なるほどね。
+		// output or input is 20 mili sec fixed.
 		speex_encode_int(enc_state, (int16_t *)pcm->inherit_super.inherit_super.data, &bits);
 		int write_size = speex_bits_write(&bits, (char *)encoded_buf, 65536);
 		LOG_PRINT("write_size:%d", write_size);
@@ -188,12 +188,10 @@ static void speexTest() {
 		speex_bits_read_from(&bits_dec, (char *)encoded_buf, write_size);
 
 		LOG_PRINT("read ok");
-		// こっちも同じ。20ミリsec分だけデコードされてでてくる。
-		// 8k:160サンプル
-		// 16k:320サンプル
-		// 32k:640サンプル
-		// となる模様。
-		// というわけで、speexのencode,decodeはとりあえずこれでいけるっぽいです。
+		// 20mili sec for decode.
+		// 8kHz :160 samples
+		// 16kHz:320 samples
+		// 32kHz:640 samples
 		int decode_size = speex_decode_int(dec_state, &bits_dec, decoded_buf);
 
 //		LOG_PRINT("ptr:%d", decoded_buf);
