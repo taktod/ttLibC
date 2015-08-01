@@ -20,9 +20,21 @@ extern "C" {
 #include <stdint.h>
 
 /**
+ * read type of bitReader
+ */
+typedef enum {
+	/** normal */
+	BitReaderType_default,
+	/** add support of emulation_prevention_three_byte */
+	BitReaderType_h26x,
+} ttLibC_BitReader_Type;
+
+/**
  * data for bitReader.
  */
 typedef struct {
+	/** read type. */
+	ttLibC_BitReader_Type type;
 } ttLibC_Util_BitReader;
 
 typedef ttLibC_Util_BitReader ttLibC_BitReader;
@@ -33,7 +45,7 @@ typedef ttLibC_Util_BitReader ttLibC_BitReader;
  * @param data_size
  * @return bit reader object.
  */
-ttLibC_BitReader *ttLibC_BitReader_make(void *data, size_t data_size);
+ttLibC_BitReader *ttLibC_BitReader_make(void *data, size_t data_size, ttLibC_BitReader_Type type);
 
 /**
  * get bit from bit reader.

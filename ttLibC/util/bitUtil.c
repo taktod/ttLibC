@@ -23,6 +23,8 @@ typedef struct {
 	uint8_t *data;
 	/** data size */
 	size_t data_size;
+	/** zero count */
+	uint8_t zero_count; // for emuluation prevention three byte(h264 h265)
 } ttLibC_Util_BitReader_;
 
 typedef ttLibC_Util_BitReader_ ttLibC_BitReader_;
@@ -33,11 +35,16 @@ typedef ttLibC_Util_BitReader_ ttLibC_BitReader_;
  * @param data_size
  * @return bit reader object.
  */
-ttLibC_BitReader *ttLibC_BitReader_make(void *data, size_t data_size) {
+ttLibC_BitReader *ttLibC_BitReader_make(void *data, size_t data_size, ttLibC_BitReader_Type type) {
 	ttLibC_BitReader_ *reader = (ttLibC_BitReader_ *)malloc(sizeof(ttLibC_BitReader_));
+	reader->zero_count = 0;
 	reader->pos = 0;
 	reader->data = data;
 	reader->data_size = data_size;
+	reader->inherit_super.type = type;
+	if(*reader->data == 0) {
+		reader->zero_count ++;
+	}
 	return (ttLibC_BitReader *)reader;
 }
 
@@ -55,12 +62,8 @@ uint32_t ttLibC_BitReader_bit(ttLibC_BitReader *reader, uint32_t bit_num) {
 	uint32_t bit = 0;
 	uint32_t mask = 0;
 	uint32_t shift = 0;
+	val = *reader_->data;
 	do {
-		if(reader_->data_size <= 0) {
-			ERR_PRINT("no more data buffer.");
-			return 0;
-		}
-		val = *reader_->data;
 		bit = 8 - reader_->pos > bit_num ? bit_num : 8 - reader_->pos;
 		result <<= bit;
 		mask = (1 << bit) - 1;
@@ -70,6 +73,34 @@ uint32_t ttLibC_BitReader_bit(ttLibC_BitReader *reader, uint32_t bit_num) {
 		if(reader_->pos == 8) {
 			++ reader_->data;
 			-- reader_->data_size;
+			if(reader_->data_size <= 0) {
+				ERR_PRINT("no more data buffer.");
+				return 0;
+			}
+			val = *reader_->data;
+			if(val == 0) {
+				reader_->zero_count ++;
+			}
+			else {
+				if(val == 3 && reader_->zero_count == 2) {
+					++ reader_->data;
+					if(reader_->data_size == 0) {
+						ERR_PRINT("no more data.");
+						return 0;
+					}
+					-- reader_->data_size;
+					val = *reader_->data;
+					if(val == 0) {
+						reader_->zero_count = 1;
+					}
+					else {
+						reader_->zero_count = 0;
+					}
+				}
+				else {
+					reader_->zero_count = 0;
+				}
+			}
 		}
 		reader_->pos = reader_->pos & 0x07;
 		bit_num -= bit;
@@ -103,6 +134,29 @@ int32_t ttLibC_BitReader_expGolomb(ttLibC_BitReader *reader, bool sign) {
 			}
 			-- reader_->data_size;
 			val = *reader_->data;
+			if(val == 0) {
+				reader_->zero_count ++;
+			}
+			else {
+				if(val == 3 && reader_->zero_count == 2) {
+					++ reader_->data;
+					if(reader_->data_size == 0) {
+						ERR_PRINT("no more data.");
+						return 0;
+					}
+					-- reader_->data_size;
+					val = *reader_->data;
+					if(val == 0) {
+						reader_->zero_count = 1;
+					}
+					else {
+						reader_->zero_count = 0;
+					}
+				}
+				else {
+					reader_->zero_count = 0;
+				}
+			}
 			reader_->pos = 0;
 		}
 	} while(true);
@@ -124,7 +178,7 @@ int32_t ttLibC_BitReader_expGolomb(ttLibC_BitReader *reader, bool sign) {
 		}
 	}
 	else {
-		return ttLibC_BitReader_bit(reader, count) - 1;
+		return val - 1;
 	}
 }
 
