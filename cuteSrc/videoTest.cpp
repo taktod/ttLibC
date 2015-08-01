@@ -15,6 +15,7 @@
 #include <ttLibC/util/hexUtil.h>
 #include <ttLibC/frame/video/bgr.h>
 #include <ttLibC/frame/video/yuv420.h>
+#include <ttLibC/frame/video/h264.h>
 #include <ttLibC/resampler/imageResampler.h>
 
 #ifdef __ENABLE_OPENCV__
@@ -24,6 +25,15 @@
 #ifdef __ENABLE_OPENH264__
 #	include <wels/codec_api.h>
 #endif
+
+static void h264SequenceParameterSetAnalyzeTest() {
+	LOG_PRINT("h264SequenceParameterSetAnalyzeTest");
+	uint8_t buf[256];
+	uint32_t size = ttLibC_HexUtil_makeBuffer("00000001674D401E924201405FF2E02200000300C800002ED51E2C5C90", buf, 256);
+	uint32_t width = ttLibC_H264_getWidth(NULL, buf, size);
+	uint32_t height = ttLibC_H264_getHeight(NULL, buf, size);
+	LOG_PRINT("%d x %d", width, height);
+}
 
 static void openh264Test() {
 	LOG_PRINT("openh264Test");
@@ -272,6 +282,7 @@ static void openh264Test() {
  */
 cute::suite videoTests(cute::suite s) {
 	s.clear();
+	s.push_back(CUTE(h264SequenceParameterSetAnalyzeTest));
 	s.push_back(CUTE(openh264Test));
 	return s;
 }

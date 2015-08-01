@@ -127,8 +127,63 @@ ttLibC_H264 *ttLibC_H264_make(
  * @param info      pointer for info data.(update with data.)
  * @param data      data for analyze
  * @param data_size data size
+ * @return true:analyze success
  */
 bool ttLibC_H264_getNalInfo(ttLibC_H264_NalInfo* info, uint8_t *data, size_t data_size);
+
+/**
+ * analyez info of one nal(for avcc data).
+ * @param info      pointer for info data.(update with data.)
+ * @param data      data for analyze
+ * @param data_size data size
+ * @return true:analyze success
+ */
+bool ttLibC_H264_getAvccInfo(ttLibC_H264_NalInfo* info, uint8_t *data, size_t data_size);
+
+/**
+ * check data type is nal or not.
+ */
+bool ttLibC_H264_isNal(uint8_t *data, size_t data_size);
+
+/**
+ * check data type is avcc or not.
+ */
+bool ttLibC_H264_isAvcc(uint8_t *data, size_t data_size);
+
+/**
+ * check data which is key or not.
+ * @param data      target data
+ * @param data_size target data size
+ * @return true: data is key frame. false: not key frame.
+ */
+bool ttLibC_H264_isKey(uint8_t *data, size_t data_size);
+
+/**
+ * analyze width from data.
+ * @param prev_frame ref for frame before make.
+ * @param data       target data
+ * @param data_size  target data size
+ * @return width siz
+ */
+uint32_t ttLibC_H264_getWidth(ttLibC_H264 *prev_frame, uint8_t *data, size_t data_size);
+
+/**
+ * analyze height from data.
+ * @param prev_frame ref for frame before make.
+ * @param data       target data
+ * @param data_size  target data size
+ * @return height size
+ */
+uint32_t ttLibC_H264_getHeight(ttLibC_H264 *prev_frame, uint8_t *data, size_t data_size);
+
+/**
+ * get frame object from data.
+ * @param prev_frame reuse frame object.
+ * @param data       target data
+ * @param data_size  target data size
+ * @return h264 frame object.
+ */
+ttLibC_H264 *ttLibC_H264_getFrame(ttLibC_H264 *prev_frame, uint8_t *data, size_t data_size);
 
 /**
  * close frame
