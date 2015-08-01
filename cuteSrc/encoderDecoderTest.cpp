@@ -41,52 +41,16 @@
 #	include <ttLibC/resampler/speexdspResampler.h>
 #endif
 
-#ifdef __ENABLE_SPEEX__
-#	include <ttLibC/encoder/speexEncoder.h>
-#endif
-
 #include <ttLibC/util/beepUtil.h>
 #include <ttLibC/frame/audio/pcms16.h>
 #include <ttLibC/frame/audio/mp3.h>
 #include <ttLibC/frame/audio/aac.h>
-#include <ttLibC/frame/audio/speex.h>
 
 #include <ttLibC/frame/video/bgr.h>
 #include <ttLibC/frame/video/yuv420.h>
 #include <ttLibC/frame/video/h264.h>
 
 #include <ttLibC/resampler/imageResampler.h>
-
-void speexEncoderCallback(void *ptr, ttLibC_Speex *speex) {
-	LOG_PRINT("speexできた。");
-}
-
-static void speexTest() {
-	LOG_PRINT("speexTest");
-#if defined(__ENABLE_SPEEX__) && defined(__ENABLE_OPENAL__)
-	uint32_t sample_rate = 8000;
-	uint32_t channel_num = 1;
-	ttLibC_BeepGenerator *generator = ttLibC_BeepGenerator_make(PcmS16Type_littleEndian, 440, sample_rate, channel_num);
-	ttLibC_AlDevice *device = ttLibC_AlDevice_make(256);
-	ttLibC_SpeexEncoder *encoder = ttLibC_SpeexEncoder_make(sample_rate, channel_num, 5);
-	ttLibC_PcmS16 *pcm = NULL, *p;
-	for(int i = 0;i < 10;++ i) {
-		p = ttLibC_BeepGenerator_makeBeepByMiliSec(generator, pcm, 500);
-		if(p == NULL) {
-			break;
-		}
-		pcm = p;
-		ttLibC_SpeexEncoder_encode(encoder, pcm, speexEncoderCallback, NULL);
-		ttLibC_AlDevice_queue(device, pcm);
-//		break;
-	}
-	ttLibC_AlDevice_proceed(device, -1);
-	ttLibC_SpeexEncoder_close(&encoder);
-	ttLibC_AlDevice_close(&device);
-	ttLibC_PcmS16_close(&pcm);
-	ttLibC_BeepGenerator_close(&generator);
-#endif
-}
 
 static void speexdspResamplerTest() {
 	LOG_PRINT("speexdspResamplerTest");
