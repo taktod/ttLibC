@@ -330,7 +330,7 @@ fi
 AM_CONDITIONAL(ENABLE_OPUS, test x$opus_flg$opus_check = "xyesyes")
 
 if test x$avcodec_flg$lgpl_flg$avcodec_check = "xyesyesyes"; then
-	AC_DEVICE([__ENABLE_AVCODEC__])
+	AC_DEFINE([__ENABLE_AVCODEC__])
 fi
 AM_CONDITIONAL(ENABLE_AVCODEC, test x$avcodec_flg$lgpl_flg$avcodec_check = "xyesyesyes")
 
