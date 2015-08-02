@@ -17,6 +17,96 @@
 #include "../../log.h"
 
 /*
+ * make audio frame.
+ * @param prev_frame    reuse frame.
+ * @param frame_size    allocate frame size
+ * @param frame_type    type of frame
+ * @param sample_rate   sample rate
+ * @param sample_num    sample number
+ * @param channel_num   channel number
+ * @param data          data
+ * @param data_size     data size
+ * @param non_copy_mode true:hold the data pointer, false:data will copy.
+ * @param pts           pts for data.
+ * @param timebase      timebase for pts.
+ */
+ttLibC_Audio *ttLibC_Audio_make(
+		ttLibC_Audio *prev_frame,
+		size_t frame_size,
+		ttLibC_Frame_Type frame_type,
+		uint32_t sample_rate,
+		uint32_t sample_num,
+		uint32_t channel_num,
+		void *data,
+		size_t data_size,
+		bool non_copy_mode,
+		uint64_t pts,
+		uint32_t timebase) {
+	ttLibC_Audio *audio = prev_frame;
+	size_t buffer_size_ = data_size;
+	size_t data_size_ = data_size;
+	switch(frame_type) {
+	case frameType_aac:
+	case frameType_mp3:
+	case frameType_opus:
+	case frameType_pcmS16:
+	case frameType_speex:
+		break;
+	default:
+		ERR_PRINT("unknown audio frame type.%d", frame_type);
+		return NULL;
+	}
+	if(frame_size == NULL) {
+		frame_size = sizeof(ttLibC_Audio);
+	}
+	if(audio == NULL) {
+		audio = malloc(frame_size);
+		if(audio == NULL) {
+			ERR_PRINT("failed to allocate memory for audio frame.");
+			return NULL;
+		}
+		audio->inherit_super.data = NULL;
+	}
+	else {
+		if(!audio->inherit_super.is_non_copy) {
+			if(non_copy_mode || audio->inherit_super.data_size < data_size) {
+				free(audio->inherit_super.data);
+				audio->inherit_super.data = NULL;
+			}
+			else {
+				data_size_ = audio->inherit_super.data_size;
+			}
+		}
+	}
+	audio->channel_num               = channel_num;
+	audio->sample_num                = sample_num;
+	audio->sample_rate               = sample_rate;
+	audio->inherit_super.buffer_size = buffer_size_;
+	audio->inherit_super.data_size   = data_size_;
+	audio->inherit_super.is_non_copy = non_copy_mode;
+	audio->inherit_super.pts         = pts;
+	audio->inherit_super.timebase    = timebase;
+	audio->inherit_super.type        = frame_type;
+	if(non_copy_mode) {
+		audio->inherit_super.data = data;
+	}
+	else {
+		if(audio->inherit_super.data == NULL) {
+			audio->inherit_super.data = malloc(data_size);
+			if(audio->inherit_super.data == NULL) {
+				ERR_PRINT("failed to allocate memory for data.");
+				if(prev_frame == NULL) {
+					free(audio);
+				}
+				return NULL;
+			}
+		}
+		memcpy(audio->inherit_super.data, data, data_size);
+	}
+	return audio;
+}
+
+/*
  * close frame
  * @param frame
  */

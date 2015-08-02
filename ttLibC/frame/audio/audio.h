@@ -34,6 +34,33 @@ typedef struct {
 typedef ttLibC_Frame_Audio ttLibC_Audio;
 
 /**
+ * make audio frame.
+ * @param prev_frame    reuse frame.
+ * @param frame_size    allocate frame size
+ * @param frame_type    type of frame
+ * @param sample_rate   sample rate
+ * @param sample_num    sample number
+ * @param channel_num   channel number
+ * @param data          data
+ * @param data_size     data size
+ * @param non_copy_mode true:hold the data pointer, false:data will copy.
+ * @param pts           pts for data.
+ * @param timebase      timebase for pts.
+ */
+ttLibC_Audio *ttLibC_Audio_make(
+		ttLibC_Audio *prev_frame,
+		size_t frame_size,
+		ttLibC_Frame_Type frame_type,
+		uint32_t sample_rate,
+		uint32_t sample_num,
+		uint32_t channel_num,
+		void *data,
+		size_t data_size,
+		bool non_copy_mode,
+		uint64_t pts,
+		uint32_t timebase);
+
+/**
  * close frame
  * @param frame
  */
