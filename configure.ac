@@ -257,7 +257,7 @@ fi
 if test x$avcodec_flg = "xyes"; then
 	PKG_CHECK_MODULES(
 		[LIBAVCODEC],
-		[libavcodec],
+		[libavcodec, libavutil],
 		[avcodec_check=yes]
 	)
 fi

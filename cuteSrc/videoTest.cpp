@@ -26,6 +26,185 @@
 #	include <wels/codec_api.h>
 #endif
 
+#ifdef __ENABLE_AVCODEC__
+	extern "C" {
+#		include <libavcodec/avcodec.h>
+	}
+#endif
+
+static void avcodecTest() {
+	LOG_PRINT("avcodecTest");
+#if defined(__ENABLE_AVCODEC__) && defined(__ENABLE_OPENCV__)
+	uint32_t width=320, height=240;
+	ttLibC_CvCapture *capture = ttLibC_CvCapture_make(0, width, height);
+	ttLibC_CvWindow *window   = ttLibC_CvWindow_make("original");
+	ttLibC_CvWindow *dec_win  = ttLibC_CvWindow_make("decoded");
+	ttLibC_Bgr    *bgr = NULL, *b, *dbgr = NULL;
+	ttLibC_Yuv420 *yuv = NULL, *y, *dyuv = NULL;
+
+	AVCodec *codec;
+	AVCodecContext *enc = NULL;
+	AVFrame *picture = NULL;
+
+	codec = avcodec_find_encoder(AV_CODEC_ID_FLV1);
+	if(!codec) {
+		ERR_PRINT("failed to get codec information.");
+	}
+	else {
+		enc = avcodec_alloc_context3(codec);
+		if(enc == NULL) {
+			ERR_PRINT("failed to get encode context.");
+		}
+		else {
+			enc->bit_rate = 150000;
+			enc->width = width;
+			enc->height = height;
+			enc->time_base = (AVRational){1,12};
+			enc->gop_size = 10;
+			enc->max_b_frames = 0;
+			enc->pix_fmt = AV_PIX_FMT_YUV420P;
+			if(avcodec_open2(enc, codec, NULL) < 0) {
+				LOG_PRINT("failed to open codec.");
+				av_free(enc);
+				enc = NULL;
+			}
+			else {
+				picture = av_frame_alloc();
+				if(picture == NULL) {
+					ERR_PRINT("failed to make picture.");
+					avcodec_close(enc);
+					av_free(enc);
+					enc = NULL;
+				}
+				else {
+					picture->linesize[0] = enc->width;
+					picture->linesize[1] = (enc->width >> 1);
+					picture->linesize[2] = (enc->width >> 1);
+				}
+			}
+		}
+	}
+
+	AVCodec *decodec;
+	AVCodecContext *dec = NULL;
+	AVFrame *decpicture = NULL;
+
+	decodec = avcodec_find_decoder(AV_CODEC_ID_FLV1);
+	if(!decodec) {
+		ERR_PRINT("failed to get codec information.");
+	}
+	else {
+		dec = avcodec_alloc_context3(decodec);
+		if(dec == NULL) {
+			ERR_PRINT("failed to get decode context");
+		}
+		else {
+			if(avcodec_open2(dec, decodec, NULL) < 0) {
+				ERR_PRINT("failed to open codec.");
+				av_free(dec);
+				dec = NULL;
+			}
+			else {
+				decpicture = av_frame_alloc();
+				if(decpicture == NULL) {
+					ERR_PRINT("failed to make picture");
+					av_free(dec);
+					dec = NULL;
+				}
+			}
+		}
+	}
+
+	AVPacket packet;
+	av_init_packet(&packet);
+
+	int got_output;
+	int out_size;
+	int outbuf_size = 100000;
+	uint8_t *outbuf = (uint8_t *)malloc(outbuf_size);
+
+	while(true) {
+		b = ttLibC_CvCapture_queryFrame(capture, bgr);
+		if(b == NULL) {
+			break;
+		}
+		bgr = b;
+		ttLibC_CvWindow_showBgr(window, bgr);
+		y = ttLibC_ImageResampler_makeYuv420FromBgr(yuv, Yuv420Type_planar, bgr);
+		if(y == NULL) {
+			break;
+		}
+		yuv = y;
+		// now convert this yuv with avcodec.
+		picture->data[0] = yuv->y_data;
+		picture->data[1] = yuv->u_data;
+		picture->data[2] = yuv->v_data;
+
+		packet.data = NULL;
+		packet.size = 0;
+		out_size = avcodec_encode_video2(enc, &packet, picture, &got_output);
+		if(out_size != 0) {
+			LOG_PRINT("failed to encode.");
+		}
+		else {
+			// success..
+//			ttLibC_HexUtil_dump(packet.data, packet.size, true);
+			// now for decode.
+			int got_picture;
+			out_size = avcodec_decode_video2(dec, decpicture, &got_picture, &packet);
+			if(out_size < 0) {
+				LOG_PRINT("failed to decode");
+			}
+			else {
+				if(got_picture) {
+					if(dec->pix_fmt == AV_PIX_FMT_YUV420P) {
+						y = ttLibC_Yuv420_make(dyuv, Yuv420Type_planar, decpicture->width, decpicture->height, NULL, 0,
+								decpicture->data[0], decpicture->linesize[0],
+								decpicture->data[1], decpicture->linesize[1],
+								decpicture->data[2], decpicture->linesize[2],
+								true, 0, 1000);
+						if(y == NULL) {
+							break;
+						}
+						dyuv = y;
+						b = ttLibC_ImageResampler_makeBgrFromYuv420(dbgr, BgrType_bgr, dyuv);
+						if(b == NULL) {
+							break;
+						}
+						dbgr = b;
+						ttLibC_CvWindow_showBgr(dec_win, dbgr);
+					}
+				}
+			}
+		}
+		uint8_t key = ttLibC_CvWindow_waitForKeyInput(10);
+		if(key == Keychar_Esc) {
+			break;
+		}
+	}
+	if(dec != NULL) {
+		avcodec_close(dec);
+		av_free(dec);
+		av_free(decpicture);
+	}
+	if(enc != NULL) {
+		avcodec_close(enc);
+		av_free(enc);
+		av_free(picture);
+	}
+	if(outbuf) {
+		free(outbuf);
+	}
+	ttLibC_Yuv420_close(&yuv);
+	ttLibC_Yuv420_close(&dyuv);
+	ttLibC_Bgr_close(&bgr);
+	ttLibC_Bgr_close(&dbgr);
+	ttLibC_CvWindow_close(&window);
+	ttLibC_CvWindow_close(&dec_win);
+	ttLibC_CvCapture_close(&capture);
+#endif
+}
+
 static void h264SequenceParameterSetAnalyzeTest() {
 	LOG_PRINT("h264SequenceParameterSetAnalyzeTest");
 	uint8_t buf[256];
@@ -282,6 +461,7 @@ static void openh264Test() {
  */
 cute::suite videoTests(cute::suite s) {
 	s.clear();
+	s.push_back(CUTE(avcodecTest));
 	s.push_back(CUTE(h264SequenceParameterSetAnalyzeTest));
 	s.push_back(CUTE(openh264Test));
 	return s;
