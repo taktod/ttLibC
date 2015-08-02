@@ -46,17 +46,69 @@
 #	include <ttLibC/decoder/speexDecoder.h>
 #endif
 
+#ifdef __ENABLE_OPUS__
+#	include <ttLibC/encoder/opusEncoder.h>
+#	include <ttLibC/decoder/opusDecoder.h>
+#endif
+
 #include <ttLibC/util/beepUtil.h>
 #include <ttLibC/frame/audio/pcms16.h>
 #include <ttLibC/frame/audio/mp3.h>
 #include <ttLibC/frame/audio/aac.h>
 #include <ttLibC/frame/audio/speex.h>
+#include <ttLibC/frame/audio/opus.h>
 
 #include <ttLibC/frame/video/bgr.h>
 #include <ttLibC/frame/video/yuv420.h>
 #include <ttLibC/frame/video/h264.h>
 
 #include <ttLibC/resampler/imageResampler.h>
+
+#if defined(__ENABLE_OPUS__) && defined(__ENABLE_OPENAL__)
+typedef struct {
+	ttLibC_AlDevice *device;
+	ttLibC_OpusDecoder *decoder;
+} opusTest_t;
+
+void opusDecoderCallback(void *ptr, ttLibC_PcmS16 *pcms16) {
+	opusTest_t *testData = (opusTest_t *)ptr;
+	ttLibC_AlDevice_queue(testData->device, pcms16);
+}
+
+void opusEncoderCallback(void *ptr, ttLibC_Opus *opus) {
+//	LOG_PRINT("encoded.:%d", opus->inherit_super.inherit_super.pts);
+	opusTest_t *testData = (opusTest_t *)ptr;
+	ttLibC_OpusDecoder_decode(testData->decoder, opus, opusDecoderCallback, ptr);
+}
+#endif
+
+static void opusTest() {
+	LOG_PRINT("opusTest");
+#if defined(__ENABLE_OPUS__) && defined(__ENABLE_OPENAL__)
+	uint32_t sample_rate = 48000;
+	uint32_t channel_num = 2;
+	opusTest_t testData;
+	ttLibC_BeepGenerator *generator = ttLibC_BeepGenerator_make(PcmS16Type_littleEndian, 440, sample_rate, channel_num);
+	testData.device = ttLibC_AlDevice_make(256);
+	testData.decoder = ttLibC_OpusDecoder_make(sample_rate, channel_num);
+	ttLibC_OpusEncoder *encoder = ttLibC_OpusEncoder_make(sample_rate, channel_num, 480);
+	ttLibC_PcmS16 *pcm = NULL, *p;
+	for(int i = 0;i < 10;++ i) {
+		p = ttLibC_BeepGenerator_makeBeepBySampleNum(generator, pcm, 4900);
+		if(p == NULL) {
+			break;
+		}
+		pcm = p;
+		ttLibC_OpusEncoder_encode(encoder, pcm, opusEncoderCallback, &testData);
+	}
+	ttLibC_AlDevice_proceed(testData.device, -1);
+	ttLibC_OpusDecoder_close(&testData.decoder);
+	ttLibC_OpusEncoder_close(&encoder);
+	ttLibC_AlDevice_close(&testData.device);
+	ttLibC_PcmS16_close(&pcm);
+	ttLibC_BeepGenerator_close(&generator);
+#endif
+}
 
 #if defined(__ENABLE_SPEEX__) && defined(__ENABLE_OPENAL__)
 typedef struct {
@@ -363,6 +415,7 @@ static void imageResamplerTest() {
  */
 cute::suite encoderDecoderTests(cute::suite s) {
 	s.clear();
+	s.push_back(CUTE(opusTest));
 	s.push_back(CUTE(speexTest));
 	s.push_back(CUTE(speexdspResamplerTest));
 	s.push_back(CUTE(openh264Test));

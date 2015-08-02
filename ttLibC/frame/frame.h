@@ -37,6 +37,8 @@ typedef enum {
 	frameType_aac,
 	/** ttLibC_Speex audio frame */
 	frameType_speex,
+	/** ttLibC_Opus audio frame */
+	frameType_opus,
 } ttLibC_Frame_Type;
 
 /**

@@ -13,6 +13,7 @@
 #include "mp3.h"
 #include "aac.h"
 #include "speex.h"
+#include "opus.h"
 #include "../../log.h"
 
 /*
@@ -36,6 +37,9 @@ void ttLibC_Audio_close(ttLibC_Audio **frame) {
 		break;
 	case frameType_speex:
 		ttLibC_Speex_close((ttLibC_Speex **)frame);
+		break;
+	case frameType_opus:
+		ttLibC_Opus_close((ttLibC_Opus **)frame);
 		break;
 	default:
 		ERR_PRINT("unknown type:%d", target->inherit_super.type);

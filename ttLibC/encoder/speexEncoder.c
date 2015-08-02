@@ -12,7 +12,6 @@
 
 #include "speexEncoder.h"
 #include "../log.h"
-#include "../util/hexUtil.h"
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>

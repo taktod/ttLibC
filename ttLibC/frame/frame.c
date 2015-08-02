@@ -34,6 +34,7 @@ void ttLibC_Frame_close(ttLibC_Frame **frame) {
 	case frameType_mp3:
 	case frameType_aac:
 	case frameType_speex:
+	case frameType_opus:
 		ttLibC_Audio_close((ttLibC_Audio **)frame);
 		break;
 	default:
