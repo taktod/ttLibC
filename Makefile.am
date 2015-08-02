@@ -2,6 +2,7 @@ nobase_include_HEADERS= \
 	ttLibC/frame/audio/aac.h \
 	ttLibC/frame/audio/audio.h \
 	ttLibC/frame/audio/mp3.h \
+	ttLibC/frame/audio/opus.h \
 	ttLibC/frame/audio/pcms16.h \
 	ttLibC/frame/audio/speex.h \
 	ttLibC/frame/video/bgr.h \
@@ -61,6 +62,12 @@ endif
 if ENABLE_FILE
 nobase_include_HEADERS += \
 	ttLibC/util/httpUtil.h
+endif
+
+if ENABLE_OPUS
+nobase_include_HEADERS += \
+	ttLibC/encoder/opusEncoder.h \
+	ttLibC/decoder/opusDecoder.h
 endif
 
 pkgconfigdir=@pkgconfigdir@
