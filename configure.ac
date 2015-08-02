@@ -29,6 +29,7 @@ openh264_flg=no
 speexdsp_flg=no
 speex_flg=no
 opus_flg=no
+avcodec_flg=no
 
 # check result
 cute_check=no 
@@ -41,6 +42,7 @@ openh264_check=no
 speexdsp_check=no
 speex_check=no
 opus_check=no
+avcodec_check=no
 
 AC_ARG_ENABLE(
 	[lgpl],
@@ -103,6 +105,7 @@ AC_ARG_ENABLE(
 		speexdsp_flg=$enableval
 		speex_flg=$enableval
 		opus_flg=$enableval
+		avcodec_flg=$enableval
 	]
 )
 
@@ -160,6 +163,12 @@ AC_ARG_ENABLE(
 	[opus_flg=$enableval]
 )
 
+AC_ARG_ENABLE(
+	[avcodec],
+	AS_HELP_STRING([--enable-avcodec/--disable-avcodec], [enable/disable avcodec(ffmpeg or libav) code.]),
+	[avcodec_flg=$enableval]
+)
+
 if test x$opencv_flg = "xyes"; then
 	PKG_CHECK_MODULES(
 		[OPENCV],
@@ -167,7 +176,7 @@ if test x$opencv_flg = "xyes"; then
 		[opencv_check=yes]
 	)
 fi
-if test x$openal_flg$gpl_flg = "xyesyes"; then
+if test x$openal_flg = "xyes"; then
 	PKG_CHECK_MODULES(
 		[OPENAL],
 		[openal],
@@ -245,6 +254,13 @@ if test x$opus_flg = "xyes"; then
 		[opus_check=yes]
 	)
 fi
+if test x$avcodec_flg = "xyes"; then
+	PKG_CHECK_MODULES(
+		[LIBAVCODEC],
+		[libavcodec],
+		[avcodec_check=yes]
+	)
+fi
 
 if test x$gpl_flg = "xyes"; then
 	AC_DEFINE([__ENABLE_GPL__])
@@ -312,6 +328,11 @@ if test x$opus_flg$opus_check = "xyesyes"; then
 	AC_DEFINE([__ENABLE_OPUS__])
 fi
 AM_CONDITIONAL(ENABLE_OPUS, test x$opus_flg$opus_check = "xyesyes")
+
+if test x$avcodec_flg$lgpl_flg$avcodec_check = "xyesyesyes"; then
+	AC_DEVICE([__ENABLE_AVCODEC__])
+fi
+AM_CONDITIONAL(ENABLE_AVCODEC, test x$avcodec_flg$lgpl_flg$avcodec_check = "xyesyesyes")
 
 AC_ARG_WITH(pkgconfigdir,
 	AS_HELP_STRING([--with-pkgconfigdir], [Use the specified pkgconfig dir.(default is $libdir/pkgconfig)]),
@@ -468,4 +489,21 @@ if test x$opus_flg = "xyes"; then
 	fi
 else
 	echo "opus: off"
+fi
+if test x$avcodec_flg = "xyes"; then
+	if test x$lgpl_flg = "xyes"; then
+		if test x$avcodec_check = "xyes"; then
+			if test x$gpl_flg = "xyes"; then
+				echo "avcodec: on"
+			else
+				echo "avcodec: on(restricted by license. lgpl)"
+			fi
+		else 
+			echo "avcodec: off(avcodec library is missing.)"
+		fi
+	else
+		echo "avcodec: off(under lgpl or gpl only.)"
+	fi
+else
+	echo "avcodec: off"
 fi
