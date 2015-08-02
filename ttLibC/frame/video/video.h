@@ -46,6 +46,34 @@ typedef struct {
 typedef ttLibC_Frame_Video ttLibC_Video;
 
 /**
+ * make video frame
+ * @param prev_frame    reuse frame.
+ * @param frame_size    allocate frame size.
+ * @param frame_type    type of frame.
+ * @param type          type of videoframe
+ * @param width         width
+ * @param height        height
+ * @param data          data
+ * @param data_size     data size
+ * @param non_copy_mode true: hold the data pointer. false:copy the data.
+ * @param pts           pts for data.
+ * @param timebase      timebase number for pts.
+ * @return video frame object.
+ */
+ttLibC_Video *ttLibC_Video_make(
+		ttLibC_Video *prev_frame,
+		size_t frame_size,
+		ttLibC_Frame_Type frame_type,
+		ttLibC_Video_Type type,
+		uint32_t width,
+		uint32_t height,
+		void *data,
+		size_t data_size,
+		bool non_copy_mode,
+		uint64_t pts,
+		uint32_t timebase);
+
+/**
  * close frame
  * @param frame
  */
