@@ -38,13 +38,19 @@ typedef struct {
 typedef ttLibC_Encoder_Openh264Encoder_ ttLibC_Openh264Encoder_;
 
 /*
- * make openh264 encoder(baseline only.) (maybe add more params later)
- * @param width  target width
- * @param height target height
+ * make openh264 encoder(baseline only.)
+ * @param width         target width
+ * @param height        target height
+ * @param max_quantizer max q value
+ * @param min_quantizer min q value
+ * @param bitrate       target bitrate
  */
-static ttLibC_Openh264Encoder *Openh264Encoder_make(
+static ttLibC_Openh264Encoder *Openh264Encoder_make_ex(
 		uint32_t width,
-		uint32_t height) {
+		uint32_t height,
+		uint32_t max_quantizer,
+		uint32_t min_quantizer,
+		uint32_t bitrate) {
 	ttLibC_Openh264Encoder_ *encoder = (ttLibC_Openh264Encoder_ *)malloc(sizeof(ttLibC_Openh264Encoder_));
 	if(encoder == NULL) {
 		ERR_PRINT("failed to alloc encoder object.");
@@ -63,10 +69,10 @@ static ttLibC_Openh264Encoder *Openh264Encoder_make(
 	paramExt.fMaxFrameRate  = 5; // fps
 	paramExt.iPicWidth      = width;
 	paramExt.iPicHeight     = height;
-	paramExt.iTargetBitrate = 250000; // in bit / sec
-	paramExt.iMaxBitrate    = 250000;
-	paramExt.iMinQp         = 4;
-	paramExt.iMaxQp         = 20;
+	paramExt.iTargetBitrate = bitrate; // in bit / sec
+	paramExt.iMaxBitrate    = bitrate;
+	paramExt.iMinQp         = min_quantizer;
+	paramExt.iMaxQp         = max_quantizer;
 
 	paramExt.iRCMode                    = RC_BITRATE_MODE;
 	paramExt.iTemporalLayerNum          = 1;
@@ -371,9 +377,29 @@ extern "C" {
 ttLibC_Openh264Encoder *ttLibC_Openh264Encoder_make(
 		uint32_t width,
 		uint32_t height) {
-	return Openh264Encoder_make(
+	return Openh264Encoder_make_ex(
 			width,
-			height);
+			height,
+			20,
+			4,
+			250000);
+}
+
+/*
+ * call make for c code
+ */
+ttLibC_Openh264Encoder *ttLibC_Openh264Encoder_make_ex(
+		uint32_t width,
+		uint32_t height,
+		uint32_t max_quantizer,
+		uint32_t min_quantizer,
+		uint32_t bitrate) {
+	return Openh264Encoder_make_ex(
+			width,
+			height,
+			max_quantizer,
+			min_quantizer,
+			bitrate);
 }
 
 /*

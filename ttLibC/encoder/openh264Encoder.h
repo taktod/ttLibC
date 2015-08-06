@@ -62,6 +62,21 @@ ttLibC_Openh264Encoder *ttLibC_Openh264Encoder_make(
 		uint32_t height);
 
 /**
+ * make openh264 encoder(baseline only.)
+ * @param width         target width
+ * @param height        target height
+ * @param max_quantizer max q value
+ * @param min_quantizer min q value
+ * @param bitrate       target bitrate (bit / sec)
+ */
+ttLibC_Openh264Encoder *ttLibC_Openh264Encoder_make_ex(
+		uint32_t width,
+		uint32_t height,
+		uint32_t max_quantizer,
+		uint32_t min_quantizer,
+		uint32_t bitrate);
+
+/**
  * encode frame.
  * @param encoder  openh264 encoder object
  * @param yuv420   source yuv420 data.
