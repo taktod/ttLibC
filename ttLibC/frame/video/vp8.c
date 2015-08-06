@@ -72,7 +72,7 @@ uint32_t ttLibC_Vp8_getWidth(ttLibC_Vp8 *prev_frame, uint8_t *data, size_t data_
 		ERR_PRINT("data size is too small for analyze.");
 		return 0;
 	}
-	if(atsfLib_Vp8_isKey(data, data_size)) {
+	if(ttLibC_Vp8_isKey(data, data_size)) {
 		return ((dat[7] & 0x3F) << 8) | dat[6];
 	}
 	else {
@@ -100,7 +100,7 @@ uint32_t ttLibC_Vp8_getHeight(ttLibC_Vp8 *prev_frame, uint8_t *data, size_t data
 		ERR_PRINT("data size is too small for analyze.");
 		return 0;
 	}
-	if(atsfLib_Vp8_isKey(data, data_size)) {
+	if(ttLibC_Vp8_isKey(data, data_size)) {
 		return ((dat[9] & 0x3F) << 8) | dat[8];
 	}
 	else {
