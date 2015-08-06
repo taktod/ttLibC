@@ -54,7 +54,7 @@ static void httpClientTest() {
 	LOG_PRINT("httpClientTest");
 #ifdef __ENABLE_FILE__
 	ttLibC_HttpClient *client = ttLibC_HttpClient_make(256, 10);
-	ttLibC_HttpClient_getRange(client, "http://www.google.com/", 0, 500, httpClientCallback, NULL);
+	ttLibC_HttpClient_getRange(client, "http://www.google.com/", 0, 500, false, httpClientCallback, NULL);
 	ttLibC_HttpClient_close(&client);
 #endif
 }
