@@ -9,6 +9,10 @@
  */
 
 #include "audio.h"
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
 #include "pcms16.h"
 #include "mp3.h"
 #include "aac.h"
@@ -56,7 +60,7 @@ ttLibC_Audio *ttLibC_Audio_make(
 		ERR_PRINT("unknown audio frame type.%d", frame_type);
 		return NULL;
 	}
-	if(frame_size == NULL) {
+	if(frame_size == 0) {
 		frame_size = sizeof(ttLibC_Audio);
 	}
 	if(audio == NULL) {
