@@ -71,15 +71,17 @@ ttLibC_HttpClient *ttLibC_HttpClient_make(
  * get method download.
  * @param client         http client object
  * @param target_address address for download.
+ * @param is_binary      true:read as binary false:read as string
  * @param callback       callback for download data.
  * @param ptr            user def data pointer.
  */
 void ttLibC_HttpClient_get(
 		ttLibC_HttpClient *client,
 		const char *target_address,
+		bool is_binary,
 		ttLibC_HttpClientFunc callback,
 		void *ptr) {
-	ttLibC_HttpClient_getRange(client, target_address, 0, 0, callback, ptr);
+	ttLibC_HttpClient_getRange(client, target_address, 0, 0, is_binary, callback, ptr);
 }
 
 /*
@@ -88,6 +90,7 @@ void ttLibC_HttpClient_get(
  * @param target_address address for download.
  * @param range_start    begin point for download. if 0, ignore
  * @param range_length   download size for download. if 0, ignore
+ * @param is_binary      true:read as binary false:read as string
  * @param callback       callback for download data.
  * @param ptr            user def data pointer.
  */
@@ -96,6 +99,7 @@ void ttLibC_HttpClient_getRange(
 		const char *target_address,
 		size_t range_start,
 		size_t range_length,
+		bool is_binary,
 		ttLibC_HttpClientFunc callback,
 		void *ptr) {
 	if(client == NULL) {
@@ -209,6 +213,10 @@ void ttLibC_HttpClient_getRange(
 						// now ready to get body content.
 						is_body = true;
 					}
+					if(strstr(buf, "HTTP") != NULL) {
+						float dummy = 0;
+						sscanf(buf, "HTTP/%f %d", &dummy, &client->status_code);
+					}
 					if(strstr(buf, "ETag") != NULL) {
 						sscanf(buf, "ETag: \"%s", client->ETag);
 						int length = strlen(client->ETag);
@@ -225,12 +233,23 @@ void ttLibC_HttpClient_getRange(
 					}
 				}
 				else {
+					if(client->status_code < 200 || client->status_code >= 300) {
+						return;
+					}
 					// body content.
 					size_t read_size = 0;
-					if((read_size = fread(client_->buffer, 1, client->buffer_size, fp)) == 0) {
-						break;
+					if(is_binary) {
+						if((read_size = fread(client_->buffer, 1, client->buffer_size, fp)) == 0) {
+							break;
+						}
+						callback(ptr, client, client_->buffer, read_size);
 					}
-					callback(ptr, client, client_->buffer, read_size);
+					else {
+						if(fgets((char *)client_->buffer, client->buffer_size, fp) == NULL) {
+							break;
+						}
+						callback(ptr, client, client_->buffer, strlen((char *)client_->buffer));
+					}
 					if(client->wait_interval != 0) {
 						struct timespec ts;
 						ts.tv_sec = (client->wait_interval / 1000);
