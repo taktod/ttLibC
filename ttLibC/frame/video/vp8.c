@@ -35,7 +35,7 @@ ttLibC_Vp8 *ttLibC_Vp8_make(
 		bool non_copy_mode,
 		uint64_t pts,
 		uint32_t timebase) {
-	return ttLibC_Video_make(prev_frame, sizeof(ttLibC_Vp8_), frameType_vp8, video_type, width, height, data, data_size, non_copy_mode, pts, timebase);
+	return (ttLibC_Vp8 *)ttLibC_Video_make((ttLibC_Video *)prev_frame, sizeof(ttLibC_Vp8_), frameType_vp8, video_type, width, height, data, data_size, non_copy_mode, pts, timebase);
 }
 
 /*
