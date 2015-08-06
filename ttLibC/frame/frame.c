@@ -26,15 +26,18 @@ void ttLibC_Frame_close(ttLibC_Frame **frame) {
 	}
 	switch(target->type) {
 	case frameType_bgr:
-	case frameType_yuv420:
+	case frameType_flv1:
 	case frameType_h264:
+	case frameType_vp8:
+	case frameType_wmv1:
+	case frameType_yuv420:
 		ttLibC_Video_close((ttLibC_Video **)frame);
 		break;
-	case frameType_pcmS16:
-	case frameType_mp3:
 	case frameType_aac:
-	case frameType_speex:
+	case frameType_mp3:
 	case frameType_opus:
+	case frameType_pcmS16:
+	case frameType_speex:
 		ttLibC_Audio_close((ttLibC_Audio **)frame);
 		break;
 	default:

@@ -29,6 +29,10 @@ typedef enum {
 	frameType_yuv420,
 	/** ttLibC_H264 video frame */
 	frameType_h264,
+	/** ttLibC_Flv1 video frame */
+	frameType_flv1,
+	frameType_vp8,
+	frameType_wmv1,
 	/** ttLibC_PcmS16 audio frame */
 	frameType_pcmS16,
 	/** ttLibC_Mp3 audio frame */

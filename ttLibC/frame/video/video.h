@@ -74,6 +74,12 @@ ttLibC_Video *ttLibC_Video_make(
 		uint32_t timebase);
 
 /**
+ * close frame(use internal)
+ * @param frame
+ */
+void ttLibC_Video_close_(ttLibC_Video **frame);
+
+/**
  * close frame
  * @param frame
  */

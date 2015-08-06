@@ -9,9 +9,15 @@
  */
 
 #include "video.h"
+
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
 #include "bgr.h"
 #include "yuv420.h"
 #include "h264.h"
+#include "vp8.h"
 #include "../../log.h"
 
 /*
@@ -46,7 +52,10 @@ ttLibC_Video *ttLibC_Video_make(
 	size_t data_size_ = data_size;
 	switch(frame_type) {
 	case frameType_bgr:
+	case frameType_flv1:
 	case frameType_h264:
+	case frameType_vp8:
+	case frameType_wmv1:
 	case frameType_yuv420:
 		break;
 	default:
@@ -62,7 +71,7 @@ ttLibC_Video *ttLibC_Video_make(
 		ERR_PRINT("unknown video type.%d", frame_type);
 		return NULL;
 	}
-	if(frame_size == NULL) {
+	if(frame_size == 0) {
 		frame_size = sizeof(ttLibC_Video);
 	}
 	if(video == NULL) {
@@ -112,6 +121,22 @@ ttLibC_Video *ttLibC_Video_make(
 	return video;
 }
 
+/**
+ * close frame(use internal)
+ * @param frame
+ */
+void ttLibC_Video_close_(ttLibC_Video **frame) {
+	ttLibC_Video *target = *frame;
+	if(target == NULL) {
+		return;
+	}
+	if(!target->inherit_super.is_non_copy) {
+		free(target->inherit_super.data);
+	}
+	free(target);
+	*frame = NULL;
+}
+
 /*
  * close frame
  * @param frame
@@ -125,11 +150,20 @@ void ttLibC_Video_close(ttLibC_Video **frame) {
 	case frameType_bgr:
 		ttLibC_Bgr_close((ttLibC_Bgr **)frame);
 		break;
+	case frameType_h264:
+		ttLibC_H264_close((ttLibC_H264 **)frame);
+		break;
 	case frameType_yuv420:
 		ttLibC_Yuv420_close((ttLibC_Yuv420 **)frame);
 		break;
-	case frameType_h264:
-		ttLibC_H264_close((ttLibC_H264 **)frame);
+	case frameType_vp8:
+		ttLibC_Vp8_close((ttLibC_Vp8 **)frame);
+		break;
+	case frameType_flv1:
+	case frameType_wmv1:
+		{
+			ttLibC_Video_close_(frame);
+		}
 		break;
 	default:
 		ERR_PRINT("unknown type:%d", target->inherit_super.type);

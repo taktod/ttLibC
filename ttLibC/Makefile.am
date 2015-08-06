@@ -14,14 +14,15 @@ libttLibC_a_SOURCES= \
 	encoder/speexEncoder.c \
 	frame/audio/aac.c \
 	frame/audio/audio.c \
-	frame/audio/pcms16.c \
 	frame/audio/mp3.c \
 	frame/audio/opus.c \
+	frame/audio/pcms16.c \
 	frame/audio/speex.c \
-	frame/video/video.c \
 	frame/video/bgr.c \
-	frame/video/yuv420.c \
 	frame/video/h264.c \
+	frame/video/video.c \
+	frame/video/vp8.c \
+	frame/video/yuv420.c \
 	frame/frame.c \
 	resampler/imageResampler.c \
 	resampler/speexdspResampler.c \

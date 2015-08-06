@@ -8,6 +8,7 @@ nobase_include_HEADERS= \
 	ttLibC/frame/video/bgr.h \
 	ttLibC/frame/video/h264.h \
 	ttLibC/frame/video/video.h \
+	ttLibC/frame/video/vp8.h \
 	ttLibC/frame/video/yuv420.h \
 	ttLibC/frame/frame.h \
 	ttLibC/resampler/imageResampler.h \
