@@ -15,9 +15,16 @@
 #include <stdlib.h>
 
 #include "bgr.h"
-#include "yuv420.h"
+#include "flv1.h"
 #include "h264.h"
+#include "h265.h"
+#include "theora.h"
+#include "vp6.h"
 #include "vp8.h"
+#include "vp9.h"
+#include "wmv1.h"
+#include "wmv2.h"
+#include "yuv420.h"
 #include "../../log.h"
 
 /*
@@ -54,8 +61,13 @@ ttLibC_Video *ttLibC_Video_make(
 	case frameType_bgr:
 	case frameType_flv1:
 	case frameType_h264:
+	case frameType_h265:
+	case frameType_theora:
+	case frameType_vp6:
 	case frameType_vp8:
+	case frameType_vp9:
 	case frameType_wmv1:
+	case frameType_wmv2:
 	case frameType_yuv420:
 		break;
 	default:
@@ -64,7 +76,7 @@ ttLibC_Video *ttLibC_Video_make(
 	}
 	switch(type) {
 	case videoType_info:
-	case videoType_inter:
+	case videoType_inner:
 	case videoType_key:
 		break;
 	default:
@@ -150,17 +162,32 @@ void ttLibC_Video_close(ttLibC_Video **frame) {
 	case frameType_bgr:
 		ttLibC_Bgr_close((ttLibC_Bgr **)frame);
 		break;
+	case frameType_flv1:
+		ttLibC_Flv1_close((ttLibC_Flv1 **)frame);
+		break;
 	case frameType_h264:
 		ttLibC_H264_close((ttLibC_H264 **)frame);
 		break;
 	case frameType_yuv420:
 		ttLibC_Yuv420_close((ttLibC_Yuv420 **)frame);
 		break;
+	case frameType_vp6:
+		ttLibC_Vp6_close((ttLibC_Vp6 **)frame);
+		break;
 	case frameType_vp8:
 		ttLibC_Vp8_close((ttLibC_Vp8 **)frame);
 		break;
-	case frameType_flv1:
+	case frameType_vp9:
+		ttLibC_Vp9_close((ttLibC_Vp9 **)frame);
+		break;
 	case frameType_wmv1:
+		ttLibC_Wmv1_close((ttLibC_Wmv1 **)frame);
+		break;
+	case frameType_wmv2:
+		ttLibC_Wmv2_close((ttLibC_Wmv2 **)frame);
+		break;
+	case frameType_h265:
+	case frameType_theora:
 		{
 			ttLibC_Video_close_(frame);
 		}

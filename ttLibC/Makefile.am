@@ -19,9 +19,16 @@ libttLibC_a_SOURCES= \
 	frame/audio/pcms16.c \
 	frame/audio/speex.c \
 	frame/video/bgr.c \
+	frame/video/flv1.c \
 	frame/video/h264.c \
+	frame/video/h265.c \
+	frame/video/theora.c \
 	frame/video/video.c \
+	frame/video/vp6.c \
 	frame/video/vp8.c \
+	frame/video/vp9.c \
+	frame/video/wmv1.c \
+	frame/video/wmv2.c \
 	frame/video/yuv420.c \
 	frame/frame.c \
 	resampler/imageResampler.c \

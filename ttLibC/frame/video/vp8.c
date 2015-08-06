@@ -35,7 +35,18 @@ ttLibC_Vp8 *ttLibC_Vp8_make(
 		bool non_copy_mode,
 		uint64_t pts,
 		uint32_t timebase) {
-	return (ttLibC_Vp8 *)ttLibC_Video_make((ttLibC_Video *)prev_frame, sizeof(ttLibC_Vp8_), frameType_vp8, video_type, width, height, data, data_size, non_copy_mode, pts, timebase);
+	return (ttLibC_Vp8 *)ttLibC_Video_make(
+			(ttLibC_Video *)prev_frame,
+			sizeof(ttLibC_Vp8_),
+			frameType_vp8,
+			video_type,
+			width,
+			height,
+			data,
+			data_size,
+			non_copy_mode,
+			pts,
+			timebase);
 }
 
 /*
@@ -114,7 +125,7 @@ uint32_t ttLibC_Vp8_getHeight(ttLibC_Vp8 *prev_frame, uint8_t *data, size_t data
 
 /*
  * make frame object from vp8 binary data.
- * @param prev_frame ref for prev analyzed vp8 frame.
+ * @param prev_frame    ref for prev analyzed vp8 frame.
  * @param data          vp8 data
  * @param data_size     vp8 data size
  * @param non_copy_mode true:hold pointer. false:copy data.
@@ -130,7 +141,10 @@ ttLibC_Vp8 *ttLibC_Vp8_getFrame(ttLibC_Vp8 *prev_frame, uint8_t *data, size_t da
 	bool isKey = ttLibC_Vp8_isKey(data, data_size);
 	uint32_t width  = ttLibC_Vp8_getWidth(prev_frame, data, data_size);
 	uint32_t height = ttLibC_Vp8_getHeight(prev_frame, data, data_size);
-	return ttLibC_Vp8_make(prev_frame, isKey ? videoType_key : videoType_inter, width, height, data, data_size, non_copy_mode, pts, timebase);
+	if(width == 0 || height == 0) {
+		return NULL;
+	}
+	return ttLibC_Vp8_make(prev_frame, isKey ? videoType_key : videoType_inner, width, height, data, data_size, non_copy_mode, pts, timebase);
 }
 
 /*

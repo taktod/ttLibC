@@ -6,9 +6,16 @@ nobase_include_HEADERS= \
 	ttLibC/frame/audio/pcms16.h \
 	ttLibC/frame/audio/speex.h \
 	ttLibC/frame/video/bgr.h \
+	ttLibC/frame/video/flv1.h \
 	ttLibC/frame/video/h264.h \
+	ttLibC/frame/video/h265.h \
+	ttLibC/frame/video/theora.h \
 	ttLibC/frame/video/video.h \
+	ttLibC/frame/video/vp6.h \
 	ttLibC/frame/video/vp8.h \
+	ttLibC/frame/video/vp9.h \
+	ttLibC/frame/video/wmv1.h \
+	ttLibC/frame/video/wmv2.h \
 	ttLibC/frame/video/yuv420.h \
 	ttLibC/frame/frame.h \
 	ttLibC/resampler/imageResampler.h \

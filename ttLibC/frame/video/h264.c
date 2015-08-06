@@ -98,7 +98,7 @@ ttLibC_H264 *ttLibC_H264_make(
 		h264->inherit_super.inherit_super.type = videoType_info;
 		break;
 	case H264Type_slice:
-		h264->inherit_super.inherit_super.type = videoType_inter;
+		h264->inherit_super.inherit_super.type = videoType_inner;
 		break;
 	case H264Type_sliceIDR:
 		h264->inherit_super.inherit_super.type = videoType_key;

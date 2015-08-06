@@ -78,7 +78,7 @@ uint32_t ttLibC_Vp8_getHeight(ttLibC_Vp8 *prev_frame, uint8_t *data, size_t data
 
 /**
  * make frame object from vp8 binary data.
- * @param prev_frame ref for prev analyzed vp8 frame.
+ * @param prev_frame    ref for prev analyzed vp8 frame.
  * @param data          vp8 data
  * @param data_size     vp8 data size
  * @param non_copy_mode true:hold pointer. false:copy data.

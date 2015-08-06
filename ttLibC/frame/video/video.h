@@ -23,8 +23,8 @@ extern "C" {
 typedef enum {
 	/** key frame */
 	videoType_key,
-	/** inter frame */
-	videoType_inter,
+	/** inner frame */
+	videoType_inner,
 	/** information frame */
 	videoType_info
 } ttLibC_Video_Type;
