@@ -356,154 +356,154 @@ echo "Result ..."
 
 # about license
 if test x$gpl_flg = "xyes"; then
-	echo "license: GPLv3"
+echo "license: GPLv3"
 	cp gpl-3.0.txt LICENSE
 else
 	if test x$lgpl_flg = "xyes"; then
-		echo "license: LGPLv3"
+echo "license: LGPLv3"
 		cp lgpl-3.0.txt LICENSE
 	else
-		echo "license: The 3 Cause BSD."
+echo "license: The 3 Cause BSD."
 		cp 3causeBSD.txt LICENSE
 	fi
 fi
 # about debug flg
 if test x$debug_flg = "x1"; then
-	echo "debug: on"
+echo "debug:            on"
 else
-	echo "debug: off"
+echo "debug:            off"
 fi
 # about test code.
 if test x$test_flg = "xyes"; then
 	if test x$gpl_flg = "xyes"; then
 		if test x$cute_check = "xyes"; then
-			echo "test: on"
+echo "test:             on"
 		else
-			echo "test: off(cause of no cute library.)"
+echo "test:             off(cause of no cute library.)"
 		fi
 	else
-		echo "test: off(under gpl only.)"
+echo "test:             off(under gpl only.)"
 	fi
 else
-	echo "test: off"
+echo "test:             off"
 fi
 # about library support
 if test x$file_flg = "xyes"; then
-	echo "file feature: on"
+echo "file feature:     on"
 else
-	echo "file feature: off"
+echo "file feature:     off"
 fi
 if test x$opencv_flg = "xyes"; then
 	if test x$opencv_check = "xyes"; then
-		echo "opencv: on"
+echo "opencv:           on"
 	else
-		echo "opencv: off(opencv library is missing.)"
+echo "opencv:           off(opencv library is missing.)"
 	fi
 else
-	echo "opencv: off"
+echo "opencv:           off"
 fi
 if test x$openal_flg = "xyes"; then
 	if test x$gpl_flg = "xyes"; then
 		if test x$openal_check = "xyes"; then
-			echo "openal: on"
+echo "openal:           on"
 		else
-			echo "openal: off(openal library is missing.)"
+echo "openal:           off(openal library is missing.)"
 		fi
 	else
-		echo "openal: off(under gpl only.)"
+echo "openal:           off(under gpl only.)"
 	fi
 else
-	echo "openal: off"
+echo "openal:           off"
 fi
 if test x$mp3lame_flg = "xyes"; then
 	if test x$gpl_flg = "xyes"; then
 		if test x$mp3lame_decode_check = "xyes"; then
-			echo "mp3lame(decoder): on"
+echo "mp3lame(decoder): on"
 		else
-			echo "mp3lame(decoder): off(mp3lame library is missing.)"
+echo "mp3lame(decoder): off(mp3lame library is missing.)"
 		fi
 	else
-		echo "mp3lame(decoder): off(under gpl only.)"
+echo "mp3lame(decoder): off(under gpl only.)"
 	fi
 else
-	echo "mp3lame(decoder): off"
+echo "mp3lame(decoder): off"
 fi
 if test x$mp3lame_flg = "xyes"; then
 	if test x$lgpl_flg = "xyes"; then
 		if test x$mp3lame_encode_check = "xyes"; then
-			echo "mp3lame(encoder): on"
+echo "mp3lame(encoder): on"
 		else
-			echo "mp3lame(encoder): off(mp3lame library is missing.)"
+echo "mp3lame(encoder): off(mp3lame library is missing.)"
 		fi
 	else
-		echo "mp3lame(encoder): off(under lgpl only.)"
+echo "mp3lame(encoder): off(under lgpl only.)"
 	fi
 else
-	echo "mp3lame(encoder): off"
+echo "mp3lame(encoder): off"
 fi
 if test x$faac_flg = "xyes"; then
 	if test x$lgpl_flg = "xyes"; then
 		if test x$faac_encode_check = "xyes"; then
-			echo "faac(encoder): on"
+echo "faac(encoder):    on"
 		else
-			echo "faac(encoder): off(faac library is missing.)"
+echo "faac(encoder):    off(faac library is missing.)"
 		fi
 	else
-		echo "faac(encoder): off(under lgpl only.)"
+echo "faac(encoder):    off(under lgpl only.)"
 	fi
 else
-	echo "faac(encode): off"
+echo "faac(encode):     off"
 fi
 if test x$openh264_flg = "xyes"; then
 	if test x$openh264_check = "xyes"; then
-		echo "openh264: on"
+echo "openh264:         on"
 	else
-		echo "openh264: off(openh264 library is missing.)"
+echo "openh264:         off(openh264 library is missing.)"
 	fi
 else
-	echo "openh264: off"
+echo "openh264:         off"
 fi
 if test x$speexdsp_flg = "xyes"; then
 	if test x$speexdsp_check = "xyes"; then
-		echo "speexdsp: on"
+echo "speexdsp:         on"
 	else
-		echo "speexdsp: off(speexdsp library is missing.)"
+echo "speexdsp:         off(speexdsp library is missing.)"
 	fi
 else
-	echo "speexdsp: off"
+echo "speexdsp:         off"
 fi
 if test x$speex_flg = "xyes"; then
 	if test x$speex_check = "xyes"; then
-		echo "speex: on"
+echo "speex:            on"
 	else
-		echo "speex: off(speex library is missing.)"
+echo "speex:            off(speex library is missing.)"
 	fi
 else
-	echo "speex: off"
+echo "speex:            off"
 fi
 if test x$opus_flg = "xyes"; then
 	if test x$opus_check = "xyes"; then
-		echo "opus: on"
+echo "opus:             on"
 	else
-		echo "opus: off(opus library is missing.)"
+echo "opus:             off(opus library is missing.)"
 	fi
 else
-	echo "opus: off"
+echo "opus:             off"
 fi
 if test x$avcodec_flg = "xyes"; then
 	if test x$lgpl_flg = "xyes"; then
 		if test x$avcodec_check = "xyes"; then
 			if test x$gpl_flg = "xyes"; then
-				echo "avcodec: on"
+echo "avcodec:          on"
 			else
-				echo "avcodec: on(restricted by license. lgpl)"
+echo "avcodec:          on(restricted by license. lgpl)"
 			fi
 		else 
-			echo "avcodec: off(avcodec library is missing.)"
+echo "avcodec:          off(avcodec library is missing.)"
 		fi
 	else
-		echo "avcodec: off(under lgpl or gpl only.)"
+echo "avcodec:          off(under lgpl or gpl only.)"
 	fi
 else
-	echo "avcodec: off"
+echo "avcodec:          off"
 fi
