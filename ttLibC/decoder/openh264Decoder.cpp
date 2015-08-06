@@ -89,7 +89,7 @@ static void Openh264Decoder_decode(
 	uint8_t *decodeBuf[3] = {0};
 	uint32_t res = decoder_->decoder->DecodeFrame2((const unsigned char *)h264->inherit_super.inherit_super.data, h264->inherit_super.inherit_super.buffer_size, decodeBuf, &decoder_->bufInfo);
 	if(res != 0) {
-		ERR_PRINT("failed to decode data.");
+		ERR_PRINT("failed to decode data.:%x", res);
 		return;
 	}
 	if(decoder_->bufInfo.UsrData.sSystemBuffer.iWidth == 0

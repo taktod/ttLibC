@@ -63,12 +63,12 @@ static ttLibC_Openh264Encoder *Openh264Encoder_make(
 	paramExt.fMaxFrameRate  = 5; // fps
 	paramExt.iPicWidth      = width;
 	paramExt.iPicHeight     = height;
-	paramExt.iTargetBitrate = 500000; // in bit / sec
-	paramExt.iMaxBitrate    = 500000;
+	paramExt.iTargetBitrate = 250000; // in bit / sec
+	paramExt.iMaxBitrate    = 250000;
 	paramExt.iMinQp         = 4;
 	paramExt.iMaxQp         = 20;
 
-	paramExt.iRCMode                    = RC_QUALITY_MODE;
+	paramExt.iRCMode                    = RC_BITRATE_MODE;
 	paramExt.iTemporalLayerNum          = 1;
 	paramExt.iSpatialLayerNum           = 1;
 	paramExt.bEnableDenoise             = 1;
