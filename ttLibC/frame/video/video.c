@@ -186,8 +186,10 @@ void ttLibC_Video_close(ttLibC_Video **frame) {
 	case frameType_wmv2:
 		ttLibC_Wmv2_close((ttLibC_Wmv2 **)frame);
 		break;
-	case frameType_h265:
 	case frameType_theora:
+		ttLibC_Theora_close((ttLibC_Theora **)frame);
+		break;
+	case frameType_h265:
 		{
 			ttLibC_Video_close_(frame);
 		}
