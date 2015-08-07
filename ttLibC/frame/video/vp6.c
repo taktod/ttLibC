@@ -90,6 +90,10 @@ uint32_t ttLibC_Vp6_getWidth(ttLibC_Vp6 *prev_frame, uint8_t *data, size_t data_
 	uint32_t frameMode = ttLibC_BitReader_bit(reader, 1);
 	if(frameMode == 1) {
 		ttLibC_BitReader_close(&reader);
+		if(prev_frame == NULL) {
+			ERR_PRINT("ref frame is missing.");
+			return 0;
+		}
 		return prev_frame->inherit_super.width;
 	}
 	ttLibC_BitReader_bit(reader, 6);
@@ -118,6 +122,10 @@ uint32_t ttLibC_Vp6_getHeight(ttLibC_Vp6 *prev_frame, uint8_t *data, size_t data
 	uint32_t frameMode = ttLibC_BitReader_bit(reader, 1);
 	if(frameMode == 1) {
 		ttLibC_BitReader_close(&reader);
+		if(prev_frame == NULL) {
+			ERR_PRINT("ref frame is missing.");
+			return 0;
+		}
 		return prev_frame->inherit_super.height;
 	}
 	ttLibC_BitReader_bit(reader, 6);
@@ -155,7 +163,7 @@ ttLibC_Vp6 *ttLibC_Vp6_getFrame(
 		ERR_PRINT("data size is too small for analyze.");
 		return NULL;
 	}
-	bool isKey = ttLibC_Vp6_isKey(data, data_size);
+	bool is_key = ttLibC_Vp6_isKey(data, data_size);
 	uint32_t width  = ttLibC_Vp6_getWidth(prev_frame, data, data_size);
 	uint32_t height = ttLibC_Vp6_getHeight(prev_frame, data, data_size);
 	if(width == 0 || height == 0) {
@@ -163,7 +171,7 @@ ttLibC_Vp6 *ttLibC_Vp6_getFrame(
 	}
 	return ttLibC_Vp6_make(
 			prev_frame,
-			isKey ? videoType_key : videoType_inner,
+			is_key ? videoType_key : videoType_inner,
 			width,
 			height,
 			data, data_size,

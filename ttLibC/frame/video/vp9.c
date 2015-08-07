@@ -109,6 +109,10 @@ uint32_t ttLibC_Vp9_getWidth(ttLibC_Vp9 *prev_frame, uint8_t *data, size_t data_
 	if(key_frame_flag != 0) {
 		// not key frame, use prev_frame in order to ref width
 		ttLibC_BitReader_close(&reader);
+		if(prev_frame == NULL) {
+			ERR_PRINT("ref frame is missing.");
+			return 0;
+		}
 		return prev_frame->inherit_super.width;
 	}
 	uint32_t startCode1 = ttLibC_BitReader_bit(reader, 8);
@@ -152,6 +156,10 @@ uint32_t ttLibC_Vp9_getHeight(ttLibC_Vp9 *prev_frame, uint8_t *data, size_t data
 	if(key_frame_flag != 0) {
 		// not key frame, use prev_frame in order to ref width
 		ttLibC_BitReader_close(&reader);
+		if(prev_frame == NULL) {
+			ERR_PRINT("ref frame is missing.");
+			return 0;
+		}
 		return prev_frame->inherit_super.width;
 	}
 	uint32_t startCode1 = ttLibC_BitReader_bit(reader, 8);

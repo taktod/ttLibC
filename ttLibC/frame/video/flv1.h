@@ -17,12 +17,19 @@ extern "C" {
 
 #include "video.h"
 
+typedef enum {
+	Flv1Type_intra,
+	Flv1Type_inner,
+	Flv1Type_disposableInner,
+} ttLibC_Flv1_Type;
+
 /**
  * flv1 frame definition
  */
 typedef struct {
 	/** inherit data from ttLibC_Video */
 	ttLibC_Video inherit_super;
+	ttLibC_Flv1_Type type;
 } ttLibC_Frame_Video_Flv1;
 
 typedef ttLibC_Frame_Video_Flv1 ttLibC_Flv1;
@@ -30,7 +37,7 @@ typedef ttLibC_Frame_Video_Flv1 ttLibC_Flv1;
 /**
  * make flv1 frame
  * @param prev_frame    reuse frame
- * @param video_type    video type of flv1
+ * @param type          flv1 frame type
  * @param width         width
  * @param height        height
  * @param data          flv1 data
@@ -41,7 +48,7 @@ typedef ttLibC_Frame_Video_Flv1 ttLibC_Flv1;
  */
 ttLibC_Flv1 *ttLibC_Flv1_make(
 		ttLibC_Flv1 *prev_frame,
-		ttLibC_Video_Type video_type,
+		ttLibC_Flv1_Type type,
 		uint32_t width,
 		uint32_t height,
 		void *data,
