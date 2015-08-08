@@ -133,7 +133,7 @@ ttLibC_Video *ttLibC_Video_make(
 	return video;
 }
 
-/**
+/*
  * close frame(use internal)
  * @param frame
  */

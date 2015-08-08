@@ -13,11 +13,17 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "pcms16.h"
-#include "mp3.h"
 #include "aac.h"
-#include "speex.h"
+#include "adpcmImaWav.h"
+#include "mp3.h"
+#include "nellymoser.h"
 #include "opus.h"
+#include "pcmAlaw.h"
+#include "pcmMulaw.h"
+#include "pcms16.h"
+#include "speex.h"
+#include "vorbis.h"
+
 #include "../../log.h"
 
 /*
@@ -111,6 +117,22 @@ ttLibC_Audio *ttLibC_Audio_make(
 }
 
 /*
+ * close frame(use internal)
+ * @param frame
+ */
+void ttLibC_Audio_close_(ttLibC_Audio **frame) {
+	ttLibC_Audio *target = *frame;
+	if(target == NULL) {
+		return;
+	}
+	if(!target->inherit_super.is_non_copy) {
+		free(target->inherit_super.data);
+	}
+	free(target);
+	*frame = NULL;
+}
+
+/*
  * close frame
  * @param frame
  */
@@ -120,20 +142,35 @@ void ttLibC_Audio_close(ttLibC_Audio **frame) {
 		return;
 	}
 	switch(target->inherit_super.type) {
-	case frameType_pcmS16:
-		ttLibC_PcmS16_close((ttLibC_PcmS16 **)frame);
+	case frameType_aac:
+		ttLibC_Aac_close((ttLibC_Aac **)frame);
+		break;
+	case frameType_adpcm_ima_wav:
+		ttLibC_AdpcmImaWav_close((ttLibC_AdpcmImaWav **)frame);
 		break;
 	case frameType_mp3:
 		ttLibC_Mp3_close((ttLibC_Mp3 **)frame);
 		break;
-	case frameType_aac:
-		ttLibC_Aac_close((ttLibC_Aac **)frame);
+	case frameType_nellymoser:
+		ttLibC_Nellymoser_close((ttLibC_Nellymoser **)frame);
+		break;
+	case frameType_opus:
+		ttLibC_Opus_close((ttLibC_Opus **)frame);
+		break;
+	case frameType_pcm_alaw:
+		ttLibC_PcmAlaw_close((ttLibC_PcmAlaw **)frame);
+		break;
+	case frameType_pcm_mulaw:
+		ttLibC_PcmMulaw_close((ttLibC_PcmMulaw **)frame);
+		break;
+	case frameType_pcmS16:
+		ttLibC_PcmS16_close((ttLibC_PcmS16 **)frame);
 		break;
 	case frameType_speex:
 		ttLibC_Speex_close((ttLibC_Speex **)frame);
 		break;
-	case frameType_opus:
-		ttLibC_Opus_close((ttLibC_Opus **)frame);
+	case frameType_vorbis:
+		ttLibC_Vorbis_close((ttLibC_Vorbis **)frame);
 		break;
 	default:
 		ERR_PRINT("unknown type:%d", target->inherit_super.type);

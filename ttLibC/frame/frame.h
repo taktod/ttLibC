@@ -46,20 +46,28 @@ typedef enum {
 	/** ttLibC_Yuv420 video frame */
 	frameType_yuv420,
 
+//	frameType_flashSv, // flash screen video
+//	frameType_flashSv2,// flash screen video 2
+
 	/** ttLibC_Aac audio frame */
 	frameType_aac,
+	/** ttLibC_AdpcmImaWav */
 	frameType_adpcm_ima_wav,
 	/** ttLibC_Mp3 audio frame */
 	frameType_mp3,
+	/** ttLibC_Nellymoser */
 	frameType_nellymoser,
 	/** ttLibC_Opus audio frame */
 	frameType_opus,
+	/** ttLibC_PcmAlaw */
 	frameType_pcm_alaw,
+	/** ttLibC_PcmMulaw */
 	frameType_pcm_mulaw,
 	/** ttLibC_PcmS16 audio frame */
 	frameType_pcmS16,
 	/** ttLibC_Speex audio frame */
 	frameType_speex,
+	/** ttLibC_Vorbis */
 	frameType_vorbis,
 //	frameType_adpcm_swf,
 //	frameType_ac3,

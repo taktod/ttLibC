@@ -61,6 +61,12 @@ ttLibC_Audio *ttLibC_Audio_make(
 		uint32_t timebase);
 
 /**
+ * close frame(use internal)
+ * @param frame
+ */
+void ttLibC_Audio_close_(ttLibC_Audio **frame);
+
+/**
  * close frame
  * @param frame
  */

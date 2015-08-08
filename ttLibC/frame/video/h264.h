@@ -183,7 +183,13 @@ uint32_t ttLibC_H264_getHeight(ttLibC_H264 *prev_frame, uint8_t *data, size_t da
  * @param data_size  target data size
  * @return h264 frame object.
  */
-ttLibC_H264 *ttLibC_H264_getFrame(ttLibC_H264 *prev_frame, uint8_t *data, size_t data_size);
+ttLibC_H264 *ttLibC_H264_getFrame(
+		ttLibC_H264 *prev_frame,
+		uint8_t *data,
+		size_t data_size,
+		bool non_copy_mode,
+		uint64_t pts,
+		uint32_t timebase);
 
 /**
  * close frame

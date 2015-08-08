@@ -205,7 +205,7 @@ ttLibC_Theora *ttLibC_Theora_getFrame(
 		return NULL;
 	}
 	ttLibC_Theora_Type type = TheoraType_innerFrame;
-	if(first_byte & 0x40 != 0) {
+	if((first_byte & 0x40) != 0) {
 		type = TheoraType_intraFrame;
 	}
 	if(width == 0 || height == 0) {

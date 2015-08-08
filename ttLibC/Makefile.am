@@ -13,11 +13,16 @@ libttLibC_a_SOURCES= \
 	encoder/opusEncoder.c \
 	encoder/speexEncoder.c \
 	frame/audio/aac.c \
+	frame/audio/adpcmImaWav.c \
 	frame/audio/audio.c \
 	frame/audio/mp3.c \
+	frame/audio/nellymoser.c \
 	frame/audio/opus.c \
+	frame/audio/pcmAlaw.c \
+	frame/audio/pcmMulaw.c \
 	frame/audio/pcms16.c \
 	frame/audio/speex.c \
+	frame/audio/vorbis.c \
 	frame/video/bgr.c \
 	frame/video/flv1.c \
 	frame/video/h264.c \
