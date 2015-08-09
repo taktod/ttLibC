@@ -24,6 +24,7 @@ nobase_include_HEADERS= \
 	ttLibC/frame/video/wmv2.h \
 	ttLibC/frame/video/yuv420.h \
 	ttLibC/frame/frame.h \
+	ttLibC/resampler/audioResampler.h \
 	ttLibC/resampler/imageResampler.h \
 	ttLibC/util/beepUtil.h \
 	ttLibC/util/bitUtil.h \

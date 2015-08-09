@@ -37,6 +37,7 @@ libttLibC_a_SOURCES= \
 	frame/video/wmv2.c \
 	frame/video/yuv420.c \
 	frame/frame.c \
+	resampler/audioResampler.c \
 	resampler/imageResampler.c \
 	resampler/speexdspResampler.c \
 	util/beepUtil.c \

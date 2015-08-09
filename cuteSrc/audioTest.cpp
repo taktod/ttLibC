@@ -45,7 +45,29 @@
 #	include <opus/opus.h>
 #endif
 
+#include <ttLibC/resampler/audioResampler.h>
+
 #include <ttLibC/frame/audio/mp3.h>
+
+static void audioResamplerTest() {
+	LOG_PRINT("audioResamplerTest");
+	int16_t data[10] = {32767, 30000, 10000, 13000, 0, 0, -10000, -13000, -32767, -30000};
+	ttLibC_PcmS16 *pcms16 = ttLibC_PcmS16_make(NULL, PcmS16Type_littleEndian, 5, 5, 2, &data, 10, true, 0, 1000);
+/*	ttLibC_PcmF32 *pcmf32 = (ttLibC_PcmF32 *)ttLibC_AudioResampler_convertFormat(NULL, frameType_pcmF32, PcmF32Type_interleave, 1, (ttLibC_Audio *)pcms16);
+	float *f = (float *)pcmf32->inherit_super.inherit_super.data;
+	for(int i = 0;i < 5;i ++) {
+		LOG_PRINT("val:%f", f[i]);
+	}
+	ttLibC_PcmF32_close(&pcmf32);*/
+
+	ttLibC_PcmS16 *pcms16_out = (ttLibC_PcmS16 *)ttLibC_AudioResampler_convertFormat(NULL, frameType_pcmS16, PcmS16Type_littleEndian, 1, (ttLibC_Audio *)pcms16);
+	int16_t *dat = (int16_t *)pcms16_out->inherit_super.inherit_super.data;
+	for(int i = 0;i < 5;i ++) {
+		LOG_PRINT("val:%d", dat[i]);
+	}
+	ttLibC_PcmS16_close(&pcms16_out);
+	ttLibC_PcmS16_close(&pcms16);
+}
 
 static void opusTest() {
 	LOG_PRINT("opusTest");
@@ -470,6 +492,7 @@ static void mp3lameTest() {
  */
 cute::suite audioTests(cute::suite s) {
 	s.clear();
+	s.push_back(CUTE(audioResamplerTest));
 	s.push_back(CUTE(opusTest));
 	s.push_back(CUTE(mp3DecodeTest));
 	s.push_back(CUTE(speexTest));
