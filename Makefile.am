@@ -1,10 +1,16 @@
 nobase_include_HEADERS= \
 	ttLibC/frame/audio/aac.h \
+	ttLibC/frame/audio/adpcmImaWav.h \
 	ttLibC/frame/audio/audio.h \
 	ttLibC/frame/audio/mp3.h \
+	ttLibC/frame/audio/nellymoser.h \
 	ttLibC/frame/audio/opus.h \
+	ttLibC/frame/audio/pcmAlaw.h \
+	ttLibC/frame/audio/pcmf32.h \
+	ttLibC/frame/audio/pcmMulaw.h \
 	ttLibC/frame/audio/pcms16.h \
 	ttLibC/frame/audio/speex.h \
+	ttLibC/frame/audio/vorbis.h \
 	ttLibC/frame/video/bgr.h \
 	ttLibC/frame/video/flv1.h \
 	ttLibC/frame/video/h264.h \
