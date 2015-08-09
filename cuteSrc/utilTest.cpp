@@ -19,6 +19,7 @@
 #include <ttLibC/frame/video/bgr.h>
 #include <ttLibC/frame/audio/pcms16.h>
 #include <ttLibC/util/beepUtil.h>
+#include <ttLibC/util/ioUtil.h>
 
 #ifdef __ENABLE_OPENCV__
 #	include <ttLibC/util/opencvUtil.h>
@@ -42,6 +43,43 @@
 #include <sys/param.h>
 #include <sys/uio.h>
 #include <unistd.h>
+
+static void ioTest() {
+	LOG_PRINT("ioTest");
+	uint64_t num = 0x12345678;
+	uint64_t result = num;
+	ttLibC_HexUtil_dump(&num, 8, true);
+	result = le_uint16_t(num);
+	ttLibC_HexUtil_dump(&result, 8, true);
+	result = be_uint16_t(num);
+	ttLibC_HexUtil_dump(&result, 8, true);
+	result = le_uint24_t(num);
+	ttLibC_HexUtil_dump(&result, 8, true);
+	result = be_uint24_t(num);
+	ttLibC_HexUtil_dump(&result, 8, true);
+	result = le_uint32_t(num);
+	ttLibC_HexUtil_dump(&result, 8, true);
+	result = be_uint32_t(num);
+	ttLibC_HexUtil_dump(&result, 8, true);
+	result = le_uint64_t(num);
+	ttLibC_HexUtil_dump(&result, 8, true);
+	result = be_uint64_t(num);
+	ttLibC_HexUtil_dump(&result, 8, true);
+
+	num = 0x81828384;
+	int64_t iresult = le_int16_t(num);
+	LOG_PRINT("val:%lld", iresult);
+	iresult = be_int16_t(num);
+	LOG_PRINT("val:%lld", iresult);
+	iresult = le_int32_t(num);
+	LOG_PRINT("val:%lld", iresult);
+	iresult = be_int32_t(num);
+	LOG_PRINT("val:%lld", iresult);
+	iresult = le_int64_t(num);
+	LOG_PRINT("val:%lld", iresult);
+	iresult = be_int64_t(num);
+	LOG_PRINT("val:%lld", iresult);
+}
 
 #ifdef __ENABLE_FILE__
 void httpClientCallback(void *ptr, ttLibC_HttpClient *client, void *data, size_t data_size) {
@@ -137,6 +175,7 @@ static void openalUtilTest() {
  */
 cute::suite utilTests(cute::suite s) {
 	s.clear();
+	s.push_back(CUTE(ioTest));
 	s.push_back(CUTE(httpClientTest));
 	s.push_back(CUTE(hexUtilTest));
 	s.push_back(CUTE(opencvUtilTest));

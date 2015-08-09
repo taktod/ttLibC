@@ -19,6 +19,7 @@ libttLibC_a_SOURCES= \
 	frame/audio/nellymoser.c \
 	frame/audio/opus.c \
 	frame/audio/pcmAlaw.c \
+	frame/audio/pcmf32.c \
 	frame/audio/pcmMulaw.c \
 	frame/audio/pcms16.c \
 	frame/audio/speex.c \
@@ -42,6 +43,7 @@ libttLibC_a_SOURCES= \
 	util/bitUtil.c \
 	util/hexUtil.c \
 	util/httpUtil.c \
+	util/ioUtil.c \
 	util/openalUtil.c \
 	util/opencvUtil.c \
 	ttLibC.c

@@ -19,6 +19,7 @@
 #include "nellymoser.h"
 #include "opus.h"
 #include "pcmAlaw.h"
+#include "pcmf32.h"
 #include "pcmMulaw.h"
 #include "pcms16.h"
 #include "speex.h"
@@ -57,10 +58,16 @@ ttLibC_Audio *ttLibC_Audio_make(
 	size_t data_size_ = data_size;
 	switch(frame_type) {
 	case frameType_aac:
+	case frameType_adpcm_ima_wav:
 	case frameType_mp3:
+	case frameType_nellymoser:
 	case frameType_opus:
+	case frameType_pcm_alaw:
+	case frameType_pcmF32:
+	case frameType_pcm_mulaw:
 	case frameType_pcmS16:
 	case frameType_speex:
+	case frameType_vorbis:
 		break;
 	default:
 		ERR_PRINT("unknown audio frame type.%d", frame_type);
@@ -159,6 +166,9 @@ void ttLibC_Audio_close(ttLibC_Audio **frame) {
 		break;
 	case frameType_pcm_alaw:
 		ttLibC_PcmAlaw_close((ttLibC_PcmAlaw **)frame);
+		break;
+	case frameType_pcmF32:
+		ttLibC_PcmF32_close((ttLibC_PcmF32 **)frame);
 		break;
 	case frameType_pcm_mulaw:
 		ttLibC_PcmMulaw_close((ttLibC_PcmMulaw **)frame);

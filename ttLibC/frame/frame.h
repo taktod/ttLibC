@@ -61,6 +61,8 @@ typedef enum {
 	frameType_opus,
 	/** ttLibC_PcmAlaw */
 	frameType_pcm_alaw,
+	/** ttLibC_PcmF32 */
+	frameType_pcmF32,
 	/** ttLibC_PcmMulaw */
 	frameType_pcm_mulaw,
 	/** ttLibC_PcmS16 audio frame */

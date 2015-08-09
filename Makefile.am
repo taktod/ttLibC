@@ -22,6 +22,7 @@ nobase_include_HEADERS= \
 	ttLibC/util/beepUtil.h \
 	ttLibC/util/bitUtil.h \
 	ttLibC/util/hexUtil.h \
+	ttLibC/util/ioUtil.h \
 	ttLibC/log.h \
 	ttLibC/ttLibC.h
 

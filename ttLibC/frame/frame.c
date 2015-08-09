@@ -44,6 +44,7 @@ void ttLibC_Frame_close(ttLibC_Frame **frame) {
 	case frameType_nellymoser:
 	case frameType_opus:
 	case frameType_pcm_alaw:
+	case frameType_pcmF32:
 	case frameType_pcm_mulaw:
 	case frameType_pcmS16:
 	case frameType_speex:
