@@ -300,6 +300,8 @@ ttLibC_Audio *ttLibC_AudioResampler_convertFormat(
 					target_frame->inherit_super.data = NULL;
 				}
 			}
+			// force to put non copy.
+			target_frame->inherit_super.is_non_copy = true;
 		}
 	}
 	// if data is null, we need to allocate.
