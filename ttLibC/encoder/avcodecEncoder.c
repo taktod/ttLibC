@@ -507,8 +507,8 @@ static void AvcodecEncoder_encode_PcmS16(
 		if(!AvcodecEncoder_encode_AudioDetail(
 				encoder,
 				l_data,
-				r_data,
 				l_data_size,
+				r_data,
 				r_data_size,
 				encoder->frame_size,
 				callback,
