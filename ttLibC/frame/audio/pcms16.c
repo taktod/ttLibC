@@ -23,6 +23,10 @@
  * @param channel_num   channel number of data. 1:monoral 2:stereo
  * @param data          pcm data
  * @param data_size     pcm data size
+ * @param l_data        pointer for l_data
+ * @param l_stride      stride(data_size) for l_data
+ * @param r_data        pointer for r_data
+ * @param r_stride      stride(data_size) for r_data
  * @param non_copy_mode true:hold the data pointer. false:data will copy.
  * @param pts           pts for pcm data.
  * @param timebase      timebase number for pts.
@@ -36,17 +40,31 @@ ttLibC_PcmS16 *ttLibC_PcmS16_make(
 		uint32_t channel_num,
 		void *data,
 		size_t data_size,
+		void *l_data,
+		uint32_t l_stride,
+		void *r_data,
+		uint32_t r_stride,
 		bool non_copy_mode,
 		uint64_t pts,
 		uint32_t timebase) {
 	ttLibC_PcmS16 *pcms16 = prev_frame;
 	size_t data_size_ = data_size;
 	size_t buffer_size_ = data_size;
+	uint32_t l_step = 2;
+	uint32_t r_step = 0;
 	switch(type) {
 	case PcmS16Type_littleEndian:
 	case PcmS16Type_bigEndian:
+		if(channel_num == 2) {
+			l_step = 4;
+			r_step = 4;
+		}
+		break;
 	case PcmS16Type_bigEndian_planar:
 	case PcmS16Type_littleEndian_planar:
+		if(channel_num == 2) {
+			r_step = 2;
+		}
 		break;
 	default:
 		ERR_PRINT("unknown pcmS16 type.%d", type);
@@ -72,6 +90,12 @@ ttLibC_PcmS16 *ttLibC_PcmS16_make(
 		}
 	}
 	pcms16->type                                    = type;
+	pcms16->l_data                                  = l_data;
+	pcms16->l_stride                                = l_stride;
+	pcms16->l_step                                  = l_step;
+	pcms16->r_data                                  = r_data;
+	pcms16->r_stride                                = r_stride;
+	pcms16->r_step                                  = r_step;
 	pcms16->inherit_super.channel_num               = channel_num;
 	pcms16->inherit_super.sample_num                = sample_num;
 	pcms16->inherit_super.sample_rate               = sample_rate;

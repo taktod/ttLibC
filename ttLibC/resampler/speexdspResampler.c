@@ -117,10 +117,10 @@ ttLibC_PcmS16 *ttLibC_SpeexdspResampler_resample(ttLibC_SpeexdspResampler *resam
 		}
 		return NULL;
 	case PcmS16Type_littleEndian:
-		res = speex_resampler_process_interleaved_int(resampler_->resampler, (const int16_t *)src_pcms16->inherit_super.inherit_super.data, &in_sample_num, (int16_t *)data, &out_sample_num);
+		res = speex_resampler_process_interleaved_int(resampler_->resampler, (const int16_t *)src_pcms16->l_data, &in_sample_num, (int16_t *)data, &out_sample_num);
 		break;
 	case PcmS16Type_littleEndian_planar:
-		res = speex_resampler_process_int(resampler_->resampler, resampler_->inherit_super.channel_num, (const int16_t *)src_pcms16->inherit_super.inherit_super.data, &in_sample_num, (int16_t *)data, &out_sample_num);
+		res = speex_resampler_process_int(resampler_->resampler, resampler_->inherit_super.channel_num, (const int16_t *)src_pcms16->l_data, &in_sample_num, (int16_t *)data, &out_sample_num);
 		break;
 	}
 	if(res != 0) {
@@ -131,7 +131,41 @@ ttLibC_PcmS16 *ttLibC_SpeexdspResampler_resample(ttLibC_SpeexdspResampler *resam
 		return NULL;
 	}
 	uint64_t pts = src_pcms16->inherit_super.inherit_super.pts * resampler_->inherit_super.output_sample_rate / resampler_->inherit_super.input_sample_rate;
-	pcms16 = ttLibC_PcmS16_make(pcms16, src_pcms16->type, resampler_->inherit_super.output_sample_rate, out_sample_num, resampler_->inherit_super.channel_num, data, data_size, true, pts, resampler_->inherit_super.output_sample_rate);
+	uint8_t *l_data = NULL;
+	uint32_t l_stride = 0;
+	uint8_t *r_data = NULL;
+	uint32_t r_stride = 0;
+	switch(src_pcms16->type) {
+	case PcmS16Type_bigEndian:
+	case PcmS16Type_littleEndian:
+		l_data = data;
+		l_stride = out_sample_num * 2 * resampler_->inherit_super.channel_num;
+		break;
+	case PcmS16Type_bigEndian_planar:
+	case PcmS16Type_littleEndian_planar:
+		l_data = data;
+		l_stride = out_sample_num * 2;
+		if(resampler_->inherit_super.channel_num == 2) {
+			r_data = data + l_stride;
+			r_stride = l_stride;
+		}
+		break;
+	}
+	pcms16 = ttLibC_PcmS16_make(
+			pcms16,
+			src_pcms16->type,
+			resampler_->inherit_super.output_sample_rate,
+			out_sample_num,
+			resampler_->inherit_super.channel_num,
+			data,
+			data_size,
+			l_data,
+			l_stride,
+			r_data,
+			r_stride,
+			true,
+			pts,
+			resampler_->inherit_super.output_sample_rate);
 	if(pcms16 == NULL) {
 		if(is_alloc_flg) {
 			free(data);

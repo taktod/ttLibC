@@ -155,65 +155,26 @@ void ttLibC_Mp3lameEncoder_encode(ttLibC_Mp3lameEncoder *encoder, ttLibC_PcmS16 
 		return;
 	}
 	ttLibC_Mp3lameEncoder_ *encoder_ = (ttLibC_Mp3lameEncoder_ *)encoder;
-	switch(encoder_->inherit_super.channel_num) {
-	default:
-		ERR_PRINT("encoder channel_num is invalid:%d", encoder_->inherit_super.channel_num);
+	switch(pcm->type) {
+	case PcmS16Type_bigEndian:
+	case PcmS16Type_bigEndian_planar:
+		ERR_PRINT("bigendian is not support to convert.");
 		return;
-	case 1:
-		if(pcm->inherit_super.channel_num != 1) {
-			ERR_PRINT("encoder channel num is different from pcm channel num.");
-			return;
-		}
-		switch(pcm->type) {
-		case PcmS16Type_bigEndian:
-		case PcmS16Type_bigEndian_planar:
-			ERR_PRINT("bigendian is not support to convert.");
-			return;
-		case PcmS16Type_littleEndian:
-			{
-				uint32_t size = lame_encode_buffer_interleaved(encoder_->gflags, (short*)pcm->inherit_super.inherit_super.data, pcm->inherit_super.sample_num, encoder_->data + encoder_->data_start_pos, encoder_->data_size - encoder_->data_start_pos);
-				checkEncodedData(encoder_, size + encoder_->data_start_pos, callback, ptr);
-			}
-			break;
-		case PcmS16Type_littleEndian_planar:
-			{
-				uint32_t size = lame_encode_buffer(encoder_->gflags, (const short*)pcm->inherit_super.inherit_super.data, NULL, pcm->inherit_super.sample_num, encoder_->data + encoder_->data_start_pos, encoder_->data_size - encoder_->data_start_pos);
-				checkEncodedData(encoder_, size + encoder_->data_start_pos, callback, ptr);
-			}
-			break;
-		default:
-			ERR_PRINT("unknown pcms16_type:%d", pcm->type);
-			return;
+	case PcmS16Type_littleEndian:
+		{
+			uint32_t size = lame_encode_buffer_interleaved(encoder_->gflags, (short*)pcm->l_data, pcm->inherit_super.sample_num, encoder_->data + encoder_->data_start_pos, encoder_->data_size - encoder_->data_start_pos);
+			checkEncodedData(encoder_, size + encoder_->data_start_pos, callback, ptr);
 		}
 		break;
-	case 2:
-		if(pcm->inherit_super.channel_num != 2) {
-			ERR_PRINT("encoder channel num is different from pcm channel num.");
-			return;
-		}
-		switch(pcm->type) {
-		case PcmS16Type_bigEndian:
-		case PcmS16Type_bigEndian_planar:
-			ERR_PRINT("bigendian is not support to convert.");
-			return;
-		case PcmS16Type_littleEndian:
-			{
-				uint32_t size = lame_encode_buffer_interleaved(encoder_->gflags, (short*)pcm->inherit_super.inherit_super.data, pcm->inherit_super.sample_num, encoder_->data + encoder_->data_start_pos, encoder_->data_size - encoder_->data_start_pos);
-				checkEncodedData(encoder_, size + encoder_->data_start_pos, callback, ptr);
-			}
-			break;
-		case PcmS16Type_littleEndian_planar:
-			{
-				short *right_data = (short *)pcm->inherit_super.inherit_super.data;
-				uint32_t size = lame_encode_buffer(encoder_->gflags, (const short*)pcm->inherit_super.inherit_super.data, (const short *)right_data + pcm->inherit_super.sample_num, pcm->inherit_super.sample_num, encoder_->data + encoder_->data_start_pos, encoder_->data_size - encoder_->data_start_pos);
-				checkEncodedData(encoder_, size + encoder_->data_start_pos, callback, ptr);
-			}
-			break;
-		default:
-			ERR_PRINT("unknown pcms16_type:%d", pcm->type);
-			return;
+	case PcmS16Type_littleEndian_planar:
+		{
+			uint32_t size = lame_encode_buffer(encoder_->gflags, (const short*)pcm->l_data, (const short*)pcm->r_data, pcm->inherit_super.sample_num, encoder_->data + encoder_->data_start_pos, encoder_->data_size - encoder_->data_start_pos);
+			checkEncodedData(encoder_, size + encoder_->data_start_pos, callback, ptr);
 		}
 		break;
+	default:
+		ERR_PRINT("unknown pcms16_type:%d", pcm->type);
+		return;
 	}
 }
 

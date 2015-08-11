@@ -52,7 +52,21 @@
 static void audioResamplerTest() {
 	LOG_PRINT("audioResamplerTest");
 	int16_t data[10] = {32767, 30000, 10000, 13000, 0, 0, -10000, -13000, -32767, -30000};
-	ttLibC_PcmS16 *pcms16 = ttLibC_PcmS16_make(NULL, PcmS16Type_littleEndian, 5, 5, 2, &data, 10, true, 0, 1000);
+	ttLibC_PcmS16 *pcms16 = ttLibC_PcmS16_make(
+			NULL,
+			PcmS16Type_littleEndian,
+			5,
+			5,
+			2,
+			&data,
+			10,
+			&data,
+			10,
+			NULL,
+			0,
+			true,
+			0,
+			1000);
 /*	ttLibC_PcmF32 *pcmf32 = (ttLibC_PcmF32 *)ttLibC_AudioResampler_convertFormat(NULL, frameType_pcmF32, PcmF32Type_interleave, 1, (ttLibC_Audio *)pcms16);
 	float *f = (float *)pcmf32->inherit_super.inherit_super.data;
 	for(int i = 0;i < 5;i ++) {
@@ -118,7 +132,21 @@ static void opusTest() {
 		if(size == 0) {
 			break;
 		}
-		p = ttLibC_PcmS16_make(dpcm, PcmS16Type_littleEndian, sample_rate, 480, channel_num, data, size * channel_num * sizeof(int16_t), true, 0, 1000);
+		p = ttLibC_PcmS16_make(
+				dpcm,
+				PcmS16Type_littleEndian,
+				sample_rate,
+				480,
+				channel_num,
+				data,
+				size * channel_num * sizeof(int16_t),
+				data,
+				size * channel_num * sizeof(int16_t),
+				NULL,
+				0,
+				true,
+				0,
+				1000);
 		if(p == NULL) {
 			break;
 		}
@@ -160,8 +188,20 @@ void mp3EncodeProc(void *ptr, ttLibC_Mp3 *mp3) {
 		buf ++;
 	}
 	ttLibC_PcmS16 *p = ttLibC_PcmS16_make(
-			decoded_pcm, PcmS16Type_littleEndian,
-			44100, 1152, 2, data, num * 4, true, mp3->inherit_super.inherit_super.pts, mp3->inherit_super.inherit_super.timebase);
+			decoded_pcm,
+			PcmS16Type_littleEndian,
+			44100,
+			1152,
+			2,
+			data,
+			num * 4,
+			data,
+			1152 * 2 * 2,
+			NULL,
+			0,
+			true,
+			mp3->inherit_super.inherit_super.pts,
+			mp3->inherit_super.inherit_super.timebase);
 	if(p == NULL) {
 		ERR_PRINT("failed to make pcm data.");
 		return;
@@ -361,7 +401,21 @@ static void speexdspResampleTest() {
 		else {
 			LOG_PRINT("in_size:%d, out_size:%d", in_size, out_size);
 		}
-		ttLibC_PcmS16 *resampled_pcm = ttLibC_PcmS16_make(NULL, PcmS16Type_littleEndian, output_sample_rate, out_size, channel, resampled_data, out_size * sizeof(int16_t) * 2, true, 0, 1000);
+		ttLibC_PcmS16 *resampled_pcm = ttLibC_PcmS16_make(
+				NULL,
+				PcmS16Type_littleEndian,
+				output_sample_rate,
+				out_size,
+				channel,
+				resampled_data,
+				out_size * sizeof(int16_t) * 2,
+				resampled_data,
+				out_size * sizeof(int16_t) * 2,
+				NULL,
+				0,
+				true,
+				0,
+				1000);
 		LOG_PRINT("sample_num:%d rate:%d", resampled_pcm->inherit_super.sample_num, resampled_pcm->inherit_super.sample_rate);
 		LOG_PRINT("sample_num:%d rate:%d", pcm->inherit_super.sample_num, pcm->inherit_super.sample_rate);
 		ttLibC_AlDevice_queue(device, resampled_pcm);

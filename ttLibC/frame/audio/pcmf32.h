@@ -31,6 +31,18 @@ typedef struct {
 	ttLibC_Audio inherit_super;
 	/** pcmf32 type */
 	ttLibC_PcmF32_Type type;
+	/** ref pointer for left channel */
+	uint8_t *l_data;
+	/** stride size(data_size) of left channel. */
+	uint32_t l_stride;
+	/** step to next left sample. */
+	uint32_t l_step;
+	/** ref pointer for right channel */
+	uint8_t *r_data;
+	/** stride size(data_size) of right channel. */
+	uint32_t r_stride;
+	/** step to next right sample. */
+	uint32_t r_step;
 } ttLibC_Frame_Audio_PcmF32;
 
 typedef ttLibC_Frame_Audio_PcmF32 ttLibC_PcmF32;
@@ -44,6 +56,10 @@ typedef ttLibC_Frame_Audio_PcmF32 ttLibC_PcmF32;
  * @param channel_num   channel number of data. 1:monoral 2:stereo
  * @param data          pcm data
  * @param data_size     pcm data size
+ * @param l_data        pointer for l_data
+ * @param l_stride      stride(data_size) for l_data
+ * @param r_data        pointer for r_data
+ * @param r_stride      stride(data_size) for r_data
  * @param non_copy_mode true:hold the data pointer. false:data will copy.
  * @param pts           pts for pcm data.
  * @param timebase      timebase number for pts.
@@ -57,6 +73,10 @@ ttLibC_PcmF32 *ttLibC_PcmF32_make(
 		uint32_t channel_num,
 		void *data,
 		size_t data_size,
+		void *l_data,
+		uint32_t l_stride,
+		void *r_data,
+		uint32_t r_stride,
 		bool non_copy_mode,
 		uint64_t pts,
 		uint32_t timebase);

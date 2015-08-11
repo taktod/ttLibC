@@ -143,8 +143,8 @@ void ttLibC_OpusEncoder_encode(
 	case PcmS16Type_littleEndian:
 		break;
 	}
-	size_t left_size = pcm->inherit_super.inherit_super.buffer_size;
-	uint8_t *data = pcm->inherit_super.inherit_super.data;
+	size_t left_size = pcm->l_stride;
+	uint8_t *data = pcm->l_data;
 	if(encoder_->pcm_buffer_next_pos != 0) {
 		if(left_size < encoder_->pcm_buffer_size - encoder_->pcm_buffer_next_pos) {
 			// need more buffer.

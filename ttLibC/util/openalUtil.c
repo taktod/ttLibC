@@ -85,6 +85,7 @@ bool ttLibC_AlDevice_queue(ttLibC_AlDevice *device, ttLibC_PcmS16 *pcms16) {
 	if(pcms16 == NULL) {
 		return false;
 	}
+	// overflowしたらデータqueueに追加できなくする予定だったのにそうなってない。
 	switch(pcms16->type) {
 	case PcmS16Type_bigEndian:
 	case PcmS16Type_bigEndian_planar:
@@ -118,7 +119,7 @@ bool ttLibC_AlDevice_queue(ttLibC_AlDevice *device, ttLibC_PcmS16 *pcms16) {
 	int num;
 	ALuint buffer = 0;
 	alGetSourcei(device_->source, AL_BUFFERS_PROCESSED, &num);
-	if(num != -1) {
+	if(num != -1 && num != 0) {
 		// reuse played buffer.
 		alSourceUnqueueBuffers(device_->source, 1, &buffer);
 	}
@@ -139,7 +140,7 @@ bool ttLibC_AlDevice_queue(ttLibC_AlDevice *device, ttLibC_PcmS16 *pcms16) {
 			}
 		}
 	}
-	alBufferData(buffer, format, pcms16->inherit_super.inherit_super.data, pcms16->inherit_super.inherit_super.buffer_size, pcms16->inherit_super.sample_rate);
+	alBufferData(buffer, format, pcms16->l_data, pcms16->l_stride, pcms16->inherit_super.sample_rate);
 	alSourceQueueBuffers(device_->source, 1, &buffer);
 	return true;
 }

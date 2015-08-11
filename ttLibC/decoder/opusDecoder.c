@@ -87,7 +87,20 @@ void ttLibC_OpusDecoder_decode(
 		return;
 	}
 	// TODO put the pts and timebase from opus, however, this value should correspond with sample_rate for decoded data?
-	ttLibC_PcmS16 *pcm = ttLibC_PcmS16_make(decoder_->pcms16, PcmS16Type_littleEndian, decoder_->inherit_super.sample_rate, size, decoder_->inherit_super.channel_num, decoder_->pcm_buffer, size * sizeof(int16_t) * decoder_->inherit_super.channel_num, true, opus->inherit_super.inherit_super.pts, opus->inherit_super.inherit_super.timebase);
+	ttLibC_PcmS16 *pcm = ttLibC_PcmS16_make(
+			decoder_->pcms16,
+			PcmS16Type_littleEndian,
+			decoder_->inherit_super.sample_rate,
+			size,
+			decoder_->inherit_super.channel_num,
+			decoder_->pcm_buffer,
+			size * sizeof(int16_t) * decoder_->inherit_super.channel_num,
+			decoder_->pcm_buffer,
+			size * sizeof(int16_t) * decoder_->inherit_super.channel_num,
+			NULL,
+			0,
+			true, opus->inherit_super.inherit_super.pts,
+			opus->inherit_super.inherit_super.timebase);
 	if(pcm == NULL) {
 		return;
 	}

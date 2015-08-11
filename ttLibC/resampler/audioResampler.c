@@ -36,7 +36,7 @@ static void AudioResampler_convertFormatSrcPcmS16(
 	case PcmS16Type_bigEndian:
 	default:
 	case PcmS16Type_littleEndian:
-		src_l_data = src_frame->inherit_super.inherit_super.data;
+		src_l_data = src_frame->l_data;
 		if(src_frame->inherit_super.channel_num == 2) {
 			src_r_data = src_l_data + 1;
 			src_step = 2;
@@ -47,9 +47,9 @@ static void AudioResampler_convertFormatSrcPcmS16(
 		break;
 	case PcmS16Type_bigEndian_planar:
 	case PcmS16Type_littleEndian_planar:
-		src_l_data = src_frame->inherit_super.inherit_super.data;
+		src_l_data = src_frame->l_data;
 		if(src_frame->inherit_super.channel_num == 2) {
-			src_r_data = src_l_data + src_frame->inherit_super.sample_num;
+			src_r_data = src_frame->r_data;
 		}
 		src_step = 1;
 		break;
@@ -152,7 +152,7 @@ static void AudioResampler_convertFormatSrcPcmF32(
 	switch(src_frame->type) {
 	default:
 	case PcmF32Type_interleave:
-		src_l_data = src_frame->inherit_super.inherit_super.data;
+		src_l_data = src_frame->l_data;
 		if(src_frame->inherit_super.channel_num == 2) {
 			src_r_data = src_l_data + 1;
 			src_step = 2;
@@ -162,9 +162,9 @@ static void AudioResampler_convertFormatSrcPcmF32(
 		}
 		break;
 	case PcmF32Type_planar:
-		src_l_data = src_frame->inherit_super.inherit_super.data;
+		src_l_data = src_frame->l_data;
 		if(src_frame->inherit_super.channel_num == 2) {
-			src_r_data = src_l_data + src_frame->inherit_super.sample_num;
+			src_r_data = src_frame->r_data;
 		}
 		src_step = 1;
 		break;
@@ -377,7 +377,26 @@ ttLibC_Audio *ttLibC_AudioResampler_convertFormat(
 		break;
 	case frameType_pcmS16:
 		{
-			ttLibC_PcmS16 *pcms16 = ttLibC_PcmS16_make(
+			ttLibC_PcmS16 *pcms16 = NULL;
+			uint32_t l_stride = 0;
+			uint32_t r_stride = 0;
+			switch(type) {
+			case PcmS16Type_bigEndian:
+			case PcmS16Type_littleEndian:
+//				l_data = data;
+				l_stride = sample_num * 2 * channel_num;
+				break;
+			case PcmS16Type_bigEndian_planar:
+			case PcmS16Type_littleEndian_planar:
+//				l_data = data;
+				l_stride = sample_num * 2;
+				if(channel_num == 2) {
+//					r_data = data + l_stride;
+					r_stride = l_stride;
+				}
+				break;
+			}
+			pcms16 = ttLibC_PcmS16_make(
 					(ttLibC_PcmS16 *)target_frame,
 					type,
 					sample_rate,
@@ -385,6 +404,10 @@ ttLibC_Audio *ttLibC_AudioResampler_convertFormat(
 					channel_num,
 					data,
 					data_size,
+					l_data,
+					l_stride,
+					r_data,
+					r_stride,
 					true,
 					src_frame->inherit_super.pts,
 					src_frame->inherit_super.timebase);
@@ -396,7 +419,21 @@ ttLibC_Audio *ttLibC_AudioResampler_convertFormat(
 		}
 	case frameType_pcmF32:
 		{
-			ttLibC_PcmF32 *pcmf32 = ttLibC_PcmF32_make(
+			ttLibC_PcmF32 *pcmf32 = NULL;
+			uint32_t l_stride = 0;
+			uint32_t r_stride = 0;
+			switch(type) {
+			case PcmF32Type_interleave:
+				l_stride = sample_num * 4 * channel_num;
+				break;
+			case PcmF32Type_planar:
+				l_stride = sample_num * 4;
+				if(channel_num == 2) {
+					r_stride = l_stride;
+				}
+				break;
+			}
+			pcmf32 = ttLibC_PcmF32_make(
 					(ttLibC_PcmF32 *)target_frame,
 					type,
 					sample_rate,
@@ -404,6 +441,10 @@ ttLibC_Audio *ttLibC_AudioResampler_convertFormat(
 					channel_num,
 					data,
 					data_size,
+					l_data,
+					l_stride,
+					r_data,
+					r_stride,
 					true,
 					src_frame->inherit_super.pts,
 					src_frame->inherit_super.timebase);

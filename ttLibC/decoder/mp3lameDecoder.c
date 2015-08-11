@@ -156,7 +156,21 @@ void ttLibC_Mp3lameDecoder_decode(
 		}
 	}
 	// make pcms16 object.
-	ttLibC_PcmS16 *p = ttLibC_PcmS16_make(decoder_->pcms16, PcmS16Type_littleEndian, mp3->inherit_super.sample_rate, num, mp3->inherit_super.channel_num, decoder_->pcm_buffer, (decoder_->buffer_size >> 1), true, mp3->inherit_super.inherit_super.pts, mp3->inherit_super.inherit_super.timebase);
+	ttLibC_PcmS16 *p = ttLibC_PcmS16_make(
+			decoder_->pcms16,
+			PcmS16Type_littleEndian,
+			mp3->inherit_super.sample_rate,
+			num,
+			mp3->inherit_super.channel_num,
+			decoder_->pcm_buffer,
+			(decoder_->buffer_size >> 1),
+			decoder_->pcm_buffer,
+			num * 2 * mp3->inherit_super.channel_num,
+			NULL,
+			0,
+			true,
+			mp3->inherit_super.inherit_super.pts,
+			mp3->inherit_super.inherit_super.timebase);
 	if(p == NULL) {
 		return;
 	}

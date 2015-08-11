@@ -185,7 +185,41 @@ ttLibC_PcmS16 *ttLibC_BeepGenerator_makeBeepBySampleNum(
 		}
 		return NULL;
 	}
-	pcms16 = ttLibC_PcmS16_make(pcms16, generator->type, generator->sample_rate, sample_num, generator->channel_num, data, data_size, true, pts, generator->sample_rate);
+	uint8_t *l_data = NULL;
+	uint32_t l_stride = 0;
+	uint8_t *r_data = NULL;
+	uint32_t r_stride = 0;
+	switch(generator->type) {
+	case PcmS16Type_bigEndian:
+	case PcmS16Type_littleEndian:
+		l_data = data;
+		l_stride = sample_num * 2 * generator->channel_num;
+		break;
+	case PcmS16Type_bigEndian_planar:
+	case PcmS16Type_littleEndian_planar:
+		l_data = data;
+		l_stride = sample_num * 2;
+		if(generator->channel_num == 2) {
+			r_data = data + l_stride;
+			r_stride = l_stride;
+		}
+		break;
+	}
+	pcms16 = ttLibC_PcmS16_make(
+			pcms16,
+			generator->type,
+			generator->sample_rate,
+			sample_num,
+			generator->channel_num,
+			data,
+			data_size,
+			l_data,
+			l_stride,
+			r_data,
+			r_stride,
+			true,
+			pts,
+			generator->sample_rate);
 	if(pcms16 == NULL) {
 		if(is_alloc_flg) {
 			free(data);

@@ -112,7 +112,21 @@ void ttLibC_SpeexDecoder_decode(
 		return;
 	}
 	uint32_t sample_num = decoder_->inherit_super.sample_rate / 50;
-	ttLibC_PcmS16 *p = ttLibC_PcmS16_make(decoder_->pcms16, PcmS16Type_littleEndian, decoder_->inherit_super.sample_rate, sample_num, decoder_->inherit_super.channel_num, decoder_->pcm_buffer, decoder_->pcm_buffer_size, true, speex->inherit_super.inherit_super.pts, speex->inherit_super.inherit_super.timebase);
+	ttLibC_PcmS16 *p = ttLibC_PcmS16_make(
+			decoder_->pcms16,
+			PcmS16Type_littleEndian,
+			decoder_->inherit_super.sample_rate,
+			sample_num,
+			decoder_->inherit_super.channel_num,
+			decoder_->pcm_buffer,
+			decoder_->pcm_buffer_size,
+			decoder_->pcm_buffer,
+			sample_num * 2 * decoder_->inherit_super.channel_num,
+			NULL,
+			0,
+			true,
+			speex->inherit_super.inherit_super.pts,
+			speex->inherit_super.inherit_super.timebase);
 	if(p == NULL) {
 		return;
 	}
