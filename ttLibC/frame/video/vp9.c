@@ -39,7 +39,7 @@ ttLibC_Vp9 *ttLibC_Vp9_make(
 	return (ttLibC_Vp9 *)ttLibC_Video_make(
 			(ttLibC_Video *)prev_frame,
 			sizeof(ttLibC_Vp9_),
-			frameType_vp6,
+			frameType_vp9,
 			video_type,
 			width,
 			height,

@@ -38,7 +38,7 @@ ttLibC_Wmv2 *ttLibC_Wmv2_make(
 	return (ttLibC_Wmv2 *)ttLibC_Video_make(
 			(ttLibC_Video *)prev_frame,
 			sizeof(ttLibC_Wmv2_),
-			frameType_vp6,
+			frameType_wmv2,
 			video_type,
 			width,
 			height,
