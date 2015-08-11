@@ -36,7 +36,7 @@ static void AudioResampler_convertFormatSrcPcmS16(
 	case PcmS16Type_bigEndian:
 	default:
 	case PcmS16Type_littleEndian:
-		src_l_data = src_frame->l_data;
+		src_l_data = (int16_t *)src_frame->l_data;
 		if(src_frame->inherit_super.channel_num == 2) {
 			src_r_data = src_l_data + 1;
 			src_step = 2;
@@ -47,9 +47,9 @@ static void AudioResampler_convertFormatSrcPcmS16(
 		break;
 	case PcmS16Type_bigEndian_planar:
 	case PcmS16Type_littleEndian_planar:
-		src_l_data = src_frame->l_data;
+		src_l_data = (int16_t *)src_frame->l_data;
 		if(src_frame->inherit_super.channel_num == 2) {
-			src_r_data = src_frame->r_data;
+			src_r_data = (int16_t *)src_frame->r_data;
 		}
 		src_step = 1;
 		break;
@@ -152,7 +152,7 @@ static void AudioResampler_convertFormatSrcPcmF32(
 	switch(src_frame->type) {
 	default:
 	case PcmF32Type_interleave:
-		src_l_data = src_frame->l_data;
+		src_l_data = (float *)src_frame->l_data;
 		if(src_frame->inherit_super.channel_num == 2) {
 			src_r_data = src_l_data + 1;
 			src_step = 2;
@@ -162,9 +162,9 @@ static void AudioResampler_convertFormatSrcPcmF32(
 		}
 		break;
 	case PcmF32Type_planar:
-		src_l_data = src_frame->l_data;
+		src_l_data = (float *)src_frame->l_data;
 		if(src_frame->inherit_super.channel_num == 2) {
-			src_r_data = src_frame->r_data;
+			src_r_data = (float *)src_frame->r_data;
 		}
 		src_step = 1;
 		break;
