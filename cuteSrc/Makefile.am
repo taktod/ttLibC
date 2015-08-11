@@ -5,6 +5,7 @@ noinst_PROGRAMS=cuteTest
 cuteTest_SOURCES= \
 	cuteTest.cpp \
 	containerTest.cpp \
+	avcodecTest.cpp \
 	audioTest.cpp \
 	videoTest.cpp \
 	utilTest.cpp \

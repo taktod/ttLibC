@@ -86,6 +86,12 @@ nobase_include_HEADERS += \
 	ttLibC/decoder/opusDecoder.h
 endif
 
+if ENABLE_AVCODEC
+nobase_include_HEADERS += \
+	ttLibC/encoder/avcodecEncoder.h \
+	ttLibC/decoder/avcodecDecoder.h
+endif
+
 pkgconfigdir=@pkgconfigdir@
 pkgconfig_DATA=ttLibC.pc
 CLEANFILES=ttLibC.pc
