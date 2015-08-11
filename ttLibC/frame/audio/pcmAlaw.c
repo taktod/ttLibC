@@ -58,6 +58,6 @@ ttLibC_PcmAlaw *ttLibC_PcmAlaw_make(
  * @param frame
  */
 void ttLibC_PcmAlaw_close(ttLibC_PcmAlaw **frame) {
-	ttLibC_Audio_close((ttLibC_Audio **)frame);
+	ttLibC_Audio_close_((ttLibC_Audio **)frame);
 }
 
