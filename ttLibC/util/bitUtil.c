@@ -6,6 +6,8 @@
  *
  * @author taktod
  * @date   2015/08/01
+ *
+ * @note should I make bit reader for little endian?
  */
 
 #include "bitUtil.h"
