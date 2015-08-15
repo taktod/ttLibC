@@ -83,7 +83,7 @@ ttLibC_Mp3_Type ttLibC_Mp3_getMp3Type(
  * @param timebase   timebase for mp3 frame.
  * @return mp3 object.
  */
-ttLibC_Mp3 *ttLibC_Mp3_makeFrame(
+ttLibC_Mp3 *ttLibC_Mp3_getFrame(
 		ttLibC_Mp3 *prev_frame,
 		void *data,
 		size_t data_size,

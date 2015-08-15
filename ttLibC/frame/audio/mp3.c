@@ -383,7 +383,7 @@ static ttLibC_Mp3 *makeTagFrame(ttLibC_Mp3 *prev_frame, void *data, size_t data_
  * @param timebase   timebase for mp3 frame.
  * @return mp3 object.
  */
-ttLibC_Mp3 *ttLibC_Mp3_makeFrame(ttLibC_Mp3 *prev_frame, void *data, size_t data_size, uint64_t pts, uint32_t timebase) {
+ttLibC_Mp3 *ttLibC_Mp3_getFrame(ttLibC_Mp3 *prev_frame, void *data, size_t data_size, uint64_t pts, uint32_t timebase) {
 	ttLibC_Mp3_Type type = ttLibC_Mp3_getMp3Type(data, data_size);
 	switch(type) {
 	case Mp3Type_frame:
