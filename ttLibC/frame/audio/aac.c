@@ -6,7 +6,6 @@
  *
  * @author taktod
  * @date   2015/07/23
- * TODO need to make adts analyze task.
  * TODO need to make dsi analyze task. (needed for flv.)
  */
 
@@ -16,7 +15,14 @@
 #include <stdlib.h>
 #include "../../log.h"
 
+#include "../../util/bitUtil.h"
+
 typedef ttLibC_Frame_Audio_Aac ttLibC_Aac_;
+
+static uint32_t sample_rate_table[] = {
+		96000, 88200, 64000, 48000, 44100, 32000, 24000, 22050, 16000, 12000, 11025, 8000
+};
+
 
 /*
  * make aac frame.
@@ -104,6 +110,7 @@ ttLibC_Aac *ttLibC_Aac_make(
 
 /*
  * analyze aac frame and make data.
+ * only support adts.
  * @param prev_frame reuse frame
  * @param data       aac binary data.
  * @param data_size  data size
@@ -111,14 +118,64 @@ ttLibC_Aac *ttLibC_Aac_make(
  * @param timebase   timebase for pts.
  * @return aac object
  */
-ttLibC_Aac *ttLibC_Aac_makeFrame(
+ttLibC_Aac *ttLibC_Aac_getFrame(
 		ttLibC_Aac *prev_frame,
 		void *data,
 		size_t data_size,
 		uint64_t pts,
 		uint32_t timebase) {
-	// TODO make this.
-	return NULL;
+	/*
+	 * bit memo for adts aac.
+	 * 12bit syncbit fill with 1
+	 * 1bit id
+	 * 2bit layer
+	 * 1bit protection absent
+	 * 2bit profile
+	 * 4bit sampling frequence index
+	 * 1bit private bit
+	 * 3bit channel configuration
+	 * 1bit original flag
+	 * 1bit home
+	 * 1bit copyright identification bit
+	 * 1bit copyright identification start
+	 * 13bit frame size
+	 * 11bit adts buffer full ness
+	 * 2bit no raw data blocks in frame.
+	 */
+	ttLibC_BitReader *reader = ttLibC_BitReader_make(data, data_size, BitReaderType_default);
+	if(ttLibC_BitReader_bit(reader, 12) != 0xFFF) {
+		ERR_PRINT("sync bit is invalid.");
+		ttLibC_BitReader_close(&reader);
+		return NULL;
+	}
+	ttLibC_BitReader_bit(reader, 1);
+	ttLibC_BitReader_bit(reader, 2);
+	ttLibC_BitReader_bit(reader, 1);
+	ttLibC_BitReader_bit(reader, 2);
+	uint32_t sample_rate_index = ttLibC_BitReader_bit(reader, 4);
+	uint32_t sample_rate = sample_rate_table[sample_rate_index];
+	ttLibC_BitReader_bit(reader, 1);
+	uint32_t channel_num = ttLibC_BitReader_bit(reader, 3);
+	ttLibC_BitReader_bit(reader, 1);
+	ttLibC_BitReader_bit(reader, 1);
+	ttLibC_BitReader_bit(reader, 1);
+	ttLibC_BitReader_bit(reader, 1);
+	uint32_t frame_size = ttLibC_BitReader_bit(reader, 13);
+	ttLibC_BitReader_bit(reader, 11);
+	ttLibC_BitReader_bit(reader, 2);
+	ttLibC_BitReader_close(&reader);
+	// this frame_size includes the adts header.
+	return ttLibC_Aac_make(
+			prev_frame,
+			AacType_adts,
+			sample_rate,
+			1024,
+			channel_num,
+			data,
+			frame_size,
+			true,
+			pts,
+			timebase);
 }
 
 /*

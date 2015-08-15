@@ -74,7 +74,7 @@ ttLibC_Aac *ttLibC_Aac_make(
  * @param timebase   timebase for pts.
  * @return aac object
  */
-ttLibC_Aac *ttLibC_Aac_makeFrame(
+ttLibC_Aac *ttLibC_Aac_getFrame(
 		ttLibC_Aac *prev_frame,
 		void *data,
 		size_t data_size,
