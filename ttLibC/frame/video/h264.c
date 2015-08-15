@@ -63,10 +63,8 @@ ttLibC_H264 *ttLibC_H264_make(
 	case H264Type_configData:
 	case H264Type_slice:
 	case H264Type_sliceIDR:
-		break;
 	case H264Type_unknown:
-		ERR_PRINT("unknown is defined.");
-		return NULL;
+		break;
 	default:
 		ERR_PRINT("unknown h264 type.%d", type);
 		return NULL;
@@ -95,6 +93,7 @@ ttLibC_H264 *ttLibC_H264_make(
 	h264->inherit_super.inherit_super.height = height;
 	switch(type) {
 	case H264Type_configData:
+	case H264Type_unknown:
 		h264->inherit_super.inherit_super.type = videoType_info;
 		break;
 	case H264Type_slice:
@@ -103,7 +102,7 @@ ttLibC_H264 *ttLibC_H264_make(
 	case H264Type_sliceIDR:
 		h264->inherit_super.inherit_super.type = videoType_key;
 		break;
-	case H264Type_unknown:
+	default:
 		if(prev_frame == NULL) {
 			free(h264);
 		}
@@ -550,7 +549,90 @@ ttLibC_H264 *ttLibC_H264_getFrame(
 		bool non_copy_mode,
 		uint64_t pts,
 		uint32_t timebase) {
-	// TODO make this function.
+	// analyze data as nal. annex B.
+	ttLibC_H264_NalInfo nal_info;
+	if(!ttLibC_H264_getNalInfo(&nal_info, data, data_size)) {
+		ERR_PRINT("failed to get nal info.");
+		return NULL;
+	}
+	ttLibC_H264 *h264 = NULL;
+	size_t target_size = 0;
+	uint32_t width = 0, height = 0;
+	if(prev_frame != NULL) {
+		width  = prev_frame->inherit_super.width;
+		height = prev_frame->inherit_super.height;
+	}
+	switch(nal_info.nal_unit_type) {
+	case H264NalType_accessUnitDelimiter:
+	case H264NalType_supplementalEnhancementInformation:
+	default:
+		// type unknown.
+		return ttLibC_H264_make(
+				prev_frame,
+				H264Type_unknown,
+				width,
+				height,
+				data,
+				nal_info.nal_size,
+				true,
+				pts,
+				timebase);
+	case H264NalType_sequenceParameterSet:
+		// assume sps, pps.. order.
+		target_size = nal_info.nal_size;
+		width = ttLibC_H264_getWidth(prev_frame, data, data_size);
+		height = ttLibC_H264_getHeight(prev_frame, data, data_size);
+		// try to get next data.
+		if(!ttLibC_H264_getNalInfo(&nal_info, data + target_size, data_size - target_size)) {
+			ERR_PRINT("failed to get nal info.");
+			return NULL;
+		}
+		if(nal_info.nal_unit_type != H264NalType_pictureParameterSet) {
+			ERR_PRINT("expect sps and pps chunk. however, find other nal:%x", nal_info.nal_unit_type);
+			return NULL;
+		}
+		// now sps and pps is ready.
+		// TODO I have to improve this code, h264 config data can be consist with 2 or more sps, pps.
+		// sometimes possible to include sps-ext.
+		target_size += nal_info.nal_size;
+		return ttLibC_H264_make(
+				prev_frame,
+				H264Type_configData,
+				width,
+				height,
+				data,
+				target_size,
+				true,
+				pts,
+				timebase);
+	case H264NalType_pictureParameterSet:
+		ERR_PRINT("unexpected.. to have pps first.");
+		return NULL;
+	case H264NalType_sliceIDR:
+		// TODO to improve this code. it is better to check, first mb in slice.
+		return ttLibC_H264_make(
+				prev_frame,
+				H264Type_sliceIDR,
+				width,
+				height,
+				data,
+				data_size,
+				true,
+				pts,
+				timebase);
+	case H264NalType_slice:
+		// TODO to improve this code. it is better to check, first mb in slice.
+		return ttLibC_H264_make(
+				prev_frame,
+				H264Type_slice,
+				width,
+				height,
+				data,
+				data_size,
+				true,
+				pts,
+				timebase);
+	}
 	return NULL;
 }
 
