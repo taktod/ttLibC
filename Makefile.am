@@ -28,6 +28,7 @@ nobase_include_HEADERS= \
 	ttLibC/resampler/imageResampler.h \
 	ttLibC/util/beepUtil.h \
 	ttLibC/util/bitUtil.h \
+	ttLibC/util/crc32Util.h \
 	ttLibC/util/hexUtil.h \
 	ttLibC/util/ioUtil.h \
 	ttLibC/log.h \

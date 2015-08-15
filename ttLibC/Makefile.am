@@ -44,6 +44,7 @@ libttLibC_a_SOURCES= \
 	resampler/speexdspResampler.c \
 	util/beepUtil.c \
 	util/bitUtil.c \
+	util/crc32Util.c \
 	util/hexUtil.c \
 	util/httpUtil.c \
 	util/ioUtil.c \

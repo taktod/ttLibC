@@ -33,6 +33,8 @@
 #	include <ttLibC/util/httpUtil.h>
 #endif
 
+#include <ttLibC/util/crc32Util.h>
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -43,6 +45,21 @@
 #include <sys/param.h>
 #include <sys/uio.h>
 #include <unistd.h>
+
+static void crc32Test() {
+	LOG_PRINT("crc32Test");
+	ttLibC_Crc32 *crc32 = ttLibC_Crc32_make(0xFFFFFFFFL);
+	uint8_t buf[32];
+	// 2AB104B2
+	uint32_t size = ttLibC_HexUtil_makeBuffer("00B00D0001C100000001F000", buf, 32);
+	uint8_t *data = buf;
+	for(int i = 0;i < size;++ i, ++data) {
+		ttLibC_Crc32_update(crc32, *data);
+	}
+	LOG_PRINT("result:%x", ttLibC_Crc32_getValue(crc32));
+	ASSERTM("FAILED", ttLibC_Crc32_getValue(crc32) == 0x2AB104B2);
+	ttLibC_Crc32_close(&crc32);
+}
 
 static void ioTest() {
 	LOG_PRINT("ioTest");
@@ -175,6 +192,7 @@ static void openalUtilTest() {
  */
 cute::suite utilTests(cute::suite s) {
 	s.clear();
+	s.push_back(CUTE(crc32Test));
 	s.push_back(CUTE(ioTest));
 	s.push_back(CUTE(httpClientTest));
 	s.push_back(CUTE(hexUtilTest));
