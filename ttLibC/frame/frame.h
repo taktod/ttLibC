@@ -73,6 +73,7 @@ typedef enum {
 	frameType_vorbis,
 //	frameType_adpcm_swf,
 //	frameType_ac3,
+	frameType_unknown = -1,
 } ttLibC_Frame_Type;
 
 /**
