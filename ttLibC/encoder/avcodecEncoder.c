@@ -118,7 +118,8 @@ static bool AvcodecEncoder_encode_AudioDetail(
 					encoder->packet.size,
 					true,
 					encoder->packet.pts,
-					encoder->inherit_super.sample_rate);
+					encoder->inherit_super.sample_rate,
+					0);
 			if(aac != NULL) {
 				callback(ptr, (ttLibC_Frame *)aac);
 				encoder->frame = (ttLibC_Frame *)aac;

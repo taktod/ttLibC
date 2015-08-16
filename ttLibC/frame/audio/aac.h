@@ -51,6 +51,7 @@ typedef ttLibC_Frame_Audio_Aac ttLibC_Aac;
  * @param non_copy_mode true:hold the data pointer. false:data will copy.
  * @param pts           pts for aac data.
  * @param timebase      timebase number for pts.
+ * @param dsi_info      decoder specific info(global header for low data.)
  * @return aac object.
  */
 ttLibC_Aac *ttLibC_Aac_make(
@@ -63,7 +64,8 @@ ttLibC_Aac *ttLibC_Aac_make(
 		size_t data_size,
 		bool non_copy_mode,
 		uint64_t pts,
-		uint32_t timebase);
+		uint32_t timebase,
+		uint64_t dsi_info);
 
 /**
  * analyze aac frame and make data.

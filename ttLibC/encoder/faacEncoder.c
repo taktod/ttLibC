@@ -142,7 +142,18 @@ static void checkEncodedData(ttLibC_FaacEncoder_ *encoder, uint32_t encode_size,
 	// calcurate sample_num from encoder->samples_put. 1024 fixed?
 	uint32_t sample_num = encoder->samples_input / encoder->inherit_super.channel_num;
 	ttLibC_Aac *aac = encoder->aac;
-	aac = ttLibC_Aac_make(aac, AacType_adts, encoder->inherit_super.sample_rate, sample_num, encoder->inherit_super.channel_num, encoder->data, encode_size, true, encoder->pts, encoder->inherit_super.sample_rate);
+	aac = ttLibC_Aac_make(
+			aac,
+			AacType_adts,
+			encoder->inherit_super.sample_rate,
+			sample_num,
+			encoder->inherit_super.channel_num,
+			encoder->data,
+			encode_size,
+			true,
+			encoder->pts,
+			encoder->inherit_super.sample_rate,
+			0);
 	if(aac != NULL) {
 		callback(ptr, aac);
 		encoder->aac = aac;
