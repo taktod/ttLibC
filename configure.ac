@@ -30,6 +30,7 @@ speexdsp_flg=no
 speex_flg=no
 opus_flg=no
 avcodec_flg=no
+faad_flg=no
 
 # check result
 cute_check=no 
@@ -43,6 +44,7 @@ speexdsp_check=no
 speex_check=no
 opus_check=no
 avcodec_check=no
+faad_decode_check=no
 
 AC_ARG_ENABLE(
 	[lgpl],
@@ -106,6 +108,7 @@ AC_ARG_ENABLE(
 		speex_flg=$enableval
 		opus_flg=$enableval
 		avcodec_flg=$enableval
+		faad_flg=$enableval
 	]
 )
 
@@ -167,6 +170,12 @@ AC_ARG_ENABLE(
 	[avcodec],
 	AS_HELP_STRING([--enable-avcodec/--disable-avcodec], [enable/disable avcodec(ffmpeg or libav) code.]),
 	[avcodec_flg=$enableval]
+)
+
+AC_ARG_ENABLE(
+	[faad],
+	AS_HELP_STRING([--enable-faad/--disable-faad], [enable/disable faad2 code.]),
+	[faad_flg=$enableval]
 )
 
 if test x$opencv_flg = "xyes"; then
@@ -261,6 +270,27 @@ if test x$avcodec_flg = "xyes"; then
 		[avcodec_check=yes]
 	)
 fi
+if test x$faad_flg = "xyes"; then
+	AC_CHECK_HEADER(
+		faad.h,
+		[
+			AC_CHECK_LIB(
+				faad,
+				NeAACDecGetErrorMessage,
+				[
+					FAAD_CFLAGS='-I/usr/local/include'
+					FAAD_LIBS='-L/usr/local/lib -lfaad'
+					AC_SUBST([FAAD_CFLAGS])
+					AC_SUBST([FAAD_LIBS])
+					AC_DEFINE([__ENABLE_FAAD__])
+					if test x$gpl_flg = "xyes"; then
+						faad_decode_check=yes
+					fi
+				]
+			)
+		],
+	)
+fi
 
 if test x$gpl_flg = "xyes"; then
 	AC_DEFINE([__ENABLE_GPL__])
@@ -333,6 +363,11 @@ if test x$avcodec_flg$lgpl_flg$avcodec_check = "xyesyesyes"; then
 	AC_DEFINE([__ENABLE_AVCODEC__])
 fi
 AM_CONDITIONAL(ENABLE_AVCODEC, test x$avcodec_flg$lgpl_flg$avcodec_check = "xyesyesyes")
+
+if test x$faad_flg$gpl_flg$faad_decode_check = "xyesyesyes"; then
+	AC_DEFINE([__ENABLE_FAAD_DECODE__])
+fi
+AM_CONDITIONAL(ENABLE_FAAD_DECODE, test x$faad_flg$gpl_flg$faad_decode_check = "xyesyesyes")
 
 AC_ARG_WITH(pkgconfigdir,
 	AS_HELP_STRING([--with-pkgconfigdir], [Use the specified pkgconfig dir.(default is $libdir/pkgconfig)]),
@@ -416,19 +451,6 @@ else
 echo "openal:           off"
 fi
 if test x$mp3lame_flg = "xyes"; then
-	if test x$gpl_flg = "xyes"; then
-		if test x$mp3lame_decode_check = "xyes"; then
-echo "mp3lame(decoder): on"
-		else
-echo "mp3lame(decoder): off(mp3lame library is missing.)"
-		fi
-	else
-echo "mp3lame(decoder): off(under gpl only.)"
-	fi
-else
-echo "mp3lame(decoder): off"
-fi
-if test x$mp3lame_flg = "xyes"; then
 	if test x$lgpl_flg = "xyes"; then
 		if test x$mp3lame_encode_check = "xyes"; then
 echo "mp3lame(encoder): on"
@@ -440,6 +462,19 @@ echo "mp3lame(encoder): off(under lgpl only.)"
 	fi
 else
 echo "mp3lame(encoder): off"
+fi
+if test x$mp3lame_flg = "xyes"; then
+	if test x$gpl_flg = "xyes"; then
+		if test x$mp3lame_decode_check = "xyes"; then
+echo "mp3lame(decoder): on"
+		else
+echo "mp3lame(decoder): off(mp3lame library is missing.)"
+		fi
+	else
+echo "mp3lame(decoder): off(under gpl only.)"
+	fi
+else
+echo "mp3lame(decoder): off"
 fi
 if test x$faac_flg = "xyes"; then
 	if test x$lgpl_flg = "xyes"; then
@@ -453,6 +488,19 @@ echo "faac(encoder):    off(under lgpl only.)"
 	fi
 else
 echo "faac(encode):     off"
+fi
+if test x$faad_flg = "xyes"; then
+	if test x$gpl_flg = "xyes"; then
+		if test x$faad_decode_check = "xyes"; then
+echo "faad(decoder):    on"
+		else
+echo "faad(decoder):    off(faac library is missing.)"
+		fi
+	else
+echo "faad(decoder):    off(under gpl only.)"
+	fi
+else
+echo "faad(decode):     off"
 fi
 if test x$openh264_flg = "xyes"; then
 	if test x$openh264_check = "xyes"; then

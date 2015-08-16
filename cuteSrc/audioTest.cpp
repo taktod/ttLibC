@@ -27,6 +27,10 @@
 #	include <faaccfg.h>
 #endif
 
+#ifdef __ENABLE_FAAC_ENCODE__
+#	include <faad.h>
+#endif
+
 #ifdef __ENABLE_SPEEXDSP__
 #	include <speex/speex_resampler.h>
 #endif
@@ -48,6 +52,47 @@
 #include <ttLibC/resampler/audioResampler.h>
 
 #include <ttLibC/frame/audio/mp3.h>
+
+static void faadTest() {
+	LOG_PRINT("faadTest");
+#if defined(__ENABLE_FAAD_DECODE__)
+	NeAACDecHandle hDecoder;
+	NeAACDecFrameInfo frameInfo;
+	NeAACDecConfigurationPtr config;
+
+	hDecoder = NeAACDecOpen();
+	// ここで処理する。
+	config = NeAACDecGetCurrentConfiguration(hDecoder);
+	config->defObjectType = MAIN;
+	config->outputFormat = FAAD_FMT_16BIT;
+	config->downMatrix = 0;
+	config->useOldADTSFormat = 1;
+	NeAACDecSetConfiguration(hDecoder, config);
+	uint8_t buf[256];
+	size_t size = ttLibC_HexUtil_makeBuffer("1210", buf, 256);
+	unsigned long sample_rate;
+	uint8_t channel_num;
+	NeAACDecInit2(hDecoder, buf, size, &sample_rate, &channel_num);
+	LOG_PRINT("sample_rate:%d channel_num:%d", sample_rate, channel_num);
+	size = ttLibC_HexUtil_makeBuffer("210049900219002380", buf, 256);
+	int16_t *data = NULL;
+	data = (int16_t *)NeAACDecDecode(hDecoder, &frameInfo, buf, size);
+	LOG_PRINT("returned samples:%d", frameInfo.samples);
+	data = (int16_t *)NeAACDecDecode(hDecoder, &frameInfo, buf, size);
+	LOG_PRINT("returned samples:%d", frameInfo.samples);
+	data = (int16_t *)NeAACDecDecode(hDecoder, &frameInfo, buf, size);
+	LOG_PRINT("returned samples:%d", frameInfo.samples);
+	data = (int16_t *)NeAACDecDecode(hDecoder, &frameInfo, buf, size);
+	LOG_PRINT("returned samples:%d", frameInfo.samples);
+	data = (int16_t *)NeAACDecDecode(hDecoder, &frameInfo, buf, size);
+	LOG_PRINT("returned samples:%d", frameInfo.samples);
+	data = (int16_t *)NeAACDecDecode(hDecoder, &frameInfo, buf, size);
+	LOG_PRINT("returned samples:%d", frameInfo.samples);
+	data = (int16_t *)NeAACDecDecode(hDecoder, &frameInfo, buf, size);
+	LOG_PRINT("returned samples:%d", frameInfo.samples);
+	NeAACDecClose(hDecoder);
+#endif
+}
 
 static void audioResamplerTest() {
 	LOG_PRINT("audioResamplerTest");
@@ -547,6 +592,7 @@ static void mp3lameTest() {
  */
 cute::suite audioTests(cute::suite s) {
 	s.clear();
+	s.push_back(CUTE(faadTest));
 	s.push_back(CUTE(audioResamplerTest));
 	s.push_back(CUTE(opusTest));
 	s.push_back(CUTE(mp3DecodeTest));
