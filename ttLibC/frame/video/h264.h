@@ -192,6 +192,19 @@ ttLibC_H264 *ttLibC_H264_getFrame(
 		uint32_t timebase);
 
 /**
+ * analyze mp4 avcc tag.
+ * @param prev_frame  reuse frame object.
+ * @param data        data
+ * @param data_size   data_size
+ * @param length_size size of length information on avcc.
+ */
+ttLibC_H264 *ttLibC_H264_analyzeAvccTag(
+		ttLibC_H264 *prev_frame,
+		uint8_t *data,
+		size_t data_size,
+		uint32_t *length_size);
+
+/**
  * close frame
  * @param frame
  */

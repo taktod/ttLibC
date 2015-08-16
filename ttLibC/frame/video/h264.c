@@ -13,7 +13,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include "../../log.h"
+#include "../../util/ioUtil.h"
 #include "../../util/bitUtil.h"
+#include "../../util/hexUtil.h"
 
 /*
  * h264 analyze ref information
@@ -634,6 +636,131 @@ ttLibC_H264 *ttLibC_H264_getFrame(
 				timebase);
 	}
 	return NULL;
+}
+
+/*
+ * analyze mp4 avcc tag.
+ * @param prev_frame  reuse frame object.
+ * @param data        data
+ * @param data_size   data_size
+ * @param length_size size of length information on avcc.
+ */
+ttLibC_H264 *ttLibC_H264_analyzeAvccTag(
+		ttLibC_H264 *prev_frame,
+		uint8_t *data,
+		size_t data_size,
+		uint32_t *length_size) {
+	size_t buffer_size = data_size; // assume sps is one pps is one.
+	uint8_t *buffer = NULL;
+	bool is_alloc_flg = false;
+	if(prev_frame != NULL) {
+		if(!prev_frame->inherit_super.inherit_super.is_non_copy) {
+			if(prev_frame->inherit_super.inherit_super.data_size > buffer_size) {
+				// memory do have enough size.
+				buffer = prev_frame->inherit_super.inherit_super.data;
+				buffer_size = prev_frame->inherit_super.inherit_super.data_size;
+			}
+			else {
+				// need more size.
+				free(prev_frame->inherit_super.inherit_super.data);
+			}
+		}
+		prev_frame->inherit_super.inherit_super.is_non_copy = true;
+	}
+	if(buffer == NULL) {
+		buffer = malloc(buffer_size);
+		is_alloc_flg = true;
+	}
+	uint8_t *buf = buffer;
+	size_t buf_pos = 0;
+	/**
+	 * 1byte version
+	 * 1byte profile
+	 * 1byte compatibility
+	 * 1byte level
+	 * 6bit reserved
+	 * 2bit nalLengthSize - 1
+	 * 3bit reserved
+	 * 5bit sps num
+	 * 2byte sps size;
+	 * nbyte sps
+	 * 1byte pps num
+	 * 2byte pps size
+	 * nbyte pps
+	 * done...
+	 */
+	if(data[0] != 1) {
+		ERR_PRINT("avcc version is not 1.");
+	}
+	*length_size = (data[4] & 0x03) + 1;
+	uint32_t sps_count = data[5] & 0x1F;
+	if(sps_count != 1) {
+		ERR_PRINT("sps count is not 1.:%d", sps_count);
+		if(is_alloc_flg) {
+			free(buffer);
+		}
+		return NULL;
+	}
+	data += 6;
+	data_size -= 6 ;
+	uint32_t sps_size = be_uint16_t(*((uint16_t *)data));
+	data += 2;
+	data_size -= 2;
+	*((uint32_t *)buf) = be_uint32_t(1);
+	buf += 4;
+	buf_pos += 4;
+	memcpy(buf, data, sps_size);
+	data += sps_size;
+	data_size -= sps_size;
+	buf += sps_size;
+	buf_pos += sps_size;
+	uint32_t pps_count = data[0];
+	if(pps_count != 1) {
+		ERR_PRINT("pps count is not 1.:%d", pps_count);
+		if(is_alloc_flg) {
+			free(buffer);
+		}
+		return NULL;
+	}
+	uint32_t pps_size = be_uint16_t(*((uint16_t *)(data + 1)));
+	data += 3;
+	data_size -= 3;
+	*((uint32_t *)buf) = be_uint32_t(1);
+	buf += 4;
+	buf_pos += 4;
+	memcpy(buf, data, pps_size);
+	data += pps_size;
+	data_size -= pps_size;
+	buf += pps_size;
+	buf_pos += pps_size;
+	if(data_size != 0) {
+		ERR_PRINT("data loading is not complete, there is some more.");
+		if(is_alloc_flg) {
+			free(buffer);
+		}
+		return NULL;
+	}
+	// now make frame.
+	ttLibC_H264 *h264 = ttLibC_H264_getFrame(
+			prev_frame,
+			buffer,
+			buf_pos,
+			true,
+			0,
+			1000);
+	if(h264 == NULL) {
+		if(is_alloc_flg) {
+			free(buffer);
+		}
+		return NULL;
+	}
+	// ok.
+	// update buffer size
+	h264->inherit_super.inherit_super.data_size = buffer_size;
+	// set the data non copy.
+	h264->inherit_super.inherit_super.is_non_copy = false;
+	// done.
+	return h264;
 }
 
 /*
