@@ -46,7 +46,7 @@ typedef ttLibC_Util_HttpUtil_HttpClient ttLibC_HttpClient;
  * @param data      downloaded data.
  * @param data_size downloaded data_size.
  */
-typedef void (* ttLibC_HttpClientFunc)(void *ptr, ttLibC_HttpClient *client, void *data, size_t data_size);
+typedef bool (* ttLibC_HttpClientFunc)(void *ptr, ttLibC_HttpClient *client, void *data, size_t data_size);
 
 /**
  * make http client

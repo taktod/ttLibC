@@ -30,7 +30,7 @@ typedef ttLibC_Decoder_OpusDecoder ttLibC_OpusDecoder;
  * @param ptr    user def value pointer.
  * @param pcms16 decoded fra.e
  */
-typedef void (* ttLibC_OpusDecodeFunc)(void *ptr, ttLibC_PcmS16 *pcms16);
+typedef bool (* ttLibC_OpusDecodeFunc)(void *ptr, ttLibC_PcmS16 *pcms16);
 
 /**
  * make opus decoder

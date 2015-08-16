@@ -14,6 +14,7 @@
 #ifdef __ENABLE_AVCODEC__
 extern "C" {
 #	include <libavcodec/avcodec.h>
+#	include <libavutil/opt.h>
 }
 #	include <ttLibC/encoder/avcodecEncoder.h>
 #	include <ttLibC/decoder/avcodecDecoder.h>
@@ -43,7 +44,7 @@ typedef struct {
 	ttLibC_AvcodecDecoder *decoder;
 } avcodecAudioTest_t;
 
-void avcodecAudioDecodeCallback(void *ptr, ttLibC_Frame *frame) {
+bool avcodecAudioDecodeCallback(void *ptr, ttLibC_Frame *frame) {
 	avcodecAudioTest_t *testData = (avcodecAudioTest_t *)ptr;
 	// convert from frame into pcms16 interleave data.
 	ttLibC_PcmS16 *pcms16 = (ttLibC_PcmS16 *)ttLibC_AudioResampler_convertFormat(
@@ -53,22 +54,24 @@ void avcodecAudioDecodeCallback(void *ptr, ttLibC_Frame *frame) {
 			2,
 			(ttLibC_Audio *)frame);
 	if(pcms16 == NULL) {
-		return;
+		return true;
 	}
 	// queue sound.
 	ttLibC_AlDevice_queue(testData->device, pcms16);
+	return true;
 }
 
-void avcodecAudioEncodeCallback(void *ptr, ttLibC_Frame *frame) {
+bool avcodecAudioEncodeCallback(void *ptr, ttLibC_Frame *frame) {
 	avcodecAudioTest_t *testData = (avcodecAudioTest_t *)ptr;
+	if(testData == NULL) {
+		return false;
+	}
 	if(frame == NULL) {
-		return;
+		return true;
 	}
 	LOG_PRINT("encoded type:%u pts:%llu", frame->type, frame->pts);
-	if(testData == NULL) {
-		return;
-	}
 	ttLibC_AvcodecDecoder_decode(testData->decoder, frame, avcodecAudioDecodeCallback, ptr);
+	return true;
 }
 #endif
 
@@ -347,29 +350,31 @@ typedef struct {
 	ttLibC_AvcodecDecoder *decoder;
 } avcodecVideoTest_t;
 
-void avcodecVideoDecoderCallback(void *ptr, ttLibC_Frame *frame) {
+bool avcodecVideoDecoderCallback(void *ptr, ttLibC_Frame *frame) {
 	avcodecVideoTest_t *testData = (avcodecVideoTest_t *)ptr;
 	switch(frame->type) {
 	case frameType_yuv420:
 		{
 			ttLibC_Bgr *b = ttLibC_ImageResampler_makeBgrFromYuv420(testData->bgr, BgrType_bgr, (ttLibC_Yuv420 *)frame);
 			if(b == NULL) {
-				return;
+				return false;
 			}
 			testData->bgr = b;
 			ttLibC_CvWindow_showBgr(testData->window, testData->bgr);
 		}
 		break;
 	default:
-		return;
+		break;
 	}
+	return true;
 }
 
-void avcodecVideoEncoderCallback(void *ptr, ttLibC_Frame *frame) {
+bool avcodecVideoEncoderCallback(void *ptr, ttLibC_Frame *frame) {
 	avcodecVideoTest_t *testData = (avcodecVideoTest_t *)ptr;
 	ttLibC_Video *video = (ttLibC_Video *)frame;
 	LOG_PRINT("keyFrame:%u size:%lu", video->type, video->inherit_super.buffer_size);
 	ttLibC_AvcodecDecoder_decode(testData->decoder, frame, avcodecVideoDecoderCallback, ptr);
+	return true;
 }
 #endif
 
@@ -563,6 +568,86 @@ static void wmv2Test() {
 #endif
 }
 
+static void h264Test() {
+	LOG_PRINT("h264Test");
+#if defined(__ENABLE_AVCODEC__) && defined(__ENABLE_OPENCV__)
+	// TODO h264 nal analyze is not ready. do later.
+/*	uint32_t width = 320, height = 240;
+	ttLibC_CvCapture *capture = ttLibC_CvCapture_make(0, width, height);
+	ttLibC_CvWindow  *window  = ttLibC_CvWindow_make("original");
+	ttLibC_Bgr    *bgr = NULL, *b;
+	ttLibC_Yuv420 *yuv = NULL, *y;
+	avcodecVideoTest_t testData;
+	AVCodecContext *enc = (AVCodecContext *)ttLibC_AvcodecEncoder_getAVCodecContext(frameType_h264);
+	enc->bit_rate = 650000;
+	enc->width = width;
+	enc->height = height;
+	enc->global_quality = 10;
+	enc->framerate = (AVRational){1, 15};
+	enc->time_base = (AVRational){1, 1000};
+	enc->gop_size = 10;
+	enc->max_b_frames = 0;
+
+	enc->level = 30;
+	av_opt_set(enc, "coder", "0", 0);
+	av_opt_set(enc, "qmin", "10", 0);
+	av_opt_set(enc, "bf", "0", 0);
+	av_opt_set(enc, "wprefp", "0", 0);
+	av_opt_set(enc, "cmp", "+chroma", 0);
+	av_opt_set(enc, "partitions", "-parti8x8+parti4x4+partp8x8+partp4x4-partb8x8", 0);
+	av_opt_set(enc, "me_method", "hex", 0);
+	av_opt_set(enc, "subq", "5", 0);
+	av_opt_set(enc, "me_range", "16", 0);
+	av_opt_set(enc, "keyint_min", "25", 0);
+	av_opt_set(enc, "sc_threshold", "40", 0);
+	av_opt_set(enc, "i_qfactor", "0.71", 0);
+	av_opt_set(enc, "b_strategy", "0", 0);
+	av_opt_set(enc, "qcomp", "0.6", 0);
+	av_opt_set(enc, "qmax", "30", 0);
+	av_opt_set(enc, "qdiff", "4", 0);
+	av_opt_set(enc, "direct-pred", "0", 0);
+//	av_opt_set(enc, "profile", "main", 0);
+	enc->profile = FF_PROFILE_H264_BASELINE;
+	enc->flags = CODEC_FLAG_LOOP_FILTER | CODEC_FLAG_CLOSED_GOP | CODEC_FLAG_LOW_DELAY;
+	enc->pix_fmt = AV_PIX_FMT_YUV420P;
+	ttLibC_AvcodecEncoder *encoder = ttLibC_AvcodecEncoder_makeWithAVCodecContext(enc);
+	testData.window  = ttLibC_CvWindow_make("h264 decode");
+	testData.bgr     = NULL;
+	testData.decoder = ttLibC_AvcodecVideoDecoder_make(frameType_h264, width, height);
+	while(true) {
+		// capture
+		b = ttLibC_CvCapture_queryFrame(capture, bgr);
+		if(b == NULL) {
+			break;
+		}
+		bgr = b;
+		// convert to yuv420p
+		y = ttLibC_ImageResampler_makeYuv420FromBgr(yuv, Yuv420Type_planar, bgr);
+		if(y == NULL) {
+			break;
+		}
+		yuv = y;
+		// encode
+		ttLibC_AvcodecEncoder_encode(encoder, (ttLibC_Frame *)yuv, avcodecVideoEncoderCallback, &testData);
+		// show original frame.
+		ttLibC_CvWindow_showBgr(window, bgr);
+		// if press esc key, exit.
+		uint8_t keychar = ttLibC_CvWindow_waitForKeyInput(10);
+		if(keychar == Keychar_Esc) {
+			break;
+		}
+	}
+	ttLibC_AvcodecEncoder_close(&encoder);
+	ttLibC_Yuv420_close(&yuv);
+	ttLibC_Bgr_close(&bgr);
+	ttLibC_AvcodecDecoder_close(&testData.decoder);
+	ttLibC_Bgr_close(&testData.bgr);
+	ttLibC_CvWindow_close(&testData.window);
+	ttLibC_CvWindow_close(&window);
+	ttLibC_CvCapture_close(&capture);*/
+#endif
+}
+
 /**
  * define all test for avcodec.
  * @param s cute::suite obj
@@ -581,5 +666,6 @@ cute::suite avcodecTests(cute::suite s) {
 	s.push_back(CUTE(vp8Test));
 	s.push_back(CUTE(wmv1Test));
 	s.push_back(CUTE(wmv2Test));
+	s.push_back(CUTE(h264Test));
 	return s;
 }

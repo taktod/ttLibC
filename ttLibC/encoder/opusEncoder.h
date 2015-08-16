@@ -41,7 +41,7 @@ typedef ttLibC_Encoder_OpusEncoder ttLibC_OpusEncoder;
  * @param ptr  user def value pointer.
  * @param opus encoded opus frame.
  */
-typedef void (* ttLibC_OpusEncodeFunc)(void *ptr, ttLibC_Opus *opus);
+typedef bool (* ttLibC_OpusEncodeFunc)(void *ptr, ttLibC_Opus *opus);
 
 /**
  * make opus encoder.

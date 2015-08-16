@@ -172,7 +172,7 @@ static hip_t hip_gflags;
 static ttLibC_PcmS16 *decoded_pcm;
 static ttLibC_AlDevice *device;
 
-void mp3EncodeProc(void *ptr, ttLibC_Mp3 *mp3) {
+bool mp3EncodeProc(void *ptr, ttLibC_Mp3 *mp3) {
 	LOG_PRINT("success to make mp3");
 	short left[65536], right[65536];
 	short data[65536];
@@ -204,11 +204,12 @@ void mp3EncodeProc(void *ptr, ttLibC_Mp3 *mp3) {
 			mp3->inherit_super.inherit_super.timebase);
 	if(p == NULL) {
 		ERR_PRINT("failed to make pcm data.");
-		return;
+		return false;
 	}
 	decoded_pcm = p;
 	ttLibC_AlDevice_queue(device, decoded_pcm);
 	ttLibC_AlDevice_proceed(device, 10);
+	return true;
 }
 #endif
 

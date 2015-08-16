@@ -51,7 +51,7 @@ typedef ttLibC_Encoder_AvcodecEncoder ttLibC_AvcodecEncoder;
  * @param ptr   user def value pointer.
  * @param frame encoded frame.
  */
-typedef void (* ttLibC_AvcodecEncodeFunc)(void *ptr, ttLibC_Frame *frame);
+typedef bool (* ttLibC_AvcodecEncodeFunc)(void *ptr, ttLibC_Frame *frame);
 
 /**
  * get AVCodecContext for target frameType.

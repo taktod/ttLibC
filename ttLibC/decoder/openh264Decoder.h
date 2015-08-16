@@ -33,7 +33,7 @@ typedef ttLibC_Decoder_Openh264Decoder ttLibC_Openh264Decoder;
  * @param ptr    user def value pointer.
  * @param yuv420 decoded yuv420 frame.
  */
-typedef void (* ttLibC_Openh264DecodeFunc)(void *ptr, ttLibC_Yuv420 *yuv420);
+typedef bool (* ttLibC_Openh264DecodeFunc)(void *ptr, ttLibC_Yuv420 *yuv420);
 
 /**
  * make openh264 decoder (maybe add more params later.)

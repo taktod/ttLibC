@@ -99,9 +99,10 @@ static void ioTest() {
 }
 
 #ifdef __ENABLE_FILE__
-void httpClientCallback(void *ptr, ttLibC_HttpClient *client, void *data, size_t data_size) {
+bool httpClientCallback(void *ptr, ttLibC_HttpClient *client, void *data, size_t data_size) {
 	LOG_PRINT("callback is called.");
 	ttLibC_HexUtil_dump(data, data_size, true);
+	return true;
 }
 #endif
 

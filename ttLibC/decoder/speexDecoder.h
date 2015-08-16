@@ -33,7 +33,7 @@ typedef ttLibC_Decoder_SpeexDecoder ttLibC_SpeexDecoder;
  * @param ptr    user def value pointer.
  * @param pcms16 decoded frame.
  */
-typedef void (* ttLibC_SpeexDecodeFunc)(void *ptr, ttLibC_PcmS16 *pcms16);
+typedef bool (* ttLibC_SpeexDecodeFunc)(void *ptr, ttLibC_PcmS16 *pcms16);
 
 /**
  * make speex decoder

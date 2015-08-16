@@ -48,7 +48,7 @@ typedef ttLibC_Encoder_SpeexEncoder ttLibC_SpeexEncoder;
  * @param ptr   user def value pointer.
  * @param speex encoded speex frame.
  */
-typedef void (* ttLibC_SpeexEncodeFunc)(void *ptr, ttLibC_Speex *speex);
+typedef bool (* ttLibC_SpeexEncodeFunc)(void *ptr, ttLibC_Speex *speex);
 
 /**
  * make speex encoder(CBR).

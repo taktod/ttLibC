@@ -63,6 +63,9 @@
 #include <ttLibC/frame/video/h264.h>
 
 #include <ttLibC/resampler/imageResampler.h>
+#include <ttLibC/resampler/audioResampler.h>
+
+#include <ttLibC/util/hexUtil.h>
 
 #if defined(__ENABLE_OPUS__) && defined(__ENABLE_OPENAL__)
 typedef struct {
@@ -70,15 +73,17 @@ typedef struct {
 	ttLibC_OpusDecoder *decoder;
 } opusTest_t;
 
-void opusDecoderCallback(void *ptr, ttLibC_PcmS16 *pcms16) {
+bool opusDecoderCallback(void *ptr, ttLibC_PcmS16 *pcms16) {
 	opusTest_t *testData = (opusTest_t *)ptr;
 	ttLibC_AlDevice_queue(testData->device, pcms16);
+	return true;
 }
 
-void opusEncoderCallback(void *ptr, ttLibC_Opus *opus) {
+bool opusEncoderCallback(void *ptr, ttLibC_Opus *opus) {
 //	LOG_PRINT("encoded.:%d", opus->inherit_super.inherit_super.pts);
 	opusTest_t *testData = (opusTest_t *)ptr;
 	ttLibC_OpusDecoder_decode(testData->decoder, opus, opusDecoderCallback, ptr);
+	return true;
 }
 #endif
 
@@ -116,16 +121,18 @@ typedef struct {
 	ttLibC_SpeexDecoder *decoder;
 } speexTest_t;
 
-void speexDecoderCallback(void *ptr, ttLibC_PcmS16 *pcms16) {
+bool speexDecoderCallback(void *ptr, ttLibC_PcmS16 *pcms16) {
 //	LOG_PRINT("decoded.");
 	speexTest_t *testData = (speexTest_t *)ptr;
 	// play with openal.
 	ttLibC_AlDevice_queue(testData->device, pcms16);
+	return true;
 }
 
-void speexEncoderCallback(void *ptr, ttLibC_Speex *speex) {
+bool speexEncoderCallback(void *ptr, ttLibC_Speex *speex) {
 	speexTest_t *testData = (speexTest_t *)ptr;
 	ttLibC_SpeexDecoder_decode(testData->decoder, speex, speexDecoderCallback, ptr);
+	return true;
 }
 #endif
 
@@ -200,33 +207,24 @@ typedef struct {
 	ttLibC_Bgr *dbgr;
 } openh264TestData;
 
-void openh264DecoderTestCallback(void *ptr, ttLibC_Yuv420 *yuv420) {
+bool openh264DecoderTestCallback(void *ptr, ttLibC_Yuv420 *yuv420) {
 	openh264TestData *testData = (openh264TestData *)ptr;
 	ttLibC_Bgr *b = ttLibC_ImageResampler_makeBgrFromYuv420(testData->dbgr, BgrType_bgr, yuv420);
 	if(b == NULL) {
-		return;
+		return false;
 	}
 	testData->dbgr = b;
 	ttLibC_CvWindow_showBgr(testData->dec_win, testData->dbgr);
+	return true;
 }
 
-void openh264EncoderTestCallback(void *ptr, ttLibC_H264 *h264) {
+bool openh264EncoderTestCallback(void *ptr, ttLibC_H264 *h264) {
 	openh264TestData *testData = (openh264TestData *)ptr;
-/*	switch(h264->type) {
-	case H264Type_configData:
-		LOG_PRINT("encoded. config:   pts:%llu size:%lu", h264->inherit_super.inherit_super.pts, h264->inherit_super.inherit_super.buffer_size);
-		break;
-	case H264Type_slice:
-		LOG_PRINT("encoded. slice:    pts:%llu size:%lu", h264->inherit_super.inherit_super.pts, h264->inherit_super.inherit_super.buffer_size);
-		break;
-	case H264Type_sliceIDR:
-		LOG_PRINT("encoded. sliceIDR: pts:%llu size:%lu", h264->inherit_super.inherit_super.pts, h264->inherit_super.inherit_super.buffer_size);
-		break;
-	default:
-		LOG_PRINT("encoded. unknown:  pts:%llu size:%lu", h264->inherit_super.inherit_super.pts, h264->inherit_super.inherit_super.buffer_size);
-		break;
-	}*/
+	if(h264->type == H264Type_unknown) {
+		return true;
+	}
 	ttLibC_Openh264Decoder_decode(testData->decoder, h264, openh264DecoderTestCallback, testData);
+	return true;
 }
 #endif
 
@@ -276,12 +274,13 @@ static void openh264Test() {
 #endif
 }
 
-void faacEncoderTestCallback(void *ptr, ttLibC_Aac *aac) {
+bool faacEncoderTestCallback(void *ptr, ttLibC_Aac *aac) {
 	FILE* fp = (FILE *)ptr;
 	LOG_PRINT("encoded. pts:%llu size:%lu", aac->inherit_super.inherit_super.pts, aac->inherit_super.inherit_super.buffer_size);
 	if(fp) {
 		fwrite(aac->inherit_super.inherit_super.data, 1, aac->inherit_super.inherit_super.buffer_size, fp);
 	}
+	return true;
 }
 
 static void faacEncoderTest() {
@@ -320,16 +319,18 @@ typedef struct {
 	ttLibC_AlDevice *device;
 } mp3lameTest_TestData_t;
 
-void mp3lameDecoderTestCallback(void *ptr, ttLibC_PcmS16 *pcm) {
+bool mp3lameDecoderTestCallback(void *ptr, ttLibC_PcmS16 *pcm) {
 	mp3lameTest_TestData_t *testData = (mp3lameTest_TestData_t *)ptr;
 	ttLibC_AlDevice_queue(testData->device, pcm);
+	return true;
 }
 
-void mp3lameEncoderTestCallback(void *ptr, ttLibC_Mp3 *mp3) {
+bool mp3lameEncoderTestCallback(void *ptr, ttLibC_Mp3 *mp3) {
 	LOG_PRINT("encoded. pts:%llu size:%lu", mp3->inherit_super.inherit_super.pts, mp3->inherit_super.inherit_super.buffer_size);
 	LOG_PRINT("sample_num:%d", mp3->inherit_super.sample_num);
 	mp3lameTest_TestData_t *testData = (mp3lameTest_TestData_t *)ptr;
 	ttLibC_Mp3lameDecoder_decode(testData->decoder, mp3, mp3lameDecoderTestCallback, ptr);
+	return true;
 }
 #endif
 

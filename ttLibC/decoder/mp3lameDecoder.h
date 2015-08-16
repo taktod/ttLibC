@@ -42,7 +42,7 @@ typedef ttLibC_Decoder_Mp3lameDecoder ttLibC_Mp3lameDecoder;
  * @param ptr    user def value pointer.
  * @param pcms16 decoded frame.
  */
-typedef void (* ttLibC_Mp3lameDecodeFunc)(void *ptr, ttLibC_PcmS16 *pcms16);
+typedef bool (* ttLibC_Mp3lameDecodeFunc)(void *ptr, ttLibC_PcmS16 *pcms16);
 
 /**
  * make mp3lame decoder

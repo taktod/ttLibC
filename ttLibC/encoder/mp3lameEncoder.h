@@ -48,7 +48,7 @@ typedef ttLibC_Encoder_Mp3lameEncoder ttLibC_Mp3lameEncoder;
  * @param ptr user def value pointer.
  * @param mp3 encoded mp3 frame.
  */
-typedef void (* ttLibC_Mp3lameEncodeFunc)(void *ptr, ttLibC_Mp3 *mp3);
+typedef bool (* ttLibC_Mp3lameEncodeFunc)(void *ptr, ttLibC_Mp3 *mp3);
 
 /**
  * make mp3lame encoder (cbr)

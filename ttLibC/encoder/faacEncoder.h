@@ -44,7 +44,7 @@ typedef ttLibC_Encoder_FaacEncoder ttLibC_FaacEncoder;
  * @param ptr user def value pointer.
  * @param aac encoded aac frame.
  */
-typedef void (* ttLibC_FaacEncodeFunc)(void *ptr, ttLibC_Aac *aac);
+typedef bool (* ttLibC_FaacEncodeFunc)(void *ptr, ttLibC_Aac *aac);
 
 /**
  * make faac encoder
