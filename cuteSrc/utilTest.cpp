@@ -49,9 +49,9 @@
 static void crc32Test() {
 	LOG_PRINT("crc32Test");
 	ttLibC_Crc32 *crc32 = ttLibC_Crc32_make(0xFFFFFFFFL);
-	uint8_t buf[32];
+	uint8_t buf[256];
 	// 2AB104B2
-	uint32_t size = ttLibC_HexUtil_makeBuffer("00B00D0001C100000001F000", buf, 32);
+	uint32_t size = ttLibC_HexUtil_makeBuffer("00B00D0001C100000001F000", buf, sizeof(buf));
 	uint8_t *data = buf;
 	for(int i = 0;i < size;++ i, ++data) {
 		ttLibC_Crc32_update(crc32, *data);
