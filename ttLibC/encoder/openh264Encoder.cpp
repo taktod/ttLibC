@@ -244,6 +244,7 @@ static void checkEncodedData(
 		}
 		ttLibC_H264 *h264 = NULL;
 		if(target_type == H264Type_configData) {
+			// put the memory hold. in order to refer from enoder.
 			h264 = ttLibC_H264_make(
 					encoder->configData,
 					target_type,
