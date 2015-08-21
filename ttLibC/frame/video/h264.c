@@ -136,6 +136,40 @@ ttLibC_H264 *ttLibC_H264_make(
 }
 
 /*
+ * make clone frame.
+ * always make copy buffer on it.
+ * @param prev_frame reuse frame object.
+ * @param src_frame  source of clone.
+ */
+ttLibC_H264 *ttLibC_H264_clone(
+		ttLibC_H264 *prev_frame,
+		ttLibC_H264 *src_frame) {
+	if(src_frame == NULL) {
+		return NULL;
+	}
+	if(src_frame->inherit_super.inherit_super.type != frameType_h264) {
+		ERR_PRINT("try to clone non h264 frame.");
+		return NULL;
+	}
+	if(prev_frame != NULL && prev_frame->inherit_super.inherit_super.type != frameType_h264) {
+		// if close with ttLibC_Frame_close. object size is depends on original frameType. and this will break the memory.
+		// therefore, just skip it.
+		ERR_PRINT("try to use non h264 frame for reuse.");
+		return NULL;
+	}
+	return ttLibC_H264_make(
+			prev_frame,
+			src_frame->type,
+			src_frame->inherit_super.width,
+			src_frame->inherit_super.height,
+			src_frame->inherit_super.inherit_super.data,
+			src_frame->inherit_super.inherit_super.buffer_size,
+			false,
+			src_frame->inherit_super.inherit_super.pts,
+			src_frame->inherit_super.inherit_super.timebase);
+}
+
+/*
  * analyze info of one nal.
  * @param info      pointer for info data.(update with data.)
  * @param data      data for analyze

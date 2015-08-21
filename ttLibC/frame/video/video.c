@@ -133,6 +133,39 @@ ttLibC_Video *ttLibC_Video_make(
 	return video;
 }
 
+/**
+ * make clone frame.
+ * always make copy buffer on it.
+ * @param prev_frame reuse frame object.
+ * @param src_frame  source of clone.
+ */
+ttLibC_Video *ttLibC_Video_clone(
+		ttLibC_Video *prev_frame,
+		ttLibC_Video *src_frame) {
+	if(src_frame == NULL) {
+		return NULL;
+	}
+	switch(src_frame->inherit_super.type) {
+//	case frameType_bgr:
+//	case frameType_flv1:
+	case frameType_h264:
+		return (ttLibC_Video *)ttLibC_H264_clone(
+ 				(ttLibC_H264 *)prev_frame,
+				(ttLibC_H264 *)src_frame);
+//	case frameType_h265:
+//	case frameType_theora:
+//	case frameType_vp6:
+//	case frameType_vp8:
+//	case frameType_vp9:
+//	case frameType_wmv1:
+//	case frameType_wmv2:
+//	case frameType_yuv420:
+	default:
+		LOG_PRINT("no clone function, frame type:%d", src_frame->inherit_super.type);
+		return NULL;
+	}
+}
+
 /*
  * close frame(use internal)
  * @param frame

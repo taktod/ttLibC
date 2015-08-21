@@ -110,6 +110,16 @@ typedef struct {
 } ttLibC_Frame;
 
 /**
+ * make clone frame.
+ * always make copy buffer on it.
+ * @param prev_frame reuse frame object.
+ * @param src_frame  source of clone.
+ */
+ttLibC_Frame *ttLibC_Frame_clone(
+		ttLibC_Frame *prev_frame,
+		ttLibC_Frame *src_frame);
+
+/**
  * close frame
  * @param frame
  */

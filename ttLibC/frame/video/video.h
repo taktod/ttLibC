@@ -74,6 +74,16 @@ ttLibC_Video *ttLibC_Video_make(
 		uint32_t timebase);
 
 /**
+ * make clone frame.
+ * always make copy buffer on it.
+ * @param prev_frame reuse frame object.
+ * @param src_frame  source of clone.
+ */
+ttLibC_Video *ttLibC_Video_clone(
+		ttLibC_Video *prev_frame,
+		ttLibC_Video *src_frame);
+
+/**
  * close frame(use internal)
  * @param frame
  */

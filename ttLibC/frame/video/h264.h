@@ -123,6 +123,16 @@ ttLibC_H264 *ttLibC_H264_make(
 		uint32_t timebase);
 
 /**
+ * make clone frame.
+ * always make copy buffer on it.
+ * @param prev_frame reuse frame object.
+ * @param src_frame  source of clone.
+ */
+ttLibC_H264 *ttLibC_H264_clone(
+		ttLibC_H264 *prev_frame,
+		ttLibC_H264 *src_frame);
+
+/**
  * analyze info of one nal.
  * @param info      pointer for info data.(update with data.)
  * @param data      data for analyze

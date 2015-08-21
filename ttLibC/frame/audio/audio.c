@@ -124,6 +124,36 @@ ttLibC_Audio *ttLibC_Audio_make(
 }
 
 /*
+ * make clone frame.
+ * always make copy buffer on it.
+ * @param prev_frame reuse frame object.
+ * @param src_frame  source of clone.
+ */
+ttLibC_Audio *ttLibC_Audio_clone(
+		ttLibC_Audio *prev_frame,
+		ttLibC_Audio *src_frame) {
+	if(src_frame == NULL) {
+		return NULL;
+	}
+	switch(src_frame->inherit_super.type) {
+//	case frameType_aac:
+//	case frameType_adpcm_ima_wav:
+//	case frameType_mp3:
+//	case frameType_nellymoser:
+//	case frameType_opus:
+//	case frameType_pcm_alaw:
+//	case frameType_pcmF32:
+//	case frameType_pcm_mulaw:
+//	case frameType_pcmS16:
+//	case frameType_speex:
+//	case frameType_vorbis:
+	default:
+		LOG_PRINT("no clone function, frame type:%d", src_frame->inherit_super.type);
+		return NULL;
+	}
+}
+
+/*
  * close frame(use internal)
  * @param frame
  */
