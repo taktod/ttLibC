@@ -136,7 +136,10 @@ ttLibC_Audio *ttLibC_Audio_clone(
 		return NULL;
 	}
 	switch(src_frame->inherit_super.type) {
-//	case frameType_aac:
+	case frameType_aac:
+		return (ttLibC_Audio *)ttLibC_Aac_clone(
+				(ttLibC_Aac *)prev_frame,
+				(ttLibC_Aac *)src_frame);
 //	case frameType_adpcm_ima_wav:
 //	case frameType_mp3:
 //	case frameType_nellymoser:

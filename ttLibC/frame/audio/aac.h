@@ -68,6 +68,16 @@ ttLibC_Aac *ttLibC_Aac_make(
 		uint64_t dsi_info);
 
 /**
+ * make clone frame.
+ * always make copy buffer on it.
+ * @param prev_frame reuse frame object.
+ * @param src_frame  source of clone.
+ */
+ttLibC_Aac *ttLibC_Aac_clone(
+		ttLibC_Aac *prev_frame,
+		ttLibC_Aac *src_frame);
+
+/**
  * analyze aac frame and make data.
  * @param prev_frame reuse frame
  * @param data       aac binary data.
