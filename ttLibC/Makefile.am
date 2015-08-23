@@ -3,6 +3,22 @@ AUTOMAKE_OPTIONS=subdir-objects
 lib_LIBRARIES=libttLibC.a
 
 libttLibC_a_SOURCES= \
+	container/flv/type/audioTag.c \
+	container/flv/type/headerTag.c \
+	container/flv/type/metaTag.c \
+	container/flv/type/videoTag.c \
+	container/flv/flvReader.c \
+	container/flv/flvTag.c \
+	container/flv/flvWriter.c \
+	container/mpegts/type/pat.c \
+	container/mpegts/type/pes.c \
+	container/mpegts/type/pmt.c \
+	container/mpegts/type/sdt.c \
+	container/mpegts/mpegtsPacket.c \
+	container/mpegts/mpegtsReader.c \
+	container/mpegts/mpegtsWriter.c \
+	container/container.c \
+	container/misc.c \
 	decoder/avcodecDecoder.c \
 	decoder/mp3lameDecoder.c \
 	decoder/openh264Decoder.cpp \
