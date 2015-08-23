@@ -16,6 +16,7 @@
 #include "../../util/ioUtil.h"
 #include "../../util/bitUtil.h"
 #include "../../util/hexUtil.h"
+#include "../../util/crc32Util.h"
 
 /*
  * h264 analyze ref information
@@ -178,6 +179,9 @@ ttLibC_H264 *ttLibC_H264_clone(
 bool ttLibC_H264_getNalInfo(ttLibC_H264_NalInfo* info, uint8_t *data, size_t data_size) {
 	if(info == NULL) {
 		return false;
+	}
+	if(data_size == 0) {
+		return false; // no more data.
 	}
 //	info->pos           = 0;
 	info->data_pos      = 0;
@@ -795,6 +799,117 @@ ttLibC_H264 *ttLibC_H264_analyzeAvccTag(
 	h264->inherit_super.inherit_super.is_non_copy = false;
 	// done.
 	return h264;
+}
+
+/*
+ * calcurate crc32 value for configdata.
+ * @param h264 target h264 object
+ * @return value of crc32. 0 for error.
+ */
+uint32_t ttLibC_H264_getConfigCrc32(ttLibC_H264 *h264) {
+	if(h264->type != H264Type_configData) {
+		return 0;
+	}
+	ttLibC_Crc32 *crc32 = ttLibC_Crc32_make(0);
+	uint8_t *data = h264->inherit_super.inherit_super.data;
+	for(uint32_t i = 0;i < h264->inherit_super.inherit_super.buffer_size;++ i) {
+		ttLibC_Crc32_update(crc32, *data);
+		++ data;
+	}
+	uint32_t value = ttLibC_Crc32_getValue(crc32);
+	ttLibC_Crc32_close(&crc32);
+	return value;
+}
+
+/*
+ * read avcc buffer for config data.
+ * @param h264      target h264 object. this must be config data.
+ * @param data      buffer to put data.
+ * @param data_size buffer size.
+ * @return write size. 0 for error.
+ */
+size_t ttLibC_H264_readAvccTag(
+		ttLibC_H264 *h264,
+		void *data,
+		size_t data_size) {
+	// need to know the size of sps and pps.
+	ttLibC_H264_NalInfo nal_info;
+	uint8_t *buf = h264->inherit_super.inherit_super.data;
+	size_t buf_size = h264->inherit_super.inherit_super.buffer_size;
+	ttLibC_H264_NalInfo sps_info, pps_info;
+	uint8_t *sps_buf = NULL;
+	uint8_t *pps_buf = NULL;
+	while(ttLibC_H264_getNalInfo(&nal_info, buf, buf_size)) {
+		switch(nal_info.nal_unit_type) {
+		case H264NalType_sequenceParameterSet:
+			if(sps_buf != NULL) {
+				ERR_PRINT("found more than 2 sps. not supported.");
+				return 0;
+			}
+			sps_buf = buf;
+			sps_info.data_pos      = nal_info.data_pos;
+			sps_info.nal_size      = nal_info.nal_size;
+			sps_info.nal_unit_type = nal_info.nal_unit_type;
+			break;
+		case H264NalType_pictureParameterSet:
+			if(pps_buf != NULL) {
+				ERR_PRINT("found more than 2 pps. not supported.");
+				return 0;
+			}
+			pps_buf = buf;
+			pps_info.data_pos      = nal_info.data_pos;
+			pps_info.nal_size      = nal_info.nal_size;
+			pps_info.nal_unit_type = nal_info.nal_unit_type;
+			break;
+		default:
+			ERR_PRINT("unexpected nal is found.");
+			return 0;
+		}
+		buf += nal_info.nal_size;
+		buf_size -= nal_info.nal_size;
+	}
+	// now ready.
+	/*
+	 * note
+	 * 01 version
+	 * 4D 40 1E(sps copy 3 byte from sps)
+	 * FF size length (size_length = 4, so ff is ok.)
+	 * E1 lower 4bit is depends on the number of sps.
+	 * xx xx 2byte for sps size
+	 * sps body data.
+	 * 01 1byte for the number of pps.
+	 * xx xx 2byte for pps size
+	 * pps body data
+	 * that's all.
+	 */
+	size_t target_size = 11 + sps_info.nal_size - sps_info.data_pos + pps_info.nal_size - pps_info.data_pos;
+	if(data_size < target_size) {
+		ERR_PRINT("input buffer is too small:%zx required size:%zx", data_size, target_size);
+		return 0;
+	}
+	uint8_t *dat = data;
+	dat[0] = 0x01;
+	dat[1] = sps_buf[1 + sps_info.data_pos];
+	dat[2] = sps_buf[2 + sps_info.data_pos];
+	dat[3] = sps_buf[3 + sps_info.data_pos];
+	dat[4] = 0xFF;
+	dat[5] = 0xE1;
+	uint16_t sps_size = sps_info.nal_size - sps_info.data_pos;
+	dat[6] = (sps_size >> 8) & 0xFF;
+	dat[7] = sps_size & 0xFF;
+	dat += 8;
+	data_size -= 8;
+	memcpy(dat, sps_buf + sps_info.data_pos, sps_size);
+	dat += sps_size;
+	data_size -= sps_size;
+	dat[0] = 0x01;
+	uint16_t pps_size = pps_info.nal_size - pps_info.data_pos;
+	dat[1] = (pps_size >> 8) & 0xFF;
+	dat[2] = pps_size & 0xFF;
+	dat += 3;
+	data_size -= 3;
+	memcpy(dat, pps_buf + pps_info.data_pos, pps_size);
+	return target_size;
 }
 
 /*

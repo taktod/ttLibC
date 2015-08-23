@@ -16,6 +16,8 @@
 #include "../../log.h"
 
 #include "../../util/bitUtil.h"
+#include "../../util/crc32Util.h"
+#include "../../util/hexUtil.h"
 
 typedef struct {
 	ttLibC_Aac inherit_super;
@@ -27,7 +29,6 @@ typedef ttLibC_Frame_Audio_Aac_ ttLibC_Aac_;
 static uint32_t sample_rate_table[] = {
 		96000, 88200, 64000, 48000, 44100, 32000, 24000, 22050, 16000, 12000, 11025, 8000
 };
-
 
 /*
  * make aac frame.
@@ -219,6 +220,171 @@ ttLibC_Aac *ttLibC_Aac_getFrame(
 			pts,
 			timebase,
 			0);
+}
+
+/*
+ * get adts header from aac information.
+ * @param target_aac target aac object.
+ * @param data       written target buffer.
+ * @param data_size  buffer size
+ * @return 0:error others:written size.
+ */
+size_t ttLibC_Aac_readAdtsHeader(
+		ttLibC_Aac *target_aac,
+		void *data,
+		size_t data_size) {
+	if(target_aac == NULL) {
+		return 0;
+	}
+	if(data_size < 7) {
+		ERR_PRINT("adtsHeader buffer size is too small.");
+		return 0;
+	}
+	ttLibC_Aac_ *aac_ = (ttLibC_Aac_ *)target_aac;
+	ttLibC_BitReader *reader = ttLibC_BitReader_make(&aac_->dsi_info, sizeof(aac_->dsi_info), BitReaderType_default);
+	/*
+	 * 内容メモ
+	 * 5bit object1 type
+	 * 6bit object2 type2 (object1 == 31の時のみ)
+	 * 4bit frequencyIndex
+	 * 24bit frequency (frequencyIndexが15の場合のみ)
+	 * 4bit channelConfigurtion.
+	 * bit 端数埋め
+	 */
+	uint32_t object_type = ttLibC_BitReader_bit(reader, 5);
+	if(object_type == 31) {
+		LOG_PRINT("not tested yet. maybe work.");
+		object_type = ttLibC_BitReader_bit(reader, 6);
+	}
+	uint32_t frequency_index = ttLibC_BitReader_bit(reader, 4);
+	if(frequency_index == 15) {
+		ERR_PRINT("not tested yet. now return error.");
+		uint32_t frequency = ttLibC_BitReader_bit(reader, 24); // たぶんこの値がそのまま周波数だと思われr。
+		return 0;
+	}
+	uint32_t channel_conf = ttLibC_BitReader_bit(reader, 4);
+	ttLibC_BitReader_close(&reader);
+	-- object_type; // to make adts, need to decrement.
+	size_t aac_size = target_aac->inherit_super.inherit_super.buffer_size + 7;
+	// ready to work.
+	uint8_t *buf = (uint8_t *)data;
+	/*
+	 * つくるデータメモ
+	 * 12bit syncbit 1埋め
+	 * 1bit id
+	 * 2bit layer
+	 * 1bit protection absent 1いれとく。
+	 * 2bit profile
+	 * 4bit sampling frequence index
+	 * 1bit private bit 1いれておく。
+	 * 3bit channel configuration.
+	 * 1bit origin flag
+	 * 1bit home
+	 * 1bit copyright identification bit
+	 * 1bit copyright identification start
+	 * 13bit frame size(adtsheaderも含む)
+	 * 11bit buffer fullness 1で埋め
+	 * 2bit no raw data blocks in frame.
+	 */
+	buf[0] = 0xFF;
+	buf[1] = 0xF1;
+	buf[2] = ((object_type & 0x03) << 6) | ((frequency_index & 0x0F) << 2) | 0x00 | ((channel_conf & 0x07) >> 2);
+	// 2bitだけframe size
+	// 11 bit
+	// 8bit frame size
+	// 3bit frame size + 5bit 0x1F
+	// 6bit 0x3F 2bit 0x00
+	buf[3] = ((channel_conf & 0x03) << 6) | ((aac_size >> 11) & 0x03);
+	buf[4] = (aac_size >> 3) & 0xFF;
+	buf[5] = ((aac_size & 0x07) << 5) | 0x1F;
+	buf[6] = 0xFC;
+	return 7;
+}
+
+/**
+ * calcurate crc32 value for configdata.
+ * if this value is changed, the configuration of aac is changed.
+ * @param aac target aac object.
+ * @return value of crc32. 0 for error.
+ */
+uint32_t ttLibC_Aac_getConfigCrc32(ttLibC_Aac *aac) {
+	ttLibC_Aac_ *aac_ = (ttLibC_Aac_ *)aac;
+	ttLibC_Crc32 *crc32 = ttLibC_Crc32_make(0);
+	uint8_t *buf;
+	switch(aac->type) {
+	case AacType_raw:
+		// treat dsi_info as 8byte data.
+		buf = (uint8_t *)(&aac_->dsi_info);
+		for(int i = 0;i < 8;i ++) {
+			ttLibC_Crc32_update(crc32, buf[i]);
+		}
+		break;
+	default:
+	case AacType_adts:
+		// for adts check until 5bits on the forth byte.
+		buf = aac->inherit_super.inherit_super.data;
+		ttLibC_Crc32_update(crc32, buf[0]);
+		ttLibC_Crc32_update(crc32, buf[1]);
+		ttLibC_Crc32_update(crc32, buf[2]);
+		ttLibC_Crc32_update(crc32, buf[3] & 0xF8);
+		break;
+	}
+	uint32_t value = ttLibC_Crc32_getValue(crc32);
+	ttLibC_Crc32_close(&crc32);
+	return value;
+}
+
+/**
+ * get dsi buffer for aac data.
+ * @param aac
+ * @param data
+ * @param data_size
+ * @return write size. 0 for error.
+ */
+size_t ttLibC_Aac_readDsiInfo(
+		ttLibC_Aac *aac,
+		void *data,
+		size_t data_size) {
+	ttLibC_Aac_ *aac_ = (ttLibC_Aac_ *)aac;
+	uint8_t *buf;
+	switch(aac->type) {
+	case AacType_raw:
+		{
+			// dsi_info is just copy of dsi.
+			// however, need to check the length.
+			buf = (uint8_t *)(&aac_->dsi_info);
+			ttLibC_BitReader *reader = ttLibC_BitReader_make(buf, 8, BitReaderType_default);
+			uint32_t need_bit = 5;
+			if(ttLibC_BitReader_bit(reader, 5) == 31) {
+				ttLibC_BitReader_bit(reader, 6);
+				need_bit += 6;
+			}
+			need_bit += 4;
+			if(ttLibC_BitReader_bit(reader, 4) == 15) {
+				ttLibC_BitReader_bit(reader, 24);
+				need_bit += 24;
+			}
+			need_bit += 4;
+			// got the need bits length.
+			bool round_up = ((need_bit % 8) != 0);
+			uint32_t size = need_bit / 8;
+			if(round_up) {
+				++ size;
+			}
+			ttLibC_BitReader_close(&reader);
+			// copy the data.
+			uint8_t *dat = data;
+			for(uint32_t i = 0;i < size;++ i) {
+				dat[i] = buf[i];
+			}
+			return size;
+		}
+		break;
+	default:
+	case AacType_adts:
+		ERR_PRINT("do later");
+		return 0;
+	}
 }
 
 /*

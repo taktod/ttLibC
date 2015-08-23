@@ -94,6 +94,38 @@ ttLibC_Aac *ttLibC_Aac_getFrame(
 		uint32_t timebase);
 
 /**
+ * get adts header from aac information.
+ * @param target_aac target aac object.
+ * @param data       written target buffer.
+ * @param data_size  buffer size
+ * @return 0:error others:written size.
+ */
+size_t ttLibC_Aac_readAdtsHeader(
+		ttLibC_Aac *target_aac,
+		void *data,
+		size_t data_size);
+
+/**
+ * calcurate crc32 value for configdata.
+ * if this value is changed, the configuration of aac is changed.
+ * @param aac target aac object.
+ * @return value of crc32. 0 for error.
+ */
+uint32_t ttLibC_Aac_getConfigCrc32(ttLibC_Aac *aac);
+
+/**
+ * get dsi buffer for aac data.
+ * @param aac
+ * @param data
+ * @param data_size
+ * @return write size. 0 for error.
+ */
+size_t ttLibC_Aac_readDsiInfo(
+		ttLibC_Aac *aac,
+		void *data,
+		size_t data_size);
+
+/**
  * close frame
  * @param frame
  */

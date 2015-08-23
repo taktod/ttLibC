@@ -215,6 +215,25 @@ ttLibC_H264 *ttLibC_H264_analyzeAvccTag(
 		uint32_t *length_size);
 
 /**
+ * calcurate crc32 value for configdata.
+ * @param h264 target h264 object
+ * @return value of crc32. 0 for error.
+ */
+uint32_t ttLibC_H264_getConfigCrc32(ttLibC_H264 *h264);
+
+/**
+ * read avcc buffer for config data.
+ * @param h264      target h264 object. this must be config data.
+ * @param data      buffer to put data.
+ * @param data_size buffer size.
+ * @return write size. 0 for error.
+ */
+size_t ttLibC_H264_readAvccTag(
+		ttLibC_H264 *h264,
+		void *data,
+		size_t data_size);
+
+/**
  * close frame
  * @param frame
  */
