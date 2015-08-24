@@ -10,6 +10,9 @@ libttLibC_a_SOURCES= \
 	container/flv/flvReader.c \
 	container/flv/flvTag.c \
 	container/flv/flvWriter.c \
+	container/mp3/mp3Frame.c \
+	container/mp3/mp3Reader.c \
+	container/mp3/mp3Writer.c \
 	container/mpegts/type/pat.c \
 	container/mpegts/type/pes.c \
 	container/mpegts/type/pmt.c \

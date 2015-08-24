@@ -28,8 +28,8 @@ ttLibC_FlvReader *ttLibC_FlvReader_make() {
 	reader->status      = body;
 	reader->target_size = 13;
 
-	reader->tmp_buffer          = malloc(65536);
 	reader->tmp_buffer_size     = 65536;
+	reader->tmp_buffer          = malloc(reader->tmp_buffer_size);
 	reader->tmp_buffer_next_pos = 0;
 	return (ttLibC_FlvReader *)reader;
 }

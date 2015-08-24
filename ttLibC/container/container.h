@@ -30,6 +30,8 @@ typedef enum {
 	containerType_mp3,
 	containerType_mp4,
 	containerType_mpegts,
+	containerType_riff,
+	containerType_wav,
 } ttLibC_Container_Type;
 
 /**

@@ -14,6 +14,7 @@
 #include <string.h>
 
 #include "flv.h"
+#include "mp3.h"
 #include "mpegts.h"
 #include "../log.h"
 
@@ -46,6 +47,8 @@ ttLibC_Container *ttLibC_Container_make(
 	case containerType_mp3:
 	case containerType_mp4:
 	case containerType_mpegts:
+	case containerType_riff:
+	case containerType_wav:
 		break;
 	default:
 		ERR_PRINT("unknown container type.%d", container_type);
@@ -114,10 +117,13 @@ bool ttLibC_Container_getFrame(
 	case containerType_flv:
 		return ttLibC_Flv_getFrame((ttLibC_Flv *)container, callback, ptr);
 //	case containerType_mkv:
-//	case containerType_mp3:
+	case containerType_mp3:
+		return ttLibC_Container_Mp3_getFrame((ttLibC_Container_Mp3 *)container, callback, ptr);
 //	case containerType_mp4:
 	case containerType_mpegts:
 		return ttLibC_Mpegts_getFrame((ttLibC_Mpegts *)container, callback, ptr);
+//	case containerType_riff:
+//	case containerType_wav:
 	default:
 		return false;
 	}
@@ -135,12 +141,16 @@ void ttLibC_Container_close(ttLibC_Container **container) {
 	case containerType_flv:
 		ttLibC_Flv_close((ttLibC_Flv **)container);
 		break;
+	case containerType_mp3:
+		ttLibC_Container_Mp3_close((ttLibC_Container_Mp3 **)container);
+		break;
 	case containerType_mpegts:
 		ttLibC_Mpegts_close((ttLibC_Mpegts **)container);
 		break;
 	case containerType_mkv:
-	case containerType_mp3:
 	case containerType_mp4:
+	case containerType_riff:
+	case containerType_wav:
 		ERR_PRINT("not make yet.:%d", target->type);
 		break;
 	default:
@@ -185,11 +195,15 @@ void ttLibC_ContainerReader_close(ttLibC_ContainerReader **reader) {
 		ttLibC_FlvReader_close((ttLibC_FlvReader **)reader);
 		return;
 //	case containerType_mkv:
-//	case containerType_mp3:
+	case containerType_mp3:
+		ttLibC_Mp3Reader_close((ttLibC_Mp3Reader **)reader);
+		return;
 //	case containerType_mp4:
 	case containerType_mpegts:
 		ttLibC_MpegtsReader_close((ttLibC_MpegtsReader **)reader);
 		return;
+//	case containerType_riff:
+//	case containerType_wav:
 	default:
 		ERR_PRINT("unknown container type for reader close.%d", target->type);
 		break;
@@ -236,11 +250,15 @@ void ttLibC_ContainerWriter_close(ttLibC_ContainerWriter **writer) {
 		ttLibC_FlvWriter_close((ttLibC_FlvWriter **)writer);
 		return;
 //	case containerType_mkv:
-//	case containerType_mp3:
+	case containerType_mp3:
+		ttLibC_Mp3Writer_close((ttLibC_Mp3Writer **)writer);
+		return;
 //	case containerType_mp4:
 	case containerType_mpegts:
 		ttLibC_MpegtsWriter_close((ttLibC_MpegtsWriter **)writer);
 		return;
+//	case containerType_riff:
+//	case containerType_wav:
 	default:
 		ERR_PRINT("unknown container type for writer close.:%d", target->type);
 		break;

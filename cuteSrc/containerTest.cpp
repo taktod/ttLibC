@@ -16,6 +16,7 @@
 
 #include <ttLibC/container/flv.h>
 #include <ttLibC/container/mpegts.h>
+#include <ttLibC/container/mp3.h>
 
 typedef struct {
 	ttLibC_ContainerReader *reader;
@@ -23,6 +24,44 @@ typedef struct {
 	FILE *fp_in;
 	FILE *fp_out;
 } containerTest_t;
+
+bool mp3Test_writeFrameCallback(void *ptr, void *data, size_t data_size) {
+	containerTest_t *testData = (containerTest_t *)ptr;
+	if(testData->fp_out) {
+		fwrite(data, 1, data_size, testData->fp_out);
+	}
+	return true;
+}
+
+bool mp3Test_getFrameCallback(void *ptr, ttLibC_Frame *frame) {
+	containerTest_t *testData = (containerTest_t *)ptr;
+	return ttLibC_Mp3Writer_write((ttLibC_Mp3Writer *)testData->writer, frame, mp3Test_writeFrameCallback, ptr);
+}
+
+bool mp3Test_getMp3Callback(void *ptr, ttLibC_Container_Mp3 *mp3) {
+	return ttLibC_Container_Mp3_getFrame(mp3, mp3Test_getFrameCallback, ptr);
+}
+
+static void mp3Test() {
+	LOG_PRINT("mp3Test");
+	containerTest_t testData;
+	testData.reader = (ttLibC_ContainerReader *)ttLibC_Mp3Reader_make();
+	testData.writer = (ttLibC_ContainerWriter *)ttLibC_Mp3Writer_make();
+	testData.fp_in = fopen("test.mp3", "rb");
+	testData.fp_out = fopen("test_out.mp3", "wb");
+	do {
+		uint8_t buffer[65536];
+		size_t read_size = fread(buffer, 1, 65536, testData.fp_in);
+		if(!ttLibC_Mp3Reader_read((ttLibC_Mp3Reader *)testData.reader, buffer, read_size, mp3Test_getMp3Callback, &testData)) {
+			ERR_PRINT("error occured!");
+			break;
+		}
+	}while(!feof(testData.fp_in));
+	ttLibC_ContainerReader_close(&testData.reader);
+	ttLibC_ContainerWriter_close(&testData.writer);
+	if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
+	if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
+}
 
 bool mpegtsTest_writePacketCallback(void *ptr, void *data, size_t data_size) {
 	containerTest_t *testData = (containerTest_t *)ptr;
@@ -122,6 +161,7 @@ static void flvTest() {
 cute::suite containerTests(cute::suite s) {
 	s.clear();
 	// now these test is works only with h264/aac data.
+//	s.push_back(CUTE(mp3Test));
 //	s.push_back(CUTE(mpegtsTest));
 //	s.push_back(CUTE(flvTest));
 	return s;
