@@ -296,7 +296,17 @@ static ttLibC_Mp3 *Mp3_makeFrame(ttLibC_Mp3 *prev_frame, void *data, size_t data
 		return NULL;
 	}
 	// now make mp3 object.
-	ttLibC_Mp3_ *mp3 = (ttLibC_Mp3_ *)ttLibC_Mp3_make(prev_frame, Mp3Type_frame, sample_rate, sample_num, channel_num, data, frame_size, true, pts, timebase);
+	ttLibC_Mp3_ *mp3 = (ttLibC_Mp3_ *)ttLibC_Mp3_make(
+			prev_frame,
+			Mp3Type_frame,
+			sample_rate,
+			sample_num,
+			channel_num,
+			data,
+			frame_size,
+			true,
+			pts,
+			timebase);
 	if(mp3 == NULL) {
 		return NULL;
 	}
@@ -304,8 +314,62 @@ static ttLibC_Mp3 *Mp3_makeFrame(ttLibC_Mp3 *prev_frame, void *data, size_t data
 }
 
 static ttLibC_Mp3 *Mp3_makeId3Frame(ttLibC_Mp3 *prev_frame, void *data, size_t data_size, uint64_t pts, uint32_t timebase) {
+	if(data_size < 10) {
+		return NULL;
+	}
 	// pts maybe 0.
-	return NULL;
+	ttLibC_BitReader *reader = ttLibC_BitReader_make(data, data_size, BitReaderType_default);
+	/*
+	 * recipe
+	 * 24bit ID3
+	 * 16bit version
+	 * 8bit flag
+	 * 1bit dummy
+	 * 7bit size1
+	 * 1bit dummy
+	 * 7bit size2
+	 * 1bit dummy
+	 * 7bit size3
+	 * 1bit dummy
+	 * 7bit size4
+	 *
+	 * 10 + size1size2size3size4 = size
+	 */
+	if(ttLibC_BitReader_bit(reader, 8) != 'I'
+	|| ttLibC_BitReader_bit(reader, 8) != 'D'
+	|| ttLibC_BitReader_bit(reader, 8) != '3') {
+		ERR_PRINT("tag is not ID3.");
+		ttLibC_BitReader_close(&reader);
+		return NULL;
+	}
+	ttLibC_BitReader_bit(reader, 16);
+	ttLibC_BitReader_bit(reader, 8);
+	ttLibC_BitReader_bit(reader, 1);
+	uint32_t size = ttLibC_BitReader_bit(reader, 7);
+	ttLibC_BitReader_bit(reader, 1);
+	size = (size << 7) | ttLibC_BitReader_bit(reader, 7);
+	ttLibC_BitReader_bit(reader, 1);
+	size = (size << 7) | ttLibC_BitReader_bit(reader, 7);
+	ttLibC_BitReader_bit(reader, 1);
+	size = (size << 7) | ttLibC_BitReader_bit(reader, 7);
+	size += 10; // これがフレームサイズ
+	LOG_PRINT("SIZE:%x", size);
+	ttLibC_BitReader_close(&reader);
+	ttLibC_Mp3_ *mp3 = (ttLibC_Mp3_ *)ttLibC_Mp3_make(
+			prev_frame,
+			Mp3Type_id3,
+			0,
+			0,
+			0,
+			data,
+			size,
+			true,
+			0,
+			44100);
+	if(mp3 == NULL) {
+		return NULL;
+	}
+	return (ttLibC_Mp3 *)mp3;
 }
 
 static ttLibC_Mp3 *Mp3_makeTagFrame(ttLibC_Mp3 *prev_frame, void *data, size_t data_size, uint64_t pts, uint32_t timebase) {
