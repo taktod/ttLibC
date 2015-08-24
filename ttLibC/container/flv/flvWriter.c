@@ -15,6 +15,7 @@
 #include "type/metaTag.h"
 #include "../../log.h"
 #include "../../util/hexUtil.h"
+#include "../../frame/video/h264.h"
 #include <stdlib.h>
 
 ttLibC_FlvWriter *ttLibC_FlvWriter_make(
@@ -33,7 +34,9 @@ ttLibC_FlvWriter *ttLibC_FlvWriter_make(
 		writer->video_track.crc32       = 0;
 		writer->video_track.frame_type  = video_type;
 		// そんなにためることもないでしょう。
-		writer->video_track.frame_queue = ttLibC_FrameQueue_make(9, 32);
+		// 貯める必要がありました。元のデータがなんであるかによって、stackを大きめにとる必要があるかは変わってくるみたいです。
+		// ソースをmpegtsにしたところ、stackが小さすぎて正しい動作にならなかった。
+		writer->video_track.frame_queue = ttLibC_FrameQueue_make(9, 255);
 		break;
 	default:
 		writer->video_track.crc32       = 0;
@@ -51,7 +54,7 @@ ttLibC_FlvWriter *ttLibC_FlvWriter_make(
 	case frameType_speex:
 		writer->audio_track.crc32       = 0;
 		writer->audio_track.frame_type  = audio_type;
-		writer->audio_track.frame_queue = ttLibC_FrameQueue_make(8, 32);
+		writer->audio_track.frame_queue = ttLibC_FrameQueue_make(8, 255);
 		break;
 	default:
 		writer->audio_track.crc32       = 0;
@@ -81,8 +84,15 @@ bool ttLibC_FlvWriter_write(
 	frame->pts = (uint64_t)(1.0 * frame->pts * 1000 / frame->timebase);
 	frame->timebase = 1000;
 	switch(frame->type) {
-	case frameType_flv1:
 	case frameType_h264:
+		{
+			ttLibC_H264 *h264 = (ttLibC_H264 *)frame;
+			if(h264->type == H264Type_unknown) {
+				// unknownデータはskipしておく。(AUDとか)
+				return true;
+			}
+		}
+	case frameType_flv1:
 	case frameType_vp6:
 		// 以下videoTagの指定と一致するか確認してから、videoTagで処理する。
 		if(writer_->video_track.frame_type != frame->type) {

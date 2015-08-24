@@ -257,6 +257,10 @@ bool ttLibC_FlvAudioTag_writeTag(
 				// aacのヘッダを書き出す。
 				uint8_t dsi[16];
 				size_t size = ttLibC_Aac_readDsiInfo(aac, dsi, sizeof(dsi));
+				if(size == 0) {
+					ERR_PRINT("dsi data size is 0. something wrong.");
+					return false;
+				}
 				// あとはaacのデータを書き出す。
 				buf[0]  = 0x08;
 				uint32_t pre_size = size + 2;

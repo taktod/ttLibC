@@ -25,6 +25,55 @@ typedef struct {
 	FILE *fp_out;
 } containerTest_t;
 
+bool mpegtsToFlvTest_writeFuncCallback(void *ptr, void *data, size_t data_size) {
+	containerTest_t *testData = (containerTest_t *)ptr;
+	if(testData->fp_out) {
+		fwrite(data, 1, data_size, testData->fp_out);
+	}
+	return true;
+}
+
+bool mpegtsToFlvTest_getFrameCallback(void *ptr, ttLibC_Frame *frame) {
+	containerTest_t *testData = (containerTest_t *)ptr;
+	return ttLibC_FlvWriter_write(
+			(ttLibC_FlvWriter *)testData->writer,
+			frame,
+			mpegtsToFlvTest_writeFuncCallback,
+			ptr);
+}
+
+bool mpegtsToFlvTest_getMpegtsPacketCallback(void *ptr, ttLibC_Mpegts *mpegts) {
+	return ttLibC_Mpegts_getFrame(
+			mpegts,
+			mpegtsToFlvTest_getFrameCallback,
+			ptr);
+}
+
+static void mpegtsToFlvTest() {
+	LOG_PRINT("mpegtsToFlvTest");
+	containerTest_t testData;
+	testData.reader = (ttLibC_ContainerReader *)ttLibC_MpegtsReader_make();
+	testData.writer = (ttLibC_ContainerWriter *)ttLibC_FlvWriter_make(frameType_h264, frameType_aac);
+	testData.fp_in = fopen("test.ts", "rb");
+	testData.fp_out = fopen("test_ts_out.flv", "wb");
+	do {
+		uint8_t buffer[65536];
+		size_t read_size = fread(buffer, 1, 65536, testData.fp_in);
+		if(!ttLibC_MpegtsReader_read(
+				(ttLibC_MpegtsReader *)testData.reader,
+				buffer,
+				read_size,
+				mpegtsToFlvTest_getMpegtsPacketCallback,
+				&testData)) {
+			break;
+		}
+	}while(!feof(testData.fp_in));
+	ttLibC_ContainerReader_close(&testData.reader);
+	ttLibC_ContainerWriter_close(&testData.writer);
+	if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
+	if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
+}
+
 bool mp3Test_writeFrameCallback(void *ptr, void *data, size_t data_size) {
 	containerTest_t *testData = (containerTest_t *)ptr;
 	if(testData->fp_out) {
@@ -160,10 +209,10 @@ static void flvTest() {
  */
 cute::suite containerTests(cute::suite s) {
 	s.clear();
-	// now these test is works only with h264/aac data.
-//	s.push_back(CUTE(mp3Test));
-//	s.push_back(CUTE(mpegtsTest));
-//	s.push_back(CUTE(flvTest));
+//	s.push_back(CUTE(mpegtsToFlvTest)); // h264/aac
+//	s.push_back(CUTE(mp3Test)); // none/mp3
+//	s.push_back(CUTE(mpegtsTest)); // h264/aac
+//	s.push_back(CUTE(flvTest)); // h264/aac
 	return s;
 }
 

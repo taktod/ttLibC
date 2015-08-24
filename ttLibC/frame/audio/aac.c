@@ -380,9 +380,37 @@ size_t ttLibC_Aac_readDsiInfo(
 			return size;
 		}
 		break;
-	default:
 	case AacType_adts:
-		ERR_PRINT("do later");
+		{
+			// only check 3 or 4 byte.
+			buf = aac->inherit_super.inherit_super.data;
+			buf += 2;
+			ttLibC_BitReader *reader = ttLibC_BitReader_make(buf, 2, BitReaderType_default);
+			uint32_t object_type = ttLibC_BitReader_bit(reader, 2) + 1;
+			uint32_t frequency_index = ttLibC_BitReader_bit(reader, 4);
+			ttLibC_BitReader_bit(reader, 1);
+			uint32_t channel_conf = ttLibC_BitReader_bit(reader, 3);
+			// ready to go.
+			ttLibC_BitReader_close(&reader);
+			uint8_t *dat = data;
+			if(frequency_index == 15) {
+				ERR_PRINT("I don't now how to deal with frequency index is 15.");
+				return 0;
+			}
+			if(object_type == 31) {
+				LOG_PRINT("not check yet.");
+				dat[0] = (31 << 3) | ((object_type >> 3) & 0x07);
+				dat[1] = ((object_type << 5) & 0xE0) | ((frequency_index << 1) & 0x1E) | ((channel_conf >> 3) & 0x01);
+				dat[2] = (channel_conf << 5) & 0xE0;
+				return 3;
+			}
+			else {
+				dat[0] = ((object_type << 3) & 0xF8) | ((frequency_index >> 1) & 0x07);
+				dat[1] = ((frequency_index << 7) & 0x80) | ((channel_conf << 3) & 0x78);
+				return 2;
+			}
+		}
+	default:
 		return 0;
 	}
 }
