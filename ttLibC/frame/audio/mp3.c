@@ -15,6 +15,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "../../log.h"
+#include "../../util/bitUtil.h"
 
 /*
  * mp3 frame definition(detail)
@@ -24,8 +25,6 @@ typedef struct {
 	ttLibC_Mp3 inherit_super;
 	union {
 		struct { // for frame
-			/** frame header 4byte data. */
-			uint32_t frame_header;
 		};
 		struct { // for id3
 
@@ -145,7 +144,7 @@ ttLibC_Mp3_Type ttLibC_Mp3_getMp3Type(
 	case 0xFF:
 		return Mp3Type_frame;
 	default:
-		ERR_PRINT("unknown mp3 frame. start width:%x", *dat);
+		LOG_PRINT("unknown mp3 frame. start width:%x", *dat);
 		return -1;
 	}
 }
@@ -162,93 +161,34 @@ static int sampleRateTableV1[]  = {44100, 48000, 32000};
 static int sampleRateTableV2[]  = {22050, 24000, 16000};
 static int sampleRateTableV25[] = {11025, 12000,  8000};
 
-static uint16_t getSyncBit(uint32_t header) {
-	return ((header >> 21) & 0x7FF);
-}
-/*
- * @param header first 4 byte of frame.
- * @return 0:mpeg2.5 2:mpeg2 3:mpeg1
- */
-static uint8_t getMpegVersion(uint32_t header) {
-	return ((header >> 19) & 0x03);
-}
-
-/*
- * @param header first 4 byte of frame.
- * @return 1:layer3 2:layer2 3:layer1
- */
-static uint8_t getLayer(uint32_t header) {
-	return ((header >> 17) & 0x03);
-}
-
-/**
- * @param header first 4 byte of frame.
- * @return 0:protected by CRC16
- */
-static uint8_t getProtectionBit(uint32_t header) {
-	return ((header >> 16) & 0x01);
-}
-
-static uint8_t getBitrateIndex(uint32_t header) {
-	return ((header >> 12) & 0x0F);
-}
-
-static uint8_t getSampleRateIndex(uint32_t header) {
-	return ((header >> 10) & 0x03);
-}
-
-static uint8_t getPaddingBit(uint32_t header) {
-	return ((header >> 9) & 0x01);
-}
-
-static uint8_t getPrivateBit(uint32_t header) {
-	return ((header >> 8) & 0x01);
-}
-
-/*
- * @param header first 4 byte of frame.
- * @return 0:stereo 1:joint stereo 2:dual channel 3:monoral
- */
-static uint8_t getChannelMode(uint32_t header) {
-	return ((header >> 6) & 0x03);
-}
-
-static uint8_t getModeExtension(uint32_t header) {
-	// for joint stereo.
-	return ((header >> 4) & 0x03);
-}
-
-static uint8_t getCopyRight(uint32_t header) {
-	return ((header >> 3) & 0x01);
-}
-static uint8_t getOriginalFlg(uint32_t header) {
-	return ((header >> 2) & 0x01);
-}
-static uint8_t getEmphasis(uint32_t header) {
-	return (header & 3);
-}
-
-static ttLibC_Mp3 *makeFrame(ttLibC_Mp3 *prev_frame, void *data, size_t data_size, uint64_t pts, uint32_t timebase) {
+static ttLibC_Mp3 *Mp3_makeFrame(ttLibC_Mp3 *prev_frame, void *data, size_t data_size, uint64_t pts, uint32_t timebase) {
 	if(data_size < 4) {
 		return NULL;
 	}
-	uint8_t *dat = data;
-	uint32_t header = (dat[0] << 24) | (dat[1] << 16) | (dat[2] << 8) | dat[3];
-	// check the sync bit.
-	if(getSyncBit(header) != 0x7FF) {
-		ERR_PRINT("syncBit is invalid.");
-		return NULL;
+	ttLibC_BitReader *reader = ttLibC_BitReader_make(data, data_size, BitReaderType_default);
+	if(ttLibC_BitReader_bit(reader, 11) != 0x07FF) {
+		ERR_PRINT("syncbit is invalid.");
+		ttLibC_BitReader_close(&reader);
+		return 0;
 	}
-	uint8_t mpeg_version = getMpegVersion(header);
-	uint8_t layer = getLayer(header);
-	uint8_t bitrate_index = getBitrateIndex(header);
-	uint8_t sample_rate_index = getSampleRateIndex(header);
-	uint8_t padding_bit = getPaddingBit(header);
+	uint8_t mpeg_version = ttLibC_BitReader_bit(reader, 2);
+	uint8_t layer        = ttLibC_BitReader_bit(reader, 2);
+	ttLibC_BitReader_bit(reader, 1);
+	uint8_t bitrate_index     = ttLibC_BitReader_bit(reader, 4);
+	uint8_t sample_rate_index = ttLibC_BitReader_bit(reader, 2);
+	uint8_t padding_bit       = ttLibC_BitReader_bit(reader, 1);
+	ttLibC_BitReader_bit(reader, 1);
+	uint8_t channel_mode = ttLibC_BitReader_bit(reader, 2);
+	ttLibC_BitReader_bit(reader, 2);
+	ttLibC_BitReader_bit(reader, 1);
+	ttLibC_BitReader_bit(reader, 1);
+	ttLibC_BitReader_bit(reader, 2);
+	ttLibC_BitReader_close(&reader);
 
 	uint32_t bitrate = 0;
 	uint32_t sample_rate = 0;
-	uint32_t channel_num = getChannelMode(header) == 3 ? 1 : 2;
-	uint32_t frame_size = 0;
+	size_t frame_size = 0;
+	uint32_t channel_num = channel_mode == 3 ? 1 : 2;
 	switch(mpeg_version) {
 	case 0:
 	case 2:
@@ -324,11 +264,11 @@ static ttLibC_Mp3 *makeFrame(ttLibC_Mp3 *prev_frame, void *data, size_t data_siz
 		ERR_PRINT("unknown layer index:%d", layer);
 		return NULL;
 	}
-	// if data_size is more than frame_size, we can make mp3 frame object.
 	if(data_size < frame_size) {
 		// data size is too short. need more.
 		return NULL;
 	}
+
 	uint32_t sample_num = 0;
 	switch(layer) {
 	case 3:
@@ -360,17 +300,15 @@ static ttLibC_Mp3 *makeFrame(ttLibC_Mp3 *prev_frame, void *data, size_t data_siz
 	if(mp3 == NULL) {
 		return NULL;
 	}
-	// save the extra data for Mp3Type_frame.
-	mp3->frame_header = header;
 	return (ttLibC_Mp3 *)mp3;
 }
 
-static ttLibC_Mp3 *makeId3Frame(ttLibC_Mp3 *prev_frame, void *data, size_t data_size, uint64_t pts, uint32_t timebase) {
+static ttLibC_Mp3 *Mp3_makeId3Frame(ttLibC_Mp3 *prev_frame, void *data, size_t data_size, uint64_t pts, uint32_t timebase) {
 	// pts maybe 0.
 	return NULL;
 }
 
-static ttLibC_Mp3 *makeTagFrame(ttLibC_Mp3 *prev_frame, void *data, size_t data_size, uint64_t pts, uint32_t timebase) {
+static ttLibC_Mp3 *Mp3_makeTagFrame(ttLibC_Mp3 *prev_frame, void *data, size_t data_size, uint64_t pts, uint32_t timebase) {
 	return NULL;
 }
 
@@ -387,11 +325,11 @@ ttLibC_Mp3 *ttLibC_Mp3_getFrame(ttLibC_Mp3 *prev_frame, void *data, size_t data_
 	ttLibC_Mp3_Type type = ttLibC_Mp3_getMp3Type(data, data_size);
 	switch(type) {
 	case Mp3Type_frame:
-		return makeFrame(prev_frame, data, data_size, pts, timebase);
+		return Mp3_makeFrame(prev_frame, data, data_size, pts, timebase);
 	case Mp3Type_id3:
-		return makeId3Frame(prev_frame, data, data_size, pts, timebase);
+		return Mp3_makeId3Frame(prev_frame, data, data_size, pts, timebase);
 	case Mp3Type_tag:
-		return makeTagFrame(prev_frame, data, data_size, pts, timebase);
+		return Mp3_makeTagFrame(prev_frame, data, data_size, pts, timebase);
 	default:
 		// unknown mp3 frame. can be here, in the case of too short data. less than 1byte.
 		return NULL;
