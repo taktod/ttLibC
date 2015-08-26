@@ -146,8 +146,12 @@ ttLibC_Audio *ttLibC_Audio_clone(
 //	case frameType_opus:
 //	case frameType_pcm_alaw:
 //	case frameType_pcmF32:
+//		return (ttLibC_Audio *)ttLibC_PcmF32
 //	case frameType_pcm_mulaw:
-//	case frameType_pcmS16:
+	case frameType_pcmS16:
+		return (ttLibC_Audio *)ttLibC_PcmS16_clone(
+				(ttLibC_PcmS16 *)prev_frame,
+				(ttLibC_PcmS16 *)src_frame);
 //	case frameType_speex:
 //	case frameType_vorbis:
 	default:

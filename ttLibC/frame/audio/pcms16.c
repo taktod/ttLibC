@@ -124,6 +124,90 @@ ttLibC_PcmS16 *ttLibC_PcmS16_make(
 	return pcms16;
 }
 
+/*
+ * make clone frame.
+ * always make copy buffer on it.
+ * @param prev_frame reuse frame object.
+ * @param src_frame  source of clone.
+ */
+ttLibC_PcmS16 *ttLibC_PcmS16_clone(
+		ttLibC_PcmS16 *prev_frame,
+		ttLibC_PcmS16 *src_frame) {
+	if(src_frame == NULL) {
+		return NULL;
+	}
+	if(src_frame->inherit_super.inherit_super.type != frameType_pcmS16) {
+		ERR_PRINT("try to clone non pcms16 frame.");
+		return NULL;
+	}
+	if(prev_frame != NULL && prev_frame->inherit_super.inherit_super.type != frameType_pcmS16) {
+		ERR_PRINT("try to use non pcms16 frame for reuse.");
+		return NULL;
+	}
+	if(src_frame->inherit_super.inherit_super.data == NULL) {
+		ERR_PRINT("original data have only reference, nothing to copy.");
+		return NULL;
+	}
+	// データのコピーをします。
+	switch(src_frame->type) {
+	case PcmS16Type_bigEndian:
+	case PcmS16Type_littleEndian:
+		{
+			ttLibC_PcmS16 *pcms16 = ttLibC_PcmS16_make(
+					prev_frame,
+					src_frame->type,
+					src_frame->inherit_super.sample_rate,
+					src_frame->inherit_super.sample_num,
+					src_frame->inherit_super.channel_num,
+					src_frame->inherit_super.inherit_super.data,
+					src_frame->inherit_super.inherit_super.buffer_size,
+					NULL,
+					src_frame->l_stride,
+					NULL,
+					src_frame->r_stride,
+					false,
+					src_frame->inherit_super.inherit_super.pts,
+					src_frame->inherit_super.inherit_super.timebase);
+			if(pcms16 == NULL) {
+				return NULL;
+			}
+			pcms16->l_data = pcms16->inherit_super.inherit_super.data;
+			if(src_frame->inherit_super.channel_num == 2) {
+				pcms16->r_data = pcms16->l_data + 2;
+			}
+			return pcms16;
+		}
+		break;
+	case PcmS16Type_bigEndian_planar:
+	case PcmS16Type_littleEndian_planar:
+		{
+			ttLibC_PcmS16 *pcms16 = ttLibC_PcmS16_make(
+					prev_frame,
+					src_frame->type,
+					src_frame->inherit_super.sample_rate,
+					src_frame->inherit_super.sample_num,
+					src_frame->inherit_super.channel_num,
+					src_frame->inherit_super.inherit_super.data,
+					src_frame->inherit_super.inherit_super.buffer_size,
+					NULL,
+					src_frame->l_stride,
+					NULL,
+					src_frame->r_stride,
+					false,
+					src_frame->inherit_super.inherit_super.pts,
+					src_frame->inherit_super.inherit_super.timebase);
+			pcms16->l_data = pcms16->inherit_super.inherit_super.data;
+			if(pcms16 == NULL) {
+				return NULL;
+			}
+			if(src_frame->inherit_super.channel_num == 2) {
+				pcms16->r_data = pcms16->l_data + (size_t)(src_frame->r_data - src_frame->l_data);
+			}
+			return pcms16;
+		}
+		break;
+	}
+}
 
 /*
  * close frame
