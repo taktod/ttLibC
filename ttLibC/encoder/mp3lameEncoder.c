@@ -162,8 +162,14 @@ void ttLibC_Mp3lameEncoder_encode(ttLibC_Mp3lameEncoder *encoder, ttLibC_PcmS16 
 		return;
 	case PcmS16Type_littleEndian:
 		{
-			uint32_t size = lame_encode_buffer_interleaved(encoder_->gflags, (short*)pcm->l_data, pcm->inherit_super.sample_num, encoder_->data + encoder_->data_start_pos, encoder_->data_size - encoder_->data_start_pos);
-			checkEncodedData(encoder_, size + encoder_->data_start_pos, callback, ptr);
+			if(encoder_->inherit_super.channel_num == 1) {
+				uint32_t size = lame_encode_buffer(encoder_->gflags, (const short*)pcm->l_data, NULL, pcm->inherit_super.sample_num, encoder_->data + encoder_->data_start_pos, encoder_->data_size - encoder_->data_start_pos);
+				checkEncodedData(encoder_, size + encoder_->data_start_pos, callback, ptr);
+			}
+			else {
+				uint32_t size = lame_encode_buffer_interleaved(encoder_->gflags, (short*)pcm->l_data, pcm->inherit_super.sample_num, encoder_->data + encoder_->data_start_pos, encoder_->data_size - encoder_->data_start_pos);
+				checkEncodedData(encoder_, size + encoder_->data_start_pos, callback, ptr);
+			}
 		}
 		break;
 	case PcmS16Type_littleEndian_planar:
