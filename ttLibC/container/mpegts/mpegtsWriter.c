@@ -56,12 +56,14 @@ ttLibC_MpegtsWriter *ttLibC_MpegtsWriter_make_ex(
 	}
 	uint16_t pid = 0x100;
 	for(int i = 0;i < MaxPesTracks; ++ i) {
-		if(i > types_num) {
+		writer->track[i].cc = 0;
+		if(i >= types_num) {
 			writer->inherit_super.trackInfo[i].pid = 0;
 			writer->inherit_super.trackInfo[i].frame_type = frameType_unknown;
+			writer->track[i].h264_configData = NULL;
+			writer->track[i].frame_queue = NULL;
 			continue;
 		}
-		writer->track[i].cc = 0;
 		writer->track[i].h264_configData = NULL;
 		writer->track[i].frame_queue = ttLibC_FrameQueue_make(pid, 255);
 		switch(target_frame_types[i]) {
