@@ -272,21 +272,21 @@ bool ttLibC_FlvAudioTag_writeTag(
 			ttLibC_Aac *aac = (ttLibC_Aac *)frame;
 			uint32_t crc32_value = ttLibC_Aac_getConfigCrc32(aac);
 			if(writer->audio_track.crc32 == 0 || writer->audio_track.crc32 != crc32_value) {
-				// crc32が変わっている場合(もしくは初アクセス)
-				// aacのヘッダを書き出す。
+				// if crc32 is changed or first access.
+				// try to write media sequence header.
 				uint8_t dsi[16];
 				size_t size = ttLibC_Aac_readDsiInfo(aac, dsi, sizeof(dsi));
 				if(size == 0) {
 					ERR_PRINT("dsi data size is 0. something wrong.");
 					return false;
 				}
-				// あとはaacのデータを書き出す。
+				// write data.
 				buf[0]  = 0x08;
 				uint32_t pre_size = size + 2;
 				buf[1]  = (pre_size >> 16) & 0xFF;
 				buf[2]  = (pre_size >> 8) & 0xFF;
 				buf[3]  = pre_size & 0xFF;
-				// pts値
+				// pts
 				buf[4]  = (aac->inherit_super.inherit_super.pts >> 16) & 0xFF;
 				buf[5]  = (aac->inherit_super.inherit_super.pts >> 8) & 0xFF;
 				buf[6]  = aac->inherit_super.inherit_super.pts & 0xFF;
@@ -296,7 +296,6 @@ bool ttLibC_FlvAudioTag_writeTag(
 				buf[9]  = 0x00;
 				buf[10] = 0x00;
 				// tag
-				// ここがどうなるかは、aacの周波数、チャンネル次第。
 				buf[11] = 0xA0;
 				buf[11] |= 0x02; // 16bit force.
 				switch(aac->inherit_super.channel_num) {
@@ -326,10 +325,12 @@ bool ttLibC_FlvAudioTag_writeTag(
 					return false;
 				}
 				// type
-				buf[12] = 0x00;
+				buf[12] = 0x00; // msh
+				// header
 				if(!callback(ptr, buf, 13)) {
 					return false;
 				}
+				// body
 				if(!callback(ptr, dsi, size)) {
 					return false;;
 				}
@@ -343,13 +344,12 @@ bool ttLibC_FlvAudioTag_writeTag(
 					return false;
 				}
 				writer->audio_track.crc32 = crc32_value;
-//				return true;
 			}
-			// あとは通常のフレームを書き込む
+			// write aac raw data.
 			uint8_t *audio_data = aac->inherit_super.inherit_super.data;
 			uint32_t audio_data_size = aac->inherit_super.inherit_super.buffer_size;
 			if(aac->type == AacType_adts) {
-				// adtsの場合は、7byte目から保持する必要がある。
+				// for adts, need to skip first 7byte.
 				audio_data += 7;
 				audio_data_size -= 7;
 			}
@@ -358,7 +358,7 @@ bool ttLibC_FlvAudioTag_writeTag(
 			buf[1]  = (pre_size >> 16) & 0xFF;
 			buf[2]  = (pre_size >> 8) & 0xFF;
 			buf[3]  = pre_size & 0xFF;
-			// pts値
+			// pts
 			buf[4]  = (aac->inherit_super.inherit_super.pts >> 16) & 0xFF;
 			buf[5]  = (aac->inherit_super.inherit_super.pts >> 8) & 0xFF;
 			buf[6]  = aac->inherit_super.inherit_super.pts & 0xFF;
@@ -397,7 +397,84 @@ bool ttLibC_FlvAudioTag_writeTag(
 			}
 			// type
 			buf[12] = 0x01;
+			// header
 			if(!callback(ptr, buf, 13)) {
+				return false;
+			}
+			// data_body
+			if(!callback(ptr, audio_data, audio_data_size)) {
+				return false;
+			}
+			// post size.
+			uint32_t post_size = pre_size + 11;
+			buf[0] = (post_size >> 24) & 0xFF;
+			buf[1] = (post_size >> 16) & 0xFF;
+			buf[2] = (post_size >> 8) & 0xFF;
+			buf[3] = post_size & 0xFF;
+			if(!callback(ptr, buf, 4)) {
+				return false;
+			}
+			// done.
+			return true;
+		}
+		break;
+	case frameType_mp3:
+		{
+			ttLibC_Audio *audio = (ttLibC_Audio *)frame;
+			uint8_t *audio_data = audio->inherit_super.data;
+			uint32_t audio_data_size = audio->inherit_super.buffer_size;
+			buf[0]  = 0x08;
+			uint32_t pre_size = audio_data_size + 1;
+			buf[1]  = (pre_size >> 16) & 0xFF;
+			buf[2]  = (pre_size >> 8) & 0xFF;
+			buf[3]  = pre_size & 0xFF;
+			// pts
+			buf[4]  = (audio->inherit_super.pts >> 16) & 0xFF;
+			buf[5]  = (audio->inherit_super.pts >> 8) & 0xFF;
+			buf[6]  = audio->inherit_super.pts & 0xFF;
+			buf[7]  = (audio->inherit_super.pts >> 24) & 0xFF;
+			// track
+			buf[8]  = 0x00;
+			buf[9]  = 0x00;
+			buf[10] = 0x00;
+			if(frame->type == frameType_mp3) {
+				if(audio->sample_rate == 8000) {
+					buf[11] = 0xE0;
+				}
+				else {
+					buf[11] = 0x20;
+				}
+			}
+			buf[11] |= 0x02; // 16bit force.
+			switch(audio->channel_num) {
+			case 1:
+				buf[11] |= 0x00;
+				break;
+			case 2:
+				buf[11] |= 0x01;
+				break;
+			default:
+				return false;
+			}
+			switch(audio->sample_rate) {
+			case 44100:
+				buf[11] |= 0x0C;
+				break;
+			case 22050:
+				buf[11] |= 0x08;
+				break;
+			case 11025:
+				buf[11] |= 0x04;
+				break;
+			case 5512:
+				buf[11] |= 0x00;
+				break;
+			default:
+				buf[11] |= 0x00;
+				break;
+			}
+			// header
+			if(!callback(ptr, buf, 12)) {
 				return false;
 			}
 			// data_body
@@ -415,7 +492,6 @@ bool ttLibC_FlvAudioTag_writeTag(
 			return true;
 		}
 		break;
-	case frameType_mp3:
 	case frameType_nellymoser:
 	case frameType_pcmS16:
 	case frameType_pcm_alaw:
