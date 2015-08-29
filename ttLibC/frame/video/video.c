@@ -147,7 +147,10 @@ ttLibC_Video *ttLibC_Video_clone(
 	}
 	switch(src_frame->inherit_super.type) {
 //	case frameType_bgr:
-//	case frameType_flv1:
+	case frameType_flv1:
+		return (ttLibC_Video *)ttLibC_Flv1_clone(
+				(ttLibC_Flv1 *)prev_frame,
+				(ttLibC_Flv1 *)src_frame);
 	case frameType_h264:
 		return (ttLibC_Video *)ttLibC_H264_clone(
  				(ttLibC_H264 *)prev_frame,

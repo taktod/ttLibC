@@ -66,6 +66,38 @@ ttLibC_Flv1 *ttLibC_Flv1_make(
 	return (ttLibC_Flv1 *)flv1;
 }
 
+/*
+ * make clone frame.
+ * always make copy buffer on it.
+ * @param prev_frame reuse frame object.
+ * @param src_frame  source of clone.
+ */
+ttLibC_Flv1 *ttLibC_Flv1_clone(
+		ttLibC_Flv1 *prev_frame,
+		ttLibC_Flv1 *src_frame) {
+	if(src_frame == NULL) {
+		return NULL;
+	}
+	if(src_frame->inherit_super.inherit_super.type != frameType_flv1) {
+		ERR_PRINT("try to clone non flv1 frame.");
+		return NULL;
+	}
+	if(prev_frame != NULL && prev_frame->inherit_super.inherit_super.type != frameType_flv1) {
+		ERR_PRINT("try to use non flv1 frame for reuse.");
+		return NULL;
+	}
+	return ttLibC_Flv1_make(
+			prev_frame,
+			src_frame->type,
+			src_frame->inherit_super.width,
+			src_frame->inherit_super.height,
+			src_frame->inherit_super.inherit_super.data,
+			src_frame->inherit_super.inherit_super.buffer_size,
+			false,
+			src_frame->inherit_super.inherit_super.pts,
+			src_frame->inherit_super.inherit_super.timebase);
+}
+
 static int8_t Flv1_getPictureType(void *data, size_t data_size) {
 	/*
 	 * 17bit picture Start code 0000 0000 0000 0000 1
