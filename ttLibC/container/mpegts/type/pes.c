@@ -14,6 +14,7 @@
 #include "../../../log.h"
 #include "../../../util/bitUtil.h"
 #include "../../../util/ioUtil.h"
+#include "../../../util/hexUtil.h"
 
 #include "../../../frame/audio/aac.h"
 #include "../../../frame/audio/mp3.h"
@@ -415,7 +416,37 @@ bool ttLibC_Pes_getFrame(
 		}
 		break;
 	case frameType_mp3:
-		// 内容は通常のmp3であるはず。
+		{
+			buffer = pes->inherit_super.inherit_super.inherit_super.data;
+			left_size = pes->inherit_super.inherit_super.inherit_super.buffer_size;
+			uint64_t sample_num_count = 0;
+			uint32_t sample_rate = 0;
+			do {
+				uint64_t pts = pes->inherit_super.inherit_super.inherit_super.pts;
+				if(sample_rate != 0) {
+					pts = pts + (sample_num_count * 90000 / sample_rate);
+				}
+				ttLibC_Mp3 *mp3 = ttLibC_Mp3_getFrame(
+						(ttLibC_Mp3 *)pes->inherit_super.frame,
+						buffer,
+						left_size,
+						pts,
+						pes->inherit_super.inherit_super.inherit_super.timebase);
+				if(mp3 == NULL) {
+					ERR_PRINT("failed to get mp3 frame.");
+					return false;
+				}
+				sample_rate = mp3->inherit_super.sample_rate;
+				sample_num_count += mp3->inherit_super.sample_num;
+				pes->inherit_super.frame = (ttLibC_Frame *)mp3;
+				if(!callback(ptr, pes->inherit_super.frame)) {
+					return false;
+				}
+				buffer += mp3->inherit_super.inherit_super.buffer_size;
+				left_size -= mp3->inherit_super.inherit_super.buffer_size;
+			} while(left_size > 0);
+			return true;
+		}
 		break;
 	default:
 		LOG_PRINT("unexpected frame type is found.:%d", pes->frame_type);
