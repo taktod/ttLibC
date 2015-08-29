@@ -750,8 +750,16 @@ bool ttLibC_Pes_writeAudioPacket(
 	aacData.p_buf[3] = 0x30 | (track->cc & 0x0F);
 	track->cc ++;
 	if(aacData.total_size < 168) {
-		LOG_PRINT("too small size, make this later:%d", aacData.total_size);
-		return false;
+		uint32_t fill_size = 168 - aacData.total_size + 1;
+		aacData.p_buf[4] = fill_size;
+		aacData.p_buf[5] = 0x40;
+		aacData.p_buf += 6;
+		aacData.p_buf_left_size -= 6;
+		for(uint32_t i = 0;i < fill_size - 1;i ++) {
+			*aacData.p_buf = 0xFF;
+			++ aacData.p_buf;
+			-- aacData.p_buf_left_size;
+		}
 	}
 	else {
 		// adaptation fieldを書き込む。

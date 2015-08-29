@@ -88,6 +88,7 @@ ttLibC_MpegtsWriter *ttLibC_MpegtsWriter_make_ex(
 	writer->cc_pat = 0;
 	writer->cc_pmt = 0;
 	writer->cc_sdt = 0;
+	writer->max_unit_duration = max_unit_duration;
 	writer->inherit_super.inherit_super.type = containerType_mpegts;
 	// このタイミングでsdtやpat、pmtをつくってしまう。
 	// とりあえずsdtをつくる。
@@ -117,6 +118,13 @@ bool MpegtsWriter_h264_test(void *ptr, ttLibC_Frame *frame) {
 	switch(h264->type) {
 	case H264Type_slice:
 		// sliceはそのまま足せばOK
+		testData->writer->max_unit_duration; // このduration分以上進んでいる場合は、強制的にaac書き込みに進める。
+		if((uint32_t)(h264->inherit_super.inherit_super.pts - testData->writer->current_pts_pos) > testData->writer->max_unit_duration) {
+			// ptsがmax_durationより進んだので、次のフェーズに進めたほうがよさげ。
+			// これでどうなるかな？
+			testData->writer->target_pos = h264->inherit_super.inherit_super.pts;
+			return false;
+		}
 		break;
 	case H264Type_sliceIDR:
 		if(testData->writer->current_pts_pos != h264->inherit_super.inherit_super.pts) {
