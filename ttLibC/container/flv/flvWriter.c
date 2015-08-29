@@ -91,6 +91,7 @@ static bool FlvWriter_queueFrame(
 				return true;
 			}
 		}
+		/* no break */
 	case frameType_flv1:
 	case frameType_vp6:
 		// if the frame type is different from track. return false.
