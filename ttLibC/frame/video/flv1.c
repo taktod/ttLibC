@@ -252,7 +252,8 @@ ttLibC_Flv1 *ttLibC_Flv1_getFrame(
 	int8_t type = Flv1_getPictureType(data, data_size);
 	uint32_t width = ttLibC_Flv1_getWidth(data, data_size);
 	uint32_t height = ttLibC_Flv1_getHeight(data, data_size);
-	if(type != Flv1Type_intra || type != Flv1Type_inner || type != Flv1Type_disposableInner || width == 0 || height == 0) {
+	if((type != Flv1Type_intra && type != Flv1Type_inner && type != Flv1Type_disposableInner)
+			|| width == 0 || height == 0) {
 		return NULL;
 	}
 	return ttLibC_Flv1_make(
