@@ -122,7 +122,65 @@ static bool FlvWriter_queueFrame(
 }
 
 // フレームを書き出す。
-static bool FlvWriter_writeFrame() {
+static bool FlvWriter_writeFrameAudioOnly(
+		ttLibC_FlvWriter_ *writer,
+		ttLibC_ContainerWriterFunc callback,
+		void *ptr) {
+	while(true) {
+		ttLibC_Frame *audio = ttLibC_FrameQueue_dequeue_first(writer->audio_track.frame_queue);
+		if(audio == NULL) {
+			break;
+		}
+		writer->inherit_super.inherit_super.pts = audio->pts;
+		if(!ttLibC_FlvAudioTag_writeTag(writer, audio, callback, ptr)) {
+			return false;
+		}
+	}
+	return true;
+}
+
+static bool FlvWriter_writeFrameVideoOnly(
+		ttLibC_FlvWriter_ *writer,
+		ttLibC_ContainerWriterFunc callback,
+		void *ptr) {
+	while(true) {
+		ttLibC_Frame *video = ttLibC_FrameQueue_dequeue_first(writer->video_track.frame_queue);
+		if(video == NULL) {
+			break;
+		}
+		writer->inherit_super.inherit_super.pts = video->pts;
+		if(!ttLibC_FlvVideoTag_writeTag(writer, video, callback, ptr)) {
+			return false;
+		}
+	}
+	return true;
+}
+
+static int FlvWriter_writeFrame(
+		ttLibC_FlvWriter_ *writer,
+		ttLibC_ContainerWriterFunc callback,
+		void *ptr) {
+	while(true) {
+		ttLibC_Frame *video = ttLibC_FrameQueue_ref_first(writer->video_track.frame_queue);
+		ttLibC_Frame *audio = ttLibC_FrameQueue_ref_first(writer->audio_track.frame_queue);
+		if(video == NULL || audio == NULL) {
+			break;
+		}
+		if(video->pts > audio->pts) {
+			audio = ttLibC_FrameQueue_dequeue_first(writer->audio_track.frame_queue);
+			writer->inherit_super.inherit_super.pts = audio->pts;
+			if(!ttLibC_FlvAudioTag_writeTag(writer, audio, callback, ptr)) {
+				return false;
+			}
+		}
+		else {
+			video = ttLibC_FrameQueue_dequeue_first(writer->video_track.frame_queue);
+			writer->inherit_super.inherit_super.pts = video->pts;
+			if(!ttLibC_FlvVideoTag_writeTag(writer, video, callback, ptr)) {
+				return false;
+			}
+		}
+	}
 	return true;
 }
 
@@ -133,51 +191,41 @@ bool ttLibC_FlvWriter_write(
 		void *ptr) {
 	ttLibC_FlvWriter_ *writer_ = (ttLibC_FlvWriter_ *)writer;
 	if(writer_->is_first) {
-		// flvHeader情報を応答しなければいけない。
+		// try to write header information.
 		if(!ttLibC_FlvHeaderTag_writeTag(writer_, callback, ptr)) {
 			return false;
 		}
-		// 必要ならここでmetaタグも書いておきたい。
-		// まぁttLibCのクレジットくらいだけど・・・書き込む情報・・・
+		// TODO need to write meta frame?
 		writer_->is_first = false;
 	}
+	// add queue for input frame.
 	if(!FlvWriter_queueFrame(writer_, frame)) {
 		return false;
 	}
-	// audioQueueとVideoQueueを比較して、timestampが若いのを優先して出力するようにする。
-	// ただしvideo優先
-	// TODO ここは関数切り出したい。
-	while(true) {
-		if(writer_->video_track.frame_type == frameType_unknown) {
-			// video trackがないデータの場合
+	// try to write frames.
+	if(writer_->video_track.frame_type == frameType_unknown) {
+		if(!FlvWriter_writeFrameAudioOnly(
+				writer_,
+				callback,
+				ptr)) {
+			return false;
 		}
-		else if(writer_->audio_track.frame_type == frameType_unknown) {
-			// audio trackがないデータの場合
+	}
+	else if(writer_->audio_track.frame_type == frameType_unknown) {
+		// audio trackがないデータの場合
+		if(!FlvWriter_writeFrameVideoOnly(
+				writer_,
+				callback,
+				ptr)) {
+			return false;
 		}
-		else {
-			// 両方ある場合
-		}
-		ttLibC_Frame *video = ttLibC_FrameQueue_ref_first(writer_->video_track.frame_queue);
-		ttLibC_Frame *audio = ttLibC_FrameQueue_ref_first(writer_->audio_track.frame_queue);
-		if(video == NULL || audio == NULL) {
-			// 追加すべきデータがない。
-			break;
-		}
-		if(video->pts > audio->pts) {
-			audio = ttLibC_FrameQueue_dequeue_first(writer_->audio_track.frame_queue);
-			writer_->inherit_super.inherit_super.pts = audio->pts;
-			// audioを追加すべき
-			if(!ttLibC_FlvAudioTag_writeTag(writer_, audio, callback, ptr)) {
-				return false;
-			}
-		}
-		else {
-			video = ttLibC_FrameQueue_dequeue_first(writer_->video_track.frame_queue);
-			writer_->inherit_super.inherit_super.pts = video->pts;
-			// videoを追加すべき
-			if(!ttLibC_FlvVideoTag_writeTag(writer_, video, callback, ptr)) {
-				return false;
-			}
+	}
+	else {
+		if(!FlvWriter_writeFrame(
+				writer_,
+				callback,
+				ptr)) {
+			return false;
 		}
 	}
 	return true;
