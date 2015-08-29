@@ -241,9 +241,60 @@ bool ttLibC_FlvVideoTag_writeTag(
 		ttLibC_Frame *frame,
 		ttLibC_ContainerWriterFunc callback,
 		void *ptr) {
-	uint8_t buf[256]; // 書き込み用のbuffer
+	uint8_t buf[256]; // buffer for writing.
 	switch(frame->type) {
 	case frameType_flv1:
+		{
+			ttLibC_Video *video = (ttLibC_Video *)frame;
+			uint8_t *buffer = video->inherit_super.data;
+			uint32_t left_size = video->inherit_super.buffer_size;
+			buf[0]  = 0x09;
+			uint32_t pre_size = 1 + left_size;
+			buf[1]  = (pre_size >> 16) & 0xFF;
+			buf[2]  = (pre_size >> 8) & 0xFF;
+			buf[3]  = pre_size & 0xFF;
+			// pts
+			buf[4]  = (video->inherit_super.pts >> 16) & 0xFF;
+			buf[5]  = (video->inherit_super.pts >> 8) & 0xFF;
+			buf[6]  = video->inherit_super.pts & 0xFF;
+			buf[7]  = (video->inherit_super.pts >> 24) & 0xFF;
+			// track
+			buf[8]  = 0x00;
+			buf[9]  = 0x00;
+			buf[10] = 0x00;
+			// tag
+			ttLibC_Flv1 *flv1 = (ttLibC_Flv1 *)video;
+			switch(flv1->type) {
+			case Flv1Type_disposableInner:
+				buf[11] = 0x32;
+				break;
+			case Flv1Type_inner:
+				buf[11] = 0x22;
+				break;
+			case Flv1Type_intra:
+				buf[11] = 0x12;
+				break;
+			}
+			// header
+			if(!callback(ptr, buf, 12)) {
+				return false;
+			}
+			// data_body
+			if(!callback(ptr, buffer, left_size)) {
+				return false;
+			}
+			// post size
+			uint32_t post_size = pre_size + 11;
+			buf[0] = (post_size >> 24) & 0xFF;
+			buf[1] = (post_size >> 16) & 0xFF;
+			buf[2] = (post_size >> 8) & 0xFF;
+			buf[3] = post_size & 0xFF;
+			if(!callback(ptr, buf, 4)) {
+				return false;
+			}
+			// done.
+			return true;
+		}
 		break;
 	case frameType_h264:
 		{
