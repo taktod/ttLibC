@@ -62,7 +62,68 @@ ttLibC_FlvWriter *ttLibC_FlvWriter_make(
 		writer->audio_track.frame_queue = NULL;
 		break;
 	}
+	if(writer->audio_track.frame_type == frameType_unknown && writer->video_track.frame_type == frameType_unknown) {
+		ERR_PRINT("target track is invalid for both audio and video.");
+		free(writer);
+		return NULL;
+	}
 	return (ttLibC_FlvWriter *)writer;
+}
+
+/*
+ * add frame on queue.
+ * @param writer target flv writer object.
+ * @param frame  frame
+ * @return true:success false:error
+ */
+static bool FlvWriter_queueFrame(
+		ttLibC_FlvWriter_ *writer,
+		ttLibC_Frame *frame) {
+	// change the timebase to 1000.(mili sec.)
+	frame->pts = (uint64_t)(1.0 * frame->pts * 1000 / frame->timebase);
+	frame->timebase = 1000;
+	switch(frame->type) {
+	case frameType_h264:
+		{
+			ttLibC_H264 *h264 = (ttLibC_H264 *)frame;
+			if(h264->type == H264Type_unknown) {
+				// skip h264 unknown data. like aud, or sei.
+				return true;
+			}
+		}
+	case frameType_flv1:
+	case frameType_vp6:
+		// if the frame type is different from track. return false.
+		if(writer->video_track.frame_type != frame->type) {
+			ERR_PRINT("invalid video frame is detected.");
+			return false;
+		}
+ 		ttLibC_FrameQueue_queue(writer->video_track.frame_queue, frame);
+		break;
+	case frameType_aac:
+	case frameType_mp3:
+	case frameType_nellymoser:
+	case frameType_pcm_alaw:
+	case frameType_pcm_mulaw:
+	case frameType_pcmS16:
+	case frameType_speex:
+		// if the frame type is different from track. return false.
+		if(writer->audio_track.frame_type != frame->type) {
+			ERR_PRINT("invalid audio frame is detected.");
+			return false;
+		}
+		ttLibC_FrameQueue_queue(writer->audio_track.frame_queue, frame);
+		break;
+	default:
+		ERR_PRINT("unexpected frame is found:%d", frame->type);
+		return false;
+	}
+	return true;
+}
+
+// フレームを書き出す。
+static bool FlvWriter_writeFrame() {
+	return true;
 }
 
 bool ttLibC_FlvWriter_write(
@@ -80,49 +141,22 @@ bool ttLibC_FlvWriter_write(
 		// まぁttLibCのクレジットくらいだけど・・・書き込む情報・・・
 		writer_->is_first = false;
 	}
-	// timebaseを1000に合わせておく。
-	frame->pts = (uint64_t)(1.0 * frame->pts * 1000 / frame->timebase);
-	frame->timebase = 1000;
-	switch(frame->type) {
-	case frameType_h264:
-		{
-			ttLibC_H264 *h264 = (ttLibC_H264 *)frame;
-			if(h264->type == H264Type_unknown) {
-				// unknownデータはskipしておく。(AUDとか)
-				return true;
-			}
-		}
-	case frameType_flv1:
-	case frameType_vp6:
-		// 以下videoTagの指定と一致するか確認してから、videoTagで処理する。
-		if(writer_->video_track.frame_type != frame->type) {
-			ERR_PRINT("invalid video frame is detected.");
-			return false;
-		}
-		// まずqueueにためておく。
- 		ttLibC_FrameQueue_queue(writer_->video_track.frame_queue, frame);
-		break;
-	case frameType_aac:
-	case frameType_mp3:
-	case frameType_nellymoser:
-	case frameType_pcm_alaw:
-	case frameType_pcm_mulaw:
-	case frameType_pcmS16:
-	case frameType_speex:
-		if(writer_->audio_track.frame_type != frame->type) {
-			ERR_PRINT("invalid audio frame is detected.");
-			return false;
-		}
-		ttLibC_FrameQueue_queue(writer_->audio_track.frame_queue, frame);
-		// こっちもqueueにためておく。
-		break;
-	default:
-		ERR_PRINT("unexpected frame is found:%d", frame->type);
+	if(!FlvWriter_queueFrame(writer_, frame)) {
 		return false;
 	}
 	// audioQueueとVideoQueueを比較して、timestampが若いのを優先して出力するようにする。
 	// ただしvideo優先
+	// TODO ここは関数切り出したい。
 	while(true) {
+		if(writer_->video_track.frame_type == frameType_unknown) {
+			// video trackがないデータの場合
+		}
+		else if(writer_->audio_track.frame_type == frameType_unknown) {
+			// audio trackがないデータの場合
+		}
+		else {
+			// 両方ある場合
+		}
 		ttLibC_Frame *video = ttLibC_FrameQueue_ref_first(writer_->video_track.frame_queue);
 		ttLibC_Frame *audio = ttLibC_FrameQueue_ref_first(writer_->audio_track.frame_queue);
 		if(video == NULL || audio == NULL) {
