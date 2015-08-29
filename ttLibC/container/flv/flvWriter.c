@@ -58,7 +58,7 @@ ttLibC_FlvWriter *ttLibC_FlvWriter_make(
 		break;
 	default:
 		writer->audio_track.crc32       = 0;
-		writer->audio_track.frame_type  = video_type;
+		writer->audio_track.frame_type  = frameType_unknown;
 		writer->audio_track.frame_queue = NULL;
 		break;
 	}
