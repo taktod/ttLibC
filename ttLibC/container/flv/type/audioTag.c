@@ -14,6 +14,7 @@
 #include "../../../util/hexUtil.h"
 
 #include "../../../frame/audio/aac.h"
+#include "../../../frame/audio/mp3.h"
 
 ttLibC_FlvAudioTag *ttLibC_FlvAudioTag_make(
 		ttLibC_FlvTag *prev_tag,
@@ -223,17 +224,35 @@ bool ttLibC_FlvAudioTag_getFrame(
 			return false;
 		}
 	case frameType_mp3:
-		// aacではないフレームはそのままフレーム情報がはいっているので、フレームをつくればそれでおわり。
+		{
+			ttLibC_Mp3 *mp3 = ttLibC_Mp3_getFrame(
+					(ttLibC_Mp3 *)audio_tag->inherit_super.frame,
+					buffer,
+					left_size,
+					audio_tag->inherit_super.inherit_super.inherit_super.pts,
+					audio_tag->inherit_super.inherit_super.inherit_super.timebase);
+			if(mp3 == NULL) {
+				ERR_PRINT("failed to make mp3 frame.");
+				return false;
+			}
+			audio_tag->inherit_super.frame = (ttLibC_Frame *)mp3;
+			return callback(ptr, audio_tag->inherit_super.frame);
+		}
 		break;
 	case frameType_nellymoser:
+		LOG_PRINT("nellymoser: no read process.");
 		break;
 	case frameType_pcmS16:
+		LOG_PRINT("pcms16: no read process.");
 		break;
 	case frameType_pcm_alaw:
+		LOG_PRINT("pcm alaw: no read process.");
 		break;
 	case frameType_pcm_mulaw:
+		LOG_PRINT("pcm mulaw: no read process.");
 		break;
 	case frameType_speex:
+		LOG_PRINT("speex: no read process.");
 		break;
 	default:
 		break;
@@ -402,6 +421,7 @@ bool ttLibC_FlvAudioTag_writeTag(
 	case frameType_pcm_alaw:
 	case frameType_pcm_mulaw:
 	case frameType_speex:
+		LOG_PRINT("no write process for the frame.:%d", frame->type);
 		break;
 	default:
 		ERR_PRINT("unexpected data.");
