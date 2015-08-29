@@ -72,6 +72,11 @@ ttLibC_MpegtsWriter *ttLibC_MpegtsWriter_make_ex(
 			writer->inherit_super.trackInfo[i].frame_type = frameType_aac;
 			pid ++;
 			break;
+		case frameType_mp3:
+			writer->inherit_super.trackInfo[i].pid = pid;
+			writer->inherit_super.trackInfo[i].frame_type = frameType_mp3;
+			pid ++;
+			break;
 		case frameType_h264:
 			writer->inherit_super.trackInfo[i].pid = pid;
 			writer->inherit_super.trackInfo[i].frame_type = frameType_h264;
@@ -118,10 +123,8 @@ bool MpegtsWriter_h264_test(void *ptr, ttLibC_Frame *frame) {
 	switch(h264->type) {
 	case H264Type_slice:
 		// sliceはそのまま足せばOK
-		testData->writer->max_unit_duration; // このduration分以上進んでいる場合は、強制的にaac書き込みに進める。
 		if((uint32_t)(h264->inherit_super.inherit_super.pts - testData->writer->current_pts_pos) > testData->writer->max_unit_duration) {
-			// ptsがmax_durationより進んだので、次のフェーズに進めたほうがよさげ。
-			// これでどうなるかな？
+			// ptsがmax_durationより進んだので、次のフェーズに進める。
 			testData->writer->target_pos = h264->inherit_super.inherit_super.pts;
 			return false;
 		}
@@ -321,6 +324,7 @@ bool ttLibC_MpegtsWriter_write(
 		}
 		break;
 	case frameType_aac:
+	case frameType_mp3:
 		{
 			// そのままcacheしておけばそれでよい。
 			if(!ttLibC_FrameQueue_queue(track->frame_queue, frame)) {

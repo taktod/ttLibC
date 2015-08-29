@@ -287,10 +287,9 @@ bool ttLibC_Pmt_makePacket(
 			data[0] = 0x0F;
 			break;
 		case frameType_mp3:
-			ERR_PRINT("make it later. for mp3 support on mpegts");
-//			buf_length += 5;
-// 			data[0] = 0x03;
-			return false;
+			buf_length += 5;
+			data[0] = 0x03;
+			break;
 		default:
 			ERR_PRINT("unexpected frame data.");
 			return false;

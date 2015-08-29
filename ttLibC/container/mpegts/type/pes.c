@@ -642,15 +642,6 @@ typedef struct {
 
 bool Pes_checkAudioTotalSize(void *ptr, ttLibC_Frame *frame) {
 	aac_data_t *aacData = (aac_data_t *)ptr;
-	switch(frame->type) {
-	case frameType_aac:
-		break;
-	case frameType_mp3:
-	default:
-		ERR_PRINT("unexpected frame.:%d", frame->type);
-		aacData->error_flg = true;
-		return false;
-	}
 	if(aacData->target_pts < frame->pts) {
 		// すぎたので、読み込みやめる。
 		return false;
@@ -658,12 +649,29 @@ bool Pes_checkAudioTotalSize(void *ptr, ttLibC_Frame *frame) {
 	if(aacData->start_pts > frame->pts) {
 		aacData->start_pts = frame->pts;
 	}
-	ttLibC_Aac *aac = (ttLibC_Aac *)frame;
-	if(aac->type == AacType_raw) {
-		aacData->total_size += frame->buffer_size + 7;
-	}
-	else {
-		aacData->total_size += frame->buffer_size;
+	switch(frame->type) {
+	case frameType_aac:
+		{
+			// ここでAACにキャストしているので、mp3の場合はおかしくなるな。
+			ttLibC_Aac *aac = (ttLibC_Aac *)frame;
+			if(aac->type == AacType_raw) {
+				aacData->total_size += frame->buffer_size + 7;
+			}
+			else {
+				aacData->total_size += frame->buffer_size;
+			}
+		}
+		break;
+	case frameType_mp3:
+		{
+			ttLibC_Mp3 *mp3 = (ttLibC_Mp3 *)frame;
+			aacData->total_size += frame->buffer_size;
+		}
+		break;
+	default:
+		ERR_PRINT("unexpected frame.:%d", frame->type);
+		aacData->error_flg = true;
+		return false;
 	}
 	return true;
 }
