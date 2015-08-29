@@ -314,14 +314,18 @@ bool ttLibC_MpegtsWriter_write(
 			}
 			else {
 				// それ以外のデータ
-				ttLibC_FrameQueue_queue(track->frame_queue, frame);
+				if(!ttLibC_FrameQueue_queue(track->frame_queue, frame)) {
+					return false;
+				}
 			}
 		}
 		break;
 	case frameType_aac:
 		{
 			// そのままcacheしておけばそれでよい。
-			ttLibC_FrameQueue_queue(track->frame_queue, frame);
+			if(!ttLibC_FrameQueue_queue(track->frame_queue, frame)) {
+				return false;
+			}
 		}
 		break;
 	default:

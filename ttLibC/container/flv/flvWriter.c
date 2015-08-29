@@ -99,7 +99,9 @@ static bool FlvWriter_queueFrame(
 			ERR_PRINT("invalid video frame is detected.");
 			return false;
 		}
- 		ttLibC_FrameQueue_queue(writer->video_track.frame_queue, frame);
+ 		if(!ttLibC_FrameQueue_queue(writer->video_track.frame_queue, frame)) {
+ 			return false;
+ 		}
 		break;
 	case frameType_aac:
 	case frameType_mp3:
@@ -113,7 +115,9 @@ static bool FlvWriter_queueFrame(
 			ERR_PRINT("invalid audio frame is detected.");
 			return false;
 		}
-		ttLibC_FrameQueue_queue(writer->audio_track.frame_queue, frame);
+		if(!ttLibC_FrameQueue_queue(writer->audio_track.frame_queue, frame)) {
+			return false;
+		}
 		break;
 	default:
 		ERR_PRINT("unexpected frame is found:%d", frame->type);
