@@ -123,6 +123,39 @@ ttLibC_Mp3 *ttLibC_Mp3_make(
 }
 
 /*
+ * make clone frame
+ * always make copy buffer on it.
+ * @param prev_frame reuse frame object.
+ * @param src_frame  source of clone.
+ */
+ttLibC_Mp3 *ttLibC_Mp3_clone(
+		ttLibC_Mp3 *prev_frame,
+		ttLibC_Mp3 *src_frame) {
+	if(src_frame == NULL) {
+		return NULL;
+	}
+	if(src_frame->inherit_super.inherit_super.type != frameType_mp3) {
+		ERR_PRINT("try to clone non mp3 frame.");
+		return NULL;
+	}
+	if(prev_frame != NULL && prev_frame->inherit_super.inherit_super.type != frameType_mp3) {
+		ERR_PRINT("try to use non mp3 frame for reuse.");
+		return NULL;
+	}
+	return ttLibC_Mp3_make(
+			prev_frame,
+			src_frame->type,
+			src_frame->inherit_super.sample_rate,
+			src_frame->inherit_super.sample_num,
+			src_frame->inherit_super.channel_num,
+			src_frame->inherit_super.inherit_super.data,
+			src_frame->inherit_super.inherit_super.buffer_size,
+			false,
+			src_frame->inherit_super.inherit_super.pts,
+			src_frame->inherit_super.inherit_super.timebase);
+}
+
+/*
  * check the mp3 frame type from data buffer.
  * TODO this func can be static?
  * @param data      mp3 binary data.

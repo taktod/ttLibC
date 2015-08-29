@@ -65,6 +65,16 @@ ttLibC_Mp3 *ttLibC_Mp3_make(
 		uint32_t timebase);
 
 /**
+ * make clone frame
+ * always make copy buffer on it.
+ * @param prev_frame reuse frame object.
+ * @param src_frame  source of clone.
+ */
+ttLibC_Mp3 *ttLibC_Mp3_clone(
+		ttLibC_Mp3 *prev_frame,
+		ttLibC_Mp3 *src_frame);
+
+/**
  * check the mp3 frame type from data buffer.
  * @param data      mp3 binary data.
  * @param data_size data size.
