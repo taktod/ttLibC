@@ -12,6 +12,7 @@
 #include "../flvTag.h"
 #include "../../../log.h"
 #include "../../../frame/video/h264.h"
+#include "../../../frame/video/flv1.h"
 #include "../../../util/hexUtil.h"
 #include "../../../util/ioUtil.h"
 
@@ -133,7 +134,14 @@ bool ttLibC_FlvVideoTag_getFrame(
 	size_t left_size = video_tag->inherit_super.inherit_super.inherit_super.buffer_size;
 	switch(video_tag->frame_type) {
 	case frameType_flv1:
-		// そのまま全部がフレーム
+		{
+			ttLibC_Flv1 *flv1 = ttLibC_Flv1_getFrame(NULL, buffer, left_size, true, video_tag->inherit_super.inherit_super.inherit_super.pts, video_tag->inherit_super.inherit_super.inherit_super.timebase);
+			if(flv1 == NULL) {
+				return false;
+			}
+			video_tag->inherit_super.frame = (ttLibC_Frame *)flv1;
+			return callback(ptr, video_tag->inherit_super.frame);
+		}
 		break;
 	case frameType_h264:
 		{
