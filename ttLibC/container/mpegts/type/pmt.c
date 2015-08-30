@@ -80,7 +80,7 @@ ttLibC_Pmt *ttLibC_Pmt_getPacket(
 	ttLibC_BitReader_bit(reader, 1); // payloadはあるはずなので、このbitも立っているはず。
 	uint8_t continuity_counter = ttLibC_BitReader_bit(reader, 4); // continuity counter.
 	if(adaptationFieldExist == 1) {
-		LOG_PRINT("rarely comming, do later. I know this happen with mpegts from VLC.");
+//		LOG_PRINT("rarely comming, do later. I know this happen with mpegts from VLC.");
 		/*
 		 * adaptationFieldExistがある場合
 		 * 8bit size
@@ -104,6 +104,12 @@ ttLibC_Pmt *ttLibC_Pmt_getPacket(
 		 * 9bit pcrExtension
 		 */
 		// 読み飛ばす場合は処理が面倒なので、readerを一旦解放して、元のbufferを進めて、サイドreader作り直した方がよさそう。
+		uint8_t adaptationField_size = ttLibC_BitReader_bit(reader, 8);
+		ttLibC_BitReader_close(&reader);
+		reader = ttLibC_BitReader_make(
+				data + adaptationField_size + 5,
+				data_size - adaptationField_size - 5,
+				BitReaderType_default);
 	}
 	/*
 	 * programPacket共通
@@ -126,7 +132,7 @@ ttLibC_Pmt *ttLibC_Pmt_getPacket(
 	ttLibC_BitReader_bit(reader, 1);
 	ttLibC_BitReader_bit(reader, 2);
 	uint32_t section_length = ttLibC_BitReader_bit(reader, 12); // sectionLength // patの場合はcrcまでの長さ
-//	LOG_PRINT("section_lenth:%x", section_length);
+//	LOG_PRINT("section_length:%x", section_length);
 	ttLibC_BitReader_bit(reader, 16);
 	ttLibC_BitReader_bit(reader, 2);
 	ttLibC_BitReader_bit(reader, 5);
@@ -174,15 +180,19 @@ ttLibC_Pmt *ttLibC_Pmt_getPacket(
 		ttLibC_BitReader_close(&reader);
 		return NULL;
 	}
-//	LOG_PRINT("pmtができてる。");
 	// あとはデータを繰り返す。
 	for(int i = 0;i < MaxPesTracks && section_length > 4;++ i) {
 		uint8_t stream_type = ttLibC_BitReader_bit(reader, 8);
 		ttLibC_BitReader_bit(reader, 3);
 		uint16_t pes_pid = ttLibC_BitReader_bit(reader, 13);
 		ttLibC_BitReader_bit(reader, 4);
-		ttLibC_BitReader_bit(reader, 12);
-//		LOG_PRINT("type:%x, pid:%x", stream_type, pes_pid);
+		uint16_t pes_info_length = ttLibC_BitReader_bit(reader, 12);
+		if(pes_info_length != 0) {
+			for(int i = 0;i < pes_info_length;++ i) {
+				ttLibC_BitReader_bit(reader, 8);
+			}
+			section_length -= pes_info_length;
+		}
 		pmt->pmtElementaryField[i].stream_type = stream_type;
 		pmt->pmtElementaryField[i].pid = pes_pid;
 		section_length -= 5;

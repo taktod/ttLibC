@@ -57,7 +57,6 @@ static bool MpegtsReader_read(
 	}
 	uint32_t pid = ((buffer[1] & 0x1F) << 8) | buffer[2];
 	if(pid == MpegtsType_sdt) {
-//		LOG_PRINT("sdt");
 		// sdtは特になにかしなければいけないということはない
 		ttLibC_Sdt *sdt = ttLibC_Sdt_getPacket((ttLibC_MpegtsPacket *)reader->sdt, buffer, reader->target_size);
 		if(sdt == NULL) {
@@ -68,7 +67,6 @@ static bool MpegtsReader_read(
 	}
 	else if(pid == MpegtsType_pat){
 		// patを読み込んでpmt情報を取得しないといけない。
-//		LOG_PRINT("pat");
 		ttLibC_Pat *pat = ttLibC_Pat_getPacket((ttLibC_MpegtsPacket *)reader->pat, buffer, reader->target_size);
 		if(pat == NULL) {
 			LOG_PRINT("failed to get pat.");
@@ -80,7 +78,6 @@ static bool MpegtsReader_read(
 		// このpatからpmt_pidがわかる
 	}
 	else if(pid == reader->pmt_pid) {
-//		LOG_PRINT("たぶんpmt");
 		ttLibC_Pmt *pmt = ttLibC_Pmt_getPacket((ttLibC_MpegtsPacket *)reader->pmt, buffer, reader->target_size, reader->pmt_pid);
 		if(pmt == NULL) {
 			LOG_PRINT("failed to get pmt.");
@@ -91,7 +88,6 @@ static bool MpegtsReader_read(
 		// ここからpesのpidがわかるので、更新しておく。
 	}
 	else {
-//		LOG_PRINT("たぶんpes");
 		// pmtの内容から、合致するpesをみつける。
 		bool find = false;
 		for(int i = 0;i < MaxPesTracks;++ i) {

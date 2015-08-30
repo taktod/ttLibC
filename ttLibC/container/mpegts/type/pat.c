@@ -45,8 +45,6 @@ ttLibC_Pat *ttLibC_Pat_getPacket(
 		ttLibC_MpegtsPacket *prev_packet,
 		uint8_t *data,
 		size_t data_size) {
-//	LOG_PRINT("getPaketがよばれた for pat");
-//	LOG_PRINT("ここからpmtのpidを取得しなければいけない");
 	ttLibC_BitReader *reader = ttLibC_BitReader_make(data, data_size, BitReaderType_default);
 	/*
 	 * 内容メモ
@@ -77,7 +75,6 @@ ttLibC_Pat *ttLibC_Pat_getPacket(
 	ttLibC_BitReader_bit(reader, 1); // payloadはあるはずなので、このbitも立っているはず。
 	uint8_t continuity_counter = ttLibC_BitReader_bit(reader, 4); // continuity counter.
 	if(adaptationFieldExist == 1) {
-		LOG_PRINT("rarely come here. I know mpegts from vlc can. make this later.");
 		/*
 		 * adaptationFieldExistがある場合
 		 * 8bit size
@@ -101,6 +98,12 @@ ttLibC_Pat *ttLibC_Pat_getPacket(
 		 * 9bit pcrExtension
 		 */
 		// 読み飛ばす場合は処理が面倒なので、readerを一旦解放して、元のbufferを進めて、サイドreader作り直した方がよさそう。
+		uint8_t adaptationField_size = ttLibC_BitReader_bit(reader, 8);
+		ttLibC_BitReader_close(&reader);
+		reader = ttLibC_BitReader_make(
+				data + adaptationField_size + 5,
+				data_size - adaptationField_size - 5,
+				BitReaderType_default);
 	}
 	/*
 	 * programPacket共通
@@ -122,7 +125,7 @@ ttLibC_Pat *ttLibC_Pat_getPacket(
 	ttLibC_BitReader_bit(reader, 1);
 	ttLibC_BitReader_bit(reader, 1);
 	ttLibC_BitReader_bit(reader, 2);
-	ttLibC_BitReader_bit(reader, 12); // sectionLength // patの場合はcrcまでの長さ
+	uint16_t seclen = ttLibC_BitReader_bit(reader, 12); // sectionLength // patの場合はcrcまでの長さ
 	ttLibC_BitReader_bit(reader, 16);
 	ttLibC_BitReader_bit(reader, 2);
 	ttLibC_BitReader_bit(reader, 5);
