@@ -126,6 +126,7 @@ bool mpegtsTest_getFrameCallback(void *ptr, ttLibC_Frame *frame) {
 	case frameType_h264:
 		return ttLibC_MpegtsWriter_write((ttLibC_MpegtsWriter *)testData->writer, false, 0x100, frame, mpegtsTest_writePacketCallback, ptr);
 	case frameType_aac:
+	case frameType_mp3:
 		return ttLibC_MpegtsWriter_write((ttLibC_MpegtsWriter *)testData->writer, false, 0x101, frame, mpegtsTest_writePacketCallback, ptr);
 	default:
 		LOG_PRINT("unexpect frame type is found.");
@@ -146,9 +147,70 @@ static void mpegtsTest() {
 			frameType_h264,
 			frameType_aac
 	};
-	testData.writer = (ttLibC_ContainerWriter *)ttLibC_MpegtsWriter_make(frameTypes, 2);
+	testData.writer = (ttLibC_ContainerWriter *)ttLibC_MpegtsWriter_make_ex(
+			frameTypes,
+			2,
+			15000); // 0.5秒ごとに、書き込むようにしておこうと思う。
 	testData.fp_in = fopen("test.ts", "rb");
 	testData.fp_out = fopen("test_out.ts", "wb");
+	do {
+		uint8_t buffer[65536];
+		size_t read_size = fread(buffer, 1, 65536, testData.fp_in);
+		if(!ttLibC_MpegtsReader_read((ttLibC_MpegtsReader *)testData.reader, buffer, read_size, mpegtsTest_getMpegtsCallback, &testData)) {
+			ERR_PRINT("error occured!");
+			break;
+		}
+	}while(!feof(testData.fp_in));
+	ttLibC_ContainerReader_close(&testData.reader);
+	ttLibC_ContainerWriter_close(&testData.writer);
+	if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
+	if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
+}
+
+static void mpegtsH264Mp3Test() {
+	LOG_PRINT("mpegtsH264Mp3Test");
+
+	containerTest_t testData;
+	testData.reader = (ttLibC_ContainerReader *)ttLibC_MpegtsReader_make();
+	ttLibC_Frame_Type frameTypes[] = {
+			frameType_h264,
+			frameType_mp3
+	};
+	testData.writer = (ttLibC_ContainerWriter *)ttLibC_MpegtsWriter_make_ex(
+			frameTypes,
+			2,
+			15000); // 0.5秒ごとに、書き込むようにしておこうと思う。
+	testData.fp_in = fopen("test_h264_mp3.ts", "rb");
+	testData.fp_out = fopen("test_h264_mp3_out.ts", "wb");
+	do {
+		uint8_t buffer[65536];
+		size_t read_size = fread(buffer, 1, 65536, testData.fp_in);
+		if(!ttLibC_MpegtsReader_read((ttLibC_MpegtsReader *)testData.reader, buffer, read_size, mpegtsTest_getMpegtsCallback, &testData)) {
+			ERR_PRINT("error occured!");
+			break;
+		}
+	}while(!feof(testData.fp_in));
+	ttLibC_ContainerReader_close(&testData.reader);
+	ttLibC_ContainerWriter_close(&testData.writer);
+	if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
+	if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
+}
+
+static void mpegtsVlcTest() {
+	LOG_PRINT("mpegtsVlcTest");
+
+	containerTest_t testData;
+	testData.reader = (ttLibC_ContainerReader *)ttLibC_MpegtsReader_make();
+	ttLibC_Frame_Type frameTypes[] = {
+			frameType_h264,
+			frameType_aac
+	};
+	testData.writer = (ttLibC_ContainerWriter *)ttLibC_MpegtsWriter_make_ex(
+			frameTypes,
+			2,
+			15000); // 0.5秒ごとに、書き込むようにしておこうと思う。
+	testData.fp_in = fopen("test_vlc_h264_aac.ts", "rb");
+	testData.fp_out = fopen("test_vlc_h264_aac_out.ts", "wb");
 	do {
 		uint8_t buffer[65536];
 		size_t read_size = fread(buffer, 1, 65536, testData.fp_in);
@@ -202,6 +264,38 @@ static void flvTest() {
 	if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
 }
 
+static void flvFlv1AacTest() {
+	LOG_PRINT("flvTest");
+
+	containerTest_t testData;
+	testData.reader = (ttLibC_ContainerReader *)ttLibC_FlvReader_make();
+	testData.writer = (ttLibC_ContainerWriter *)ttLibC_FlvWriter_make(frameType_flv1, frameType_aac);
+	testData.fp_in = fopen("test_flv1_aac.flv", "rb");
+	testData.fp_out = fopen("test_flv1_aac_out.flv", "wb");
+	do {
+		uint8_t buffer[65536];
+		size_t read_size = fread(buffer, 1, 65536, testData.fp_in);
+		if(!ttLibC_FlvReader_read((ttLibC_FlvReader *)testData.reader, buffer, read_size, flvTest_getFlvCallback, &testData)) {
+			ERR_PRINT("error occured!");
+			break;
+		}
+	}while(!feof(testData.fp_in));
+	ttLibC_ContainerReader_close(&testData.reader);
+	ttLibC_ContainerWriter_close(&testData.writer);
+	if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
+	if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
+}
+
+static void miscTest() {
+	LOG_PRINT("miscTest");
+	ttLibC_Frame_Type types[2] = {
+			frameType_h264,
+			frameType_aac
+	};
+	ttLibC_MpegtsWriter *writer = ttLibC_MpegtsWriter_make(types, 2);
+	ttLibC_MpegtsWriter_close(&writer);
+}
+
 /**
  * define all test for container package.
  * @param s cute::suite obj
@@ -209,6 +303,10 @@ static void flvTest() {
  */
 cute::suite containerTests(cute::suite s) {
 	s.clear();
+//	s.push_back(CUTE(mpegtsVlcTest));
+//	s.push_back(CUTE(mpegtsH264Mp3Test));
+//	s.push_back(CUTE(flvFlv1AacTest));
+//	s.push_back(CUTE(miscTest));
 //	s.push_back(CUTE(mpegtsToFlvTest)); // h264/aac
 //	s.push_back(CUTE(mp3Test)); // none/mp3
 //	s.push_back(CUTE(mpegtsTest)); // h264/aac
