@@ -15,11 +15,11 @@
 
 
 ttLibC_Mp3Writer *ttLibC_Mp3Writer_make() {
-	ttLibC_Mp3Writer_ *writer = ttLibC_ContainerWriter_make(containerType_mp3, sizeof(ttLibC_Mp3Writer_), 44100);
+	ttLibC_Mp3Writer_ *writer = (ttLibC_Mp3Writer_ *)ttLibC_ContainerWriter_make(containerType_mp3, sizeof(ttLibC_Mp3Writer_), 44100);
 	if(writer != NULL) {
 		writer->is_first = true;
 	}
-	return writer;
+	return (ttLibC_Mp3Writer *)writer;
 }
 
 bool ttLibC_Mp3Writer_write(
