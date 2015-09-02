@@ -74,12 +74,11 @@ uint32_t ttLibC_BitReader_bit(ttLibC_BitReader *reader, uint32_t bit_num) {
 		reader_->pos += bit;
 		if(reader_->pos == 8) {
 			++ reader_->data;
-			-- reader_->data_size;
-			if(reader_->data_size < 0) { // ぴったり0になる場合にエラーがおきるのか・・・
-				LOG_PRINT("no more data buffer.");
+			if(reader_->data_size <= 0) {
 				ERR_PRINT("no more data buffer.");
 				return 0;
 			}
+			-- reader_->data_size;
 			val = *reader_->data;
 			if(val == 0) {
 				reader_->zero_count ++;
