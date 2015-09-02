@@ -30,6 +30,7 @@ nobase_include_HEADERS= \
 	ttLibC/frame/frame.h \
 	ttLibC/resampler/audioResampler.h \
 	ttLibC/resampler/imageResampler.h \
+	ttLibC/util/amfUtil.h \
 	ttLibC/util/beepUtil.h \
 	ttLibC/util/bitUtil.h \
 	ttLibC/util/crc32Util.h \

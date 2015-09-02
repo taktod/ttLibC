@@ -61,6 +61,7 @@ libttLibC_a_SOURCES= \
 	resampler/audioResampler.c \
 	resampler/imageResampler.c \
 	resampler/speexdspResampler.c \
+	util/amfUtil.c \
 	util/beepUtil.c \
 	util/bitUtil.c \
 	util/crc32Util.c \
