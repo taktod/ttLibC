@@ -50,6 +50,7 @@ typedef enum {
 typedef struct {
 	ttLibC_Amf0_Type type;
 	void *object;
+	size_t data_size;
 } ttLibC_Util_Amf0Object;
 
 typedef ttLibC_Util_Amf0Object ttLibC_Amf0Object;
@@ -66,8 +67,66 @@ typedef ttLibC_Util_Amf0MapObject ttLibC_Amf0MapObject;
 
 typedef bool (* ttLibC_Amf0ObjectReadFunc)(void *ptr, ttLibC_Amf0Object *amf0_obj);
 
-bool ttLibC_Amf0Object_read(void *data, size_t data_size, ttLibC_Amf0ObjectReadFunc callback, void *ptr);
-bool ttLibC_Amf0Object_write(ttLibC_Amf0Object *object, ttLibC_AmfObjectWriteFunc callback, void *ptr);
+/**
+ * make amf0 number object.
+ * @param number
+ * @return ttLibC_Amf0Object
+ */
+ttLibC_Amf0Object *ttLibC_Amf0_number(double number);
+
+/**
+ * make amf0 boolean object.
+ * @param flag
+ * @return ttLibC_Amf0Object
+ */
+ttLibC_Amf0Object *ttLibC_Amf0_boolean(bool flag);
+
+/**
+ * make amf0 string object.
+ * @param string
+ * @return ttLibC_Amf0Object
+ */
+ttLibC_Amf0Object *ttLibC_Amf0_string(char *string);
+
+/**
+ * make amf0 map object.
+ * @param list amf0Object key -> obj maplist.
+ * @return ttLibC_Amf0Object
+ */
+ttLibC_Amf0Object *ttLibC_Amf0_map(ttLibC_Amf0MapObject *list);
+
+/**
+ * make amf0 clone.
+ * not yet.
+ * @param number
+ * @return ttLibC_Amf0Object
+ */
+ttLibC_Amf0Object *ttLibC_Amf0_clone(ttLibC_Amf0Object *src);
+
+/**
+ * read data from binary stream.
+ * @param data      binary data
+ * @param data_size data size
+ * @param callback  callback func, which will call when found amf0object.
+ * @param ptr       user def value pointer.
+ * @return true:success false:abort.
+ */
+bool ttLibC_Amf0_read(void *data, size_t data_size, ttLibC_Amf0ObjectReadFunc callback, void *ptr);
+
+/**
+ * write amf0Object as binary data.
+ * @param object   target amf0object.
+ * @param callback callback func, which will call when need to write binary.
+ * @param ptr      user def value pointer.
+ * @return true:success false:abort.
+ */
+bool ttLibC_Amf0_write(ttLibC_Amf0Object *object, ttLibC_AmfObjectWriteFunc callback, void *ptr);
+
+/**
+ * close amf0Object
+ * @param amf0_obj
+ */
+void ttLibC_Amf0_close(ttLibC_Amf0Object **amf0_obj);
 
 typedef enum {
 	amf3Type_Undefined    = 0x00,

@@ -48,6 +48,11 @@
 #include <sys/uio.h>
 #include <unistd.h>
 
+bool amfTest_write(void *ptr, void *data, size_t data_size) {
+	LOG_DUMP(data, data_size, true);
+	return true;
+}
+
 bool amfTest_read(void *ptr, ttLibC_Amf0Object *amf0_obj) {
 	switch(amf0_obj->type) {
 	case amf0Type_Number:
@@ -98,10 +103,31 @@ bool amfTest_read(void *ptr, ttLibC_Amf0Object *amf0_obj) {
 static void amfTest() {
 	LOG_PRINT("amfTest");
 	uint8_t buf[1024];
+	LOG_PRINT("read amf0 test a");
 	uint32_t size = ttLibC_HexUtil_makeBuffer("02000A6F6E4D65746144617461", buf, 1024);
-	ttLibC_Amf0Object_read(buf, size, amfTest_read, NULL);
+	ttLibC_Amf0_read(buf, size, amfTest_read, NULL);
+	LOG_PRINT("read amf0 test b");
 	size = ttLibC_HexUtil_makeBuffer("080000000D00086475726174696F6E0040607547AE147AE1000577696474680040840000000000000006686569676874004076800000000000000D766964656F646174617261746500000000000000000000096672616D657261746500403DF853E2556B28000C766964656F636F6465636964004000000000000000000D617564696F6461746172617465000000000000000000000F617564696F73616D706C65726174650040E5888000000000000F617564696F73616D706C6573697A65004030000000000000000673746572656F0101000C617564696F636F64656369640040240000000000000007656E636F64657202000D4C61766635362E33362E313030000866696C6573697A65004162D2F860000000000009", buf, 1024);
-	ttLibC_Amf0Object_read(buf, size, amfTest_read, NULL);
+
+	ttLibC_Amf0_read(buf, size, amfTest_read, NULL);
+
+	LOG_PRINT("generate map");
+	ttLibC_Amf0Object *map = ttLibC_Amf0_map((ttLibC_Amf0MapObject [])
+		{
+			{"test1", ttLibC_Amf0_number(16)},
+			{"test2", ttLibC_Amf0_string("hogehoge")},
+			{"test3", ttLibC_Amf0_boolean(true)},
+			{NULL, NULL},
+		});
+	amfTest_read(NULL, map);
+	ttLibC_Amf0_write(map, amfTest_write, NULL);
+	ttLibC_Amf0_close(&map);
+
+	LOG_PRINT("generate number");
+	ttLibC_Amf0Object *number = ttLibC_Amf0_number(15);
+	amfTest_read(NULL, number);
+	ttLibC_Amf0_write(number, amfTest_write, NULL);
+	ttLibC_Amf0_close(&number);
 }
 
 static void crc32Test() {
