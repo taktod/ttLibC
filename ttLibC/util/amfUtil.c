@@ -58,6 +58,48 @@ ttLibC_Amf0Object *ttLibC_Amf0_map(ttLibC_Amf0MapObject *list) {
 	return (ttLibC_Amf0Object *)obj;
 }
 
+ttLibC_Amf0Object *ttLibC_Amf0_object(ttLibC_Amf0MapObject *list) {
+	uint32_t element_num = 0;
+	for(int i = 0;list[i].key != NULL && list[i].amf0_obj != NULL;++ i) {
+		++ element_num;
+	}
+	ttLibC_Amf0Object *obj = malloc(sizeof(ttLibC_Amf0Object));
+	if(obj == NULL) {
+		// TODO if failed, we need to clear data inside of mapObject.
+		ERR_PRINT("failed to alloc memory for map object. need to clear list objects.");
+		return NULL;
+	}
+	ttLibC_Amf0MapObject *map_list = malloc(sizeof(ttLibC_Amf0MapObject) * (element_num + 1));
+	if(map_list == NULL) {
+		ERR_PRINT("failed to alloc memory for list object. need to clear list objects.");
+		free(obj);
+		return NULL;
+	}
+	obj->data_size = 4;
+	obj->type = amf0Type_Object;
+	obj->object = (void *)map_list;
+	int i = 0;
+	for(i = 0;list[i].key != NULL && list[i].amf0_obj != NULL;++ i) {
+		size_t size = strlen(list[i].key);
+		obj->data_size += 2 + size + list[i].amf0_obj->data_size;
+		char *key = malloc(size + 1);
+		if(key == NULL) {
+			ERR_PRINT("failed to allocate key object.");
+			// need to clear already allocated key objects.
+			free(map_list);
+			free(obj);
+			return NULL;
+		}
+		memcpy(key, list[i].key, size);
+		key[size] = 0x00;
+		map_list[i].key = key;
+		map_list[i].amf0_obj = list[i].amf0_obj;
+	}
+	map_list[i].key = NULL;
+	map_list[i].amf0_obj = NULL;
+	return (ttLibC_Amf0Object *)obj;
+}
+
 ttLibC_Amf0Object *ttLibC_Amf0_number(double number) {
 	ttLibC_Amf0Object *obj = malloc(sizeof(ttLibC_Amf0Object));
 	if(obj == NULL) {
@@ -102,6 +144,32 @@ ttLibC_Amf0Object *ttLibC_Amf0_string(char *string) {
 	buf[size] = 0x00;
 	obj->object = buf;
 	return (ttLibC_Amf0Object *)obj;
+}
+
+/**
+ * get the amf0object from amf0object or amf0map.
+ * @param amf0_map
+ * @param key
+ * @return ttLibC_Amf0Object
+ */
+ttLibC_Amf0Object *ttLibC_Amf0_getElement(ttLibC_Amf0Object *amf0_map, const char *key) {
+	switch(amf0_map->type) {
+	case amf0Type_Object:
+	case amf0Type_Map:
+		{
+			ttLibC_Amf0MapObject *list = (ttLibC_Amf0MapObject *)amf0_map->object;
+			for(int i = 0;list[i].key != NULL && list[i].amf0_obj != NULL;++ i) {
+				if(strcmp(list[i].key, key) == 0) {
+					return list[i].amf0_obj;
+				}
+			}
+		}
+		break;
+	default:
+		ERR_PRINT("try to get element for neither map nor object.");
+		return NULL;
+	}
+	return NULL;
 }
 
 ttLibC_Amf0Object *ttLibC_Amf0_clone(ttLibC_Amf0Object *src) {
@@ -160,6 +228,51 @@ static ttLibC_Amf0Object *Amf0_make(uint8_t *data, size_t data_size) {
 		}
 		return amf0_obj;
 	case amf0Type_Object:
+		{
+			++ read_size;
+			// あとで作る
+			// とりあえず保持要素数は、仮に256としておく。(そんなでかいobjectつくらないと思うけど。)
+			size_t size = 255;
+			ttLibC_Amf0MapObject *map_objects = malloc(sizeof(ttLibC_Amf0MapObject) * (size + 1));
+			for(int i = 0;i < size;++ i) {
+//				key
+				uint16_t key_size = be_uint16_t(*((uint16_t *)(data + read_size)));
+				if(key_size == 0) {
+					// for the end, set key and object is NULL.
+					map_objects[i].key = NULL;
+					map_objects[i].amf0_obj = NULL;
+					break;
+				}
+				read_size += 2;
+				char *key = malloc(key_size + 1);
+				memcpy(key, data + read_size, key_size);
+				key[key_size] = 0x00;
+				map_objects[i].key = key;
+				read_size += key_size;
+//				body
+				ttLibC_Amf0Object *amf0_obj = Amf0_make(data + read_size, data_size - read_size);
+				if(amf0_obj == NULL) {
+					ERR_PRINT("failed to analyze object.:%x", *(data + read_size));
+					return false;
+				}
+				map_objects[i].amf0_obj = (ttLibC_Amf0Object *)amf0_obj;
+				read_size += amf0_obj->data_size;
+			}
+			// amf0_obj
+			amf0_obj->type = amf0Type_Object;
+			amf0_obj->object = map_objects;
+			if(*(data + read_size)     != 0x00
+			|| *(data + read_size + 1) != 0x00
+			|| *(data + read_size + 2) != 0x09) {
+				// ここでエラーになるはずだが・・・なんでだろう。
+				ERR_PRINT("object end is corrupted.");
+				ttLibC_Amf0_close((ttLibC_Amf0Object **)&amf0_obj);
+				return NULL;
+			}
+			read_size += 3;
+			amf0_obj->data_size = read_size;
+		}
+		return amf0_obj;
 	case amf0Type_MovieClip:
 	case amf0Type_Null:
 	case amf0Type_Undefined:
@@ -196,7 +309,6 @@ static ttLibC_Amf0Object *Amf0_make(uint8_t *data, size_t data_size) {
 			map_objects[size].key = NULL;
 			map_objects[size].amf0_obj = NULL;
 			// amf0_obj
-			amf0_obj->data_size = read_size;
 			amf0_obj->type = amf0Type_Map;
 			amf0_obj->object = map_objects;
 			// check the end of data. should be 00 00 09.
@@ -207,6 +319,8 @@ static ttLibC_Amf0Object *Amf0_make(uint8_t *data, size_t data_size) {
 				ttLibC_Amf0_close((ttLibC_Amf0Object **)&amf0_obj);
 				return NULL;
 			}
+			read_size += 3;
+			amf0_obj->data_size = read_size;
 		}
 		return amf0_obj;
 	case amf0Type_ObjectEnd:
@@ -231,6 +345,7 @@ bool ttLibC_Amf0_read(void *data, size_t data_size, ttLibC_Amf0ObjectReadFunc ca
 	while(data_size > 0) {
 		ttLibC_Amf0Object *amf0_obj = Amf0_make(data, data_size);
 		if(amf0_obj == NULL) {
+			ERR_PRINT("failed to get object.");
 			return false;
 		}
 		bool result = callback(ptr, (ttLibC_Amf0Object *)amf0_obj);
@@ -282,7 +397,37 @@ static bool Amf0_write(ttLibC_Amf0Object *amf0_obj, ttLibC_AmfObjectWriteFunc ca
 			}
 		}
 		break;
-//	case amf0Type_Object:
+	case amf0Type_Object:
+		{
+			uint8_t buf[3];
+			buf[0] = amf0Type_Object;
+			if(!callback(ptr, buf, 1)) { // type
+				return false;
+			}
+			ttLibC_Amf0MapObject *lists = (ttLibC_Amf0MapObject *)amf0_obj->object;
+			for(int i = 0;lists[i].key != NULL && lists[i].amf0_obj != NULL;++ i) {
+				uint16_t key_size = be_uint16_t(strlen(lists[i].key));
+				memcpy(buf, &key_size, 2);
+				if(!callback(ptr, buf, 2)) { // keysize
+					return false;
+				}
+				key_size = be_uint16_t(key_size);
+				if(!callback(ptr, lists[i].key, key_size)) { // key
+					return false;
+				}
+				// あとは、objectを書き込めばOK
+				if(!Amf0_write(lists[i].amf0_obj, callback, ptr)) { // amfObject
+					return false;
+				}
+			}
+			buf[0] = 0x00;
+			buf[1] = 0x00;
+			buf[2] = amf0Type_ObjectEnd;
+			if(!callback(ptr, buf, 3)) { // write object end.
+				return false;
+			}
+		}
+		break;
 //	case amf0Type_MovieClip:
 //	case amf0Type_Null:
 //	case amf0Type_Undefined:
@@ -359,11 +504,11 @@ void ttLibC_Amf0_close(ttLibC_Amf0Object **amf0_obj) {
 		break;
 	case amf0Type_String:
 		break;
-//	case amf0Type_Object:
 //	case amf0Type_MovieClip:
 //	case amf0Type_Null:
 //	case amf0Type_Undefined:
 //	case amf0Type_Reference:
+	case amf0Type_Object:
 	case amf0Type_Map:
 		{
 			ttLibC_Amf0MapObject *map_objects = target->object;

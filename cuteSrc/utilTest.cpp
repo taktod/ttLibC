@@ -57,7 +57,7 @@ bool amfTest_read(void *ptr, ttLibC_Amf0Object *amf0_obj) {
 	switch(amf0_obj->type) {
 	case amf0Type_Number:
 		LOG_PRINT("number %f", *((double *)amf0_obj->object));
-		break;
+		return true;
 	case amf0Type_Boolean:
 		if(*((uint8_t *)amf0_obj->object) == 1) {
 			LOG_PRINT("bool true");
@@ -65,11 +65,21 @@ bool amfTest_read(void *ptr, ttLibC_Amf0Object *amf0_obj) {
 		else {
 			LOG_PRINT("bool false");
 		}
-		break;
+		return true;
 	case amf0Type_String:
 		LOG_PRINT("string %s", (char *)amf0_obj->object);
 		return true;
 	case amf0Type_Object:
+		LOG_PRINT("object:");
+		{
+			// try to dump data.
+			ttLibC_Amf0MapObject *map_objects = (ttLibC_Amf0MapObject *)amf0_obj->object;
+			for(int i = 0;map_objects[i].key != NULL && map_objects[i].amf0_obj != NULL;++ i) {
+				LOG_PRINT("key:%s", map_objects[i].key);
+				amfTest_read(ptr, map_objects[i].amf0_obj);
+			}
+		}
+		return true;
 	case amf0Type_MovieClip:
 	case amf0Type_Null:
 	case amf0Type_Undefined:
@@ -84,7 +94,7 @@ bool amfTest_read(void *ptr, ttLibC_Amf0Object *amf0_obj) {
 				amfTest_read(ptr, map_objects[i].amf0_obj);
 			}
 		}
-		break;
+		return true;
 	case amf0Type_ObjectEnd:
 	case amf0Type_Array:
 	case amf0Type_Date:
@@ -103,12 +113,16 @@ bool amfTest_read(void *ptr, ttLibC_Amf0Object *amf0_obj) {
 static void amfTest() {
 	LOG_PRINT("amfTest");
 	uint8_t buf[1024];
-	LOG_PRINT("read amf0 test a");
+	LOG_PRINT("read amf0 test a(string)");
 	uint32_t size = ttLibC_HexUtil_makeBuffer("02000A6F6E4D65746144617461", buf, 1024);
 	ttLibC_Amf0_read(buf, size, amfTest_read, NULL);
-	LOG_PRINT("read amf0 test b");
-	size = ttLibC_HexUtil_makeBuffer("080000000D00086475726174696F6E0040607547AE147AE1000577696474680040840000000000000006686569676874004076800000000000000D766964656F646174617261746500000000000000000000096672616D657261746500403DF853E2556B28000C766964656F636F6465636964004000000000000000000D617564696F6461746172617465000000000000000000000F617564696F73616D706C65726174650040E5888000000000000F617564696F73616D706C6573697A65004030000000000000000673746572656F0101000C617564696F636F64656369640040240000000000000007656E636F64657202000D4C61766635362E33362E313030000866696C6573697A65004162D2F860000000000009", buf, 1024);
 
+	LOG_PRINT("read amf0 test b(map)");
+	size = ttLibC_HexUtil_makeBuffer("080000000D00086475726174696F6E0040607547AE147AE1000577696474680040840000000000000006686569676874004076800000000000000D766964656F646174617261746500000000000000000000096672616D657261746500403DF853E2556B28000C766964656F636F6465636964004000000000000000000D617564696F6461746172617465000000000000000000000F617564696F73616D706C65726174650040E5888000000000000F617564696F73616D706C6573697A65004030000000000000000673746572656F0101000C617564696F636F64656369640040240000000000000007656E636F64657202000D4C61766635362E33362E313030000866696C6573697A65004162D2F860000000000009", buf, 1024);
+	ttLibC_Amf0_read(buf, size, amfTest_read, NULL);
+
+	LOG_PRINT("read amf0 test c(object)");
+	size = ttLibC_HexUtil_makeBuffer("0300036170700200046C6976650008666C61736856657202000E57494E2031352C302C302C3232330005746355726C02001D72746D703A2F2F34392E3231322E33392E31373A313933352F6C6976650004667061640100000B617564696F436F646563730040AFCE0000000000000B766964656F436F6465637300406F800000000000000E6F626A656374456E636F64696E67000000000000000000000C6361706162696C697469657300402E000000000000000D766964656F46756E6374696F6E003FF0000000000000000009", buf, 1024);
 	ttLibC_Amf0_read(buf, size, amfTest_read, NULL);
 
 	LOG_PRINT("generate map");
@@ -119,6 +133,10 @@ static void amfTest() {
 			{"test3", ttLibC_Amf0_boolean(true)},
 			{NULL, NULL},
 		});
+	ttLibC_Amf0Object *amf0_obj = ttLibC_Amf0_getElement(map, "test1");
+	if(amf0_obj != NULL) {
+		amfTest_read(NULL, amf0_obj);
+	}
 	amfTest_read(NULL, map);
 	ttLibC_Amf0_write(map, amfTest_write, NULL);
 	ttLibC_Amf0_close(&map);

@@ -96,6 +96,21 @@ ttLibC_Amf0Object *ttLibC_Amf0_string(char *string);
 ttLibC_Amf0Object *ttLibC_Amf0_map(ttLibC_Amf0MapObject *list);
 
 /**
+ * make amf0 object object.
+ * @param list amf0Object key -> obj maplist.
+ * @return ttLibC_Amf0Object
+ */
+ttLibC_Amf0Object *ttLibC_Amf0_object(ttLibC_Amf0MapObject *list);
+
+/**
+ * get the amf0object from amf0object or amf0map.
+ * @param amf0_map
+ * @param key
+ * @return ttLibC_Amf0Object
+ */
+ttLibC_Amf0Object *ttLibC_Amf0_getElement(ttLibC_Amf0Object *amf0_map, const char *key);
+
+/**
  * make amf0 clone.
  * not yet.
  * @param number
