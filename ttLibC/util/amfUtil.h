@@ -86,7 +86,7 @@ ttLibC_Amf0Object *ttLibC_Amf0_boolean(bool flag);
  * @param string
  * @return ttLibC_Amf0Object
  */
-ttLibC_Amf0Object *ttLibC_Amf0_string(char *string);
+ttLibC_Amf0Object *ttLibC_Amf0_string(const char *string);
 
 /**
  * make amf0 map object.

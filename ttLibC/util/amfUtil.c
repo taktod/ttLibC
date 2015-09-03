@@ -131,7 +131,7 @@ ttLibC_Amf0Object *ttLibC_Amf0_boolean(bool flag) {
 	return (ttLibC_Amf0Object *)obj;
 }
 
-ttLibC_Amf0Object *ttLibC_Amf0_string(char *string) {
+ttLibC_Amf0Object *ttLibC_Amf0_string(const char *string) {
 	ttLibC_Amf0Object *obj = malloc(sizeof(ttLibC_Amf0Object));
 	if(obj == NULL) {
 		return NULL;
