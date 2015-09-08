@@ -1,8 +1,10 @@
 #ttLibC: taktod's Library in C
 
 ## Author
-  name: taktod
-  twitter: https://twitter.com/taktod
+
+name: taktod
+
+twitter: https://twitter.com/taktod
 
 ##Overview
 
