@@ -70,6 +70,7 @@ libttLibC_a_SOURCES= \
 	util/ioUtil.c \
 	util/openalUtil.c \
 	util/opencvUtil.c \
+	allocator.c \
 	ttLibC.c
 
 libttLibC_a_CFLAGS=$(OPENCV_CFLAGS) $(OPENAL_CFLAGS) $(MP3LAME_CFLAGS) $(FAAC_CFLAGS) $(OPENH264_CFLAGS) $(SPEEXDSP_CFLAGS) $(SPEEX_CFLAGS) $(OPUS_CFLAGS) $(LIBAVCODEC_CFLAGS) $(FAAD_CFLAGS)

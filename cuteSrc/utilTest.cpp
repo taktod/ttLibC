@@ -37,6 +37,8 @@
 
 #include <ttLibC/util/amfUtil.h>
 
+#include <ttLibC/allocator.h>
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -47,6 +49,19 @@
 #include <sys/param.h>
 #include <sys/uio.h>
 #include <unistd.h>
+
+static void memoryTest() {
+	LOG_PRINT("memoryTest");
+	void *buf = ttLibC_malloc(50);
+	ttLibC_Allocator_dump();
+	void *buf2 = ttLibC_malloc(255);
+	ttLibC_Allocator_dump();
+	ttLibC_free(buf2);
+	ttLibC_Allocator_dump();
+	ttLibC_free(buf);
+	ttLibC_Allocator_dump();
+	LOG_PRINT("test end.");
+}
 
 bool amfTest_write(void *ptr, void *data, size_t data_size) {
 	LOG_DUMP(data, data_size, true);
@@ -295,6 +310,7 @@ static void openalUtilTest() {
  */
 cute::suite utilTests(cute::suite s) {
 	s.clear();
+	s.push_back(CUTE(memoryTest));
 	s.push_back(CUTE(amfTest));
 	s.push_back(CUTE(crc32Test));
 	s.push_back(CUTE(ioTest));

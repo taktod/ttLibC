@@ -25,6 +25,7 @@
 #include <cute_runner.h>
 #include <ide_listener.h>
 #include <xml_listener.h>
+#include <ttLibC/allocator.h>
 
 // entry for xxxTest.cpp
 cute::suite containerTests(cute::suite s);
@@ -41,6 +42,7 @@ cute::suite avcodecTests(cute::suite s);
  * @return exit code.
  */
 int main(int argc, const char *argv[]) {
+	ttLibC_Allocator_init();
 	cute::suite s;
 	cute::xml_file_opener xmlfile(argc, argv);
 	cute::xml_listener<cute::ide_listener<> > lis(xmlfile.out);
@@ -50,6 +52,7 @@ int main(int argc, const char *argv[]) {
 	cute::makeRunner(lis, argc, argv)(utilTests(s),           "utilTests");
 	cute::makeRunner(lis, argc, argv)(encoderDecoderTests(s), "encoderDecoderTests");
 	cute::makeRunner(lis, argc, argv)(avcodecTests(s),        "avcodecTests");
+	ttLibC_Allocator_close();
 	return 0;
 }
 

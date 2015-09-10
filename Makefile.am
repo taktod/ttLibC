@@ -36,6 +36,7 @@ nobase_include_HEADERS= \
 	ttLibC/util/crc32Util.h \
 	ttLibC/util/hexUtil.h \
 	ttLibC/util/ioUtil.h \
+	ttLibC/allocator.h \
 	ttLibC/log.h \
 	ttLibC/ttLibC.h
 
