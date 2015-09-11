@@ -124,7 +124,6 @@ void ttLibC_HttpClient_getRange(
 		ERR_PRINT("target address is too long.");
 		return;
 	}
-	// binaryの場合にfreadやめて、readにした方が幸せになれるかも・・・
 	if(strstr(target_address, "http://")
 	&& sscanf(target_address, "http://%s", host_path)
 	&& strcmp(target_address, "http://")) {
