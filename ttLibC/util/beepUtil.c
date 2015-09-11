@@ -12,6 +12,7 @@
 #include <math.h>
 #include "beepUtil.h"
 #include "../log.h"
+#include "../allocator.h"
 
 /*
  * make beep generator
@@ -25,7 +26,7 @@ ttLibC_BeepGenerator *ttLibC_BeepGenerator_make(
 		uint32_t target_Hz,
 		uint32_t sample_rate,
 		uint32_t channel_num) {
-	ttLibC_BeepGenerator *generator = (ttLibC_BeepGenerator *)malloc(sizeof(ttLibC_BeepGenerator));
+	ttLibC_BeepGenerator *generator = (ttLibC_BeepGenerator *)ttLibC_malloc(sizeof(ttLibC_BeepGenerator));
 	if(generator == NULL) {
 		ERR_PRINT("failed to allocate memory for beepGenerator.");
 		return NULL;
@@ -82,7 +83,7 @@ ttLibC_PcmS16 *ttLibC_BeepGenerator_makeBeepBySampleNum(
 				data_size = pcms16->inherit_super.inherit_super.data_size;
 			}
 			else {
-				free(pcms16->inherit_super.inherit_super.data);
+				ttLibC_free(pcms16->inherit_super.inherit_super.data);
 			}
 		}
 		if(data == NULL) {
@@ -92,7 +93,7 @@ ttLibC_PcmS16 *ttLibC_BeepGenerator_makeBeepBySampleNum(
 		pcms16->inherit_super.inherit_super.is_non_copy = true;
 	}
 	if(data == NULL) {
-		data = malloc(data_size);
+		data = ttLibC_malloc(data_size);
 		is_alloc_flg = true;
 	}
 	// generator beep sound.
@@ -147,7 +148,7 @@ ttLibC_PcmS16 *ttLibC_BeepGenerator_makeBeepBySampleNum(
  	default:
 		ERR_PRINT("found unknown pcms16Type.%d", generator->type);
 		if(is_alloc_flg) {
-			free(data);
+			ttLibC_free(data);
 		}
 		return NULL;
 	}
@@ -181,7 +182,7 @@ ttLibC_PcmS16 *ttLibC_BeepGenerator_makeBeepBySampleNum(
 	default:
 		ERR_PRINT("channel = %d is undefined.", generator->channel_num);
 		if(is_alloc_flg) {
-			free(data);
+			ttLibC_free(data);
 		}
 		return NULL;
 	}
@@ -222,7 +223,7 @@ ttLibC_PcmS16 *ttLibC_BeepGenerator_makeBeepBySampleNum(
 			generator->sample_rate);
 	if(pcms16 == NULL) {
 		if(is_alloc_flg) {
-			free(data);
+			ttLibC_free(data);
 		}
 		return NULL;
 	}
@@ -237,7 +238,7 @@ void ttLibC_BeepGenerator_close(ttLibC_BeepGenerator **generator) {
 	if(*generator == NULL) {
 		return;
 	}
-	free(*generator);
+	ttLibC_free(*generator);
 	*generator = NULL;
 }
 

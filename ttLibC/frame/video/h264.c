@@ -13,6 +13,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "../../log.h"
+#include "../../allocator.h"
 #include "../../util/ioUtil.h"
 #include "../../util/bitUtil.h"
 #include "../../util/hexUtil.h"
@@ -73,7 +74,7 @@ ttLibC_H264 *ttLibC_H264_make(
 		return NULL;
 	}
 	if(h264 == NULL) {
-		h264 = malloc(sizeof(ttLibC_H264_));
+		h264 = ttLibC_malloc(sizeof(ttLibC_H264_));
 		if(h264 == NULL) {
 			ERR_PRINT("failed to allocate memory for h264 frame.");
 			return NULL;
@@ -83,7 +84,7 @@ ttLibC_H264 *ttLibC_H264_make(
 	else {
 		if(!h264->inherit_super.inherit_super.inherit_super.is_non_copy) {
 			if(non_copy_mode || h264->inherit_super.inherit_super.inherit_super.data_size < data_size_) {
-				free(h264->inherit_super.inherit_super.inherit_super.data);
+				ttLibC_free(h264->inherit_super.inherit_super.inherit_super.data);
 				h264->inherit_super.inherit_super.inherit_super.data = NULL;
 			}
 			else {
@@ -107,7 +108,7 @@ ttLibC_H264 *ttLibC_H264_make(
 		break;
 	default:
 		if(prev_frame == NULL) {
-			free(h264);
+			ttLibC_free(h264);
 		}
 		return NULL;
 	}
@@ -122,11 +123,11 @@ ttLibC_H264 *ttLibC_H264_make(
 	}
 	else {
 		if(h264->inherit_super.inherit_super.inherit_super.data == NULL) {
-			h264->inherit_super.inherit_super.inherit_super.data = malloc(data_size);
+			h264->inherit_super.inherit_super.inherit_super.data = ttLibC_malloc(data_size);
 			if(h264->inherit_super.inherit_super.inherit_super.data == NULL) {
 				ERR_PRINT("failed to allocate memory for data.");
 				if(prev_frame == NULL) {
-					free(h264);
+					ttLibC_free(h264);
 				}
 				return NULL;
 			}
@@ -700,13 +701,13 @@ ttLibC_H264 *ttLibC_H264_analyzeAvccTag(
 			}
 			else {
 				// need more size.
-				free(prev_frame->inherit_super.inherit_super.data);
+				ttLibC_free(prev_frame->inherit_super.inherit_super.data);
 			}
 		}
 		prev_frame->inherit_super.inherit_super.is_non_copy = true;
 	}
 	if(buffer == NULL) {
-		buffer = malloc(buffer_size);
+		buffer = ttLibC_malloc(buffer_size);
 		is_alloc_flg = true;
 	}
 	uint8_t *buf = buffer;
@@ -735,7 +736,7 @@ ttLibC_H264 *ttLibC_H264_analyzeAvccTag(
 	if(sps_count != 1) {
 		ERR_PRINT("sps count is not 1.:%d", sps_count);
 		if(is_alloc_flg) {
-			free(buffer);
+			ttLibC_free(buffer);
 		}
 		return NULL;
 	}
@@ -756,7 +757,7 @@ ttLibC_H264 *ttLibC_H264_analyzeAvccTag(
 	if(pps_count != 1) {
 		ERR_PRINT("pps count is not 1.:%d", pps_count);
 		if(is_alloc_flg) {
-			free(buffer);
+			ttLibC_free(buffer);
 		}
 		return NULL;
 	}
@@ -774,7 +775,7 @@ ttLibC_H264 *ttLibC_H264_analyzeAvccTag(
 	if(data_size != 0) {
 		ERR_PRINT("data loading is not complete, there is some more.");
 		if(is_alloc_flg) {
-			free(buffer);
+			ttLibC_free(buffer);
 		}
 		return NULL;
 	}
@@ -788,7 +789,7 @@ ttLibC_H264 *ttLibC_H264_analyzeAvccTag(
 			1000);
 	if(h264 == NULL) {
 		if(is_alloc_flg) {
-			free(buffer);
+			ttLibC_free(buffer);
 		}
 		return NULL;
 	}
@@ -926,8 +927,8 @@ void ttLibC_H264_close(ttLibC_H264 **frame) {
 		return;
 	}
 	if(!target->inherit_super.inherit_super.inherit_super.is_non_copy) {
-		free(target->inherit_super.inherit_super.inherit_super.data);
+		ttLibC_free(target->inherit_super.inherit_super.inherit_super.data);
 	}
-	free(target);
+	ttLibC_free(target);
 	*frame = NULL;
 }

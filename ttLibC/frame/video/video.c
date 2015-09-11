@@ -26,6 +26,7 @@
 #include "wmv2.h"
 #include "yuv420.h"
 #include "../../log.h"
+#include "../../allocator.h"
 
 /*
  * make video frame
@@ -87,7 +88,7 @@ ttLibC_Video *ttLibC_Video_make(
 		frame_size = sizeof(ttLibC_Video);
 	}
 	if(video == NULL) {
-		video = malloc(frame_size);
+		video = ttLibC_malloc(frame_size);
 		if(video == NULL) {
 			ERR_PRINT("failed to allocate memory for video frame.");
 			return NULL;
@@ -97,7 +98,7 @@ ttLibC_Video *ttLibC_Video_make(
 	else {
 		if(!video->inherit_super.is_non_copy) {
 			if(non_copy_mode || video->inherit_super.data_size < data_size) {
-				free(video->inherit_super.data);
+				ttLibC_free(video->inherit_super.data);
 				video->inherit_super.data = NULL;
 			}
 			else {
@@ -119,11 +120,11 @@ ttLibC_Video *ttLibC_Video_make(
 	}
 	else {
 		if(video->inherit_super.data == NULL) {
-			video->inherit_super.data = malloc(data_size);
+			video->inherit_super.data = ttLibC_malloc(data_size);
 			if(video->inherit_super.data == NULL) {
 				ERR_PRINT("failed to allocate memory for data.");
 				if(prev_frame == NULL) {
-					free(video);
+					ttLibC_free(video);
 				}
 				return NULL;
 			}
@@ -179,9 +180,9 @@ void ttLibC_Video_close_(ttLibC_Video **frame) {
 		return;
 	}
 	if(!target->inherit_super.is_non_copy) {
-		free(target->inherit_super.data);
+		ttLibC_free(target->inherit_super.data);
 	}
-	free(target);
+	ttLibC_free(target);
 	*frame = NULL;
 }
 

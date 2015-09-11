@@ -12,6 +12,7 @@
 
 #include "../mpegtsPacket.h"
 #include "../../../log.h"
+#include "../../../allocator.h"
 #include "../../../util/bitUtil.h"
 #include "../../../util/ioUtil.h"
 #include "../../../util/hexUtil.h"
@@ -291,7 +292,7 @@ ttLibC_Pes *ttLibC_Pes_getPacket(
 		}
 		if(frame_buffer == NULL) {
 			frame_buffer_size = 65536;
-			frame_buffer = malloc(frame_buffer_size);
+			frame_buffer = ttLibC_malloc(frame_buffer_size);
 			if(frame_buffer == NULL) {
 				ERR_PRINT("failed to allocate frame buffer for pes.");
 				// ここで処理を抜ける必要あり。
@@ -316,7 +317,7 @@ ttLibC_Pes *ttLibC_Pes_getPacket(
 			ttLibC_BitReader_close(&reader);
 			if(prev_packet == NULL) {
 				// prev_packetがnullの場合はframe_bufferをallocateしたので、解放しておきます。
-				free(frame_buffer);
+				ttLibC_free(frame_buffer);
 			}
 			return NULL;
 		}

@@ -14,6 +14,7 @@
 #include "type/videoTag.h"
 #include "type/metaTag.h"
 #include "../../log.h"
+#include "../../allocator.h"
 #include "../../util/hexUtil.h"
 #include "../../frame/video/h264.h"
 #include <stdlib.h>
@@ -64,7 +65,7 @@ ttLibC_FlvWriter *ttLibC_FlvWriter_make(
 	}
 	if(writer->audio_track.frame_type == frameType_unknown && writer->video_track.frame_type == frameType_unknown) {
 		ERR_PRINT("target track is invalid for both audio and video.");
-		free(writer);
+		ttLibC_free(writer);
 		return NULL;
 	}
 	return (ttLibC_FlvWriter *)writer;
@@ -247,6 +248,6 @@ void ttLibC_FlvWriter_close(ttLibC_FlvWriter **writer) {
 	}
 	ttLibC_FrameQueue_close(&target->video_track.frame_queue);
 	ttLibC_FrameQueue_close(&target->audio_track.frame_queue);
-	free(target);
+	ttLibC_free(target);
 	*writer = NULL;
 }

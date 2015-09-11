@@ -12,7 +12,7 @@
 
 #include "speexdspResampler.h"
 #include "../log.h"
-
+#include "../allocator.h"
 #include <speex/speex_resampler.h>
 #include <stdlib.h>
 #include <string.h>
@@ -38,7 +38,7 @@ typedef ttLibC_Resampler_SpeexdspResampler_ ttLibC_SpeexdspResampler_;
  * @return resampler object.
  */
 ttLibC_SpeexdspResampler *ttLibC_SpeexdspResampler_make(uint32_t channel_num, uint32_t input_sample_rate, uint32_t output_sample_rate, uint32_t quality) {
-	ttLibC_SpeexdspResampler_ *resampler = (ttLibC_SpeexdspResampler_ *)malloc(sizeof(ttLibC_SpeexdspResampler_));
+	ttLibC_SpeexdspResampler_ *resampler = (ttLibC_SpeexdspResampler_ *)ttLibC_malloc(sizeof(ttLibC_SpeexdspResampler_));
 	if(resampler == NULL) {
 		ERR_PRINT("failed to allocate resampler object.");
 		return NULL;
@@ -47,7 +47,7 @@ ttLibC_SpeexdspResampler *ttLibC_SpeexdspResampler_make(uint32_t channel_num, ui
 	resampler->resampler = speex_resampler_init(channel_num, input_sample_rate, output_sample_rate, quality, &error_num);
 	if(error_num != 0 || resampler->resampler == NULL) {
 		ERR_PRINT("failed to init speex resampler.");
-		free(resampler);
+		ttLibC_free(resampler);
 		return NULL;
 	}
 	resampler->inherit_super.channel_num        = channel_num;
@@ -99,13 +99,13 @@ ttLibC_PcmS16 *ttLibC_SpeexdspResampler_resample(ttLibC_SpeexdspResampler *resam
 				data_size = pcms16->inherit_super.inherit_super.data_size;
 			}
 			else {
-				free(pcms16->inherit_super.inherit_super.data);
+				ttLibC_free(pcms16->inherit_super.inherit_super.data);
 			}
 		}
 		pcms16->inherit_super.inherit_super.is_non_copy = true;
 	}
 	if(data == NULL) {
-		data = malloc(data_size);
+		data = ttLibC_malloc(data_size);
 		is_alloc_flg = true;
 	}
 	int res;
@@ -113,7 +113,7 @@ ttLibC_PcmS16 *ttLibC_SpeexdspResampler_resample(ttLibC_SpeexdspResampler *resam
 	default:
 		ERR_PRINT("no way to be here..");
 		if(is_alloc_flg) {
-			free(data);
+			ttLibC_free(data);
 		}
 		return NULL;
 	case PcmS16Type_littleEndian:
@@ -126,7 +126,7 @@ ttLibC_PcmS16 *ttLibC_SpeexdspResampler_resample(ttLibC_SpeexdspResampler *resam
 	if(res != 0) {
 		ERR_PRINT("failed to resampler: %s", speex_resampler_strerror(res));
 		if(is_alloc_flg) {
-			free(data);
+			ttLibC_free(data);
 		}
 		return NULL;
 	}
@@ -168,7 +168,7 @@ ttLibC_PcmS16 *ttLibC_SpeexdspResampler_resample(ttLibC_SpeexdspResampler *resam
 			resampler_->inherit_super.output_sample_rate);
 	if(pcms16 == NULL) {
 		if(is_alloc_flg) {
-			free(data);
+			ttLibC_free(data);
 		}
 		return NULL;
 	}
@@ -187,7 +187,7 @@ void ttLibC_SpeexdspResampler_close(ttLibC_SpeexdspResampler **resampler) {
 		return;
 	}
 	speex_resampler_destroy(target->resampler);
-	free(target);
+	ttLibC_free(target);
 	*resampler = NULL;
 }
 

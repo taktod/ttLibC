@@ -11,6 +11,7 @@
 #include <cute.h>
 #include <array>
 #include <ttLibC/log.h>
+#include <ttLibC/allocator.h>
 #include <ttLibC/util/hexUtil.h>
 #include <stdio.h>
 
@@ -72,6 +73,7 @@ static void mpegtsToFlvTest() {
 	ttLibC_ContainerWriter_close(&testData.writer);
 	if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
 	if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
+	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
 bool mp3Test_writeFrameCallback(void *ptr, void *data, size_t data_size) {
@@ -110,6 +112,7 @@ static void mp3Test() {
 	ttLibC_ContainerWriter_close(&testData.writer);
 	if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
 	if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
+	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
 bool mpegtsTest_writePacketCallback(void *ptr, void *data, size_t data_size) {
@@ -165,6 +168,7 @@ static void mpegtsTest() {
 	ttLibC_ContainerWriter_close(&testData.writer);
 	if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
 	if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
+	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
 static void mpegtsH264Mp3Test() {
@@ -194,6 +198,7 @@ static void mpegtsH264Mp3Test() {
 	ttLibC_ContainerWriter_close(&testData.writer);
 	if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
 	if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
+	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
 static void mpegtsVlcTest() {
@@ -223,6 +228,7 @@ static void mpegtsVlcTest() {
 	ttLibC_ContainerWriter_close(&testData.writer);
 	if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
 	if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
+	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
 bool flvTest_writeTagCallback(void *ptr, void *data, size_t data_size) {
@@ -262,6 +268,7 @@ static void flvTest() {
 	ttLibC_ContainerWriter_close(&testData.writer);
 	if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
 	if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
+	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
 static void flvFlv1AacTest() {
@@ -284,6 +291,7 @@ static void flvFlv1AacTest() {
 	ttLibC_ContainerWriter_close(&testData.writer);
 	if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
 	if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
+	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
 static void miscTest() {
@@ -294,6 +302,7 @@ static void miscTest() {
 	};
 	ttLibC_MpegtsWriter *writer = ttLibC_MpegtsWriter_make(types, 2);
 	ttLibC_MpegtsWriter_close(&writer);
+	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
 /**

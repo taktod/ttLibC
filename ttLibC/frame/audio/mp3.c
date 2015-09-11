@@ -15,6 +15,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "../../log.h"
+#include "../../allocator.h"
 #include "../../util/bitUtil.h"
 
 /*
@@ -75,7 +76,7 @@ ttLibC_Mp3 *ttLibC_Mp3_make(
 		return NULL;
 	}
 	if(mp3 == NULL) {
-		mp3 = malloc(sizeof(ttLibC_Mp3_));
+		mp3 = ttLibC_malloc(sizeof(ttLibC_Mp3_));
 		if(mp3 == NULL) {
 			ERR_PRINT("failed to allocate memory for mp3 frame.");
 			return NULL;
@@ -85,7 +86,7 @@ ttLibC_Mp3 *ttLibC_Mp3_make(
 	else {
 		if(!mp3->inherit_super.inherit_super.inherit_super.is_non_copy) {
 			if(non_copy_mode || mp3->inherit_super.inherit_super.inherit_super.data_size < data_size) {
-				free(mp3->inherit_super.inherit_super.inherit_super.data);
+				ttLibC_free(mp3->inherit_super.inherit_super.inherit_super.data);
 				mp3->inherit_super.inherit_super.inherit_super.data = NULL;
 			}
 			else {
@@ -108,11 +109,11 @@ ttLibC_Mp3 *ttLibC_Mp3_make(
 	}
 	else {
 		if(mp3->inherit_super.inherit_super.inherit_super.data == NULL) {
-			mp3->inherit_super.inherit_super.inherit_super.data = malloc(data_size);
+			mp3->inherit_super.inherit_super.inherit_super.data = ttLibC_malloc(data_size);
 			if(mp3->inherit_super.inherit_super.inherit_super.data == NULL) {
 				ERR_PRINT("failed to allocate memory for data.");
 				if(prev_frame == NULL) {
-					free(mp3);
+					ttLibC_free(mp3);
 				}
 				return NULL;
 			}
@@ -447,8 +448,8 @@ void ttLibC_Mp3_close(ttLibC_Mp3 **frame) {
 		return;
 	}
 	if(!target->inherit_super.inherit_super.inherit_super.is_non_copy) {
-		free(target->inherit_super.inherit_super.inherit_super.data);
+		ttLibC_free(target->inherit_super.inherit_super.inherit_super.data);
 	}
-	free(target);
+	ttLibC_free(target);
 	*frame = NULL;
 }

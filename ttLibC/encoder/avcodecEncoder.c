@@ -14,6 +14,7 @@
 
 #include <libavcodec/avcodec.h>
 #include "../log.h"
+#include "../allocator.h"
 #include "../util/hexUtil.h"
 #include "../frame/video/yuv420.h"
 #include "../frame/video/bgr.h"
@@ -1009,7 +1010,7 @@ ttLibC_AvcodecEncoder *ttLibC_AvcodecEncoder_makeWithAVCodecContext(void *enc_co
 		av_free(enc);
 		return NULL;
 	}
-	ttLibC_AvcodecEncoder_ *encoder = malloc(sizeof(ttLibC_AvcodecEncoder_));
+	ttLibC_AvcodecEncoder_ *encoder = ttLibC_malloc(sizeof(ttLibC_AvcodecEncoder_));
 	if(encoder == NULL) {
 		ERR_PRINT("failed to allocate encoder object.");
 		av_free(enc);
@@ -1019,7 +1020,7 @@ ttLibC_AvcodecEncoder *ttLibC_AvcodecEncoder_makeWithAVCodecContext(void *enc_co
 	if(avcodec_open2(encoder->enc, encoder->enc->codec, NULL) < 0) {
 		ERR_PRINT("failed to open codec.");
 		av_free(encoder->enc);
-		free(encoder);
+		ttLibC_free(encoder);
 		return NULL;
 	}
 	encoder->avframe = av_frame_alloc();
@@ -1027,7 +1028,7 @@ ttLibC_AvcodecEncoder *ttLibC_AvcodecEncoder_makeWithAVCodecContext(void *enc_co
 		ERR_PRINT("failed to alloc avframe.");
 		avcodec_close(encoder->enc);
 		av_free(encoder->enc);
-		free(encoder);
+		ttLibC_free(encoder);
 		return NULL;
 	}
 	encoder->pcm_buffer = NULL;
@@ -1064,18 +1065,18 @@ ttLibC_AvcodecEncoder *ttLibC_AvcodecEncoder_makeWithAVCodecContext(void *enc_co
 			av_free(encoder->avframe);
 			avcodec_close(encoder->enc);
 			av_free(encoder->enc);
-			free(encoder);
+			ttLibC_free(encoder);
 			return NULL;
 			// support with ttLibC_PcmF32
 		case AV_SAMPLE_FMT_FLT:
 			pcm_buffer_size = encoder->frame_size * encoder->enc->channels * 4;
-			encoder->pcm_buffer = malloc(pcm_buffer_size);
+			encoder->pcm_buffer = ttLibC_malloc(pcm_buffer_size);
 			encoder->inherit_super.input_frame_type  = frameType_pcmF32;
 			encoder->inherit_super.input_format_type = PcmF32Type_interleave;
 			break;
 		case AV_SAMPLE_FMT_FLTP:
 			pcm_buffer_size = encoder->frame_size * encoder->enc->channels * 4;
-			encoder->pcm_buffer = malloc(pcm_buffer_size);
+			encoder->pcm_buffer = ttLibC_malloc(pcm_buffer_size);
 			encoder->inherit_super.input_frame_type  = frameType_pcmF32;
 			encoder->inherit_super.input_format_type = PcmF32Type_planar;
 			break;
@@ -1083,14 +1084,14 @@ ttLibC_AvcodecEncoder *ttLibC_AvcodecEncoder_makeWithAVCodecContext(void *enc_co
 		case AV_SAMPLE_FMT_S16:
 			// endian shoud be according to cpu.
 			pcm_buffer_size = encoder->frame_size * encoder->enc->channels * 2;
-			encoder->pcm_buffer = malloc(pcm_buffer_size);
+			encoder->pcm_buffer = ttLibC_malloc(pcm_buffer_size);
 			encoder->inherit_super.input_frame_type = frameType_pcmS16;
 			encoder->inherit_super.input_format_type = PcmS16Type_littleEndian;
 			break;
 		case AV_SAMPLE_FMT_S16P:
 			// endian shoud be according to cpu.
 			pcm_buffer_size = encoder->frame_size * encoder->enc->channels * 2;
-			encoder->pcm_buffer = malloc(pcm_buffer_size);
+			encoder->pcm_buffer = ttLibC_malloc(pcm_buffer_size);
 			encoder->inherit_super.input_frame_type  = frameType_pcmS16;
 			encoder->inherit_super.input_format_type = PcmS16Type_littleEndian_planar;
 			break;
@@ -1146,7 +1147,7 @@ ttLibC_AvcodecEncoder *ttLibC_AvcodecEncoder_makeWithAVCodecContext(void *enc_co
 			av_free(encoder->avframe);
 			avcodec_close(encoder->enc);
 			av_free(encoder->enc);
-			free(encoder);
+			ttLibC_free(encoder);
 			return NULL;
 		}
 		break;
@@ -1155,7 +1156,7 @@ ttLibC_AvcodecEncoder *ttLibC_AvcodecEncoder_makeWithAVCodecContext(void *enc_co
 		av_free(encoder->avframe);
 		avcodec_close(encoder->enc);
 		av_free(encoder->enc);
-		free(encoder);
+		ttLibC_free(encoder);
 		return NULL;
 	}
 	av_init_packet(&encoder->packet);
@@ -1391,7 +1392,7 @@ void ttLibC_AvcodecEncoder_close(ttLibC_AvcodecEncoder **encoder) {
 		return;
 	}
 	if(target->pcm_buffer != NULL) {
-		free(target->pcm_buffer);
+		ttLibC_free(target->pcm_buffer);
 	}
 	if(target->avframe != NULL) {
 		av_free(target->avframe);
@@ -1402,7 +1403,7 @@ void ttLibC_AvcodecEncoder_close(ttLibC_AvcodecEncoder **encoder) {
 		av_free(target->enc);
 	}
 	ttLibC_Frame_close(&target->frame);
-	free(target);
+	ttLibC_free(target);
 	*encoder = NULL;
 }
 

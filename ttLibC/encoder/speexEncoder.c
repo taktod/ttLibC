@@ -12,6 +12,7 @@
 
 #include "speexEncoder.h"
 #include "../log.h"
+#include "../allocator.h"
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -76,7 +77,7 @@ ttLibC_SpeexEncoder *ttLibC_SpeexEncoder_make(
 		ERR_PRINT("support only 8k 16k 32kHz");
 		return NULL;
 	}
-	ttLibC_SpeexEncoder_ *encoder = malloc(sizeof(ttLibC_SpeexEncoder_));
+	ttLibC_SpeexEncoder_ *encoder = ttLibC_malloc(sizeof(ttLibC_SpeexEncoder_));
 	if(encoder == NULL) {
 		ERR_PRINT("failed to alloc encoder object.");
 		return NULL;
@@ -84,7 +85,7 @@ ttLibC_SpeexEncoder *ttLibC_SpeexEncoder_make(
 	encoder->enc_state = speex_encoder_init(mode);
 	if(!encoder->enc_state) {
 		ERR_PRINT("failed to init encoder.");
-		free(encoder);
+		ttLibC_free(encoder);
 		return NULL;
 	}
 	speex_init_header(&encoder->header, sample_rate, channel_num, mode);
@@ -97,9 +98,9 @@ ttLibC_SpeexEncoder *ttLibC_SpeexEncoder_make(
 	encoder->inherit_super.sample_rate = sample_rate;
 	encoder->inherit_super.type = SpeexEncoderType_CBR;
 	encoder->data_size = 512; // 512 for instance.
-	encoder->data = malloc(encoder->data_size);
+	encoder->data = ttLibC_malloc(encoder->data_size);
  	encoder->pcm_buffer_size = sample_rate / 50 * channel_num * sizeof(int16_t); // 20milisec分保持しなければいけない。
-	encoder->pcm_buffer = malloc(encoder->pcm_buffer_size);
+	encoder->pcm_buffer = ttLibC_malloc(encoder->pcm_buffer_size);
 	encoder->pcm_buffer_next_pos = 0;
 	if(encoder->data == NULL || encoder->pcm_buffer == NULL) {
 		ttLibC_SpeexEncoder_close((ttLibC_SpeexEncoder **)&encoder);
@@ -200,17 +201,17 @@ void ttLibC_SpeexEncoder_close(ttLibC_SpeexEncoder **encoder) {
 		return;
 	}
 	if(target->pcm_buffer != NULL) {
-		free(target->pcm_buffer);
+		ttLibC_free(target->pcm_buffer);
 		target->pcm_buffer = NULL;
 	}
 	if(target->data != NULL) {
-		free(target->data);
+		ttLibC_free(target->data);
 		target->data = NULL;
 	}
 	speex_bits_destroy(&target->bits);
 	speex_encoder_destroy(target->enc_state);
 	ttLibC_Speex_close(&target->speex);
-	free(target);
+	ttLibC_free(target);
 	*encoder = NULL;
 }
 

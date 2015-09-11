@@ -14,6 +14,7 @@
 #include "mpegtsReader.h"
 
 #include "../../log.h"
+#include "../../allocator.h"
 #include "../../util/hexUtil.h"
 #include "../../util/ioUtil.h"
 #include "../../util/bitUtil.h"
@@ -38,7 +39,7 @@ ttLibC_MpegtsReader *ttLibC_MpegtsReader_make() {
 	reader->target_size = 188;
 
 	reader->tmp_buffer_size = 188;
-	reader->tmp_buffer = malloc(reader->tmp_buffer_size);
+	reader->tmp_buffer = ttLibC_malloc(reader->tmp_buffer_size);
 	reader->tmp_buffer_next_pos = 0;
 	return (ttLibC_MpegtsReader *)reader;
 }
@@ -185,12 +186,12 @@ void ttLibC_MpegtsReader_close(ttLibC_MpegtsReader **reader) {
 	ttLibC_MpegtsPacket_close((ttLibC_MpegtsPacket **)&target->pmt);
 	ttLibC_MpegtsPacket_close((ttLibC_MpegtsPacket **)&target->sdt);
 	for(int i = 0;i < MaxPesTracks;++ i) {
-		ttLibC_MpegtsPacket_close((ttLibC_MpegtsPacket **)&target->pes[0]);
+		ttLibC_MpegtsPacket_close((ttLibC_MpegtsPacket **)&target->pes[i]);
 	}
 	if(target->tmp_buffer != NULL) {
-		free(target->tmp_buffer);
+		ttLibC_free(target->tmp_buffer);
 	}
-	free(target);
+	ttLibC_free(target);
 	*reader = NULL;
 }
 

@@ -12,6 +12,7 @@
 
 #include "mp3lameEncoder.h"
 #include "../log.h"
+#include "../allocator.h"
 #include <stdint.h>
 #include <stdlib.h>
 #include <lame/lame.h>
@@ -49,7 +50,7 @@ ttLibC_Mp3lameEncoder *ttLibC_Mp3lameEncoder_make(
 		uint32_t sample_rate,
 		uint32_t channel_num,
 		uint32_t quality) {
-	ttLibC_Mp3lameEncoder_ *encoder = malloc(sizeof(ttLibC_Mp3lameEncoder_));
+	ttLibC_Mp3lameEncoder_ *encoder = ttLibC_malloc(sizeof(ttLibC_Mp3lameEncoder_));
 	if(encoder == NULL) {
 		ERR_PRINT("failed to allocate memory for encoder.");
 		return NULL;
@@ -57,7 +58,7 @@ ttLibC_Mp3lameEncoder *ttLibC_Mp3lameEncoder_make(
 	encoder->gflags = lame_init();
 	if(encoder->gflags == NULL) {
 		ERR_PRINT("failed to initialize lame.");
-		free(encoder);
+		ttLibC_free(encoder);
 		return NULL;
 	}
 	lame_set_num_channels(encoder->gflags, channel_num);
@@ -65,7 +66,7 @@ ttLibC_Mp3lameEncoder *ttLibC_Mp3lameEncoder_make(
 	default:
 		ERR_PRINT("channel is 1:mono or 2:stereo");
 		lame_close(encoder->gflags);
-		free(encoder);
+		ttLibC_free(encoder);
 		return NULL;
 	case 1:
 		lame_set_mode(encoder->gflags, MONO);
@@ -81,12 +82,12 @@ ttLibC_Mp3lameEncoder *ttLibC_Mp3lameEncoder_make(
 	if(lame_init_params(encoder->gflags) < 0) {
 		ERR_PRINT("failed to setup lame.");
 		lame_close(encoder->gflags);
-		free(encoder);
+		ttLibC_free(encoder);
 		return NULL;
 	}
 	encoder->mp3                       = NULL;
 	encoder->data_size                 = 65536;
-	encoder->data                      = malloc(encoder->data_size); // mp3encode buffer.
+	encoder->data                      = ttLibC_malloc(encoder->data_size); // mp3encode buffer.
 	encoder->pts                       = 0;
 	encoder->data_start_pos            = 0;
 	encoder->inherit_super.channel_num = channel_num;
@@ -96,7 +97,7 @@ ttLibC_Mp3lameEncoder *ttLibC_Mp3lameEncoder_make(
 	if(encoder->data == NULL) {
 		ERR_PRINT("failed to allocate encode data buffer.");
 		lame_close(encoder->gflags);
-		free(encoder);
+		ttLibC_free(encoder);
 		return NULL;
 	}
 	return (ttLibC_Mp3lameEncoder *)encoder;
@@ -194,14 +195,14 @@ void ttLibC_Mp3lameEncoder_close(ttLibC_Mp3lameEncoder **encoder) {
 	}
 	ttLibC_Mp3lameEncoder_ *target = (ttLibC_Mp3lameEncoder_ *)*encoder;
 	// release encoded data buffer.
-	free(target->data);
+	ttLibC_free(target->data);
 	target->data = NULL;
 	// release reuse mp3 object.
 	ttLibC_Mp3_close(&target->mp3);
 	// close lame.
 	lame_close(target->gflags);
 	// free mp3lameEncoder
-	free(target);
+	ttLibC_free(target);
 	*encoder = NULL;
 }
 

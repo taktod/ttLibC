@@ -21,6 +21,7 @@
 #include "../../frame/audio/aac.h"
 
 #include "../../log.h"
+#include "../../allocator.h"
 #include "../../util/hexUtil.h"
 
 #include <stdlib.h>
@@ -356,6 +357,6 @@ void ttLibC_MpegtsWriter_close(ttLibC_MpegtsWriter **writer) {
 		ttLibC_FrameQueue_close(&target->track[i].frame_queue);
 		ttLibC_Frame_close(&target->track[i].h264_configData);
 	}
-	free(target);
+	ttLibC_free(target);
 	*writer = NULL;
 }

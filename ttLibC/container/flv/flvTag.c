@@ -16,6 +16,7 @@
 #include "flvTag.h"
 #include <stdlib.h>
 #include "../../log.h"
+#include "../../allocator.h"
 
 ttLibC_FlvTag *ttLibC_FlvTag_make(
 		ttLibC_FlvTag *prev_tag,
@@ -80,8 +81,8 @@ void ttLibC_FlvTag_close(ttLibC_FlvTag **tag) {
 	}
 	ttLibC_Frame_close(&target->frame);
 	if(!target->inherit_super.inherit_super.is_non_copy) {
-		free(target->inherit_super.inherit_super.data);
+		ttLibC_free(target->inherit_super.inherit_super.data);
 	}
-	free(target);
+	ttLibC_free(target);
 	*tag = NULL;
 }

@@ -12,8 +12,10 @@
 
 #include "openh264Encoder.h"
 #include "../log.h"
+#include "../allocator.h"
 
 #include <wels/codec_api.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -51,7 +53,7 @@ static ttLibC_Openh264Encoder *Openh264Encoder_make_ex(
 		uint32_t max_quantizer,
 		uint32_t min_quantizer,
 		uint32_t bitrate) {
-	ttLibC_Openh264Encoder_ *encoder = (ttLibC_Openh264Encoder_ *)malloc(sizeof(ttLibC_Openh264Encoder_));
+	ttLibC_Openh264Encoder_ *encoder = (ttLibC_Openh264Encoder_ *)ttLibC_malloc(sizeof(ttLibC_Openh264Encoder_));
 	if(encoder == NULL) {
 		ERR_PRINT("failed to alloc encoder object.");
 		return NULL;
@@ -59,7 +61,7 @@ static ttLibC_Openh264Encoder *Openh264Encoder_make_ex(
 	uint32_t res = WelsCreateSVCEncoder(&encoder->encoder);
 	if(res != 0 || encoder->encoder == NULL) {
 		ERR_PRINT("failed to create svcEncoder.");
-		free(encoder);
+		ttLibC_free(encoder);
 		return NULL;
 	}
 	SEncParamExt paramExt;
@@ -101,7 +103,7 @@ static ttLibC_Openh264Encoder *Openh264Encoder_make_ex(
 	if(res != 0) {
 		ERR_PRINT("failed to initialize encoder params.");
 		WelsDestroySVCEncoder(encoder->encoder);
-		free(encoder);
+		ttLibC_free(encoder);
 		return NULL;
 	}
 	// append additional data.
@@ -122,7 +124,7 @@ static ttLibC_Openh264Encoder *Openh264Encoder_make_ex(
 		ERR_PRINT("failed to set encode parameter set");
 		encoder->encoder->Uninitialize();
 		WelsDestroySVCEncoder(encoder->encoder);
-		free(encoder);
+		ttLibC_free(encoder);
 		return NULL;
 	}
 	// now we are ready for sps and pps.
@@ -366,7 +368,7 @@ static void Openh264Encoder_close(ttLibC_Openh264Encoder **encoder) {
 	}
 	ttLibC_H264_close(&target->h264);
 	ttLibC_H264_close(&target->configData);
-	free(target);
+	ttLibC_free(target);
 	*encoder = NULL;
 }
 

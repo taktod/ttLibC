@@ -13,6 +13,7 @@
 
 #include "yuv420.h"
 #include "../../log.h"
+#include "../../allocator.h"
 
 /*
  * make yuv420 frame
@@ -69,7 +70,7 @@ ttLibC_Yuv420 *ttLibC_Yuv420_make(
 		return NULL;
 	}
 	if(yuv420 == NULL) {
-		yuv420 = (ttLibC_Yuv420 *)malloc(sizeof(ttLibC_Yuv420));
+		yuv420 = (ttLibC_Yuv420 *)ttLibC_malloc(sizeof(ttLibC_Yuv420));
 		if(yuv420 == NULL) {
 			ERR_PRINT("failed to allocate memory for yuv420 frame");
 			return NULL;
@@ -79,7 +80,7 @@ ttLibC_Yuv420 *ttLibC_Yuv420_make(
 	else {
 		if(!yuv420->inherit_super.inherit_super.is_non_copy) {
 			if(non_copy_mode || yuv420->inherit_super.inherit_super.data_size < data_size_) {
-				free(yuv420->inherit_super.inherit_super.data);
+				ttLibC_free(yuv420->inherit_super.inherit_super.data);
 				yuv420->inherit_super.inherit_super.data = NULL;
 			}
 			else {
@@ -114,11 +115,11 @@ ttLibC_Yuv420 *ttLibC_Yuv420_make(
 	}
 	else {
 		if(yuv420->inherit_super.inherit_super.data == NULL) {
-			yuv420->inherit_super.inherit_super.data = malloc(data_size);
+			yuv420->inherit_super.inherit_super.data = ttLibC_malloc(data_size);
 			if(yuv420->inherit_super.inherit_super.data == NULL) {
 				ERR_PRINT("failed to allocate memory for data.");
 				if(prev_frame == NULL) {
-					free(yuv420);
+					ttLibC_free(yuv420);
 				}
 				return NULL;
 			}
@@ -141,8 +142,8 @@ void ttLibC_Yuv420_close(ttLibC_Yuv420 **frame) {
 		ERR_PRINT("found non yuv420 frame in yuv420_close.");
 	}
 	if(!target->inherit_super.inherit_super.is_non_copy) {
-		free(target->inherit_super.inherit_super.data);
+		ttLibC_free(target->inherit_super.inherit_super.data);
 	}
-	free(target);
+	ttLibC_free(target);
 	*frame = NULL;
 }

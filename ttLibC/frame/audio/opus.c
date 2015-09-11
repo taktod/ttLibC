@@ -13,6 +13,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "../../log.h"
+#include "../../allocator.h"
 
 typedef ttLibC_Frame_Audio_Opus ttLibC_Opus_;
 
@@ -54,7 +55,7 @@ ttLibC_Opus *ttLibC_Opus_make(
 		return NULL;
 	}
 	if(opus == NULL) {
-		opus = malloc(sizeof(ttLibC_Opus_));
+		opus = ttLibC_malloc(sizeof(ttLibC_Opus_));
 		if(opus == NULL) {
 			ERR_PRINT("failed to allocate memory for opus frame.");
 			return NULL;
@@ -64,7 +65,7 @@ ttLibC_Opus *ttLibC_Opus_make(
 	else {
 		if(!opus->inherit_super.inherit_super.is_non_copy) {
 			if(non_copy_mode || opus->inherit_super.inherit_super.data_size < data_size) {
-				free(opus->inherit_super.inherit_super.data);
+				ttLibC_free(opus->inherit_super.inherit_super.data);
 				opus->inherit_super.inherit_super.data = NULL;
 			}
 			else {
@@ -87,11 +88,11 @@ ttLibC_Opus *ttLibC_Opus_make(
 	}
 	else {
 		if(opus->inherit_super.inherit_super.data == NULL) {
-			opus->inherit_super.inherit_super.data = malloc(data_size);
+			opus->inherit_super.inherit_super.data = ttLibC_malloc(data_size);
 			if(opus->inherit_super.inherit_super.data == NULL) {
 				ERR_PRINT("failed to allocate memory for data.");
 				if(prev_frame == NULL) {
-					free(opus);
+					ttLibC_free(opus);
 				}
 				return NULL;
 			}
@@ -120,9 +121,9 @@ void ttLibC_Opus_close(ttLibC_Opus **frame) {
 		return;
 	}
 	if(!target->inherit_super.inherit_super.is_non_copy) {
-		free(target->inherit_super.inherit_super.data);
+		ttLibC_free(target->inherit_super.inherit_super.data);
 	}
-	free(target);
+	ttLibC_free(target);
 	*frame = NULL;
 }
 

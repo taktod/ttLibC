@@ -14,6 +14,7 @@
 
 #include <libavcodec/avcodec.h>
 #include "../log.h"
+#include "../allocator.h"
 #include "../util/hexUtil.h"
 
 #include "../frame/video/bgr.h"
@@ -392,7 +393,7 @@ ttLibC_AvcodecDecoder *ttLibC_AvcodecDecoder_makeWithAVCodecContext(void *dec_co
 		av_free(dec);
 		return NULL;
 	}
-	ttLibC_AvcodecDecoder_ *decoder = malloc(sizeof(ttLibC_AvcodecDecoder_));
+	ttLibC_AvcodecDecoder_ *decoder = ttLibC_malloc(sizeof(ttLibC_AvcodecDecoder_));
 	if(decoder == NULL) {
 		ERR_PRINT("failed to allocate decoder object.");
 		av_free(dec);
@@ -403,7 +404,7 @@ ttLibC_AvcodecDecoder *ttLibC_AvcodecDecoder_makeWithAVCodecContext(void *dec_co
 	if((result = avcodec_open2(decoder->dec, decoder->dec->codec, NULL)) < 0) {
 		ERR_PRINT("failed to open codec.:%d", AVERROR(result));
 		av_free(decoder->dec);
-		free(decoder);
+		ttLibC_free(decoder);
 		return NULL;
 	}
 	decoder->avframe = av_frame_alloc();
@@ -411,7 +412,7 @@ ttLibC_AvcodecDecoder *ttLibC_AvcodecDecoder_makeWithAVCodecContext(void *dec_co
 		ERR_PRINT("failed to alloc avframe.");
 		avcodec_close(decoder->dec);
 		av_free(decoder->dec);
-		free(decoder);
+		ttLibC_free(decoder);
 		return NULL;
 	}
 	decoder->inherit_super.frame_type = frame_type;
@@ -428,7 +429,7 @@ ttLibC_AvcodecDecoder *ttLibC_AvcodecDecoder_makeWithAVCodecContext(void *dec_co
 			av_free(decoder->avframe);
 			avcodec_close(decoder->dec);
 			av_free(decoder->dec);
-			free(decoder);
+			ttLibC_free(decoder);
 			return NULL;
 		}
 		decoder->inherit_super.sample_rate = 0;
@@ -450,7 +451,7 @@ ttLibC_AvcodecDecoder *ttLibC_AvcodecDecoder_makeWithAVCodecContext(void *dec_co
 			av_free(decoder->avframe);
 			avcodec_close(decoder->dec);
 			av_free(decoder->dec);
-			free(decoder);
+			ttLibC_free(decoder);
 			return NULL;
 		}
 		decoder->inherit_super.width  = 0;
@@ -461,7 +462,7 @@ ttLibC_AvcodecDecoder *ttLibC_AvcodecDecoder_makeWithAVCodecContext(void *dec_co
 		av_free(decoder->avframe);
 		avcodec_close(decoder->dec);
 		av_free(decoder->dec);
-		free(decoder);
+		ttLibC_free(decoder);
 		return NULL;
 	}
 	av_init_packet(&decoder->packet);
@@ -628,7 +629,7 @@ void ttLibC_AvcodecDecoder_close(ttLibC_AvcodecDecoder **decoder) {
 		av_free(target->dec);
 	}
 	ttLibC_Frame_close(&target->frame);
-	free(target);
+	ttLibC_free(target);
 	*decoder = NULL;
 }
 

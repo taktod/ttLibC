@@ -11,6 +11,7 @@
 #include "mp3Frame.h"
 #include <stdlib.h>
 #include "../../log.h"
+#include "../../allocator.h"
 
 ttLibC_Mp3Frame *ttLibC_Mp3Frame_make(
 		ttLibC_Mp3Frame *prev_mp3frame,
@@ -61,8 +62,8 @@ void ttLibC_Mp3Frame_close(ttLibC_Mp3Frame **frame) {
 	}
 	ttLibC_Frame_close(&target->frame);
 	if(!target->inherit_super.inherit_super.is_non_copy) {
-		free(target->inherit_super.inherit_super.data);
+		ttLibC_free(target->inherit_super.inherit_super.data);
 	}
-	free(target);
+	ttLibC_free(target);
 	*frame = NULL;
 }

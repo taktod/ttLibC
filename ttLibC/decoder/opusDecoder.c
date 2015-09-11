@@ -9,6 +9,7 @@
 
 #include "opusDecoder.h"
 #include "../log.h"
+#include "../allocator.h"
 #include <stdlib.h>
 #include <opus/opus.h>
 
@@ -34,7 +35,7 @@ typedef ttLibC_Decoder_OpusDecoder_ ttLibC_OpusDecoder_;
 ttLibC_OpusDecoder *ttLibC_OpusDecoder_make(
 		uint32_t sample_rate,
 		uint32_t channel_num) {
-	ttLibC_OpusDecoder_ *decoder = malloc(sizeof(ttLibC_OpusDecoder_));
+	ttLibC_OpusDecoder_ *decoder = ttLibC_malloc(sizeof(ttLibC_OpusDecoder_));
 	if(decoder == NULL) {
 		ERR_PRINT("failed to allocate memory for decoder.");
 		return NULL;
@@ -43,22 +44,22 @@ ttLibC_OpusDecoder *ttLibC_OpusDecoder_make(
 	decoder->decoder = opus_decoder_create(sample_rate, channel_num, &error);
 	if(error != OPUS_OK) {
 		ERR_PRINT("error to create opus decoder:%s", opus_strerror(error));
-		free(decoder);
+		ttLibC_free(decoder);
 		return NULL;
 	}
 	if(decoder == NULL) {
 		ERR_PRINT("failed to make opus decoder.");
-		free(decoder);
+		ttLibC_free(decoder);
 		return NULL;
 	}
 	decoder->pcms16 = NULL;
 	decoder->inherit_super.channel_num = channel_num;
 	decoder->inherit_super.sample_rate = sample_rate;
 	decoder->pcm_buffer_size = 2880 * sizeof(int16_t) * channel_num;
-	decoder->pcm_buffer = malloc(decoder->pcm_buffer_size);
+	decoder->pcm_buffer = ttLibC_malloc(decoder->pcm_buffer_size);
 	if(decoder->pcm_buffer == NULL) {
 		opus_decoder_destroy(decoder->decoder);
-		free(decoder);
+		ttLibC_free(decoder);
 	}
 	return (ttLibC_OpusDecoder *)decoder;
 }
@@ -122,9 +123,9 @@ void ttLibC_OpusDecoder_close(ttLibC_OpusDecoder **decoder) {
 	}
 	ttLibC_PcmS16_close(&target->pcms16);
 	if(target->pcm_buffer != NULL) {
-		free(target->pcm_buffer);
+		ttLibC_free(target->pcm_buffer);
 	}
-	free(target);
+	ttLibC_free(target);
 	*decoder = NULL;
 }
 

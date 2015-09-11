@@ -52,6 +52,7 @@
 #include <ttLibC/resampler/audioResampler.h>
 
 #include <ttLibC/frame/audio/mp3.h>
+#include <ttLibC/allocator.h>
 
 static void faadTest() {
 	LOG_PRINT("faadTest");
@@ -73,25 +74,26 @@ static void faadTest() {
 	unsigned long sample_rate;
 	uint8_t channel_num;
 	NeAACDecInit2(hDecoder, buf, size, &sample_rate, &channel_num);
-	LOG_PRINT("sample_rate:%d channel_num:%d", sample_rate, channel_num);
+	LOG_PRINT("sample_rate:%lu channel_num:%d", sample_rate, channel_num);
 	size = ttLibC_HexUtil_makeBuffer("210049900219002380", buf, 256);
 	int16_t *data = NULL;
 	data = (int16_t *)NeAACDecDecode(hDecoder, &frameInfo, buf, size);
-	LOG_PRINT("returned samples:%d", frameInfo.samples);
+	LOG_PRINT("returned samples:%lu", frameInfo.samples);
 	data = (int16_t *)NeAACDecDecode(hDecoder, &frameInfo, buf, size);
-	LOG_PRINT("returned samples:%d", frameInfo.samples);
+	LOG_PRINT("returned samples:%lu", frameInfo.samples);
 	data = (int16_t *)NeAACDecDecode(hDecoder, &frameInfo, buf, size);
-	LOG_PRINT("returned samples:%d", frameInfo.samples);
+	LOG_PRINT("returned samples:%lu", frameInfo.samples);
 	data = (int16_t *)NeAACDecDecode(hDecoder, &frameInfo, buf, size);
-	LOG_PRINT("returned samples:%d", frameInfo.samples);
+	LOG_PRINT("returned samples:%lu", frameInfo.samples);
 	data = (int16_t *)NeAACDecDecode(hDecoder, &frameInfo, buf, size);
-	LOG_PRINT("returned samples:%d", frameInfo.samples);
+	LOG_PRINT("returned samples:%lu", frameInfo.samples);
 	data = (int16_t *)NeAACDecDecode(hDecoder, &frameInfo, buf, size);
-	LOG_PRINT("returned samples:%d", frameInfo.samples);
+	LOG_PRINT("returned samples:%lu", frameInfo.samples);
 	data = (int16_t *)NeAACDecDecode(hDecoder, &frameInfo, buf, size);
-	LOG_PRINT("returned samples:%d", frameInfo.samples);
+	LOG_PRINT("returned samples:%lu", frameInfo.samples);
 	NeAACDecClose(hDecoder);
 #endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
 static void audioResamplerTest() {
@@ -126,6 +128,7 @@ static void audioResamplerTest() {
 	}
 	ttLibC_PcmS16_close(&pcms16_out);
 	ttLibC_PcmS16_close(&pcms16);
+	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
 static void opusTest() {
@@ -210,6 +213,7 @@ static void opusTest() {
 	ttLibC_AlDevice_close(&device);
 	ttLibC_BeepGenerator_close(&generator);
 #endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
 #if defined(__ENABLE_MP3LAME__) && defined(__ENABLE_MP3LAME_ENCODE__) && defined(__ENABLE_OPENAL__)
@@ -291,7 +295,9 @@ static void mp3DecodeTest() {
 		hip_decode_exit(hip_gflags);
 	}
 	ttLibC_BeepGenerator_close(&generator);
+	ttLibC_Mp3lameEncoder_close(&encoder);
 #endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
 static void speexTest() {
@@ -402,9 +408,11 @@ static void speexTest() {
 	LOG_PRINT("encoder destroy");
 	// destroy libspeex.
 	speex_encoder_destroy(enc_state);
+	ttLibC_PcmS16_close(&pcm);
 	ttLibC_BeepGenerator_close(&generator);
 	LOG_PRINT("all end.");
 #endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
 static void speexdspResampleTest() {
@@ -470,9 +478,11 @@ static void speexdspResampleTest() {
 	}
 	ttLibC_AlDevice_proceed(device, -1);
 	ttLibC_AlDevice_close(&device);
+	ttLibC_PcmS16_close(&pcm);
 	ttLibC_BeepGenerator_close(&generator);
 	speex_resampler_destroy(resampler);
 #endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
 static void faacTest() {
@@ -533,6 +543,7 @@ static void faacTest() {
 	ttLibC_PcmS16_close(&pcm);
 	ttLibC_BeepGenerator_close(&generator);
 #endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
 static void mp3lameTest() {
@@ -579,10 +590,12 @@ static void mp3lameTest() {
 		fwrite(buf, size, 1, fp);
 //		ttLibC_HexUtil_dump(buf, size, true);
 	}
+	ttLibC_PcmS16_close(&pcm);
 	ttLibC_BeepGenerator_close(&generator);
 	fclose(fp);
 	lame_close(gflags);
 #endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
 /**

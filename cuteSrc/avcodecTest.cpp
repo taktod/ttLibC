@@ -10,6 +10,7 @@
 #include <cute.h>
 
 #include <ttLibC/log.h>
+#include <ttLibC/allocator.h>
 
 #ifdef __ENABLE_AVCODEC__
 extern "C" {
@@ -56,6 +57,7 @@ bool avcodecAudioDecodeCallback(void *ptr, ttLibC_Frame *frame) {
 	if(pcms16 == NULL) {
 		return true;
 	}
+	testData->pcms16 = pcms16;
 	// queue sound.
 	ttLibC_AlDevice_queue(testData->device, pcms16);
 	return true;
@@ -106,6 +108,7 @@ static void aacTest() {
 	ttLibC_AvcodecEncoder_close(&encoder);
 	ttLibC_BeepGenerator_close(&generator);
 #endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
 static void adpcmImaWavTest() {
@@ -139,6 +142,7 @@ static void adpcmImaWavTest() {
 	ttLibC_AvcodecEncoder_close(&encoder);
 	ttLibC_BeepGenerator_close(&generator);
 #endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
 static void mp3Test() {
@@ -180,6 +184,7 @@ static void mp3Test() {
 	ttLibC_AvcodecEncoder_close(&encoder);
 	ttLibC_BeepGenerator_close(&generator);
 #endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
 static void nellymoserTest() {
@@ -220,6 +225,7 @@ static void nellymoserTest() {
 	ttLibC_AvcodecEncoder_close(&encoder);
 	ttLibC_BeepGenerator_close(&generator);
 #endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
 static void pcmAlawTest() {
@@ -253,6 +259,7 @@ static void pcmAlawTest() {
 	ttLibC_AvcodecEncoder_close(&encoder);
 	ttLibC_BeepGenerator_close(&generator);
 #endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
 static void pcmMulawTest() {
@@ -286,6 +293,7 @@ static void pcmMulawTest() {
 	ttLibC_AvcodecEncoder_close(&encoder);
 	ttLibC_BeepGenerator_close(&generator);
 #endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
 static void vorbisTest() {
@@ -341,6 +349,7 @@ static void vorbisTest() {
 	ttLibC_AvcodecEncoder_close(&encoder);
 	ttLibC_BeepGenerator_close(&generator);
 #endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
 #if defined(__ENABLE_AVCODEC__) && defined(__ENABLE_OPENCV__)
@@ -424,6 +433,7 @@ static void flv1Test() {
 	ttLibC_CvWindow_close(&window);
 	ttLibC_CvCapture_close(&capture);
 #endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
 static void vp8Test() {
@@ -471,6 +481,7 @@ static void vp8Test() {
 	ttLibC_CvWindow_close(&window);
 	ttLibC_CvCapture_close(&capture);
 #endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
 static void wmv1Test() {
@@ -518,6 +529,7 @@ static void wmv1Test() {
 	ttLibC_CvWindow_close(&window);
 	ttLibC_CvCapture_close(&capture);
 #endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
 static void wmv2Test() {
@@ -566,6 +578,7 @@ static void wmv2Test() {
 	ttLibC_CvWindow_close(&window);
 	ttLibC_CvCapture_close(&capture);*/
 #endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
 static void h264Test() {
@@ -646,6 +659,7 @@ static void h264Test() {
 	ttLibC_CvWindow_close(&window);
 	ttLibC_CvCapture_close(&capture);*/
 #endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
 /**

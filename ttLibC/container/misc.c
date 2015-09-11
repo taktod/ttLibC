@@ -10,6 +10,7 @@
 
 #include "misc.h"
 #include "../log.h"
+#include "../allocator.h"
 
 #include <stdlib.h>
 
@@ -40,15 +41,15 @@ typedef ttLibC_Container_Misc_FrameQueue_ ttLibC_FrameQueue_;
 ttLibC_FrameQueue *ttLibC_FrameQueue_make(
 		uint32_t track_id,
 		uint32_t max_size) {
-	ttLibC_FrameQueue_ *queue = malloc(sizeof(ttLibC_FrameQueue_));
+	ttLibC_FrameQueue_ *queue = ttLibC_malloc(sizeof(ttLibC_FrameQueue_));
 	if(queue == NULL) {
 		ERR_PRINT("failed to allocate queue object.");
 		return NULL;
 	}
-	queue->frame_array = malloc(sizeof(ttLibC_Frame*) * max_size);
+	queue->frame_array = ttLibC_malloc(sizeof(ttLibC_Frame*) * max_size);
 	if(queue->frame_array == NULL) {
 		ERR_PRINT("failed to allocate frame list.");
-		free(queue);
+		ttLibC_free(queue);
 		return NULL;
 	}
 	queue->stack_count            = max_size;
@@ -184,7 +185,7 @@ void ttLibC_FrameQueue_close(ttLibC_FrameQueue **queue) {
 	for(int i = 0;i < target->stack_count;++ i) {
 		ttLibC_Frame_close(&target->frame_array[i]);
 	}
-	free(target->frame_array);
-	free(target);
+	ttLibC_free(target->frame_array);
+	ttLibC_free(target);
 	*queue = NULL;
 }

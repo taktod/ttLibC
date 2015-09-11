@@ -11,6 +11,7 @@
 #include <cute.h>
 
 #include <ttLibC/log.h>
+#include <ttLibC/allocator.h>
 
 #ifdef __ENABLE_OPENCV__
 #	include <ttLibC/util/opencvUtil.h>
@@ -113,6 +114,7 @@ static void opusTest() {
 	ttLibC_PcmS16_close(&pcm);
 	ttLibC_BeepGenerator_close(&generator);
 #endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
 #if defined(__ENABLE_SPEEX__) && defined(__ENABLE_OPENAL__)
@@ -164,6 +166,7 @@ static void speexTest() {
 	ttLibC_PcmS16_close(&pcm);
 	ttLibC_BeepGenerator_close(&generator);
 #endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
 static void speexdspResamplerTest() {
@@ -197,6 +200,7 @@ static void speexdspResamplerTest() {
 	ttLibC_AlDevice_close(&device);
 	ttLibC_BeepGenerator_close(&generator);
 #endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
 #if defined(__ENABLE_OPENH264__) && defined(__ENABLE_OPENCV__)
@@ -272,6 +276,7 @@ static void openh264Test() {
 	ttLibC_CvWindow_close(&window);
 	ttLibC_CvCapture_close(&capture);
 #endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
 bool faacEncoderTestCallback(void *ptr, ttLibC_Aac *aac) {
@@ -311,6 +316,7 @@ static void faacEncoderTest() {
 	ttLibC_BeepGenerator_close(&generator);
 	ttLibC_FaacEncoder_close(&encoder);
 #endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
 #if defined(__ENABLE_MP3LAME_ENCODE__) && defined(__ENABLE_MP3LAME_DECODE__) && (__ENABLE_OPENAL__)
@@ -363,6 +369,7 @@ static void mp3lameTest() {
 	ttLibC_Mp3lameDecoder_close(&decoder);
 	ttLibC_Mp3lameEncoder_close(&encoder);
 #endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
 /**
@@ -407,6 +414,7 @@ static void imageResamplerTest() {
 	ttLibC_CvWindow_close(&window);
 	ttLibC_CvCapture_close(&capture);
 #endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
 /**

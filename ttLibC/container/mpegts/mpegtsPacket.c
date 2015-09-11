@@ -15,6 +15,7 @@
 #include "type/sdt.h"
 #include <stdlib.h>
 #include "../../log.h"
+#include "../../allocator.h"
 #include "../../frame/frame.h"
 
 ttLibC_MpegtsPacket *ttLibC_MpegtsPacket_make(
@@ -82,8 +83,8 @@ void ttLibC_MpegtsPacket_close(ttLibC_MpegtsPacket **packet) {
 	}
 	ttLibC_Frame_close(&target->frame);
 	if(!target->inherit_super.inherit_super.is_non_copy) {
-		free(target->inherit_super.inherit_super.data);
+		ttLibC_free(target->inherit_super.inherit_super.data);
 	}
-	free(target);
+	ttLibC_free(target);
 	*packet = NULL;
 }

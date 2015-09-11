@@ -12,6 +12,7 @@
 
 #include "mp3lameDecoder.h"
 #include "../log.h"
+#include "../allocator.h"
 #include <stdlib.h>
 #include <lame/lame.h>
 
@@ -43,7 +44,7 @@ typedef ttLibC_Decoder_Mp3lameDecoder_ ttLibC_Mp3lameDecoder_;
  * make mp3lame decoder
  */
 ttLibC_Mp3lameDecoder *ttLibC_Mp3lameDecoder_make() {
-	ttLibC_Mp3lameDecoder_ *decoder = malloc(sizeof(ttLibC_Mp3lameDecoder_));
+	ttLibC_Mp3lameDecoder_ *decoder = ttLibC_malloc(sizeof(ttLibC_Mp3lameDecoder_));
 	if(decoder == NULL) {
 		ERR_PRINT("failed to allocate memory for decoder.");
 		return NULL;
@@ -52,10 +53,10 @@ ttLibC_Mp3lameDecoder *ttLibC_Mp3lameDecoder_make() {
 	decoder->inherit_super.channel_num = 0;
 	decoder->inherit_super.sample_rate = 0;
 	decoder->buffer_size = 65536;
-	decoder->buffer = malloc(decoder->buffer_size);
+	decoder->buffer = ttLibC_malloc(decoder->buffer_size);
 	if(decoder->buffer == NULL) {
 		ERR_PRINT("failed to allocate memory for buffer.");
-		free(decoder);
+		ttLibC_free(decoder);
 		return NULL;
 	}
 	// max sample_num = buffer_size / 4;
@@ -65,7 +66,7 @@ ttLibC_Mp3lameDecoder *ttLibC_Mp3lameDecoder_make() {
 	decoder->hip_gflags = hip_decode_init();
 	if(decoder->hip_gflags == NULL) {
 		ERR_PRINT("failed to initialize hip.");
-		free(decoder);
+		ttLibC_free(decoder);
 		return NULL;
 	}
 	return (ttLibC_Mp3lameDecoder *)decoder;
@@ -119,11 +120,11 @@ void ttLibC_Mp3lameDecoder_decode(
 	// check sample_num
 	if(decoder_->buffer_size < (mp3->inherit_super.sample_num << 4)) {
 		// need more buffer.
-		free(decoder_->buffer);
+		ttLibC_free(decoder_->buffer);
 		decoder_->left_buffer  = NULL;
 		decoder_->right_buffer = NULL;
 		decoder_->buffer_size = (mp3->inherit_super.sample_num << 4);
-		decoder_->buffer = malloc(decoder_->buffer_size);
+		decoder_->buffer = ttLibC_malloc(decoder_->buffer_size);
 		if(decoder_->buffer == NULL) {
 			ERR_PRINT("failed to realloc buffer.");
 			return;
@@ -192,8 +193,8 @@ void ttLibC_Mp3lameDecoder_close(ttLibC_Mp3lameDecoder **decoder) {
 		hip_decode_exit(target->hip_gflags);
 	}
 	ttLibC_PcmS16_close(&target->pcms16);
-	free(target->buffer);
-	free(target);
+	ttLibC_free(target->buffer);
+	ttLibC_free(target);
 	*decoder = NULL;
 }
 

@@ -15,6 +15,7 @@
 #include <stdlib.h>
 
 #include "../log.h"
+#include "../allocator.h"
 
 typedef struct {
 	/** inherit data from ttLibC_BitReader */
@@ -38,7 +39,7 @@ typedef ttLibC_Util_BitReader_ ttLibC_BitReader_;
  * @return bit reader object.
  */
 ttLibC_BitReader *ttLibC_BitReader_make(void *data, size_t data_size, ttLibC_BitReader_Type type) {
-	ttLibC_BitReader_ *reader = (ttLibC_BitReader_ *)malloc(sizeof(ttLibC_BitReader_));
+	ttLibC_BitReader_ *reader = (ttLibC_BitReader_ *)ttLibC_malloc(sizeof(ttLibC_BitReader_));
 	reader->zero_count = 0;
 	reader->pos = 0;
 	reader->data = data;
@@ -344,6 +345,6 @@ void ttLibC_BitReader_close(ttLibC_BitReader **reader) {
 	if(target == NULL) {
 		return;
 	}
-	free(target);
+	ttLibC_free(target);
 	*reader = NULL;
 }

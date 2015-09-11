@@ -17,6 +17,7 @@
 #include "mp3.h"
 #include "mpegts.h"
 #include "../log.h"
+#include "../allocator.h"
 
 /*
  * common function for container make.
@@ -59,7 +60,7 @@ ttLibC_Container *ttLibC_Container_make(
 		return NULL;
 	}
 	if(container == NULL) {
-		container = malloc(container_size);
+		container = ttLibC_malloc(container_size);
 		if(container == NULL) {
 			ERR_PRINT("failed to allocate memory for container.");
 			return NULL;
@@ -69,7 +70,7 @@ ttLibC_Container *ttLibC_Container_make(
 	else {
 		if(!container->is_non_copy) {
 			if(non_copy_mode || container->data_size < data_size) {
-				free(container->data);
+				ttLibC_free(container->data);
 				container->data = NULL;
 			}
 			else {
@@ -88,11 +89,11 @@ ttLibC_Container *ttLibC_Container_make(
 	}
 	else {
 		if(container->data == NULL) {
-			container->data = malloc(data_size);
+			container->data = ttLibC_malloc(data_size);
 			if(container->data == NULL) {
 				ERR_PRINT("failed to allocate memory for data.");
 				if(prev_container == NULL) {
-					free(container);
+					ttLibC_free(container);
 				}
 				return NULL;
 			}
@@ -173,7 +174,7 @@ ttLibC_ContainerReader *ttLibC_ContainerReader_make(
 		ERR_PRINT("0 is invalid size for malloc.");
 		return NULL;
 	}
-	ttLibC_ContainerReader *reader = malloc(reader_size);
+	ttLibC_ContainerReader *reader = ttLibC_malloc(reader_size);
 	if(reader == NULL) {
 		ERR_PRINT("failed to allocate memory for reader.");
 		return NULL;
@@ -226,7 +227,7 @@ ttLibC_ContainerWriter *ttLibC_ContainerWriter_make(
 		ERR_PRINT("0 is invalid size for malloc.");
 		return NULL;
 	}
-	ttLibC_ContainerWriter *writer = malloc(writer_size);
+	ttLibC_ContainerWriter *writer = ttLibC_malloc(writer_size);
 	if(writer == NULL) {
 		ERR_PRINT("failed to allocate memory for writer.");
 		return NULL;

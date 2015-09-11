@@ -135,7 +135,7 @@ bool ttLibC_FlvVideoTag_getFrame(
 	switch(video_tag->frame_type) {
 	case frameType_flv1:
 		{
-			ttLibC_Flv1 *flv1 = ttLibC_Flv1_getFrame(NULL, buffer, left_size, true, video_tag->inherit_super.inherit_super.inherit_super.pts, video_tag->inherit_super.inherit_super.inherit_super.timebase);
+			ttLibC_Flv1 *flv1 = ttLibC_Flv1_getFrame(video_tag->inherit_super.frame, buffer, left_size, true, video_tag->inherit_super.inherit_super.inherit_super.pts, video_tag->inherit_super.inherit_super.inherit_super.timebase);
 			if(flv1 == NULL) {
 				return false;
 			}

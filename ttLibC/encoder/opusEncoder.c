@@ -12,6 +12,7 @@
 
 #include "opusEncoder.h"
 #include "../log.h"
+#include "../allocator.h"
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -54,7 +55,7 @@ ttLibC_OpusEncoder *ttLibC_OpusEncoder_make(
 		uint32_t sample_rate,
 		uint32_t channel_num,
 		uint32_t unit_sample_num) {
-	ttLibC_OpusEncoder_ *encoder = malloc(sizeof(ttLibC_OpusEncoder_));
+	ttLibC_OpusEncoder_ *encoder = ttLibC_malloc(sizeof(ttLibC_OpusEncoder_));
 	if(encoder == NULL) {
 		ERR_PRINT("failed to alloc encoder object.");
 		return NULL;
@@ -63,12 +64,12 @@ ttLibC_OpusEncoder *ttLibC_OpusEncoder_make(
 	encoder->encoder = opus_encoder_create(sample_rate, channel_num, OPUS_APPLICATION_RESTRICTED_LOWDELAY, &error);
 	if(error != OPUS_OK) {
 		ERR_PRINT("error to create opus encoder:%s", opus_strerror(error));
-		free(encoder);
+		ttLibC_free(encoder);
 		return NULL;
 	}
 	if(encoder->encoder == NULL) {
 		ERR_PRINT("failed to make opus encoder.");
-		free(encoder);
+		ttLibC_free(encoder);
 		return NULL;
 	}
 	encoder->opus                          = NULL;
@@ -82,9 +83,9 @@ ttLibC_OpusEncoder *ttLibC_OpusEncoder_make(
 	encoder->inherit_super.sample_rate     = sample_rate;
 	encoder->inherit_super.unit_sample_num = unit_sample_num;
 	encoder->data_size = 512; // 512 for instance.
-	encoder->data = malloc(encoder->data_size);
+	encoder->data = ttLibC_malloc(encoder->data_size);
 	encoder->pcm_buffer_size = unit_sample_num * channel_num * sizeof(int16_t);
-	encoder->pcm_buffer = malloc(encoder->pcm_buffer_size);
+	encoder->pcm_buffer = ttLibC_malloc(encoder->pcm_buffer_size);
 	encoder->pcm_buffer_next_pos = 0;
 	if(encoder->data == NULL || encoder->pcm_buffer == NULL) {
 		ttLibC_OpusEncoder_close((ttLibC_OpusEncoder **)&encoder);
@@ -238,15 +239,15 @@ void ttLibC_OpusEncoder_close(ttLibC_OpusEncoder **encoder) {
 		opus_encoder_destroy(target->encoder);
 	}
 	if(target->data != NULL) {
-		free(target->data);
+		ttLibC_free(target->data);
 		target->data = NULL;
 	}
 	if(target->pcm_buffer != NULL) {
-		free(target->pcm_buffer);
+		ttLibC_free(target->pcm_buffer);
 		target->pcm_buffer = NULL;
 	}
 	ttLibC_Opus_close(&target->opus);
-	free(target);
+	ttLibC_free(target);
 	*encoder = NULL;
 }
 

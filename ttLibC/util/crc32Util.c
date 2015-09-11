@@ -11,6 +11,7 @@
 #include "crc32Util.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include "../allocator.h"
 
 /**
  * crc32 table make up on the first object.
@@ -26,7 +27,7 @@ static const uint32_t POLYNOMINAL = 0x04C11DB7L;
  * @return crc32 object.
  */
 ttLibC_Crc32 *ttLibC_Crc32_make(uint32_t initial_data) {
-	ttLibC_Crc32 *crc32 = malloc(sizeof(ttLibC_Crc32));
+	ttLibC_Crc32 *crc32 = ttLibC_malloc(sizeof(ttLibC_Crc32));
 	if(crc_table[1] == 0) {
 		// not initialize.
 		uint64_t crc = 0;
@@ -68,6 +69,6 @@ void ttLibC_Crc32_close(ttLibC_Crc32 **crc32) {
 	if(target == NULL) {
 		return;
 	}
-	free(target);
+	ttLibC_free(target);
 	*crc32 = NULL;
 }

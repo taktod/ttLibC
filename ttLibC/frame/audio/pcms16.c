@@ -13,6 +13,7 @@
 
 #include "pcms16.h"
 #include "../../log.h"
+#include "../../allocator.h"
 
 /*
  * make pcms16 frame
@@ -71,7 +72,7 @@ ttLibC_PcmS16 *ttLibC_PcmS16_make(
 		return NULL;
 	}
 	if(pcms16 == NULL) {
-		pcms16 = (ttLibC_PcmS16 *)malloc(sizeof(ttLibC_PcmS16));
+		pcms16 = (ttLibC_PcmS16 *)ttLibC_malloc(sizeof(ttLibC_PcmS16));
 		if(pcms16 == NULL) {
 			ERR_PRINT("failed to allocate memory for pcms16 frame.");
 			return NULL;
@@ -81,7 +82,7 @@ ttLibC_PcmS16 *ttLibC_PcmS16_make(
 	else {
 		if(!pcms16->inherit_super.inherit_super.is_non_copy) {
 			if(non_copy_mode || pcms16->inherit_super.inherit_super.data_size < data_size) {
-				free(pcms16->inherit_super.inherit_super.data);
+				ttLibC_free(pcms16->inherit_super.inherit_super.data);
 				pcms16->inherit_super.inherit_super.data = NULL;
 			}
 			else {
@@ -110,11 +111,11 @@ ttLibC_PcmS16 *ttLibC_PcmS16_make(
 	}
 	else {
 		if(pcms16->inherit_super.inherit_super.data == NULL) {
-			pcms16->inherit_super.inherit_super.data = malloc(data_size);
+			pcms16->inherit_super.inherit_super.data = ttLibC_malloc(data_size);
 			if(pcms16->inherit_super.inherit_super.data == NULL) {
 				ERR_PRINT("failed to allocate memory for data.");
 				if(prev_frame == NULL) {
-					free(pcms16);
+					ttLibC_free(pcms16);
 				}
 				return NULL;
 			}
@@ -223,8 +224,8 @@ void ttLibC_PcmS16_close(ttLibC_PcmS16 **frame) {
 		return;
 	}
 	if(!target->inherit_super.inherit_super.is_non_copy) {
-		free(target->inherit_super.inherit_super.data);
+		ttLibC_free(target->inherit_super.inherit_super.data);
 	}
-	free(target);
+	ttLibC_free(target);
 	*frame = NULL;
 }

@@ -90,7 +90,7 @@ size_t ttLibC_Allocator_dump() {
 #if __DEBUG_FLG__ == 1
 	khiter_t it;
 	size_t total_size = 0;
-	printf("\nallocator dump:\n");
+	printf("\nAllocator dump:\n");
 	for(it = kh_begin(ttLibC_Allocator_Table);it != kh_end(ttLibC_Allocator_Table); ++ it) {
 		if(kh_exist(ttLibC_Allocator_Table, it)) {
 			ttLibC_Allocator_Info *info = (ttLibC_Allocator_Info *)kh_value(ttLibC_Allocator_Table, it);

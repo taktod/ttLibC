@@ -10,6 +10,7 @@
 
 #include "mp3Reader.h"
 #include "../../log.h"
+#include "../../allocator.h"
 #include "../../frame/audio/mp3.h"
 #include <stdlib.h>
 #include <string.h>
@@ -26,7 +27,7 @@ ttLibC_Mp3Reader *ttLibC_Mp3Reader_make() {
 	reader->timebase = 44100;
 	reader->frame = NULL;
 	reader->tmp_buffer_size = 512;
-	reader->tmp_buffer = malloc(reader->tmp_buffer_size);
+	reader->tmp_buffer = ttLibC_malloc(reader->tmp_buffer_size);
 	reader->tmp_buffer_next_pos = 0;
 	return (ttLibC_Mp3Reader *)reader;
 }
@@ -141,9 +142,9 @@ void ttLibC_Mp3Reader_close(ttLibC_Mp3Reader **reader) {
 	}
 	ttLibC_Mp3Frame_close(&target->frame);
 	if(target->tmp_buffer != NULL) {
-		free(target->tmp_buffer);
+		ttLibC_free(target->tmp_buffer);
 	}
-	free(target);
+	ttLibC_free(target);
 	*reader = NULL;
 }
 

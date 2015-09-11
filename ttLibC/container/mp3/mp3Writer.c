@@ -10,6 +10,7 @@
 
 #include "mp3Writer.h"
 #include "../../log.h"
+#include "../../allocator.h"
 #include "../../frame/audio/mp3.h"
 #include <stdlib.h>
 
@@ -53,6 +54,6 @@ void ttLibC_Mp3Writer_close(ttLibC_Mp3Writer **writer) {
 		ERR_PRINT("try to close non mp3 writer.");
 		return;
 	}
-	free(target);
+	ttLibC_free(target);
 	*writer = NULL;
 }

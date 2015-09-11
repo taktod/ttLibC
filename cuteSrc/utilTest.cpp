@@ -12,6 +12,7 @@
 
 #include <ttLibC/ttLibC.h>
 #include <ttLibC/log.h>
+#include <ttLibC/allocator.h>
 #include <array>
 
 #include <ttLibC/util/hexUtil.h>
@@ -37,8 +38,6 @@
 
 #include <ttLibC/util/amfUtil.h>
 
-#include <ttLibC/allocator.h>
-
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -61,6 +60,7 @@ static void memoryTest() {
 	ttLibC_free(buf);
 	ttLibC_Allocator_dump();
 	LOG_PRINT("test end.");
+	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
 bool amfTest_write(void *ptr, void *data, size_t data_size) {
@@ -71,7 +71,7 @@ bool amfTest_write(void *ptr, void *data, size_t data_size) {
 bool amfTest_read(void *ptr, ttLibC_Amf0Object *amf0_obj) {
 	switch(amf0_obj->type) {
 	case amf0Type_Number:
-		LOG_PRINT("number %f", *((double *)amf0_obj->object));
+		LOG_PRINT("number %f", *((double *)(amf0_obj->object)));
 		return true;
 	case amf0Type_Boolean:
 		if(*((uint8_t *)amf0_obj->object) == 1) {
@@ -161,6 +161,7 @@ static void amfTest() {
 	amfTest_read(NULL, number);
 	ttLibC_Amf0_write(number, amfTest_write, NULL);
 	ttLibC_Amf0_close(&number);
+	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
 static void crc32Test() {
@@ -176,6 +177,7 @@ static void crc32Test() {
 	LOG_PRINT("result:%x", ttLibC_Crc32_getValue(crc32));
 	ASSERTM("FAILED", ttLibC_Crc32_getValue(crc32) == 0x2AB104B2);
 	ttLibC_Crc32_close(&crc32);
+	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
 static void ioTest() {
@@ -213,6 +215,7 @@ static void ioTest() {
 	LOG_PRINT("val:%lld", iresult);
 	iresult = be_int64_t(num);
 	LOG_PRINT("val:%lld", iresult);
+	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
 #ifdef __ENABLE_FILE__
@@ -230,6 +233,7 @@ static void httpClientTest() {
 	ttLibC_HttpClient_getRange(client, "http://www.google.com/", 0, 500, false, httpClientCallback, NULL);
 	ttLibC_HttpClient_close(&client);
 #endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
 /**
@@ -246,6 +250,7 @@ static void hexUtilTest() {
 	char buffer[256] = {0};
 	uint32_t length = ttLibC_HexUtil_makeBuffer("010203abcd", buffer, sizeof(buffer));
 	ttLibC_HexUtil_dump(buffer, length, true);
+	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
 /**
@@ -273,6 +278,7 @@ static void opencvUtilTest() {
 	ttLibC_CvWindow_close(&window);
 	ttLibC_CvCapture_close(&capture);
 #endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
 /**
@@ -301,6 +307,7 @@ static void openalUtilTest() {
 	ttLibC_AlDevice_close(&device);
 	ttLibC_BeepGenerator_close(&generator);
 #endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
 /**

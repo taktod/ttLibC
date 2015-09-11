@@ -26,6 +26,7 @@
 #include "vorbis.h"
 
 #include "../../log.h"
+#include "../../allocator.h"
 
 /*
  * make audio frame.
@@ -77,7 +78,7 @@ ttLibC_Audio *ttLibC_Audio_make(
 		frame_size = sizeof(ttLibC_Audio);
 	}
 	if(audio == NULL) {
-		audio = malloc(frame_size);
+		audio = ttLibC_malloc(frame_size);
 		if(audio == NULL) {
 			ERR_PRINT("failed to allocate memory for audio frame.");
 			return NULL;
@@ -87,7 +88,7 @@ ttLibC_Audio *ttLibC_Audio_make(
 	else {
 		if(!audio->inherit_super.is_non_copy) {
 			if(non_copy_mode || audio->inherit_super.data_size < data_size) {
-				free(audio->inherit_super.data);
+				ttLibC_free(audio->inherit_super.data);
 				audio->inherit_super.data = NULL;
 			}
 			else {
@@ -109,11 +110,11 @@ ttLibC_Audio *ttLibC_Audio_make(
 	}
 	else {
 		if(audio->inherit_super.data == NULL) {
-			audio->inherit_super.data = malloc(data_size);
+			audio->inherit_super.data = ttLibC_malloc(data_size);
 			if(audio->inherit_super.data == NULL) {
 				ERR_PRINT("failed to allocate memory for data.");
 				if(prev_frame == NULL) {
-					free(audio);
+					ttLibC_free(audio);
 				}
 				return NULL;
 			}
@@ -173,9 +174,9 @@ void ttLibC_Audio_close_(ttLibC_Audio **frame) {
 		return;
 	}
 	if(!target->inherit_super.is_non_copy) {
-		free(target->inherit_super.data);
+		ttLibC_free(target->inherit_super.data);
 	}
-	free(target);
+	ttLibC_free(target);
 	*frame = NULL;
 }
 

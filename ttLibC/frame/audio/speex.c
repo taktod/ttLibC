@@ -13,6 +13,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "../../log.h"
+#include "../../allocator.h"
 
 typedef ttLibC_Frame_Audio_Speex ttLibC_Speex_;
 
@@ -54,7 +55,7 @@ ttLibC_Speex *ttLibC_Speex_make(
 		return NULL;
 	}
 	if(speex == NULL) {
-		speex = malloc(sizeof(ttLibC_Speex_));
+		speex = ttLibC_malloc(sizeof(ttLibC_Speex_));
 		if(speex == NULL) {
 			ERR_PRINT("failed to allocate memory for speex frame.");
 			return NULL;
@@ -64,7 +65,7 @@ ttLibC_Speex *ttLibC_Speex_make(
 	else {
 		if(!speex->inherit_super.inherit_super.is_non_copy) {
 			if(non_copy_mode || speex->inherit_super.inherit_super.data_size < data_size) {
-				free(speex->inherit_super.inherit_super.data);
+				ttLibC_free(speex->inherit_super.inherit_super.data);
 				speex->inherit_super.inherit_super.data = NULL;
 			}
 			else {
@@ -87,11 +88,11 @@ ttLibC_Speex *ttLibC_Speex_make(
 	}
 	else {
 		if(speex->inherit_super.inherit_super.data == NULL) {
-			speex->inherit_super.inherit_super.data = malloc(data_size);
+			speex->inherit_super.inherit_super.data = ttLibC_malloc(data_size);
 			if(speex->inherit_super.inherit_super.data == NULL) {
 				ERR_PRINT("failed to allocate memory for data.");
 				if(prev_frame == NULL) {
-					free(speex);
+					ttLibC_free(speex);
 				}
 				return NULL;
 			}
@@ -134,9 +135,9 @@ void ttLibC_Speex_close(ttLibC_Speex **frame) {
 		return;
 	}
 	if(!target->inherit_super.inherit_super.is_non_copy) {
-		free(target->inherit_super.inherit_super.data);
+		ttLibC_free(target->inherit_super.inherit_super.data);
 	}
-	free(target);
+	ttLibC_free(target);
 	*frame = NULL;
 
 }

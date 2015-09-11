@@ -26,6 +26,7 @@
 #include <stdbool.h>
 
 #include "../log.h"
+#include "../allocator.h"
 
 #define BUF_LEN 256
 
@@ -48,15 +49,15 @@ typedef ttLibC_Util_HttpUtil_HttpClient_ ttLibC_HttpClient_;
 ttLibC_HttpClient *ttLibC_HttpClient_make(
 		size_t buffer_size,
 		uint32_t wait_interval) {
-	ttLibC_HttpClient_ *client = (ttLibC_HttpClient_ *)malloc(sizeof(ttLibC_HttpClient_));
+	ttLibC_HttpClient_ *client = (ttLibC_HttpClient_ *)ttLibC_malloc(sizeof(ttLibC_HttpClient_));
 	if(client == NULL) {
 		ERR_PRINT("failed to allocate client object.");
 		return NULL;
 	}
-	client->buffer = malloc(buffer_size);
+	client->buffer = ttLibC_malloc(buffer_size);
 	if(client->buffer == NULL) {
 		ERR_PRINT("failed to alloc client buffer.");
-		free(client);
+		ttLibC_free(client);
 		return NULL;
 	}
 	client->inherit_super.buffer_size = buffer_size;
@@ -123,6 +124,7 @@ void ttLibC_HttpClient_getRange(
 		ERR_PRINT("target address is too long.");
 		return;
 	}
+	// binaryの場合にfreadやめて、readにした方が幸せになれるかも・・・
 	if(strstr(target_address, "http://")
 	&& sscanf(target_address, "http://%s", host_path)
 	&& strcmp(target_address, "http://")) {
@@ -274,10 +276,10 @@ void ttLibC_HttpClient_close(ttLibC_HttpClient **client) {
 		return;
 	}
 	if(target->buffer) {
-		free(target->buffer);
+		ttLibC_free(target->buffer);
 		target->buffer = NULL;
 	}
-	free(target);
+	ttLibC_free(target);
 	*client = NULL;
 }
 

@@ -12,6 +12,7 @@
 
 #include "speexDecoder.h"
 #include "../log.h"
+#include "../allocator.h"
 #include <stdlib.h>
 #include <speex/speex.h>
 #include <speex/speex_header.h>
@@ -64,7 +65,7 @@ ttLibC_SpeexDecoder *ttLibC_SpeexDecoder_make(
 		return NULL;
 	}
 
-	ttLibC_SpeexDecoder_ *decoder = malloc(sizeof(ttLibC_SpeexDecoder_));
+	ttLibC_SpeexDecoder_ *decoder = ttLibC_malloc(sizeof(ttLibC_SpeexDecoder_));
 	if(decoder == NULL) {
 		ERR_PRINT("failed to allocate memory for decoder.");
 		return NULL;
@@ -76,7 +77,7 @@ ttLibC_SpeexDecoder *ttLibC_SpeexDecoder_make(
 	speex_bits_init(&decoder->bits);
 	decoder->dec_state = speex_decoder_init(mode);
 	decoder->pcm_buffer_size = sample_rate / 50 * channel_num * sizeof(int16_t);
-	decoder->pcm_buffer = malloc(decoder->pcm_buffer_size);
+	decoder->pcm_buffer = ttLibC_malloc(decoder->pcm_buffer_size);
 	if(decoder->pcm_buffer == NULL) {
 		ERR_PRINT("failed to allocate memory for buffer.");
 		speex_bits_destroy(&decoder->bits);
@@ -146,10 +147,10 @@ void ttLibC_SpeexDecoder_close(ttLibC_SpeexDecoder **decoder) {
 	speex_bits_destroy(&target->bits);
 	speex_decoder_destroy(target->dec_state);
 	if(target->pcm_buffer != NULL) {
-		free(target->pcm_buffer);
+		ttLibC_free(target->pcm_buffer);
 	}
 	ttLibC_PcmS16_close(&target->pcms16);
-	free(target);
+	ttLibC_free(target);
 	*decoder = NULL;
 }
 

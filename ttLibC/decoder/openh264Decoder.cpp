@@ -12,9 +12,11 @@
 
 #include "openh264Decoder.h"
 #include "../log.h"
+#include "../allocator.h"
 
 #include <wels/codec_api.h>
 #include <limits.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -38,7 +40,7 @@ typedef ttLibC_Decoder_Openh264Decoder_ ttLibC_Openh264Decoder_;
  * make openh264 decoder (maybe add more params later.)
  */
 static ttLibC_Openh264Decoder *Openh264Decoder_make() {
-	ttLibC_Openh264Decoder_ *decoder = (ttLibC_Openh264Decoder_ *)malloc(sizeof(ttLibC_Openh264Decoder_));
+	ttLibC_Openh264Decoder_ *decoder = (ttLibC_Openh264Decoder_ *)ttLibC_malloc(sizeof(ttLibC_Openh264Decoder_));
 	if(decoder == NULL) {
 		ERR_PRINT("failed to alloc decoder object.");
 		return NULL;
@@ -46,7 +48,7 @@ static ttLibC_Openh264Decoder *Openh264Decoder_make() {
 	uint32_t res = WelsCreateDecoder(&decoder->decoder);
 	if(res != 0 || decoder == NULL) {
 		ERR_PRINT("failed to make decoder.");
-		free(decoder);
+		ttLibC_free(decoder);
 		return NULL;
 	}
 	SDecodingParam decParam;
@@ -60,7 +62,7 @@ static ttLibC_Openh264Decoder *Openh264Decoder_make() {
 	if(res != 0) {
 		ERR_PRINT("failed to initialize decoder.");
 		WelsDestroyDecoder(decoder->decoder);
-		free(decoder);
+		ttLibC_free(decoder);
 		return NULL;
 	}
 	decoder->yuv420 = NULL;
@@ -132,7 +134,7 @@ static void Openh264Decoder_close(ttLibC_Openh264Decoder **decoder) {
 		WelsDestroyDecoder(target->decoder);
 	}
 	ttLibC_Yuv420_close(&target->yuv420);
-	free(target);
+	ttLibC_free(target);
 	*decoder = NULL;
 }
 

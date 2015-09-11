@@ -14,6 +14,7 @@
 
 #include "openalUtil.h"
 #include "../log.h"
+#include "../allocator.h"
 #include <time.h>
 
 #include <stdlib.h>
@@ -35,7 +36,7 @@ typedef ttLibC_Util_OpenalUtil_AlDevice_ ttLibC_AlDevice_;
  * @param buffer_num number for queue buffers.
  */
 ttLibC_AlDevice *ttLibC_AlDevice_make(uint32_t buffer_num) {
-	ttLibC_AlDevice_ *device = malloc(sizeof(ttLibC_AlDevice_));
+	ttLibC_AlDevice_ *device = ttLibC_malloc(sizeof(ttLibC_AlDevice_));
 	if(device == NULL) {
 		ERR_PRINT("failed to allocate memory for alDevice.");
 		return NULL;
@@ -43,28 +44,28 @@ ttLibC_AlDevice *ttLibC_AlDevice_make(uint32_t buffer_num) {
 	device->device = alcOpenDevice(NULL);
 	if(device->device == NULL) {
 		ERR_PRINT("failed to open ALCdevice.");
-		free(device);
+		ttLibC_free(device);
 		return NULL;
 	}
 	device->context = alcCreateContext(device->device, NULL);
 	if(device->context == NULL) {
 		ERR_PRINT("failed to create ALCcontext.");
 		alcCloseDevice(device->device);
-		free(device);
+		ttLibC_free(device);
 		return NULL;
 	}
 	alcMakeContextCurrent(device->context);
 	alGenSources(1, &device->source);
 
 	device->inherit_super.buffer_num = buffer_num;
-	device->buffers = malloc(sizeof(ALuint) * device->inherit_super.buffer_num);
+	device->buffers = ttLibC_malloc(sizeof(ALuint) * device->inherit_super.buffer_num);
 	if(device->buffers == NULL) {
 		ERR_PRINT("failed to allocate memory for buffers");
 		alDeleteSources(1, &device->source);
 		alcMakeContextCurrent(NULL);
 		alcDestroyContext(device->context);
 		alcCloseDevice(device->device);
-		free(device);
+		ttLibC_free(device);
 		return NULL;
 	}
 	for(uint32_t i = 0;i < device->inherit_super.buffer_num;++ i) {
@@ -231,11 +232,11 @@ void ttLibC_AlDevice_close(ttLibC_AlDevice **device) {
 			target->buffers[i] = 0;
 		}
 	}
-	free(target->buffers);
+	ttLibC_free(target->buffers);
 	alcMakeContextCurrent(NULL);
 	alcDestroyContext(target->context);
 	alcCloseDevice(target->device);
-	free(target);
+	ttLibC_free(target);
 	*device = NULL;
 }
 

@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "../log.h"
+#include "../allocator.h"
 #include "ioUtil.h"
 #include "hexUtil.h"
 
@@ -21,16 +22,16 @@ ttLibC_Amf0Object *ttLibC_Amf0_map(ttLibC_Amf0MapObject *list) {
 	for(int i = 0;list[i].key != NULL && list[i].amf0_obj != NULL;++ i) {
 		++ element_num;
 	}
-	ttLibC_Amf0Object *obj = malloc(sizeof(ttLibC_Amf0Object));
+	ttLibC_Amf0Object *obj = ttLibC_malloc(sizeof(ttLibC_Amf0Object));
 	if(obj == NULL) {
 		// TODO if failed, we need to clear data inside of mapObject.
 		ERR_PRINT("failed to alloc memory for map object. need to clear list objects.");
 		return NULL;
 	}
-	ttLibC_Amf0MapObject *map_list = malloc(sizeof(ttLibC_Amf0MapObject) * (element_num + 1));
+	ttLibC_Amf0MapObject *map_list = ttLibC_malloc(sizeof(ttLibC_Amf0MapObject) * (element_num + 1));
 	if(map_list == NULL) {
 		ERR_PRINT("failed to alloc memory for list object. need to clear list objects.");
-		free(obj);
+		ttLibC_free(obj);
 		return NULL;
 	}
 	obj->data_size = 8;
@@ -40,12 +41,12 @@ ttLibC_Amf0Object *ttLibC_Amf0_map(ttLibC_Amf0MapObject *list) {
 	for(i = 0;list[i].key != NULL && list[i].amf0_obj != NULL;++ i) {
 		size_t size = strlen(list[i].key);
 		obj->data_size += 2 + size + list[i].amf0_obj->data_size;
-		char *key = malloc(size + 1);
+		char *key = ttLibC_malloc(size + 1);
 		if(key == NULL) {
 			ERR_PRINT("failed to allocate key object.");
 			// need to clear already allocated key objects.
-			free(map_list);
-			free(obj);
+			ttLibC_free(map_list);
+			ttLibC_free(obj);
 			return NULL;
 		}
 		memcpy(key, list[i].key, size);
@@ -63,16 +64,16 @@ ttLibC_Amf0Object *ttLibC_Amf0_object(ttLibC_Amf0MapObject *list) {
 	for(int i = 0;list[i].key != NULL && list[i].amf0_obj != NULL;++ i) {
 		++ element_num;
 	}
-	ttLibC_Amf0Object *obj = malloc(sizeof(ttLibC_Amf0Object));
+	ttLibC_Amf0Object *obj = ttLibC_malloc(sizeof(ttLibC_Amf0Object));
 	if(obj == NULL) {
 		// TODO if failed, we need to clear data inside of mapObject.
 		ERR_PRINT("failed to alloc memory for map object. need to clear list objects.");
 		return NULL;
 	}
-	ttLibC_Amf0MapObject *map_list = malloc(sizeof(ttLibC_Amf0MapObject) * (element_num + 1));
+	ttLibC_Amf0MapObject *map_list = ttLibC_malloc(sizeof(ttLibC_Amf0MapObject) * (element_num + 1));
 	if(map_list == NULL) {
 		ERR_PRINT("failed to alloc memory for list object. need to clear list objects.");
-		free(obj);
+		ttLibC_free(obj);
 		return NULL;
 	}
 	obj->data_size = 4;
@@ -82,12 +83,12 @@ ttLibC_Amf0Object *ttLibC_Amf0_object(ttLibC_Amf0MapObject *list) {
 	for(i = 0;list[i].key != NULL && list[i].amf0_obj != NULL;++ i) {
 		size_t size = strlen(list[i].key);
 		obj->data_size += 2 + size + list[i].amf0_obj->data_size;
-		char *key = malloc(size + 1);
+		char *key = ttLibC_malloc(size + 1);
 		if(key == NULL) {
 			ERR_PRINT("failed to allocate key object.");
 			// need to clear already allocated key objects.
-			free(map_list);
-			free(obj);
+			ttLibC_free(map_list);
+			ttLibC_free(obj);
 			return NULL;
 		}
 		memcpy(key, list[i].key, size);
@@ -101,26 +102,26 @@ ttLibC_Amf0Object *ttLibC_Amf0_object(ttLibC_Amf0MapObject *list) {
 }
 
 ttLibC_Amf0Object *ttLibC_Amf0_number(double number) {
-	ttLibC_Amf0Object *obj = malloc(sizeof(ttLibC_Amf0Object));
+	ttLibC_Amf0Object *obj = ttLibC_malloc(sizeof(ttLibC_Amf0Object));
 	if(obj == NULL) {
 		return NULL;
 	}
 	obj->data_size = 9;
 	obj->type = amf0Type_Number;
-	uint8_t *buf = (uint8_t *)malloc(8);
+	uint8_t *buf = (uint8_t *)ttLibC_malloc(8);
 	memcpy(buf, &number, 8);
 	obj->object = buf;
 	return (ttLibC_Amf0Object *)obj;
 }
 
 ttLibC_Amf0Object *ttLibC_Amf0_boolean(bool flag) {
-	ttLibC_Amf0Object *obj = malloc(sizeof(ttLibC_Amf0Object));
+	ttLibC_Amf0Object *obj = ttLibC_malloc(sizeof(ttLibC_Amf0Object));
 	if(obj == NULL) {
 		return NULL;
 	}
 	obj->data_size = 2;
 	obj->type = amf0Type_Boolean;
-	uint8_t *buf = (uint8_t *)malloc(1);
+	uint8_t *buf = (uint8_t *)ttLibC_malloc(1);
 	if(flag) {
 		*buf = 0x01;
 	}
@@ -132,14 +133,14 @@ ttLibC_Amf0Object *ttLibC_Amf0_boolean(bool flag) {
 }
 
 ttLibC_Amf0Object *ttLibC_Amf0_string(const char *string) {
-	ttLibC_Amf0Object *obj = malloc(sizeof(ttLibC_Amf0Object));
+	ttLibC_Amf0Object *obj = ttLibC_malloc(sizeof(ttLibC_Amf0Object));
 	if(obj == NULL) {
 		return NULL;
 	}
 	size_t size = strlen(string);
 	obj->data_size = 3 + size;
 	obj->type = amf0Type_String;
-	uint8_t *buf = (uint8_t *)malloc(size + 1);
+	uint8_t *buf = (uint8_t *)ttLibC_malloc(size + 1);
 	memcpy(buf, string, size);
 	buf[size] = 0x00;
 	obj->object = buf;
@@ -181,7 +182,7 @@ ttLibC_Amf0Object *ttLibC_Amf0_clone(ttLibC_Amf0Object *src) {
  * make and reply amf0object
  */
 static ttLibC_Amf0Object *Amf0_make(uint8_t *data, size_t data_size) {
-	ttLibC_Amf0Object *amf0_obj = malloc(sizeof(ttLibC_Amf0Object));
+	ttLibC_Amf0Object *amf0_obj = ttLibC_malloc(sizeof(ttLibC_Amf0Object));
 	if(amf0_obj == NULL) {
 		ERR_PRINT("failed to make amf0object.");
 		return NULL;
@@ -192,7 +193,7 @@ static ttLibC_Amf0Object *Amf0_make(uint8_t *data, size_t data_size) {
 		{
 			++ read_size;
 			// 8bit double, endian is bigendian.
-			uint8_t *number = malloc(8);
+			uint8_t *number = ttLibC_malloc(8);
 			uint64_t be_val = be_uint64_t(*((uint64_t *)(data + read_size)));
 			memcpy(number, &be_val, 8);
 			read_size += 8;
@@ -204,7 +205,7 @@ static ttLibC_Amf0Object *Amf0_make(uint8_t *data, size_t data_size) {
 	case amf0Type_Boolean:
 		{
 			++ read_size;
-			uint8_t *value = malloc(1);
+			uint8_t *value = ttLibC_malloc(1);
 			*value = *(data + read_size);
 			++ read_size;
 			amf0_obj->type = amf0Type_Boolean;
@@ -218,7 +219,7 @@ static ttLibC_Amf0Object *Amf0_make(uint8_t *data, size_t data_size) {
 			// byte for string size.
 			uint16_t size = be_uint16_t(*((uint16_t *)(data + read_size)));
 			read_size += 2;
-			char *string = malloc(size + 1); // + 1 for null byte.
+			char *string = ttLibC_malloc(size + 1); // + 1 for null byte.
 			memcpy(string, data + read_size, size);
 			string[size] = 0x00;
 			read_size += size;
@@ -233,7 +234,7 @@ static ttLibC_Amf0Object *Amf0_make(uint8_t *data, size_t data_size) {
 			// あとで作る
 			// とりあえず保持要素数は、仮に256としておく。(そんなでかいobjectつくらないと思うけど。)
 			size_t size = 255;
-			ttLibC_Amf0MapObject *map_objects = malloc(sizeof(ttLibC_Amf0MapObject) * (size + 1));
+			ttLibC_Amf0MapObject *map_objects = ttLibC_malloc(sizeof(ttLibC_Amf0MapObject) * (size + 1));
 			for(int i = 0;i < size;++ i) {
 //				key
 				uint16_t key_size = be_uint16_t(*((uint16_t *)(data + read_size)));
@@ -244,7 +245,7 @@ static ttLibC_Amf0Object *Amf0_make(uint8_t *data, size_t data_size) {
 					break;
 				}
 				read_size += 2;
-				char *key = malloc(key_size + 1);
+				char *key = ttLibC_malloc(key_size + 1);
 				memcpy(key, data + read_size, key_size);
 				key[key_size] = 0x00;
 				map_objects[i].key = key;
@@ -277,7 +278,7 @@ static ttLibC_Amf0Object *Amf0_make(uint8_t *data, size_t data_size) {
 	case amf0Type_Null:
 	case amf0Type_Undefined:
 	case amf0Type_Reference:
-		free(amf0_obj);
+		ttLibC_free(amf0_obj);
 		return NULL;
 	case amf0Type_Map:
 		{
@@ -286,12 +287,12 @@ static ttLibC_Amf0Object *Amf0_make(uint8_t *data, size_t data_size) {
 			uint32_t size = be_uint32_t(*((uint32_t *)(data + read_size)));
 			read_size += 4;
 			// data holder.
-			ttLibC_Amf0MapObject *map_objects = malloc(sizeof(ttLibC_Amf0MapObject) * (size + 1));
+			ttLibC_Amf0MapObject *map_objects = ttLibC_malloc(sizeof(ttLibC_Amf0MapObject) * (size + 1));
 			for(int i = 0;i < size;++ i) {
 //				key
 				uint16_t key_size = be_uint16_t(*((uint16_t *)(data + read_size)));
 				read_size += 2;
-				char *key = malloc(key_size + 1);
+				char *key = ttLibC_malloc(key_size + 1);
 				memcpy(key, data + read_size, key_size);
 				key[key_size] = 0x00;
 				map_objects[i].key = key;
@@ -334,10 +335,10 @@ static ttLibC_Amf0Object *Amf0_make(uint8_t *data, size_t data_size) {
 	case amf0Type_TypedObject:
 	case amf0Type_Amf3Object:
 	default:
-		free(amf0_obj);
+		ttLibC_free(amf0_obj);
 		return NULL;
 	}
-	free(amf0_obj);
+	ttLibC_free(amf0_obj);
 	return NULL;
 }
 
@@ -515,7 +516,7 @@ void ttLibC_Amf0_close(ttLibC_Amf0Object **amf0_obj) {
 			int i = 0;
 			while(map_objects[i].key != NULL && map_objects[i].amf0_obj != NULL) {
 				if(map_objects[i].key != NULL) {
-					free(map_objects[i].key);
+					ttLibC_free(map_objects[i].key);
 				}
 				ttLibC_Amf0_close((ttLibC_Amf0Object **)&map_objects[i].amf0_obj);
 				++ i;
@@ -534,7 +535,7 @@ void ttLibC_Amf0_close(ttLibC_Amf0Object **amf0_obj) {
 	default:
 		break;
 	}
-	free(target->object);
-	free(target);
+	ttLibC_free(target->object);
+	ttLibC_free(target);
 	*amf0_obj = NULL;
 }

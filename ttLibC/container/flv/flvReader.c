@@ -11,6 +11,7 @@
 #include "flvReader.h"
 
 #include "../../log.h"
+#include "../../allocator.h"
 #include "../../util/hexUtil.h"
 #include "../../util/ioUtil.h"
 
@@ -29,7 +30,7 @@ ttLibC_FlvReader *ttLibC_FlvReader_make() {
 	reader->target_size = 13;
 
 	reader->tmp_buffer_size     = 65536;
-	reader->tmp_buffer          = malloc(reader->tmp_buffer_size);
+	reader->tmp_buffer          = ttLibC_malloc(reader->tmp_buffer_size);
 	reader->tmp_buffer_next_pos = 0;
 	return (ttLibC_FlvReader *)reader;
 }
@@ -184,8 +185,8 @@ void ttLibC_FlvReader_close(ttLibC_FlvReader **reader) {
 	ttLibC_FlvTag_close((ttLibC_FlvTag **)&target->audio_tag);
 	ttLibC_FlvTag_close((ttLibC_FlvTag **)&target->video_tag);
 	if(target->tmp_buffer != NULL) {
-		free(target->tmp_buffer);
+		ttLibC_free(target->tmp_buffer);
 	}
-	free(target);
+	ttLibC_free(target);
 	*reader = NULL;
 }

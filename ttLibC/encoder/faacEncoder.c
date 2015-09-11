@@ -13,6 +13,7 @@
 #include "faacEncoder.h"
 #include "../frame/audio/aac.h"
 #include "../log.h"
+#include "../allocator.h"
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -59,7 +60,7 @@ ttLibC_FaacEncoder *ttLibC_FaacEncoder_make(
 		uint32_t sample_rate,
 		uint32_t channel_num,
 		uint32_t bitrate) {
-	ttLibC_FaacEncoder_ *encoder = malloc(sizeof(ttLibC_FaacEncoder_));
+	ttLibC_FaacEncoder_ *encoder = ttLibC_malloc(sizeof(ttLibC_FaacEncoder_));
 	if(encoder == NULL) {
 		ERR_PRINT("failed to allocate memory for encoder.");
 		return NULL;
@@ -68,20 +69,20 @@ ttLibC_FaacEncoder *ttLibC_FaacEncoder_make(
 	encoder->handle = faacEncOpen(sample_rate, channel_num, &samples_input, &max_bytes_output);
 	if(!encoder->handle) {
 		ERR_PRINT("failed to open faac.");
-		free(encoder);
+		ttLibC_free(encoder);
 		return NULL;
 	}
 	encoder->config = faacEncGetCurrentConfiguration(encoder->handle);
 	if(encoder->config == NULL) {
 		ERR_PRINT("failed to ref current configuration.");
 		faacEncClose(encoder->handle);
-		free(encoder);
+		ttLibC_free(encoder);
 		return NULL;
 	}
 	if(encoder->config->version != FAAC_CFG_VERSION) {
 		ERR_PRINT("version is mismatch for faac.");
 		faacEncClose(encoder->handle);
-		free(encoder);
+		ttLibC_free(encoder);
 		return NULL;
 	}
 	switch(type) {
@@ -111,16 +112,16 @@ ttLibC_FaacEncoder *ttLibC_FaacEncoder_make(
 	if(!faacEncSetConfiguration(encoder->handle, encoder->config)) {
 		ERR_PRINT("failed to set configuration.");
 		faacEncClose(encoder->handle);
-		free(encoder);
+		ttLibC_free(encoder);
 		return NULL;
 	}
 	encoder->aac                       = NULL;
 	encoder->data_size                 = max_bytes_output;
-	encoder->data                      = malloc(encoder->data_size);
+	encoder->data                      = ttLibC_malloc(encoder->data_size);
 	encoder->samples_input             = samples_input;
 	encoder->samples_length            = samples_input * 2; // pcmS16 is 2byte for each sample.
 	encoder->pcm_buffer_next_pos       = 0;
-	encoder->pcm_buffer                = malloc(samples_input * sizeof(int16_t));
+	encoder->pcm_buffer                = ttLibC_malloc(samples_input * sizeof(int16_t));
 	encoder->pts                       = 0;
 	encoder->inherit_super.channel_num = channel_num;
 	encoder->inherit_super.sample_rate = sample_rate;
@@ -238,15 +239,18 @@ void ttLibC_FaacEncoder_close(ttLibC_FaacEncoder **encoder) {
 		return;
 	}
 	ttLibC_FaacEncoder_ *target = (ttLibC_FaacEncoder_ *)*encoder;
+	if(target->pcm_buffer) {
+		ttLibC_free(target->pcm_buffer);
+	}
 	if(target->handle) {
 		faacEncClose(target->handle);
 	}
 	if(target->data) {
-		free(target->data);
+		ttLibC_free(target->data);
 		target->data = NULL;
 	}
 	ttLibC_Aac_close(&target->aac);
-	free(target);
+	ttLibC_free(target);
 	*encoder = NULL;
 }
 

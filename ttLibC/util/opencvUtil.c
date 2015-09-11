@@ -14,6 +14,7 @@
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
 #include "../log.h"
+#include "../allocator.h"
 
 #ifdef __APPLE__
 // for osx, mach_time is better than time.h.
@@ -36,13 +37,13 @@ typedef ttLibC_Util_OpencvUtil_CvWindow_ ttLibC_CvWindow_;
  * @return ttLibC_CvWindow object
  */
 ttLibC_CvWindow *ttLibC_CvWindow_make(const char *name) {
-	ttLibC_CvWindow_ *window = malloc(sizeof(ttLibC_CvWindow_));
+	ttLibC_CvWindow_ *window = ttLibC_malloc(sizeof(ttLibC_CvWindow_));
 	if(window == NULL) {
 		ERR_PRINT("failed to allocate memory for window.");
 		return NULL;
 	}
 	size_t len = strlen(name);
-	window->inherit_super.name = malloc(len + 1);
+	window->inherit_super.name = ttLibC_malloc(len + 1);
 	sprintf(window->inherit_super.name, "%s", name);
 	cvNamedWindow(window->inherit_super.name, CV_WINDOW_NORMAL);
 	window->image = NULL;
@@ -137,14 +138,14 @@ void ttLibC_CvWindow_close(ttLibC_CvWindow **window) {
 	}
 	ttLibC_CvWindow_ *window_ = (ttLibC_CvWindow_ *)(*window);
 	if(window_->inherit_super.name != NULL) {
-		free(window_->inherit_super.name);
+		ttLibC_free(window_->inherit_super.name);
 		window_->inherit_super.name = NULL;
 	}
 	if(window_->image != NULL) {
 		cvReleaseImage(&window_->image);
 		window_->image = NULL;
 	}
-	free(window_);
+	ttLibC_free(window_);
 	*window = NULL;
 }
 
@@ -181,7 +182,7 @@ ttLibC_CvCapture *ttLibC_CvCapture_make(
 		uint32_t camera_num,
 		uint32_t width,
 		uint32_t height) {
-	ttLibC_CvCapture_ *capture = malloc(sizeof(ttLibC_CvCapture_));
+	ttLibC_CvCapture_ *capture = ttLibC_malloc(sizeof(ttLibC_CvCapture_));
 	if(capture == NULL) {
 		ERR_PRINT("failed to allocate memory for cvCapture.");
 		return NULL;
@@ -189,7 +190,7 @@ ttLibC_CvCapture *ttLibC_CvCapture_make(
 	capture->capture = cvCreateCameraCapture(camera_num);
 	if(capture->capture == NULL) {
 		ERR_PRINT("failed to open camera device.");
-		free(capture);
+		ttLibC_free(capture);
 		return NULL;
 	}
 	cvSetCaptureProperty(capture->capture, CV_CAP_PROP_FRAME_WIDTH, width);
@@ -250,7 +251,7 @@ void ttLibC_CvCapture_close(ttLibC_CvCapture **capture) {
 		cvReleaseCapture(&capture_->capture);
 		capture_->capture = NULL;
 	}
-	free(capture_);
+	ttLibC_free(capture_);
 	*capture = NULL;
 }
 

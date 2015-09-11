@@ -11,6 +11,7 @@
 #include <cute.h>
 #include <ttLibC/ttLibC.h>
 #include <ttLibC/log.h>
+#include <ttLibC/allocator.h>
 
 #include <ttLibC/util/hexUtil.h>
 #include <ttLibC/frame/video/bgr.h>
@@ -121,7 +122,7 @@ static void avcodecTest() {
 	int got_output;
 	int out_size;
 	int outbuf_size = 100000;
-	uint8_t *outbuf = (uint8_t *)malloc(outbuf_size);
+	uint8_t *outbuf = (uint8_t *)ttLibC_malloc(outbuf_size);
 
 	while(true) {
 		b = ttLibC_CvCapture_queryFrame(capture, bgr);
@@ -193,7 +194,7 @@ static void avcodecTest() {
 		av_free(picture);
 	}
 	if(outbuf) {
-		free(outbuf);
+		ttLibC_free(outbuf);
 	}
 	ttLibC_Yuv420_close(&yuv);
 	ttLibC_Yuv420_close(&dyuv);
@@ -203,6 +204,7 @@ static void avcodecTest() {
 	ttLibC_CvWindow_close(&dec_win);
 	ttLibC_CvCapture_close(&capture);
 #endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
 static void h264SequenceParameterSetAnalyzeTest() {
@@ -212,6 +214,7 @@ static void h264SequenceParameterSetAnalyzeTest() {
 	uint32_t width = ttLibC_H264_getWidth(NULL, buf, size);
 	uint32_t height = ttLibC_H264_getHeight(NULL, buf, size);
 	LOG_PRINT("%d x %d", width, height);
+	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
 static void openh264Test() {
@@ -452,6 +455,7 @@ static void openh264Test() {
 		WelsDestroySVCEncoder(encoder);
 	}
 #endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
 /**

@@ -10,6 +10,7 @@
 
 #include "imageResampler.h"
 #include "../log.h"
+#include "../allocator.h"
 #include <stdlib.h>
 
 /*
@@ -54,7 +55,7 @@ ttLibC_Yuv420 *ttLibC_ImageResampler_makeYuv420FromBgr(
 			}
 			else {
 				// size is small for reuse.
-				free(yuv420->inherit_super.inherit_super.data);
+				ttLibC_free(yuv420->inherit_super.inherit_super.data);
 			}
 		}
 		if(data == NULL) {
@@ -64,7 +65,7 @@ ttLibC_Yuv420 *ttLibC_ImageResampler_makeYuv420FromBgr(
 		yuv420->inherit_super.inherit_super.is_non_copy = true;
 	}
 	if(data == NULL) {
-		data = malloc(data_size);
+		data = ttLibC_malloc(data_size);
 		is_alloc_flg = true;
 	}
 	// now start to convert.
@@ -156,7 +157,7 @@ ttLibC_Yuv420 *ttLibC_ImageResampler_makeYuv420FromBgr(
 	default:
 		ERR_PRINT("found unknown bgr type for src_frame:%d", src_frame->type);
 		if(is_alloc_flg) {
-			free(data);
+			ttLibC_free(data);
 		}
 		return NULL;
 	}
@@ -241,7 +242,7 @@ ttLibC_Yuv420 *ttLibC_ImageResampler_makeYuv420FromBgr(
 	yuv420 = ttLibC_Yuv420_make(yuv420, type, width, height, data, data_size, y_data, y_stride, u_data, u_stride, v_data, v_stride, true, src_frame->inherit_super.inherit_super.pts, src_frame->inherit_super.inherit_super.timebase);
 	if(yuv420 == NULL) {
 		if(is_alloc_flg) {
-			free(data);
+			ttLibC_free(data);
 		}
 		return NULL;
 	}
@@ -290,7 +291,7 @@ ttLibC_Bgr *ttLibC_ImageResampler_makeBgrFromYuv420(
 			}
 			else {
 				// size is too short.
-				free(bgr->inherit_super.inherit_super.data);
+				ttLibC_free(bgr->inherit_super.inherit_super.data);
 			}
 		}
 		if(data == NULL) {
@@ -300,7 +301,7 @@ ttLibC_Bgr *ttLibC_ImageResampler_makeBgrFromYuv420(
 		bgr->inherit_super.inherit_super.is_non_copy = true;
 	}
 	if(data == NULL) {
-		data = malloc(data_size);
+		data = ttLibC_malloc(data_size);
 		is_alloc_flg = true;
 	}
 	// now start to convert.
@@ -402,7 +403,7 @@ ttLibC_Bgr *ttLibC_ImageResampler_makeBgrFromYuv420(
 	bgr = ttLibC_Bgr_make(bgr, type, width, height, width_stride, data, data_size, true, src_frame->inherit_super.inherit_super.pts, src_frame->inherit_super.inherit_super.timebase);
 	if(bgr == NULL) {
 		if(is_alloc_flg) {
-			free(data);
+			ttLibC_free(data);
 		}
 		return NULL;
 	}

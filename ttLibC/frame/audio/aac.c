@@ -14,6 +14,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "../../log.h"
+#include "../../allocator.h"
 
 #include "../../util/bitUtil.h"
 #include "../../util/crc32Util.h"
@@ -68,7 +69,7 @@ ttLibC_Aac *ttLibC_Aac_make(
 		return NULL;
 	}
 	if(aac == NULL) {
-		aac = malloc(sizeof(ttLibC_Aac_));
+		aac = ttLibC_malloc(sizeof(ttLibC_Aac_));
 		if(aac == NULL) {
 			ERR_PRINT("failed to allocate memory for aac frame.");
 			return NULL;
@@ -78,7 +79,7 @@ ttLibC_Aac *ttLibC_Aac_make(
 	else {
 		if(!aac->inherit_super.inherit_super.inherit_super.is_non_copy) {
 			if(non_copy_mode || aac->inherit_super.inherit_super.inherit_super.data_size < data_size) {
-				free(aac->inherit_super.inherit_super.inherit_super.data);
+				ttLibC_free(aac->inherit_super.inherit_super.inherit_super.data);
 				aac->inherit_super.inherit_super.inherit_super.data = NULL;
 			}
 			else {
@@ -102,11 +103,11 @@ ttLibC_Aac *ttLibC_Aac_make(
 	}
 	else {
 		if(aac->inherit_super.inherit_super.inherit_super.data == NULL) {
-			aac->inherit_super.inherit_super.inherit_super.data = malloc(data_size);
+			aac->inherit_super.inherit_super.inherit_super.data = ttLibC_malloc(data_size);
 			if(aac->inherit_super.inherit_super.inherit_super.data == NULL) {
 				ERR_PRINT("failed to allocate memory for data.");
 				if(prev_frame == NULL) {
-					free(aac);
+					ttLibC_free(aac);
 				}
 				return NULL;
 			}
@@ -429,8 +430,8 @@ void ttLibC_Aac_close(ttLibC_Aac **frame) {
 		return;
 	}
 	if(!target->inherit_super.inherit_super.inherit_super.is_non_copy) {
-		free(target->inherit_super.inherit_super.inherit_super.data);
+		ttLibC_free(target->inherit_super.inherit_super.inherit_super.data);
 	}
-	free(target);
+	ttLibC_free(target);
 	*frame = NULL;
 }

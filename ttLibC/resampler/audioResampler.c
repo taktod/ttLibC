@@ -10,6 +10,7 @@
 
 #include "audioResampler.h"
 #include "../log.h"
+#include "../allocator.h"
 #include "../util/ioUtil.h"
 #include <stdlib.h>
 
@@ -296,7 +297,7 @@ ttLibC_Audio *ttLibC_AudioResampler_convertFormat(
 					data_size = target_frame->inherit_super.data_size;
 				}
 				else {
-					free(target_frame->inherit_super.data);
+					ttLibC_free(target_frame->inherit_super.data);
 					target_frame->inherit_super.data = NULL;
 				}
 			}
@@ -306,7 +307,7 @@ ttLibC_Audio *ttLibC_AudioResampler_convertFormat(
 	}
 	// if data is null, we need to allocate.
 	if(data == NULL) {
-		data = malloc(data_size);
+		data = ttLibC_malloc(data_size);
 		is_alloc_flg = true;
 	}
 	uint8_t *l_data = NULL;
@@ -456,7 +457,7 @@ ttLibC_Audio *ttLibC_AudioResampler_convertFormat(
 		}
 	}
 	if(is_alloc_flg) {
-		free(data);
+		ttLibC_free(data);
 	}
 	return NULL;
 }
