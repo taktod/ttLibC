@@ -173,8 +173,70 @@ ttLibC_Amf0Object *ttLibC_Amf0_getElement(ttLibC_Amf0Object *amf0_map, const cha
 	return NULL;
 }
 
-ttLibC_Amf0Object *ttLibC_Amf0_clone(ttLibC_Amf0Object *src) {
-	LOG_PRINT("clone is not ready now.");
+ttLibC_Amf0Object *ttLibC_Amf0_clone(ttLibC_Amf0Object *src_obj) {
+	switch(src_obj->type) {
+	case amf0Type_Number:
+		return ttLibC_Amf0_number(*((double*)src_obj->object));
+	case amf0Type_Boolean:
+		return ttLibC_Amf0_boolean(*((uint8_t *)src_obj->object) == 1);
+	case amf0Type_String:
+		return ttLibC_Amf0_string((char *)src_obj->object);
+	case amf0Type_Object:
+		{
+			ttLibC_Amf0MapObject *src_lists = (ttLibC_Amf0MapObject *)src_obj->object;
+			size_t count = 0;
+			for(int i = 0;src_lists[i].key != NULL && src_lists[i].amf0_obj != NULL;++ i) {
+				++ count;
+			}
+			ttLibC_Amf0MapObject *list = ttLibC_malloc(sizeof(ttLibC_Amf0MapObject) * (count + 1));
+			for(int i = 0;src_lists[i].key != NULL && src_lists[i].amf0_obj != NULL;++ i) {
+				list[i].key = src_lists[i].key;
+				list[i].amf0_obj = ttLibC_Amf0_clone(src_lists[i].amf0_obj);
+			}
+			list[count].key = NULL;
+			list[count].amf0_obj = NULL;
+			ttLibC_Amf0Object *cloned_obj = ttLibC_Amf0_object(list);
+			ttLibC_free(list);
+			return cloned_obj;
+		}
+		break;
+	case amf0Type_MovieClip:
+	case amf0Type_Null:
+	case amf0Type_Undefined:
+	case amf0Type_Reference:
+		break;
+	case amf0Type_Map:
+		{
+			ttLibC_Amf0MapObject *src_lists = (ttLibC_Amf0MapObject *)src_obj->object;
+			size_t count = 0;
+			for(int i = 0;src_lists[i].key != NULL && src_lists[i].amf0_obj != NULL;++ i) {
+				count ++;
+			}
+			ttLibC_Amf0MapObject *list = ttLibC_malloc(sizeof(ttLibC_Amf0MapObject) * (count + 1));
+			for(int i = 0;src_lists[i].key != NULL && src_lists[i].amf0_obj != NULL;++ i) {
+				list[i].key = src_lists[i].key;
+				list[i].amf0_obj = ttLibC_Amf0_clone(src_lists[i].amf0_obj);
+			}
+			list[count].key = NULL;
+			list[count].amf0_obj = NULL;
+			ttLibC_Amf0Object *cloned_obj = ttLibC_Amf0_map(list);
+			ttLibC_free(list);
+			return cloned_obj;
+		}
+		break;
+	case amf0Type_ObjectEnd:
+	case amf0Type_Array:
+	case amf0Type_Date:
+	case amf0Type_LongString:
+	case amf0Type_Unsupported:
+	case amf0Type_RecordSet:
+	case amf0Type_XmlDocument:
+	case amf0Type_TypedObject:
+	case amf0Type_Amf3Object:
+	default:
+		break;
+	}
+	LOG_PRINT("target_type:%d", src_obj->type);
 	return NULL;
 }
 
@@ -285,12 +347,20 @@ static ttLibC_Amf0Object *Amf0_make(uint8_t *data, size_t data_size) {
 			++ read_size;
 			// get the element size.
 			uint32_t size = be_uint32_t(*((uint32_t *)(data + read_size)));
+			// with the response of fms, I found size = 0 map object.
+			if(size == 0) {
+				size = 255; // assume to have 255 elements for max
+			}
 			read_size += 4;
 			// data holder.
 			ttLibC_Amf0MapObject *map_objects = ttLibC_malloc(sizeof(ttLibC_Amf0MapObject) * (size + 1));
 			for(int i = 0;i < size;++ i) {
 //				key
 				uint16_t key_size = be_uint16_t(*((uint16_t *)(data + read_size)));
+				if(key_size == 0) {
+					// 終端である可能性がある。
+					break;
+				}
 				read_size += 2;
 				char *key = ttLibC_malloc(key_size + 1);
 				memcpy(key, data + read_size, key_size);
@@ -343,13 +413,15 @@ static ttLibC_Amf0Object *Amf0_make(uint8_t *data, size_t data_size) {
 }
 
 bool ttLibC_Amf0_read(void *data, size_t data_size, ttLibC_Amf0ObjectReadFunc callback, void *ptr) {
+	uint8_t *dat = data;
 	while(data_size > 0) {
-		ttLibC_Amf0Object *amf0_obj = Amf0_make(data, data_size);
+		ttLibC_Amf0Object *amf0_obj = Amf0_make(dat, data_size);
 		if(amf0_obj == NULL) {
 			ERR_PRINT("failed to get object.");
 			return false;
 		}
 		bool result = callback(ptr, (ttLibC_Amf0Object *)amf0_obj);
+		dat += amf0_obj->data_size;
 		data_size -= amf0_obj->data_size;
 		// close used object.
 		ttLibC_Amf0_close((ttLibC_Amf0Object **)&amf0_obj);
