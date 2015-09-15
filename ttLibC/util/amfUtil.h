@@ -96,6 +96,12 @@ ttLibC_Amf0Object *ttLibC_Amf0_string(const char *string);
 ttLibC_Amf0Object *ttLibC_Amf0_map(ttLibC_Amf0MapObject *list);
 
 /**
+ * make amf0 null object.
+ * @return ttLibC_Amf0Object
+ */
+ttLibC_Amf0Object *ttLibC_Amf0_null();
+
+/**
  * make amf0 object object.
  * @param list amf0Object key -> obj maplist.
  * @return ttLibC_Amf0Object

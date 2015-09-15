@@ -132,6 +132,17 @@ ttLibC_Amf0Object *ttLibC_Amf0_boolean(bool flag) {
 	return (ttLibC_Amf0Object *)obj;
 }
 
+ttLibC_Amf0Object *ttLibC_Amf0_null() {
+	ttLibC_Amf0Object *obj = ttLibC_malloc(sizeof(ttLibC_Amf0Object));
+	if(obj == NULL) {
+		return NULL;
+	}
+	obj->data_size = 1;
+	obj->type = amf0Type_Null;
+	obj->object = NULL;
+	return (ttLibC_Amf0Object *)obj;
+}
+
 ttLibC_Amf0Object *ttLibC_Amf0_string(const char *string) {
 	ttLibC_Amf0Object *obj = ttLibC_malloc(sizeof(ttLibC_Amf0Object));
 	if(obj == NULL) {
@@ -201,7 +212,9 @@ ttLibC_Amf0Object *ttLibC_Amf0_clone(ttLibC_Amf0Object *src_obj) {
 		}
 		break;
 	case amf0Type_MovieClip:
+		break;
 	case amf0Type_Null:
+		return ttLibC_Amf0_null();
 	case amf0Type_Undefined:
 	case amf0Type_Reference:
 		break;
@@ -337,11 +350,18 @@ static ttLibC_Amf0Object *Amf0_make(uint8_t *data, size_t data_size) {
 		}
 		return amf0_obj;
 	case amf0Type_MovieClip:
+		break;
 	case amf0Type_Null:
+		{
+			++ read_size;
+			amf0_obj->type = amf0Type_Null;
+			amf0_obj->object = NULL;
+			amf0_obj->data_size = read_size;
+		}
+		return amf0_obj;
 	case amf0Type_Undefined:
 	case amf0Type_Reference:
-		ttLibC_free(amf0_obj);
-		return NULL;
+		break;
 	case amf0Type_Map:
 		{
 			++ read_size;
@@ -405,9 +425,10 @@ static ttLibC_Amf0Object *Amf0_make(uint8_t *data, size_t data_size) {
 	case amf0Type_TypedObject:
 	case amf0Type_Amf3Object:
 	default:
-		ttLibC_free(amf0_obj);
-		return NULL;
+		break;
 	}
+	LOG_PRINT("unknown amf0Type:%x", (*data));
+	LOG_DUMP(data, data_size, true);
 	ttLibC_free(amf0_obj);
 	return NULL;
 }
@@ -578,7 +599,8 @@ void ttLibC_Amf0_close(ttLibC_Amf0Object **amf0_obj) {
 	case amf0Type_String:
 		break;
 //	case amf0Type_MovieClip:
-//	case amf0Type_Null:
+	case amf0Type_Null:
+		break;
 //	case amf0Type_Undefined:
 //	case amf0Type_Reference:
 	case amf0Type_Object:
@@ -607,7 +629,9 @@ void ttLibC_Amf0_close(ttLibC_Amf0Object **amf0_obj) {
 	default:
 		break;
 	}
-	ttLibC_free(target->object);
+	if(target->object) {
+		ttLibC_free(target->object);
+	}
 	ttLibC_free(target);
 	*amf0_obj = NULL;
 }
