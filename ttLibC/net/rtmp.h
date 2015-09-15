@@ -19,6 +19,27 @@ extern "C" {
 #include <stdint.h>
 
 /**
+ * rtmpMessageType
+ */
+typedef enum {
+	RtmpMessageType_setChunkSize = 0x01,
+	RtmpMessageType_abortMessage = 0x02,
+	RtmpMessageType_acknowledgement = 0x03,
+	RtmpMessageType_userControlMessage = 0x04,
+	RtmpMessageType_windowAcknowledgementSize = 0x05,
+	RtmpMessageType_setPeerBandwidth = 0x06,
+	RtmpMessageType_audioMessage = 0x08,
+	RtmpMessageType_videoMessage = 0x09,
+	RtmpMessageType_amf3DataMessage = 0x0F,
+	RtmpMessageType_amf3SharedObjectMessage = 0x10,
+	RtmpMessageType_amf3Command = 0x11,
+	RtmpMessageType_amf0DataMessage = 0x12,
+	RtmpMessageType_amf0SharedObjectMessage = 0x13,
+	RtmpMessageType_amf0Command = 0x14,
+	RtmpMessageType_aggregateMessage = 0x16,
+} ttLibC_RtmpMessage_Type;
+
+/**
  * information for rtmpConnection.
  */
 typedef struct {

@@ -16,7 +16,8 @@ extern "C" {
 #endif
 
 #include "../rtmp.h"
-#include "message.h"
+#include "header.h"
+//#include "message.h"
 
 typedef enum {
 	readType_header,   // header取得動作中

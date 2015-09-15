@@ -10,6 +10,7 @@
 
 #ifdef __ENABLE_FILE__
 #include "netConnection.h"
+#include "message.h"
 #include "../../log.h"
 #include "../../allocator.h"
 #include "../../util/hexUtil.h"

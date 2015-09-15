@@ -20,27 +20,6 @@ extern "C" {
 #include <stdbool.h>
 #include <stdio.h>
 
-/**
- * rtmpMessageType
- */
-typedef enum {
-	RtmpMessageType_setChunkSize = 0x01,
-	RtmpMessageType_abortMessage = 0x02,
-	RtmpMessageType_acknowledgement = 0x03,
-	RtmpMessageType_userControlMessage = 0x04,
-	RtmpMessageType_windowAcknowledgementSize = 0x05,
-	RtmpMessageType_setPeerBandwidth = 0x06,
-	RtmpMessageType_audioMessage = 0x08,
-	RtmpMessageType_videoMessage = 0x09,
-	RtmpMessageType_amf3DataMessage = 0x0F,
-	RtmpMessageType_amf3SharedObjectMessage = 0x10,
-	RtmpMessageType_amf3Command = 0x11,
-	RtmpMessageType_amf0DataMessage = 0x12,
-	RtmpMessageType_amf0SharedObjectMessage = 0x13,
-	RtmpMessageType_amf0Command = 0x14,
-	RtmpMessageType_aggregateMessage = 0x16,
-} ttLibC_RtmpMessage_Type;
-
 /*
  * rtmpのheader情報をコントロールするクラス
  * とします。
@@ -83,57 +62,7 @@ deltaTimeの件もなし
  *
  */
 
-typedef bool (* ttLibC_RtmpHeaderWriteFunc)(void *ptr, void *data, size_t data_size);
-
-typedef enum {
-	RtmpHeaderType_0 = 0x00,
-	RtmpHeaderType_1 = 0x01,
-	RtmpHeaderType_2 = 0x02,
-	RtmpHeaderType_3 = 0x03,
-} ttLibC_RtmpHeader_Type;
-
-typedef struct {
-//	uint8_t type; // typeはheaderをbinary化するときに決定されるものとする。
-	uint32_t cs_id;
-	uint32_t timestamp;
-	uint32_t size;
-	ttLibC_RtmpMessage_Type message_type;
-	uint32_t stream_id;
-
-	uint32_t read_size; // 読み込み時に利用したデータサイズ
-} ttLibC_Net_RtmpHeader;
-
-typedef ttLibC_Net_RtmpHeader ttLibC_RtmpHeader;
-
-ttLibC_RtmpHeader *ttLibC_RtmpHeader_make(
-		ttLibC_RtmpConnection *conn,
-		uint64_t pts,
-		uint32_t size,
-		ttLibC_RtmpMessage_Type type,
-		uint32_t stream_id);
-
-/**
- * 現在処理中のrtmpHeaderを取得する。
- * netConnectionがcs_idを保持しているため動作可能。
- * あとマルチスレッドで動作してない・・・というのもある。
- */
-ttLibC_RtmpHeader *ttLibC_RtmpHeader_getCurrentHeader(ttLibC_RtmpConnection *conn);
-
-bool ttLibC_RtmpHeader_write(
-		ttLibC_RtmpHeader_Type type,
-		ttLibC_RtmpHeader *header,
-		ttLibC_RtmpHeaderWriteFunc callback,
-		void *ptr);
-
-// rtmpHeaderをつくって応答する。
-// この動作はboolにして、応答をcallback化した方がいいか？
-// そもそもrtmpMessageのreadに吸収されそうだけど。
-ttLibC_RtmpHeader *ttLibC_RtmpHeader_read(
-		ttLibC_RtmpConnection *conn,
-		void *data,
-		size_t data_size);
-
-void ttLibC_RtmpHeader_close(ttLibC_RtmpHeader **header);
+#include "header.h"
 
 typedef struct {
 	ttLibC_RtmpHeader *header; // header情報
