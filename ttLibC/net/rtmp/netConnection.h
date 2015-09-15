@@ -34,6 +34,9 @@ typedef struct {
 	uint32_t chunk_size;
 	size_t send_size;
 
+	ttLibC_RtmpEventFunc event_callback;
+	void *event_ptr;
+
 	// tmp buffer for server response.
 	ttLibC_RtmpRead_Type read_type;
 	uint8_t *tmp_buffer;

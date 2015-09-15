@@ -20,12 +20,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef struct {
-	ttLibC_RtmpConnection_ *conn;
-	ttLibC_RtmpEventFunc eventfunc;
-	void *ptr;
-} ttLibC_RtmpMessageCallback_t;
-
 static bool RtmpConnection_writeCallback(void *ptr, void *data, size_t data_size) {
 	ttLibC_RtmpConnection_ *conn = (ttLibC_RtmpConnection_ *)ptr;
 	if(conn->send_size + data_size > conn->chunk_size) {
@@ -54,12 +48,12 @@ static bool RtmpConnection_writeCallback(void *ptr, void *data, size_t data_size
 static bool RtmpConnection_clientHandler(
 		void *ptr,
 		ttLibC_RtmpMessage *message) {
-	ttLibC_RtmpMessageCallback_t *callback_data = (ttLibC_RtmpMessageCallback_t *)ptr;
+	ttLibC_RtmpConnection_ *conn = (ttLibC_RtmpConnection_ *)ptr;
 	switch(message->header->message_type) {
 	case RtmpMessageType_setChunkSize:
 		{
 			ttLibC_RtmpSetChunkSize *setChunkSize_message = (ttLibC_RtmpSetChunkSize *)message;
-			callback_data->conn->chunk_size = setChunkSize_message->value;
+			conn->chunk_size = setChunkSize_message->value;
 		}
 		break;
 	case RtmpMessageType_abortMessage:
@@ -80,14 +74,14 @@ static bool RtmpConnection_clientHandler(
 					// pingの場合はpongをつくって応答しなければならない。
 					uint32_t time = user_control_message->value;
 					ttLibC_RtmpUserControlMessage *pong = (ttLibC_RtmpUserControlMessage *)ttLibC_RtmpMessage_userControlMessage(
-							(ttLibC_RtmpConnection *)callback_data->conn,
+							(ttLibC_RtmpConnection *)conn,
 							RtmpEventType_Pong);
 					pong->value = time;
 					write_result = ttLibC_RtmpMessage_write(
-							(ttLibC_RtmpConnection *)callback_data->conn,
+							(ttLibC_RtmpConnection *)conn,
 							(ttLibC_RtmpMessage *)pong,
 							RtmpConnection_writeCallback,
-							callback_data->conn);
+							conn);
 					// メッセージとして送る。
 					ttLibC_RtmpMessage_close((ttLibC_RtmpMessage **)&pong);
 					return write_result;
@@ -122,9 +116,9 @@ static bool RtmpConnection_clientHandler(
 			ttLibC_RtmpAmf0Command *amf0Command_message = (ttLibC_RtmpAmf0Command *)message;
 			uint32_t command_id = (uint32_t)(*((double *)amf0Command_message->command_id->object));
 			const char *command_name = amf0Command_message->command_name->object;
-			if(strcmp(command_name, "_result") == 0 && callback_data->conn->command_id == command_id) {
-				callback_data->conn->command_id ++;
-				callback_data->eventfunc(callback_data->ptr, amf0Command_message->command_param2);
+			if(strcmp(command_name, "_result") == 0 && conn->command_id == command_id) {
+				conn->command_id ++;
+				conn->event_callback(conn->event_ptr, amf0Command_message->command_param2);
 			}
 		}
 		break;
@@ -139,10 +133,6 @@ static bool RtmpConnection_checkServerResponse(
 		ttLibC_RtmpEventFunc callback,
 		void *ptr) {
 	uint8_t buffer[256];
-	ttLibC_RtmpMessageCallback_t callback_val;
-	callback_val.conn = conn;
-	callback_val.eventfunc = callback;
-	callback_val.ptr = ptr;
 	do {
 		ssize_t res = read(conn->sock, buffer, 256);
 		if(res > 0) {
@@ -151,7 +141,7 @@ static bool RtmpConnection_checkServerResponse(
 					buffer,
 					res,
 					RtmpConnection_clientHandler,
-					&callback_val)) {
+					conn)) {
 				break;
 			}
 		}
@@ -161,7 +151,6 @@ static bool RtmpConnection_checkServerResponse(
 			break;
 		}
 		else {
-			LOG_PRINT("connection timeout.");
 			// timeout or err. quit loop.
 			break;
 		}
@@ -186,11 +175,12 @@ static bool RtmpConnection_connect(ttLibC_RtmpConnection_ *conn) {
 		ERR_PRINT("failed to make socket");
 		return false;
 	}
-	struct timeval tv;
-	tv.tv_sec = 1;
-	tv.tv_usec = 0;
 	// put timeout for recv.
+	struct timeval tv;
+	tv.tv_sec = 0;
+	tv.tv_usec = 500000;
 	setsockopt(conn->sock, SOL_SOCKET, SO_RCVTIMEO, (char *)&tv, sizeof(tv));
+
 	// need timeout for send?
 
 	if(connect(conn->sock, (struct sockaddr *)&server, sizeof(server)) == -1) {
@@ -311,6 +301,8 @@ ttLibC_RtmpConnection *ttLibC_RtmpConnection_make() {
 	conn->tmp_header_buffer_target_size = 0;
 
 	conn->read_type = readType_header; // headerの読み込みから始める。
+	conn->event_callback = NULL;
+	conn->event_ptr = NULL;
 	return (ttLibC_RtmpConnection *)conn;
 }
 
@@ -324,6 +316,8 @@ bool ttLibC_RtmpConnection_connect(
 	char app[256];
 	int32_t port = 1935;
 	char server_path[256];
+	conn_->event_callback = callback;
+	conn_->event_ptr = ptr;
 
 	if(strstr(address, "rtmp://")    // start with [rtmp://]
 	&& sscanf(address, "rtmp://%s", server_path)  // there is data after [rtmp://]
@@ -381,6 +375,14 @@ bool ttLibC_RtmpConnection_connect(
 		return false;
 	}
 	return true;
+}
+
+bool ttLibC_RtmpConnection_read(ttLibC_RtmpConnection *conn) {
+	ttLibC_RtmpConnection_ *conn_ = (ttLibC_RtmpConnection_ *)conn;
+	if(conn_->event_callback != NULL) {
+		return RtmpConnection_checkServerResponse(conn_, conn_->event_callback, conn_->event_ptr);
+	}
+	return false;
 }
 
 void ttLibC_RtmpConnection_close(ttLibC_RtmpConnection **conn) {

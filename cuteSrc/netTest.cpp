@@ -25,6 +25,7 @@ typedef struct {
 } rtmpTest_t;
 
 bool rtmpTest_onStatusEvent(void *ptr, ttLibC_Amf0Object *amf0_obj) {
+	rtmpTest_t *testData = (rtmpTest_t *)ptr;
 	switch(amf0_obj->type) {
 	case amf0Type_Object:
 	case amf0Type_Map:
@@ -33,6 +34,7 @@ bool rtmpTest_onStatusEvent(void *ptr, ttLibC_Amf0Object *amf0_obj) {
 			LOG_PRINT("code:%s", (const char *)code->object);
 			if(code != NULL && strcmp((const char *)code->object, "NetConnection.Connect.Success") == 0) {
 				LOG_PRINT("connect success.");
+				testData->work_flg = false;
 			}
 		}
 		break;
@@ -50,8 +52,12 @@ static void rtmpTest() {
 			conn,
 			"rtmp://localhost/live",
 			rtmpTest_onStatusEvent,
-			NULL);
-	// この部分に、必要なだけ、接続をループするなにがしを作っておかなければならない。
+			&testData);
+	while(ttLibC_RtmpConnection_read(conn)) {
+		if(!testData.work_flg) {
+			break;
+		}
+	}
 	ttLibC_RtmpConnection_close(&conn);
 	ASSERT(ttLibC_Allocator_dump() == 0);
 }

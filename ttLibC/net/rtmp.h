@@ -57,6 +57,8 @@ bool ttLibC_RtmpConnection_connect(
 		ttLibC_RtmpEventFunc callback,
 		void *ptr);
 
+bool ttLibC_RtmpConnection_read(ttLibC_RtmpConnection *conn);
+
 /**
  * close
  */
