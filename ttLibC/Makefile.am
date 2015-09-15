@@ -58,6 +58,14 @@ libttLibC_a_SOURCES= \
 	frame/video/wmv2.c \
 	frame/video/yuv420.c \
 	frame/frame.c \
+	net/rtmp/message/aggregate.c \
+	net/rtmp/message/audio.c \
+	net/rtmp/message/command.c \
+	net/rtmp/message/system.c \
+	net/rtmp/message/video.c \
+	net/rtmp/message.c \
+	net/rtmp/netConnection.c \
+	net/rtmp/netStream.c \
 	resampler/audioResampler.c \
 	resampler/imageResampler.c \
 	resampler/speexdspResampler.c \

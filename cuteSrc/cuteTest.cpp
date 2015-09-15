@@ -31,6 +31,7 @@
 cute::suite containerTests(cute::suite s);
 cute::suite audioTests(cute::suite s);
 cute::suite videoTests(cute::suite s);
+cute::suite netTests(cute::suite s);
 cute::suite utilTests(cute::suite s);
 cute::suite encoderDecoderTests(cute::suite s);
 cute::suite avcodecTests(cute::suite s);
@@ -49,6 +50,7 @@ int main(int argc, const char *argv[]) {
 	cute::makeRunner(lis, argc, argv)(containerTests(s),      "containerTests");
 	cute::makeRunner(lis, argc, argv)(audioTests(s),          "audioTests");
 	cute::makeRunner(lis, argc, argv)(videoTests(s),          "videoTests");
+	cute::makeRunner(lis, argc, argv)(netTests(s),            "netTests");
 	cute::makeRunner(lis, argc, argv)(utilTests(s),           "utilTests");
 	cute::makeRunner(lis, argc, argv)(encoderDecoderTests(s), "encoderDecoderTests");
 	cute::makeRunner(lis, argc, argv)(avcodecTests(s),        "avcodecTests");

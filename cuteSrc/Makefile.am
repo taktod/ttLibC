@@ -8,6 +8,7 @@ cuteTest_SOURCES= \
 	avcodecTest.cpp \
 	audioTest.cpp \
 	videoTest.cpp \
+	netTest.cpp \
 	utilTest.cpp \
 	encoderDecoderTest.cpp
 
