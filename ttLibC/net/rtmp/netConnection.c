@@ -14,6 +14,8 @@
 #include "../../log.h"
 #include "../../allocator.h"
 #include "../../util/hexUtil.h"
+#include "type/command.h"
+#include "type/system.h"
 #include <netdb.h>
 #include <netinet/in.h>
 #include <unistd.h>
@@ -74,7 +76,7 @@ static bool RtmpConnection_clientHandler(
 					bool write_result = true;
 					// pingの場合はpongをつくって応答しなければならない。
 					uint32_t time = user_control_message->value;
-					ttLibC_RtmpUserControlMessage *pong = (ttLibC_RtmpUserControlMessage *)ttLibC_RtmpMessage_userControlMessage(
+					ttLibC_RtmpUserControlMessage *pong = (ttLibC_RtmpUserControlMessage *)ttLibC_RtmpSystemMessage_userControlMessage(
 							(ttLibC_RtmpConnection *)conn,
 							RtmpEventType_Pong);
 					pong->value = time;
@@ -257,7 +259,7 @@ static bool RtmpConnection_handshake(ttLibC_RtmpConnection_ *conn) {
 }
 
 static bool RtmpConnection_sendConnect(ttLibC_RtmpConnection_ *conn) {
-	ttLibC_RtmpMessage *msg = ttLibC_RtmpMessage_connect(
+	ttLibC_RtmpMessage *msg = ttLibC_RtmpCommandMessage_connect(
 			(ttLibC_RtmpConnection *)conn,
 			NULL); // to use custom message, I will use here.
 
