@@ -30,6 +30,8 @@ typedef struct {
 // そうすれば、netConnectionにいれている命令集をはずすことができる。
 
 // これでコマンドを作る形にしよう。
+/*
+// for future use, comment here.
 ttLibC_RtmpMessage *ttLibC_RtmpCommandMessage_amf0Command(
 		ttLibC_RtmpConnection *conn,
 		uint64_t pts,
@@ -37,10 +39,13 @@ ttLibC_RtmpMessage *ttLibC_RtmpCommandMessage_amf0Command(
 		uint32_t command_id,
 		ttLibC_Amf0Object *object1,
 		ttLibC_Amf0Object *object2);
+*/
 
-ttLibC_RtmpMessage *ttLibC_RtmpCommandMessage_connect(
+bool ttLibC_RtmpCommandMessage_sendConnect(
 		ttLibC_RtmpConnection *conn,
-		ttLibC_Amf0Object *override_connect_params);
+		ttLibC_Amf0Object *override_connect_params,
+		ttLibC_RtmpDataWriteFunc callback,
+		void *ptr);
 
 void ttLibC_RtmpCommandMessage_close(ttLibC_RtmpMessage **message);
 

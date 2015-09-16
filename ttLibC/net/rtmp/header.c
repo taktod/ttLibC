@@ -108,7 +108,7 @@ ttLibC_RtmpHeader *ttLibC_RtmpHeader_getCurrentHeader(
 bool ttLibC_RtmpHeader_write(
 		ttLibC_RtmpHeader_Type type,
 		ttLibC_RtmpHeader *header,
-		ttLibC_RtmpHeaderWriteFunc callback,
+		ttLibC_RtmpDataWriteFunc callback,
 		void *ptr) {
 	// csid:max 3byte
 	// timestamp size messageType streamId = 11byte

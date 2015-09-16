@@ -17,7 +17,7 @@
 extern "C" {
 #endif
 
-typedef bool (* ttLibC_RtmpHeaderWriteFunc)(void *ptr, void *data, size_t data_size);
+typedef bool (* ttLibC_RtmpDataWriteFunc)(void *ptr, void *data, size_t data_size);
 
 typedef enum {
 	RtmpHeaderType_0 = 0x00,
@@ -60,7 +60,7 @@ ttLibC_RtmpHeader *ttLibC_RtmpHeader_getCurrentHeader(
 bool ttLibC_RtmpHeader_write(
 		ttLibC_RtmpHeader_Type type,
 		ttLibC_RtmpHeader *header,
-		ttLibC_RtmpHeaderWriteFunc callback,
+		ttLibC_RtmpDataWriteFunc callback,
 		void *ptr);
 
 // rtmpHeaderをつくって応答する。

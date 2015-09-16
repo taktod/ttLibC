@@ -20,6 +20,7 @@ extern "C" {
 
 typedef ttLibC_Rtmp4ByteMessage ttLibC_RtmpWindowAcknowledgementSize;
 typedef ttLibC_Rtmp4ByteMessage ttLibC_RtmpSetChunkSize;
+typedef ttLibC_Rtmp4ByteMessage ttLibC_RtmpAcknowledgement;
 
 typedef struct {
 	ttLibC_RtmpMessage inherit_super;
@@ -54,6 +55,17 @@ typedef struct {
 ttLibC_RtmpMessage *ttLibC_RtmpSystemMessage_userControlMessage(
 		ttLibC_RtmpConnection *conn,
 		ttLibC_RtmpUserControlMessage_EventType event_type);
+
+bool ttLibC_RtmpSystemMessage_sendPong(
+		ttLibC_RtmpConnection *conn,
+		uint32_t time,
+		ttLibC_RtmpDataWriteFunc callback,
+		void *ptr);
+
+bool ttLibC_RtmpSystemMessage_sendAcknowledgement(
+		ttLibC_RtmpConnection *conn,
+		ttLibC_RtmpDataWriteFunc callback,
+		void *ptr);
 
 void ttLibC_RtmpSystemMessage_close(ttLibC_RtmpMessage **message);
 

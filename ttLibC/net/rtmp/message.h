@@ -56,7 +56,7 @@ ttLibC_RtmpMessage *ttLibC_RtmpMessage_make(
 bool ttLibC_RtmpMessage_write(
 		ttLibC_RtmpConnection *conn,
 		ttLibC_RtmpMessage *message,
-		ttLibC_RtmpHeaderWriteFunc callback,
+		ttLibC_RtmpDataWriteFunc callback,
 		void *ptr); // bufferに書き込むためのbyteデータをcallbackで呼び出す。
 
 bool ttLibC_RtmpMessage_read(

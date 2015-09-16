@@ -59,7 +59,7 @@ ttLibC_RtmpMessage *ttLibC_RtmpCommandMessage_amf0Command(
 	return (ttLibC_RtmpMessage *)amf0_command;
 }
 
-ttLibC_RtmpMessage *ttLibC_RtmpCommandMessage_connect(
+static ttLibC_RtmpMessage *RtmpCommandMessage_connect(
 		ttLibC_RtmpConnection *conn,
 		ttLibC_Amf0Object *override_connect_params) {
 	// コネクト命令発行。
@@ -112,6 +112,23 @@ ttLibC_RtmpMessage *ttLibC_RtmpCommandMessage_connect(
 		ttLibC_Amf0_close(&command_param);
 	}
 	return message;
+}
+
+bool ttLibC_RtmpCommandMessage_sendConnect(
+		ttLibC_RtmpConnection *conn,
+		ttLibC_Amf0Object *override_connect_params,
+		ttLibC_RtmpDataWriteFunc callback,
+		void *ptr) {
+	ttLibC_RtmpMessage *connect = RtmpCommandMessage_connect(
+			conn,
+			override_connect_params);
+	bool result = ttLibC_RtmpMessage_write(
+			conn,
+			connect,
+			callback,
+			ptr);
+	ttLibC_RtmpMessage_close(&connect);
+	return result;
 }
 
 void ttLibC_RtmpCommandMessage_close(ttLibC_RtmpMessage **message) {

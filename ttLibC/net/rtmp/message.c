@@ -56,7 +56,7 @@ ttLibC_RtmpMessage *ttLibC_RtmpMessage_make(
 bool ttLibC_RtmpMessage_write(
 		ttLibC_RtmpConnection *conn,
 		ttLibC_RtmpMessage *message,
-		ttLibC_RtmpHeaderWriteFunc callback,
+		ttLibC_RtmpDataWriteFunc callback,
 		void *ptr) {
 	ttLibC_RtmpConnection_ *conn_ = (ttLibC_RtmpConnection_ *)conn;
 	if(message == NULL) {

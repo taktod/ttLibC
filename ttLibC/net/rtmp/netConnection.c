@@ -52,6 +52,19 @@ static bool RtmpConnection_clientHandler(
 		void *ptr,
 		ttLibC_RtmpMessage *message) {
 	ttLibC_RtmpConnection_ *conn = (ttLibC_RtmpConnection_ *)ptr;
+	// やっぱりここに来るのか・・
+	// ここでメッセージを取得したら・・・
+	// size分追加していく。
+	conn->read_size += message->header->size;
+	if(conn->read_size > conn->byte_read_window) {
+		// acknowledgeを送るタイミングになった。
+		LOG_PRINT("acknowledgeを送るタイミングになった。");
+		// 4byteMessageと同じ形でread_sizeの大きさをそのまま送ればいいみたい。
+		ttLibC_RtmpSystemMessage_sendAcknowledgement(
+				(ttLibC_RtmpConnection *)conn,
+				RtmpConnection_writeCallback,
+				conn);
+	}
 	switch(message->header->message_type) {
 	case RtmpMessageType_setChunkSize:
 		{
@@ -74,20 +87,12 @@ static bool RtmpConnection_clientHandler(
 			case RtmpEventType_Ping:
 				{
 					bool write_result = true;
-					// pingの場合はpongをつくって応答しなければならない。
-					uint32_t time = user_control_message->value;
-					ttLibC_RtmpUserControlMessage *pong = (ttLibC_RtmpUserControlMessage *)ttLibC_RtmpSystemMessage_userControlMessage(
+					// reply pong.
+					return ttLibC_RtmpSystemMessage_sendPong(
 							(ttLibC_RtmpConnection *)conn,
-							RtmpEventType_Pong);
-					pong->value = time;
-					write_result = ttLibC_RtmpMessage_write(
-							(ttLibC_RtmpConnection *)conn,
-							(ttLibC_RtmpMessage *)pong,
+							user_control_message->value,
 							RtmpConnection_writeCallback,
 							conn);
-					// メッセージとして送る。
-					ttLibC_RtmpMessage_close((ttLibC_RtmpMessage **)&pong);
-					return write_result;
 				}
 				break;
 //			case RtmpEventType_Pong:
@@ -103,8 +108,16 @@ static bool RtmpConnection_clientHandler(
 		}
 		break;
 	case RtmpMessageType_windowAcknowledgementSize:
+		{
+			ttLibC_RtmpWindowAcknowledgementSize *window_acknowledgement_size = (ttLibC_RtmpWindowAcknowledgementSize *)message;
+			conn->byte_read_window = window_acknowledgement_size->value;
+		}
 		break;
 	case RtmpMessageType_setPeerBandwidth:
+		{
+			ttLibC_RtmpSetPeerBandwidth *set_peer_bandwidth = (ttLibC_RtmpSetPeerBandwidth *)message;
+			conn->byte_write_window = set_peer_bandwidth->window_acknowledge_size;
+		}
 		break;
 	case RtmpMessageType_audioMessage:
 	case RtmpMessageType_videoMessage:
@@ -258,22 +271,6 @@ static bool RtmpConnection_handshake(ttLibC_RtmpConnection_ *conn) {
 	return true;
 }
 
-static bool RtmpConnection_sendConnect(ttLibC_RtmpConnection_ *conn) {
-	ttLibC_RtmpMessage *msg = ttLibC_RtmpCommandMessage_connect(
-			(ttLibC_RtmpConnection *)conn,
-			NULL); // to use custom message, I will use here.
-
-	bool result = ttLibC_RtmpMessage_write(
-			(ttLibC_RtmpConnection *)conn,
-			msg,
-			RtmpConnection_writeCallback,
-			conn);
-
-	// rtmp message is no more need. close.
-	ttLibC_RtmpMessage_close(&msg);
-	return result;
-}
-
 // move?
 static bool RtmpConnection_sendCreateStream(ttLibC_Net_RtmpConnection_ *conn) {
 	return true;
@@ -289,6 +286,11 @@ ttLibC_RtmpConnection *ttLibC_RtmpConnection_make() {
 	conn->send_size            = 0;
 	conn->chunk_size           = 128;
 	conn->command_id           = 1;
+
+	conn->read_size            = 0;
+	conn->byte_read_window     = 2500000;
+	conn->byte_write_window    = 2500000;
+
 	conn->inherit_super.app    = NULL;
 	conn->inherit_super.server = NULL;
 	for(int i = 0;i < 64;++ i) {
@@ -372,7 +374,11 @@ bool ttLibC_RtmpConnection_connect(
 		return false;
 	}
 	// send amf0 connect message.
-	if(!RtmpConnection_sendConnect(conn_)) {
+	if(!ttLibC_RtmpCommandMessage_sendConnect(
+			conn,
+			NULL,
+			RtmpConnection_writeCallback,
+			conn)) {
 		return false;
 	}
 	// check response.

@@ -52,6 +52,7 @@ ttLibC_RtmpMessage *ttLibC_RtmpSystemMessage_userControlMessage(
 		size = 6;
 		break;
 	}
+	((ttLibC_RtmpConnection_ *)conn)->cs_id = 2;
 	ttLibC_RtmpUserControlMessage *user_control_message = (ttLibC_RtmpUserControlMessage *)ttLibC_RtmpMessage_make(
 			conn,
 			sizeof(ttLibC_RtmpUserControlMessage),
@@ -61,6 +62,48 @@ ttLibC_RtmpMessage *ttLibC_RtmpSystemMessage_userControlMessage(
 			0);
 	user_control_message->event_type = event_type;
 	return (ttLibC_RtmpMessage *)user_control_message;
+}
+
+bool ttLibC_RtmpSystemMessage_sendPong(
+		ttLibC_RtmpConnection *conn,
+		uint32_t time,
+		ttLibC_RtmpDataWriteFunc callback,
+		void *ptr) {
+	ttLibC_RtmpUserControlMessage *pong = (ttLibC_RtmpUserControlMessage *)ttLibC_RtmpSystemMessage_userControlMessage(
+			conn,
+			RtmpEventType_Pong);
+	pong->value = time;
+	bool result = ttLibC_RtmpMessage_write(
+			conn,
+			(ttLibC_RtmpMessage *)pong,
+			callback,
+			ptr);
+	ttLibC_RtmpMessage_close((ttLibC_RtmpMessage **)&pong);
+	return result;
+}
+
+bool ttLibC_RtmpSystemMessage_sendAcknowledgement(
+		ttLibC_RtmpConnection *conn,
+		ttLibC_RtmpDataWriteFunc callback,
+		void *ptr) {
+	ttLibC_RtmpConnection_ *conn_ = (ttLibC_RtmpConnection_ *)conn;
+	conn_->cs_id = 2;
+	ttLibC_RtmpAcknowledgement *acknowledgement = (ttLibC_RtmpAcknowledgement *)ttLibC_RtmpMessage_make(
+			conn,
+			sizeof(ttLibC_RtmpAcknowledgement),
+			0,
+			4,
+			RtmpMessageType_acknowledgement,
+			0);
+	acknowledgement->value = conn_->read_size;
+	bool result = ttLibC_RtmpMessage_write(
+			conn,
+			(ttLibC_RtmpMessage *)acknowledgement,
+			callback,
+			ptr);
+	ttLibC_RtmpMessage_close((ttLibC_RtmpMessage **)&acknowledgement);
+	conn_->read_size = 0;
+	return result;
 }
 
 void ttLibC_RtmpSystemMessage_close(ttLibC_RtmpMessage **message) {

@@ -38,7 +38,14 @@ typedef struct {
 	uint32_t command_id; // command id will be incremented.
 	int32_t sock;
 	uint32_t chunk_size;
-	size_t send_size;
+	size_t send_size; // これは、chunk_sizeのコントロールをするのに必要となる、すでに送信したデータみたいです。
+
+	// windowの読み込みサイズ ack_sizeを超えたらwindow_acknowledgementを送信する必要あり。
+	size_t read_size; // ackを応答するかどうかを判定するようの読み込んだデータ量保持
+	// ackしたら、%で割り、あまりをだすことにする。
+	// この他にacknowledgeを送るために、今までに送った、受け取ったデータ量を保持する定数が必要です。
+	size_t byte_read_window;
+	size_t byte_write_window;
 
 	ttLibC_RtmpEventFunc event_callback;
 	void *event_ptr;
