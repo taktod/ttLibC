@@ -73,7 +73,13 @@ bool ttLibC_RtmpMessage_write(
 	switch(message->header->message_type) {
 	case RtmpMessageType_setChunkSize:
 	case RtmpMessageType_abortMessage:
+		break;
 	case RtmpMessageType_acknowledgement:
+		{
+			ttLibC_Rtmp4ByteMessage *fourbyte_message = (ttLibC_Rtmp4ByteMessage *)message;
+			uint32_t value = be_uint32_t(fourbyte_message->value);
+			callback(ptr, &value, 4);
+		}
 		break;
 	case RtmpMessageType_userControlMessage:
 		{
