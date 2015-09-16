@@ -24,10 +24,11 @@ typedef enum {
 	RtmpHeaderType_1 = 0x01,
 	RtmpHeaderType_2 = 0x02,
 	RtmpHeaderType_3 = 0x03,
+	RtmpHeaderType_default = 0xFF,
 } ttLibC_RtmpHeader_Type;
 
 typedef struct {
-//	uint8_t type; // typeはheaderをbinary化するときに決定されるものとする。
+	ttLibC_RtmpHeader_Type type; // typeはreadもしくはmakeするときに前のデータとの差分で決定するものとする。
 	uint32_t cs_id;
 	uint32_t timestamp;
 	uint32_t size;
@@ -44,14 +45,17 @@ ttLibC_RtmpHeader *ttLibC_RtmpHeader_make(
 		uint64_t pts,
 		uint32_t size,
 		ttLibC_RtmpMessage_Type type,
-		uint32_t stream_id);
+		uint32_t stream_id,
+		bool is_read);
 
 /**
  * 現在処理中のrtmpHeaderを取得する。
  * netConnectionがcs_idを保持しているため動作可能。
  * あとマルチスレッドで動作してない・・・というのもある。
  */
-ttLibC_RtmpHeader *ttLibC_RtmpHeader_getCurrentHeader(ttLibC_RtmpConnection *conn);
+ttLibC_RtmpHeader *ttLibC_RtmpHeader_getCurrentHeader(
+		ttLibC_RtmpConnection *conn,
+		bool is_read);
 
 bool ttLibC_RtmpHeader_write(
 		ttLibC_RtmpHeader_Type type,

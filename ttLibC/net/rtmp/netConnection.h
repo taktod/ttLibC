@@ -27,8 +27,13 @@ typedef enum {
 
 typedef struct {
 	ttLibC_RtmpConnection inherit_super;
+	// for send
 	ttLibC_RtmpHeader *headers[64]; // 64 headers for often use.
 	ttLibC_RtmpHeader **ex_headers; // left 65536 headers, use with alloc
+
+	// for recv
+	ttLibC_RtmpHeader *r_headers[64]; // 64 headers for often use.
+	ttLibC_RtmpHeader **r_ex_headers; // left 65536 headers, use with alloc
 	uint32_t cs_id;
 	uint32_t command_id; // command id will be incremented.
 	int32_t sock;

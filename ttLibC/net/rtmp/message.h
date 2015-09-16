@@ -48,7 +48,7 @@ deltaTimeが0xFFFFFFの場合は・・・
 type2の場合
 3byte deltatime
 sizeは前回と同じ
-mesageTypeも前回と同じ
+messageTypeも前回と同じ
 streamIdも前回の使い回し
 deltaTimeが0xFFFFFFの場合は
   4byte timestamp

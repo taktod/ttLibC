@@ -191,7 +191,7 @@ ttLibC_RtmpMessage *ttLibC_RtmpMessage_make(
 		return NULL;
 	}
 	// rtmpHeaderだけつくっておく必要がある。
-	ttLibC_RtmpHeader *header = ttLibC_RtmpHeader_make(conn, pts, size, type, stream_id);
+	ttLibC_RtmpHeader *header = ttLibC_RtmpHeader_make(conn, pts, size, type, stream_id, false);
 	if(header == NULL) {
 		ttLibC_free(message);
 		return NULL;
@@ -211,7 +211,7 @@ bool ttLibC_RtmpMessage_write(
 	}
 	// messageがなにものであるかで、書き込みの方法がかわるはず。
 	// 同じデータを使い回す場合は、似たデータがあるか確認して、type1や2を使えばデータサイズは小さくできます。
-	if(!ttLibC_RtmpHeader_write(RtmpHeaderType_0, message->header, callback, ptr)) {
+	if(!ttLibC_RtmpHeader_write(RtmpHeaderType_default, message->header, callback, ptr)) {
 		ERR_PRINT("failed to write header message.");
 		return false;
 	}
@@ -523,7 +523,7 @@ static bool RtmpMessage_readBody(
 		size_t data_size,
 		ttLibC_RtmpMessageReadFunc callback,
 		void *ptr) {
-	ttLibC_RtmpHeader *header = ttLibC_RtmpHeader_getCurrentHeader((ttLibC_RtmpConnection *)conn);
+	ttLibC_RtmpHeader *header = ttLibC_RtmpHeader_getCurrentHeader((ttLibC_RtmpConnection *)conn, true);
 	uint8_t *buf = NULL;
 	bool callback_result = true;
 	if(conn->tmp_buffer_next_pos != 0) {

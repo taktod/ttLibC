@@ -25,7 +25,7 @@ static bool RtmpConnection_writeCallback(void *ptr, void *data, size_t data_size
 	ttLibC_RtmpConnection_ *conn = (ttLibC_RtmpConnection_ *)ptr;
 	if(conn->send_size + data_size > conn->chunk_size) {
 		uint8_t *dat = data;
-		ttLibC_RtmpHeader *header = ttLibC_RtmpHeader_getCurrentHeader((ttLibC_RtmpConnection *)conn);
+		ttLibC_RtmpHeader *header = ttLibC_RtmpHeader_getCurrentHeader((ttLibC_RtmpConnection *)conn, false);
 		if(header == NULL) {
 			return false;
 		}
@@ -149,7 +149,7 @@ static bool RtmpConnection_checkServerResponse(
 		else if(res == 0) {
 			// response 0 = disconnect from server.
 			LOG_PRINT("disconnect from server.");
-			break;
+			return false;
 		}
 		else {
 			// timeout or err. quit loop.
@@ -291,8 +291,10 @@ ttLibC_RtmpConnection *ttLibC_RtmpConnection_make() {
 	conn->inherit_super.server = NULL;
 	for(int i = 0;i < 64;++ i) {
 		conn->headers[i] = NULL;
+		conn->r_headers[i] = NULL;
 	}
 	conn->ex_headers = NULL;
+	conn->r_ex_headers = NULL;
 	conn->tmp_buffer = NULL;
 	conn->tmp_buffer_size = 0;
 	conn->tmp_buffer_next_pos = 0;
@@ -405,12 +407,19 @@ void ttLibC_RtmpConnection_close(ttLibC_RtmpConnection **conn) {
 	}
 	for(int i = 0;i < 64;++ i) {
 		ttLibC_RtmpHeader_close(&target->headers[i]);
+		ttLibC_RtmpHeader_close(&target->r_headers[i]);
 	}
 	if(target->ex_headers != NULL) {
 		for(int i = 0;i < 65536;++ i) {
 			ttLibC_RtmpHeader_close(&target->ex_headers[i]);
 		}
 		ttLibC_free(target->ex_headers);
+	}
+	if(target->r_ex_headers != NULL) {
+		for(int i = 0;i < 65536;++ i) {
+			ttLibC_RtmpHeader_close(&target->r_ex_headers[i]);
+		}
+		ttLibC_free(target->r_ex_headers);
 	}
 	if(target->tmp_buffer) {
 		ttLibC_free(target->tmp_buffer);

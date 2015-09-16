@@ -19,18 +19,25 @@ ttLibC_RtmpHeader *ttLibC_RtmpHeader_make(
 		ttLibC_RtmpConnection *conn,
 		uint64_t pts,
 		uint32_t size,
-		ttLibC_RtmpMessage_Type type,
-		uint32_t stream_id) {
+		ttLibC_RtmpMessage_Type message_type,
+		uint32_t stream_id,
+		bool is_read) {
 	ttLibC_RtmpConnection_ *conn_ = (ttLibC_RtmpConnection_ *)conn;
 	ttLibC_RtmpHeader *header = NULL;
 	if(conn_->cs_id < 64) {
-		header = conn_->headers[conn_->cs_id];
+		if(is_read) {
+			header = conn_->r_headers[conn_->cs_id];
+		}
+		else {
+			header = conn_->headers[conn_->cs_id];
+		}
 	}
 	else {
 		// TODO need to make for extra headers.
 		ERR_PRINT("huge data size cs_id is not supported now.");
 		return NULL;
 	}
+	bool has_prev_header = (header != NULL);
 	if(header == NULL) {
 		header = (ttLibC_RtmpHeader *)ttLibC_malloc(sizeof(ttLibC_RtmpHeader));
 	}
@@ -39,14 +46,37 @@ ttLibC_RtmpHeader *ttLibC_RtmpHeader_make(
 		return NULL;
 	}
 	header->cs_id = conn_->cs_id;
-	header->message_type = type;
+	// この位置で前のheader情報と追加したいデータがどの程度にているか判断し、typeに登録しておく。
+	// size timestamp stream_idが一致する場合
+	if(has_prev_header && header->stream_id == stream_id) {
+		if(header->size == size && header->message_type == message_type) {
+			if(header->timestamp == pts) {
+				header->type = RtmpHeaderType_3;
+			}
+			else {
+				header->type = RtmpHeaderType_2;
+			}
+		}
+		else {
+			header->type = RtmpHeaderType_1;
+		}
+	}
+	else {
+		header->type = RtmpHeaderType_0;
+	}
+	header->message_type = message_type;
 	header->size = size;
 	header->timestamp = (uint32_t)pts;
 	header->stream_id = stream_id;
 	header->read_size = 0;
 	// register header on netConnection
 	if(conn_->cs_id < 64) {
-		conn_->headers[conn_->cs_id] = header;
+		if(is_read) {
+			conn_->r_headers[conn_->cs_id] = header;
+		}
+		else {
+			conn_->headers[conn_->cs_id] = header;
+		}
 	}
 	else {
 		// TODO need to make for extra headers.
@@ -54,13 +84,20 @@ ttLibC_RtmpHeader *ttLibC_RtmpHeader_make(
 	return header;
 }
 
-ttLibC_RtmpHeader *ttLibC_RtmpHeader_getCurrentHeader(ttLibC_RtmpConnection *conn) {
+ttLibC_RtmpHeader *ttLibC_RtmpHeader_getCurrentHeader(
+		ttLibC_RtmpConnection *conn,
+		bool is_read) {
 	ttLibC_RtmpConnection_ *conn_ = (ttLibC_RtmpConnection_ *)conn;
 	if(conn_ == NULL) {
 		return NULL;
 	}
 	if(conn_->cs_id < 64) {
-		return conn_->headers[conn_->cs_id];
+		if(is_read) {
+			return conn_->r_headers[conn_->cs_id];
+		}
+		else {
+			return conn_->headers[conn_->cs_id];
+		}
 	}
 	else {
 		ERR_PRINT("huge data size_ cs_id is not ready.");
@@ -77,6 +114,12 @@ bool ttLibC_RtmpHeader_write(
 	// timestamp size messageType streamId = 11byte
 	// timestamp_ext:4byte
 	// 3 + 11 + 4:max 18 byte
+	if(type == RtmpHeaderType_default) {
+		// reuse動作は、前回の送信headerに対して実行可能みたいです。
+		// 受け取ったデータをベースに、reuseを実行するとサーバー側からエラーがかえってくる模様。
+		// うーん。
+		type = header->type;
+	}
 	uint8_t data[18];
 	uint8_t *buf = data;
 	size_t data_size = 0;
@@ -217,7 +260,7 @@ ttLibC_RtmpHeader *ttLibC_RtmpHeader_read(
 	// innerHeaderの場合は、ここでcs_idをつけるのではなく、出来上がったデータとcs_idが一致しているか確認しないといけない。
 	// が、面倒なので、とりあえずほっとく。
 	conn_->cs_id = cs_id;
-	ttLibC_RtmpHeader *prev_header = ttLibC_RtmpHeader_getCurrentHeader(conn);
+	ttLibC_RtmpHeader *prev_header = ttLibC_RtmpHeader_getCurrentHeader(conn, true);
 	if(prev_header == NULL && type != RtmpHeaderType_0) {
 		ERR_PRINT("acquire non type0 without and prev_header. something wrong.");
 		return NULL;
@@ -246,7 +289,7 @@ ttLibC_RtmpHeader *ttLibC_RtmpHeader_read(
 				dat += 4;
 				data_size -= 4;
 			}
-			ttLibC_RtmpHeader *header = ttLibC_RtmpHeader_make(conn, timestamp, size, message_type, stream_id);
+			ttLibC_RtmpHeader *header = ttLibC_RtmpHeader_make(conn, timestamp, size, message_type, stream_id, true);
 			if(header == NULL) {
 				return NULL;
 			}
@@ -277,7 +320,7 @@ ttLibC_RtmpHeader *ttLibC_RtmpHeader_read(
 				dat += 4;
 				data_size -= 4;
 			}
-			ttLibC_RtmpHeader *header = ttLibC_RtmpHeader_make(conn, timestamp, size, message_type, stream_id);
+			ttLibC_RtmpHeader *header = ttLibC_RtmpHeader_make(conn, timestamp, size, message_type, stream_id, true);
 			if(header == NULL) {
 				return NULL;
 			}
@@ -308,7 +351,7 @@ ttLibC_RtmpHeader *ttLibC_RtmpHeader_read(
 				dat += 4;
 				data_size -= 4;
 			}
-			ttLibC_RtmpHeader *header = ttLibC_RtmpHeader_make(conn, timestamp, size, message_type, stream_id);
+			ttLibC_RtmpHeader *header = ttLibC_RtmpHeader_make(conn, timestamp, size, message_type, stream_id, true);
 			if(header == NULL) {
 				return NULL;
 			}
@@ -321,6 +364,8 @@ ttLibC_RtmpHeader *ttLibC_RtmpHeader_read(
 			prev_header->read_size = dat - (uint8_t *)data;
 			return prev_header; // use prev_header it self.
 		}
+		break;
+	default:
 		break;
 	}
 	return NULL;
