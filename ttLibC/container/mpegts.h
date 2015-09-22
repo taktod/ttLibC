@@ -137,6 +137,7 @@ typedef ttLibC_ContainerWriter_MpegtsWriter ttLibC_MpegtsWriter;
  * @param target_frame_types array of ttLibC_Frame_Type
  * @param types_num          size of target_frame_types array.
  * @return mpegts writer object.
+ * TODO remove types_num instead of using types_num, add frameType_none for end marker of array.
  */
 ttLibC_MpegtsWriter *ttLibC_MpegtsWriter_make(
 		ttLibC_Frame_Type* target_frame_types,
@@ -148,6 +149,7 @@ ttLibC_MpegtsWriter *ttLibC_MpegtsWriter_make(
  * @param types_num          size of target_frame_types array.
  * @param max_unit_duration  unit duration for audio data.
  * @return mpegts writer object.
+ * TODO remove types_num instead of using types_num, add frameType_none for end marker of array.
  */
 ttLibC_MpegtsWriter *ttLibC_MpegtsWriter_make_ex(
 		ttLibC_Frame_Type *target_frame_types,
