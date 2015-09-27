@@ -19,7 +19,9 @@
 #include <string.h>
 
 ttLibC_FlvReader *ttLibC_FlvReader_make() {
-	ttLibC_FlvReader_ *reader = (ttLibC_FlvReader_ *)ttLibC_ContainerReader_make(containerType_flv, sizeof(ttLibC_FlvReader_));
+	ttLibC_FlvReader_ *reader = (ttLibC_FlvReader_ *)ttLibC_ContainerReader_make(
+			containerType_flv,
+			sizeof(ttLibC_FlvReader_));
 
 	reader->flv_tag   = NULL;
 	reader->audio_tag = NULL;
