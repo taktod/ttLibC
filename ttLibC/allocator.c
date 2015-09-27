@@ -6,8 +6,6 @@
  *
  * @author taktod
  * @date   2015/09/07
- *
- * @see http://qiita.com/shimacpyon/items/9f18dbac318059aa6ed8
  */
 
 #include "log.h"
