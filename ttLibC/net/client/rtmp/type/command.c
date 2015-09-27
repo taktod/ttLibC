@@ -11,8 +11,8 @@
 #include "command.h"
 #include <stdio.h>
 #include <stdbool.h>
-#include "../../../log.h"
-#include "../../../allocator.h"
+#include "../../../../log.h"
+#include "../../../../allocator.h"
 
 ttLibC_RtmpMessage *ttLibC_RtmpCommandMessage_amf0Command(
 		ttLibC_RtmpConnection *conn,
@@ -57,6 +57,16 @@ ttLibC_RtmpMessage *ttLibC_RtmpCommandMessage_amf0Command(
 	amf0_command->command_param1 = object1;
 	amf0_command->command_param2 = object2;
 	return (ttLibC_RtmpMessage *)amf0_command;
+}
+
+static ttLibC_RtmpMessage *RtmpCommandMessage_createStream(
+		ttLibC_RtmpConnection *conn) {
+	ttLibC_RtmpConnection_ *conn_ = (ttLibC_RtmpConnection_ *)conn;
+	if(conn_ == NULL) {
+		ERR_PRINT("conn is null.");
+		return NULL;
+	}
+	return NULL;
 }
 
 static ttLibC_RtmpMessage *RtmpCommandMessage_connect(
@@ -112,6 +122,21 @@ static ttLibC_RtmpMessage *RtmpCommandMessage_connect(
 		ttLibC_Amf0_close(&command_param);
 	}
 	return message;
+}
+
+bool ttLibC_RtmpCommandMessage_sendCreateStream(
+		ttLibC_RtmpConnection *conn,
+		ttLibC_RtmpDataWriteFunc callback,
+		void *ptr) {
+	ttLibC_RtmpMessage *createStream = RtmpCommandMessage_createStream(
+			conn);
+	bool result = ttLibC_RtmpMessage_write(
+			conn,
+			createStream,
+			callback,
+			ptr);
+	ttLibC_RtmpMessage_close(&createStream);
+	return result;
 }
 
 bool ttLibC_RtmpCommandMessage_sendConnect(

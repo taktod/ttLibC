@@ -14,10 +14,10 @@
 #include <string.h>
 #include "type/command.h"
 #include "type/system.h"
-#include "../../log.h"
-#include "../../allocator.h"
-#include "../../util/hexUtil.h"
-#include "../../util/ioUtil.h"
+#include "../../../log.h"
+#include "../../../allocator.h"
+#include "../../../util/hexUtil.h"
+#include "../../../util/ioUtil.h"
 
 static ttLibC_RtmpMessage *RtmpMessage_read_make(
 		ttLibC_RtmpHeader *header,

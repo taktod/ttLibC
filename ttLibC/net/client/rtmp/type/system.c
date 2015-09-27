@@ -11,8 +11,8 @@
 #include "system.h"
 #include "../netConnection.h"
 #include "../message.h"
-#include "../../../log.h"
-#include "../../../allocator.h"
+#include "../../../../log.h"
+#include "../../../../allocator.h"
 
 ttLibC_RtmpMessage *ttLibC_RtmpSystemMessage_userControlMessage(
 		ttLibC_RtmpConnection *conn,

@@ -41,6 +41,11 @@ ttLibC_RtmpMessage *ttLibC_RtmpCommandMessage_amf0Command(
 		ttLibC_Amf0Object *object2);
 */
 
+bool ttLibC_RtmpCommandMessage_sendCreateStream(
+		ttLibC_RtmpConnection *conn,
+		ttLibC_RtmpDataWriteFunc callback,
+		void *ptr);
+
 bool ttLibC_RtmpCommandMessage_sendConnect(
 		ttLibC_RtmpConnection *conn,
 		ttLibC_Amf0Object *override_connect_params,

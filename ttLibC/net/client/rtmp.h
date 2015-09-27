@@ -15,7 +15,9 @@
 extern "C" {
 #endif
 
-#include "../util/amfUtil.h"
+#include "../../util/amfUtil.h"
+#include "../../frame/frame.h"
+
 #include <stdint.h>
 
 /**
@@ -87,17 +89,35 @@ void ttLibC_RtmpConnection_close(ttLibC_RtmpConnection **conn);
 
 // next to make netStream.
 typedef struct {
-
 } ttLibC_Net_RtmpStream;
 
 typedef ttLibC_Net_RtmpStream ttLibC_RtmpStream;
 
-void ttLibC_RtmpStream_make();
-void ttLibC_RtmpStream_play();
-void ttLibC_RtmpStream_publish();
+typedef bool (* ttLibC_RtmpFrameFunc)(void *ptr, ttLibC_Frame *frame);
 
-void ttLibC_Rtmp_NetStream_feed(); // feed frame data for publish.
+// makeすると、ttLibC_RtmpStreamのオブジェクトが帰ってくる。
+ttLibC_RtmpStream *ttLibC_RtmpStream_make(ttLibC_RtmpConnection *conn);
 
+uint32_t ttLibC_RtmpStream_play(
+		ttLibC_RtmpStream *stream,
+		const char *name,
+		ttLibC_RtmpFrameFunc callback,
+		void *ptr);
+
+uint32_t ttLibC_RtmpStream_publish(
+		ttLibC_RtmpStream *stream,
+		const char *name);
+
+bool ttLibC_RtmpStream_stop(
+		ttLibC_RtmpStream *stream,
+		uint32_t id);
+
+void ttLibC_RtmpStream_feed(
+		ttLibC_RtmpStream *stream,
+		uint32_t id,
+		ttLibC_Frame *frame);
+
+void ttLibC_RtmpStream_close(ttLibC_RtmpStream **stream);
 
 #ifdef __cplusplus
 } /* extern "C" */

@@ -17,13 +17,23 @@
 #include <ttLibC/util/hexUtil.h>
 #include <ttLibC/util/amfUtil.h>
 #include <string.h>
-#include <ttLibC/net/rtmp.h>
+#include <ttLibC/net/client/rtmp.h>
 #include <time.h>
 
 typedef struct {
 	bool work_flg;
+	ttLibC_RtmpConnection *netConnection;
+	ttLibC_RtmpStream *netStream;
+	uint32_t work_id;
 } rtmpTest_t;
 
+// callback for rtmp frame downloads.(play only)
+bool rtmpTest_frameReceiveCallback(void *ptr, ttLibC_Frame *frame) {
+	rtmpTest_t *testData = (rtmpTest_t *)ptr;
+	return true;
+}
+
+// callback for rtmp event
 bool rtmpTest_onStatusEvent(void *ptr, ttLibC_Amf0Object *amf0_obj) {
 	rtmpTest_t *testData = (rtmpTest_t *)ptr;
 	switch(amf0_obj->type) {
@@ -35,6 +45,13 @@ bool rtmpTest_onStatusEvent(void *ptr, ttLibC_Amf0Object *amf0_obj) {
 			if(code != NULL && strcmp((const char *)code->object, "NetConnection.Connect.Success") == 0) {
 				LOG_PRINT("connect success.");
 				testData->work_flg = false;
+				// make netStream
+				testData->netStream = ttLibC_RtmpStream_make(testData->netConnection);
+				if(testData->netStream != NULL) {
+					// do publish
+					testData->work_id = ttLibC_RtmpStream_publish(testData->netStream, "test");
+//					testData->work_id = ttLibC_RtmpStream_play(testData->netStream, "test", rtmpTest_frameReceiveCallback, ptr);
+				}
 			}
 		}
 		break;
@@ -47,19 +64,27 @@ bool rtmpTest_onStatusEvent(void *ptr, ttLibC_Amf0Object *amf0_obj) {
 static void rtmpTest() {
 	rtmpTest_t testData;
 	testData.work_flg = true;
-	ttLibC_RtmpConnection *conn = ttLibC_RtmpConnection_make();
+	testData.netConnection = ttLibC_RtmpConnection_make();
+	testData.netStream = NULL;
 	ttLibC_RtmpConnection_connect(
-			conn,
+			testData.netConnection,
 			"rtmp://localhost/live",
 			rtmpTest_onStatusEvent,
 			&testData);
-	while(ttLibC_RtmpConnection_read(conn)) {
+	while(ttLibC_RtmpConnection_read(testData.netConnection)) {
 		if(!testData.work_flg) {
 			break;
 		}
+//		ttLibC_RtmpStream_feed(testData.netStream, testData.work_id, frame);
 	}
-	ttLibC_RtmpConnection_close(&conn);
+	ttLibC_RtmpStream_close(&testData.netStream);
+	ttLibC_RtmpConnection_close(&testData.netConnection);
 	ASSERT(ttLibC_Allocator_dump() == 0);
+}
+
+static void echoServerTest2() {
+	LOG_PRINT("echo server test2");
+	// 複数接続対策してみる。
 }
 
 static void echoServerTest() {
@@ -141,6 +166,7 @@ static void echoServerTest() {
 cute::suite netTests(cute::suite s) {
 	s.clear();
 	s.push_back(CUTE(rtmpTest));
+	s.push_back(CUTE(echoServerTest2));
 	s.push_back(CUTE(echoServerTest));
 	return s;
 }

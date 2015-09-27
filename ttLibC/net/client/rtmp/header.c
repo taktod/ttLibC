@@ -11,9 +11,9 @@
 #include "header.h"
 #include <stdio.h>
 #include "netConnection.h"
-#include "../../allocator.h"
-#include "../../log.h"
-#include "../../util/ioUtil.h"
+#include "../../../allocator.h"
+#include "../../../log.h"
+#include "../../../util/ioUtil.h"
 
 ttLibC_RtmpHeader *ttLibC_RtmpHeader_make(
 		ttLibC_RtmpConnection *conn,

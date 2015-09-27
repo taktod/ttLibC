@@ -9,11 +9,12 @@
  */
 
 #ifdef __ENABLE_FILE__
+
 #include "netConnection.h"
 #include "message.h"
-#include "../../log.h"
-#include "../../allocator.h"
-#include "../../util/hexUtil.h"
+#include "../../../log.h"
+#include "../../../allocator.h"
+#include "../../../util/hexUtil.h"
 #include "type/command.h"
 #include "type/system.h"
 #include <netdb.h>
@@ -268,11 +269,6 @@ static bool RtmpConnection_handshake(ttLibC_RtmpConnection_ *conn) {
 		left_size -= size;
 		read_size += size;
 	}while(left_size > 0);
-	return true;
-}
-
-// move?
-static bool RtmpConnection_sendCreateStream(ttLibC_Net_RtmpConnection_ *conn) {
 	return true;
 }
 
