@@ -40,11 +40,15 @@ typedef ttLibC_Util_BitReader_ ttLibC_BitReader_;
  */
 ttLibC_BitReader *ttLibC_BitReader_make(void *data, size_t data_size, ttLibC_BitReader_Type type) {
 	ttLibC_BitReader_ *reader = (ttLibC_BitReader_ *)ttLibC_malloc(sizeof(ttLibC_BitReader_));
+	if(reader == NULL) {
+		return NULL;
+	}
 	reader->zero_count = 0;
 	reader->pos = 0;
 	reader->data = data;
 	reader->data_size = data_size;
 	reader->inherit_super.type = type;
+	reader->inherit_super.read_size = 0;
 	if(*reader->data == 0) {
 		reader->zero_count ++;
 	}
@@ -79,6 +83,7 @@ uint32_t ttLibC_BitReader_bit(ttLibC_BitReader *reader, uint32_t bit_num) {
 				ERR_PRINT("no more data buffer.");
 				return 0;
 			}
+			++ reader_->inherit_super.read_size;
 			-- reader_->data_size;
 			val = *reader_->data;
 			if(val == 0) {
@@ -91,6 +96,7 @@ uint32_t ttLibC_BitReader_bit(ttLibC_BitReader *reader, uint32_t bit_num) {
 						return 0;
 					}
 					-- reader_->data_size;
+					++ reader_->inherit_super.read_size;
 					val = *reader_->data;
 					if(val == 0) {
 						reader_->zero_count = 1;
@@ -133,6 +139,7 @@ int32_t ttLibC_BitReader_expGolomb(ttLibC_BitReader *reader, bool sign) {
 				ERR_PRINT("no more data.");
 				return 0;
 			}
+			++ reader_->inherit_super.read_size;
 			-- reader_->data_size;
 			val = *reader_->data;
 			if(val == 0) {
@@ -144,6 +151,7 @@ int32_t ttLibC_BitReader_expGolomb(ttLibC_BitReader *reader, bool sign) {
 					ERR_PRINT("no more data.");
 					return 0;
 				}
+				++ reader_->inherit_super.read_size;
 				-- reader_->data_size;
 				val = *reader_->data;
 				if(val == 0) {
@@ -200,6 +208,7 @@ uint64_t ttLibC_BitReader_ebml(ttLibC_BitReader *reader, bool is_tag) {
 	uint64_t val = *reader_->data;
 	++ reader_->data;
 	-- reader_->data_size;
+	++ reader_->inherit_super.read_size;
 	if(val & 0x80) {
 		if(is_tag) {
 			return val;
@@ -218,6 +227,7 @@ uint64_t ttLibC_BitReader_ebml(ttLibC_BitReader *reader, bool is_tag) {
 		val = (val << 8) | (*reader_->data);
 		++ reader_->data;
 		-- reader_->data_size;
+		++ reader_->inherit_super.read_size;
 		if(is_tag) {
 			return val;
 		}
@@ -235,6 +245,7 @@ uint64_t ttLibC_BitReader_ebml(ttLibC_BitReader *reader, bool is_tag) {
 		val = (val << 16) | (*(reader_->data) << 8) | (*(reader_->data + 1));
 		reader_->data += 2;
 		reader_->data_size -= 2;
+		reader_->inherit_super.read_size += 2;
 		if(is_tag) {
 			return val;
 		}
@@ -252,6 +263,7 @@ uint64_t ttLibC_BitReader_ebml(ttLibC_BitReader *reader, bool is_tag) {
 		val = (val << 24) | (*(reader_->data) << 16) | (*(reader_->data + 1) << 8) | (*(reader_->data + 2));
 		reader_->data += 3;
 		reader_->data_size -= 3;
+		reader_->inherit_super.read_size += 3;
 		if(is_tag) {
 			return val;
 		}
@@ -269,6 +281,7 @@ uint64_t ttLibC_BitReader_ebml(ttLibC_BitReader *reader, bool is_tag) {
 		val = (val << 32) | (*(reader_->data) << 24) | (*(reader_->data + 1) << 16) | (*(reader_->data + 2) << 8) | (*(reader_->data + 3));
 		reader_->data += 4;
 		reader_->data_size -= 4;
+		reader_->inherit_super.read_size += 4;
 		if(is_tag) {
 			return val;
 		}
@@ -287,6 +300,7 @@ uint64_t ttLibC_BitReader_ebml(ttLibC_BitReader *reader, bool is_tag) {
 		val = (val << 32) | (*(reader_->data + 1) << 24) | (*(reader_->data + 2) << 16) | (*(reader_->data + 3) << 8) | (*(reader_->data + 4));
 		reader_->data += 5;
 		reader_->data_size -= 5;
+		reader_->inherit_super.read_size += 5;
 		if(is_tag) {
 			return val;
 		}
@@ -305,6 +319,7 @@ uint64_t ttLibC_BitReader_ebml(ttLibC_BitReader *reader, bool is_tag) {
 		val = (val << 32) | (*(reader_->data + 2) << 24) | (*(reader_->data + 3) << 16) | (*(reader_->data + 4) << 8) | (*(reader_->data + 5));
 		reader_->data += 6;
 		reader_->data_size -= 6;
+		reader_->inherit_super.read_size += 6;
 		if(is_tag) {
 			return val;
 		}
@@ -323,6 +338,7 @@ uint64_t ttLibC_BitReader_ebml(ttLibC_BitReader *reader, bool is_tag) {
 		val = (val << 32) | (*(reader_->data + 3) << 24) | (*(reader_->data + 4) << 16) | (*(reader_->data + 5) << 8) | (*(reader_->data + 6));
 		reader_->data += 7;
 		reader_->data_size -= 7;
+		reader_->inherit_super.read_size += 7;
 		if(is_tag) {
 			return val;
 		}

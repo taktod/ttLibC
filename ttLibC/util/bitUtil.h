@@ -35,6 +35,8 @@ typedef enum {
 typedef struct {
 	/** read type. */
 	ttLibC_BitReader_Type type;
+	/** reading size */
+	size_t read_size;
 } ttLibC_Util_BitReader;
 
 typedef ttLibC_Util_BitReader ttLibC_BitReader;
