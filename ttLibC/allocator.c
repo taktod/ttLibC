@@ -75,8 +75,10 @@ bool ttLibC_Allocator_init() {
 	if(ttLibC_Allocator_Table == NULL) {
 		ttLibC_Allocator_Table = kh_init(ttLibC_Allocator);
 	}
-#endif
 	return ttLibC_Allocator_Table != NULL;
+#else
+	return false;
+#endif
 }
 
 /*
@@ -84,10 +86,10 @@ bool ttLibC_Allocator_init() {
  * @return total size of allocate.
  */
 size_t ttLibC_Allocator_dump() {
+#if __DEBUG_FLG__ == 1
 	if(ttLibC_Allocator_Table == NULL) {
 		return 0;
 	}
-#if __DEBUG_FLG__ == 1
 	khiter_t it;
 	size_t total_size = 0;
 	printf("\nAllocator dump:\n");
@@ -100,6 +102,8 @@ size_t ttLibC_Allocator_dump() {
 	}
 	printf("total_size:%lu\n", total_size);
 	return total_size;
+#else
+	return 0;
 #endif
 }
 
