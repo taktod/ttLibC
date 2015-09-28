@@ -28,6 +28,7 @@ nobase_include_HEADERS= \
 	ttLibC/frame/video/wmv2.h \
 	ttLibC/frame/video/yuv420.h \
 	ttLibC/frame/frame.h \
+	ttLibC/net/server/tcp.h \
 	ttLibC/resampler/audioResampler.h \
 	ttLibC/resampler/imageResampler.h \
 	ttLibC/util/amfUtil.h \
@@ -84,7 +85,8 @@ endif
 
 if ENABLE_FILE
 nobase_include_HEADERS += \
-	ttLibC/util/httpUtil.h
+	ttLibC/util/httpUtil.h \
+	ttLibC/util/forkUtil.h
 endif
 
 if ENABLE_OPUS
