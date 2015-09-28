@@ -12,6 +12,7 @@
 
 #include <sys/types.h>
 #include <strings.h>
+#include <unistd.h>
 #include <errno.h>
 #include "../../allocator.h"
 #include "../../log.h"

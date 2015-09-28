@@ -33,13 +33,6 @@ typedef struct {
 	struct sockaddr_in client_addr;
 } ttLibC_TcpClientInfo;
 
-/*
-bool ttLibC_TcpServer_init(
-		ttLibC_TcpServerInfo *server_info,
-		uint64_t ip,
-		uint16_t port);
-*/
-
 ttLibC_TcpServerInfo *ttLibC_TcpServer_make(
 		uint64_t ip,
 		uint16_t port);
@@ -48,12 +41,6 @@ bool ttLibC_TcpServer_open(ttLibC_TcpServerInfo *server_info);
 
 ttLibC_TcpClientInfo *ttLibC_TcpServer_wait(
 		ttLibC_TcpServerInfo *server_info);
-
-/*
-bool ttLibC_TcpServer_wait(
-		ttLibC_TcpServerInfo *server_info,
-		ttLibC_TcpClientInfo *client_info);
-*/
 
 void ttLibC_TcpServer_close(ttLibC_TcpServerInfo **server_info);
 
