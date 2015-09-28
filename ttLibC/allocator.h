@@ -19,6 +19,7 @@ extern "C" {
 
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 /**
  * ttLibC_malloc
