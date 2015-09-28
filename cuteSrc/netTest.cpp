@@ -22,31 +22,12 @@
 #include <ttLibC/net/server/tcp.h>
 #include <ttLibC/util/forkUtil.h>
 
-/*
-void catch_SigChld(int i) {
-	pid_t child_pid = 0;
-	do {
-		int child_ret;
-		child_pid = waitpid(-1, &child_ret, WNOHANG);
-	} while(child_pid);
-}
-
-void setup_SigChld() {
-	struct sigaction act;
-	memset(&act, 0, sizeof(act));
-	act.sa_handler = catch_SigChld;
-	sigemptyset(&act.sa_mask);
-	act.sa_flags = SA_NOCLDSTOP | SA_RESTART;
-	sigaction(SIGCHLD, &act, NULL);
-}
-*/
 static void tcpServerTest() {
 	LOG_PRINT("tcpServerTest");
 	int ok = 1;
 	ttLibC_TcpServerInfo *server_info;
 	ttLibC_TcpClientInfo *client_info;
 	if(ok) {
-//		setup_SigChld();
 		ttLibC_ForkUtil_setup();
 		server_info = ttLibC_TcpServer_make(0x00000000UL, 8080);
 		ok = ttLibC_TcpServer_open(server_info);
@@ -55,21 +36,15 @@ static void tcpServerTest() {
 		while((client_info = ttLibC_TcpServer_wait(server_info)) != NULL) {
 			pid_t child_pid = ttLibC_ForkUtil_fork();
 			if(child_pid == -1) {
-				// 動作失敗
 				break;
 			}
 			else if(child_pid == 0) {
-				// 子プロセスの動作
 				ttLibC_TcpServer_close(&server_info);
-				// なんかする
 				ttLibC_TcpClient_close(&client_info);
-				LOG_PRINT("子プロセス側");
 				ASSERT(ttLibC_Allocator_dump() == 0);
 				exit(0);
 			}
 			else {
-				LOG_PRINT("親プロセス側");
-				// 親プロセスクライアント動作は必要ないので、閉じておく。
 				ttLibC_TcpClient_close(&client_info);
 			}
 		}
