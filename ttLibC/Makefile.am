@@ -67,6 +67,7 @@ libttLibC_a_SOURCES= \
 	net/client/rtmp/message.c \
 	net/client/rtmp/netConnection.c \
 	net/client/rtmp/netStream.c \
+	net/server/tcp.c \
 	resampler/audioResampler.c \
 	resampler/imageResampler.c \
 	resampler/speexdspResampler.c \
