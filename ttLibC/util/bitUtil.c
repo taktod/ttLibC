@@ -49,6 +49,7 @@ ttLibC_BitReader *ttLibC_BitReader_make(void *data, size_t data_size, ttLibC_Bit
 	reader->data_size = data_size;
 	reader->inherit_super.type = type;
 	reader->inherit_super.read_size = 0;
+	reader->inherit_super.error_flag = false;
 	if(*reader->data == 0) {
 		reader->zero_count ++;
 	}
@@ -81,6 +82,7 @@ uint32_t ttLibC_BitReader_bit(ttLibC_BitReader *reader, uint32_t bit_num) {
 			++ reader_->data;
 			if(reader_->data_size <= 0) {
 				ERR_PRINT("no more data buffer.");
+				reader_->inherit_super.error_flag = true;
 				return 0;
 			}
 			++ reader_->inherit_super.read_size;
@@ -93,6 +95,7 @@ uint32_t ttLibC_BitReader_bit(ttLibC_BitReader *reader, uint32_t bit_num) {
 					++ reader_->data;
 					if(reader_->data_size == 0) {
 						ERR_PRINT("no more data.");
+						reader_->inherit_super.error_flag = true;
 						return 0;
 					}
 					-- reader_->data_size;
@@ -137,6 +140,7 @@ int32_t ttLibC_BitReader_expGolomb(ttLibC_BitReader *reader, bool sign) {
 			++ reader_->data;
 			if(reader_->data_size == 0) {
 				ERR_PRINT("no more data.");
+				reader_->inherit_super.error_flag = true;
 				return 0;
 			}
 			++ reader_->inherit_super.read_size;
@@ -149,6 +153,7 @@ int32_t ttLibC_BitReader_expGolomb(ttLibC_BitReader *reader, bool sign) {
 				++ reader_->data;
 				if(reader_->data_size == 0) {
 					ERR_PRINT("no more data.");
+					reader_->inherit_super.error_flag = true;
 					return 0;
 				}
 				++ reader_->inherit_super.read_size;
@@ -169,6 +174,7 @@ int32_t ttLibC_BitReader_expGolomb(ttLibC_BitReader *reader, bool sign) {
 	} while(true);
 	if(count > 32) {
 		ERR_PRINT("too big exp golumb.");
+		reader_->inherit_super.error_flag = true;
 		return 0;
 	}
 	val = ttLibC_BitReader_bit(reader, count);
@@ -199,10 +205,12 @@ uint64_t ttLibC_BitReader_ebml(ttLibC_BitReader *reader, bool is_tag) {
 	ttLibC_BitReader_ *reader_ = (ttLibC_BitReader_ *)reader;
 	if(reader_->data_size == 0) {
 		ERR_PRINT("no more data.");
+		reader_->inherit_super.error_flag = true;
 		return 0;
 	}
 	if(reader_->pos != 0) {
 		ERR_PRINT("ebml value need to begin with full byte.");
+		reader_->inherit_super.error_flag = true;
 		return 0;
 	}
 	uint64_t val = *reader_->data;
@@ -222,6 +230,7 @@ uint64_t ttLibC_BitReader_ebml(ttLibC_BitReader *reader, bool is_tag) {
 			ERR_PRINT("no more data.");
 			reader_->data += reader_->data_size;
 			reader_->data_size = 0;
+			reader_->inherit_super.error_flag = true;
 			return 0;
 		}
 		val = (val << 8) | (*reader_->data);
@@ -240,6 +249,7 @@ uint64_t ttLibC_BitReader_ebml(ttLibC_BitReader *reader, bool is_tag) {
 			ERR_PRINT("no more data.");
 			reader_->data += reader_->data_size;
 			reader_->data_size = 0;
+			reader_->inherit_super.error_flag = true;
 			return 0;
 		}
 		val = (val << 16) | (*(reader_->data) << 8) | (*(reader_->data + 1));
@@ -258,6 +268,7 @@ uint64_t ttLibC_BitReader_ebml(ttLibC_BitReader *reader, bool is_tag) {
 			ERR_PRINT("no more data.");
 			reader_->data += reader_->data_size;
 			reader_->data_size = 0;
+			reader_->inherit_super.error_flag = true;
 			return 0;
 		}
 		val = (val << 24) | (*(reader_->data) << 16) | (*(reader_->data + 1) << 8) | (*(reader_->data + 2));
@@ -276,6 +287,7 @@ uint64_t ttLibC_BitReader_ebml(ttLibC_BitReader *reader, bool is_tag) {
 			ERR_PRINT("no more data.");
 			reader_->data += reader_->data_size;
 			reader_->data_size = 0;
+			reader_->inherit_super.error_flag = true;
 			return 0;
 		}
 		val = (val << 32) | (*(reader_->data) << 24) | (*(reader_->data + 1) << 16) | (*(reader_->data + 2) << 8) | (*(reader_->data + 3));
@@ -294,6 +306,7 @@ uint64_t ttLibC_BitReader_ebml(ttLibC_BitReader *reader, bool is_tag) {
 			ERR_PRINT("no more data.");
 			reader_->data += reader_->data_size;
 			reader_->data_size = 0;
+			reader_->inherit_super.error_flag = true;
 			return 0;
 		}
 		val = (val << 8) | (*(reader_->data));
@@ -313,6 +326,7 @@ uint64_t ttLibC_BitReader_ebml(ttLibC_BitReader *reader, bool is_tag) {
 			ERR_PRINT("no more data.");
 			reader_->data += reader_->data_size;
 			reader_->data_size = 0;
+			reader_->inherit_super.error_flag = true;
 			return 0;
 		}
 		val = (val << 16) | (*(reader_->data) << 8) | (*(reader_->data + 1));
@@ -332,6 +346,7 @@ uint64_t ttLibC_BitReader_ebml(ttLibC_BitReader *reader, bool is_tag) {
 			ERR_PRINT("no more data.");
 			reader_->data += reader_->data_size;
 			reader_->data_size = 0;
+			reader_->inherit_super.error_flag = true;
 			return 0;
 		}
 		val = (val << 24) | (*(reader_->data) << 16) | (*(reader_->data + 1) << 8) | (*(reader_->data + 2));

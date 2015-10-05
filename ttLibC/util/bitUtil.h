@@ -37,6 +37,8 @@ typedef struct {
 	ttLibC_BitReader_Type type;
 	/** reading size */
 	size_t read_size;
+	/** flag for reading error */
+	bool error_flag;
 } ttLibC_Util_BitReader;
 
 typedef ttLibC_Util_BitReader ttLibC_BitReader;
