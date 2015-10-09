@@ -35,6 +35,7 @@ nobase_include_HEADERS= \
 	ttLibC/util/beepUtil.h \
 	ttLibC/util/bitUtil.h \
 	ttLibC/util/crc32Util.h \
+	ttLibC/util/dynamicBufferUtil.h \
 	ttLibC/util/hexUtil.h \
 	ttLibC/util/ioUtil.h \
 	ttLibC/allocator.h \

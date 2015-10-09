@@ -75,6 +75,7 @@ libttLibC_a_SOURCES= \
 	util/beepUtil.c \
 	util/bitUtil.c \
 	util/crc32Util.c \
+	util/dynamicBufferUtil.c \
 	util/forkUtil.c \
 	util/hexUtil.c \
 	util/httpUtil.c \

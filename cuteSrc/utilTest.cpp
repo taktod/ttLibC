@@ -38,6 +38,8 @@
 
 #include <ttLibC/util/amfUtil.h>
 
+#include <ttLibC/util/dynamicBufferUtil.h>
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -49,17 +51,48 @@
 #include <sys/uio.h>
 #include <unistd.h>
 
-static void memoryTest() {
-	LOG_PRINT("memoryTest");
-	void *buf = ttLibC_malloc(50);
-	ttLibC_Allocator_dump();
-	void *buf2 = ttLibC_malloc(255);
-	ttLibC_Allocator_dump();
-	ttLibC_free(buf2);
-	ttLibC_Allocator_dump();
-	ttLibC_free(buf);
-	ttLibC_Allocator_dump();
-	LOG_PRINT("test end.");
+static void dynamicBufferTest() {
+	LOG_PRINT("dynamicBufferTest");
+	ttLibC_DynamicBuffer *buffer = ttLibC_DynamicBuffer_make();
+	uint8_t data[256];
+	size_t size = ttLibC_HexUtil_makeBuffer("010203040506", data, 256);
+	LOG_PRINT("size:%llu", size);
+	// データを追記する。
+	ttLibC_DynamicBuffer_append(buffer, data, size);
+	// 中身確認
+	LOG_DUMP(ttLibC_DynamicBuffer_refData(buffer),
+			ttLibC_DynamicBuffer_refSize(buffer), true);
+	LOG_PRINT("bs:%llu, ts:%llu", buffer->buffer_size, buffer->target_size);
+	// 5byte処理済みにする。
+	ttLibC_DynamicBuffer_markAsRead(buffer, 5);
+	// データを追記する。
+	size = ttLibC_HexUtil_makeBuffer("AABBCCDD", data, 256);
+	ttLibC_DynamicBuffer_append(buffer, data, size);
+	LOG_PRINT("bs:%llu, ts:%llu", buffer->buffer_size, buffer->target_size);
+	// 中身確認
+	LOG_DUMP(ttLibC_DynamicBuffer_refData(buffer),
+			ttLibC_DynamicBuffer_refSize(buffer), true);
+	// 読み込み済みデータをクリアする。
+	ttLibC_DynamicBuffer_reset(buffer);
+	// さらに中身確認
+	LOG_DUMP(ttLibC_DynamicBuffer_refData(buffer),
+			ttLibC_DynamicBuffer_refSize(buffer), true);
+	// 4byte処理済みにする。
+	ttLibC_DynamicBuffer_markAsRead(buffer, 4);
+	// さらに中身確認
+	LOG_DUMP(ttLibC_DynamicBuffer_refData(buffer),
+			ttLibC_DynamicBuffer_refSize(buffer), true);
+	// 読み込み済みデータをクリアする。
+	ttLibC_DynamicBuffer_clear(buffer);
+	// さらに中身確認
+	LOG_DUMP(ttLibC_DynamicBuffer_refData(buffer),
+			ttLibC_DynamicBuffer_refSize(buffer), true);
+	size = ttLibC_HexUtil_makeBuffer("EEFF", data, 256);
+	ttLibC_DynamicBuffer_append(buffer, data, size);
+	LOG_PRINT("bs:%llu, ts:%llu", buffer->buffer_size, buffer->target_size);
+	LOG_DUMP(ttLibC_DynamicBuffer_refData(buffer),
+			ttLibC_DynamicBuffer_refSize(buffer), true);
+	ttLibC_DynamicBuffer_close(&buffer);
 	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
@@ -167,14 +200,16 @@ static void amfTest() {
 static void crc32Test() {
 	LOG_PRINT("crc32Test");
 	ttLibC_Crc32 *crc32 = ttLibC_Crc32_make(0xFFFFFFFFL);
-	uint8_t buf[256];
+	uint8_t buf[256] = "123456789";
 	// 2AB104B2
-	uint32_t size = ttLibC_HexUtil_makeBuffer("00B00D0001C100000001F000", buf, sizeof(buf));
+//	uint32_t size = ttLibC_HexUtil_makeBuffer("00B00D0001C100000001F000", buf, sizeof(buf));
+	uint32_t size = 9;
 	uint8_t *data = buf;
 	for(int i = 0;i < size;++ i, ++data) {
+		LOG_PRINT("%c", *data);
 		ttLibC_Crc32_update(crc32, *data);
 	}
-	LOG_PRINT("result:%x", ttLibC_Crc32_getValue(crc32));
+	LOG_PRINT("result:%llu", ttLibC_Crc32_getValue(crc32));
 	ASSERTM("FAILED", ttLibC_Crc32_getValue(crc32) == 0x2AB104B2);
 	ttLibC_Crc32_close(&crc32);
 	ASSERT(ttLibC_Allocator_dump() == 0);
@@ -317,7 +352,7 @@ static void openalUtilTest() {
  */
 cute::suite utilTests(cute::suite s) {
 	s.clear();
-	s.push_back(CUTE(memoryTest));
+	s.push_back(CUTE(dynamicBufferTest));
 	s.push_back(CUTE(amfTest));
 	s.push_back(CUTE(crc32Test));
 	s.push_back(CUTE(ioTest));
