@@ -18,12 +18,21 @@
 #include <ttLibC/util/amfUtil.h>
 #include <string.h>
 #include <time.h>
-#include <ttLibC/net/client/rtmp.h>
+
+#ifdef __ENABLE_FILE__
+#	include <ttLibC/net/client/rtmp.h>
+#endif
+
 #include <ttLibC/net/server/tcp.h>
-#include <ttLibC/util/forkUtil.h>
+
+#ifdef __ENABLE_FILE__
+#	include <ttLibC/util/forkUtil.h>
+#endif
 
 static void tcpServerTest() {
 	LOG_PRINT("tcpServerTest");
+
+#ifdef __ENABLE_FILE__
 	int ok = 1;
 	ttLibC_TcpServerInfo *server_info;
 	ttLibC_TcpClientInfo *client_info;
@@ -50,6 +59,7 @@ static void tcpServerTest() {
 		}
 	}
 	ttLibC_TcpServer_close(&server_info);
+#endif
 	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
@@ -95,6 +105,7 @@ bool rtmpTest_onStatusEvent(void *ptr, ttLibC_Amf0Object *amf0_obj) {
 }
 
 static void rtmpTest() {
+#ifdef __ENABLE_FILE__
 	rtmpTest_t testData;
 	testData.work_flg = true;
 	testData.netConnection = ttLibC_RtmpConnection_make();
@@ -112,6 +123,7 @@ static void rtmpTest() {
 	}
 	ttLibC_RtmpStream_close(&testData.netStream);
 	ttLibC_RtmpConnection_close(&testData.netConnection);
+#endif
 	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
