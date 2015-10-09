@@ -63,6 +63,7 @@ static void tcpServerTest() {
 	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
+#ifdef __ENABLE_FILE__
 typedef struct {
 	bool work_flg;
 	ttLibC_RtmpConnection *netConnection;
@@ -103,6 +104,7 @@ bool rtmpTest_onStatusEvent(void *ptr, ttLibC_Amf0Object *amf0_obj) {
 	}
 	return true;
 }
+#endif
 
 static void rtmpTest() {
 #ifdef __ENABLE_FILE__
