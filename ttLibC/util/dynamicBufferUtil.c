@@ -19,7 +19,9 @@ typedef struct {
 	size_t read_pos;
 	size_t buffer_size;
 	size_t target_size;
-} ttLibC_DynamicBuffer_;
+} ttLibC_Util_DynamicBuffer_;
+
+typedef ttLibC_Util_DynamicBuffer_ ttLibC_DynamicBuffer_;
 
 ttLibC_DynamicBuffer* ttLibC_DynamicBuffer_make() {
 	ttLibC_DynamicBuffer_ *buffer = ttLibC_malloc(sizeof(ttLibC_DynamicBuffer_));

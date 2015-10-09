@@ -28,7 +28,9 @@ typedef struct {
 	size_t buffer_size;
 	/** hold memory size, (less than buffer_size) */
 	size_t target_size;
-} ttLibC_DynamicBuffer;
+} ttLibC_Util_DynamicBuffer;
+
+typedef ttLibC_Util_DynamicBuffer ttLibC_DynamicBuffer;
 
 /**
  * make buffer
