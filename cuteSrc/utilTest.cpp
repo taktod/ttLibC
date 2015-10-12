@@ -39,6 +39,7 @@
 #include <ttLibC/util/amfUtil.h>
 
 #include <ttLibC/util/dynamicBufferUtil.h>
+#include <ttLibC/util/bitUtil.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -50,6 +51,24 @@
 #include <sys/param.h>
 #include <sys/uio.h>
 #include <unistd.h>
+
+static void connectorTest() {
+	LOG_PRINT("connectorTest");
+	uint8_t buffer[256];
+	size_t buffer_size = 256;
+	ttLibC_BitConnector *connector = ttLibC_BitConnector_make(buffer, buffer_size);
+	ttLibC_BitConnector_ebml(connector, 0x02);
+	ttLibC_BitConnector_ebml(connector, 0xFF);
+	ttLibC_BitConnector_ebml(connector, 0xFFFF);
+	ttLibC_BitConnector_ebml(connector, 0xFFFFFF);
+	ttLibC_BitConnector_ebml(connector, 0xFFFFFFFFL);
+	ttLibC_BitConnector_ebml(connector, 0xFFFFFFFFFFL);
+	ttLibC_BitConnector_ebml(connector, 0xFFFFFFFFFFFFL);
+	ttLibC_BitConnector_ebml(connector, 0xFFFFFFFFFFFFFFL);
+	LOG_DUMP(buffer, connector->write_size, true);
+	ttLibC_BitConnector_close(&connector);
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
 
 static void dynamicBufferTest() {
 	LOG_PRINT("dynamicBufferTest");
@@ -352,6 +371,7 @@ static void openalUtilTest() {
  */
 cute::suite utilTests(cute::suite s) {
 	s.clear();
+	s.push_back(CUTE(connectorTest));
 	s.push_back(CUTE(dynamicBufferTest));
 	s.push_back(CUTE(amfTest));
 	s.push_back(CUTE(crc32Test));

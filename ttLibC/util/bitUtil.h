@@ -81,6 +81,27 @@ uint64_t ttLibC_BitReader_ebml(ttLibC_BitReader *reader, bool is_tag);
  */
 void ttLibC_BitReader_close(ttLibC_BitReader **reader);
 
+typedef struct {
+	/** writing data size */
+	size_t write_size;
+	/** flag for connecting error */
+	bool error_flag;
+} ttLibC_Util_BitConnector;
+
+typedef ttLibC_Util_BitConnector ttLibC_BitConnector;
+
+ttLibC_BitConnector *ttLibC_BitConnector_make(void *data, size_t data_size);
+
+bool ttLibC_BitConnector_bit(ttLibC_BitConnector *connector, uint32_t value, uint32_t bit_num);
+
+/*
+bool ttLibC_BitConnector_expGolomb(ttLibC_BitConnector *connector, int32_t value, bool sign);
+*/
+
+bool ttLibC_BitConnector_ebml(ttLibC_BitConnector *connector, uint64_t val);
+
+void ttLibC_BitConnector_close(ttLibC_BitConnector **connector);
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
