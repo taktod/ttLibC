@@ -67,6 +67,13 @@ static void connectorTest() {
 	ttLibC_BitConnector_ebml(connector, 0xFFFFFFFFFFFFFFL);
 	LOG_DUMP(buffer, connector->write_size, true);
 	ttLibC_BitConnector_close(&connector);
+	connector = ttLibC_BitConnector_make(buffer, buffer_size);
+	ttLibC_BitConnector_bit(connector, 0xFEDCB, 20);
+	ttLibC_BitConnector_bit(connector, 3, 4);
+	ttLibC_BitConnector_bit(connector, 5, 3);
+	ttLibC_BitConnector_bit(connector, 6, 5);
+	LOG_DUMP(buffer, connector->write_size, true);
+	ttLibC_BitConnector_close(&connector);
 	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 

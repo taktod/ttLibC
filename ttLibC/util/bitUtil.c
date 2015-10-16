@@ -383,6 +383,7 @@ void ttLibC_BitReader_close(ttLibC_BitReader **reader) {
 typedef struct {
 	/** inherit data from ttLibC_BitConnector */
 	ttLibC_BitConnector inherit_super;
+	uint32_t pos;
 	uint8_t *data;
 	size_t data_size;
 } ttLibC_Util_BitConnector_;
@@ -394,6 +395,7 @@ ttLibC_BitConnector *ttLibC_BitConnector_make(void *data, size_t data_size) {
 	if(connector == NULL) {
 		return NULL;
 	}
+	connector->pos = 0;
 	connector->data = data;
 	connector->data_size = data_size;
 	connector->inherit_super.write_size = 0;
@@ -402,7 +404,37 @@ ttLibC_BitConnector *ttLibC_BitConnector_make(void *data, size_t data_size) {
 }
 
 bool ttLibC_BitConnector_bit(ttLibC_BitConnector *connector, uint32_t value, uint32_t bit_num) {
-	return false;
+	ttLibC_BitConnector_ *connector_ = (ttLibC_BitConnector_ *)connector;
+	do {
+		if(connector_->pos == 0) {
+			if(connector_->data_size == connector_->inherit_super.write_size) {
+				ERR_PRINT("buffer is fulled. no way to add more data.");
+				return false;
+			}
+			if(connector_->inherit_super.write_size != 0) {
+				++ connector_->data;
+			}
+			(*connector_->data) = 0;
+			++ connector_->inherit_super.write_size;
+		}
+		uint32_t bit_mask = (1 << (8 - connector_->pos)) - 1;
+		if(8 - connector_->pos < bit_num) {
+			// right shift
+			uint32_t shift_count = bit_num - 8 + connector_->pos;
+			(*connector_->data) |= bit_mask & (value >> shift_count);
+			// update bit_num;
+			bit_num = bit_num - 8 + connector_->pos;
+			connector_->pos = 0; // filled up byte data. so next data start with pos = 0;
+		}
+		else {
+			// left shift
+			uint32_t shift_count = 8 - connector_->pos - bit_num;
+			(*connector_->data) |= bit_mask & (value << shift_count);
+			connector_->pos = (connector_->pos + bit_num) & 0x07;
+			break;
+		}
+	}while(true);
+	return true;
 }
 
 /*
@@ -413,6 +445,11 @@ bool ttLibC_BitConnector_expGolomb(ttLibC_BitConnector *connector, int32_t value
 
 bool ttLibC_BitConnector_ebml(ttLibC_BitConnector *connector, uint64_t val) {
 	ttLibC_BitConnector_ *connector_ = (ttLibC_BitConnector_ *)connector;
+	if(connector_->pos != 0) {
+		ERR_PRINT("ebml writing must start with complete byte.");
+		connector_->inherit_super.error_flag = true;
+		return false;
+	}
 	if(val < 0x80) {
 		if(connector_->data_size - connector_->inherit_super.write_size < 1) {
 			connector_->inherit_super.error_flag = true;
