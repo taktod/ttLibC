@@ -163,7 +163,7 @@ bool ttLibC_DynamicBuffer_alloc(
 			return false;
 		}
 		buffer_->buffer_size = size;
-		buffer_->target_size = 0;
+		buffer_->target_size = size;
 		buffer_->inherit_super.buffer_size = buffer_->buffer_size;
 		buffer_->inherit_super.target_size = buffer_->target_size;
 		return true;
@@ -171,6 +171,8 @@ bool ttLibC_DynamicBuffer_alloc(
 	else {
 		if(buffer_->buffer_size > size) {
 			// if already have enough size. nothing to do.
+			buffer_->target_size = size;
+			buffer_->inherit_super.target_size = buffer_->target_size;
 			return true;
 		}
 		else {
@@ -187,6 +189,8 @@ bool ttLibC_DynamicBuffer_alloc(
 			buffer_->buffer = new_buffer;
 			buffer_->buffer_size = size;
 			buffer_->inherit_super.buffer_size = buffer_->buffer_size;
+			buffer_->target_size = size;
+			buffer_->inherit_super.target_size = buffer_->target_size;
 		}
 	}
 	return true;
