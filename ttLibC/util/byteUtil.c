@@ -12,6 +12,7 @@
 #include "byteUtil.h"
 
 #include <stdlib.h>
+#include <string.h>
 
 #include "../log.h"
 #include "../allocator.h"
@@ -681,7 +682,6 @@ bool ttLibC_ByteConnector_string(
 		return false;
 	}
 	// データbufferも十分あるので、データを書き込んでおく
-	LOG_PRINT("");
 	memcpy(connector_->data, str, str_size);
 	connector_->data += str_size;
 	connector_->data_size -= str_size;
