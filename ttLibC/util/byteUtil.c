@@ -392,7 +392,21 @@ size_t ttLibC_ByteReader_string(
 		char *buffer,
 		size_t buffer_size,
 		size_t target_size) {
-	return 0;
+	ttLibC_ByteReader_ *reader_ = (ttLibC_ByteReader_ *)reader;
+	if(buffer_size < target_size) {
+		ERR_PRINT("buffer size is too small for reading size.");
+		return 0;
+	}
+	if(reader_->data_size < target_size) {
+		ERR_PRINT("hold buffer size is smaller than target_size");
+		return 0;
+	}
+	memcpy(buffer, reader_->data, target_size);
+	buffer[target_size] = '\0';
+	reader_->data += target_size;
+	reader_->data_size -= target_size;
+	reader_->inherit_super.read_size += target_size;
+	return target_size;
 }
 
 /*
@@ -467,9 +481,6 @@ bool ttLibC_ByteConnector_bit(
 				ERR_PRINT("buffer is fulled. no way to add more data.");
 				return false;
 			}
-			if(connector_->inherit_super.write_size != 0) {
-				++ connector_->data;
-			}
 			(*connector_->data) = 0;
 			++ connector_->inherit_super.write_size;
 		}
@@ -481,12 +492,18 @@ bool ttLibC_ByteConnector_bit(
 			// update bit_num;
 			bit_num = bit_num - 8 + connector_->pos;
 			connector_->pos = 0; // filled up byte data. so next data start with pos = 0;
+			++ connector_->data;
+			-- connector_->data_size;
 		}
 		else {
 			// left shift
 			uint32_t shift_count = 8 - connector_->pos - bit_num;
 			(*connector_->data) |= bit_mask & (value << shift_count);
 			connector_->pos = (connector_->pos + bit_num) & 0x07;
+			if(connector_->pos == 0) {
+				++ connector_->data;
+				-- connector_->data_size;
+			}
 			break;
 		}
 	} while(true);
@@ -525,37 +542,43 @@ bool ttLibC_ByteConnector_ebml(
 		return false;
 	}
 	if(value < 0x80) {
-		if(connector_->data_size - connector_->inherit_super.write_size < 1) {
+		if(connector_->data_size < 1) {
 			connector_->inherit_super.error_flag = true;
 			return false;
 		}
 		connector_->data[connector_->inherit_super.write_size] = (0x80 | value);
-		connector_->inherit_super.write_size ++;
+		++ connector_->data;
+		-- connector_->data_size;
+		++ connector_->inherit_super.write_size;
 		return true;
 	}
 	if(value < 0x4000) {
-		if(connector_->data_size - connector_->inherit_super.write_size < 2) {
+		if(connector_->data_size < 2) {
 			connector_->inherit_super.error_flag = true;
 			return false;
 		}
 		connector_->data[connector_->inherit_super.write_size] = (0x40 | ((value >> 8) & 0xFF));
 		connector_->data[connector_->inherit_super.write_size + 1] = (value & 0xFF);
+		connector_->data += 2;
+		connector_->data_size -= 2;
 		connector_->inherit_super.write_size += 2;
 		return true;
 	}
 	if(value < 0x200000) {
-		if(connector_->data_size - connector_->inherit_super.write_size < 3) {
+		if(connector_->data_size < 3) {
 			connector_->inherit_super.error_flag = true;
 			return false;
 		}
 		connector_->data[connector_->inherit_super.write_size] = (0x20 | ((value >> 16) & 0xFF));
 		connector_->data[connector_->inherit_super.write_size + 1] = ((value >> 8) & 0xFF);
 		connector_->data[connector_->inherit_super.write_size + 2] = (value & 0xFF);
+		connector_->data += 3;
+		connector_->data_size -= 3;
 		connector_->inherit_super.write_size += 3;
 		return true;
 	}
 	if(value < 0x10000000L) {
-		if(connector_->data_size - connector_->inherit_super.write_size < 4) {
+		if(connector_->data_size < 4) {
 			connector_->inherit_super.error_flag = true;
 			return false;
 		}
@@ -567,7 +590,7 @@ bool ttLibC_ByteConnector_ebml(
 		return true;
 	}
 	if(value < 0x0800000000L) {
-		if(connector_->data_size - connector_->inherit_super.write_size < 5) {
+		if(connector_->data_size < 5) {
 			connector_->inherit_super.error_flag = true;
 			return false;
 		}
@@ -576,11 +599,13 @@ bool ttLibC_ByteConnector_ebml(
 		connector_->data[connector_->inherit_super.write_size + 2] = ((value >> 16) & 0xFF);
 		connector_->data[connector_->inherit_super.write_size + 3] = ((value >> 8) & 0xFF);
 		connector_->data[connector_->inherit_super.write_size + 4] = (value & 0xFF);
+		connector_->data += 5;
+		connector_->data_size -= 5;
 		connector_->inherit_super.write_size += 5;
 		return true;
 	}
 	if(value < 0x040000000000L) {
-		if(connector_->data_size - connector_->inherit_super.write_size < 6) {
+		if(connector_->data_size < 6) {
 			connector_->inherit_super.error_flag = true;
 			return false;
 		}
@@ -590,11 +615,13 @@ bool ttLibC_ByteConnector_ebml(
 		connector_->data[connector_->inherit_super.write_size + 3] = ((value >> 16) & 0xFF);
 		connector_->data[connector_->inherit_super.write_size + 4] = ((value >> 8) & 0xFF);
 		connector_->data[connector_->inherit_super.write_size + 5] = (value & 0xFF);
+		connector_->data += 6;
+		connector_->data_size -= 6;
 		connector_->inherit_super.write_size += 6;
 		return true;
 	}
 	if(value < 0x02000000000000L) {
-		if(connector_->data_size - connector_->inherit_super.write_size < 7) {
+		if(connector_->data_size < 7) {
 			connector_->inherit_super.error_flag = true;
 			return false;
 		}
@@ -605,11 +632,13 @@ bool ttLibC_ByteConnector_ebml(
 		connector_->data[connector_->inherit_super.write_size + 4] = ((value >> 16) & 0xFF);
 		connector_->data[connector_->inherit_super.write_size + 5] = ((value >> 8) & 0xFF);
 		connector_->data[connector_->inherit_super.write_size + 6] = (value & 0xFF);
+		connector_->data += 7;
+		connector_->data_size -= 7;
 		connector_->inherit_super.write_size += 7;
 		return true;
 	}
 	if(value < 0x0100000000000000L) {
-		if(connector_->data_size - connector_->inherit_super.write_size < 8) {
+		if(connector_->data_size < 8) {
 			connector_->inherit_super.error_flag = true;
 			return false;
 		}
@@ -621,6 +650,8 @@ bool ttLibC_ByteConnector_ebml(
 		connector_->data[connector_->inherit_super.write_size + 5] = ((value >> 16) & 0xFF);
 		connector_->data[connector_->inherit_super.write_size + 6] = ((value >> 8) & 0xFF);
 		connector_->data[connector_->inherit_super.write_size + 7] = (value & 0xFF);
+		connector_->data += 8;
+		connector_->data_size -= 8;
 		connector_->inherit_super.write_size += 8;
 		return true;
 	}
@@ -638,7 +669,24 @@ bool ttLibC_ByteConnector_string(
 		ttLibC_ByteConnector *connector,
 		const char *str,
 		size_t str_size) {
-
+	ttLibC_ByteConnector_ *connector_ = (ttLibC_ByteConnector_ *)connector;
+	if(connector_->pos != 0) {
+		ERR_PRINT("string writing must start with complete byte.");
+		connector_->inherit_super.error_flag = true;
+		return false;
+	}
+	if(connector_->data_size < str_size) {
+		ERR_PRINT("buffer doesn't have enough size for string write.");
+		connector_->inherit_super.error_flag = true;
+		return false;
+	}
+	// データbufferも十分あるので、データを書き込んでおく
+	LOG_PRINT("");
+	memcpy(connector_->data, str, str_size);
+	connector_->data += str_size;
+	connector_->data_size -= str_size;
+	connector_->inherit_super.write_size += str_size;
+	return true;
 }
 
 /*

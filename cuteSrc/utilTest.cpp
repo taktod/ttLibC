@@ -40,6 +40,7 @@
 
 #include <ttLibC/util/dynamicBufferUtil.h>
 #include <ttLibC/util/bitUtil.h>
+#include <ttLibC/util/byteUtil.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -51,6 +52,43 @@
 #include <sys/param.h>
 #include <sys/uio.h>
 #include <unistd.h>
+
+static void byteUtilTest() {
+	LOG_PRINT("byteUtilTest");
+	uint8_t buffer[256];
+	uint32_t size = ttLibC_HexUtil_makeBuffer("01024304403132333430", buffer, 256);
+	ttLibC_ByteReader *reader = ttLibC_ByteReader_make(buffer, size, ByteUtilType_default);
+	LOG_PRINT("4bit val:%llx", ttLibC_ByteReader_bit(reader, 4));
+	LOG_PRINT("4bit val:%llx", ttLibC_ByteReader_bit(reader, 4));
+	LOG_PRINT("4bit val:%llx", ttLibC_ByteReader_bit(reader, 4));
+	LOG_PRINT("4bit val:%llx", ttLibC_ByteReader_bit(reader, 4));
+	LOG_PRINT("ebml val:%llx", ttLibC_ByteReader_ebml(reader, false));
+	char buf[256];
+	ttLibC_ByteReader_string(reader, buf, 256, 5);
+	LOG_PRINT("string:%s", buf);
+	LOG_PRINT("4bit val:%llx", ttLibC_ByteReader_bit(reader, 8));
+	ttLibC_ByteReader_close(&reader);
+	ttLibC_ByteConnector *connector = ttLibC_ByteConnector_make(buffer, 256, ByteUtilType_default);
+	ttLibC_ByteConnector_ebml(connector, 0x02);
+	ttLibC_ByteConnector_ebml(connector, 0xFF);
+	ttLibC_ByteConnector_ebml(connector, 0xFFFF);
+	ttLibC_ByteConnector_ebml(connector, 0xFFFFFF);
+	ttLibC_ByteConnector_ebml(connector, 0xFFFFFFFFL);
+	ttLibC_ByteConnector_ebml(connector, 0xFFFFFFFFFFL);
+	ttLibC_ByteConnector_ebml(connector, 0xFFFFFFFFFFFFL);
+	ttLibC_ByteConnector_ebml(connector, 0xFFFFFFFFFFFFFFL);
+	LOG_DUMP(buffer, connector->write_size, true);
+	ttLibC_ByteConnector_close(&connector);
+	connector = ttLibC_ByteConnector_make(buffer, 256, ByteUtilType_default);
+	ttLibC_ByteConnector_bit(connector, 0xFEDCB, 20);
+	ttLibC_ByteConnector_bit(connector, 3, 4);
+	ttLibC_ByteConnector_bit(connector, 5, 3);
+	ttLibC_ByteConnector_bit(connector, 6, 5);
+	ttLibC_ByteConnector_string(connector, "test1234", 8);
+	LOG_DUMP(buffer, connector->write_size, true);
+	ttLibC_ByteConnector_close(&connector);
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
 
 static void connectorTest() {
 	LOG_PRINT("connectorTest");
@@ -378,6 +416,7 @@ static void openalUtilTest() {
  */
 cute::suite utilTests(cute::suite s) {
 	s.clear();
+	s.push_back(CUTE(byteUtilTest));
 	s.push_back(CUTE(connectorTest));
 	s.push_back(CUTE(dynamicBufferTest));
 	s.push_back(CUTE(amfTest));

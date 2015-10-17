@@ -94,13 +94,11 @@ uint64_t ttLibC_ByteReader_ebml(
  * @param target_size
  * @return read size.
  */
-/*
 size_t ttLibC_ByteReader_string(
 		ttLibC_ByteReader *reader,
 		char *buffer,
 		size_t buffer_size,
 		size_t target_size);
-*/
 
 /**
  * close ByteReader
