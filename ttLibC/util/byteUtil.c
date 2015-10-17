@@ -1,77 +1,84 @@
 /*
- * @file   bitUtil.c
- * @brief  bit work support.
+ * @file   byteUtil.c
+ * @brief  byte work support.
  *
  * this code is under 3-Cause BSD license
  *
- * deprecated. use byteUtil
- *
  * @author taktod
- * @date   2015/08/01
- *
- * @note should I make bit reader for little endian?
+ * @date   2015/10/17
+ * @note need little endian mode?
  */
 
-#include "bitUtil.h"
+#include "byteUtil.h"
 
 #include <stdlib.h>
 
 #include "../log.h"
 #include "../allocator.h"
 
+/*
+ * ByteReader object
+ */
 typedef struct {
-	/** inherit data from ttLibC_BitReader */
-	ttLibC_BitReader inherit_super;
-	/** reading target position. */
+	/** inherit data from ttLibC_ByteReader */
+	ttLibC_ByteReader inherit_super;
+	/** reading target position */
 	uint32_t pos;
 	/** data */
 	uint8_t *data;
-	/** data size */
+	/** data_size */
 	size_t data_size;
 	/** zero count */
-	uint8_t zero_count; // for emuluation prevention three byte(h264 h265)
-} ttLibC_Util_BitReader_;
+	uint8_t zero_count; // for emulation prevention three byte(h264 h265)
+} ttLibC_Util_ByteReader_;
 
-typedef ttLibC_Util_BitReader_ ttLibC_BitReader_;
+typedef ttLibC_Util_ByteReader_ ttLibC_ByteReader_;
 
 /*
- * make bit reader object.
- * @param data
- * @param data_size
- * @return bit reader object.
+ * make ByteReader object.
+ * @param data      target data
+ * @param data_size target data size
+ * @param type      target data type
+ * @return byte reader object.
  */
-ttLibC_BitReader *ttLibC_BitReader_make(void *data, size_t data_size, ttLibC_BitReader_Type type) {
-	ttLibC_BitReader_ *reader = (ttLibC_BitReader_ *)ttLibC_malloc(sizeof(ttLibC_BitReader_));
+ttLibC_ByteReader *ttLibC_ByteReader_make(
+		void *data,
+		size_t data_size,
+		ttLibC_ByteUtil_Type type) {
+	ttLibC_ByteReader_ *reader = (ttLibC_ByteReader_ *)ttLibC_malloc(sizeof(ttLibC_ByteReader_));
 	if(reader == NULL) {
 		return NULL;
 	}
 	reader->zero_count = 0;
 	reader->pos = 0;
-	reader->data = data;
+	reader->data = (uint8_t *)data;
 	reader->data_size = data_size;
 	reader->inherit_super.type = type;
 	reader->inherit_super.read_size = 0;
 	reader->inherit_super.error_flag = false;
 	if(*reader->data == 0) {
-		reader->zero_count ++;
+		++ reader->zero_count;
 	}
-	return (ttLibC_BitReader *)reader;
+	return (ttLibC_ByteReader *)reader;
 }
 
 /*
- * get bit from bit reader.
- * @param reader  target bit reader object
- * @param bit_num bit size for read.
- * @return number
+ * get bit from ByteReader
+ * @param reader
+ * @param bit_num
+ * @return value
  */
-uint32_t ttLibC_BitReader_bit(ttLibC_BitReader *reader, uint32_t bit_num) {
-	ttLibC_BitReader_ *reader_ = (ttLibC_BitReader_ *)reader;
+uint64_t ttLibC_ByteReader_bit(
+		ttLibC_ByteReader *reader,
+		uint32_t bit_num) {
+	ttLibC_ByteReader_ *reader_ = (ttLibC_ByteReader_ *)reader;
 	uint8_t val = 0;
-	uint32_t result = 0;
+	uint64_t result = 0;
 
 	uint32_t bit = 0;
 	uint32_t mask = 0;
 	uint32_t shift = 0;
+
 	val = *reader_->data;
 	do {
 		bit = 8 - reader_->pos > bit_num ? bit_num : 8 - reader_->pos;
@@ -91,43 +98,45 @@ uint32_t ttLibC_BitReader_bit(ttLibC_BitReader *reader, uint32_t bit_num) {
 			-- reader_->data_size;
 			val = *reader_->data;
 			if(val == 0) {
-				reader_->zero_count ++;
+				++ reader_->zero_count;
 			}
- 			else if(val == 3 && reader_->zero_count == 2) {
-					++ reader_->data;
-					if(reader_->data_size == 0) {
-						ERR_PRINT("no more data.");
-						reader_->inherit_super.error_flag = true;
-						return 0;
-					}
-					-- reader_->data_size;
-					++ reader_->inherit_super.read_size;
-					val = *reader_->data;
-					if(val == 0) {
-						reader_->zero_count = 1;
-					}
-					else {
-						reader_->zero_count = 0;
-					}
+			else if(val == 3 && reader_->zero_count == 2) {
+				++ reader_->data;
+				if(reader_->data_size) {
+					ERR_PRINT("no more data.");
+					reader_->inherit_super.error_flag = true;
+					return 0;
 				}
+				-- reader_->data_size;
+				++ reader_->inherit_super.read_size;
+				val = *reader_->data;
+				if(val == 0) {
+					reader_->zero_count = 1;
+				}
+				else {
+					reader_->zero_count = 0;
+				}
+			}
 			else {
 				reader_->zero_count = 0;
 			}
 		}
 		reader_->pos = reader_->pos & 0x07;
 		bit_num -= bit;
-	}while(bit_num > 0);
+	} while(bit_num > 0);
 	return result;
 }
 
 /*
- * get exp golomb from bit reader.
- * @param reader target bit reader
- * @param sign   true: signed false:unsigned
+ * get exp golomb value from ByteReader
+ * @param reader
+ * @param sign
  * @return value
  */
-int32_t ttLibC_BitReader_expGolomb(ttLibC_BitReader *reader, bool sign) {
-	ttLibC_BitReader_ *reader_ = (ttLibC_BitReader_ *)reader;
+int32_t ttLibC_ByteReader_expGolomb(
+		ttLibC_ByteReader *reader,
+		bool sign) {
+	ttLibC_ByteReader_ *reader_ = (ttLibC_ByteReader_ *)reader;
 	uint8_t bit = 0;
 	uint32_t count = 1;
 	uint32_t val = *reader_->data;
@@ -136,8 +145,8 @@ int32_t ttLibC_BitReader_expGolomb(ttLibC_BitReader *reader, bool sign) {
 		if((val & bit) != 0) {
 			break;
 		}
-		count ++;
-		reader_->pos ++;
+		++ count;
+		++ reader_->pos;
 		if(reader_->pos == 8) {
 			++ reader_->data;
 			if(reader_->data_size == 0) {
@@ -149,7 +158,7 @@ int32_t ttLibC_BitReader_expGolomb(ttLibC_BitReader *reader, bool sign) {
 			-- reader_->data_size;
 			val = *reader_->data;
 			if(val == 0) {
-				reader_->zero_count ++;
+				++ reader_->zero_count;
 			}
 			else if(val == 3 && reader_->zero_count == 2) {
 				++ reader_->data;
@@ -175,17 +184,16 @@ int32_t ttLibC_BitReader_expGolomb(ttLibC_BitReader *reader, bool sign) {
 		}
 	} while(true);
 	if(count > 32) {
-		ERR_PRINT("too big exp golumb.");
+		ERR_PRINT("too big exp golomb.");
 		reader_->inherit_super.error_flag = true;
 		return 0;
 	}
-	val = ttLibC_BitReader_bit(reader, count);
+	val = ttLibC_ByteReader_bit(reader, count);
 	if(val == 0) {
 		return 0;
 	}
 	if(sign) {
 		if((val & 1) != 0) {
-			// minus
 			return -1 * (val >> 1);
 		}
 		else {
@@ -198,20 +206,22 @@ int32_t ttLibC_BitReader_expGolomb(ttLibC_BitReader *reader, bool sign) {
 }
 
 /*
- * get ebmp value from bit reader.
- * @param reader target bit reader
- * @param is_tag true: read as tag, false:read as number.
- * @return number
+ * get ebml value from ByteReader
+ * @param reader
+ * @param is_tag
+ * @return value
  */
-uint64_t ttLibC_BitReader_ebml(ttLibC_BitReader *reader, bool is_tag) {
-	ttLibC_BitReader_ *reader_ = (ttLibC_BitReader_ *)reader;
+uint64_t ttLibC_ByteReader_ebml(
+		ttLibC_ByteReader *reader,
+		bool is_tag) {
+	ttLibC_ByteReader_ *reader_ = (ttLibC_ByteReader_ *)reader;
 	if(reader_->data_size == 0) {
 		ERR_PRINT("no more data.");
 		reader_->inherit_super.error_flag = true;
 		return 0;
 	}
 	if(reader_->pos != 0) {
-		ERR_PRINT("ebml value need to begin with full byte.");
+		ERR_PRINT("ebml value need to begin with full byte");
 		reader_->inherit_super.error_flag = true;
 		return 0;
 	}
@@ -281,7 +291,7 @@ uint64_t ttLibC_BitReader_ebml(ttLibC_BitReader *reader, bool is_tag) {
 			return val;
 		}
 		else {
-			return val & 0x0FFFFFFF;
+			return val & 0x0FFFFFFFL;
 		}
 	}
 	else if(val & 0x08) {
@@ -300,7 +310,7 @@ uint64_t ttLibC_BitReader_ebml(ttLibC_BitReader *reader, bool is_tag) {
 			return val;
 		}
 		else {
-			return val & 0x07FFFFFFFF;
+			return val & 0x07FFFFFFFFL;
 		}
 	}
 	else if(val & 0x04) {
@@ -320,7 +330,7 @@ uint64_t ttLibC_BitReader_ebml(ttLibC_BitReader *reader, bool is_tag) {
 			return val;
 		}
 		else {
-			return val & 0x03FFFFFFFFFF;
+			return val & 0x03FFFFFFFFFFL;
 		}
 	}
 	else if(val & 0x02) {
@@ -340,7 +350,7 @@ uint64_t ttLibC_BitReader_ebml(ttLibC_BitReader *reader, bool is_tag) {
 			return val;
 		}
 		else {
-			return val & 0x01FFFFFFFFFFFF;
+			return val & 0x01FFFFFFFFFFFFL;
 		}
 	}
 	else if(val & 0x01) {
@@ -360,7 +370,7 @@ uint64_t ttLibC_BitReader_ebml(ttLibC_BitReader *reader, bool is_tag) {
 			return val;
 		}
 		else {
-			return val & 0x00FFFFFFFFFFFFFF;
+			return val & 0x00FFFFFFFFFFFFFFL;
 		}
 	}
 	else {
@@ -370,11 +380,27 @@ uint64_t ttLibC_BitReader_ebml(ttLibC_BitReader *reader, bool is_tag) {
 }
 
 /*
- * close bit reader.
+ * get string data from ByteReader
+ * @param reader
+ * @param buffer
+ * @param buffer_size
+ * @param target_size
+ * @return read size.
+ */
+size_t ttLibC_ByteReader_string(
+		ttLibC_ByteReader *reader,
+		char *buffer,
+		size_t buffer_size,
+		size_t target_size) {
+	return 0;
+}
+
+/*
+ * close ByteReader
  * @param reader
  */
-void ttLibC_BitReader_close(ttLibC_BitReader **reader) {
-	ttLibC_BitReader_ *target = (ttLibC_BitReader_ *)*reader;
+void ttLibC_ByteReader_close(ttLibC_ByteReader **reader) {
+	ttLibC_ByteReader_ *target = (ttLibC_ByteReader_ *)*reader;
 	if(target == NULL) {
 		return;
 	}
@@ -382,31 +408,59 @@ void ttLibC_BitReader_close(ttLibC_BitReader **reader) {
 	*reader = NULL;
 }
 
+
+/*
+ * ByteConnector object
+ */
 typedef struct {
-	/** inherit data from ttLibC_BitConnector */
-	ttLibC_BitConnector inherit_super;
+	/** inherit data from ttLibC_ByteConnector */
+	ttLibC_ByteConnector inherit_super;
+	/** bit position */
 	uint32_t pos;
+	/** target data */
 	uint8_t *data;
+	/** target data size */
 	size_t data_size;
-} ttLibC_Util_BitConnector_;
+} ttLibC_Util_ByteConnector_;
 
-typedef ttLibC_Util_BitConnector_ ttLibC_BitConnector_;
+typedef ttLibC_Util_ByteConnector_ ttLibC_ByteConnector_;
 
-ttLibC_BitConnector *ttLibC_BitConnector_make(void *data, size_t data_size) {
-	ttLibC_BitConnector_ *connector = (ttLibC_BitConnector_ *)ttLibC_malloc(sizeof(ttLibC_BitConnector_));
+/*
+ * make byteConnector object.
+ * @param data      memory data, result is copyed on this buffer.
+ * @param data_size data size
+ * @param type      work type(now, default only.)
+ * @return ByteConnector object.
+ */
+ttLibC_ByteConnector *ttLibC_ByteConnector_make(
+		void *data,
+		size_t data_size,
+		ttLibC_ByteUtil_Type type) {
+	ttLibC_ByteConnector_ *connector = (ttLibC_ByteConnector_ *)ttLibC_malloc(sizeof(ttLibC_ByteConnector_));
 	if(connector == NULL) {
 		return NULL;
 	}
 	connector->pos = 0;
 	connector->data = data;
 	connector->data_size = data_size;
+	connector->inherit_super.type = type;
 	connector->inherit_super.write_size = 0;
 	connector->inherit_super.error_flag = false;
-	return (ttLibC_BitConnector *)connector;
+	return (ttLibC_ByteConnector *)connector;
 }
 
-bool ttLibC_BitConnector_bit(ttLibC_BitConnector *connector, uint32_t value, uint32_t bit_num) {
-	ttLibC_BitConnector_ *connector_ = (ttLibC_BitConnector_ *)connector;
+/*
+ * write bit data into ByteConnector.
+ * @param connector
+ * @param value
+ * @param bit_num
+ * @return true:success false:error
+ */
+bool ttLibC_ByteConnector_bit(
+		ttLibC_ByteConnector *connector,
+		uint32_t value,
+		uint32_t bit_num) {
+	ttLibC_ByteConnector_ *connector_ = (ttLibC_ByteConnector_ *)connector;
 	do {
 		if(connector_->pos == 0) {
 			if(connector_->data_size == connector_->inherit_super.write_size) {
@@ -435,128 +489,164 @@ bool ttLibC_BitConnector_bit(ttLibC_BitConnector *connector, uint32_t value, uin
 			connector_->pos = (connector_->pos + bit_num) & 0x07;
 			break;
 		}
-	}while(true);
+	} while(true);
 	return true;
 }
 
 /*
-bool ttLibC_BitConnector_expGolomb(ttLibC_BitConnector *connector, int32_t value, bool sign) {
-	// TODO make later. just now this function is not necessary.
+ * write expGolomb data into ByteConnector
+ * @param connector
+ * @param value
+ * @param sign
+ * @return true:success false:error
+ */
+/*
+bool ttLibC_ByteConnector_expGolomb(
+		ttLibC_ByteConnector *connector,
+		int32_t value,
+		bool sign) {
+
 }
 */
 
-bool ttLibC_BitConnector_ebml(ttLibC_BitConnector *connector, uint64_t val) {
-	ttLibC_BitConnector_ *connector_ = (ttLibC_BitConnector_ *)connector;
+/*
+ * write ebml data into ByteConnector
+ * @param connector
+ * @param value
+ * @return true:success false:error
+ */
+bool ttLibC_ByteConnector_ebml(
+		ttLibC_ByteConnector *connector,
+		uint64_t value) {
+	ttLibC_ByteConnector_ *connector_ = (ttLibC_ByteConnector_ *)connector;
 	if(connector_->pos != 0) {
 		ERR_PRINT("ebml writing must start with complete byte.");
 		connector_->inherit_super.error_flag = true;
 		return false;
 	}
-	if(val < 0x80) {
+	if(value < 0x80) {
 		if(connector_->data_size - connector_->inherit_super.write_size < 1) {
 			connector_->inherit_super.error_flag = true;
 			return false;
 		}
-		connector_->data[connector_->inherit_super.write_size] = (0x80 | val);
+		connector_->data[connector_->inherit_super.write_size] = (0x80 | value);
 		connector_->inherit_super.write_size ++;
 		return true;
 	}
-	if(val < 0x4000) {
+	if(value < 0x4000) {
 		if(connector_->data_size - connector_->inherit_super.write_size < 2) {
 			connector_->inherit_super.error_flag = true;
 			return false;
 		}
-		connector_->data[connector_->inherit_super.write_size] = (0x40 | ((val >> 8) & 0xFF));
-		connector_->data[connector_->inherit_super.write_size + 1] = (val & 0xFF);
+		connector_->data[connector_->inherit_super.write_size] = (0x40 | ((value >> 8) & 0xFF));
+		connector_->data[connector_->inherit_super.write_size + 1] = (value & 0xFF);
 		connector_->inherit_super.write_size += 2;
 		return true;
 	}
-	if(val < 0x200000) {
+	if(value < 0x200000) {
 		if(connector_->data_size - connector_->inherit_super.write_size < 3) {
 			connector_->inherit_super.error_flag = true;
 			return false;
 		}
-		connector_->data[connector_->inherit_super.write_size] = (0x20 | ((val >> 16) & 0xFF));
-		connector_->data[connector_->inherit_super.write_size + 1] = ((val >> 8) & 0xFF);
-		connector_->data[connector_->inherit_super.write_size + 2] = (val & 0xFF);
+		connector_->data[connector_->inherit_super.write_size] = (0x20 | ((value >> 16) & 0xFF));
+		connector_->data[connector_->inherit_super.write_size + 1] = ((value >> 8) & 0xFF);
+		connector_->data[connector_->inherit_super.write_size + 2] = (value & 0xFF);
 		connector_->inherit_super.write_size += 3;
 		return true;
 	}
-	if(val < 0x10000000L) {
+	if(value < 0x10000000L) {
 		if(connector_->data_size - connector_->inherit_super.write_size < 4) {
 			connector_->inherit_super.error_flag = true;
 			return false;
 		}
-		connector_->data[connector_->inherit_super.write_size] = (0x10 | ((val >> 24) & 0xFF));
-		connector_->data[connector_->inherit_super.write_size + 1] = ((val >> 16) & 0xFF);
-		connector_->data[connector_->inherit_super.write_size + 2] = ((val >> 8) & 0xFF);
-		connector_->data[connector_->inherit_super.write_size + 3] = (val & 0xFF);
+		connector_->data[connector_->inherit_super.write_size] = (0x10 | ((value >> 24) & 0xFF));
+		connector_->data[connector_->inherit_super.write_size + 1] = ((value >> 16) & 0xFF);
+		connector_->data[connector_->inherit_super.write_size + 2] = ((value >> 8) & 0xFF);
+		connector_->data[connector_->inherit_super.write_size + 3] = (value & 0xFF);
 		connector_->inherit_super.write_size += 4;
 		return true;
 	}
-	if(val < 0x0800000000L) {
+	if(value < 0x0800000000L) {
 		if(connector_->data_size - connector_->inherit_super.write_size < 5) {
 			connector_->inherit_super.error_flag = true;
 			return false;
 		}
-		connector_->data[connector_->inherit_super.write_size] = (0x08 | ((val >> 32) & 0xFF));
-		connector_->data[connector_->inherit_super.write_size + 1] = ((val >> 24) & 0xFF);
-		connector_->data[connector_->inherit_super.write_size + 2] = ((val >> 16) & 0xFF);
-		connector_->data[connector_->inherit_super.write_size + 3] = ((val >> 8) & 0xFF);
-		connector_->data[connector_->inherit_super.write_size + 4] = (val & 0xFF);
+		connector_->data[connector_->inherit_super.write_size] = (0x08 | ((value >> 32) & 0xFF));
+		connector_->data[connector_->inherit_super.write_size + 1] = ((value >> 24) & 0xFF);
+		connector_->data[connector_->inherit_super.write_size + 2] = ((value >> 16) & 0xFF);
+		connector_->data[connector_->inherit_super.write_size + 3] = ((value >> 8) & 0xFF);
+		connector_->data[connector_->inherit_super.write_size + 4] = (value & 0xFF);
 		connector_->inherit_super.write_size += 5;
 		return true;
 	}
-	if(val < 0x040000000000L) {
+	if(value < 0x040000000000L) {
 		if(connector_->data_size - connector_->inherit_super.write_size < 6) {
 			connector_->inherit_super.error_flag = true;
 			return false;
 		}
-		connector_->data[connector_->inherit_super.write_size] = (0x04 | ((val >> 40) & 0xFF));
-		connector_->data[connector_->inherit_super.write_size + 1] = ((val >> 32) & 0xFF);
-		connector_->data[connector_->inherit_super.write_size + 2] = ((val >> 24) & 0xFF);
-		connector_->data[connector_->inherit_super.write_size + 3] = ((val >> 16) & 0xFF);
-		connector_->data[connector_->inherit_super.write_size + 4] = ((val >> 8) & 0xFF);
-		connector_->data[connector_->inherit_super.write_size + 5] = (val & 0xFF);
+		connector_->data[connector_->inherit_super.write_size] = (0x04 | ((value >> 40) & 0xFF));
+		connector_->data[connector_->inherit_super.write_size + 1] = ((value >> 32) & 0xFF);
+		connector_->data[connector_->inherit_super.write_size + 2] = ((value >> 24) & 0xFF);
+		connector_->data[connector_->inherit_super.write_size + 3] = ((value >> 16) & 0xFF);
+		connector_->data[connector_->inherit_super.write_size + 4] = ((value >> 8) & 0xFF);
+		connector_->data[connector_->inherit_super.write_size + 5] = (value & 0xFF);
 		connector_->inherit_super.write_size += 6;
 		return true;
 	}
-	if(val < 0x02000000000000L) {
+	if(value < 0x02000000000000L) {
 		if(connector_->data_size - connector_->inherit_super.write_size < 7) {
 			connector_->inherit_super.error_flag = true;
 			return false;
 		}
-		connector_->data[connector_->inherit_super.write_size] = (0x02 | ((val >> 48) & 0xFF));
-		connector_->data[connector_->inherit_super.write_size + 1] = ((val >> 40) & 0xFF);
-		connector_->data[connector_->inherit_super.write_size + 2] = ((val >> 32) & 0xFF);
-		connector_->data[connector_->inherit_super.write_size + 3] = ((val >> 24) & 0xFF);
-		connector_->data[connector_->inherit_super.write_size + 4] = ((val >> 16) & 0xFF);
-		connector_->data[connector_->inherit_super.write_size + 5] = ((val >> 8) & 0xFF);
-		connector_->data[connector_->inherit_super.write_size + 6] = (val & 0xFF);
+		connector_->data[connector_->inherit_super.write_size] = (0x02 | ((value >> 48) & 0xFF));
+		connector_->data[connector_->inherit_super.write_size + 1] = ((value >> 40) & 0xFF);
+		connector_->data[connector_->inherit_super.write_size + 2] = ((value >> 32) & 0xFF);
+		connector_->data[connector_->inherit_super.write_size + 3] = ((value >> 24) & 0xFF);
+		connector_->data[connector_->inherit_super.write_size + 4] = ((value >> 16) & 0xFF);
+		connector_->data[connector_->inherit_super.write_size + 5] = ((value >> 8) & 0xFF);
+		connector_->data[connector_->inherit_super.write_size + 6] = (value & 0xFF);
 		connector_->inherit_super.write_size += 7;
 		return true;
 	}
-	if(val < 0x0100000000000000L) {
+	if(value < 0x0100000000000000L) {
 		if(connector_->data_size - connector_->inherit_super.write_size < 8) {
 			connector_->inherit_super.error_flag = true;
 			return false;
 		}
 		connector_->data[connector_->inherit_super.write_size] = 0x01;
-		connector_->data[connector_->inherit_super.write_size + 1] = ((val >> 48) & 0xFF);
-		connector_->data[connector_->inherit_super.write_size + 2] = ((val >> 40) & 0xFF);
-		connector_->data[connector_->inherit_super.write_size + 3] = ((val >> 32) & 0xFF);
-		connector_->data[connector_->inherit_super.write_size + 4] = ((val >> 24) & 0xFF);
-		connector_->data[connector_->inherit_super.write_size + 5] = ((val >> 16) & 0xFF);
-		connector_->data[connector_->inherit_super.write_size + 6] = ((val >> 8) & 0xFF);
-		connector_->data[connector_->inherit_super.write_size + 7] = (val & 0xFF);
+		connector_->data[connector_->inherit_super.write_size + 1] = ((value >> 48) & 0xFF);
+		connector_->data[connector_->inherit_super.write_size + 2] = ((value >> 40) & 0xFF);
+		connector_->data[connector_->inherit_super.write_size + 3] = ((value >> 32) & 0xFF);
+		connector_->data[connector_->inherit_super.write_size + 4] = ((value >> 24) & 0xFF);
+		connector_->data[connector_->inherit_super.write_size + 5] = ((value >> 16) & 0xFF);
+		connector_->data[connector_->inherit_super.write_size + 6] = ((value >> 8) & 0xFF);
+		connector_->data[connector_->inherit_super.write_size + 7] = (value & 0xFF);
 		connector_->inherit_super.write_size += 8;
 		return true;
 	}
 	return false;
 }
 
-void ttLibC_BitConnector_close(ttLibC_BitConnector **connector) {
-	ttLibC_BitConnector_ *target = (ttLibC_BitConnector_ *)*connector;
+/*
+ * write string data into ByteConnector
+ * @param connector
+ * @param str
+ * @param str_size
+ * @return true:success false:error
+ */
+bool ttLibC_ByteConnector_string(
+		ttLibC_ByteConnector *connector,
+		const char *str,
+		size_t str_size) {
+
+}
+
+/*
+ * close ByteConnector object
+ * @param connector
+ */
+void ttLibC_ByteConnector_close(ttLibC_ByteConnector **connector) {
+	ttLibC_ByteConnector_ *target = (ttLibC_ByteConnector_ *)*connector;
 	if(target == NULL) {
 		return;
 	}

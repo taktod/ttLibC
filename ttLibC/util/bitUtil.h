@@ -4,6 +4,8 @@
  *
  * this code is under 3-Cause BSD license
  *
+ * deprecated. use byteUtil
+ *
  * @author taktod
  * @date   2015/08/01
  */
