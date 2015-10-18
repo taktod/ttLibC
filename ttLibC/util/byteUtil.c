@@ -547,7 +547,7 @@ bool ttLibC_ByteConnector_ebml(
 			connector_->inherit_super.error_flag = true;
 			return false;
 		}
-		connector_->data[connector_->inherit_super.write_size] = (0x80 | value);
+		connector_->data[0] = (0x80 | value);
 		++ connector_->data;
 		-- connector_->data_size;
 		++ connector_->inherit_super.write_size;
@@ -558,8 +558,8 @@ bool ttLibC_ByteConnector_ebml(
 			connector_->inherit_super.error_flag = true;
 			return false;
 		}
-		connector_->data[connector_->inherit_super.write_size] = (0x40 | ((value >> 8) & 0xFF));
-		connector_->data[connector_->inherit_super.write_size + 1] = (value & 0xFF);
+		connector_->data[0] = (0x40 | ((value >> 8) & 0xFF));
+		connector_->data[1] = (value & 0xFF);
 		connector_->data += 2;
 		connector_->data_size -= 2;
 		connector_->inherit_super.write_size += 2;
@@ -570,9 +570,9 @@ bool ttLibC_ByteConnector_ebml(
 			connector_->inherit_super.error_flag = true;
 			return false;
 		}
-		connector_->data[connector_->inherit_super.write_size] = (0x20 | ((value >> 16) & 0xFF));
-		connector_->data[connector_->inherit_super.write_size + 1] = ((value >> 8) & 0xFF);
-		connector_->data[connector_->inherit_super.write_size + 2] = (value & 0xFF);
+		connector_->data[0] = (0x20 | ((value >> 16) & 0xFF));
+		connector_->data[1] = ((value >> 8) & 0xFF);
+		connector_->data[2] = (value & 0xFF);
 		connector_->data += 3;
 		connector_->data_size -= 3;
 		connector_->inherit_super.write_size += 3;
@@ -583,10 +583,10 @@ bool ttLibC_ByteConnector_ebml(
 			connector_->inherit_super.error_flag = true;
 			return false;
 		}
-		connector_->data[connector_->inherit_super.write_size] = (0x10 | ((value >> 24) & 0xFF));
-		connector_->data[connector_->inherit_super.write_size + 1] = ((value >> 16) & 0xFF);
-		connector_->data[connector_->inherit_super.write_size + 2] = ((value >> 8) & 0xFF);
-		connector_->data[connector_->inherit_super.write_size + 3] = (value & 0xFF);
+		connector_->data[0] = (0x10 | ((value >> 24) & 0xFF));
+		connector_->data[1] = ((value >> 16) & 0xFF);
+		connector_->data[2] = ((value >> 8) & 0xFF);
+		connector_->data[3] = (value & 0xFF);
 		connector_->inherit_super.write_size += 4;
 		return true;
 	}
@@ -595,11 +595,11 @@ bool ttLibC_ByteConnector_ebml(
 			connector_->inherit_super.error_flag = true;
 			return false;
 		}
-		connector_->data[connector_->inherit_super.write_size] = (0x08 | ((value >> 32) & 0xFF));
-		connector_->data[connector_->inherit_super.write_size + 1] = ((value >> 24) & 0xFF);
-		connector_->data[connector_->inherit_super.write_size + 2] = ((value >> 16) & 0xFF);
-		connector_->data[connector_->inherit_super.write_size + 3] = ((value >> 8) & 0xFF);
-		connector_->data[connector_->inherit_super.write_size + 4] = (value & 0xFF);
+		connector_->data[0] = (0x08 | ((value >> 32) & 0xFF));
+		connector_->data[1] = ((value >> 24) & 0xFF);
+		connector_->data[2] = ((value >> 16) & 0xFF);
+		connector_->data[3] = ((value >> 8) & 0xFF);
+		connector_->data[4] = (value & 0xFF);
 		connector_->data += 5;
 		connector_->data_size -= 5;
 		connector_->inherit_super.write_size += 5;
@@ -610,12 +610,12 @@ bool ttLibC_ByteConnector_ebml(
 			connector_->inherit_super.error_flag = true;
 			return false;
 		}
-		connector_->data[connector_->inherit_super.write_size] = (0x04 | ((value >> 40) & 0xFF));
-		connector_->data[connector_->inherit_super.write_size + 1] = ((value >> 32) & 0xFF);
-		connector_->data[connector_->inherit_super.write_size + 2] = ((value >> 24) & 0xFF);
-		connector_->data[connector_->inherit_super.write_size + 3] = ((value >> 16) & 0xFF);
-		connector_->data[connector_->inherit_super.write_size + 4] = ((value >> 8) & 0xFF);
-		connector_->data[connector_->inherit_super.write_size + 5] = (value & 0xFF);
+		connector_->data[0] = (0x04 | ((value >> 40) & 0xFF));
+		connector_->data[1] = ((value >> 32) & 0xFF);
+		connector_->data[2] = ((value >> 24) & 0xFF);
+		connector_->data[3] = ((value >> 16) & 0xFF);
+		connector_->data[4] = ((value >> 8) & 0xFF);
+		connector_->data[5] = (value & 0xFF);
 		connector_->data += 6;
 		connector_->data_size -= 6;
 		connector_->inherit_super.write_size += 6;
@@ -626,13 +626,13 @@ bool ttLibC_ByteConnector_ebml(
 			connector_->inherit_super.error_flag = true;
 			return false;
 		}
-		connector_->data[connector_->inherit_super.write_size] = (0x02 | ((value >> 48) & 0xFF));
-		connector_->data[connector_->inherit_super.write_size + 1] = ((value >> 40) & 0xFF);
-		connector_->data[connector_->inherit_super.write_size + 2] = ((value >> 32) & 0xFF);
-		connector_->data[connector_->inherit_super.write_size + 3] = ((value >> 24) & 0xFF);
-		connector_->data[connector_->inherit_super.write_size + 4] = ((value >> 16) & 0xFF);
-		connector_->data[connector_->inherit_super.write_size + 5] = ((value >> 8) & 0xFF);
-		connector_->data[connector_->inherit_super.write_size + 6] = (value & 0xFF);
+		connector_->data[0] = (0x02 | ((value >> 48) & 0xFF));
+		connector_->data[1] = ((value >> 40) & 0xFF);
+		connector_->data[2] = ((value >> 32) & 0xFF);
+		connector_->data[3] = ((value >> 24) & 0xFF);
+		connector_->data[4] = ((value >> 16) & 0xFF);
+		connector_->data[5] = ((value >> 8) & 0xFF);
+		connector_->data[6] = (value & 0xFF);
 		connector_->data += 7;
 		connector_->data_size -= 7;
 		connector_->inherit_super.write_size += 7;
@@ -643,14 +643,14 @@ bool ttLibC_ByteConnector_ebml(
 			connector_->inherit_super.error_flag = true;
 			return false;
 		}
-		connector_->data[connector_->inherit_super.write_size] = 0x01;
-		connector_->data[connector_->inherit_super.write_size + 1] = ((value >> 48) & 0xFF);
-		connector_->data[connector_->inherit_super.write_size + 2] = ((value >> 40) & 0xFF);
-		connector_->data[connector_->inherit_super.write_size + 3] = ((value >> 32) & 0xFF);
-		connector_->data[connector_->inherit_super.write_size + 4] = ((value >> 24) & 0xFF);
-		connector_->data[connector_->inherit_super.write_size + 5] = ((value >> 16) & 0xFF);
-		connector_->data[connector_->inherit_super.write_size + 6] = ((value >> 8) & 0xFF);
-		connector_->data[connector_->inherit_super.write_size + 7] = (value & 0xFF);
+		connector_->data[0] = 0x01;
+		connector_->data[1] = ((value >> 48) & 0xFF);
+		connector_->data[2] = ((value >> 40) & 0xFF);
+		connector_->data[3] = ((value >> 32) & 0xFF);
+		connector_->data[4] = ((value >> 24) & 0xFF);
+		connector_->data[5] = ((value >> 16) & 0xFF);
+		connector_->data[6] = ((value >> 8) & 0xFF);
+		connector_->data[7] = (value & 0xFF);
 		connector_->data += 8;
 		connector_->data_size -= 8;
 		connector_->inherit_super.write_size += 8;
