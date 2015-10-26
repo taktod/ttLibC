@@ -86,6 +86,11 @@ bool ttLibC_DynamicBuffer_reset(ttLibC_DynamicBuffer *buffer);
 bool ttLibC_DynamicBuffer_clear(ttLibC_DynamicBuffer *buffer);
 
 /**
+ * set empty for writing buffer.
+ */
+bool ttLibC_DynamicBuffer_empty(ttLibC_DynamicBuffer *buffer);
+
+/**
  * alloc specific size of memory for dynamic buffer.
  * @param buffer target dynamic buffer object.
  * @param size   target size

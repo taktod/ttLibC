@@ -148,6 +148,20 @@ bool ttLibC_DynamicBuffer_reset(ttLibC_DynamicBuffer *buffer) {
 	return true;
 }
 
+/**
+ * set empty for writing buffer.
+ */
+bool ttLibC_DynamicBuffer_empty(ttLibC_DynamicBuffer *buffer) {
+	ttLibC_DynamicBuffer_ *buffer_ = (ttLibC_DynamicBuffer_ *)buffer;
+	if(buffer_ == NULL) {
+		return false;
+	}
+	buffer_->read_pos = 0;
+	buffer_->target_size = 0;
+	buffer_->inherit_super.target_size = 0;
+	return true;
+}
+
 bool ttLibC_DynamicBuffer_alloc(
 		ttLibC_DynamicBuffer *buffer,
 		size_t size) {
