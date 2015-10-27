@@ -257,26 +257,19 @@ ttLibC_Pes *ttLibC_Pes_getPacket(
 		uint8_t pes_length = ttLibC_BitReader_bit(reader, 8);
 		data +=  pes_length;
 		data_size -= pes_length;
-//		LOG_PRINT("pes_length:%d", pes_length);
 		uint64_t pts = 0;
 		if(has_pts) {
 			ttLibC_BitReader_bit(reader, 4); // 2である必要あり。
 			pts = ((ttLibC_BitReader_bit(reader, 4) << 29) & 0xC0000000)
 					| ((ttLibC_BitReader_bit(reader, 16) << 14)     & 0x3FFF8000)
 					| ((ttLibC_BitReader_bit(reader, 16) >> 1)      & 0x00007FFF);
-//			LOG_PRINT("pts:%d, %f", pts, pts / 90000.0f);
 		}
 		if(has_dts) {
 			ttLibC_BitReader_bit(reader, 4); // 3である必要あり。
 		}
 		// 新しいデータなので、pesを作成する必要がある。
 		if(prev_packet != NULL) {
-//			LOG_PRINT("前のデータが完成したみたいなので、一旦dumpをとっておわります。");
 
-//			LOG_DUMP(prev_packet->inherit_super.inherit_super.data, prev_packet->inherit_super.inherit_super.buffer_size, true);
-//			if(firstflag && pid != 0x100) {
-//				return NULL;
-//			}
 			// 前のデータがある場合は、そこからbufferを取り出して、利用する必要がある。
 			if(!prev_packet->inherit_super.inherit_super.is_non_copy) {
 				// 元のデータがnon_copyなら使い回しが可能です。
@@ -284,9 +277,6 @@ ttLibC_Pes *ttLibC_Pes_getPacket(
 				frame_buffer_size = prev_packet->inherit_super.inherit_super.data_size;
 				frame_buffer_next_pos = 0; // 0byte目から利用します。
 			}
-//			if(pid != 0x100) {
-//				firstflag = true;
-//			}
 			// non_copyであると仮定して動作させます。
 			prev_packet->inherit_super.inherit_super.is_non_copy = true;
 		}
@@ -336,7 +326,6 @@ ttLibC_Pes *ttLibC_Pes_getPacket(
 		frame_buffer = prev_packet->inherit_super.inherit_super.data;
 		frame_buffer_size = prev_packet->inherit_super.inherit_super.data_size;
 		frame_buffer_next_pos = prev_packet->inherit_super.inherit_super.buffer_size;
-//		LOG_PRINT("unit startじゃないデータにきました。");
 		if(frame_buffer_size < frame_buffer_next_pos + data_size) {
 			ERR_PRINT("data is overflowed.");
 			return NULL;
@@ -748,11 +737,13 @@ bool Pes_writeAudioData(void *ptr, ttLibC_Frame *frame) {
 		}
 		if(aacData->data_size == 0) {
 			if(!is_body_flag) {
-				// まだbodyデータを読み込む必要がある。
 				aacData->data = frame->data;
 				aacData->data_size = frame->buffer_size;
+				is_body_flag = true;
 			}
-			break;
+			else {
+				break;
+			}
 		}
 	}
 	return true;
@@ -814,6 +805,7 @@ bool ttLibC_Pes_writeAudioPacket(
 	aacData.p_buf[3] = 0xC0;
 	// データサイズをいれます。total_size + 8;
 	uint32_t pes_size = aacData.total_size + 8;
+	printf("pes_size:%d\n", pes_size);
 	if(pes_size < 0x10000) {
 		aacData.p_buf[4] = (pes_size >> 8) & 0xFF;
 		aacData.p_buf[5] = pes_size & 0xFF;
