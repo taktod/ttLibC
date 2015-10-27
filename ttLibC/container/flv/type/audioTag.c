@@ -332,7 +332,7 @@ bool ttLibC_FlvAudioTag_writeTag(
 				}
 				// body
 				if(!callback(ptr, dsi, size)) {
-					return false;;
+					return false;
 				}
 				// post size
 				uint32_t post_size = pre_size + 11;
