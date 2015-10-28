@@ -805,7 +805,6 @@ bool ttLibC_Pes_writeAudioPacket(
 	aacData.p_buf[3] = 0xC0;
 	// データサイズをいれます。total_size + 8;
 	uint32_t pes_size = aacData.total_size + 8;
-	printf("pes_size:%d\n", pes_size);
 	if(pes_size < 0x10000) {
 		aacData.p_buf[4] = (pes_size >> 8) & 0xFF;
 		aacData.p_buf[5] = pes_size & 0xFF;
