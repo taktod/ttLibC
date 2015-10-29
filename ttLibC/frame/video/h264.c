@@ -385,7 +385,7 @@ static void H264_analyzeSequenceParameterSet(ttLibC_H264_Ref_t *ref, uint8_t *da
 	if(pic_order_cnt_type == 0) {
 		ttLibC_BitReader_expGolomb(reader, false);
 	}
-	else {
+	else if(pic_order_cnt_type == 1){
 		ttLibC_BitReader_bit(reader, 1);
 		ttLibC_BitReader_expGolomb(reader, true);
 		ttLibC_BitReader_expGolomb(reader, true);
