@@ -52,6 +52,11 @@
 #	include <ttLibC/decoder/opusDecoder.h>
 #endif
 
+#ifdef __ENABLE_JPEG__
+#	include <ttLibC/encoder/jpegEncoder.h>
+#	include <ttLibC/decoder/jpegDecoder.h>
+#endif
+
 #include <ttLibC/util/beepUtil.h>
 #include <ttLibC/frame/audio/pcms16.h>
 #include <ttLibC/frame/audio/mp3.h>
@@ -62,11 +67,81 @@
 #include <ttLibC/frame/video/bgr.h>
 #include <ttLibC/frame/video/yuv420.h>
 #include <ttLibC/frame/video/h264.h>
+#include <ttLibC/frame/video/jpeg.h>
 
 #include <ttLibC/resampler/imageResampler.h>
 #include <ttLibC/resampler/audioResampler.h>
 
 #include <ttLibC/util/hexUtil.h>
+
+#if defined(__ENABLE_JPEG__) && defined(__ENABLE_OPENCV__)
+typedef struct {
+	ttLibC_JpegDecoder *decoder;
+	ttLibC_CvWindow *dec_win;
+	ttLibC_Bgr *dbgr;
+} jpegTestData;
+
+static bool jpegDecoderTestCallback(void *ptr, ttLibC_Yuv420 *yuv) {
+	jpegTestData *testData = (jpegTestData *)ptr;
+	ttLibC_Bgr *b = ttLibC_ImageResampler_makeBgrFromYuv420(testData->dbgr, BgrType_bgr, yuv);
+	if(b == NULL) {
+		return false;
+	}
+	testData->dbgr = b;
+	ttLibC_CvWindow_showBgr(testData->dec_win, testData->dbgr);
+	return true;
+}
+
+static bool jpegEncoderTestCallback(void *ptr, ttLibC_Jpeg *jpeg) {
+	jpegTestData *testData = (jpegTestData *)ptr;
+	ttLibC_JpegDecoder_decode(testData->decoder, jpeg, jpegDecoderTestCallback, ptr);
+	return true;
+}
+#endif
+
+static void jpegTest() {
+	LOG_PRINT("jpegTest");
+#if defined(__ENABLE_JPEG__) && defined(__ENABLE_OPENCV__)
+	uint32_t width = 320, height = 180;
+	ttLibC_CvCapture   *capture = ttLibC_CvCapture_make(0, width, height);
+	ttLibC_CvWindow    *window  = ttLibC_CvWindow_make("original");
+	ttLibC_JpegEncoder *encoder = ttLibC_JpegEncoder_make(width, height, 80);
+	ttLibC_Bgr    *bgr = NULL, *b;
+	ttLibC_Yuv420 *yuv = NULL, *y;
+	jpegTestData testData;
+	testData.dbgr = NULL;
+	testData.dec_win = ttLibC_CvWindow_make("decoded");
+	testData.decoder = ttLibC_JpegDecoder_make();
+	while(true) {
+		b = ttLibC_CvCapture_queryFrame(capture, bgr);
+		if(b == NULL) {
+			break;
+		}
+		bgr = b;
+		ttLibC_CvWindow_showBgr(window, bgr);
+		y = ttLibC_ImageResampler_makeYuv420FromBgr(yuv, Yuv420Type_planar, bgr);
+		if(y == NULL) {
+			break;
+		}
+		yuv = y;
+		ttLibC_JpegEncoder_encode(encoder, yuv, jpegEncoderTestCallback, &testData);
+		// now try to make jpeg.
+		uint8_t key = ttLibC_CvWindow_waitForKeyInput(10);
+		if(key == Keychar_Esc) {
+			break;
+		}
+	}
+	ttLibC_Bgr_close(&testData.dbgr);
+	ttLibC_Bgr_close(&bgr);
+	ttLibC_Yuv420_close(&yuv);
+	ttLibC_JpegDecoder_close(&testData.decoder);
+	ttLibC_JpegEncoder_close(&encoder);
+	ttLibC_CvWindow_close(&window);
+	ttLibC_CvWindow_close(&testData.dec_win);
+	ttLibC_CvCapture_close(&capture);
+#endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
 
 #if defined(__ENABLE_OPUS__) && defined(__ENABLE_OPENAL__)
 typedef struct {
@@ -424,6 +499,7 @@ static void imageResamplerTest() {
  */
 cute::suite encoderDecoderTests(cute::suite s) {
 	s.clear();
+	s.push_back(CUTE(jpegTest));
 	s.push_back(CUTE(opusTest));
 	s.push_back(CUTE(speexTest));
 	s.push_back(CUTE(speexdspResamplerTest));

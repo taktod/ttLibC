@@ -19,6 +19,7 @@ nobase_include_HEADERS= \
 	ttLibC/frame/video/flv1.h \
 	ttLibC/frame/video/h264.h \
 	ttLibC/frame/video/h265.h \
+	ttLibC/frame/video/jpeg.h \
 	ttLibC/frame/video/theora.h \
 	ttLibC/frame/video/video.h \
 	ttLibC/frame/video/vp6.h \
@@ -101,6 +102,12 @@ if ENABLE_AVCODEC
 nobase_include_HEADERS += \
 	ttLibC/encoder/avcodecEncoder.h \
 	ttLibC/decoder/avcodecDecoder.h
+endif
+
+if ENABLE_JPEG
+nobase_include_HEADERS += \
+	ttLibC/encoder/jpegEncoder.h \
+	ttLibC/decoder/jpegDecoder.h
 endif
 
 pkgconfigdir=@pkgconfigdir@

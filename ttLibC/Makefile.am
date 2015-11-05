@@ -23,12 +23,14 @@ libttLibC_a_SOURCES= \
 	container/container.c \
 	container/misc.c \
 	decoder/avcodecDecoder.c \
+	decoder/jpegDecoder.c \
 	decoder/mp3lameDecoder.c \
 	decoder/openh264Decoder.cpp \
 	decoder/opusDecoder.c \
 	decoder/speexDecoder.c \
 	encoder/avcodecEncoder.c \
 	encoder/faacEncoder.c \
+	encoder/jpegEncoder.c \
 	encoder/mp3lameEncoder.c \
 	encoder/openh264Encoder.cpp \
 	encoder/opusEncoder.c \
@@ -49,6 +51,7 @@ libttLibC_a_SOURCES= \
 	frame/video/flv1.c \
 	frame/video/h264.c \
 	frame/video/h265.c \
+	frame/video/jpeg.c \
 	frame/video/theora.c \
 	frame/video/video.c \
 	frame/video/vp6.c \
@@ -86,5 +89,5 @@ libttLibC_a_SOURCES= \
 	allocator.c \
 	ttLibC.c
 
-libttLibC_a_CFLAGS=$(OPENCV_CFLAGS) $(OPENAL_CFLAGS) $(MP3LAME_CFLAGS) $(FAAC_CFLAGS) $(OPENH264_CFLAGS) $(SPEEXDSP_CFLAGS) $(SPEEX_CFLAGS) $(OPUS_CFLAGS) $(LIBAVCODEC_CFLAGS) $(FAAD_CFLAGS)
-libttLibC_a_CPPFLAGS=$(OPENCV_CFLAGS) $(OPENAL_CFLAGS) $(MP3LAME_CFLAGS) $(FAAC_CFLAGS) $(OPENH264_CFLAGS) $(SPEEXDSP_CFLAGS) $(SPEEX_CFLAGS) $(OPUS_CFLAGS) $(LIBAVCODEC_CFLAGS) $(FAAD_CFLAGS)
+libttLibC_a_CFLAGS=$(OPENCV_CFLAGS) $(OPENAL_CFLAGS) $(MP3LAME_CFLAGS) $(FAAC_CFLAGS) $(OPENH264_CFLAGS) $(SPEEXDSP_CFLAGS) $(SPEEX_CFLAGS) $(OPUS_CFLAGS) $(LIBAVCODEC_CFLAGS) $(FAAD_CFLAGS) $(JPEG_CFLAGS)
+libttLibC_a_CPPFLAGS=$(OPENCV_CFLAGS) $(OPENAL_CFLAGS) $(MP3LAME_CFLAGS) $(FAAC_CFLAGS) $(OPENH264_CFLAGS) $(SPEEXDSP_CFLAGS) $(SPEEX_CFLAGS) $(OPUS_CFLAGS) $(LIBAVCODEC_CFLAGS) $(FAAD_CFLAGS) $(JPEG_CFLAGS)

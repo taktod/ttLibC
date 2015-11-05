@@ -19,6 +19,7 @@
 #include "h264.h"
 #include "h265.h"
 #include "theora.h"
+#include "jpeg.h"
 #include "vp6.h"
 #include "vp8.h"
 #include "vp9.h"
@@ -64,6 +65,7 @@ ttLibC_Video *ttLibC_Video_make(
 	case frameType_h264:
 	case frameType_h265:
 	case frameType_theora:
+	case frameType_jpeg:
 	case frameType_vp6:
 	case frameType_vp8:
 	case frameType_vp9:
@@ -204,6 +206,9 @@ void ttLibC_Video_close(ttLibC_Video **frame) {
 		break;
 	case frameType_h264:
 		ttLibC_H264_close((ttLibC_H264 **)frame);
+		break;
+	case frameType_jpeg:
+		ttLibC_Jpeg_close((ttLibC_Jpeg **)frame);
 		break;
 	case frameType_yuv420:
 		ttLibC_Yuv420_close((ttLibC_Yuv420 **)frame);

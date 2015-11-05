@@ -32,6 +32,7 @@ ttLibC_Frame *ttLibC_Frame_clone(
 	case frameType_flv1:
 	case frameType_h264:
 	case frameType_h265:
+	case frameType_jpeg:
 	case frameType_theora:
 	case frameType_vp6:
 	case frameType_vp8:
@@ -77,6 +78,7 @@ void ttLibC_Frame_close(ttLibC_Frame **frame) {
 	case frameType_flv1:
 	case frameType_h264:
 	case frameType_h265:
+	case frameType_jpeg:
 	case frameType_theora:
 	case frameType_vp6:
 	case frameType_vp8:

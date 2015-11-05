@@ -25,6 +25,7 @@ opencv_flg=no
 openal_flg=no
 mp3lame_flg=no
 faac_flg=no
+jpeg_flg=no
 openh264_flg=no
 speexdsp_flg=no
 speex_flg=no
@@ -39,6 +40,7 @@ openal_check=no
 mp3lame_encode_check=no
 mp3lame_decode_check=no
 faac_encode_check=no
+jpeg_check=no
 openh264_check=no
 speexdsp_check=no
 speex_check=no
@@ -109,6 +111,7 @@ AC_ARG_ENABLE(
 		opus_flg=$enableval
 		avcodec_flg=$enableval
 		faad_flg=$enableval
+		jpeg_flg=$enableval
 	]
 )
 
@@ -134,6 +137,12 @@ AC_ARG_ENABLE(
 	[faac],
 	AS_HELP_STRING([--enable-faac/--disable-faac], [enable/disable faac code.]),
 	[faac_flg=$enableval]
+)
+
+AC_ARG_ENABLE(
+	[jpeg],
+	AS_HELP_STRING([--enable-jpeg/--disable-jpeg], [enable/disable jpeg code.]),
+	[jpeg_flg=$enableval]
 )
 
 AC_ARG_ENABLE(
@@ -234,6 +243,26 @@ if test x$faac_flg = "xyes"; then
 		],
 	)
 fi
+
+if test x$jpeg_flg = "xyes"; then
+	AC_CHECK_HEADER(
+		jpeglib.h,
+		[
+			AC_CHECK_LIB(
+				jpeg,
+				jpeg_set_quality,
+				[
+					JPEG_CFLAGS='-I/usr/local/include'
+					JPEG_LIBS='-L/usr/local/lib -ljpeg'
+					AC_SUBST([JPEG_CFLAGS])
+					AC_SUBST([JPEG_LIBS])
+					jpeg_check=yes
+				]
+			)
+		],
+	)
+fi
+
 if test x$openh264_flg = "xyes"; then
 	PKG_CHECK_MODULES(
 		[OPENH264],
@@ -333,6 +362,11 @@ if test x$faac_flg$lgpl_flg$faac_encode_check = "xyesyesyes"; then
 	AC_DEFINE([__ENABLE_FAAC_ENCODE__])
 fi
 AM_CONDITIONAL(ENABLE_FAAC_ENCODE, test x$faac_flg$lgpl_flg$faac_encode_check = "xyesyesyes")
+
+if test x$jpeg_flg$jpeg_check = "xyesyes"; then
+	AC_DEFINE([__ENABLE_JPEG__])
+fi
+AM_CONDITIONAL(ENABLE_JPEG, test x$jpeg_flg$jpeg_check = "xyesyes")
 
 if test x$openh264_flg$openh264_check = "xyesyes"; then
 	AC_DEFINE([__ENABLE_OPENH264__])
@@ -554,4 +588,13 @@ echo "avcodec:          off(under lgpl or gpl only.)"
 	fi
 else
 echo "avcodec:          off"
+fi
+if test x$jpeg_flg = "xyes"; then
+	if test x$jpeg_check = "xyes"; then
+echo "jpeg:             on"
+	else
+echo "jpeg:             off(libjpeg is missing)"
+	fi
+else
+echo "jpeg:             off"
 fi

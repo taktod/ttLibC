@@ -31,6 +31,8 @@ typedef enum {
 	frameType_h264,
 	/** ttLibC_H265 video frame */
 	frameType_h265,
+	/** ttLibC_Jpeg video frame */
+	frameType_jpeg,
 	/** ttLibC_Theora video frame */
 	frameType_theora,
 	/** ttLibC_Vp6 video frame */
