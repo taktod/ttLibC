@@ -174,6 +174,11 @@ void ttLibC_JpegEncoder_encode(
 					cb[(i >> 1)] = yuv->u_data;
 					cr[(i >> 1)] = yuv->v_data;
 				}
+/*				y[i] = yuv->y_data + yuv->y_stride * (max - 1 + j);
+				if((i & 0x01) == 0) {
+					cb[(i >> 1)] = yuv->u_data + (yuv->u_stride * ((max - 1 + j) >> 1));
+					cr[(i >> 1)] = yuv->v_data + (yuv->v_stride * ((max - 1 + j) >> 1));
+				}*/
 			}
 			else {
 				y[i] = yuv->y_data + yuv->y_stride * (i + j);

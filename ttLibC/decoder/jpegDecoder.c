@@ -90,13 +90,17 @@ void ttLibC_JpegDecoder_decode(
 	bool is_alloc_flg = false;
 	// check the size is multiple of 16 or not.
 	if(decoder_->inherit_super.height % 16 > 0) {
-		int add_size = ((16 - (decoder_->inherit_super.height % 16)) * decoder_->inherit_super.height) * 3 / 2;
-		if(decoder_->dummy_buffer_size < add_size) {
+		size_t dummy_size = decoder_->inherit_super.width * 3;
+		if(decoder_->dummy_buffer_size < dummy_size) {
 			if(decoder_->dummy_buffer != NULL) {
 				ttLibC_free(decoder_->dummy_buffer);
 			}
-			decoder_->dummy_buffer_size = add_size;
-			decoder_->dummy_buffer = ttLibC_malloc(add_size);
+			decoder_->dummy_buffer = ttLibC_malloc(dummy_size);
+			if(decoder_->dummy_buffer == NULL) {
+				ERR_PRINT("failed to make dummy buffer.");
+				return;
+			}
+			decoder_->dummy_buffer_size = dummy_size;
 		}
 	}
 
@@ -135,10 +139,20 @@ void ttLibC_JpegDecoder_decode(
 		}
 		for(int i = 0;i < 16;i ++) {
 			if(i >= max) {
-				y[i] = decoder_->dummy_buffer + (i - max) * decoder_->inherit_super.width;
+/*				y[i] = decoder_->dummy_buffer + (i - max) * decoder_->inherit_super.width;
 				if((i & 0x01) == 0) {
 					cb[(i >> 1)] = decoder_->dummy_buffer + (16 - max) * decoder_->inherit_super.width + (i - max) * decoder_->inherit_super.width / 4;
 					cr[(i >> 1)] = decoder_->dummy_buffer + (16 - max) * decoder_->inherit_super.width * 5 / 4 + (i - max) * decoder_->inherit_super.width / 4;
+				}*/
+/*				y[i] = y_data - decoder_->inherit_super.width;
+				if((i & 0x01) == 0) {
+					cb[(i >> 1)] = u_data - (decoder_->inherit_super.width >> 1);
+					cr[(i >> 1)] = v_data - (decoder_->inherit_super.width >> 1);
+				}*/
+				y[i] = decoder_->dummy_buffer;
+				if((i & 0x01) == 0) {
+					cb[(i >> 1)] = decoder_->dummy_buffer + decoder_->inherit_super.width;
+					cr[(i >> 1)] = decoder_->dummy_buffer + decoder_->inherit_super.width * 2;
 				}
 			}
 			else {
