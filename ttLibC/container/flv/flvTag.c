@@ -1,6 +1,6 @@
 /*
  * @file   flvTag.c
- * @brief  
+ * @brief  flvTag container.
  *
  * this code is under 3-Cause BSD license.
  *
@@ -59,7 +59,7 @@ bool ttLibC_Flv_getFrame(ttLibC_Flv *flv, ttLibC_getFrameFunc callback, void *pt
 		return ttLibC_FlvAudioTag_getFrame((ttLibC_FlvAudioTag *)flv, callback, ptr);
 	case FlvType_header:
 	case FlvType_meta:
-		// 取得するデータはない
+		// header and meta data doesn't have any frame.
 		return true;
 	case FlvType_video:
 		return ttLibC_FlvVideoTag_getFrame((ttLibC_FlvVideoTag *)flv, callback, ptr);

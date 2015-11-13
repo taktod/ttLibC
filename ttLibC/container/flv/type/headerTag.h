@@ -1,6 +1,6 @@
 /**
  * @file   headerTag.h
- * @brief  
+ * @brief  flvTag for file header.
  *
  * this code is under 3-Cause BSD license.
  *
@@ -26,7 +26,6 @@ typedef struct {
 
 typedef ttLibC_Container_Flv_FlvHeaderTag ttLibC_FlvHeaderTag;
 
-// いるかこの処理？
 ttLibC_FlvHeaderTag *ttLibC_FlvHeaderTag_make(
 		ttLibC_FlvTag *prev_tag,
 		void *data,

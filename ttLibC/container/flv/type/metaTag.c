@@ -1,6 +1,6 @@
 /*
  * @file   metaTag.c
- * @brief  
+ * @brief  flvTag for meta.
  *
  * this code is under 3-Cause BSD license.
  *
@@ -32,19 +32,17 @@ ttLibC_FlvMetaTag *ttLibC_FlvMetaTag_make(
 			FlvType_meta,
 			track_id);
 	if(metaTag != NULL) {
-		// metaTagできてます。
 	}
 	return metaTag;
 }
 
-// 情報取得は別途実施するでいいと思う。
+// if need to get meta information, hold binary data and read the binary.
 ttLibC_FlvMetaTag *ttLibC_FlvMetaTag_getTag(
 		ttLibC_FlvTag *prev_tag,
 		uint8_t *data,
 		size_t data_size) {
 	/**
-	 * 内部メモ
-	 * 1byteフラグ
+	 * 1byte flag
 	 * 3byte size
 	 * 3byte timestamp
 	 * 1byte timestamp-ext

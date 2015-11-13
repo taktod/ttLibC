@@ -1,6 +1,6 @@
 /*
  * @file   flvReader.c
- * @brief  
+ * @brief  flvTag reader from binary data.
  *
  * this code is under 3-Cause BSD license.
  *
@@ -27,13 +27,12 @@ ttLibC_FlvReader *ttLibC_FlvReader_make() {
 	reader->audio_tag = NULL;
 	reader->video_tag = NULL;
 
+	// first header has not size but data.
 	reader->type        = FlvType_header;
 	reader->status      = body;
 	reader->target_size = 13;
 
-	reader->tmp_buffer_size     = 65536;
-	reader->tmp_buffer          = ttLibC_malloc(reader->tmp_buffer_size);
-	reader->tmp_buffer_next_pos = 0;
+	reader->tmp_buffer = ttLibC_DynamicBuffer_make();
 	return (ttLibC_FlvReader *)reader;
 }
 
@@ -101,60 +100,21 @@ bool ttLibC_FlvReader_read(
 		size_t data_size,
 		ttLibC_FlvReadFunc callback,
 		void *ptr) {
-	ttLibC_FlvReader_ *reader_ = (ttLibC_FlvReader_ *)reader;
 	if(reader == NULL) {
 		return false;
 	}
-	uint8_t *buffer = data;
-	size_t left_size = data_size;
-	if(reader_->tmp_buffer_next_pos != 0) {
-		// 必要分コピーしておきます。
-		size_t copy_size = reader_->target_size - reader_->tmp_buffer_next_pos;
-		memcpy(reader_->tmp_buffer + reader_->tmp_buffer_next_pos, buffer, copy_size);
-		buffer += copy_size;
-		left_size -= copy_size;
-		if(reader_->status == size) {
-			// サイズ状態なら、サイズ分のデータを読み込んでなんとかする。
-			reader_->type = *reader_->tmp_buffer;
-			uint32_t tag_size = be_uint32_t(*((uint32_t *)reader_->tmp_buffer)) & 0x00FFFFFF;
-
-			reader_->status = body;
-			reader_->target_size = tag_size + 11 + 4;
-
-			// body用のデータを読み込む必要あり。
-			if(reader_->tmp_buffer_size < reader_->target_size) {
-				LOG_PRINT("tmp buffer is too small.(rarely occured I think.):%zx", reader_->target_size);
-				return false;
-			}
-			// データが足りるのでデータをコピーしないといけない。
-			copy_size = reader_->target_size - 4;
-			memcpy(reader_->tmp_buffer + 4, buffer, copy_size);
-			buffer += copy_size;
-			left_size -= copy_size;
-		}
-		if(!FlvReader_read(reader_, reader_->tmp_buffer, reader_->target_size, callback, ptr)) {
-			return false;
-		}
-		reader_->status = size;
-		reader_->target_size = 4;
-	}
+	ttLibC_FlvReader_ *reader_ = (ttLibC_FlvReader_ *)reader;
+	ttLibC_DynamicBuffer_append(reader_->tmp_buffer, (uint8_t *)data, data_size);
 	do {
-		if(reader_->target_size > left_size) {
-			if(reader_->tmp_buffer_size < reader_->target_size) {
-				// tmp_bufferの内容をallocしなおしてサイズを大きくしないと足りなくなります。
-				LOG_PRINT("tmp buffer is too small.(rarely occured I think.):%zx", reader_->target_size);
-				return false;
-			}
-			memcpy(reader_->tmp_buffer, buffer, left_size);
-			reader_->tmp_buffer_next_pos = left_size;
-			// コピーしておいとく。
-			return true;
+		uint8_t *buffer = ttLibC_DynamicBuffer_refData(reader_->tmp_buffer);
+		size_t left_size = ttLibC_DynamicBuffer_refSize(reader_->tmp_buffer);
+		if(reader_->target_size > ttLibC_DynamicBuffer_refSize(reader_->tmp_buffer)) {
+			ttLibC_DynamicBuffer_clear(reader_->tmp_buffer);
+			return true; // continue
 		}
 		switch(reader_->status) {
 		case size:
-			// こちら側でデータが足りなくなった場合は・・・こまったことになる。
 			reader_->type = *buffer;
-			// タグサイズ取得
 			uint32_t tag_size = be_uint32_t(*((uint32_t *)buffer)) & 0x00FFFFFF;
 			reader_->status = body;
 			reader_->target_size = tag_size + 11 + 4;
@@ -162,11 +122,10 @@ bool ttLibC_FlvReader_read(
 		default:
 		case body:
 			if(!FlvReader_read(reader_, buffer, reader_->target_size, callback, ptr)) {
+				ttLibC_DynamicBuffer_clear(reader_->tmp_buffer);
 				return false;
 			}
-			buffer += reader_->target_size;
-			left_size -= reader_->target_size;
-
+			ttLibC_DynamicBuffer_markAsRead(reader_->tmp_buffer, reader_->target_size);
 			reader_->status = size;
 			reader_->target_size = 4;
 			break;
@@ -186,9 +145,7 @@ void ttLibC_FlvReader_close(ttLibC_FlvReader **reader) {
 	ttLibC_FlvTag_close(&target->flv_tag);
 	ttLibC_FlvTag_close((ttLibC_FlvTag **)&target->audio_tag);
 	ttLibC_FlvTag_close((ttLibC_FlvTag **)&target->video_tag);
-	if(target->tmp_buffer != NULL) {
-		ttLibC_free(target->tmp_buffer);
-	}
+	ttLibC_DynamicBuffer_close(&target->tmp_buffer);
 	ttLibC_free(target);
 	*reader = NULL;
 }

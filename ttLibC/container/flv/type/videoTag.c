@@ -1,6 +1,6 @@
 /*
  * @file   videoTag.c
- * @brief  
+ * @brief  flvTag for video
  *
  * this code is under 3-Cause BSD license.
  *
@@ -53,7 +53,7 @@ ttLibC_FlvVideoTag *ttLibC_FlvVideoTag_make(
 			break;
 		case 5:
 			// on2vp6 alpha
-			video_tag->frame_type = frameType_vp6; // 本当はvp6 alpha(あとで判定する。)
+			video_tag->frame_type = frameType_vp6;
 			break;
 		case 6:
 			// screen video 2
@@ -74,11 +74,8 @@ ttLibC_FlvVideoTag *ttLibC_FlvVideoTag_getTag(
 		ttLibC_FlvTag *prev_tag,
 		uint8_t *data,
 		size_t data_size) {
-	// データを読み取って解析していく。
-	// dataの部分には、フレームデータをそのままいれておく形にしておく。
 	/*
-	 * 内容メモ
-	 * 1byte フラグ
+	 * 1byte flag
 	 * 3byte size
 	 * 3byte timestamp
 	 * 1byte timestamp-ext
@@ -135,7 +132,13 @@ bool ttLibC_FlvVideoTag_getFrame(
 	switch(video_tag->frame_type) {
 	case frameType_flv1:
 		{
-			ttLibC_Flv1 *flv1 = ttLibC_Flv1_getFrame(video_tag->inherit_super.frame, buffer, left_size, true, video_tag->inherit_super.inherit_super.inherit_super.pts, video_tag->inherit_super.inherit_super.inherit_super.timebase);
+			ttLibC_Flv1 *flv1 = ttLibC_Flv1_getFrame(
+					(ttLibC_Flv1 *)video_tag->inherit_super.frame,
+					buffer,
+					left_size,
+					true,
+					video_tag->inherit_super.inherit_super.inherit_super.pts,
+					video_tag->inherit_super.inherit_super.inherit_super.timebase);
 			if(flv1 == NULL) {
 				return false;
 			}
@@ -145,20 +148,12 @@ bool ttLibC_FlvVideoTag_getFrame(
 		break;
 	case frameType_h264:
 		{
-			// 始めのbyteをみて、なんであるか判定しないといけない。
-			// frameを取り出すことができたら、callbackで呼び出してやる。
-			// frameができたら、video_tag->frameにくくっておく。
-			// この２点で十分と思われる。
-			// ttLibC_h264は基本annexBでできているので、flvのデータをそのまま使うことはできない。
-			// よってデータを改良しなければならない。
-			// 書き直しが生じるとおもってつくっていく必要がある。
-			// これはavcc形式のデータの場合はどこでも発生する話なので、ttLibC_H264側で処理やらせよう。
 			uint32_t dts = (buffer[1] << 16) | (buffer[2] << 8) | buffer[3];
 			if(dts != 0) {
 				LOG_PRINT("found dts is non zero h264 data.");
 			}
 			if(buffer[0] == 0x00) {
-				// avcC データ
+				// avcC information
 				buffer += 4;
 				left_size -= 4;
 				uint32_t length_size = 0;
@@ -171,21 +166,21 @@ bool ttLibC_FlvVideoTag_getFrame(
 					ERR_PRINT("avcc size length is too small.");
 					return false;
 				}
-				// video_tagのlength_sizeはコピーして保持しないとだめ。
+				// h264_length_size can be changed, however, usually 4byte
 				video_tag->h264_length_size = length_size;
 				video_tag->inherit_super.frame = (ttLibC_Frame *)h264;
 				return callback(ptr, video_tag->inherit_super.frame);
 			}
 			else if(buffer[0] == 0x01) {
-				// 通常のh264データ
+				// normal frame.
+				// first 4 byte for type and 3byte dts.(just ignore.)
 				buffer += 4;
 				left_size -= 4;
 				uint8_t *buf = buffer;
 				size_t buf_size = left_size;
-				// サイズも取得する。
+				// change sizenal -> nal
 				do {
 					uint32_t size = 0;
-					// まずsize部を00 00 01に変更する。
 					for(int i = 1;i <= video_tag->h264_length_size;++ i) {
 						size = (size << 8) | *buf;
 						if(i != video_tag->h264_length_size) {
@@ -200,7 +195,6 @@ bool ttLibC_FlvVideoTag_getFrame(
 					buf += size;
 					buf_size -= size;
 				} while(buf_size > 0);
-				// ここでbufferの中身が完成した
 				ttLibC_H264 *h264 = ttLibC_H264_getFrame(
 						(ttLibC_H264 *)video_tag->inherit_super.frame,
 						buffer,
@@ -216,11 +210,11 @@ bool ttLibC_FlvVideoTag_getFrame(
 				return callback(ptr, video_tag->inherit_super.frame);
 			}
 			else if(buffer[0] == 0x02) {
-				// h264の終端フラグ
+				// flag for end of h264 stream.
 				return true;
 			}
 			else {
-				// それ以外
+				// others, unknown
 				LOG_PRINT("found unknown data. h264 end sign?");
 				LOG_DUMP(buffer, left_size, true);
 				return false;
@@ -228,7 +222,7 @@ bool ttLibC_FlvVideoTag_getFrame(
 		}
 		break;
 	case frameType_vp6:
-		// 始めのbyteをみて・・・以下略
+		// need to make
 		break;
 	default:
 		break;
@@ -298,17 +292,11 @@ bool ttLibC_FlvVideoTag_writeTag(
 		break;
 	case frameType_h264:
 		{
-			// h264の場合はmshである可能性がある。
-			// h264のconfigDataのデータはcrc32を取得して保存しておく。
-			// このcrcが変わったらmshを再度書き出す必要がでてくる。(まぁ普通ないけど)
 			ttLibC_H264 *h264 = (ttLibC_H264*)frame;
 			switch(h264->type) {
 			case H264Type_configData:
-				// writerが保持している現在のconfigDataのcrc32を計算し、writerが保持しているものと比較。
-				// 一致していればすでに書き込みずみなので放置
-				// 一致しなければ書き込みを実施する、
-				// なおcrc32が0の場合は初回書き込みなので、必ず書き込む
-				// h264のconfigDataのcrc32計算は他でも必要になりそうですね。
+				// need to make media sequence header.
+				// if crc32 value is same, the data is same.
 				{
 					uint32_t crc32_value = ttLibC_H264_getConfigCrc32(h264);
 					if(writer->video_track.crc32 == 0 || writer->video_track.crc32 != crc32_value) {
@@ -317,14 +305,13 @@ bool ttLibC_FlvVideoTag_writeTag(
 						 */
 						uint8_t avcc[256];
 						size_t size = ttLibC_H264_readAvccTag(h264, avcc, sizeof(avcc));
-						// 中身がきまったので、flvタグをつくって応答します。
-						// bufの内容を書いていきます。
+						// make up buf.
 						buf[0]  = 0x09;
 						uint32_t pre_size = size + 4 + 1;
 						buf[1]  = (pre_size >> 16) & 0xFF;
 						buf[2]  = (pre_size >> 8) & 0xFF;
 						buf[3]  = pre_size & 0xFF;
-						// pts値
+						// pts
 						buf[4]  = (h264->inherit_super.inherit_super.pts >> 16) & 0xFF;
 						buf[5]  = (h264->inherit_super.inherit_super.pts >> 8) & 0xFF;
 						buf[6]  = h264->inherit_super.inherit_super.pts & 0xFF;
@@ -366,7 +353,6 @@ bool ttLibC_FlvVideoTag_writeTag(
 			case H264Type_slice:
 			case H264Type_sliceIDR:
 				{
-					// まず全体の長さを知る必要がある。
 					uint32_t pre_size = 5; // codec + type + dts(3byte)
 					ttLibC_H264_NalInfo nal_info;
 					uint8_t *data = h264->inherit_super.inherit_super.data;
@@ -381,7 +367,7 @@ bool ttLibC_FlvVideoTag_writeTag(
 					buf[1]  = (pre_size >> 16) & 0xFF;
 					buf[2]  = (pre_size >> 8) & 0xFF;
 					buf[3]  = pre_size & 0xFF;
-					// pts値
+					// pts
 					buf[4]  = (h264->inherit_super.inherit_super.pts >> 16) & 0xFF;
 					buf[5]  = (h264->inherit_super.inherit_super.pts >> 8) & 0xFF;
 					buf[6]  = h264->inherit_super.inherit_super.pts & 0xFF;
@@ -406,9 +392,10 @@ bool ttLibC_FlvVideoTag_writeTag(
 					if(!callback(ptr, buf, 16)) {
 						return false;
 					}
-					// 実態を書き込んでいく。
+					// now ready to make data.
 					data = h264->inherit_super.inherit_super.data;
 					data_size = h264->inherit_super.inherit_super.buffer_size;
+					// nal -> sizenal.
 					while(ttLibC_H264_getNalInfo(&nal_info, data, data_size)) {
 						uint32_t size = nal_info.nal_size - nal_info.data_pos;
 						buf[0] = (size >> 24) & 0xFF;

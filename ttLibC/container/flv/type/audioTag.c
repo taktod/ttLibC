@@ -1,6 +1,6 @@
 /*
  * @file   audioTag.c
- * @brief  
+ * @brief  flvTag for audio
  *
  * this code is under 3-Cause BSD license.
  *
@@ -180,7 +180,6 @@ ttLibC_FlvAudioTag *ttLibC_FlvAudioTag_getTag(
 			channel_flag);
 }
 
-// dsiは43bit以上必要みたいなので、uint64_tで保持しておこうかな・・・
 bool ttLibC_FlvAudioTag_getFrame(
 		ttLibC_FlvAudioTag *audio_tag,
 		ttLibC_getFrameFunc callback,

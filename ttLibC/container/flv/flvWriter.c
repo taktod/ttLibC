@@ -1,6 +1,6 @@
 /*
  * @file   flvWriter.c
- * @brief  
+ * @brief  flvTag writer to make binary data.
  *
  * this code is under 3-Cause BSD license.
  *
@@ -34,9 +34,7 @@ ttLibC_FlvWriter *ttLibC_FlvWriter_make(
 	case frameType_vp6:
 		writer->video_track.crc32       = 0;
 		writer->video_track.frame_type  = video_type;
-		// そんなにためることもないでしょう。
-		// 貯める必要がありました。元のデータがなんであるかによって、stackを大きめにとる必要があるかは変わってくるみたいです。
-		// ソースをmpegtsにしたところ、stackが小さすぎて正しい動作にならなかった。
+		// we need to have enough size of queue. or drop some frame.
 		writer->video_track.frame_queue = ttLibC_FrameQueue_make(9, 255);
 		break;
 	default:
@@ -127,7 +125,6 @@ static bool FlvWriter_queueFrame(
 	return true;
 }
 
-// フレームを書き出す。
 static bool FlvWriter_writeFrameAudioOnly(
 		ttLibC_FlvWriter_ *writer,
 		ttLibC_ContainerWriteFunc callback,
@@ -218,7 +215,6 @@ bool ttLibC_FlvWriter_write(
 		}
 	}
 	else if(writer_->audio_track.frame_type == frameType_unknown) {
-		// audio trackがないデータの場合
 		if(!FlvWriter_writeFrameVideoOnly(
 				writer_,
 				callback,

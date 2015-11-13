@@ -1,6 +1,6 @@
 /*
  * @file   headerTag.c
- * @brief  
+ * @brief  flvTag for file header.
  *
  * this code is under 3-Cause BSD license.
  *
@@ -44,7 +44,6 @@ ttLibC_FlvHeaderTag *ttLibC_FlvHeaderTag_getTag(
 		ttLibC_FlvTag *prev_tag,
 		uint8_t *data,
 		size_t data_size) {
-	// まず先頭の3文字が'FLVである必要がある。'
 	if(data[0] != 'F'
 	|| data[1] != 'L'
 	|| data[2] != 'V') {

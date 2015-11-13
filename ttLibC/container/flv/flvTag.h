@@ -1,6 +1,6 @@
 /**
  * @file   flvTag.h
- * @brief  
+ * @brief  flvTag container.
  *
  * this code is under 3-Cause BSD license.
  *
@@ -18,19 +18,28 @@ extern "C" {
 #include "../flv.h"
 #include "../containerCommon.h"
 
+/**
+ * detail definition of flvTag
+ */
 typedef struct {
-	// 共通項目を取り出しておく。
 	ttLibC_Flv inherit_super;
-	uint32_t track_id; // 1固定
-	// size -> ttLibC_Containerで保持する。
-	// timestamp -> 同上
-	// track_id -> ここに含める (本来の意味でのtrackIdはttLibC_Flv_Typeで代用する予定)
-	// でいいかな。
-	ttLibC_Frame *frame; // 本来ならvideoFrameとaudioFrameのみで十分だが、ここで保持させることで解放時にうまく解放できるようにする。
+	uint32_t track_id; // 1
+	ttLibC_Frame *frame;
 } ttLibC_Container_FlvTag;
 
 typedef ttLibC_Container_FlvTag ttLibC_FlvTag;
 
+/**
+ * make flvTag container
+ * @param prev_frame
+ * @param data
+ * @param data_size
+ * @param non_copy_mode
+ * @param pts
+ * @param timebase
+ * @param type
+ * @param track_id
+ */
 ttLibC_FlvTag *ttLibC_FlvTag_make(
 		ttLibC_FlvTag *prev_tag,
 		void *data,

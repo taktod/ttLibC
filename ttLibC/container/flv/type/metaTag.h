@@ -1,6 +1,6 @@
 /**
  * @file   metaTag.h
- * @brief  
+ * @brief  flvTag for meta.
  *
  * this code is under 3-Cause BSD license.
  *
@@ -19,7 +19,7 @@ extern "C" {
 
 typedef struct {
 	ttLibC_FlvTag inherit_super;
-	// 追加でとっておくデータは特にいまのところなし。
+	// meta data is just ignore for now.
 } ttLibC_Container_Flv_FlvMetaTag;
 
 typedef ttLibC_Container_Flv_FlvMetaTag ttLibC_FlvMetaTag;

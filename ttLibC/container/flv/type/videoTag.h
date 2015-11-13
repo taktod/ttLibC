@@ -1,6 +1,6 @@
 /**
  * @file   videoTag.h
- * @brief  
+ * @brief  flvTag for video
  *
  * this code is under 3-Cause BSD license.
  *
@@ -22,7 +22,7 @@ typedef struct {
 	ttLibC_FlvTag inherit_super;
 	ttLibC_Frame_Type frame_type;
 	uint8_t codec_id;
-	uint32_t h264_length_size;
+	uint32_t h264_length_size; // size information for sizeNal unit(usually 4 byte.)
 } ttLibC_Container_Flv_FlvVideoTag;
 
 typedef ttLibC_Container_Flv_FlvVideoTag ttLibC_FlvVideoTag;

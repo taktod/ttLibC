@@ -1,6 +1,6 @@
 /**
  * @file   flv.h
- * @brief  
+ * @brief  flv container support
  *
  * this code is under 3-Cause BSD license.
  *
