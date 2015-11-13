@@ -1,6 +1,6 @@
 /*
  * @file   mp3Writer.c
- * @brief  
+ * @brief  mp3Frame writer to make binary data.
  *
  * this code is under 3-Cause BSD license.
  *
@@ -13,7 +13,6 @@
 #include "../../allocator.h"
 #include "../../frame/audio/mp3.h"
 #include <stdlib.h>
-
 
 ttLibC_Mp3Writer *ttLibC_Mp3Writer_make() {
 	ttLibC_Mp3Writer_ *writer = (ttLibC_Mp3Writer_ *)ttLibC_ContainerWriter_make(containerType_mp3, sizeof(ttLibC_Mp3Writer_), 44100);
@@ -37,11 +36,11 @@ bool ttLibC_Mp3Writer_write(
 		ERR_PRINT("only support mp3.");
 		return false;
 	}
-	// frameのptsデータをsample_rateベースに書き直します。
+	// overwrite timeinformation base on sample_rate.
 	ttLibC_Mp3 *mp3 = (ttLibC_Mp3 *)frame;
 	mp3->inherit_super.inherit_super.pts = mp3->inherit_super.inherit_super.pts * mp3->inherit_super.sample_rate / mp3->inherit_super.inherit_super.timebase;
 	mp3->inherit_super.inherit_super.timebase = mp3->inherit_super.sample_rate;
-	// timestampの値を確認しておきたい。
+	// in the case of gap, need to insert no sound data.
 	return callback(ptr, mp3->inherit_super.inherit_super.data, mp3->inherit_super.inherit_super.buffer_size);
 }
 

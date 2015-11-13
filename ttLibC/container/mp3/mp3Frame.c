@@ -1,6 +1,6 @@
 /*
  * @file   mp3Frame.c
- * @brief  
+ * @brief  mp3frame container.
  *
  * this code is under 3-Cause BSD license.
  *

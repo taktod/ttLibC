@@ -1,6 +1,6 @@
 /*
  * @file   mp3Reader.h
- * @brief  
+ * @brief  mp3Frame reader from binary data.
  *
  * this code is under 3-Cause BSD license.
  *
@@ -18,13 +18,15 @@ extern "C" {
 #include "../mp3.h"
 
 #include "mp3Frame.h"
+#include "../../util/dynamicBufferUtil.h"
 
+/**
+ * mp3Reader detail definition.
+ */
 typedef struct {
 	ttLibC_Mp3Reader inherit_super;
 	ttLibC_Mp3Frame *frame;
-	uint8_t *tmp_buffer;
-	size_t tmp_buffer_size;
-	size_t tmp_buffer_next_pos;
+	ttLibC_DynamicBuffer *tmp_buffer;
 	uint64_t current_pts;
 	uint32_t timebase;
 } ttLibC_ContainerReader_Mp3Reader_;

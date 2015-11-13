@@ -1,6 +1,6 @@
 /**
  * @file   mp3Writer.h
- * @brief  
+ * @brief  mp3Frame writer to make binary data.
  *
  * this code is under 3-Cause BSD license.
  *
@@ -18,6 +18,9 @@ extern "C" {
 #include "../mp3.h"
 #include "mp3Frame.h"
 
+/**
+ * mp3writer detail definition.
+ */
 typedef struct {
 	ttLibC_Mp3Writer inherit_super;
 	bool is_first;

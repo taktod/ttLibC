@@ -1,6 +1,6 @@
 /*
  * @file   mp3Reader.c
- * @brief  
+ * @brief  mp3Frame reader from binary data.
  *
  * this code is under 3-Cause BSD license.
  *
@@ -21,14 +21,12 @@ ttLibC_Mp3Reader *ttLibC_Mp3Reader_make() {
 		ERR_PRINT("failed to allocate memory for reader.");
 		return NULL;
 	}
-	// これは一度作成すれば、それを使い回すことができるっぽいですね。
-
 	reader->current_pts = 0;
+	// fill data for example data.
 	reader->timebase = 44100;
 	reader->frame = NULL;
-	reader->tmp_buffer_size = 512;
-	reader->tmp_buffer = ttLibC_malloc(reader->tmp_buffer_size);
-	reader->tmp_buffer_next_pos = 0;
+
+	reader->tmp_buffer = ttLibC_DynamicBuffer_make();
 	return (ttLibC_Mp3Reader *)reader;
 }
 
@@ -41,7 +39,7 @@ bool Mp3Reader_updateMp3Frame(
 			0,
 			true,
 			mp3->inherit_super.inherit_super.pts,
-			mp3->inherit_super.inherit_super.timebase);;
+			mp3->inherit_super.inherit_super.timebase);
 	if(mp3_frame == NULL) {
 		return false;
 	}
@@ -61,6 +59,7 @@ ttLibC_Mp3 *Mp3Reader_readMp3FromBinary(
 	}
 	mp3 = ttLibC_Mp3_getFrame(prev_frame, data, data_size, 0, 1000);
 	if(mp3 != NULL) {
+		// fix timestamp information.
 		switch(mp3->type) {
 		case Mp3Type_frame:
 			mp3->inherit_super.inherit_super.pts = reader->current_pts;
@@ -81,55 +80,26 @@ bool ttLibC_Mp3Reader_read(
 		size_t data_size,
 		ttLibC_Mp3ReadFunc callback,
 		void *ptr) {
-	// mp3lame encoderのときと違いこっちでは、データサイズが足りない場合がある。
-	// mp3readerで読み込めばまったく同じになっているので・・・そうしようか・・・
 	ttLibC_Mp3Reader_ *reader_ = (ttLibC_Mp3Reader_ *)reader;
 	ttLibC_Mp3 *mp3 = NULL;
-	if(reader_->tmp_buffer_next_pos != 0) {
-		// 現在のデータをtmp_bufferに追記する。
-		size_t copy_size = reader_->tmp_buffer_size - reader_->tmp_buffer_next_pos;
-		if(copy_size > data_size) {
-			copy_size = data_size;
-		}
-		memcpy(reader_->tmp_buffer + reader_->tmp_buffer_next_pos, data, copy_size);
-		mp3 = Mp3Reader_readMp3FromBinary(reader_, reader_->tmp_buffer, reader_->tmp_buffer_next_pos + copy_size);
-		if(mp3 == NULL) {
-			ERR_PRINT("failed to get mp3 frame. something fatal happen?");
-			return false;
-		}
-		data += mp3->inherit_super.inherit_super.buffer_size - reader_->tmp_buffer_next_pos;
-		data_size -= mp3->inherit_super.inherit_super.buffer_size - reader_->tmp_buffer_next_pos;
-
-		if(!Mp3Reader_updateMp3Frame(
-				reader_,
-				mp3)) {
-			return false;
-		}
-		// このmp3_frameをcallbackで応答すればよい。
-		if(!callback(ptr, (ttLibC_Container_Mp3 *)reader_->frame)) {
-			return false;
-		}
-	}
-	// ここからdo whileループにする。
+	ttLibC_DynamicBuffer_append(reader_->tmp_buffer, data, data_size);
 	do {
-		mp3 = Mp3Reader_readMp3FromBinary(reader_, data, data_size);
+		mp3 = Mp3Reader_readMp3FromBinary(reader_, ttLibC_DynamicBuffer_refData(reader_->tmp_buffer), ttLibC_DynamicBuffer_refSize(reader_->tmp_buffer));
 		if(mp3 == NULL) {
-			memcpy(reader_->tmp_buffer, data, data_size);
-			reader_->tmp_buffer_next_pos = data_size;
-			// NULLになった場合はデータが足りてないから。
-			// だいたいがサイズが足りないので、ここでおわり。
+			// if mp3 is NULL, need more data.
+			ttLibC_DynamicBuffer_clear(reader_->tmp_buffer);
 			return true;
 		}
-		data += mp3->inherit_super.inherit_super.buffer_size;
-		data_size -= mp3->inherit_super.inherit_super.buffer_size;
+		ttLibC_DynamicBuffer_markAsRead(reader_->tmp_buffer, mp3->inherit_super.inherit_super.buffer_size);
 		if(!Mp3Reader_updateMp3Frame(
 				reader_,
 				mp3)) {
 			ERR_PRINT("failed to make mp3 frame");
+			ttLibC_DynamicBuffer_clear(reader_->tmp_buffer);
 			return false;
 		}
-		// このmp3_frameをcallbackで応答すればよい。
 		if(!callback(ptr, (ttLibC_Container_Mp3 *)reader_->frame)) {
+			ttLibC_DynamicBuffer_clear(reader_->tmp_buffer);
 			return false;
 		}
 	} while(true);
@@ -141,9 +111,7 @@ void ttLibC_Mp3Reader_close(ttLibC_Mp3Reader **reader) {
 		return;
 	}
 	ttLibC_Mp3Frame_close(&target->frame);
-	if(target->tmp_buffer != NULL) {
-		ttLibC_free(target->tmp_buffer);
-	}
+	ttLibC_DynamicBuffer_close(&target->tmp_buffer);
 	ttLibC_free(target);
 	*reader = NULL;
 }
