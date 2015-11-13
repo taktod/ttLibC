@@ -59,7 +59,7 @@ bool ttLibC_FlvAudioTag_getFrame(
 bool ttLibC_FlvAudioTag_writeTag(
 		ttLibC_FlvWriter_ *writer,
 		ttLibC_Frame *frame,
-		ttLibC_ContainerWriterFunc callback,
+		ttLibC_ContainerWriteFunc callback,
 		void *ptr);
 
 #ifdef __cplusplus

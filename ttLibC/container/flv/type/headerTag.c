@@ -67,7 +67,7 @@ ttLibC_FlvHeaderTag *ttLibC_FlvHeaderTag_getTag(
 
 bool ttLibC_FlvHeaderTag_writeTag(
 		ttLibC_FlvWriter_ *writer,
-		ttLibC_ContainerWriterFunc callback,
+		ttLibC_ContainerWriteFunc callback,
 		void *ptr) {
 	uint8_t buf[13];
 	size_t size = ttLibC_HexUtil_makeBuffer("464C5601000000000900000000", buf, 13);

@@ -74,7 +74,7 @@ typedef ttLibC_ContainerReader_FlvReader ttLibC_FlvReader;
  * @param flv flv object.
  * @return bool true:continue false:stop
  */
-typedef bool (* ttLibC_FlvReaderFunc)(void *ptr, ttLibC_Flv *flv);
+typedef bool (* ttLibC_FlvReadFunc)(void *ptr, ttLibC_Flv *flv);
 
 /**
  * make flv reader.
@@ -95,7 +95,7 @@ bool ttLibC_FlvReader_read(
 		ttLibC_FlvReader *reader,
 		void *data,
 		size_t data_size,
-		ttLibC_FlvReaderFunc callback,
+		ttLibC_FlvReadFunc callback,
 		void *ptr);
 
 /**
@@ -136,7 +136,7 @@ ttLibC_FlvWriter *ttLibC_FlvWriter_make(
 bool ttLibC_FlvWriter_write(
 		ttLibC_FlvWriter *writer,
 		ttLibC_Frame *frame,
-		ttLibC_ContainerWriterFunc callback,
+		ttLibC_ContainerWriteFunc callback,
 		void *ptr);
 
 /**

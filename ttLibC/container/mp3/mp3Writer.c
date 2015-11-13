@@ -26,7 +26,7 @@ ttLibC_Mp3Writer *ttLibC_Mp3Writer_make() {
 bool ttLibC_Mp3Writer_write(
 		ttLibC_Mp3Writer *writer,
 		ttLibC_Frame *frame,
-		ttLibC_ContainerWriterFunc callback,
+		ttLibC_ContainerWriteFunc callback,
 		void *ptr) {
 	ttLibC_Mp3Writer_ *writer_ = (ttLibC_Mp3Writer_ *)writer;
 	if(writer_ == NULL) {

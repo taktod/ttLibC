@@ -58,21 +58,21 @@ bool ttLibC_Pes_writePacket(
 		ttLibC_PointerQueue *queue,
 		uint32_t start_pos,
 		uint32_t end_pos,
-		ttLibC_ContainerWriterFunc callback,
+		ttLibC_ContainerWriteFunc callback,
 		void *ptr);
 */
 
 bool ttLibC_Pes_writeH264Packet(
 		ttLibC_MpegtsTrack *track, // ccの更新で必要
 		ttLibC_Frame *frame, // 書き込み対象のデータ
-		ttLibC_ContainerWriterFunc callback,
+		ttLibC_ContainerWriteFunc callback,
 		void *ptr);
 
 bool ttLibC_Pes_writeAudioPacket(
 		ttLibC_MpegtsWriter_ *writer,
 		ttLibC_MpegtsTrack *track,
 //		uint64_t pts,
-		ttLibC_ContainerWriterFunc callback,
+		ttLibC_ContainerWriteFunc callback,
 		void *ptr);
 
 #ifdef __cplusplus

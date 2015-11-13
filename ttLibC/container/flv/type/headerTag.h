@@ -45,7 +45,7 @@ ttLibC_FlvHeaderTag *ttLibC_FlvHeaderTag_getTag(
 
 bool ttLibC_FlvHeaderTag_writeTag(
 		ttLibC_FlvWriter_ *writer,
-		ttLibC_ContainerWriterFunc callback,
+		ttLibC_ContainerWriteFunc callback,
 		void *ptr);
 
 #ifdef __cplusplus

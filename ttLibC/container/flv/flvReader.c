@@ -41,7 +41,7 @@ static bool FlvReader_read(
 		ttLibC_FlvReader_ *reader,
 		uint8_t *buffer,
 		size_t buffer_size,
-		ttLibC_FlvReaderFunc callback,
+		ttLibC_FlvReadFunc callback,
 		void *ptr) {
 	ttLibC_FlvTag *tag = NULL;
 	switch(reader->type) {
@@ -99,7 +99,7 @@ bool ttLibC_FlvReader_read(
 		ttLibC_FlvReader *reader,
 		void *data,
 		size_t data_size,
-		ttLibC_FlvReaderFunc callback,
+		ttLibC_FlvReadFunc callback,
 		void *ptr) {
 	ttLibC_FlvReader_ *reader_ = (ttLibC_FlvReader_ *)reader;
 	if(reader == NULL) {

@@ -48,7 +48,7 @@ static bool MpegtsReader_read(
 		ttLibC_MpegtsReader_ *reader,
 		uint8_t *buffer,
 		size_t left_size,
-		ttLibC_MpegtsReaderFunc callback,
+		ttLibC_MpegtsReadFunc callback,
 		void *ptr) {
 //	ttLibC_HexUtil_dump(buffer, reader->target_size, true);
 	bool result = true;
@@ -128,7 +128,7 @@ static bool MpegtsReader_read(
 	return result;
 }
 
-bool ttLibC_MpegtsReader_read(ttLibC_MpegtsReader *reader, void *data, size_t data_size, ttLibC_MpegtsReaderFunc callback, void *ptr) {
+bool ttLibC_MpegtsReader_read(ttLibC_MpegtsReader *reader, void *data, size_t data_size, ttLibC_MpegtsReadFunc callback, void *ptr) {
 //	LOG_PRINT("データをreadする。");
 	ttLibC_MpegtsReader_ *reader_ = (ttLibC_MpegtsReader_ *)reader;
 	if(reader_ == NULL) {

@@ -130,7 +130,7 @@ static bool FlvWriter_queueFrame(
 // フレームを書き出す。
 static bool FlvWriter_writeFrameAudioOnly(
 		ttLibC_FlvWriter_ *writer,
-		ttLibC_ContainerWriterFunc callback,
+		ttLibC_ContainerWriteFunc callback,
 		void *ptr) {
 	while(true) {
 		ttLibC_Frame *audio = ttLibC_FrameQueue_dequeue_first(writer->audio_track.frame_queue);
@@ -147,7 +147,7 @@ static bool FlvWriter_writeFrameAudioOnly(
 
 static bool FlvWriter_writeFrameVideoOnly(
 		ttLibC_FlvWriter_ *writer,
-		ttLibC_ContainerWriterFunc callback,
+		ttLibC_ContainerWriteFunc callback,
 		void *ptr) {
 	while(true) {
 		ttLibC_Frame *video = ttLibC_FrameQueue_dequeue_first(writer->video_track.frame_queue);
@@ -164,7 +164,7 @@ static bool FlvWriter_writeFrameVideoOnly(
 
 static int FlvWriter_writeFrame(
 		ttLibC_FlvWriter_ *writer,
-		ttLibC_ContainerWriterFunc callback,
+		ttLibC_ContainerWriteFunc callback,
 		void *ptr) {
 	while(true) {
 		ttLibC_Frame *video = ttLibC_FrameQueue_ref_first(writer->video_track.frame_queue);
@@ -193,7 +193,7 @@ static int FlvWriter_writeFrame(
 bool ttLibC_FlvWriter_write(
 		ttLibC_FlvWriter *writer,
 		ttLibC_Frame *frame,
-		ttLibC_ContainerWriterFunc callback,
+		ttLibC_ContainerWriteFunc callback,
 		void *ptr) {
 	ttLibC_FlvWriter_ *writer_ = (ttLibC_FlvWriter_ *)writer;
 	if(writer_->is_first) {

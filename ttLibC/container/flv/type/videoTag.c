@@ -239,7 +239,7 @@ bool ttLibC_FlvVideoTag_getFrame(
 bool ttLibC_FlvVideoTag_writeTag(
 		ttLibC_FlvWriter_ *writer,
 		ttLibC_Frame *frame,
-		ttLibC_ContainerWriterFunc callback,
+		ttLibC_ContainerWriteFunc callback,
 		void *ptr) {
 	uint8_t buf[256]; // buffer for writing.
 	switch(frame->type) {

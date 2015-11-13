@@ -447,7 +447,7 @@ bool ttLibC_Pes_getFrame(
 bool ttLibC_Pes_writeH264Packet(
 		ttLibC_MpegtsTrack *track, // ccの更新で必要
 		ttLibC_Frame *frame, // 書き込み対象のデータ
-		ttLibC_ContainerWriterFunc callback,
+		ttLibC_ContainerWriteFunc callback,
 		void *ptr) {
 	ttLibC_H264 *h264 = (ttLibC_H264 *)frame;
 	ttLibC_H264 *config = (ttLibC_H264 *)track->h264_configData;
@@ -624,7 +624,7 @@ typedef struct {
 	uint64_t start_pts;
 	uint8_t *data;
 	size_t   data_size;
-	ttLibC_ContainerWriterFunc callback;
+	ttLibC_ContainerWriteFunc callback;
 	ttLibC_MpegtsTrack *track;
 	void *ptr;
 	bool error_flg;
@@ -752,7 +752,7 @@ bool Pes_writeAudioData(void *ptr, ttLibC_Frame *frame) {
 bool ttLibC_Pes_writeAudioPacket(
 		ttLibC_MpegtsWriter_ *writer,
 		ttLibC_MpegtsTrack *track,
-		ttLibC_ContainerWriterFunc callback,
+		ttLibC_ContainerWriteFunc callback,
 		void *ptr) {
 	// ptsを超えないデータについて、まず、全体長を調べる。
 	// 続いて書き込みを実施する。

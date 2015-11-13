@@ -79,7 +79,7 @@ typedef ttLibC_ContainerReader_MpegtsReader ttLibC_MpegtsReader;
  * @param ptr    user def pointer.
  * @param mpegts read mpegts object.
  */
-typedef bool (* ttLibC_MpegtsReaderFunc)(void *ptr, ttLibC_Mpegts *mpegts);
+typedef bool (* ttLibC_MpegtsReadFunc)(void *ptr, ttLibC_Mpegts *mpegts);
 
 /**
  * make mpegts reader object
@@ -100,7 +100,7 @@ bool ttLibC_MpegtsReader_read(
 		ttLibC_MpegtsReader *reader,
 		void *data,
 		size_t data_size,
-		ttLibC_MpegtsReaderFunc callback,
+		ttLibC_MpegtsReadFunc callback,
 		void *ptr);
 
 /**
@@ -171,7 +171,7 @@ bool ttLibC_MpegtsWriter_write(
 		bool update_info_flag,
 		uint16_t pid,
 		ttLibC_Frame *frame,
-		ttLibC_ContainerWriterFunc callback,
+		ttLibC_ContainerWriteFunc callback,
 		void *ptr);
 
 /**

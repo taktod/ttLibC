@@ -76,6 +76,15 @@ typedef struct {
 	ttLibC_Container_Type type;
 } ttLibC_ContainerReader;
 
+typedef bool (* ttLibC_ContainerReadFunc)(void *ptr, ttLibC_Container *container);
+
+bool ttLibC_ContainerReader_read(
+		ttLibC_ContainerReader *reader,
+		void  *data,
+		size_t data_size,
+		ttLibC_ContainerReadFunc callback,
+		void  *ptr);
+
 /**
  * close container reader
  * @param reader
@@ -100,8 +109,13 @@ typedef struct {
  * @param data_size data sizes
  * @return true:continue false:stop
  */
-typedef bool (* ttLibC_ContainerWriterFunc)(void *ptr, void *data, size_t size);
+typedef bool (* ttLibC_ContainerWriteFunc)(void *ptr, void *data, size_t size);
 
+bool ttLibC_ContainerWriter_write(
+		ttLibC_ContainerWriter *writer,
+		ttLibC_Frame *frame,
+		ttLibC_ContainerWriteFunc callback,
+		void *ptr);
 
 /**
  * close container writer

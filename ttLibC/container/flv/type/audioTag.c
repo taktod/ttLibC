@@ -263,7 +263,7 @@ bool ttLibC_FlvAudioTag_getFrame(
 bool ttLibC_FlvAudioTag_writeTag(
 		ttLibC_FlvWriter_ *writer,
 		ttLibC_Frame *frame,
-		ttLibC_ContainerWriterFunc callback,
+		ttLibC_ContainerWriteFunc callback,
 		void *ptr) {
 	uint8_t buf[256];
 	switch(frame->type) {

@@ -79,7 +79,7 @@ bool ttLibC_Mp3Reader_read(
 		ttLibC_Mp3Reader *reader,
 		void *data,
 		size_t data_size,
-		ttLibC_Mp3ReaderFunc callback,
+		ttLibC_Mp3ReadFunc callback,
 		void *ptr) {
 	// mp3lame encoderのときと違いこっちでは、データサイズが足りない場合がある。
 	// mp3readerで読み込めばまったく同じになっているので・・・そうしようか・・・

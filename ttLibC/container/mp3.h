@@ -36,7 +36,7 @@ typedef struct {
 
 typedef ttLibC_ContainerReader_Mp3Reader ttLibC_Mp3Reader;
 
-typedef bool (* ttLibC_Mp3ReaderFunc)(void *ptr, ttLibC_Container_Mp3 *mp3);
+typedef bool (* ttLibC_Mp3ReadFunc)(void *ptr, ttLibC_Container_Mp3 *mp3);
 
 ttLibC_Mp3Reader *ttLibC_Mp3Reader_make();
 
@@ -44,7 +44,7 @@ bool ttLibC_Mp3Reader_read(
 		ttLibC_Mp3Reader *reader,
 		void *data,
 		size_t data_size,
-		ttLibC_Mp3ReaderFunc callback,
+		ttLibC_Mp3ReadFunc callback,
 		void *ptr);
 
 void ttLibC_Mp3Reader_close(ttLibC_Mp3Reader **reader);
@@ -62,7 +62,7 @@ ttLibC_Mp3Writer *ttLibC_Mp3Writer_make();
 bool ttLibC_Mp3Writer_write(
 		ttLibC_Mp3Writer *writer,
 		ttLibC_Frame *frame,
-		ttLibC_ContainerWriterFunc callback,
+		ttLibC_ContainerWriteFunc callback,
 		void *ptr);
 
 void ttLibC_Mp3Writer_close(ttLibC_Mp3Writer **writer);

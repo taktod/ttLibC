@@ -109,7 +109,7 @@ ttLibC_MpegtsWriter *ttLibC_MpegtsWriter_make_ex(
 typedef struct {
 	ttLibC_MpegtsWriter_ *writer;
 	ttLibC_MpegtsTrack *track;
-	ttLibC_ContainerWriterFunc callback;
+	ttLibC_ContainerWriteFunc callback;
 	void *ptr;
 	bool error_flg;
 } test_t;
@@ -153,7 +153,7 @@ bool MpegtsWriter_h264_test(void *ptr, ttLibC_Frame *frame) {
 // この処理はマルチトラックを考慮していません。
 static bool MpegtsWriter_writeFromQueue(
 		ttLibC_MpegtsWriter_ *writer,
-		ttLibC_ContainerWriterFunc callback,
+		ttLibC_ContainerWriteFunc callback,
 		void *ptr) {
 	// h264はsliceIDRが見つかるまで取得後に即書き出す。
 	// とりあえずqueueと取り出す
@@ -221,7 +221,7 @@ bool ttLibC_MpegtsWriter_write(
 		bool update_info_flag,
 		uint16_t pid,
 		ttLibC_Frame *frame,
-		ttLibC_ContainerWriterFunc callback,
+		ttLibC_ContainerWriteFunc callback,
 		void *ptr) {
 	ttLibC_MpegtsWriter_ *writer_ = (ttLibC_MpegtsWriter_ *)writer;
 	if(writer_->is_first || update_info_flag) {
