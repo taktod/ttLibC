@@ -56,28 +56,6 @@ typedef struct {
 typedef bool (* ttLibC_getFrameFunc)(void *ptr, ttLibC_Frame *frame);
 
 /**
- * common function for container make.
- * @param prev_container reuse container object.
- * @param container_size memory allocate size for container object.
- * @param container_type target container_type
- * @param data           data
- * @param data_size      data_size
- * @param non_copy_mode  true:hold the pointer / false:copy memory data.
- * @param pts            pts for container
- * @param timebase       timebase for pts.
- * @return container object.
- */
-ttLibC_Container *ttLibC_Container_make(
-		ttLibC_Container *prev_container,
-		size_t container_size,
-		ttLibC_Container_Type container_type,
-		void *data,
-		size_t data_size,
-		bool non_copy_mode,
-		uint64_t pts,
-		uint32_t timebase);
-
-/**
  * get frame from container object.
  * @param container container object.
  * @param callback  callback function
@@ -89,12 +67,6 @@ bool ttLibC_Container_getFrame(
 		ttLibC_getFrameFunc callback,
 		void *ptr);
 
-/**
- * close container
- * @param container
- */
-void ttLibC_Container_close(ttLibC_Container **container);
-
 // -------------------------------------------------------------- //
 
 /**
@@ -103,17 +75,6 @@ void ttLibC_Container_close(ttLibC_Container **container);
 typedef struct {
 	ttLibC_Container_Type type;
 } ttLibC_ContainerReader;
-
-/**
- * common work for containerReader make.
- * use inner only.
- * @param container_type target container type.
- * @param reader_size    sizeof object.
- * @return reader object.
- */
-ttLibC_ContainerReader *ttLibC_ContainerReader_make(
-		ttLibC_Container_Type container_type,
-		size_t reader_size);
 
 /**
  * close container reader
@@ -141,18 +102,6 @@ typedef struct {
  */
 typedef bool (* ttLibC_ContainerWriterFunc)(void *ptr, void *data, size_t size);
 
-/**
- * common work for containerWriter make
- * use inner only.
- * @param container_type target container type.
- * @param writer_size    sizeof object.
- * @param timebase       timebase for writer.
- * @return writer object.
- */
-ttLibC_ContainerWriter *ttLibC_ContainerWriter_make(
-		ttLibC_Container_Type container_type,
-		size_t writer_size,
-		uint32_t timebase);
 
 /**
  * close container writer

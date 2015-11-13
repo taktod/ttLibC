@@ -16,6 +16,7 @@ extern "C" {
 #endif
 
 #include "../mpegts.h"
+#include "../containerCommon.h"
 
 typedef struct {
 	ttLibC_Mpegts inherit_super;

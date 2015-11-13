@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../containerCommon.h"
 #include "../mp3.h"
 
 typedef struct {

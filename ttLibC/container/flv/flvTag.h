@@ -16,6 +16,7 @@ extern "C" {
 #endif
 
 #include "../flv.h"
+#include "../containerCommon.h"
 
 typedef struct {
 	// 共通項目を取り出しておく。

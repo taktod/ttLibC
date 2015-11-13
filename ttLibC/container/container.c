@@ -9,6 +9,7 @@
  */
 
 #include "container.h"
+#include "containerCommon.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -132,7 +133,7 @@ bool ttLibC_Container_getFrame(
 
 /*
  * close container
- */
+ * /
 void ttLibC_Container_close(ttLibC_Container **container) {
 	ttLibC_Container *target = *container;
 	if(target == NULL) {
@@ -159,6 +160,7 @@ void ttLibC_Container_close(ttLibC_Container **container) {
 		break;
 	}
 }
+*/
 
 /*
  * common work for containerReader make.
