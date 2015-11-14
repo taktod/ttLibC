@@ -17,7 +17,7 @@ static const char *version = "ttLibC"
 #	if defined(__ENABLE_LGPL__)
 		" LGPLv3 version"
 #	else
-		" 3cause BSD version"
+		" 3-Cause BSD version"
 #	endif
 #endif
 ;
@@ -33,5 +33,3 @@ const char *ttLibC_getLastError(int error_no) {
 const char *ttLibC_getVersion() {
 	return version;
 }
-
-
