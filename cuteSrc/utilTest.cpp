@@ -39,7 +39,6 @@
 #include <ttLibC/util/amfUtil.h>
 
 #include <ttLibC/util/dynamicBufferUtil.h>
-#include <ttLibC/util/bitUtil.h>
 #include <ttLibC/util/byteUtil.h>
 
 #include <stdio.h>
@@ -94,24 +93,24 @@ static void connectorTest() {
 	LOG_PRINT("connectorTest");
 	uint8_t buffer[256];
 	size_t buffer_size = 256;
-	ttLibC_BitConnector *connector = ttLibC_BitConnector_make(buffer, buffer_size);
-	ttLibC_BitConnector_ebml(connector, 0x02);
-	ttLibC_BitConnector_ebml(connector, 0xFF);
-	ttLibC_BitConnector_ebml(connector, 0xFFFF);
-	ttLibC_BitConnector_ebml(connector, 0xFFFFFF);
-	ttLibC_BitConnector_ebml(connector, 0xFFFFFFFFL);
-	ttLibC_BitConnector_ebml(connector, 0xFFFFFFFFFFL);
-	ttLibC_BitConnector_ebml(connector, 0xFFFFFFFFFFFFL);
-	ttLibC_BitConnector_ebml(connector, 0xFFFFFFFFFFFFFFL);
+	ttLibC_ByteConnector *connector = ttLibC_ByteConnector_make(buffer, buffer_size, ByteUtilType_default);
+	ttLibC_ByteConnector_ebml(connector, 0x02);
+	ttLibC_ByteConnector_ebml(connector, 0xFF);
+	ttLibC_ByteConnector_ebml(connector, 0xFFFF);
+	ttLibC_ByteConnector_ebml(connector, 0xFFFFFF);
+	ttLibC_ByteConnector_ebml(connector, 0xFFFFFFFFL);
+	ttLibC_ByteConnector_ebml(connector, 0xFFFFFFFFFFL);
+	ttLibC_ByteConnector_ebml(connector, 0xFFFFFFFFFFFFL);
+	ttLibC_ByteConnector_ebml(connector, 0xFFFFFFFFFFFFFFL);
 	LOG_DUMP(buffer, connector->write_size, true);
-	ttLibC_BitConnector_close(&connector);
-	connector = ttLibC_BitConnector_make(buffer, buffer_size);
-	ttLibC_BitConnector_bit(connector, 0xFEDCB, 20);
-	ttLibC_BitConnector_bit(connector, 3, 4);
-	ttLibC_BitConnector_bit(connector, 5, 3);
-	ttLibC_BitConnector_bit(connector, 6, 5);
+	ttLibC_ByteConnector_close(&connector);
+	connector = ttLibC_ByteConnector_make(buffer, buffer_size, ByteUtilType_default);
+	ttLibC_ByteConnector_bit(connector, 0xFEDCB, 20);
+	ttLibC_ByteConnector_bit(connector, 3, 4);
+	ttLibC_ByteConnector_bit(connector, 5, 3);
+	ttLibC_ByteConnector_bit(connector, 6, 5);
 	LOG_DUMP(buffer, connector->write_size, true);
-	ttLibC_BitConnector_close(&connector);
+	ttLibC_ByteConnector_close(&connector);
 	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
