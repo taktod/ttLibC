@@ -411,6 +411,46 @@ size_t ttLibC_ByteReader_string(
 }
 
 /*
+ * skip several size of byte reading.
+ * @param reader
+ * @param skip_size size in byte num.
+ */
+size_t ttLibC_ByteReader_skipByte(
+		ttLibC_ByteReader *reader,
+		size_t skip_size) {
+	ttLibC_ByteReader_ *reader_ = (ttLibC_ByteReader_ *)reader;
+	if(reader_->data_size < skip_size) {
+		ERR_PRINT("hold buffer size is smaller than skip_size.");
+		return 0;
+	}
+	reader_->data += skip_size;
+	reader_->data_size -= skip_size;
+	reader_->inherit_super.read_size += skip_size;
+	return skip_size;
+}
+
+/*
+ * rewind several size of byte reading.
+ * (go backward.)
+ * @param reader
+ * @param rewind_size
+ */
+size_t ttLibC_ByteReader_rewindByte(
+		ttLibC_ByteReader *reader,
+		size_t rewind_size) {
+	ttLibC_ByteReader_ *reader_ = (ttLibC_ByteReader_ *)reader;
+	// TODO check with global val, bad coder can put fake value on this to destroy program.
+	if(reader_->inherit_super.read_size < rewind_size) {
+		ERR_PRINT("cannot rewind before original start position.");
+		return 0;
+	}
+	reader_->data -= rewind_size;
+	reader_->data_size += rewind_size;
+	reader_->inherit_super.read_size -= rewind_size;
+	return rewind_size;
+}
+
+/*
  * close ByteReader
  * @param reader
  */

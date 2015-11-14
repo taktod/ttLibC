@@ -101,6 +101,35 @@ size_t ttLibC_ByteReader_string(
 		size_t target_size);
 
 /**
+ * skip several size of bit reading.
+ * @param reader
+ * @param skip_size size in bit num.
+ * TODO do later, if need.
+ */
+/*size_t ttLibC_ByteReader_skipBit(
+		ttLibC_ByteReader *reader,
+		size_t skip_size);*/
+
+/**
+ * skip several size of byte reading.
+ * @param reader
+ * @param skip_size size in byte num.
+ */
+size_t ttLibC_ByteReader_skipByte(
+		ttLibC_ByteReader *reader,
+		size_t skip_size);
+
+/**
+ * rewind several size of byte reading.
+ * (go backward.)
+ * @param reader
+ * @param rewind_size
+ */
+size_t ttLibC_ByteReader_rewindByte(
+		ttLibC_ByteReader *reader,
+		size_t rewind_size);
+
+/**
  * close ByteReader
  * @param reader
  */
