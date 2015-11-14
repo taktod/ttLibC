@@ -1,6 +1,6 @@
 /**
  * @file   mpegtsWriter.h
- * @brief  
+ * @brief  mpegts container writer.
  *
  * this code is under 3-Cause BSD license.
  *
@@ -19,26 +19,51 @@ extern "C" {
 
 #include "../misc.h"
 
+/**
+ * definition of mpegts tracks/
+ */
 typedef struct {
 	ttLibC_FrameQueue *frame_queue;
 	ttLibC_Frame *h264_configData;
-	uint8_t cc;
+	uint8_t cc; // continuity counter.
+	ttLibC_Frame_Type frame_type;
 } ttLibC_MpegtsTrack;
 
+/**
+ * definition of mpegts
+ */
+typedef enum {
+	status_target_check, // check next target duration by pcr track.
+	status_video_check,
+	status_video_add,
+	status_audio_check,
+	status_audio_add,
+	status_current_update,
+} ttLibC_MpegtsWriter_Status;
+
+/**
+ * detail definition of mpegts writer.
+ */
 typedef struct {
 	ttLibC_MpegtsWriter inherit_super;
-	uint64_t current_pts_pos;
-	uint64_t target_pos;
-	uint32_t max_unit_duration;
+
 	uint8_t cc_sdt;
 	uint8_t cc_pat;
 	uint8_t cc_pmt;
-	// bufferを一度作成すれば、あとは巡回カウンターの値だけ変えれば十分なので、ここに実態を保持させておきます。
+
 	uint8_t sdt_buf[188];
 	uint8_t pat_buf[188];
 	uint8_t pmt_buf[188];
-	ttLibC_MpegtsTrack track[MaxPesTracks];
+
+	ttLibC_MpegtsTrack *track_list;
+	uint32_t pes_track_num;
+
 	bool is_first;
+	uint64_t current_pts_pos;
+	uint64_t target_pos;
+	uint32_t max_unit_duration;
+
+	ttLibC_MpegtsWriter_Status status;
 } ttLibC_ContainerWriter_MpegtsWriter_;
 
 typedef ttLibC_ContainerWriter_MpegtsWriter_ ttLibC_MpegtsWriter_;

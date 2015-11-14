@@ -1,6 +1,6 @@
 /*
  * @file   sdt.c
- * @brief  
+ * @brief  mpegts sdt.
  *
  * this code is under 3-Cause BSD license.
  *
@@ -12,13 +12,14 @@
 #include "../mpegtsPacket.h"
 
 #include "../../../log.h"
+#include "../../../allocator.h"
 #include "../../../util/hexUtil.h"
 #include "../../../util/crc32Util.h"
 #include "../../../util/ioUtil.h"
 #include <string.h>
 
 ttLibC_Sdt *ttLibC_Sdt_make(
-		ttLibC_MpegtsPacket *prev_packet,
+		ttLibC_Sdt *prev_packet,
 		void *data,
 		size_t data_size,
 		bool non_copy_mode,
@@ -27,7 +28,7 @@ ttLibC_Sdt *ttLibC_Sdt_make(
 		uint16_t pid,
 		uint8_t continuity_counter) {
 	ttLibC_Sdt *sdt = (ttLibC_Sdt *)ttLibC_MpegtsPacket_make(
-			prev_packet,
+			(ttLibC_MpegtsPacket *)prev_packet,
 			data,
 			data_size,
 			non_copy_mode,
@@ -43,15 +44,23 @@ ttLibC_Sdt *ttLibC_Sdt_make(
 }
 
 ttLibC_Sdt *ttLibC_Sdt_getPacket(
-		ttLibC_MpegtsPacket *prev_packet,
+		ttLibC_Sdt *prev_sdt,
 		uint8_t *data,
 		size_t data_size) {
 	if(data_size != 188) {
 		ERR_PRINT("size is not 188 bytes");
 		return NULL;
 	}
-	// 該当のデータがsdtだったら、sdtの巡回カウンターを取得して、次のデータがその値+1になっているか確認しておきたい。
-	return ttLibC_Sdt_make(prev_packet, NULL, 0, true, 0, 1000, MpegtsType_sdt, 0);
+	// for sdt, if we have 188 byte, that's ok. cause sdt is just meta information.
+	return ttLibC_Sdt_make(
+			prev_sdt,
+			NULL,
+			0,
+			true,
+			0,
+			1000,
+			MpegtsType_sdt,
+			0);
 }
 
 bool ttLibC_Sdt_makePacket(
@@ -63,38 +72,14 @@ bool ttLibC_Sdt_makePacket(
 	uint32_t name_length = strlen(name);
 	uint8_t *buf_crc = data + 5;
 	uint32_t buf_length = 0x15 + name_length + provider_length;
-	/*
-	 * 内容メモ
-	 * 先頭4byte
-	 * 8bit syncByte
-	 * 1bit transportErrorIndicator
-	 * 1bit payloadUnitStartIndicator
-	 * 1bit transportPriority
-	 * 13bit pid
-	 * 2bit scramblingControl
-	 * 1bit adaptationFieldExist
-	 * 1bit payloadFieldExist
-	 * 4bit continuityCounter
-	 */
+
+	// 4byte header
 	data[0] = 0x47;
 	data[1] = 0x40;
 	data[2] = 0x11;
 	data[3] = 0x10;
-	/*
-	 * programPacket共通
-	 * 8bit pointerField
-	 * 8bit tableId
-	 * 1bit sectionSyntaxIndicator
-	 * 1bit reservedFutureUse1
-	 * 2bit reserved1
-	 * 12bit sectionLength(ここから先の長さ)
-	 * 16bit programNumber
-	 * 2bit reserved
-	 * 5bit versionNUmber
-	 * 1bit currentNextOrder
-	 * 8bit sectionNumber
-	 * 8bit lastSectionNumber
-	 */
+
+	// common programPacket header.
 	data[4]  = 0x00;
 	data[5]  = 0x42; // fixed id
 	data[6]  = 0xF0;
@@ -135,7 +120,7 @@ bool ttLibC_Sdt_makePacket(
 	memcpy(data, name, name_length);
 	data += name_length;
 	data_size -= name_length;
-	// あとはcrc32を計算する。
+	// crc32
 	ttLibC_Crc32 *crc32 = ttLibC_Crc32_make(0xFFFFFFFF);
 	for(int i = 0;i < buf_length;++ i) {
 		ttLibC_Crc32_update(crc32, *buf_crc);
@@ -145,11 +130,21 @@ bool ttLibC_Sdt_makePacket(
 	data += 4;
 	data_size -= 4;
 	ttLibC_Crc32_close(&crc32);
-	// crc32
-	// あとはff埋め
+	// fill with 0xFF
 	for(int i = 0;i < data_size;++ i) {
 		*data = 0xFF;
 		++ data;
 	}
 	return true;
+}
+
+void ttLibC_Sdt_close(ttLibC_Sdt **sdt) {
+	ttLibC_Sdt *target = *sdt;
+	if(!target->inherit_super.inherit_super.inherit_super.is_non_copy) {
+		if(target->inherit_super.inherit_super.inherit_super.data) {
+			ttLibC_free(target->inherit_super.inherit_super.inherit_super.data);
+		}
+	}
+	ttLibC_free(target);
+	*sdt = NULL;
 }

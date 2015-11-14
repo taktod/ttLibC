@@ -1,16 +1,11 @@
 /**
  * @file   mpegts.h
- * @brief  
+ * @brief  mpegts container support
  *
  * this code is under 3-Cause BSD license.
  *
  * @author taktod
  * @date   2015/08/13
- * TODO やっとくこと。
- * ・終端の書き込み動作がない
- * ・音声のみのmpegtsの書き出しが不可能
- * ・映像のみのmpegtsの書き出しも不可能
- * ・複数音声、複数映像の書き出しも不可能
  */
 
 #ifndef TTLIBC_CONTAINER_MPEGTS_H_
@@ -22,8 +17,6 @@ extern "C" {
 
 #include "container.h"
 #include "../frame/frame.h"
-
-#define MaxPesTracks 5
 
 /**
  * enum for mpegts type.
@@ -127,7 +120,6 @@ typedef ttLibC_ContainerWriter_MpegtsTrackInfo ttLibC_MpegtsTrackInfo;
 typedef struct {
 	ttLibC_ContainerWriter inherit_super;
 	/** ref the track info to get pid and frame type. */
-	ttLibC_MpegtsTrackInfo trackInfo[MaxPesTracks];
 } ttLibC_ContainerWriter_MpegtsWriter;
 
 typedef ttLibC_ContainerWriter_MpegtsWriter ttLibC_MpegtsWriter;

@@ -1,6 +1,6 @@
 /**
  * @file   pes.h
- * @brief  
+ * @brief  mpegts pes.
  *
  * this code is under 3-Cause BSD license.
  *
@@ -21,12 +21,13 @@ extern "C" {
 typedef struct {
 	ttLibC_MpegtsPacket inherit_super;
 	ttLibC_Frame_Type frame_type;
+	ttLibC_Frame *frame;
 } ttLibC_Container_Mpegts_Pes;
 
 typedef ttLibC_Container_Mpegts_Pes ttLibC_Pes;
 
 ttLibC_Pes *ttLibC_Pes_make(
-		ttLibC_MpegtsPacket *prev_packet,
+		ttLibC_Pes *prev_pes,
 		void *data,
 		size_t data_size,
 		bool non_copy_mode,
@@ -37,7 +38,7 @@ ttLibC_Pes *ttLibC_Pes_make(
 		uint8_t stream_type);
 
 ttLibC_Pes *ttLibC_Pes_getPacket(
-		ttLibC_MpegtsPacket *prev_packet,
+		ttLibC_Pes *prev_pes,
 		uint8_t *data,
 		size_t data_size,
 		uint8_t stream_type,
@@ -49,31 +50,32 @@ bool ttLibC_Pes_getFrame(
 		void *ptr);
 
 /**
- * この関数だけは、sdt pat pmtと違い、書き込みのcallbackを呼び出します。
- * sdt pat pmtは初期化時にbufferをつくるので、別扱いになる感じ。
- * /
-bool ttLibC_Pes_writePacket(
-		ttLibC_MpegtsWriter_ *writer,
-		ttLibC_Frame_Type frame_type,
-		ttLibC_PointerQueue *queue,
-		uint32_t start_pos,
-		uint32_t end_pos,
-		ttLibC_ContainerWriteFunc callback,
-		void *ptr);
-*/
-
+ * write h264 packet.
+ * @param track
+ * @param frame
+ * @param callback
+ * @param ptr
+ */
 bool ttLibC_Pes_writeH264Packet(
-		ttLibC_MpegtsTrack *track, // ccの更新で必要
-		ttLibC_Frame *frame, // 書き込み対象のデータ
+		ttLibC_MpegtsTrack *track,
+		ttLibC_Frame *frame,
 		ttLibC_ContainerWriteFunc callback,
 		void *ptr);
 
+/**
+ * write audio packet.
+ * @param writer
+ * @param track
+ * @param callback
+ * @param ptr
+ */
 bool ttLibC_Pes_writeAudioPacket(
 		ttLibC_MpegtsWriter_ *writer,
 		ttLibC_MpegtsTrack *track,
-//		uint64_t pts,
 		ttLibC_ContainerWriteFunc callback,
 		void *ptr);
+
+void ttLibC_Pes_close(ttLibC_Pes **pes);
 
 #ifdef __cplusplus
 } /* extern "C" */

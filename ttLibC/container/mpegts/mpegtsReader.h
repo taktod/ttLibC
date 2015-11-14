@@ -1,6 +1,6 @@
 /**
  * @file   mpegtsReader.h
- * @brief  
+ * @brief  mpegts container reader.
  *
  * this code is under 3-Cause BSD license.
  *
@@ -22,30 +22,29 @@ extern "C" {
 #include "type/pmt.h"
 #include "type/sdt.h"
 
+#include "../../util/dynamicBufferUtil.h"
+
+/**
+ * detail definition of mpegtsReader
+ */
 typedef struct {
 	ttLibC_MpegtsReader inherit_super;
 
-	// 使い回すpacketオブジェクト
+	// re-use container objects.
 	ttLibC_Pat *pat;
 	ttLibC_Pmt *pmt;
 	ttLibC_Sdt *sdt;
-	ttLibC_Pes *pes[MaxPesTracks]; // ここに必要なpesデータをいれておく。
-	// とりあえずトラックは５個まで対応することにする。
+	ttLibC_Pes **pes_list;
 
-	// 処理関連
-	ttLibC_Mpegts_Type type;
-	size_t target_size; // 読み込むべきデータサイズ
+	uint32_t pes_track_num;
+
+	size_t target_size; // read_size is 188 fixed.
 	uint16_t pmt_pid;
-	// これにより複数トラックのmpegtsから特定の音声と映像だけ取得ということができる。
 
-	// 一時バッファ関連
-	uint8_t *tmp_buffer;
-	size_t tmp_buffer_size;
-	size_t tmp_buffer_next_pos;
+	ttLibC_DynamicBuffer *tmp_buffer;
 } ttLibC_ContainerReader_MpegtsReader_;
 
 typedef ttLibC_ContainerReader_MpegtsReader_ ttLibC_MpegtsReader_;
-
 
 #ifdef __cplusplus
 } /* extern "C" */

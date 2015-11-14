@@ -1,6 +1,6 @@
 /**
  * @file   pat.h
- * @brief  
+ * @brief  mpegts pat.
  *
  * this code is under 3-Cause BSD license.
  *
@@ -17,6 +17,9 @@ extern "C" {
 
 #include "../mpegtsPacket.h"
 
+/**
+ * pat detail definition.
+ */
 typedef struct {
 	ttLibC_MpegtsPacket inherit_super;
 	uint16_t pmt_pid;
@@ -25,7 +28,7 @@ typedef struct {
 typedef ttLibC_Container_Mpegts_Pat ttLibC_Pat;
 
 ttLibC_Pat *ttLibC_Pat_make(
-		ttLibC_MpegtsPacket *prev_packet,
+		ttLibC_Pat *prev_packet,
 		void *data,
 		size_t data_size,
 		bool non_copy_mode,
@@ -36,13 +39,15 @@ ttLibC_Pat *ttLibC_Pat_make(
 		uint16_t pmt_pid);
 
 ttLibC_Pat *ttLibC_Pat_getPacket(
-		ttLibC_MpegtsPacket *prev_packet,
+		ttLibC_Pat *prev_pat,
 		uint8_t *data,
 		size_t data_size);
 
 bool ttLibC_Pat_makePacket(
 		uint8_t *data,
 		size_t data_size);
+
+void ttLibC_Pat_close(ttLibC_Pat **pat);
 
 #ifdef __cplusplus
 } /* extern "C" */

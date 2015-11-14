@@ -1,6 +1,6 @@
 /**
  * @file   sdt.h
- * @brief  
+ * @brief  mpegts sdt.
  *
  * this code is under 3-Cause BSD license.
  *
@@ -24,7 +24,7 @@ typedef struct {
 typedef ttLibC_Container_Mpegts_Sdt ttLibC_Sdt;
 
 ttLibC_Sdt *ttLibC_Sdt_make(
-		ttLibC_MpegtsPacket *prev_packet,
+		ttLibC_Sdt *prev_packet,
 		void *data,
 		size_t data_size,
 		bool non_copy_mode,
@@ -34,7 +34,7 @@ ttLibC_Sdt *ttLibC_Sdt_make(
 		uint8_t continuity_counter);
 
 ttLibC_Sdt *ttLibC_Sdt_getPacket(
-		ttLibC_MpegtsPacket *prev_packet,
+		ttLibC_Sdt *prev_Sdt,
 		uint8_t *data,
 		size_t data_size);
 
@@ -43,6 +43,8 @@ bool ttLibC_Sdt_makePacket(
 		const char *name,
 		uint8_t *data,
 		size_t data_size);
+
+void ttLibC_Sdt_close(ttLibC_Sdt **sdt);
 
 #ifdef __cplusplus
 } /* extern "C" */
