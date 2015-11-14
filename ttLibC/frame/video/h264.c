@@ -15,7 +15,7 @@
 #include "../../log.h"
 #include "../../allocator.h"
 #include "../../util/ioUtil.h"
-#include "../../util/bitUtil.h"
+#include "../../util/byteUtil.h"
 #include "../../util/hexUtil.h"
 #include "../../util/crc32Util.h"
 
@@ -334,20 +334,20 @@ bool ttLibC_H264_isKey(uint8_t *data, size_t data_size) {
 static ttLibC_H264_Ref_t ref = {0};
 
 static void H264_analyzeSequenceParameterSet(ttLibC_H264_Ref_t *ref, uint8_t *data, size_t data_size) {
-	ttLibC_BitReader *reader = ttLibC_BitReader_make(data, data_size, BitReaderType_h26x);
+	ttLibC_ByteReader *reader = ttLibC_ByteReader_make(data, data_size, ByteUtilType_h26x);
 
-	ttLibC_BitReader_bit(reader, 1);
-	ttLibC_BitReader_bit(reader, 2);
-	uint8_t type = ttLibC_BitReader_bit(reader, 5);
+	ttLibC_ByteReader_bit(reader, 1);
+	ttLibC_ByteReader_bit(reader, 2);
+	uint8_t type = ttLibC_ByteReader_bit(reader, 5);
 	if(type != H264NalType_sequenceParameterSet) {
 		ERR_PRINT("get non sps data.");
-		ttLibC_BitReader_close(&reader);
+		ttLibC_ByteReader_close(&reader);
 		return;
 	}
-	uint8_t profile_idc = ttLibC_BitReader_bit(reader, 8);
-	ttLibC_BitReader_bit(reader, 8);
-	ttLibC_BitReader_bit(reader, 8);
-	ttLibC_BitReader_expGolomb(reader, false);
+	uint8_t profile_idc = ttLibC_ByteReader_bit(reader, 8);
+	ttLibC_ByteReader_bit(reader, 8);
+	ttLibC_ByteReader_bit(reader, 8);
+	ttLibC_ByteReader_expGolomb(reader, false);
 	switch(profile_idc) {
 	case 100:
 	case 110:
@@ -363,14 +363,14 @@ static void H264_analyzeSequenceParameterSet(ttLibC_H264_Ref_t *ref, uint8_t *da
 	case 134:
 		{
 			ERR_PRINT("non check code.");
-			uint32_t chroma_format_idc = ttLibC_BitReader_expGolomb(reader, false);
+			uint32_t chroma_format_idc = ttLibC_ByteReader_expGolomb(reader, false);
 			if(chroma_format_idc == 3) {
-				ttLibC_BitReader_bit(reader, 1);
+				ttLibC_ByteReader_bit(reader, 1);
 			}
-			ttLibC_BitReader_expGolomb(reader, false);
-			ttLibC_BitReader_expGolomb(reader, false);
-			ttLibC_BitReader_bit(reader, 1);
-			uint8_t seq_scaling_matrix_present_flag = ttLibC_BitReader_bit(reader, 1);
+			ttLibC_ByteReader_expGolomb(reader, false);
+			ttLibC_ByteReader_expGolomb(reader, false);
+			ttLibC_ByteReader_bit(reader, 1);
+			uint8_t seq_scaling_matrix_present_flag = ttLibC_ByteReader_bit(reader, 1);
 			if(seq_scaling_matrix_present_flag == 1) {
 				ERR_PRINT("not imprement for seq_scaling_matrix_present");
 				return;
@@ -380,44 +380,44 @@ static void H264_analyzeSequenceParameterSet(ttLibC_H264_Ref_t *ref, uint8_t *da
 	default:
 		break;
 	}
-	ttLibC_BitReader_expGolomb(reader, false);
-	uint32_t pic_order_cnt_type = ttLibC_BitReader_expGolomb(reader, false);
+	ttLibC_ByteReader_expGolomb(reader, false);
+	uint32_t pic_order_cnt_type = ttLibC_ByteReader_expGolomb(reader, false);
 	if(pic_order_cnt_type == 0) {
-		ttLibC_BitReader_expGolomb(reader, false);
+		ttLibC_ByteReader_expGolomb(reader, false);
 	}
 	else if(pic_order_cnt_type == 1){
-		ttLibC_BitReader_bit(reader, 1);
-		ttLibC_BitReader_expGolomb(reader, true);
-		ttLibC_BitReader_expGolomb(reader, true);
-		uint32_t num_ref_frames_in_pic_order_cnt_cycle = ttLibC_BitReader_expGolomb(reader, false);
+		ttLibC_ByteReader_bit(reader, 1);
+		ttLibC_ByteReader_expGolomb(reader, true);
+		ttLibC_ByteReader_expGolomb(reader, true);
+		uint32_t num_ref_frames_in_pic_order_cnt_cycle = ttLibC_ByteReader_expGolomb(reader, false);
 		for(int i = 0;i < num_ref_frames_in_pic_order_cnt_cycle;++ i) {
-			ttLibC_BitReader_expGolomb(reader, true);
+			ttLibC_ByteReader_expGolomb(reader, true);
 		}
 	}
-	ttLibC_BitReader_expGolomb(reader, false);
-	ttLibC_BitReader_bit(reader, 1);
-	uint32_t pic_width_in_mbs_minus1 = ttLibC_BitReader_expGolomb(reader, false);
-	uint32_t pic_height_in_map_units_minus1 = ttLibC_BitReader_expGolomb(reader, false);
-	uint8_t frame_mbs_only_flag = ttLibC_BitReader_bit(reader, 1);
+	ttLibC_ByteReader_expGolomb(reader, false);
+	ttLibC_ByteReader_bit(reader, 1);
+	uint32_t pic_width_in_mbs_minus1 = ttLibC_ByteReader_expGolomb(reader, false);
+	uint32_t pic_height_in_map_units_minus1 = ttLibC_ByteReader_expGolomb(reader, false);
+	uint8_t frame_mbs_only_flag = ttLibC_ByteReader_bit(reader, 1);
 	if(!frame_mbs_only_flag) {
-		ttLibC_BitReader_bit(reader, 1);
+		ttLibC_ByteReader_bit(reader, 1);
 	}
-	ttLibC_BitReader_bit(reader, 1);
-	uint8_t frame_cropping_flag = ttLibC_BitReader_bit(reader, 1);
+	ttLibC_ByteReader_bit(reader, 1);
+	uint8_t frame_cropping_flag = ttLibC_ByteReader_bit(reader, 1);
 	uint32_t frame_crop_left_offset   = 0;
 	uint32_t frame_crop_right_offset  = 0;
 	uint32_t frame_crop_top_offset    = 0;
 	uint32_t frame_crop_bottom_offset = 0;
 	if(frame_cropping_flag == 1) {
-		frame_crop_left_offset   = ttLibC_BitReader_expGolomb(reader, false);
-		frame_crop_right_offset  = ttLibC_BitReader_expGolomb(reader, false);
-		frame_crop_top_offset    = ttLibC_BitReader_expGolomb(reader, false);
-		frame_crop_bottom_offset = ttLibC_BitReader_expGolomb(reader, false);
+		frame_crop_left_offset   = ttLibC_ByteReader_expGolomb(reader, false);
+		frame_crop_right_offset  = ttLibC_ByteReader_expGolomb(reader, false);
+		frame_crop_top_offset    = ttLibC_ByteReader_expGolomb(reader, false);
+		frame_crop_bottom_offset = ttLibC_ByteReader_expGolomb(reader, false);
 	}
 	ref->width = ((pic_width_in_mbs_minus1 + 1) * 16) - frame_crop_left_offset * 2 - frame_crop_right_offset * 2;
 	ref->height = ((2 - frame_mbs_only_flag)* (pic_height_in_map_units_minus1 +1) * 16) - (frame_crop_top_offset * 2) - (frame_crop_bottom_offset * 2);
 
-	ttLibC_BitReader_close(&reader);
+	ttLibC_ByteReader_close(&reader);
 }
 
 /*

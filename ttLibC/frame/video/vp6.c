@@ -10,7 +10,7 @@
 
 #include "vp6.h"
 #include "../../log.h"
-#include "../../util/bitUtil.h"
+#include "../../util/byteUtil.h"
 
 typedef ttLibC_Frame_Video_Vp6 ttLibC_Vp6_;
 
@@ -22,7 +22,7 @@ typedef ttLibC_Frame_Video_Vp6 ttLibC_Vp6_;
  * @param height        height
  * @param data          vp6 data
  * @param data_size     vp6 data size
- * @param non_copy_mode true:hold the data pointer. false:data will copy.
+ * @param non_copy_mode truef:hold the data pointer. false:data will copy.
  * @param pts           pts for vp6 data.
  * @param timebase      timebase number for pts.
  */
@@ -86,27 +86,27 @@ uint32_t ttLibC_Vp6_getWidth(ttLibC_Vp6 *prev_frame, uint8_t *data, size_t data_
 	 * 8bit dimX (x16 = width)
 	 * 8bit ...
 	 */
-	ttLibC_BitReader *reader = ttLibC_BitReader_make(data, data_size, BitReaderType_default);
-	uint32_t frameMode = ttLibC_BitReader_bit(reader, 1);
+	ttLibC_ByteReader *reader = ttLibC_ByteReader_make(data, data_size, ByteUtilType_default);
+	uint32_t frameMode = ttLibC_ByteReader_bit(reader, 1);
 	if(frameMode == 1) {
-		ttLibC_BitReader_close(&reader);
+		ttLibC_ByteReader_close(&reader);
 		if(prev_frame == NULL) {
 			ERR_PRINT("ref frame is missing.");
 			return 0;
 		}
 		return prev_frame->inherit_super.width;
 	}
-	ttLibC_BitReader_bit(reader, 6);
-	uint32_t marker = ttLibC_BitReader_bit(reader, 1);
-	ttLibC_BitReader_bit(reader, 5);
-	uint32_t version2 = ttLibC_BitReader_bit(reader, 2);
-	ttLibC_BitReader_bit(reader, 1);
+	ttLibC_ByteReader_bit(reader, 6);
+	uint32_t marker = ttLibC_ByteReader_bit(reader, 1);
+	ttLibC_ByteReader_bit(reader, 5);
+	uint32_t version2 = ttLibC_ByteReader_bit(reader, 2);
+	ttLibC_ByteReader_bit(reader, 1);
 	if(marker == 1 && version2 == 0) {
-		ttLibC_BitReader_bit(reader, 16);
+		ttLibC_ByteReader_bit(reader, 16);
 	}
-	uint32_t width = ttLibC_BitReader_bit(reader, 8) * 16;
-	ttLibC_BitReader_bit(reader, 8);
-	ttLibC_BitReader_close(&reader);
+	uint32_t width = ttLibC_ByteReader_bit(reader, 8) * 16;
+	ttLibC_ByteReader_bit(reader, 8);
+	ttLibC_ByteReader_close(&reader);
 	return width;
 }
 
@@ -118,27 +118,27 @@ uint32_t ttLibC_Vp6_getWidth(ttLibC_Vp6 *prev_frame, uint8_t *data, size_t data_
  * @return 0:error or height size.
  */
 uint32_t ttLibC_Vp6_getHeight(ttLibC_Vp6 *prev_frame, uint8_t *data, size_t data_size) {
-	ttLibC_BitReader *reader = ttLibC_BitReader_make(data, data_size, BitReaderType_default);
-	uint32_t frameMode = ttLibC_BitReader_bit(reader, 1);
+	ttLibC_ByteReader *reader = ttLibC_ByteReader_make(data, data_size, ByteUtilType_default);
+	uint32_t frameMode = ttLibC_ByteReader_bit(reader, 1);
 	if(frameMode == 1) {
-		ttLibC_BitReader_close(&reader);
+		ttLibC_ByteReader_close(&reader);
 		if(prev_frame == NULL) {
 			ERR_PRINT("ref frame is missing.");
 			return 0;
 		}
 		return prev_frame->inherit_super.height;
 	}
-	ttLibC_BitReader_bit(reader, 6);
-	uint32_t marker = ttLibC_BitReader_bit(reader, 1);
-	ttLibC_BitReader_bit(reader, 5);
-	uint32_t version2 = ttLibC_BitReader_bit(reader, 2);
-	ttLibC_BitReader_bit(reader, 1);
+	ttLibC_ByteReader_bit(reader, 6);
+	uint32_t marker = ttLibC_ByteReader_bit(reader, 1);
+	ttLibC_ByteReader_bit(reader, 5);
+	uint32_t version2 = ttLibC_ByteReader_bit(reader, 2);
+	ttLibC_ByteReader_bit(reader, 1);
 	if(marker == 1 && version2 == 0) {
-		ttLibC_BitReader_bit(reader, 16);
+		ttLibC_ByteReader_bit(reader, 16);
 	}
-	ttLibC_BitReader_bit(reader, 8);
-	uint32_t height = ttLibC_BitReader_bit(reader, 8) * 16;
-	ttLibC_BitReader_close(&reader);
+	ttLibC_ByteReader_bit(reader, 8);
+	uint32_t height = ttLibC_ByteReader_bit(reader, 8) * 16;
+	ttLibC_ByteReader_close(&reader);
 	return height;
 }
 

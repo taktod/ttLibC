@@ -16,7 +16,7 @@
 #include "../../log.h"
 #include "../../allocator.h"
 
-#include "../../util/bitUtil.h"
+#include "../../util/byteUtil.h"
 #include "../../util/crc32Util.h"
 #include "../../util/hexUtil.h"
 
@@ -186,28 +186,28 @@ ttLibC_Aac *ttLibC_Aac_getFrame(
 	 * 11bit adts buffer full ness
 	 * 2bit no raw data blocks in frame.
 	 */
-	ttLibC_BitReader *reader = ttLibC_BitReader_make(data, data_size, BitReaderType_default);
-	if(ttLibC_BitReader_bit(reader, 12) != 0xFFF) {
+	ttLibC_ByteReader *reader = ttLibC_ByteReader_make(data, data_size, ByteUtilType_default);
+	if(ttLibC_ByteReader_bit(reader, 12) != 0xFFF) {
 		ERR_PRINT("sync bit is invalid.");
-		ttLibC_BitReader_close(&reader);
+		ttLibC_ByteReader_close(&reader);
 		return NULL;
 	}
-	ttLibC_BitReader_bit(reader, 1);
-	ttLibC_BitReader_bit(reader, 2);
-	ttLibC_BitReader_bit(reader, 1);
-	ttLibC_BitReader_bit(reader, 2);
-	uint32_t sample_rate_index = ttLibC_BitReader_bit(reader, 4);
+	ttLibC_ByteReader_bit(reader, 1);
+	ttLibC_ByteReader_bit(reader, 2);
+	ttLibC_ByteReader_bit(reader, 1);
+	ttLibC_ByteReader_bit(reader, 2);
+	uint32_t sample_rate_index = ttLibC_ByteReader_bit(reader, 4);
 	uint32_t sample_rate = sample_rate_table[sample_rate_index];
-	ttLibC_BitReader_bit(reader, 1);
-	uint32_t channel_num = ttLibC_BitReader_bit(reader, 3);
-	ttLibC_BitReader_bit(reader, 1);
-	ttLibC_BitReader_bit(reader, 1);
-	ttLibC_BitReader_bit(reader, 1);
-	ttLibC_BitReader_bit(reader, 1);
-	uint32_t frame_size = ttLibC_BitReader_bit(reader, 13);
-	ttLibC_BitReader_bit(reader, 11);
-	ttLibC_BitReader_bit(reader, 2);
-	ttLibC_BitReader_close(&reader);
+	ttLibC_ByteReader_bit(reader, 1);
+	uint32_t channel_num = ttLibC_ByteReader_bit(reader, 3);
+	ttLibC_ByteReader_bit(reader, 1);
+	ttLibC_ByteReader_bit(reader, 1);
+	ttLibC_ByteReader_bit(reader, 1);
+	ttLibC_ByteReader_bit(reader, 1);
+	uint32_t frame_size = ttLibC_ByteReader_bit(reader, 13);
+	ttLibC_ByteReader_bit(reader, 11);
+	ttLibC_ByteReader_bit(reader, 2);
+	ttLibC_ByteReader_close(&reader);
 	// this frame_size includes the adts header.
 	return ttLibC_Aac_make(
 			prev_frame,
@@ -242,7 +242,7 @@ size_t ttLibC_Aac_readAdtsHeader(
 		return 0;
 	}
 	ttLibC_Aac_ *aac_ = (ttLibC_Aac_ *)target_aac;
-	ttLibC_BitReader *reader = ttLibC_BitReader_make(&aac_->dsi_info, sizeof(aac_->dsi_info), BitReaderType_default);
+	ttLibC_ByteReader *reader = ttLibC_ByteReader_make(&aac_->dsi_info, sizeof(aac_->dsi_info), ByteUtilType_default);
 	/*
 	 * 内容メモ
 	 * 5bit object1 type
@@ -252,19 +252,19 @@ size_t ttLibC_Aac_readAdtsHeader(
 	 * 4bit channelConfigurtion.
 	 * bit 端数埋め
 	 */
-	uint32_t object_type = ttLibC_BitReader_bit(reader, 5);
+	uint32_t object_type = ttLibC_ByteReader_bit(reader, 5);
 	if(object_type == 31) {
 		LOG_PRINT("not tested yet. maybe work.");
-		object_type = ttLibC_BitReader_bit(reader, 6);
+		object_type = ttLibC_ByteReader_bit(reader, 6);
 	}
-	uint32_t frequency_index = ttLibC_BitReader_bit(reader, 4);
+	uint32_t frequency_index = ttLibC_ByteReader_bit(reader, 4);
 	if(frequency_index == 15) {
 		ERR_PRINT("not tested yet. now return error.");
-		uint32_t frequency = ttLibC_BitReader_bit(reader, 24); // たぶんこの値がそのまま周波数だと思われr。
+		uint32_t frequency = ttLibC_ByteReader_bit(reader, 24); // たぶんこの値がそのまま周波数だと思われr。
 		return 0;
 	}
-	uint32_t channel_conf = ttLibC_BitReader_bit(reader, 4);
-	ttLibC_BitReader_close(&reader);
+	uint32_t channel_conf = ttLibC_ByteReader_bit(reader, 4);
+	ttLibC_ByteReader_close(&reader);
 	-- object_type; // to make adts, need to decrement.
 	size_t aac_size = target_aac->inherit_super.inherit_super.buffer_size + 7;
 	// ready to work.
@@ -354,15 +354,15 @@ size_t ttLibC_Aac_readDsiInfo(
 			// dsi_info is just copy of dsi.
 			// however, need to check the length.
 			buf = (uint8_t *)(&aac_->dsi_info);
-			ttLibC_BitReader *reader = ttLibC_BitReader_make(buf, 8, BitReaderType_default);
+			ttLibC_ByteReader *reader = ttLibC_ByteReader_make(buf, 8, ByteUtilType_default);
 			uint32_t need_bit = 5;
-			if(ttLibC_BitReader_bit(reader, 5) == 31) {
-				ttLibC_BitReader_bit(reader, 6);
+			if(ttLibC_ByteReader_bit(reader, 5) == 31) {
+				ttLibC_ByteReader_bit(reader, 6);
 				need_bit += 6;
 			}
 			need_bit += 4;
-			if(ttLibC_BitReader_bit(reader, 4) == 15) {
-				ttLibC_BitReader_bit(reader, 24);
+			if(ttLibC_ByteReader_bit(reader, 4) == 15) {
+				ttLibC_ByteReader_bit(reader, 24);
 				need_bit += 24;
 			}
 			need_bit += 4;
@@ -372,7 +372,7 @@ size_t ttLibC_Aac_readDsiInfo(
 			if(round_up) {
 				++ size;
 			}
-			ttLibC_BitReader_close(&reader);
+			ttLibC_ByteReader_close(&reader);
 			// copy the data.
 			uint8_t *dat = data;
 			for(uint32_t i = 0;i < size;++ i) {
@@ -386,13 +386,13 @@ size_t ttLibC_Aac_readDsiInfo(
 			// only check 3 or 4 byte.
 			buf = aac->inherit_super.inherit_super.data;
 			buf += 2;
-			ttLibC_BitReader *reader = ttLibC_BitReader_make(buf, 2, BitReaderType_default);
-			uint32_t object_type = ttLibC_BitReader_bit(reader, 2) + 1;
-			uint32_t frequency_index = ttLibC_BitReader_bit(reader, 4);
-			ttLibC_BitReader_bit(reader, 1);
-			uint32_t channel_conf = ttLibC_BitReader_bit(reader, 3);
+			ttLibC_ByteReader *reader = ttLibC_ByteReader_make(buf, 2, ByteUtilType_default);
+			uint32_t object_type = ttLibC_ByteReader_bit(reader, 2) + 1;
+			uint32_t frequency_index = ttLibC_ByteReader_bit(reader, 4);
+			ttLibC_ByteReader_bit(reader, 1);
+			uint32_t channel_conf = ttLibC_ByteReader_bit(reader, 3);
 			// ready to go.
-			ttLibC_BitReader_close(&reader);
+			ttLibC_ByteReader_close(&reader);
 			uint8_t *dat = data;
 			if(frequency_index == 15) {
 				ERR_PRINT("I don't now how to deal with frequency index is 15.");

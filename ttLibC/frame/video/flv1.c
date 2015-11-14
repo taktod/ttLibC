@@ -11,7 +11,7 @@
 #include "flv1.h"
 #include "../../log.h"
 
-#include "../../util/bitUtil.h"
+#include "../../util/byteUtil.h"
 
 typedef ttLibC_Frame_Video_Flv1 ttLibC_Flv1_;
 
@@ -118,23 +118,23 @@ static int8_t Flv1_getPictureType(void *data, size_t data_size) {
 	 * 5bit quantizer
 	 * 1bit extra information flag -> 8bit extra information
 	 */
-	ttLibC_BitReader *reader = ttLibC_BitReader_make(data, data_size, BitReaderType_default);
-	if(ttLibC_BitReader_bit(reader, 17) != 1) {
+	ttLibC_ByteReader *reader = ttLibC_ByteReader_make(data, data_size, ByteUtilType_default);
+	if(ttLibC_ByteReader_bit(reader, 17) != 1) {
 		ERR_PRINT("invalid flv1 data.");
-		ttLibC_BitReader_close(&reader);
+		ttLibC_ByteReader_close(&reader);
 		return -1;
 	}
-	ttLibC_BitReader_bit(reader, 5);
-	ttLibC_BitReader_bit(reader, 8);
-	uint32_t picture_size = ttLibC_BitReader_bit(reader, 3);
+	ttLibC_ByteReader_bit(reader, 5);
+	ttLibC_ByteReader_bit(reader, 8);
+	uint32_t picture_size = ttLibC_ByteReader_bit(reader, 3);
 	switch(picture_size) {
 	case 0:
-		ttLibC_BitReader_bit(reader, 8);
-		ttLibC_BitReader_bit(reader, 8);
+		ttLibC_ByteReader_bit(reader, 8);
+		ttLibC_ByteReader_bit(reader, 8);
 		break;
 	case 1:
-		ttLibC_BitReader_bit(reader, 16);
-		ttLibC_BitReader_bit(reader, 16);
+		ttLibC_ByteReader_bit(reader, 16);
+		ttLibC_ByteReader_bit(reader, 16);
 		break;
 	case 2:
 	case 3:
@@ -145,11 +145,11 @@ static int8_t Flv1_getPictureType(void *data, size_t data_size) {
 	default:
 	case 7:
 		ERR_PRINT("picture type = 7 is reserved.");
-		ttLibC_BitReader_close(&reader);
+		ttLibC_ByteReader_close(&reader);
 		return -1;
 	}
-	uint32_t picture_type = ttLibC_BitReader_bit(reader, 2);
-	ttLibC_BitReader_close(&reader);
+	uint32_t picture_type = ttLibC_ByteReader_bit(reader, 2);
+	ttLibC_ByteReader_close(&reader);
 	return (int8_t)picture_type;
 }
 
@@ -170,22 +170,22 @@ bool ttLibC_Flv1_isKey(void *data, size_t data_size) {
  * @return width  0 for error.
  */
 uint32_t ttLibC_Flv1_getWidth(void *data, size_t data_size) {
-	ttLibC_BitReader *reader = ttLibC_BitReader_make(data, data_size, BitReaderType_default);
-	if(ttLibC_BitReader_bit(reader, 17) != 1) {
+	ttLibC_ByteReader *reader = ttLibC_ByteReader_make(data, data_size, ByteUtilType_default);
+	if(ttLibC_ByteReader_bit(reader, 17) != 1) {
 		ERR_PRINT("invalid flv1 data.");
-		ttLibC_BitReader_close(&reader);
+		ttLibC_ByteReader_close(&reader);
 		return 0;
 	}
-	ttLibC_BitReader_bit(reader, 5);
-	ttLibC_BitReader_bit(reader, 8);
-	uint32_t picture_size = ttLibC_BitReader_bit(reader, 3);
+	ttLibC_ByteReader_bit(reader, 5);
+	ttLibC_ByteReader_bit(reader, 8);
+	uint32_t picture_size = ttLibC_ByteReader_bit(reader, 3);
 	uint32_t width = 0;
 	switch(picture_size) {
 	case 0:
-		width = ttLibC_BitReader_bit(reader, 8);
+		width = ttLibC_ByteReader_bit(reader, 8);
 		break;
 	case 1:
-		width = ttLibC_BitReader_bit(reader, 16);
+		width = ttLibC_ByteReader_bit(reader, 16);
 		break;
 	case 2:
 		width = 352;
@@ -205,10 +205,10 @@ uint32_t ttLibC_Flv1_getWidth(void *data, size_t data_size) {
 	default:
 	case 7:
 		ERR_PRINT("picture type = 7 is reserved.");
-		ttLibC_BitReader_close(&reader);
+		ttLibC_ByteReader_close(&reader);
 		return 0;
 	}
-	ttLibC_BitReader_close(&reader);
+	ttLibC_ByteReader_close(&reader);
 	return width;
 }
 
@@ -219,24 +219,24 @@ uint32_t ttLibC_Flv1_getWidth(void *data, size_t data_size) {
  * @return height  0 for error.
  */
 uint32_t ttLibC_Flv1_getHeight(void *data, size_t data_size) {
-	ttLibC_BitReader *reader = ttLibC_BitReader_make(data, data_size, BitReaderType_default);
-	if(ttLibC_BitReader_bit(reader, 17) != 1) {
+	ttLibC_ByteReader *reader = ttLibC_ByteReader_make(data, data_size, ByteUtilType_default);
+	if(ttLibC_ByteReader_bit(reader, 17) != 1) {
 		ERR_PRINT("invalid flv1 data.");
-		ttLibC_BitReader_close(&reader);
+		ttLibC_ByteReader_close(&reader);
 		return 0;
 	}
-	ttLibC_BitReader_bit(reader, 5);
-	ttLibC_BitReader_bit(reader, 8);
-	uint32_t picture_size = ttLibC_BitReader_bit(reader, 3);
+	ttLibC_ByteReader_bit(reader, 5);
+	ttLibC_ByteReader_bit(reader, 8);
+	uint32_t picture_size = ttLibC_ByteReader_bit(reader, 3);
 	uint32_t height = 0;
 	switch(picture_size) {
 	case 0:
-		ttLibC_BitReader_bit(reader, 8);
-		height = ttLibC_BitReader_bit(reader, 8);
+		ttLibC_ByteReader_bit(reader, 8);
+		height = ttLibC_ByteReader_bit(reader, 8);
 		break;
 	case 1:
-		ttLibC_BitReader_bit(reader, 16);
-		height = ttLibC_BitReader_bit(reader, 16);
+		ttLibC_ByteReader_bit(reader, 16);
+		height = ttLibC_ByteReader_bit(reader, 16);
 		break;
 	case 2:
 		height = 288;
@@ -256,10 +256,10 @@ uint32_t ttLibC_Flv1_getHeight(void *data, size_t data_size) {
 	default:
 	case 7:
 		ERR_PRINT("picture type = 7 is reserved.");
-		ttLibC_BitReader_close(&reader);
+		ttLibC_ByteReader_close(&reader);
 		return 0;
 	}
-	ttLibC_BitReader_close(&reader);
+	ttLibC_ByteReader_close(&reader);
 	return height;
 }
 

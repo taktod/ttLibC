@@ -10,7 +10,7 @@
 
 #include "vp9.h"
 #include "../../log.h"
-#include "../../util/bitUtil.h"
+#include "../../util/byteUtil.h"
 
 typedef ttLibC_Frame_Video_Vp9 ttLibC_Vp9_;
 
@@ -57,17 +57,17 @@ ttLibC_Vp9 *ttLibC_Vp9_make(
  * @return true: key frame false:inter frame
  */
 bool ttLibC_Vp9_isKey(void *data, size_t data_size) {
-	ttLibC_BitReader *reader = ttLibC_BitReader_make(data, data_size, BitReaderType_default);
-	ttLibC_BitReader_bit(reader, 2);
-	ttLibC_BitReader_bit(reader, 1);
-	ttLibC_BitReader_bit(reader, 1);
-	uint32_t ref_flag = ttLibC_BitReader_bit(reader, 1);
+	ttLibC_ByteReader *reader = ttLibC_ByteReader_make(data, data_size, ByteUtilType_default);
+	ttLibC_ByteReader_bit(reader, 2);
+	ttLibC_ByteReader_bit(reader, 1);
+	ttLibC_ByteReader_bit(reader, 1);
+	uint32_t ref_flag = ttLibC_ByteReader_bit(reader, 1);
 	if(ref_flag == 1) {
 		ERR_PRINT("ref func is not implemented yet.");
-		ttLibC_BitReader_bit(reader, 3);
+		ttLibC_ByteReader_bit(reader, 3);
 	}
-	uint32_t key_frame_flag = ttLibC_BitReader_bit(reader, 1);
-	ttLibC_BitReader_close(&reader);
+	uint32_t key_frame_flag = ttLibC_ByteReader_bit(reader, 1);
+	ttLibC_ByteReader_close(&reader);
 	return (key_frame_flag == 0);
 }
 
@@ -94,42 +94,42 @@ uint32_t ttLibC_Vp9_getWidth(ttLibC_Vp9 *prev_frame, uint8_t *data, size_t data_
 	 * 16bit width - 1
 	 * 16bit height - 1
 	 */
-	ttLibC_BitReader *reader = ttLibC_BitReader_make(data, data_size, BitReaderType_default);
-	ttLibC_BitReader_bit(reader, 2);
-	ttLibC_BitReader_bit(reader, 1);
-	ttLibC_BitReader_bit(reader, 1);
-	uint32_t ref_flag = ttLibC_BitReader_bit(reader, 1);
+	ttLibC_ByteReader *reader = ttLibC_ByteReader_make(data, data_size, ByteUtilType_default);
+	ttLibC_ByteReader_bit(reader, 2);
+	ttLibC_ByteReader_bit(reader, 1);
+	ttLibC_ByteReader_bit(reader, 1);
+	uint32_t ref_flag = ttLibC_ByteReader_bit(reader, 1);
 	if(ref_flag == 1) {
 		ERR_PRINT("ref func is not implemented yet.");
-		ttLibC_BitReader_bit(reader, 3);
+		ttLibC_ByteReader_bit(reader, 3);
 	}
-	uint32_t key_frame_flag = ttLibC_BitReader_bit(reader, 1);
-	ttLibC_BitReader_bit(reader, 1);
-	ttLibC_BitReader_bit(reader, 1);
+	uint32_t key_frame_flag = ttLibC_ByteReader_bit(reader, 1);
+	ttLibC_ByteReader_bit(reader, 1);
+	ttLibC_ByteReader_bit(reader, 1);
 	if(key_frame_flag != 0) {
 		// not key frame, use prev_frame in order to ref width
-		ttLibC_BitReader_close(&reader);
+		ttLibC_ByteReader_close(&reader);
 		if(prev_frame == NULL) {
 			ERR_PRINT("ref frame is missing.");
 			return 0;
 		}
 		return prev_frame->inherit_super.width;
 	}
-	uint32_t startCode1 = ttLibC_BitReader_bit(reader, 8);
-	uint32_t startCode2 = ttLibC_BitReader_bit(reader, 8);
-	uint32_t startCode3 = ttLibC_BitReader_bit(reader, 8);
+	uint32_t startCode1 = ttLibC_ByteReader_bit(reader, 8);
+	uint32_t startCode2 = ttLibC_ByteReader_bit(reader, 8);
+	uint32_t startCode3 = ttLibC_ByteReader_bit(reader, 8);
 	if(startCode1 != 0x49
 	|| startCode2 != 0x83
 	|| startCode3 != 0x42) {
 		ERR_PRINT("invalid start code for keyframe.");
-		ttLibC_BitReader_close(&reader);
+		ttLibC_ByteReader_close(&reader);
 		return 0;
 	}
-	ttLibC_BitReader_bit(reader, 3);
-	ttLibC_BitReader_bit(reader, 1);
-	uint32_t width_minus_1  = ttLibC_BitReader_bit(reader, 16);
-	uint32_t height_minus_1 = ttLibC_BitReader_bit(reader, 16);
-	ttLibC_BitReader_close(&reader);
+	ttLibC_ByteReader_bit(reader, 3);
+	ttLibC_ByteReader_bit(reader, 1);
+	uint32_t width_minus_1  = ttLibC_ByteReader_bit(reader, 16);
+	uint32_t height_minus_1 = ttLibC_ByteReader_bit(reader, 16);
+	ttLibC_ByteReader_close(&reader);
 	return width_minus_1 + 1;
 }
 
@@ -141,42 +141,42 @@ uint32_t ttLibC_Vp9_getWidth(ttLibC_Vp9 *prev_frame, uint8_t *data, size_t data_
  * @return 0:error or height size.
  */
 uint32_t ttLibC_Vp9_getHeight(ttLibC_Vp9 *prev_frame, uint8_t *data, size_t data_size) {
-	ttLibC_BitReader *reader = ttLibC_BitReader_make(data, data_size, BitReaderType_default);
-	ttLibC_BitReader_bit(reader, 2);
-	ttLibC_BitReader_bit(reader, 1);
-	ttLibC_BitReader_bit(reader, 1);
-	uint32_t ref_flag = ttLibC_BitReader_bit(reader, 1);
+	ttLibC_ByteReader *reader = ttLibC_ByteReader_make(data, data_size, ByteUtilType_default);
+	ttLibC_ByteReader_bit(reader, 2);
+	ttLibC_ByteReader_bit(reader, 1);
+	ttLibC_ByteReader_bit(reader, 1);
+	uint32_t ref_flag = ttLibC_ByteReader_bit(reader, 1);
 	if(ref_flag == 1) {
 		ERR_PRINT("ref func is not implemented yet.");
-		ttLibC_BitReader_bit(reader, 3);
+		ttLibC_ByteReader_bit(reader, 3);
 	}
-	uint32_t key_frame_flag = ttLibC_BitReader_bit(reader, 1);
-	ttLibC_BitReader_bit(reader, 1);
-	ttLibC_BitReader_bit(reader, 1);
+	uint32_t key_frame_flag = ttLibC_ByteReader_bit(reader, 1);
+	ttLibC_ByteReader_bit(reader, 1);
+	ttLibC_ByteReader_bit(reader, 1);
 	if(key_frame_flag != 0) {
 		// not key frame, use prev_frame in order to ref width
-		ttLibC_BitReader_close(&reader);
+		ttLibC_ByteReader_close(&reader);
 		if(prev_frame == NULL) {
 			ERR_PRINT("ref frame is missing.");
 			return 0;
 		}
 		return prev_frame->inherit_super.width;
 	}
-	uint32_t startCode1 = ttLibC_BitReader_bit(reader, 8);
-	uint32_t startCode2 = ttLibC_BitReader_bit(reader, 8);
-	uint32_t startCode3 = ttLibC_BitReader_bit(reader, 8);
+	uint32_t startCode1 = ttLibC_ByteReader_bit(reader, 8);
+	uint32_t startCode2 = ttLibC_ByteReader_bit(reader, 8);
+	uint32_t startCode3 = ttLibC_ByteReader_bit(reader, 8);
 	if(startCode1 != 0x49
 	|| startCode2 != 0x83
 	|| startCode3 != 0x42) {
 		ERR_PRINT("invalid start code for keyframe.");
-		ttLibC_BitReader_close(&reader);
+		ttLibC_ByteReader_close(&reader);
 		return 0;
 	}
-	ttLibC_BitReader_bit(reader, 3);
-	ttLibC_BitReader_bit(reader, 1);
-	uint32_t width_minus_1  = ttLibC_BitReader_bit(reader, 16);
-	uint32_t height_minus_1 = ttLibC_BitReader_bit(reader, 16);
-	ttLibC_BitReader_close(&reader);
+	ttLibC_ByteReader_bit(reader, 3);
+	ttLibC_ByteReader_bit(reader, 1);
+	uint32_t width_minus_1  = ttLibC_ByteReader_bit(reader, 16);
+	uint32_t height_minus_1 = ttLibC_ByteReader_bit(reader, 16);
+	ttLibC_ByteReader_close(&reader);
 	return height_minus_1 + 1;
 }
 

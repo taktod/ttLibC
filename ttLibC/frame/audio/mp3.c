@@ -16,7 +16,7 @@
 #include <stdlib.h>
 #include "../../log.h"
 #include "../../allocator.h"
-#include "../../util/bitUtil.h"
+#include "../../util/byteUtil.h"
 
 /*
  * mp3 frame definition(detail)
@@ -199,25 +199,25 @@ static ttLibC_Mp3 *Mp3_makeFrame(ttLibC_Mp3 *prev_frame, void *data, size_t data
 	if(data_size < 4) {
 		return NULL;
 	}
-	ttLibC_BitReader *reader = ttLibC_BitReader_make(data, data_size, BitReaderType_default);
-	if(ttLibC_BitReader_bit(reader, 11) != 0x07FF) {
+	ttLibC_ByteReader *reader = ttLibC_ByteReader_make(data, data_size, ByteUtilType_default);
+	if(ttLibC_ByteReader_bit(reader, 11) != 0x07FF) {
 		ERR_PRINT("syncbit is invalid.");
-		ttLibC_BitReader_close(&reader);
+		ttLibC_ByteReader_close(&reader);
 		return 0;
 	}
-	uint8_t mpeg_version = ttLibC_BitReader_bit(reader, 2);
-	uint8_t layer        = ttLibC_BitReader_bit(reader, 2);
-	ttLibC_BitReader_bit(reader, 1);
-	uint8_t bitrate_index     = ttLibC_BitReader_bit(reader, 4);
-	uint8_t sample_rate_index = ttLibC_BitReader_bit(reader, 2);
-	uint8_t padding_bit       = ttLibC_BitReader_bit(reader, 1);
-	ttLibC_BitReader_bit(reader, 1);
-	uint8_t channel_mode = ttLibC_BitReader_bit(reader, 2);
-	ttLibC_BitReader_bit(reader, 2);
-	ttLibC_BitReader_bit(reader, 1);
-	ttLibC_BitReader_bit(reader, 1);
-	ttLibC_BitReader_bit(reader, 2);
-	ttLibC_BitReader_close(&reader);
+	uint8_t mpeg_version = ttLibC_ByteReader_bit(reader, 2);
+	uint8_t layer        = ttLibC_ByteReader_bit(reader, 2);
+	ttLibC_ByteReader_bit(reader, 1);
+	uint8_t bitrate_index     = ttLibC_ByteReader_bit(reader, 4);
+	uint8_t sample_rate_index = ttLibC_ByteReader_bit(reader, 2);
+	uint8_t padding_bit       = ttLibC_ByteReader_bit(reader, 1);
+	ttLibC_ByteReader_bit(reader, 1);
+	uint8_t channel_mode = ttLibC_ByteReader_bit(reader, 2);
+	ttLibC_ByteReader_bit(reader, 2);
+	ttLibC_ByteReader_bit(reader, 1);
+	ttLibC_ByteReader_bit(reader, 1);
+	ttLibC_ByteReader_bit(reader, 2);
+	ttLibC_ByteReader_close(&reader);
 
 	uint32_t bitrate = 0;
 	uint32_t sample_rate = 0;
@@ -352,7 +352,7 @@ static ttLibC_Mp3 *Mp3_makeId3Frame(ttLibC_Mp3 *prev_frame, void *data, size_t d
 		return NULL;
 	}
 	// pts maybe 0.
-	ttLibC_BitReader *reader = ttLibC_BitReader_make(data, data_size, BitReaderType_default);
+	ttLibC_ByteReader *reader = ttLibC_ByteReader_make(data, data_size, ByteUtilType_default);
 	/*
 	 * recipe
 	 * 24bit ID3
@@ -369,26 +369,25 @@ static ttLibC_Mp3 *Mp3_makeId3Frame(ttLibC_Mp3 *prev_frame, void *data, size_t d
 	 *
 	 * 10 + size1size2size3size4 = size
 	 */
-	if(ttLibC_BitReader_bit(reader, 8) != 'I'
-	|| ttLibC_BitReader_bit(reader, 8) != 'D'
-	|| ttLibC_BitReader_bit(reader, 8) != '3') {
+	if(ttLibC_ByteReader_bit(reader, 8) != 'I'
+	|| ttLibC_ByteReader_bit(reader, 8) != 'D'
+	|| ttLibC_ByteReader_bit(reader, 8) != '3') {
 		ERR_PRINT("tag is not ID3.");
-		ttLibC_BitReader_close(&reader);
+		ttLibC_ByteReader_close(&reader);
 		return NULL;
 	}
-	ttLibC_BitReader_bit(reader, 16);
-	ttLibC_BitReader_bit(reader, 8);
-	ttLibC_BitReader_bit(reader, 1);
-	uint32_t size = ttLibC_BitReader_bit(reader, 7);
-	ttLibC_BitReader_bit(reader, 1);
-	size = (size << 7) | ttLibC_BitReader_bit(reader, 7);
-	ttLibC_BitReader_bit(reader, 1);
-	size = (size << 7) | ttLibC_BitReader_bit(reader, 7);
-	ttLibC_BitReader_bit(reader, 1);
-	size = (size << 7) | ttLibC_BitReader_bit(reader, 7);
+	ttLibC_ByteReader_bit(reader, 16);
+	ttLibC_ByteReader_bit(reader, 8);
+	ttLibC_ByteReader_bit(reader, 1);
+	uint32_t size = ttLibC_ByteReader_bit(reader, 7);
+	ttLibC_ByteReader_bit(reader, 1);
+	size = (size << 7) | ttLibC_ByteReader_bit(reader, 7);
+	ttLibC_ByteReader_bit(reader, 1);
+	size = (size << 7) | ttLibC_ByteReader_bit(reader, 7);
+	ttLibC_ByteReader_bit(reader, 1);
+	size = (size << 7) | ttLibC_ByteReader_bit(reader, 7);
 	size += 10; // これがフレームサイズ
-	LOG_PRINT("SIZE:%x", size);
-	ttLibC_BitReader_close(&reader);
+	ttLibC_ByteReader_close(&reader);
 	ttLibC_Mp3_ *mp3 = (ttLibC_Mp3_ *)ttLibC_Mp3_make(
 			prev_frame,
 			Mp3Type_id3,
