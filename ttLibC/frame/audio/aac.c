@@ -155,17 +155,19 @@ ttLibC_Aac *ttLibC_Aac_clone(
 /*
  * analyze aac frame and make data.
  * only support adts.
- * @param prev_frame reuse frame
- * @param data       aac binary data.
- * @param data_size  data size
- * @param pts        pts for aac frame.
- * @param timebase   timebase for pts.
+ * @param prev_frame    reuse frame
+ * @param data          aac binary data.
+ * @param data_size     data size
+ * @param non_copy_mode true:hold data pointer false:copy data.
+ * @param pts           pts for aac frame.
+ * @param timebase      timebase for pts.
  * @return aac object
  */
 ttLibC_Aac *ttLibC_Aac_getFrame(
 		ttLibC_Aac *prev_frame,
 		void *data,
 		size_t data_size,
+		bool non_copy_mode,
 		uint64_t pts,
 		uint32_t timebase) {
 	/*
@@ -217,7 +219,7 @@ ttLibC_Aac *ttLibC_Aac_getFrame(
 			channel_num,
 			data,
 			frame_size,
-			true,
+			non_copy_mode,
 			pts,
 			timebase,
 			0);

@@ -275,6 +275,7 @@ bool ttLibC_Pes_getFrame(
 						(ttLibC_Aac *)pes->frame,
 						buffer,
 						left_size,
+						true,
 						pts,
 						pes->inherit_super.inherit_super.inherit_super.timebase);
 				if(aac == NULL) {
