@@ -103,7 +103,7 @@ ttLibC_Openh264Encoder *ttLibC_Openh264Encoder_makeWithSEncParamExt(void *paramE
  * @param callback callback func for h264 creation.
  * @param ptr      pointer for user def value, which will call in callback.
  */
-void ttLibC_Openh264Encoder_encode(
+bool ttLibC_Openh264Encoder_encode(
 		ttLibC_Openh264Encoder *encoder,
 		ttLibC_Yuv420 *yuv420,
 		ttLibC_Openh264EncodeFunc callback,

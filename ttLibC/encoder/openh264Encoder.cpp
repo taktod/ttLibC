@@ -488,12 +488,12 @@ ttLibC_Openh264Encoder *ttLibC_Openh264Encoder_makeWithSEncParamExt(void *paramE
 /*
  * call encode for c code
  */
-void ttLibC_Openh264Encoder_encode(
+bool ttLibC_Openh264Encoder_encode(
 		ttLibC_Openh264Encoder* encoder,
 		ttLibC_Yuv420 *yuv420,
 		ttLibC_Openh264EncodeFunc callback,
 		void *ptr) {
-	Openh264Encoder_encode(
+	return Openh264Encoder_encode(
 			encoder, yuv420, callback, ptr);
 }
 
