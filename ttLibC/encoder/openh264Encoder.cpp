@@ -437,6 +437,8 @@ ttLibC_Openh264Encoder *ttLibC_Openh264Encoder_make_ex(
 	paramExt.iMinQp         = min_quantizer;
 	paramExt.iMaxBitrate    = bitrate;
 	paramExt.iTargetBitrate = bitrate;
+	paramExt.sSpatialLayers[0].iSpatialBitrate = bitrate;
+	paramExt.sSpatialLayers[0].iMaxSpatialBitrate = bitrate;
 	return Openh264Encoder_make(&paramExt);
 }
 
