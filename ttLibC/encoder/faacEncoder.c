@@ -212,7 +212,9 @@ bool ttLibC_FaacEncoder_encode(
 		left_size -= encoder_->samples_length - encoder_->pcm_buffer_next_pos;
 		size_t encode_size = faacEncEncode(encoder_->handle, (int32_t *)encoder_->pcm_buffer, encoder_->samples_input, encoder_->data, encoder_->data_size);
 		if(encode_size > 0) {
-			checkEncodedData(encoder_, encode_size, callback, ptr);
+			if(!checkEncodedData(encoder_, encode_size, callback, ptr)) {
+				return false;
+			}
 		}
 		encoder_->pcm_buffer_next_pos = 0;
 	}
