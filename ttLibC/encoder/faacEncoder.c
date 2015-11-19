@@ -137,7 +137,7 @@ ttLibC_FaacEncoder *ttLibC_FaacEncoder_make(
  * @param callback    callback func
  * @param ptr         user def data pointer.
  */
-static void checkEncodedData(ttLibC_FaacEncoder_ *encoder, uint32_t encode_size, ttLibC_FaacEncodeFunc callback, void *ptr) {
+static bool checkEncodedData(ttLibC_FaacEncoder_ *encoder, uint32_t encode_size, ttLibC_FaacEncodeFunc callback, void *ptr) {
 	// detail data from encoder.
 	// this func is called for each aac frame.
 	// calcurate sample_num from encoder->samples_put. 1024 fixed?
@@ -156,10 +156,16 @@ static void checkEncodedData(ttLibC_FaacEncoder_ *encoder, uint32_t encode_size,
 			encoder->inherit_super.sample_rate,
 			0);
 	if(aac != NULL) {
-		callback(ptr, aac);
 		encoder->aac = aac;
+		encoder->pts += sample_num;
+		if(!callback(ptr, aac)) {
+			return false;
+		}
 	}
-	encoder->pts += sample_num;
+	else {
+		return false;
+	}
+	return true;
 }
 
 /*
@@ -169,16 +175,16 @@ static void checkEncodedData(ttLibC_FaacEncoder_ *encoder, uint32_t encode_size,
  * @param callback callback func for aac creation.
  * @param ptr      pointer for user def value, which will call in callback.
  */
-void ttLibC_FaacEncoder_encode(
+bool ttLibC_FaacEncoder_encode(
 		ttLibC_FaacEncoder *encoder,
 		ttLibC_PcmS16 *pcm,
 		ttLibC_FaacEncodeFunc callback,
 		void *ptr) {
 	if(encoder == NULL) {
-		return;
+		return false;
 	}
 	if(pcm == NULL) {
-		return;
+		return false;
 	}
 	ttLibC_FaacEncoder_ *encoder_ = (ttLibC_FaacEncoder_ *)encoder;
 	// support only little endian & interleave.
@@ -188,7 +194,7 @@ void ttLibC_FaacEncoder_encode(
 	case PcmS16Type_littleEndian_planar:
 	default:
 		ERR_PRINT("non supported type of pcm:%d", pcm->type);
-		return;
+		return false;
 	case PcmS16Type_littleEndian:
 		break;
 	}
@@ -199,7 +205,7 @@ void ttLibC_FaacEncoder_encode(
 			// append data is not enough for encode. just add.
 			memcpy(encoder_->pcm_buffer + encoder_->pcm_buffer_next_pos, data, left_size);
 			encoder_->pcm_buffer_next_pos += left_size;
-			return;
+			return true;
 		}
 		memcpy(encoder_->pcm_buffer + encoder_->pcm_buffer_next_pos, data, encoder_->samples_length - encoder_->pcm_buffer_next_pos);
 		data += encoder_->samples_length - encoder_->pcm_buffer_next_pos;
@@ -218,12 +224,14 @@ void ttLibC_FaacEncoder_encode(
 				memcpy(encoder_->pcm_buffer, data, left_size);
 				encoder_->pcm_buffer_next_pos = left_size;
 			}
-			break;
+			return true;
 		}
 		// data have enough size.
 		size_t encode_size = faacEncEncode(encoder_->handle, (int32_t *)data, encoder_->samples_input, encoder_->data, encoder_->data_size);
 		if(encode_size > 0) {
-			checkEncodedData(encoder_, encode_size, callback, ptr);
+			if(!checkEncodedData(encoder_, encode_size, callback, ptr)) {
+				return false;
+			}
 		}
 		data += encoder_->samples_length;
 		left_size -= encoder_->samples_length;
