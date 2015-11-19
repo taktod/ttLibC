@@ -40,19 +40,11 @@ typedef struct {
 typedef ttLibC_Encoder_Openh264Encoder_ ttLibC_Openh264Encoder_;
 
 /*
- * make openh264 encoder(baseline only.)
- * @param width         target width
- * @param height        target height
- * @param max_quantizer max q value
- * @param min_quantizer min q value
- * @param bitrate       target bitrate
+ * make openh264 encoder
+ * @param paramExt SEncParamExt struct obj.
+ * @return openh264 encoder
  */
-static ttLibC_Openh264Encoder *Openh264Encoder_make_ex(
-		uint32_t width,
-		uint32_t height,
-		uint32_t max_quantizer,
-		uint32_t min_quantizer,
-		uint32_t bitrate) {
+static ttLibC_Openh264Encoder *Openh264Encoder_make(SEncParamExt *pParamExt) {
 	ttLibC_Openh264Encoder_ *encoder = (ttLibC_Openh264Encoder_ *)ttLibC_malloc(sizeof(ttLibC_Openh264Encoder_));
 	if(encoder == NULL) {
 		ERR_PRINT("failed to alloc encoder object.");
@@ -67,38 +59,75 @@ static ttLibC_Openh264Encoder *Openh264Encoder_make_ex(
 	SEncParamExt paramExt;
 	memset(&paramExt, 0, sizeof(SEncParamExt));
 	encoder->encoder->GetDefaultParams(&paramExt);
-	paramExt.iUsageType     = CAMERA_VIDEO_REAL_TIME;
-	paramExt.fMaxFrameRate  = 5; // fps
-	paramExt.iPicWidth      = width;
-	paramExt.iPicHeight     = height;
-	paramExt.iTargetBitrate = bitrate; // in bit / sec
-	paramExt.iMaxBitrate    = bitrate;
-	paramExt.iMinQp         = min_quantizer;
-	paramExt.iMaxQp         = max_quantizer;
+	paramExt.iUsageType     = pParamExt->iUsageType;
+	paramExt.fMaxFrameRate  = pParamExt->fMaxFrameRate;
+	paramExt.iPicWidth      = pParamExt->iPicWidth;
+	paramExt.iPicHeight     = pParamExt->iPicHeight;
+	paramExt.iTargetBitrate = pParamExt->iTargetBitrate; // in bit / sec
+	paramExt.iMaxBitrate    = pParamExt->iMaxBitrate;
+	paramExt.iMinQp         = pParamExt->iMinQp;
+	paramExt.iMaxQp         = pParamExt->iMaxQp;
 
-	paramExt.iRCMode                    = RC_BITRATE_MODE;
-	paramExt.iTemporalLayerNum          = 1;
-	paramExt.iSpatialLayerNum           = 1;
-	paramExt.bEnableDenoise             = 1;
-	paramExt.bEnableBackgroundDetection = 0;
-	paramExt.bEnableAdaptiveQuant       = 1;
-	paramExt.bEnableFrameSkip           = 1;
-	paramExt.bEnableLongTermReference   = 0;
-	paramExt.iLtrMarkPeriod             = 30;
-	paramExt.uiIntraPeriod              = 15; // GOP
-	paramExt.eSpsPpsIdStrategy          = CONSTANT_ID;
+	paramExt.iRCMode                    = pParamExt->iRCMode;
+	paramExt.iTemporalLayerNum          = pParamExt->iTemporalLayerNum;
+	paramExt.iSpatialLayerNum           = pParamExt->iSpatialLayerNum;
+	paramExt.bEnableDenoise             = pParamExt->bEnableDenoise;
+	paramExt.bEnableBackgroundDetection = pParamExt->bEnableBackgroundDetection;
+	paramExt.bEnableAdaptiveQuant       = pParamExt->bEnableAdaptiveQuant;
+	paramExt.bEnableFrameSkip           = pParamExt->bEnableFrameSkip;
+	paramExt.bEnableLongTermReference   = pParamExt->bEnableLongTermReference;
+	paramExt.iLtrMarkPeriod             = pParamExt->iLtrMarkPeriod;
+	paramExt.uiIntraPeriod              = pParamExt->uiIntraPeriod; // GOP
+	paramExt.eSpsPpsIdStrategy          = pParamExt->eSpsPpsIdStrategy;
 
-	paramExt.bPrefixNalAddingCtrl   = 0;
-	paramExt.iLoopFilterDisableIdc  = 1;
-	paramExt.iEntropyCodingModeFlag = 0;
-	paramExt.iMultipleThreadIdc     = 0;
-	paramExt.sSpatialLayers[0].iVideoWidth                         = paramExt.iPicWidth;
-	paramExt.sSpatialLayers[0].iVideoHeight                        = paramExt.iPicHeight;
-	paramExt.sSpatialLayers[0].fFrameRate                          = paramExt.fMaxFrameRate;
-	paramExt.sSpatialLayers[0].iSpatialBitrate                     = paramExt.iTargetBitrate;
-	paramExt.sSpatialLayers[0].iMaxSpatialBitrate                  = paramExt.iMaxBitrate;
-	paramExt.sSpatialLayers[0].sSliceCfg.uiSliceMode               = SM_AUTO_SLICE;
-	paramExt.sSpatialLayers[0].sSliceCfg.sSliceArgument.uiSliceNum = 0;
+	paramExt.bPrefixNalAddingCtrl   = pParamExt->bPrefixNalAddingCtrl;
+	paramExt.iLoopFilterDisableIdc  = pParamExt->iLoopFilterDisableIdc;
+	paramExt.iEntropyCodingModeFlag = pParamExt->iEntropyCodingModeFlag;
+	paramExt.iMultipleThreadIdc     = pParamExt->iMultipleThreadIdc;
+	for(int i = 0;i < MAX_SPATIAL_LAYER_NUM;++ i) {
+		if(i == 0 || pParamExt->sSpatialLayers[i].iVideoWidth != 0)
+			paramExt.sSpatialLayers[i].iVideoWidth                         = pParamExt->sSpatialLayers[0].iVideoWidth;
+		if(i == 0 || pParamExt->sSpatialLayers[i].iVideoHeight != 0)
+			paramExt.sSpatialLayers[i].iVideoHeight                        = pParamExt->sSpatialLayers[0].iVideoHeight;
+		if(i == 0 || pParamExt->sSpatialLayers[i].fFrameRate != 0)
+			paramExt.sSpatialLayers[i].fFrameRate                          = pParamExt->sSpatialLayers[0].fFrameRate;
+		if(i == 0 || pParamExt->sSpatialLayers[i].iSpatialBitrate != 0)
+			paramExt.sSpatialLayers[i].iSpatialBitrate                     = pParamExt->sSpatialLayers[0].iSpatialBitrate;
+		if(i == 0 || pParamExt->sSpatialLayers[i].iMaxSpatialBitrate != 0)
+			paramExt.sSpatialLayers[i].iMaxSpatialBitrate                  = pParamExt->sSpatialLayers[0].iMaxSpatialBitrate;
+		if(i == 0 || pParamExt->sSpatialLayers[i].sSliceCfg.uiSliceMode != 0)
+			paramExt.sSpatialLayers[i].sSliceCfg.uiSliceMode               = pParamExt->sSpatialLayers[0].sSliceCfg.uiSliceMode;
+		if(i == 0 || pParamExt->sSpatialLayers[i].sSliceCfg.sSliceArgument.uiSliceNum != 0)
+			paramExt.sSpatialLayers[i].sSliceCfg.sSliceArgument.uiSliceNum = pParamExt->sSpatialLayers[0].sSliceCfg.sSliceArgument.uiSliceNum;
+		if(pParamExt->sSpatialLayers[i].uiProfileIdc != 0)
+			paramExt.sSpatialLayers[i].uiProfileIdc                        = pParamExt->sSpatialLayers[i].uiProfileIdc;
+		if(pParamExt->sSpatialLayers[i].uiLevelIdc != 0)
+			paramExt.sSpatialLayers[i].uiLevelIdc                          = pParamExt->sSpatialLayers[i].uiLevelIdc;
+		if(pParamExt->sSpatialLayers[i].sSliceCfg.sSliceArgument.uiSliceSizeConstraint != 0) {
+			paramExt.sSpatialLayers[i].sSliceCfg.sSliceArgument.uiSliceSizeConstraint =
+					pParamExt->sSpatialLayers[i].sSliceCfg.sSliceArgument.uiSliceSizeConstraint;
+		}
+		for(int j = 0;j < MAX_SLICES_NUM_TMP;++ j) {
+			if(pParamExt->sSpatialLayers[i].sSliceCfg.sSliceArgument.uiSliceMbNum[j] != 0) {
+				paramExt.sSpatialLayers[i].sSliceCfg.sSliceArgument.uiSliceMbNum[j] =
+						pParamExt->sSpatialLayers[i].sSliceCfg.sSliceArgument.uiSliceMbNum[j];
+			}
+		}
+	}
+
+	if(pParamExt->iComplexityMode != 0)          paramExt.iComplexityMode          = pParamExt->iComplexityMode;
+	if(pParamExt->iNumRefFrame != 0)             paramExt.iNumRefFrame             = pParamExt->iNumRefFrame;
+	if(pParamExt->bEnableSSEI != 0)              paramExt.bEnableSSEI              = pParamExt->bEnableSSEI;
+	if(pParamExt->bSimulcastAVC != 0)            paramExt.bSimulcastAVC            = pParamExt->bSimulcastAVC;
+	if(pParamExt->iPaddingFlag != 0)             paramExt.iPaddingFlag             = pParamExt->iPaddingFlag;
+	if(pParamExt->uiMaxNalSize != 0)             paramExt.uiMaxNalSize             = pParamExt->uiMaxNalSize;
+	if(pParamExt->iLTRRefNum != 0)               paramExt.iLTRRefNum               = pParamExt->iLTRRefNum;
+	if(pParamExt->iLoopFilterAlphaC0Offset != 0) paramExt.iLoopFilterAlphaC0Offset = pParamExt->iLoopFilterAlphaC0Offset;
+	if(pParamExt->iLoopFilterBetaOffset != 0)    paramExt.iLoopFilterBetaOffset    = pParamExt->iLoopFilterBetaOffset;
+	if(pParamExt->bEnableFrameCroppingFlag != 0) paramExt.bEnableFrameCroppingFlag = pParamExt->bEnableFrameCroppingFlag;
+	if(pParamExt->bEnableSceneChangeDetect != 0) paramExt.bEnableSceneChangeDetect = pParamExt->bEnableSceneChangeDetect;
+	if(pParamExt->bIsLosslessLink != 0)          paramExt.bIsLosslessLink          = pParamExt->bIsLosslessLink;
+
 	res = encoder->encoder->InitializeExt(&paramExt);
 	if(res != 0) {
 		ERR_PRINT("failed to initialize encoder params.");
@@ -118,7 +147,7 @@ static ttLibC_Openh264Encoder *Openh264Encoder_make_ex(
 
 	memset(&encoder->info,    0, sizeof(SFrameBSInfo));
 	memset(&encoder->picture, 0, sizeof(SSourcePicture));
-	// can check default config Data.(now skip it.)
+	// can check default configData (sps and pps).(now skip it.)
 /*	res = encoder->encoder->EncodeParameterSets(&encoder->info);
 	if(res != 0) {
 		ERR_PRINT("failed to set encode parameter set");
@@ -136,10 +165,10 @@ static ttLibC_Openh264Encoder *Openh264Encoder_make_ex(
 		ttLibC_HexUtil_dump(data, layerInfo.pNalLengthInByte[i], true);
 		data += layerInfo.pNalLengthInByte[i];
 	} // */
-	encoder->inherit_super.width = width;
-	encoder->inherit_super.height = height;
+	encoder->inherit_super.width  = pParamExt->iPicWidth;
+	encoder->inherit_super.height = pParamExt->iPicHeight;
 	encoder->configData = NULL;
-	encoder->h264 = NULL;
+	encoder->h264       = NULL;
 	return (ttLibC_Openh264Encoder *)encoder;
 }
 
@@ -149,7 +178,7 @@ static ttLibC_Openh264Encoder *Openh264Encoder_make_ex(
  * @param callback callback func
  * @param ptr      user def data pointer
  */
-static void checkEncodedData(
+static bool checkEncodedData(
 		ttLibC_Openh264Encoder_ *encoder,
 		ttLibC_Openh264EncodeFunc callback,
 		void *ptr) {
@@ -164,16 +193,16 @@ static void checkEncodedData(
 
 		ttLibC_H264_Type target_type = H264Type_unknown;
 		for(int j = 0;j < layerInfo.iNalCount;++ j) {
-			if(!ttLibC_H264_getNalInfo(&nalInfo, buf, layerInfo.pNalLengthInByte[j])) {
+			if(!ttLibC_H264_getNalInfo(&nalInfo, buf, (size_t)layerInfo.pNalLengthInByte[j])) {
 				// failed to get data.
 				ERR_PRINT("h264 data is corrupted.");
-				return;
+				return false;
 			}
 			target_size += layerInfo.pNalLengthInByte[j];
 			switch(nalInfo.nal_unit_type) {
 			case H264NalType_error:
 				ERR_PRINT("unknown nal type is found.");
-				break;
+				return false;
 			default:
 				LOG_PRINT("nal type for not implemented now.");
 				break;
@@ -195,7 +224,7 @@ static void checkEncodedData(
 					break;
 				default:
 					ERR_PRINT("never come here.");
-					break;
+					return false;
 				}
 				break;
 			case H264NalType_sliceIDR:
@@ -216,7 +245,7 @@ static void checkEncodedData(
 					break;
 				default:
 					ERR_PRINT("never come here.");
-					break;
+					return false;
 				}
 				break;
 			case H264NalType_sequenceParameterSet:
@@ -225,6 +254,7 @@ static void checkEncodedData(
 					if(target_type != H264Type_unknown) {
 						// not tested yet.(no way to here with openh264?)
 						ERR_PRINT("need to make h264 object.");
+						return false;
 					}
 					// for first data. initialize target type.
 					target_type = H264Type_unknown;
@@ -237,7 +267,7 @@ static void checkEncodedData(
 					break;
 				default:
 					ERR_PRINT("never come here.");
-					break;
+					return false;
 				}
 				break;
 			}
@@ -259,10 +289,13 @@ static void checkEncodedData(
 					1000);
 			if(h264 != NULL) {
 				encoder->configData = h264;
-				callback(ptr, encoder->configData);
+				if(!callback(ptr, encoder->configData)) {
+					return false;
+				}
 			}
 			else {
 				ERR_PRINT("failed to make h264 object(type configData)");
+				return false;
 			}
 		}
 		else {
@@ -278,13 +311,17 @@ static void checkEncodedData(
 					1000);
 			if(h264 != NULL) {
 				encoder->h264 = h264;
-				callback(ptr, encoder->h264);
+				if(!callback(ptr, encoder->h264)) {
+					return false;
+				}
 			}
 			else {
 				ERR_PRINT("failed to make h264 object(type h264)");
+				return false;
 			}
 		}
 	}
+	return true;
 }
 
 /*
@@ -294,16 +331,16 @@ static void checkEncodedData(
  * @param callback callback func for h264 creation.
  * @param ptr      pointer for user def value, which will call in callback.
  */
-static void Openh264Encoder_encode(
+static bool Openh264Encoder_encode(
 		ttLibC_Openh264Encoder *encoder,
 		ttLibC_Yuv420 *yuv,
 		ttLibC_Openh264EncodeFunc callback,
 		void *ptr) {
 	if(encoder == NULL) {
-		return;
+		return false;
 	}
 	if(yuv == NULL) {
-		return;
+		return false;
 	}
 	switch(yuv->type) {
 	case Yuv420Type_planar:
@@ -312,7 +349,7 @@ static void Openh264Encoder_encode(
 	case Yvu420Type_planar:
 	case Yvu420Type_semiPlanar:
 		ERR_PRINT("support only yuv420 planar.");
-		return;
+		return false;
 	}
 	ttLibC_Openh264Encoder_ *encoder_ = (ttLibC_Openh264Encoder_ *)encoder;
 	encoder_->picture.iPicWidth    = yuv->inherit_super.width;
@@ -327,7 +364,7 @@ static void Openh264Encoder_encode(
 	uint32_t res = encoder_->encoder->EncodeFrame(&encoder_->picture, &encoder_->info);
 	if(res != cmResultSuccess) {
 		ERR_PRINT("failed to encode picture.");
-		return;
+		return false;
 	}
 /*
 	switch(encoder_->info.eFrameType) {
@@ -341,7 +378,7 @@ static void Openh264Encoder_encode(
 		LOG_PRINT("invalid timestamp: in %llu, out %llu", yuv->inherit_super.inherit_super.pts, encoder_->info.uiTimeStamp);
 		break;
 	case videoFrameTypeSkip:
-		LOG_PRINT("skip timestamp: in %llu, out %llu", yuv->inherit_super.inherit_super.pts, encoder_->info.uiTimeStamp);
+//		LOG_PRINT("skip timestamp: in %llu, out %llu", yuv->inherit_super.inherit_super.pts, encoder_->info.uiTimeStamp);
 		break;
 	case videoFrameTypeIDR:
 		LOG_PRINT("idr timestamp: in %llu, out %llu", yuv->inherit_super.inherit_super.pts, encoder_->info.uiTimeStamp);
@@ -350,7 +387,7 @@ static void Openh264Encoder_encode(
 		LOG_PRINT("p timestamp: in %llu, out %llu", yuv->inherit_super.inherit_super.pts, encoder_->info.uiTimeStamp);
 		break;
 	}*/
-	checkEncodedData(encoder_, callback, ptr);
+	return checkEncodedData(encoder_, callback, ptr);
 }
 
 /*
@@ -380,12 +417,9 @@ extern "C" {
 ttLibC_Openh264Encoder *ttLibC_Openh264Encoder_make(
 		uint32_t width,
 		uint32_t height) {
-	return Openh264Encoder_make_ex(
-			width,
-			height,
-			20,
-			4,
-			250000);
+	SEncParamExt paramExt;
+	ttLibC_Openh264Encoder_getDefaultSEncParamExt(&paramExt, width, height);
+	return Openh264Encoder_make(&paramExt);
 }
 
 /*
@@ -397,12 +431,58 @@ ttLibC_Openh264Encoder *ttLibC_Openh264Encoder_make_ex(
 		uint32_t max_quantizer,
 		uint32_t min_quantizer,
 		uint32_t bitrate) {
-	return Openh264Encoder_make_ex(
-			width,
-			height,
-			max_quantizer,
-			min_quantizer,
-			bitrate);
+	SEncParamExt paramExt;
+	ttLibC_Openh264Encoder_getDefaultSEncParamExt(&paramExt, width, height);
+	paramExt.iMaxQp         = max_quantizer;
+	paramExt.iMinQp         = min_quantizer;
+	paramExt.iMaxBitrate    = bitrate;
+	paramExt.iTargetBitrate = bitrate;
+	return Openh264Encoder_make(&paramExt);
+}
+
+void ttLibC_Openh264Encoder_getDefaultSEncParamExt(
+		void *paramExt,
+		uint32_t width,
+		uint32_t height) {
+	SEncParamExt *pParamExt = (SEncParamExt *)paramExt;
+	memset(paramExt, 0, sizeof(SEncParamExt));
+	pParamExt->iUsageType     = CAMERA_VIDEO_REAL_TIME;
+	pParamExt->fMaxFrameRate  = 15;
+	pParamExt->iPicWidth      = width;
+	pParamExt->iPicHeight     = height;
+	pParamExt->iTargetBitrate = 250000;
+	pParamExt->iMaxBitrate    = 250000;
+	pParamExt->iMinQp         = 4;
+	pParamExt->iMaxQp         = 20;
+
+	pParamExt->iRCMode                    = RC_BITRATE_MODE;
+	pParamExt->iTemporalLayerNum          = 1;
+	pParamExt->iSpatialLayerNum           = 1;
+	pParamExt->bEnableDenoise             = true;
+	pParamExt->bEnableBackgroundDetection = false;
+	pParamExt->bEnableAdaptiveQuant       = true;
+	pParamExt->bEnableFrameSkip           = true;
+	pParamExt->bEnableLongTermReference   = false;
+	pParamExt->iLtrMarkPeriod             = 30;
+	pParamExt->uiIntraPeriod              = 15;
+	pParamExt->eSpsPpsIdStrategy          = CONSTANT_ID;
+
+	pParamExt->bPrefixNalAddingCtrl   = false;
+	pParamExt->iLoopFilterDisableIdc  = 1;
+	pParamExt->iEntropyCodingModeFlag = 0;
+	pParamExt->iMultipleThreadIdc     = 0;
+
+	pParamExt->sSpatialLayers[0].iVideoWidth                         = pParamExt->iPicWidth;
+	pParamExt->sSpatialLayers[0].iVideoHeight                        = pParamExt->iPicHeight;
+	pParamExt->sSpatialLayers[0].fFrameRate                          = pParamExt->fMaxFrameRate;
+	pParamExt->sSpatialLayers[0].iSpatialBitrate                     = pParamExt->iTargetBitrate;
+	pParamExt->sSpatialLayers[0].iMaxSpatialBitrate                  = pParamExt->iMaxBitrate;
+	pParamExt->sSpatialLayers[0].sSliceCfg.uiSliceMode               = SM_AUTO_SLICE;
+	pParamExt->sSpatialLayers[0].sSliceCfg.sSliceArgument.uiSliceNum = 0;
+}
+
+ttLibC_Openh264Encoder *ttLibC_Openh264Encoder_makeWithSEncParamExt(void *paramExt) {
+	return Openh264Encoder_make((SEncParamExt *)paramExt);
 }
 
 /*
