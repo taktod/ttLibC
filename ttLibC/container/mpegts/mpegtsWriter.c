@@ -133,6 +133,9 @@ static bool MpegtsWriter_H264TrackAdd(void *ptr, ttLibC_Frame *frame) {
 		callbackData->error_flg = true;
 		return false;
 	}
+	if(callbackData->writer->inherit_super.inherit_super.pts > frame->pts) {
+		callbackData->writer->inherit_super.inherit_super.pts = frame->pts;
+	}
 	return true;
 }
 
@@ -277,6 +280,9 @@ static bool MpegtsWriter_writeFromQueue(
 	case status_current_update:
 		{
 			writer->current_pts_pos = writer->target_pos;
+			if(writer->inherit_super.inherit_super.pts < writer->current_pts_pos) {
+				writer->inherit_super.inherit_super.pts = writer->current_pts_pos;
+			}
 			// go back to first step.
 			writer->status = status_target_check;
 			return MpegtsWriter_writeFromQueue(writer, callback, ptr);
