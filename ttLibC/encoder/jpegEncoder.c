@@ -99,17 +99,18 @@ ttLibC_JpegEncoder *ttLibC_JpegEncoder_make(
  * @param yuv420   source yuv420 data
  * @param callback callback func for jpeg creation.
  * @param ptr      pointer for user def value, which will call in callback.
+ * @return true / false
  */
-void ttLibC_JpegEncoder_encode(
+bool ttLibC_JpegEncoder_encode(
 		ttLibC_JpegEncoder *encoder,
 		ttLibC_Yuv420 *yuv,
 		ttLibC_JpegEncodeFunc callback,
 		void *ptr) {
 	if(encoder == NULL) {
-		return;
+		return false;
 	}
 	if(yuv == NULL) {
-		return;
+		return false;
 	}
 	switch(yuv->type) {
 	case Yuv420Type_planar:
@@ -118,7 +119,7 @@ void ttLibC_JpegEncoder_encode(
 	case Yuv420Type_semiPlanar:
 	case Yvu420Type_semiPlanar:
 		ERR_PRINT("only support planar.");
-		return;
+		return false;
 	}
 
 	ttLibC_JpegEncoder_ *encoder_ = (ttLibC_JpegEncoder_ *)encoder;
@@ -151,6 +152,10 @@ void ttLibC_JpegEncoder_encode(
 	}
 	if(data == NULL) {
 		data = ttLibC_malloc(data_size);
+		if(data == NULL) {
+			ERR_PRINT("failed to allocate data buffer.");
+			return false;
+		}
 		is_alloc_flg = true;
 	}
 	// do convert.
@@ -197,13 +202,16 @@ void ttLibC_JpegEncoder_encode(
 		if(is_alloc_flg) {
 			ttLibC_free(data);
 		}
-		return;
+		return false;
 	}
 	// done.
 	jpeg->inherit_super.inherit_super.buffer_size = encoder_->cinfo.dest->next_output_byte - data;
 	jpeg->inherit_super.inherit_super.is_non_copy = false;
 	encoder_->jpeg = jpeg;
-	callback(ptr, jpeg);
+	if(!callback(ptr, jpeg)) {
+		return false;
+	}
+	return true;
 }
 
 /*

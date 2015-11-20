@@ -55,7 +55,7 @@ ttLibC_JpegEncoder *ttLibC_JpegEncoder_make(
  * @param callback callback func for jpeg encode.
  * @param ptr      pointer for user def value, which will call in callback.
  */
-void ttLibC_JpegEncoder_encode(
+bool ttLibC_JpegEncoder_encode(
 		ttLibC_JpegEncoder *encoder,
 		ttLibC_Yuv420 *yuv,
 		ttLibC_JpegEncodeFunc callback,
