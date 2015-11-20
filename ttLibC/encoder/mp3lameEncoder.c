@@ -109,8 +109,9 @@ ttLibC_Mp3lameEncoder *ttLibC_Mp3lameEncoder_make(
  * @param encode_size size of encode data.
  * @param callback    callback func.
  * @param ptr         user def data pointer.
+ * @return true / false
  */
-static void checkEncodedData(ttLibC_Mp3lameEncoder_ *encoder, uint32_t encode_size, ttLibC_Mp3lameEncodeFunc callback, void *ptr) {
+static bool checkEncodedData(ttLibC_Mp3lameEncoder_ *encoder, uint32_t encode_size, ttLibC_Mp3lameEncodeFunc callback, void *ptr) {
 	uint8_t *data = encoder->data;
 	ttLibC_Mp3 *mp3 = NULL;
 	do {
@@ -122,7 +123,9 @@ static void checkEncodedData(ttLibC_Mp3lameEncoder_ *encoder, uint32_t encode_si
 			encoder->pts += mp3->inherit_super.sample_num;
 			encoder->mp3 = mp3;
 			// call callback with created object.
-			callback(ptr, encoder->mp3);
+			if(!callback(ptr, encoder->mp3)) {
+				return false;
+			}
 			data += encoder->mp3->inherit_super.inherit_super.buffer_size;
 			encode_size -= encoder->mp3->inherit_super.inherit_super.buffer_size;
 		}
@@ -139,6 +142,7 @@ static void checkEncodedData(ttLibC_Mp3lameEncoder_ *encoder, uint32_t encode_si
 	}
 	// next append position of data = encode_remain_size.
 	encoder->data_start_pos = encode_size;
+	return true;
 }
 
 /*
@@ -147,42 +151,50 @@ static void checkEncodedData(ttLibC_Mp3lameEncoder_ *encoder, uint32_t encode_si
  * @param pcm      source pcm data.
  * @param callback callback func for mp3 creation.
  * @param ptr      pointer for user def value, which will call in callback.
+ * @return true / false
  */
-void ttLibC_Mp3lameEncoder_encode(ttLibC_Mp3lameEncoder *encoder, ttLibC_PcmS16 *pcm, ttLibC_Mp3lameEncodeFunc callback, void *ptr) {
+bool ttLibC_Mp3lameEncoder_encode(ttLibC_Mp3lameEncoder *encoder, ttLibC_PcmS16 *pcm, ttLibC_Mp3lameEncodeFunc callback, void *ptr) {
 	if(encoder == NULL) {
-		return;
+		return false;
 	}
 	if(pcm == NULL) {
-		return;
+		return false;
 	}
 	ttLibC_Mp3lameEncoder_ *encoder_ = (ttLibC_Mp3lameEncoder_ *)encoder;
 	switch(pcm->type) {
 	case PcmS16Type_bigEndian:
 	case PcmS16Type_bigEndian_planar:
 		ERR_PRINT("bigendian is not support to convert.");
-		return;
+		return false;
 	case PcmS16Type_littleEndian:
 		{
 			if(encoder_->inherit_super.channel_num == 1) {
 				uint32_t size = lame_encode_buffer(encoder_->gflags, (const short*)pcm->l_data, NULL, pcm->inherit_super.sample_num, encoder_->data + encoder_->data_start_pos, encoder_->data_size - encoder_->data_start_pos);
-				checkEncodedData(encoder_, size + encoder_->data_start_pos, callback, ptr);
+				if(!checkEncodedData(encoder_, size + encoder_->data_start_pos, callback, ptr)) {
+					return false;
+				}
 			}
 			else {
 				uint32_t size = lame_encode_buffer_interleaved(encoder_->gflags, (short*)pcm->l_data, pcm->inherit_super.sample_num, encoder_->data + encoder_->data_start_pos, encoder_->data_size - encoder_->data_start_pos);
-				checkEncodedData(encoder_, size + encoder_->data_start_pos, callback, ptr);
+				if(!checkEncodedData(encoder_, size + encoder_->data_start_pos, callback, ptr)) {
+					return false;
+				}
 			}
 		}
 		break;
 	case PcmS16Type_littleEndian_planar:
 		{
 			uint32_t size = lame_encode_buffer(encoder_->gflags, (const short*)pcm->l_data, (const short*)pcm->r_data, pcm->inherit_super.sample_num, encoder_->data + encoder_->data_start_pos, encoder_->data_size - encoder_->data_start_pos);
-			checkEncodedData(encoder_, size + encoder_->data_start_pos, callback, ptr);
+			if(!checkEncodedData(encoder_, size + encoder_->data_start_pos, callback, ptr)) {
+				return false;
+			}
 		}
 		break;
 	default:
 		ERR_PRINT("unknown pcms16_type:%d", pcm->type);
-		return;
+		return false;
 	}
+	return true;
 }
 
 /*
