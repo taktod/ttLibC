@@ -115,8 +115,9 @@ ttLibC_SpeexEncoder *ttLibC_SpeexEncoder_make(
  * @param data     target pcms16 buffer data
  * @param callback callback func
  * @param ptr      user def data pointer.
+ * @return true / false
  */
-static void doEncode(ttLibC_SpeexEncoder_ *encoder, void *data, ttLibC_SpeexEncodeFunc callback, void *ptr) {
+static bool doEncode(ttLibC_SpeexEncoder_ *encoder, void *data, ttLibC_SpeexEncodeFunc callback, void *ptr) {
 	speex_bits_reset(&encoder->bits);
 	// encode
 	speex_encode_int(encoder->enc_state, (int16_t *)data, &encoder->bits);
@@ -125,10 +126,16 @@ static void doEncode(ttLibC_SpeexEncoder_ *encoder, void *data, ttLibC_SpeexEnco
 	uint32_t sample_num = encoder->inherit_super.sample_rate / 50;
 	ttLibC_Speex *speex = ttLibC_Speex_make(encoder->speex, SpeexType_frame, encoder->inherit_super.sample_rate, sample_num, encoder->inherit_super.channel_num, encoder->data, write_size, true, encoder->pts, encoder->inherit_super.sample_rate);
 	if(speex != NULL) {
-		callback(ptr, speex);
 		encoder->speex = speex;
+		if(!callback(ptr, speex)) {
+			return false;
+		}
+	}
+	else {
+		return false;
 	}
 	encoder->pts += sample_num;
+	return true;
 }
 
 /*
@@ -137,17 +144,18 @@ static void doEncode(ttLibC_SpeexEncoder_ *encoder, void *data, ttLibC_SpeexEnco
  * @param pcm      source pcm data. support little endian interleave only.
  * @param callback callback func for speex creation.
  * @param ptr      pointer for user def value, which will call in callback.
+ * @return true / false
  */
-void ttLibC_SpeexEncoder_encode(
+bool ttLibC_SpeexEncoder_encode(
 		ttLibC_SpeexEncoder *encoder,
 		ttLibC_PcmS16 *pcm,
 		ttLibC_SpeexEncodeFunc callback,
 		void *ptr) {
 	if(encoder == NULL) {
-		return;
+		return false;
 	}
 	if(pcm == NULL) {
-		return;
+		return false;
 	}
 	ttLibC_SpeexEncoder_ *encoder_ = (ttLibC_SpeexEncoder_ *)encoder;
 	switch(pcm->type) {
@@ -155,7 +163,7 @@ void ttLibC_SpeexEncoder_encode(
 	case PcmS16Type_bigEndian:
 	case PcmS16Type_bigEndian_planar:
 		ERR_PRINT("non supported type of pcm:%d", pcm->type);
-		return;
+		return false;
 	case PcmS16Type_littleEndian:
 	case PcmS16Type_littleEndian_planar:
 		break;
@@ -168,13 +176,15 @@ void ttLibC_SpeexEncoder_encode(
 			// need more buffer.
 			memcpy(encoder_->pcm_buffer + encoder_->pcm_buffer_next_pos, data, left_size);
 			encoder_->pcm_buffer_next_pos += left_size;
-			return;
+			return true;
 		}
 		// enough.
 		memcpy(encoder_->pcm_buffer + encoder_->pcm_buffer_next_pos, data, encoder_->pcm_buffer_size - encoder_->pcm_buffer_next_pos);
 		data += encoder_->pcm_buffer_size - encoder_->pcm_buffer_next_pos;
 		left_size -= encoder_->pcm_buffer_size - encoder_->pcm_buffer_next_pos;
-		doEncode(encoder_, encoder_->pcm_buffer, callback, ptr);
+		if(!doEncode(encoder_, encoder_->pcm_buffer, callback, ptr)) {
+			return false;
+		}
 		encoder_->pcm_buffer_next_pos = 0;
 	}
 	do {
@@ -185,10 +195,13 @@ void ttLibC_SpeexEncoder_encode(
 			}
 			break;
 		}
-		doEncode(encoder_, data, callback, ptr);
+		if(!doEncode(encoder_, data, callback, ptr)) {
+			return false;
+		}
 		data += encoder_->pcm_buffer_size;
 		left_size -= encoder_->pcm_buffer_size;
 	}while(true);
+	return true;
 }
 
 /*

@@ -68,8 +68,9 @@ ttLibC_SpeexEncoder *ttLibC_SpeexEncoder_make(
  * @param pcm      source pcm data. support little endian interleave only.
  * @param callback callback func for speex creation.
  * @param ptr      pointer for user def value, which will call in callback.
+ * @return true / false
  */
-void ttLibC_SpeexEncoder_encode(
+bool ttLibC_SpeexEncoder_encode(
 		ttLibC_SpeexEncoder *encoder,
 		ttLibC_PcmS16 *pcm,
 		ttLibC_SpeexEncodeFunc callback,
