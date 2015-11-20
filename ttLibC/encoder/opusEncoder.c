@@ -101,18 +101,21 @@ ttLibC_OpusEncoder *ttLibC_OpusEncoder_make(
  * @param callback callback func
  * @param ptr      user def data pointer.
  */
-static void doEncode(ttLibC_OpusEncoder_ *encoder, void *data, ttLibC_OpusEncodeFunc callback, void *ptr) {
+static bool doEncode(ttLibC_OpusEncoder_ *encoder, void *data, ttLibC_OpusEncodeFunc callback, void *ptr) {
 	int size = opus_encode(encoder->encoder, (int16_t *)data, encoder->inherit_super.unit_sample_num, encoder->data, encoder->data_size);
 	if(size == 0) {
 		ERR_PRINT("failed to make opus.");
-		return;
+		return false;
 	}
 	ttLibC_Opus *opus = ttLibC_Opus_make(encoder->opus, OpusType_frame, encoder->inherit_super.sample_rate, encoder->inherit_super.unit_sample_num, encoder->inherit_super.channel_num, encoder->data, size, true, encoder->pts, encoder->inherit_super.sample_rate);
 	if(opus != NULL) {
-		callback(ptr, opus);
 		encoder->opus = opus;
+		if(!callback(ptr, opus)) {
+			return false;
+		}
 	}
 	encoder->pts += encoder->inherit_super.unit_sample_num;
+	return true;
 }
 
 /*
@@ -121,17 +124,18 @@ static void doEncode(ttLibC_OpusEncoder_ *encoder, void *data, ttLibC_OpusEncode
  * @param pcm      source pcm data. support little endian interleave only.
  * @param callback callback func for opus creation.
  * @param ptr      pointer for user def value, which will call in callback
+ * @return true / false
  */
-void ttLibC_OpusEncoder_encode(
+bool ttLibC_OpusEncoder_encode(
 		ttLibC_OpusEncoder *encoder,
 		ttLibC_PcmS16 *pcm,
 		ttLibC_OpusEncodeFunc callback,
 		void *ptr) {
 	if(encoder == NULL) {
-		return;
+		return false;
 	}
 	if(pcm == NULL) {
-		return;
+		return false;
 	}
 	ttLibC_OpusEncoder_ *encoder_ = (ttLibC_OpusEncoder_ *)encoder;
 	switch(pcm->type) {
@@ -140,7 +144,7 @@ void ttLibC_OpusEncoder_encode(
 	case PcmS16Type_bigEndian_planar:
 	case PcmS16Type_littleEndian_planar:
 		ERR_PRINT("non supported type of pcm:%d", pcm->type);
-		return;
+		return false;
 	case PcmS16Type_littleEndian:
 		break;
 	}
@@ -151,13 +155,15 @@ void ttLibC_OpusEncoder_encode(
 			// need more buffer.
 			memcpy(encoder_->pcm_buffer + encoder_->pcm_buffer_next_pos, data, left_size);
 			encoder_->pcm_buffer_next_pos += left_size;
-			return;
+			return true;
 		}
 		// enough.
 		memcpy(encoder_->pcm_buffer + encoder_->pcm_buffer_next_pos, data, encoder_->pcm_buffer_size - encoder_->pcm_buffer_next_pos);
 		data += encoder_->pcm_buffer_size - encoder_->pcm_buffer_next_pos;
 		left_size -= encoder_->pcm_buffer_size - encoder_->pcm_buffer_next_pos;
-		doEncode(encoder_, encoder_->pcm_buffer, callback, ptr);
+		if(!doEncode(encoder_, encoder_->pcm_buffer, callback, ptr)) {
+			return false;
+		}
 		encoder_->pcm_buffer_next_pos = 0;
 	}
 	do {
@@ -168,10 +174,13 @@ void ttLibC_OpusEncoder_encode(
 			}
 			break;
 		}
-		doEncode(encoder_, data, callback, ptr);
+		if(!doEncode(encoder_, data, callback, ptr)) {
+			return false;
+		}
 		data += encoder_->pcm_buffer_size;
 		left_size -= encoder_->pcm_buffer_size;
 	}while(true);
+	return true;
 }
 
 /*

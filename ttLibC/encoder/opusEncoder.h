@@ -61,8 +61,9 @@ ttLibC_OpusEncoder *ttLibC_OpusEncoder_make(
  * @param pcm      source pcm data. support little endian interleave only.
  * @param callback callback func for opus creation.
  * @param ptr      pointer for user def value, which will call in callback
+ * @return true / false
  */
-void ttLibC_OpusEncoder_encode(
+bool ttLibC_OpusEncoder_encode(
 		ttLibC_OpusEncoder *encoder,
 		ttLibC_PcmS16 *pcm,
 		ttLibC_OpusEncodeFunc callback,
