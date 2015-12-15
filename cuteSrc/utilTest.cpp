@@ -40,6 +40,8 @@
 
 #include <ttLibC/util/dynamicBufferUtil.h>
 #include <ttLibC/util/byteUtil.h>
+#include <ttLibC/util/linkedListUtil.h>
+#include <ttLibC/util/stlListUtil.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -51,6 +53,70 @@
 #include <sys/param.h>
 #include <sys/uio.h>
 #include <unistd.h>
+
+static bool stlListTest_findItem(void *ptr, void *item) {
+	LOG_PRINT("fi:%d", *((int *)item));
+	return true;
+}
+
+static bool stlListTest_findItem2(void *ptr, void *item) {
+	ttLibC_StlList *list = (ttLibC_StlList *)ptr;
+	LOG_PRINT("fi2:%d", *((int *)item));
+	if(*((int *)item) == 5) {
+		LOG_PRINT("削除対象アイテムみつけた。:%d", *((int *)item));
+		ttLibC_StlList_remove(list, item);
+	}
+	return true;
+}
+
+static void stlListTest() {
+	LOG_PRINT("stlListTest");
+	ttLibC_StlList *list = ttLibC_StlList_make();
+	int val1 = 5;
+	int val2 = 6;
+	int val3 = 3;
+	ttLibC_StlList_addFirst(list, &val1);
+	ttLibC_StlList_addLast(list, &val2);
+	ttLibC_StlList_addFirst(list, &val3);
+	ttLibC_StlList_forEach(list, stlListTest_findItem, NULL);
+	ttLibC_StlList_forEachReverse(list, stlListTest_findItem, NULL);
+	ttLibC_StlList_forEach(list, stlListTest_findItem2, list);
+	ttLibC_StlList_forEach(list, stlListTest_findItem, NULL);
+	ttLibC_StlList_close(&list);
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
+
+static bool findItem(void *ptr, void *item, size_t item_size) {
+	// intの配列であると仮定させてやらないとだめなわけか・・・面倒だね。
+	LOG_PRINT("value:%d", *((int *)item));
+	if(*(int *)item == 5) {
+		LOG_PRINT("削除すべきデータを見つけた。");
+		ttLibC_LinkedList *linkedList = (ttLibC_LinkedList *)ptr;
+		ttLibC_LinkedList_remove(linkedList, item);
+	}
+	return true;
+}
+
+static bool findItem2(void *ptr, void *item, size_t item_size) {
+	// intの配列であると仮定させてやらないとだめなわけか・・・面倒だね。
+	LOG_PRINT("value:%d", *((int *)item));
+	return true;
+}
+
+static void linkedListTest() {
+	LOG_PRINT("linkedListTest");
+	ttLibC_LinkedList *linkedList = ttLibC_LinkedList_make();
+	int val = 5;
+	ttLibC_LinkedList_addLast(linkedList, &val, sizeof(val), false);
+	val = 6;
+	ttLibC_LinkedList_addLast(linkedList, &val, sizeof(val), false);
+	val = 3;
+	ttLibC_LinkedList_addFirst(linkedList, &val ,sizeof(val), false);
+	ttLibC_LinkedList_forEach(linkedList, findItem, linkedList);
+	ttLibC_LinkedList_forEach(linkedList, findItem2, NULL);
+	ttLibC_LinkedList_close(&linkedList);
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
 
 static void byteUtilTest() {
 	LOG_PRINT("byteUtilTest");
@@ -415,6 +481,8 @@ static void openalUtilTest() {
  */
 cute::suite utilTests(cute::suite s) {
 	s.clear();
+	s.push_back(CUTE(stlListTest));
+	s.push_back(CUTE(linkedListTest));
 	s.push_back(CUTE(byteUtilTest));
 	s.push_back(CUTE(connectorTest));
 	s.push_back(CUTE(dynamicBufferTest));
