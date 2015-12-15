@@ -207,6 +207,15 @@ void ttLibC_TettyBootstrap_pipeline_addLast(
 		ttLibC_TettyChannelHandler *channel_handler);
 
 /**
+ * remove channel handler.
+ * @param bootstrap       bootstrap object.
+ * @param channel_handler use def channel_handler object.
+ */
+void ttLibC_TettyBootstrap_pipeline_remove(
+		ttLibC_TettyBootstrap *bootstrap,
+		ttLibC_TettyChannelHandler *channel_handler);
+
+/**
  * write data for all connect socket.(share one task for all connection.)
  * @param bootstrap
  * @param data

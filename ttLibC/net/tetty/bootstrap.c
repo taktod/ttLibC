@@ -324,9 +324,21 @@ void ttLibC_TettyBootstrap_close(ttLibC_TettyBootstrap **bootstrap) {
  */
 void ttLibC_TettyBootstrap_pipeline_addLast(
 		ttLibC_TettyBootstrap *bootstrap,
-		ttLibC_TettyChannelHandler *channelHandler) {
+		ttLibC_TettyChannelHandler *channel_handler) {
 	ttLibC_TettyBootstrap_ *bootstrap_ = (ttLibC_TettyBootstrap_ *)bootstrap;
-	ttLibC_StlList_addLast(bootstrap_->pipeline, channelHandler);
+	ttLibC_StlList_addLast(bootstrap_->pipeline, channel_handler);
+}
+
+/*
+ * remove channel handler.
+ * @param bootstrap       bootstrap object.
+ * @param channel_handler use def channel_handler object.
+ */
+void ttLibC_TettyBootstrap_pipeline_remove(
+		ttLibC_TettyBootstrap *bootstrap,
+		ttLibC_TettyChannelHandler *channel_handler) {
+	ttLibC_TettyBootstrap_ *bootstrap_ = (ttLibC_TettyBootstrap_ *)bootstrap;
+	ttLibC_StlList_remove(bootstrap_->pipeline, channel_handler);
 }
 
 /*
