@@ -26,6 +26,9 @@ extern "C" {
 typedef struct {
 	int wait_socket;
 	struct sockaddr_in server_addr;
+	bool use_reuse_addr;
+	bool use_keep_alive;
+	bool use_tcp_nodelay;
 } ttLibC_TcpServerInfo;
 
 typedef struct {

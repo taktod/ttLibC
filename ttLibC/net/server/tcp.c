@@ -14,6 +14,7 @@
 #include <strings.h>
 #include <unistd.h>
 #include <errno.h>
+#include <netinet/tcp.h>
 #include "../../allocator.h"
 #include "../../log.h"
 
@@ -30,6 +31,9 @@ ttLibC_TcpServerInfo *ttLibC_TcpServer_make(
 	server_info->server_addr.sin_family = AF_INET;
 	server_info->server_addr.sin_addr.s_addr = htonl(ip);
 	server_info->server_addr.sin_port = htons(port);
+	server_info->use_reuse_addr  = false;
+	server_info->use_keep_alive  = false;
+	server_info->use_tcp_nodelay = false;
 	return server_info;
 }
 
@@ -41,6 +45,18 @@ bool ttLibC_TcpServer_open(ttLibC_TcpServerInfo *server_info) {
 	if(server_info->wait_socket == -1) {
 		ERR_PRINT("failed to open socket.");
 		return false;
+	}
+	// set the options for server.
+	int optval = 1;
+	// TODO need to check return value.
+	if(server_info->use_keep_alive) {
+		setsockopt(server_info->wait_socket, SOL_SOCKET, SO_KEEPALIVE, &optval, sizeof(optval));
+	}
+	if(server_info->use_reuse_addr) {
+		setsockopt(server_info->wait_socket, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
+	}
+	if(server_info->use_tcp_nodelay) {
+		setsockopt(server_info->wait_socket, IPPROTO_TCP, TCP_NODELAY, &optval, sizeof(optval));
 	}
 	if(bind(
 			server_info->wait_socket,
@@ -79,6 +95,7 @@ ttLibC_TcpClientInfo *ttLibC_TcpServer_wait(
 		}
 		ERR_PRINT("failed to accept.");
 		ttLibC_free(client_info);
+		return NULL;
 	}
 	return client_info;
 }
