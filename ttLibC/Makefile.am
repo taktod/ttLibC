@@ -76,7 +76,6 @@ libttLibC_a_SOURCES= \
 	resampler/speexdspResampler.c \
 	util/amfUtil.c \
 	util/beepUtil.c \
-	util/bitUtil.c \
 	util/byteUtil.c \
 	util/crc32Util.c \
 	util/dynamicBufferUtil.c \
@@ -84,8 +83,10 @@ libttLibC_a_SOURCES= \
 	util/hexUtil.c \
 	util/httpUtil.c \
 	util/ioUtil.c \
+	util/linkedListUtil.c \
 	util/openalUtil.c \
 	util/opencvUtil.c \
+	util/stlListUtil.cpp \
 	allocator.c \
 	ttLibC.c
 

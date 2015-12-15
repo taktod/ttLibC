@@ -34,12 +34,13 @@ nobase_include_HEADERS= \
 	ttLibC/resampler/imageResampler.h \
 	ttLibC/util/amfUtil.h \
 	ttLibC/util/beepUtil.h \
-	ttLibC/util/bitUtil.h \
 	ttLibC/util/byteUtil.h \
 	ttLibC/util/crc32Util.h \
 	ttLibC/util/dynamicBufferUtil.h \
 	ttLibC/util/hexUtil.h \
 	ttLibC/util/ioUtil.h \
+	ttLibC/util/linkedListUtil.h \
+	ttLibC/util/stlListUtil.h \
 	ttLibC/allocator.h \
 	ttLibC/log.h \
 	ttLibC/ttLibC.h
