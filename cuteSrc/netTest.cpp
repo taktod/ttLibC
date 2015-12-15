@@ -21,6 +21,7 @@
 
 #ifdef __ENABLE_FILE__
 #	include <ttLibC/net/client/rtmp.h>
+#	include <ttLibC/net/tetty.h>
 #endif
 
 #include <ttLibC/net/server/tcp.h>
@@ -28,6 +29,102 @@
 #ifdef __ENABLE_FILE__
 #	include <ttLibC/util/forkUtil.h>
 #endif
+
+#ifdef __ENABLE_FILE__
+tetty_errornum tettyServerTest_channelRead(ttLibC_TettyContext *ctx, void *data, size_t data_size) {
+	if(strncmp((const char *)data, "closeServer", 11) == 0) {
+		LOG_PRINT("close server is called.");
+		ctx->bootstrap->error_flag = 1; // treat as error, quit server.
+		return 0;
+	}
+	if(strncmp((const char *)data, "close", 5) == 0) {
+		LOG_PRINT("close command is called.");
+		ttLibC_TettyContext_close(ctx);
+		return 0;
+	}
+	LOG_PRINT("got data:%s", (const char *)data);
+	ttLibC_TettyBootstrap_channels_write(ctx->bootstrap, data, data_size);
+	return 0;
+}
+
+tetty_errornum tettyClientTest_channelRead(ttLibC_TettyContext *ctx, void *data, size_t data_size) {
+	LOG_PRINT("got data:%s", (const char *)data);
+	return 0;
+}
+
+tetty_errornum tettyClientTest_channelActive(ttLibC_TettyContext *ctx) {
+	ttLibC_TettyContext_channel_write(ctx, (void *)"hello", 5);
+	return 0;
+}
+#endif
+
+static void tettyClientTest() {
+	LOG_PRINT("tettyClientTest");
+#ifdef __ENABLE_FILE__
+	ttLibC_TettyBootstrap *bootstrap = ttLibC_TettyBootstrap_make();
+	ttLibC_TettyBootstrap_channel(bootstrap, ChannelType_Tcp);
+	ttLibC_TettyBootstrap_option(bootstrap, Option_SO_KEEPALIVE);
+	ttLibC_TettyBootstrap_option(bootstrap, Option_TCP_NODELAY);
+
+	ttLibC_TettyChannelHandler handler;
+	memset(&handler, 0, sizeof(handler));
+	handler.channelRead = tettyClientTest_channelRead;
+	handler.channelActive = tettyClientTest_channelActive;
+	ttLibC_TettyBootstrap_pipeline_addLast(bootstrap, &handler);
+
+	ttLibC_TettyBootstrap_connect(bootstrap, "localhost", 12345);
+
+	while(true) {
+		// channelがcloseしたらプロセス死んで欲しいな・・・
+		if(ttLibC_TettyBootstrap_sync(bootstrap)) {
+			// クライアント動作なので、trueが帰ってくることはありえないはず。
+		}
+		if(bootstrap->error_flag) {
+			// エラーが発生した。
+			break;
+		}
+	}
+	ttLibC_TettyBootstrap_close(&bootstrap);
+#endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
+
+static void tettyServerTest() {
+	LOG_PRINT("tettyServerTest");
+#ifdef __ENABLE_FILE__
+	// tettyによるサーバーとしての動作テストを実施します。
+	ttLibC_TettyBootstrap *bootstrap = ttLibC_TettyBootstrap_make();
+	ttLibC_TettyBootstrap_channel(bootstrap, ChannelType_Tcp); // とりあえずtcpで動作してみよう。
+	ttLibC_TettyBootstrap_option(bootstrap, Option_SO_KEEPALIVE);
+	ttLibC_TettyBootstrap_option(bootstrap, Option_TCP_NODELAY);
+	ttLibC_TettyBootstrap_option(bootstrap, Option_SO_REUSEADDR);
+
+	// 動作pipelineをつくる。
+	ttLibC_TettyChannelHandler handler;
+	memset(&handler, 0, sizeof(handler));
+	handler.channelRead = tettyServerTest_channelRead;
+	ttLibC_TettyBootstrap_pipeline_addLast(bootstrap, &handler);
+
+	ttLibC_TettyBootstrap_bind(bootstrap, 12345);
+
+	/*
+	 * とりあえずforkせずにやってみようと思う。
+	 */
+	while(true) {
+		// 状況に変化がある場合はtrueが応答される。
+		if(ttLibC_TettyBootstrap_sync(bootstrap)) {
+			// server動作なので、この状態でtrueが応答されたということはclientができたということ
+			// forkサーバーを実装するので、プロセスforkを実施しなければならない。
+		}
+		if(bootstrap->error_flag) {
+			// エラーが発生したので、処理をやめる。
+			break;
+		}
+	}
+	ttLibC_TettyBootstrap_close(&bootstrap);
+#endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
 
 static void tcpServerTest() {
 	LOG_PRINT("tcpServerTest");
@@ -212,6 +309,8 @@ static void echoServerTest() {
  */
 cute::suite netTests(cute::suite s) {
 	s.clear();
+	s.push_back(CUTE(tettyClientTest));
+	s.push_back(CUTE(tettyServerTest));
 	s.push_back(CUTE(tcpServerTest));
 	s.push_back(CUTE(rtmpTest));
 	s.push_back(CUTE(echoServerTest2));

@@ -30,6 +30,7 @@ nobase_include_HEADERS= \
 	ttLibC/frame/video/yuv420.h \
 	ttLibC/frame/frame.h \
 	ttLibC/net/server/tcp.h \
+	ttLibC/net/tetty.h \
 	ttLibC/resampler/audioResampler.h \
 	ttLibC/resampler/imageResampler.h \
 	ttLibC/util/amfUtil.h \
