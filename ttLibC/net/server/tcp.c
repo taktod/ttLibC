@@ -82,10 +82,10 @@ ttLibC_TcpClientInfo *ttLibC_TcpServer_wait(
 	}
 	memset(client_info, 0, sizeof(ttLibC_TcpClientInfo));
 	while(true) {
-		socklen_t client_addr_len = sizeof(client_info->client_addr);
+		socklen_t client_addr_len = sizeof(client_info->data_addr);
 		client_info->data_socket = accept(
 				server_info->wait_socket,
-				(struct sockaddr *)&client_info->client_addr,
+				(struct sockaddr *)&client_info->data_addr,
 				&client_addr_len);
 		if(client_info->data_socket != -1) {
 			break;

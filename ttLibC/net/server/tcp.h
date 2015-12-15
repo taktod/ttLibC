@@ -33,7 +33,7 @@ typedef struct {
 
 typedef struct {
 	int data_socket;
-	struct sockaddr_in client_addr;
+	struct sockaddr_in data_addr;
 } ttLibC_TcpClientInfo;
 
 ttLibC_TcpServerInfo *ttLibC_TcpServer_make(
