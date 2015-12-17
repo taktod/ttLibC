@@ -46,7 +46,6 @@ bool ttLibC_StlMap_put(
 bool ttLibC_StlMap_remove(
 		ttLibC_StlMap *map,
 		void *key) {
-	LOG_PRINT("removeするよ？");
 	ttLibC_StlMap_ *map_ = (ttLibC_StlMap_ *)map;
 	map_->map->erase(key);
 	map_->inherit_super.size = map_->map->size();
