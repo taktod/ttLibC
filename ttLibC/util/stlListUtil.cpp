@@ -1,4 +1,4 @@
-/**
+/*
  * @file   stlListUtil.cpp
  * @brief  std::list support.
  *
@@ -9,18 +9,10 @@
  */
 
 #include "stlListUtil.h"
-#include <stdio.h>
-#include <stdbool.h>
 #include <list>
 #include "../log.h"
 #include "../allocator.h"
 #include <string.h>
-
-typedef struct {
-	void *item;
-	size_t item_size;
-	bool is_non_copy;
-} ttLibC_Util_StlListNode;
 
 typedef struct {
 	ttLibC_StlList inherit_super;
