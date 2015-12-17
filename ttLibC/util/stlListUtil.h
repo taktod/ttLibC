@@ -1,10 +1,11 @@
 /**
  * @file   stlListUtil.h
- * @brief  
+ * @brief  std::list support.
+ *
+ * this code is under 3-Cause BSD License.
+ *
  * @author taktod
  * @date   2015/11/30
- * こっちの動作は、オブジェクトの管理とかは、元のプログラム側でやってもらう感じに調整しておく。
- * なのでオブジェクトのコピーとか、オブジェクトの解放とかは実施しない。
  */
 
 #ifndef TTLIBC_UTIL_STLLISTUTIL_H_

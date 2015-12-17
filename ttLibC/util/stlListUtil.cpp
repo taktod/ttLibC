@@ -1,6 +1,9 @@
 /**
  * @file   stlListUtil.cpp
- * @brief  
+ * @brief  std::list support.
+ *
+ * this code is under 3-Cause BSD License.
+ *
  * @author taktod
  * @date   2015/11/30
  */
@@ -21,7 +24,7 @@ typedef struct {
 
 typedef struct {
 	ttLibC_StlList inherit_super;
-	std::list<void *> *list; // データ実体保持
+	std::list<void *> *list;
 } ttLibC_Util_StlList_;
 
 typedef ttLibC_Util_StlList_ ttLibC_StlList_;
@@ -73,7 +76,6 @@ static bool StlList_forEach(
 		void *ptr) {
 	std::list<void *>::iterator iter = list->list->begin();
 	while(iter != list->list->end()) {
-		// 見つかったのでcallbackを呼び出す。
 		void *item = *iter;
 		++ iter;
 		if(!callback(ptr, item)) {
@@ -89,7 +91,6 @@ bool StlList_forEachReverse(
 		void *ptr) {
 	std::list<void *>::reverse_iterator iter = list->list->rbegin();
 	while(iter != list->list->rend()) {
-		// 見つかったのでcallbackを呼び出す。
 		void *item = *iter;
 		++ iter;
 		if(!callback(ptr, item)) {
