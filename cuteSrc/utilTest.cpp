@@ -42,6 +42,7 @@
 #include <ttLibC/util/byteUtil.h>
 #include <ttLibC/util/linkedListUtil.h>
 #include <ttLibC/util/stlListUtil.h>
+#include <ttLibC/util/stlMapUtil.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -53,6 +54,36 @@
 #include <sys/param.h>
 #include <sys/uio.h>
 #include <unistd.h>
+
+static bool stlMapTest_findItem(void *ptr, void *key, void *item) {
+	LOG_PRINT("key:%s val:%s", (const char *)key, (const char *)item);
+	return true;
+}
+
+static bool stlMapTest_findItem2(void *ptr, void *key, void *item) {
+	LOG_PRINT("key:%s val:%s", (const char *)key, (const char *)item);
+	if(strcmp((const char *)key, "hogehoge_k") == 0) {
+		ttLibC_StlMap *map = (ttLibC_StlMap *)ptr;
+		ttLibC_StlMap_remove(map, key);
+	}
+	return true;
+}
+
+static void stlMapTest() {
+	LOG_PRINT("stlMapTest");
+	ttLibC_StlMap *map = ttLibC_StlMap_make();
+	char *a_k = "hogehoge_k";
+	char *a_i = "hogehoge";
+	char *b_k = "hello_k";
+	char *b_i = "hello";
+	ttLibC_StlMap_put(map, a_k, a_i);
+	ttLibC_StlMap_put(map, b_k, b_i);
+	ttLibC_StlMap_forEach(map, stlMapTest_findItem, map);
+	ttLibC_StlMap_forEach(map, stlMapTest_findItem2, map);
+	ttLibC_StlMap_forEach(map, stlMapTest_findItem, map);
+	ttLibC_StlMap_close(&map);
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
 
 static bool stlListTest_findItem(void *ptr, void *item) {
 	LOG_PRINT("fi:%d", *((int *)item));
@@ -481,6 +512,7 @@ static void openalUtilTest() {
  */
 cute::suite utilTests(cute::suite s) {
 	s.clear();
+	s.push_back(CUTE(stlMapTest));
 	s.push_back(CUTE(stlListTest));
 	s.push_back(CUTE(linkedListTest));
 	s.push_back(CUTE(byteUtilTest));

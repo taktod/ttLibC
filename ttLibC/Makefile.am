@@ -89,6 +89,7 @@ libttLibC_a_SOURCES= \
 	util/openalUtil.c \
 	util/opencvUtil.c \
 	util/stlListUtil.cpp \
+	util/stlMapUtil.cpp \
 	allocator.c \
 	ttLibC.c
 
