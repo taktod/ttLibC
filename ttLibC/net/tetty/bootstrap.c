@@ -46,6 +46,7 @@ bool ttLibC_TettyBootstrap_channel(
 		ttLibC_Tetty_ChannelType channel_type) {
 	ttLibC_TettyBootstrap_ *bootstrap_ = (ttLibC_TettyBootstrap_ *)bootstrap;
 	bootstrap_->channel_type = channel_type;
+	bootstrap_->inherit_super.channel_type = channel_type;
 	return true;
 }
 

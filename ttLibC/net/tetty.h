@@ -48,6 +48,8 @@ typedef enum {
 typedef struct {
 	/** ref of error_flag */
 	tetty_errornum error_flag;
+	/** type of channel */
+	ttLibC_Tetty_ChannelType channel_type;
 } ttLibC_Net_TettyBootstrap;
 
 typedef ttLibC_Net_TettyBootstrap ttLibC_TettyBootstrap;
