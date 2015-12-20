@@ -14,8 +14,6 @@
 #include "../allocator.h"
 #include "../log.h"
 
-extern "C" {
-
 typedef struct {
 	ttLibC_StlMap inherit_super;
 	std::map<void *, void *> *map;
@@ -23,49 +21,45 @@ typedef struct {
 
 typedef ttLibC_Util_StlMap_ ttLibC_StlMap_;
 
-ttLibC_StlMap *ttLibC_StlMap_make() {
+static ttLibC_StlMap_ *StlMap_make() {
 	ttLibC_StlMap_ *map = (ttLibC_StlMap_ *)ttLibC_malloc(sizeof(ttLibC_StlMap_));
 	if(map == NULL) {
 		return NULL;
 	}
 	map->map = new std::map<void *, void *>();
 	map->inherit_super.size = 0;
-	return (ttLibC_StlMap *)map;
+	return map;
 }
 
-bool ttLibC_StlMap_put(
-		ttLibC_StlMap *map,
+static bool StlMap_put(
+		ttLibC_StlMap_ *map,
 		void *key,
 		void *item) {
-	ttLibC_StlMap_ *map_ = (ttLibC_StlMap_ *)map;
-	map_->map->insert(std::pair<void *, void *>(key, item));
-	map_->inherit_super.size = map_->map->size();
+	map->map->insert(std::pair<void *, void *>(key, item));
+	map->inherit_super.size = map->map->size();
 	return true;
 }
 
-bool ttLibC_StlMap_remove(
-		ttLibC_StlMap *map,
+static bool StlMap_remove(
+		ttLibC_StlMap_ *map,
 		void *key) {
-	ttLibC_StlMap_ *map_ = (ttLibC_StlMap_ *)map;
-	map_->map->erase(key);
-	map_->inherit_super.size = map_->map->size();
+	map->map->erase(key);
+	map->inherit_super.size = map->map->size();
 	return true;
 }
 
-bool ttLibC_StlMap_removeAll(ttLibC_StlMap *map) {
-	ttLibC_StlMap_ *map_ = (ttLibC_StlMap_ *)map;
-	map_->map->clear();
-	map_->inherit_super.size = map_->map->size();
+static bool StlMap_removeAll(ttLibC_StlMap_ *map) {
+	map->map->clear();
+	map->inherit_super.size = map->map->size();
 	return true;
 }
 
-bool ttLibC_StlMap_forEach(
-		ttLibC_StlMap *map,
+static bool StlMap_forEach(
+		ttLibC_StlMap_ *map,
 		ttLibC_StlMapRefFunc callback,
 		void *ptr) {
-	ttLibC_StlMap_ *map_ = (ttLibC_StlMap_ *)map;
-	std::map<void *, void *>::iterator iter = map_->map->begin();
-	while(iter != map_->map->end()) {
+	std::map<void *, void *>::iterator iter = map->map->begin();
+	while(iter != map->map->end()) {
 		void *key = iter->first;
 		void *item = iter->second;
 		++ iter;
@@ -76,14 +70,56 @@ bool ttLibC_StlMap_forEach(
 	return true;
 }
 
-void ttLibC_StlMap_close(ttLibC_StlMap **map) {
-	ttLibC_StlMap_ *target = (ttLibC_StlMap_ *)*map;
+static void StlMap_close(ttLibC_StlMap_ **map) {
+	ttLibC_StlMap_ *target = *map;
 	if(target == NULL) {
 		return;
 	}
 	delete target->map;
 	ttLibC_free(target);
 	*map = NULL;
+}
+
+extern "C" {
+
+ttLibC_StlMap *ttLibC_StlMap_make() {
+	return (ttLibC_StlMap *)StlMap_make();
+}
+
+bool ttLibC_StlMap_put(
+		ttLibC_StlMap *map,
+		void *key,
+		void *item) {
+	return StlMap_put(
+			(ttLibC_StlMap_ *)map,
+			key,
+			item);
+}
+
+bool ttLibC_StlMap_remove(
+		ttLibC_StlMap *map,
+		void *key) {
+	return StlMap_remove(
+			(ttLibC_StlMap_ *)map,
+			key);
+}
+
+bool ttLibC_StlMap_removeAll(ttLibC_StlMap *map) {
+	return StlMap_removeAll((ttLibC_StlMap_ *)map);
+}
+
+bool ttLibC_StlMap_forEach(
+		ttLibC_StlMap *map,
+		ttLibC_StlMapRefFunc callback,
+		void *ptr) {
+	return StlMap_forEach(
+			(ttLibC_StlMap_ *)map,
+			callback,
+			ptr);
+}
+
+void ttLibC_StlMap_close(ttLibC_StlMap **map) {
+	StlMap_close((ttLibC_StlMap_ **)map);
 }
 
 }
