@@ -73,6 +73,7 @@ libttLibC_a_SOURCES= \
 	net/server/tcp.c \
 	net/tetty/bootstrap.c \
 	net/tetty/context.c \
+	net/tetty/promise.c \
 	resampler/audioResampler.c \
 	resampler/imageResampler.c \
 	resampler/speexdspResampler.c \

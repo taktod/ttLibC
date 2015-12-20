@@ -74,16 +74,9 @@ static void tettyClientTest() {
 
 	ttLibC_TettyBootstrap_connect(bootstrap, "localhost", 12345);
 
-	while(true) {
-		// channelがcloseしたらプロセス死んで欲しいな・・・
-		if(ttLibC_TettyBootstrap_sync(bootstrap)) {
-			// クライアント動作なので、trueが帰ってくることはありえないはず。
-		}
-		if(bootstrap->error_flag) {
-			// エラーが発生した。
-			break;
-		}
-	}
+	ttLibC_TettyFuture *future = ttLibC_TettyBootstrap_closeFuture(bootstrap);
+	ttLibC_TettyPromise_sync(future);
+
 	ttLibC_TettyBootstrap_close(&bootstrap);
 #endif
 	ASSERT(ttLibC_Allocator_dump() == 0);
@@ -92,14 +85,12 @@ static void tettyClientTest() {
 static void tettyServerTest() {
 	LOG_PRINT("tettyServerTest");
 #ifdef __ENABLE_FILE__
-	// tettyによるサーバーとしての動作テストを実施します。
 	ttLibC_TettyBootstrap *bootstrap = ttLibC_TettyBootstrap_make();
-	ttLibC_TettyBootstrap_channel(bootstrap, ChannelType_Tcp); // とりあえずtcpで動作してみよう。
+	ttLibC_TettyBootstrap_channel(bootstrap, ChannelType_Tcp);
 	ttLibC_TettyBootstrap_option(bootstrap, Option_SO_KEEPALIVE);
 	ttLibC_TettyBootstrap_option(bootstrap, Option_TCP_NODELAY);
 	ttLibC_TettyBootstrap_option(bootstrap, Option_SO_REUSEADDR);
 
-	// 動作pipelineをつくる。
 	ttLibC_TettyChannelHandler handler;
 	memset(&handler, 0, sizeof(handler));
 	handler.channelRead = tettyServerTest_channelRead;
@@ -107,20 +98,9 @@ static void tettyServerTest() {
 
 	ttLibC_TettyBootstrap_bind(bootstrap, 12345);
 
-	/*
-	 * とりあえずforkせずにやってみようと思う。
-	 */
-	while(true) {
-		// 状況に変化がある場合はtrueが応答される。
-		if(ttLibC_TettyBootstrap_sync(bootstrap)) {
-			// server動作なので、この状態でtrueが応答されたということはclientができたということ
-			// forkサーバーを実装するので、プロセスforkを実施しなければならない。
-		}
-		if(bootstrap->error_flag) {
-			// エラーが発生したので、処理をやめる。
-			break;
-		}
-	}
+	ttLibC_TettyFuture *future = ttLibC_TettyBootstrap_closeFuture(bootstrap);
+	ttLibC_TettyPromise_sync(future);
+
 	ttLibC_TettyBootstrap_close(&bootstrap);
 #endif
 	ASSERT(ttLibC_Allocator_dump() == 0);
@@ -226,11 +206,6 @@ static void rtmpTest() {
 	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
-static void echoServerTest2() {
-	LOG_PRINT("echo server test2");
-	// 複数接続対策してみる。
-}
-
 static void echoServerTest() {
 	// just try to write echo server.
 	LOG_PRINT("echo server test");
@@ -313,7 +288,6 @@ cute::suite netTests(cute::suite s) {
 	s.push_back(CUTE(tettyServerTest));
 	s.push_back(CUTE(tcpServerTest));
 	s.push_back(CUTE(rtmpTest));
-	s.push_back(CUTE(echoServerTest2));
 	s.push_back(CUTE(echoServerTest));
 	return s;
 }

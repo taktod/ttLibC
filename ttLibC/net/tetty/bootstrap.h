@@ -45,6 +45,8 @@ typedef struct {
 	fd_set fdset;
 	/** fdset object for select work. */
 	fd_set fdchkset;
+
+	ttLibC_TettyFuture *close_future;
 } ttLibC_Net_TettyBootstrap_;
 
 typedef ttLibC_Net_TettyBootstrap_ ttLibC_TettyBootstrap_;

@@ -12,6 +12,7 @@
 #include <string.h>
 
 #include "bootstrap.h"
+#include "promise.h"
 #include "../../allocator.h"
 #include "../../log.h"
 #include "../../util/forkUtil.h"
@@ -31,6 +32,7 @@ ttLibC_TettyBootstrap *ttLibC_TettyBootstrap_make() {
 	bootstrap->so_reuseaddr = false;
 	bootstrap->tcp_nodelay  = false;
 	bootstrap->inherit_super.error_flag = 0;
+	bootstrap->close_future = NULL;
 	FD_ZERO(&bootstrap->fdset);
 	return (ttLibC_TettyBootstrap *)bootstrap;
 }
@@ -171,10 +173,6 @@ static bool TettyBootstrap_syncEach(void *ptr, void *item) {
 		uint8_t buffer[1024];
 		size_t read_size = 0;
 		memset(buffer, 0, sizeof(buffer));
-		// データ取得サイズが1024の場合に再度ループして、書き込みを実行するようにしてみたところ
-		// readの中でcloseが呼ばれるとclient_info->data_socketがclose後に再度呼び出されることになり
-		// プログラムが壊れる現象があったので、ここはあえてこうした。
-		// まだ読み込みすべきデータが残っていたら待ち0で即実行されるので、まぁ問題ないでしょう。
 		read_size = read(client_info->data_socket, buffer, sizeof(buffer));
 		if(read_size == 0) {
 			// closed.
@@ -195,7 +193,7 @@ static bool TettyBootstrap_syncEach(void *ptr, void *item) {
  * @param bootstrap bootstrap object.
  * @return true:new client_connection is established false:usual work.
  */
-bool ttLibC_TettyBootstrap_sync(ttLibC_TettyBootstrap *bootstrap) {
+bool ttLibC_TettyBootstrap_update(ttLibC_TettyBootstrap *bootstrap) {
 	ttLibC_TettyBootstrap_ *bootstrap_ = (ttLibC_TettyBootstrap_ *)bootstrap;
 
 	if(bootstrap_->server_info == NULL && bootstrap_->client_info_list->size == 0) {
@@ -314,6 +312,11 @@ void ttLibC_TettyBootstrap_close(ttLibC_TettyBootstrap **bootstrap) {
 	ttLibC_TettyBootstrap_closeServer((ttLibC_TettyBootstrap *)target);
 	ttLibC_StlList_close(&target->client_info_list);
 	ttLibC_StlList_close(&target->pipeline);
+	if(target->close_future != NULL) {
+		ttLibC_TettyPromise_ *promise = (ttLibC_TettyPromise_ *)target->close_future;
+		promise->promise_type = PromiseType_Promise;
+		ttLibC_TettyPromise_close((ttLibC_TettyPromise **)&promise);
+	}
 	ttLibC_free(target);
 	*bootstrap = NULL;
 }
@@ -388,4 +391,25 @@ tetty_errornum ttLibC_TettyBootstrap_channelEach_write(
 	ttLibC_TettyBootstrap_ *bootstrap_ = (ttLibC_TettyBootstrap_ *)bootstrap;
 	ttLibC_StlList_forEach(bootstrap_->client_info_list, TettyBootstrap_channelEach_write_callback, &ctx);
 	return 0;
+}
+
+/*
+ * make promise
+ * @param bootstrap
+ */
+ttLibC_TettyPromise *ttLibC_TettyBootstrap_makePromise(ttLibC_TettyBootstrap *bootstrap) {
+	return ttLibC_TettyPromise_make_(bootstrap);
+}
+
+/*
+ * get the close future.
+ * @param bootstrap
+ * @return future
+ */
+ttLibC_TettyFuture *ttLibC_TettyBootstrap_closeFuture(ttLibC_TettyBootstrap *bootstrap) {
+	ttLibC_TettyBootstrap_ *bootstrap_ = (ttLibC_TettyBootstrap_ *)bootstrap;
+	ttLibC_TettyPromise_ *future = ttLibC_TettyPromise_make_(bootstrap);
+	future->promise_type = PromiseType_Future;
+	bootstrap_->close_future = future;
+	return (ttLibC_TettyFuture *)future;
 }

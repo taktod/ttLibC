@@ -51,7 +51,7 @@ typedef struct {
 	/** data_size */
 	size_t data_size;
 	/** error number. */
-	int32_t error_no; // exceptionの場合は渡す値 それ以外の場合は応答として利用したい。
+	int32_t error_no;
 } ttLibC_Net_TettyContext_;
 
 typedef ttLibC_Net_TettyContext_ ttLibC_TettyContext_;

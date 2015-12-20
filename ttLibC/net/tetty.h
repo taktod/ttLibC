@@ -66,12 +66,24 @@ typedef struct {
 
 typedef ttLibC_Net_TettyContext ttLibC_TettyContext;
 
+typedef struct {
+	ttLibC_TettyBootstrap *bootstrap;
+	bool is_done;
+	bool is_success;
+	void *return_val;
+} ttLibC_Net_TettyPromise;
+
+// future for native work.
+typedef ttLibC_Net_TettyPromise ttLibC_TettyFuture;
+// promise for user def work.
+typedef ttLibC_Net_TettyPromise ttLibC_TettyPromise;
+
 /**
  * function definition for channelHandler
  * @param ctx working context.
  * @return errornum 0:ok others:error number.
  */
-typedef tetty_errornum (* ttLibC_Tetty_ContextFunc)  (ttLibC_TettyContext *ctx);
+typedef tetty_errornum (* ttLibC_Tetty_ContextFunc)(ttLibC_TettyContext *ctx);
 
 /**
  * function definition for channelHandler
@@ -80,14 +92,14 @@ typedef tetty_errornum (* ttLibC_Tetty_ContextFunc)  (ttLibC_TettyContext *ctx);
  * @param data_size data object size.
  * @return errornum 0:ok others:error number.
  */
-typedef tetty_errornum (* ttLibC_Tetty_DataFunc)     (ttLibC_TettyContext *ctx, void *data, size_t data_size);
+typedef tetty_errornum (* ttLibC_Tetty_DataFunc)(ttLibC_TettyContext *ctx, void *data, size_t data_size);
 
 /**
  * function definition for channelHandler
  * @param ctx      working context.
  * @param error_no error number for the exception.
  */
-typedef void    (* ttLibC_Tetty_ExceptionFunc)(ttLibC_TettyContext *ctx, int32_t error_no);
+typedef void (* ttLibC_Tetty_ExceptionFunc)(ttLibC_TettyContext *ctx, int32_t error_no);
 
 /**
  * definition of channel_handler.
@@ -175,11 +187,11 @@ bool ttLibC_TettyBootstrap_connect(
 		int port);
 
 /**
- * do sync task.
+ * do update task.
  * @param bootstrap bootstrap object.
  * @return true:new client_connection is established false:usual work.
  */
-bool ttLibC_TettyBootstrap_sync(ttLibC_TettyBootstrap *bootstrap);
+bool ttLibC_TettyBootstrap_update(ttLibC_TettyBootstrap *bootstrap);
 
 /**
  * close server socket.
@@ -241,7 +253,18 @@ tetty_errornum ttLibC_TettyBootstrap_channelEach_write(
 		void *data,
 		size_t data_size);
 
+/**
+ * make promise
+ * @param bootstrap
+ */
+ttLibC_TettyPromise *ttLibC_TettyBootstrap_makePromise(ttLibC_TettyBootstrap *bootstrap);
 
+/**
+ * get the close future.
+ * @param bootstrap
+ * @return future
+ */
+ttLibC_TettyFuture *ttLibC_TettyBootstrap_closeFuture(ttLibC_TettyBootstrap *bootstrap);
 
 /**
  * write data for one connection.
@@ -363,10 +386,50 @@ tetty_errornum ttLibC_TettyContext_super_writeEach(
 		void *data,
 		size_t data_size);
 
-ttLibC_TettyChannelHandler *A_make();
-void A_close(ttLibC_TettyChannelHandler **handler);
-ttLibC_TettyChannelHandler *B_make();
-void B_close(ttLibC_TettyChannelHandler **handler);
+/**
+ * callback function definition of promise event listener.
+ * @param ptr     user def pointer.
+ * @param promise target promise/future.
+ */
+typedef void (* ttLibC_TettyPromiseListener)(ttLibC_TettyPromise *promise);
+
+/**
+ * sync until promise/future done.
+ * @param promise target promise
+ */
+void ttLibC_TettyPromise_sync(ttLibC_TettyPromise *promise); // rethrow exception.
+//void ttLibC_TettyPromise_await(); // not throw exception.
+
+/**
+ * event listener for promise/future done.
+ * @param promise  target promise/future
+ * @param listener listener
+ */
+void ttLibC_TettyPromise_addEventListener(
+		ttLibC_TettyPromise *promise,
+		ttLibC_TettyPromiseListener listener);
+
+/**
+ * notify success to promise.
+ * @param promise target promise
+ * @param data    sub information.
+ * TODO do I need to add is_non_copy?
+ */
+void ttLibC_TettyPromise_setSuccess(ttLibC_TettyPromise *promise, void *data);
+
+/**
+ * notify failed to promise.
+ * @param promise target promise
+ * @param data    sub information.
+ * TODO do I need to add is_non_copy?
+ */
+void ttLibC_TettyPromise_setFailure(ttLibC_TettyPromise *promise, void *data);
+
+/**
+ * close generated promise
+ * @param promise target promise
+ */
+void ttLibC_TettyPromise_close(ttLibC_TettyPromise **promise);
 
 #ifdef __cplusplus
 } /* extern "C" */

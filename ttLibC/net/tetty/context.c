@@ -163,7 +163,9 @@ tetty_errornum ttLibC_TettyContext_super_channelActive(ttLibC_TettyContext *ctx)
 		LOG_PRINT("failed to ref the bootstrap.");
 		return 0;
 	}
+	ttLibC_TettyChannelHandler *channel_handler = ctx_->channel_handler;
 	ttLibC_StlList_forEach(bootstrap->pipeline, TettyContext_callNextForEach, ctx);
+	ctx_->channel_handler = channel_handler;
 	return ctx_->error_no;
 }
 
@@ -180,7 +182,9 @@ tetty_errornum ttLibC_TettyContext_super_channelInactive(ttLibC_TettyContext *ct
 		LOG_PRINT("failed to ref the bootstrap.");
 		return 0;
 	}
+	ttLibC_TettyChannelHandler *channel_handler = ctx_->channel_handler;
 	ttLibC_StlList_forEach(bootstrap->pipeline, TettyContext_callNextForEach, ctx);
+	ctx_->channel_handler = channel_handler;
 	return ctx_->error_no;
 }
 
@@ -201,7 +205,9 @@ tetty_errornum ttLibC_TettyContext_super_channelRead(ttLibC_TettyContext *ctx, v
 	}
 	ctx_->data = data;
 	ctx_->data_size = data_size;
+	ttLibC_TettyChannelHandler *channel_handler = ctx_->channel_handler;
 	ttLibC_StlList_forEach(bootstrap->pipeline, TettyContext_callNextForEach, ctx);
+	ctx_->channel_handler = channel_handler;
 	return ctx_->error_no;
 }
 
@@ -218,7 +224,9 @@ tetty_errornum ttLibC_TettyContext_super_bind(ttLibC_TettyContext *ctx) {
 		LOG_PRINT("failed to ref the bootstrap.");
 		return 0;
 	}
+	ttLibC_TettyChannelHandler *channel_handler = ctx_->channel_handler;
 	ttLibC_StlList_forEachReverse(bootstrap->pipeline, TettyContext_callNextForEach, ctx);
+	ctx_->channel_handler = channel_handler;
 	return ctx_->error_no;
 }
 
@@ -235,7 +243,9 @@ tetty_errornum ttLibC_TettyContext_super_connect(ttLibC_TettyContext *ctx) {
 		LOG_PRINT("failed to ref the bootstrap.");
 		return 0;
 	}
+	ttLibC_TettyChannelHandler *channel_handler = ctx_->channel_handler;
 	ttLibC_StlList_forEachReverse(bootstrap->pipeline, TettyContext_callNextForEach, ctx);
+	ctx_->channel_handler = channel_handler;
 	return ctx_->error_no;
 }
 
@@ -252,7 +262,9 @@ tetty_errornum ttLibC_TettyContext_super_disconnect(ttLibC_TettyContext *ctx) {
 		LOG_PRINT("failed to ref the bootstrap.");
 		return 0;
 	}
+	ttLibC_TettyChannelHandler *channel_handler = ctx_->channel_handler;
 	ttLibC_StlList_forEachReverse(bootstrap->pipeline, TettyContext_callNextForEach, ctx);
+	ctx_->channel_handler = channel_handler;
 	return ctx_->error_no;
 }
 
@@ -269,7 +281,9 @@ tetty_errornum ttLibC_TettyContext_super_close(ttLibC_TettyContext *ctx) {
 		LOG_PRINT("failed to ref the bootstrap.");
 		return 0;
 	}
+	ttLibC_TettyChannelHandler *channel_handler = ctx_->channel_handler;
 	ttLibC_StlList_forEachReverse(bootstrap->pipeline, TettyContext_callNextForEach, ctx);
+	ctx_->channel_handler = channel_handler;
 	return ctx_->error_no;
 }
 
@@ -282,12 +296,10 @@ tetty_errornum ttLibC_TettyContext_super_close(ttLibC_TettyContext *ctx) {
 static bool TettyContext_super_write_callback(void *ptr, void *item) {
 	ttLibC_TettyContext_ *ctx_ = (ttLibC_TettyContext_ *)ptr;
 	ttLibC_TcpClientInfo *client_info = (ttLibC_TcpClientInfo *)item;
-	// それぞれのclient_info宛のctxを作って実行させる。
 	void *data = ctx_->data;
 	size_t data_size = ctx_->data_size;
-	// 通常の書き込みなので、そのままwriteする。
 	write(client_info->data_socket, ctx_->data, ctx_->data_size);
-	// TODO エラーが発生した場合は対処しておきたい。
+	// TODO do something in the case of error.
 	return true;
 }
 
@@ -308,6 +320,7 @@ tetty_errornum ttLibC_TettyContext_super_write(ttLibC_TettyContext *ctx, void *d
 	}
 	ctx_->data = data;
 	ctx_->data_size = data_size;
+	ttLibC_TettyChannelHandler *channel_handler = ctx_->channel_handler; // handlerを一旦保持しておいて、あとで復元する。
 	if(ttLibC_StlList_forEachReverse(bootstrap->pipeline, TettyContext_callNextForEach, ctx)) {
 		// if finish the iterator, we need to write.
 		if(ctx_->data != NULL) {
@@ -323,6 +336,7 @@ tetty_errornum ttLibC_TettyContext_super_write(ttLibC_TettyContext *ctx, void *d
 			ctx_->data_size = 0;
 		}
 	}
+	ctx_->channel_handler = channel_handler;
 	return ctx_->error_no;
 }
 /*
