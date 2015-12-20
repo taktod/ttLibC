@@ -74,7 +74,6 @@ bool ttLibC_TcpServer_open(ttLibC_TcpServerInfo *server_info) {
 
 ttLibC_TcpClientInfo *ttLibC_TcpServer_wait(
 		ttLibC_TcpServerInfo *server_info) {
-	// clientInfoをつくって応答しなければならない。
 	ttLibC_TcpClientInfo *client_info = (ttLibC_TcpClientInfo *)ttLibC_malloc(sizeof(ttLibC_TcpClientInfo));
 	if(client_info == NULL) {
 		ERR_PRINT("failed to allocate client_info.");
