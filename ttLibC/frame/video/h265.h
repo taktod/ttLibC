@@ -20,7 +20,7 @@ extern "C" {
 /**
  * h265 nal type.
  */
-typedef enum {
+typedef enum ttLibC_H265_NalType {
 	H265NalType_trailN       = 0x00,
 	H265NalType_trailR       = 0x01,
 	H265NalType_tsaN         = 0x02,
@@ -92,7 +92,7 @@ typedef enum {
 /**
  * h265 object type
  */
-typedef enum {
+typedef enum ttLibC_H265_Type {
 	/** sps pps vps chunk */
 	H265Type_configData,
 	/** idr nut */
@@ -108,7 +108,7 @@ typedef enum {
  * h265 nalinfo definition.
  * for analyze result.
  */
-typedef struct {
+typedef struct ttLibC_H265_NalInfo {
 	/** data_pos from buffer start pos */
 	size_t data_pos;
 	ttLibC_H265_NalType nal_unit_type;
@@ -118,7 +118,7 @@ typedef struct {
 /**
  * h265 frame definition.
  */
-typedef struct {
+typedef struct ttLibC_Frame_Video_H265 {
 	/** inherit data from ttLibC_Video */
 	ttLibC_Video inherit_super;
 	/** frame type */

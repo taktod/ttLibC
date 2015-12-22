@@ -21,7 +21,7 @@ extern "C" {
 /**
  * mp3lame encoder type
  */
-typedef enum {
+typedef enum ttLibC_Mp3lameEncoder_Type {
 	Mp3lameEncoderType_CBR,
 	Mp3lameEncoderType_ABR,
 	Mp3lameEncoderType_VBR,
@@ -30,7 +30,7 @@ typedef enum {
 /**
  * mp3lame encoder definition
  */
-typedef struct {
+typedef struct ttLibC_Encoder_Mp3lameEncoder {
 	/** mp3lame encoder type */
 	ttLibC_Mp3lameEncoder_Type type;
 	/** target sample_rate */

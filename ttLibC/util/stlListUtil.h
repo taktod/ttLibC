@@ -21,7 +21,7 @@ extern "C" {
 /**
  * definition of stlList object.
  */
-typedef struct {
+typedef struct ttLibC_Util_StlList {
 	/** element size */
 	size_t size;
 } ttLibC_Util_StlList;

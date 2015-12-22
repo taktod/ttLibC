@@ -21,7 +21,7 @@ extern "C" {
 /**
  * openh264 decoder definition.
  */
-typedef struct {
+typedef struct ttLibC_Decoder_Openh264Decoder {
 	uint32_t width;
 	uint32_t height;
 } ttLibC_Decoder_Openh264Decoder;

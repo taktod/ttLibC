@@ -27,7 +27,7 @@ extern "C" {
 /**
  * detail definition of mpegtsReader
  */
-typedef struct {
+typedef struct ttLibC_ContainerReader_MpegtsReader_ {
 	ttLibC_MpegtsReader inherit_super;
 
 	// re-use container objects.

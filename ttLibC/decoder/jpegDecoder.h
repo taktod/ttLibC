@@ -21,7 +21,7 @@ extern "C" {
 /**
  * jpeg decoder definition
  */
-typedef struct {
+typedef struct ttLibC_Decoder_JpegDecoder {
 	uint32_t width;
 	uint32_t height;
 } ttLibC_Decoder_JpegDecoder;

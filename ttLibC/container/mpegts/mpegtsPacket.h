@@ -42,7 +42,7 @@ typedef uint16_t ttLibC_uint16_t;
 /**
  * adaptation field
  */
-typedef struct {
+typedef struct ttLibC_AdaptationField {
 	uint32_t size;
 	ttLibC_uint1_t discontinuityIndicator;
 	ttLibC_uint1_t randomAccessIndicator;
@@ -54,12 +54,12 @@ typedef struct {
 //	ttLibC_uint1_t adaptationFieldExtensionFlag;
 	uint64_t pcrBase;
 	uint32_t pcrExtension;
-} ttLibC_AdaptationField_t;
+} ttLibC_AdaptationField;
 
 /**
  * header information (first 4 bytes)
  */
-typedef struct {
+typedef struct ttLibC_MpegtsPacket_Header {
 	ttLibC_uint8_t syncByte;
 //	ttLibC_uint1_t transportErrorIndicator;
 	ttLibC_uint1_t payloadUnitStartIndicator;
@@ -70,14 +70,14 @@ typedef struct {
 	ttLibC_uint1_t payloadFieldExist;
 	ttLibC_uint4_t continuityCounter;
 
-	ttLibC_AdaptationField_t adaptationField;
-} ttLibC_MpegtsPacket_Header_t;
+	ttLibC_AdaptationField adaptationField;
+} ttLibC_MpegtsPacket_Header;
 
 /**
  * header information for program packet(pat pmt sdt...)
  */
-typedef struct {
-	ttLibC_MpegtsPacket_Header_t header;
+typedef struct ttLibC_ProgramPacket_Header {
+	ttLibC_MpegtsPacket_Header header;
 
 //	ttLibC_uint8_t pointerField;
 //	ttLibC_uint8_t tableId;
@@ -91,12 +91,12 @@ typedef struct {
 //	ttLibC_uint1_t currentNextOrder;
 //	ttLibC_uint8_t sectionNumber;
 //	ttLibC_uint8_t lastSectionNumber;
-} ttLibC_ProgramPacket_Header_t;
+} ttLibC_ProgramPacket_Header;
 
 /**
  * definition of mpegtsPacket.
  */
-typedef struct {
+typedef struct ttLibC_Container_MpegtsPacket {
 	ttLibC_Mpegts inherit_super;
 	uint8_t continuity_counter;
 } ttLibC_Container_MpegtsPacket;
@@ -134,7 +134,7 @@ ttLibC_MpegtsPacket *ttLibC_MpegtsPacket_make(
  */
 bool ttLibC_MpegtsPacket_loadMpegtsPacketHeader(
 		ttLibC_ByteReader *reader,
-		ttLibC_MpegtsPacket_Header_t *header_info);
+		ttLibC_MpegtsPacket_Header *header_info);
 
 /**
  * loadProgramPacketHeader information(first 4byte, adaptation field, and program packet information(til lastSectionNumber.))
@@ -144,7 +144,7 @@ bool ttLibC_MpegtsPacket_loadMpegtsPacketHeader(
  */
 bool ttLibC_MpegtsPacket_loadProgramPacketHeader(
 		ttLibC_ByteReader *reader,
-		ttLibC_ProgramPacket_Header_t *header_info);
+		ttLibC_ProgramPacket_Header *header_info);
 
 /**
  * close mpegtsPacket

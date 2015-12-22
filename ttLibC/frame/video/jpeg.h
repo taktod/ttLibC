@@ -17,7 +17,7 @@ extern "C" {
 
 #include "video.h"
 
-typedef struct {
+typedef struct ttLibC_Frame_Video_Jpeg {
 	/** inherit data from ttLibC_Video */
 	ttLibC_Video inherit_super;
 } ttLibC_Frame_Video_Jpeg;

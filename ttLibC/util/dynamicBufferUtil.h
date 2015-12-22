@@ -23,7 +23,7 @@ extern "C" {
  * data for dynamic buffer,
  * @note data is for ref.
  */
-typedef struct {
+typedef struct ttLibC_Util_DynamicBuffer {
 	/** memory size */
 	size_t buffer_size;
 	/** hold memory size, (less than buffer_size) */

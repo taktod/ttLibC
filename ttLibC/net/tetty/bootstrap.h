@@ -24,7 +24,7 @@ extern "C" {
 /**
  * bootstrap detail definition
  */
-typedef struct {
+typedef struct ttLibC_Net_TettyBootstrap_ {
 	ttLibC_TettyBootstrap inherit_super;
 	/** channel type tcp or udp */
 	ttLibC_Tetty_ChannelType channel_type;

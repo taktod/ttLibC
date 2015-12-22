@@ -18,7 +18,7 @@
 /**
  * command list.
  */
-typedef enum {
+typedef enum ttLibC_TettyContextCommand {
 	Command_channelActive,
 	Command_channelInactive,
 	Command_channelRead,
@@ -34,7 +34,7 @@ typedef enum {
 /**
  * detail definition of context.
  */
-typedef struct {
+typedef struct ttLibC_Net_TettyContext_ {
 	ttLibC_TettyContext inherit_super;
 	/** bootstrap */
 	ttLibC_TettyBootstrap *bootstrap;

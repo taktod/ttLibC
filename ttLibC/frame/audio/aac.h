@@ -20,7 +20,7 @@ extern "C" {
 /**
  * aac type
  */
-typedef enum {
+typedef enum ttLibC_Aac_Type {
 	/** with global header. */
 	AacType_raw,
 	/** no global header. */
@@ -30,7 +30,7 @@ typedef enum {
 /**
  * aac frame definition
  */
-typedef struct {
+typedef struct ttLibC_Frame_Audio_Aac {
 	/** inherit data from ttLibC_Audio */
 	ttLibC_Audio inherit_super;
 	/** frame type */

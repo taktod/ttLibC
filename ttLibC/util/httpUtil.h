@@ -22,7 +22,7 @@ extern "C" {
 /**
  * data for httpClient
  */
-typedef struct {
+typedef struct ttLibC_Util_HttpUtil_HttpClient {
 	/** ETag value. */
 	char ETag[256];
 	/** size of download. */

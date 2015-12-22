@@ -15,14 +15,14 @@
 extern "C" {
 #endif
 
-typedef struct {
+typedef struct ttLibC_RtmpStreamDetail {
 	uint32_t id; // 外部公開ID
 	uint32_t stream_id; // 動作stream_id
 	bool is_publish; // true:publish false:play
 	char name[256]; // とりあえず固定でもたせておく。
 } ttLibC_RtmpStreamDetail;
 
-typedef struct {
+typedef struct ttLibC_Net_RtmpStream_ {
 	ttLibC_RtmpStream inherit_super;
 	// id -> stream_idのmapが必要
 	// id -> typeのmapも必要(publishであるか、playであるか)

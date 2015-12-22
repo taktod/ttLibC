@@ -19,13 +19,13 @@ extern "C" {
 #include "header.h"
 //#include "message.h"
 
-typedef enum {
+typedef enum ttLibC_RtmpRead_Type {
 	readType_header,   // header取得動作中
 	readType_body,     // body取得動作中
 	readType_innerHeader, // chunkの途切れ目の中途headerを確認
 } ttLibC_RtmpRead_Type;
 
-typedef struct {
+typedef struct ttLibC_Net_RtmpConnection_ {
 	ttLibC_RtmpConnection inherit_super;
 	// for send
 	ttLibC_RtmpHeader *headers[64]; // 64 headers for often use.

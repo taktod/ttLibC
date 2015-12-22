@@ -20,7 +20,7 @@ extern "C" {
 /**
  * mp3 type
  */
-typedef enum {
+typedef enum ttLibC_Mp3_Type {
 	Mp3Type_tag,
 	Mp3Type_id3,
 	Mp3Type_frame
@@ -29,7 +29,7 @@ typedef enum {
 /**
  * mp3 frame definition
  */
-typedef struct {
+typedef struct ttLibC_Frame_Audio_Mp3 {
 	/** inherit data from ttLibC_Audio */
 	ttLibC_Audio inherit_super;
 	/** frame type */

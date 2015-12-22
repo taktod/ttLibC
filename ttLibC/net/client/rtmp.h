@@ -23,7 +23,7 @@ extern "C" {
 /**
  * rtmpMessageType
  */
-typedef enum {
+typedef enum ttLibC_RtmpMessage_Type {
 	RtmpMessageType_setChunkSize = 0x01,
 	RtmpMessageType_abortMessage = 0x02,
 	RtmpMessageType_acknowledgement = 0x03,
@@ -44,7 +44,7 @@ typedef enum {
 /**
  * information for rtmpConnection.
  */
-typedef struct {
+typedef struct ttLibC_Net_RtmpConnection {
 	char *server;
 	uint16_t port;
 	char *app;
@@ -88,7 +88,7 @@ bool ttLibC_RtmpConnection_read(ttLibC_RtmpConnection *conn);
 void ttLibC_RtmpConnection_close(ttLibC_RtmpConnection **conn);
 
 // next to make netStream.
-typedef struct {
+typedef struct ttLibC_Net_RtmpStream {
 } ttLibC_Net_RtmpStream;
 
 typedef ttLibC_Net_RtmpStream ttLibC_RtmpStream;

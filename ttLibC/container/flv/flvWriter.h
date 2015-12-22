@@ -22,7 +22,7 @@ extern "C" {
 /**
  * definition of flv track.
  */
-typedef struct {
+typedef struct ttLibC_FlvTrack {
 	ttLibC_FrameQueue *frame_queue;
 	ttLibC_Frame_Type frame_type;
 	uint32_t crc32; // crc32 value for dsi for aac or configData for h264.
@@ -31,7 +31,7 @@ typedef struct {
 /**
  * detail definition of flv writer
  */
-typedef struct {
+typedef struct ttLibC_ContainerWriter_FlvWriter_ {
 	ttLibC_FlvWriter inherit_super;
 	// flv has at most only 2 track.
 	ttLibC_FlvTrack video_track;

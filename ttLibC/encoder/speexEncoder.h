@@ -21,7 +21,7 @@ extern "C" {
 /**
  * speex encoder type
  */
-typedef enum {
+typedef enum ttLibC_SpeexEncoder_Type {
 	SpeexEncoderType_CBR,
 	SpeexEncoderType_ABR,
 	SpeexEncoderType_VBR,
@@ -30,7 +30,7 @@ typedef enum {
 /**
  * speex encoder definition
  */
-typedef struct {
+typedef struct ttLibC_Encoder_SpeexEncoder {
 	/** type information */
 	ttLibC_SpeexEncoder_Type type;
 	/** target sample_rate */

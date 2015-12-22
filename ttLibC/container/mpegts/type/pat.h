@@ -20,7 +20,7 @@ extern "C" {
 /**
  * pat detail definition.
  */
-typedef struct {
+typedef struct ttLibC_Container_Mpegts_Pat {
 	ttLibC_MpegtsPacket inherit_super;
 	uint16_t pmt_pid;
 } ttLibC_Container_Mpegts_Pat;

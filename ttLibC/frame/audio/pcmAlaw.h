@@ -20,7 +20,7 @@ extern "C" {
 /**
  * pcm alaw frame definition.
  */
-typedef struct {
+typedef struct ttLibC_Frame_Audio_PcmAlaw {
 	/** inherit data from ttLibC_Audio */
 	ttLibC_Audio inherit_super;
 } ttLibC_Frame_Audio_PcmAlaw;

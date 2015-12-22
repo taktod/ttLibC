@@ -17,7 +17,7 @@ extern "C" {
 
 #include "../mpegtsPacket.h"
 
-typedef struct {
+typedef struct ttLibC_Container_Mpegts_Sdt {
 	ttLibC_MpegtsPacket inherit_super;
 } ttLibC_Container_Mpegts_Sdt;
 

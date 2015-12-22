@@ -24,7 +24,7 @@ extern "C" {
 /**
  * container type.
  */
-typedef enum {
+typedef enum ttLibC_Container_Type {
 	containerType_flv,
 	containerType_mkv,
 	containerType_mp3,
@@ -37,7 +37,7 @@ typedef enum {
 /**
  * detail definition of container.
  */
-typedef struct {
+typedef struct ttLibC_Container {
 	ttLibC_Container_Type type;
 	void    *data;
 	size_t   data_size;
@@ -72,7 +72,7 @@ bool ttLibC_Container_getFrame(
 /**
  * definition of container reader.
  */
-typedef struct {
+typedef struct ttLibC_ContainerReader {
 	ttLibC_Container_Type type;
 } ttLibC_ContainerReader;
 
@@ -96,7 +96,7 @@ void ttLibC_ContainerReader_close(ttLibC_ContainerReader **reader);
 /**
  * definition of container writer.
  */
-typedef struct {
+typedef struct ttLibC_ContainerWriter {
 	ttLibC_Container_Type type;
 	uint64_t pts;
 	uint32_t timebase;

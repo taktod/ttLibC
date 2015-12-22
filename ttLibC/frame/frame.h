@@ -22,7 +22,7 @@ extern "C" {
 /**
  * frame type.
  */
-typedef enum {
+typedef enum ttLibC_Frame_Type {
 	/** ttLibC_Bgr video frame */
 	frameType_bgr,
 	/** ttLibC_Flv1 video frame */
@@ -81,7 +81,7 @@ typedef enum {
 /**
  * base definition of frame.
  */
-typedef struct {
+typedef struct ttLibC_Frame {
 	/** frame type information */
 	ttLibC_Frame_Type type;
 	/**

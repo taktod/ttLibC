@@ -21,7 +21,7 @@ extern "C" {
 /**
  * avcodec encoder definition.
  */
-typedef struct {
+typedef struct ttLibC_Encoder_AvcodecEncoder {
 	/** output frame type */
 	ttLibC_Frame_Type frame_type;
 	/** input frame type */

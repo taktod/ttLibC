@@ -20,7 +20,7 @@ extern "C" {
 /**
  * adpcm_ima_wav frame definition
  */
-typedef struct {
+typedef struct ttLibC_Frame_Audio_AdpcmImaWav {
 	/** inherit data from ttLibC_Audio */
 	ttLibC_Audio inherit_super;
 } ttLibC_Frame_Audio_AdpcmImaWav;

@@ -21,7 +21,7 @@ extern "C" {
 /**
  * opus encoder definition
  */
-typedef struct {
+typedef struct ttLibC_Encoder_OpusEncoder {
 	/** target sample_rate */
 	uint32_t sample_rate;
 	/** target channel_num */

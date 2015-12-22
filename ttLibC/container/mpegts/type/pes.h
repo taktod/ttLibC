@@ -18,7 +18,7 @@ extern "C" {
 #include "../mpegtsPacket.h"
 #include "../mpegtsWriter.h"
 
-typedef struct {
+typedef struct ttLibC_Container_Mpegts_Pes {
 	ttLibC_MpegtsPacket inherit_super;
 	ttLibC_Frame_Type frame_type;
 	ttLibC_Frame *frame;

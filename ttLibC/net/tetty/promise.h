@@ -20,7 +20,7 @@ extern "C" {
 /**
  * promise work type.
  */
-typedef enum {
+typedef enum ttLibC_PromiseType {
 	PromiseType_Promise,
 	PromiseType_Future
 } ttLibC_PromiseType;
@@ -28,7 +28,7 @@ typedef enum {
 /**
  * detail definition of promise/future.
  */
-typedef struct {
+typedef struct ttLibC_Net_TettyPromise_ {
 	ttLibC_TettyPromise inherit_super;
 	ttLibC_PromiseType promise_type; // promise or future
 	ttLibC_TettyBootstrap *bootstrap;

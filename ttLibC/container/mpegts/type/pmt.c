@@ -28,7 +28,7 @@ ttLibC_Pmt *ttLibC_Pmt_make(
 		uint8_t continuity_counter,
 		int pes_track_num) {
 	// copy prev field list.
-	PmtElementaryField *pmtElementaryField_list = NULL;
+	ttLibC_PmtElementaryField *pmtElementaryField_list = NULL;
 	if(prev_pmt != NULL) {
 		if(prev_pmt->pes_track_num == pes_track_num) {
 			pmtElementaryField_list = prev_pmt->pmtElementaryField_list;
@@ -52,7 +52,7 @@ ttLibC_Pmt *ttLibC_Pmt_make(
 	if(pmt != NULL) {
 		pmt->pmtElementaryField_list = pmtElementaryField_list;
 		if(pmt->pmtElementaryField_list == NULL) {
-			pmt->pmtElementaryField_list = ttLibC_malloc(sizeof(PmtElementaryField) * pes_track_num);
+			pmt->pmtElementaryField_list = ttLibC_malloc(sizeof(ttLibC_PmtElementaryField) * pes_track_num);
 		}
 		if(pmt->pmtElementaryField_list == NULL) {
 			ttLibC_Pmt_close(&pmt);
@@ -72,7 +72,7 @@ ttLibC_Pmt *ttLibC_Pmt_getPacket(
 		size_t data_size,
 		uint16_t pmt_pid) {
 	ttLibC_ByteReader *reader = ttLibC_ByteReader_make(data, data_size, ByteUtilType_default);
-	ttLibC_ProgramPacket_Header_t header_info;
+	ttLibC_ProgramPacket_Header header_info;
 	if(!ttLibC_MpegtsPacket_loadProgramPacketHeader(reader, &header_info)) {
 		return NULL;
 	}

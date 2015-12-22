@@ -22,7 +22,7 @@ extern "C" {
 /**
  * data for openal play device.
  */
-typedef struct {
+typedef struct ttLibC_Util_OpenalUtil_AlDevice {
 	/** holding buffer number. */
 	uint32_t buffer_num;
 } ttLibC_Util_OpenalUtil_AlDevice;

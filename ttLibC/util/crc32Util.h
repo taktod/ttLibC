@@ -20,7 +20,7 @@ extern "C" {
 /**
  * definition for crc32.
  */
-typedef struct {
+typedef struct ttLibC_Util_Crc32 {
 	/** calcurate value. */
 	uint64_t crc;
 } ttLibC_Util_Crc32;

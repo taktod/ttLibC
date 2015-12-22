@@ -408,8 +408,8 @@ ttLibC_TettyPromise *ttLibC_TettyBootstrap_makePromise(ttLibC_TettyBootstrap *bo
  */
 ttLibC_TettyFuture *ttLibC_TettyBootstrap_closeFuture(ttLibC_TettyBootstrap *bootstrap) {
 	ttLibC_TettyBootstrap_ *bootstrap_ = (ttLibC_TettyBootstrap_ *)bootstrap;
-	ttLibC_TettyPromise_ *future = ttLibC_TettyPromise_make_(bootstrap);
+	ttLibC_TettyPromise_ *future = (ttLibC_TettyPromise_ *)ttLibC_TettyPromise_make_(bootstrap);
 	future->promise_type = PromiseType_Future;
-	bootstrap_->close_future = future;
+	bootstrap_->close_future = (ttLibC_TettyFuture *)future;
 	return (ttLibC_TettyFuture *)future;
 }

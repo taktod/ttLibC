@@ -18,7 +18,7 @@ extern "C" {
 #include "../flvTag.h"
 #include "../flvWriter.h"
 
-typedef struct {
+typedef struct ttLibC_Container_Flv_FlvHeaderTag {
 	ttLibC_FlvTag inherit_super;
 	bool has_audio;
 	bool has_video;

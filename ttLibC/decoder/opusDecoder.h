@@ -18,7 +18,7 @@ extern "C" {
 /**
  * opus decoder definition
  */
-typedef struct {
+typedef struct ttLibC_Decoder_OpusDecoder {
 	uint32_t sample_rate;
 	uint32_t channel_num;
 } ttLibC_Decoder_OpusDecoder;

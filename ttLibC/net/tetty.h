@@ -28,7 +28,7 @@ typedef int32_t tetty_errornum;
 /**
  * type of tetty channel
  */
-typedef enum {
+typedef enum ttLibC_Tetty_ChannelType {
 	ChannelType_Tcp,
 	ChannelType_Udp
 } ttLibC_Tetty_ChannelType;
@@ -36,7 +36,7 @@ typedef enum {
 /**
  * socket option for tetty.
  */
-typedef enum {
+typedef enum ttLibC_Tetty_Option {
 	Option_SO_KEEPALIVE,
 	Option_SO_REUSEADDR,
 	Option_TCP_NODELAY
@@ -45,7 +45,7 @@ typedef enum {
 /**
  * definition of bootstrap.
  */
-typedef struct {
+typedef struct ttLibC_Net_TettyBootstrap {
 	/** ref of error_flag */
 	tetty_errornum error_flag;
 	/** type of channel */
@@ -54,19 +54,21 @@ typedef struct {
 
 typedef ttLibC_Net_TettyBootstrap ttLibC_TettyBootstrap;
 
+typedef struct ttLibC_Net_TettyChannelHandler ttLibC_TettyChannelHandler;
+
 /**
  * definition of context.
  */
-typedef struct {
+typedef struct ttLibC_Net_TettyContext {
 	/** ref for bootstrap */
 	ttLibC_Net_TettyBootstrap *bootstrap;
 	/** ref for working channel handler. */
-	void *channel_handler;
+	ttLibC_TettyChannelHandler *channel_handler;
 } ttLibC_Net_TettyContext;
 
 typedef ttLibC_Net_TettyContext ttLibC_TettyContext;
 
-typedef struct {
+typedef struct ttLibC_Net_TettyPromise {
 	ttLibC_TettyBootstrap *bootstrap;
 	bool is_done;
 	bool is_success;
@@ -104,7 +106,7 @@ typedef void (* ttLibC_Tetty_ExceptionFunc)(ttLibC_TettyContext *ctx, int32_t er
 /**
  * definition of channel_handler.
  */
-typedef struct {
+typedef struct ttLibC_Net_TettyChannelHandler {
 	/** event for channel active */
 	ttLibC_Tetty_ContextFunc channelActive;
 	/** event for channel inactive */
@@ -241,6 +243,13 @@ tetty_errornum ttLibC_TettyBootstrap_channels_write(
 		void *data,
 		size_t data_size);
 
+/*
+ttLibC_TettyFuture *ttLibC_TettyBootstrap_channels_writeFuture(
+		ttLibC_TettyBootstrap *bootstrap,
+		void *data,
+		size_t data_size);
+*/
+
 /**
  * write data for all connect socket.(do all task for each connection.)
  * @param bootstrap
@@ -252,6 +261,13 @@ tetty_errornum ttLibC_TettyBootstrap_channelEach_write(
 		ttLibC_TettyBootstrap *bootstrap,
 		void *data,
 		size_t data_size);
+
+/*
+ttLibC_TettyFuture *ttLibC_TettyBootstrap_channelEach_writeFuture(
+		ttLibC_TettyBootstrap *bootstrap,
+		void *data,
+		size_t data_size);
+*/
 
 /**
  * make promise
@@ -277,6 +293,13 @@ tetty_errornum ttLibC_TettyContext_channel_write(
 		ttLibC_TettyContext *ctx,
 		void *data,
 		size_t data_size);
+
+/*
+ttLibC_TettyFuture *ttLibC_TettyContext_channel_writeFuture(
+		ttLibC_TettyContext *ctx,
+		void *data,
+		size_t data_size);
+*/
 
 /**
  * close data connection for target context.

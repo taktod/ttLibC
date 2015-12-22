@@ -21,7 +21,7 @@ extern "C" {
 /**
  * detail definition of container Mp3Frame.
  */
-typedef struct {
+typedef struct ttLibC_Container_Mp3Frame {
 	ttLibC_Container_Mp3 inherit_super;
 	ttLibC_Frame *frame; // frame object to hold data.
 } ttLibC_Container_Mp3Frame;

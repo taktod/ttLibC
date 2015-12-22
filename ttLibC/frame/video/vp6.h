@@ -20,7 +20,7 @@ extern "C" {
 /**
  * vp6 frame definition
  */
-typedef struct {
+typedef struct ttLibC_Frame_Video_Vp6 {
 	/** inherit data from ttLibC_Video */
 	ttLibC_Video inherit_super;
 } ttLibC_Frame_Video_Vp6;

@@ -21,7 +21,7 @@ extern "C" {
 /**
  * faac encoder type
  */
-typedef enum {
+typedef enum ttLibC_FaacEncoder_Type {
 	FaacEncoderType_Main,
 	FaacEncoderType_Low,
 	FaacEncoderType_SSR,
@@ -31,7 +31,7 @@ typedef enum {
 /**
  * faac encoder definition
  */
-typedef struct {
+typedef struct ttLibC_Encoder_FaacEncoder {
 	uint32_t sample_rate;
 	uint32_t channel_num;
 	uint32_t bitrate;

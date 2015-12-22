@@ -185,6 +185,16 @@ ttLibC_ContainerReader *ttLibC_ContainerReader_make(
 	return reader;
 }
 
+bool ttLibC_ContainerReader_read(
+		ttLibC_ContainerReader *reader,
+		void *data,
+		size_t data_size,
+		ttLibC_ContainerReadFunc callback,
+		void *ptr) {
+	// それぞれのコンテナの中身をみる。
+	return true;
+}
+
 /*
  * close container reader
  */
@@ -197,7 +207,6 @@ void ttLibC_ContainerReader_close(ttLibC_ContainerReader **reader) {
 	case containerType_flv:
 		ttLibC_FlvReader_close((ttLibC_FlvReader **)reader);
 		return;
-//	case containerType_mkv:
 	case containerType_mp3:
 		ttLibC_Mp3Reader_close((ttLibC_Mp3Reader **)reader);
 		return;
@@ -240,6 +249,14 @@ ttLibC_ContainerWriter *ttLibC_ContainerWriter_make(
 	return writer;
 }
 
+bool ttLibC_ContainerWriter_write(
+		ttLibC_ContainerWriter *writer,
+		ttLibC_Frame *frame,
+		ttLibC_ContainerWriteFunc callback,
+		void *ptr) {
+	return true;
+}
+
 /*
  * close container writer
  */
@@ -252,7 +269,6 @@ void ttLibC_ContainerWriter_close(ttLibC_ContainerWriter **writer) {
 	case containerType_flv:
 		ttLibC_FlvWriter_close((ttLibC_FlvWriter **)writer);
 		return;
-//	case containerType_mkv:
 	case containerType_mp3:
 		ttLibC_Mp3Writer_close((ttLibC_Mp3Writer **)writer);
 		return;

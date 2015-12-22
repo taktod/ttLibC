@@ -21,14 +21,14 @@ extern "C" {
 /**
  * openh264 encoder type
  */
-typedef enum {
+typedef enum ttLibC_Openh264Encoder_Type {
 	Openh264EncoderType_Baseline, // supported baseline only?
 } ttLibC_Openh264Encoder_Type;
 
 /**
  * openh264 enoder definition
  */
-typedef struct {
+typedef struct ttLibC_Encoder_Openh264Encoder {
 	/** openh264 encoder type */
 	ttLibC_Openh264Encoder_Type type;
 	/** target width */

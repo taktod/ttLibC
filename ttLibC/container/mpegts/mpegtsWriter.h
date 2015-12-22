@@ -22,7 +22,7 @@ extern "C" {
 /**
  * definition of mpegts tracks/
  */
-typedef struct {
+typedef struct ttLibC_MpegtsTrack {
 	ttLibC_FrameQueue *frame_queue;
 	ttLibC_Frame *h264_configData;
 	uint8_t cc; // continuity counter.
@@ -32,7 +32,7 @@ typedef struct {
 /**
  * definition of mpegts
  */
-typedef enum {
+typedef enum ttLibC_MpegtsWriter_Status {
 	status_target_check, // check next target duration by pcr track.
 	status_video_check,
 	status_video_add,

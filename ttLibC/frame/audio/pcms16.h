@@ -20,7 +20,7 @@ extern "C" {
 /**
  * pcms16 type
  */
-typedef enum {
+typedef enum ttLibC_PcmS16_Type {
 	/** 16bit little endian signed int interleave pcm. lrlrlr....
 	 * l:left value. r:right value.
 	 */
@@ -36,7 +36,7 @@ typedef enum {
 /**
  * pcms16 frame definition
  */
-typedef struct {
+typedef struct ttLibC_Frame_Audio_PcmS16 {
 	/** inherit data from ttLibC_Audio */
 	ttLibC_Audio inherit_super;
 	/** pcms16 type */

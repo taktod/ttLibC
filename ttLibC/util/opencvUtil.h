@@ -21,14 +21,14 @@ extern "C" {
 /**
  * significant keychar value.
  */
-typedef enum {
+typedef enum ttLibC_Keychar {
 	Keychar_Esc = '\x1b'
 } ttLibC_Keychar;
 
 /**
  * data for opencv window object.
  */
-typedef struct {
+typedef struct ttLibC_Util_OpencvUtil_CvWindow {
 	/** name for window */
 	char *name;
 } ttLibC_Util_OpencvUtil_CvWindow;
@@ -67,7 +67,7 @@ uint8_t ttLibC_CvWindow_waitForKeyInput(int delay);
 /**
  * data for opencv capture object.
  */
-typedef struct {
+typedef struct ttLibC_Util_OpencvUtil_CvCapture {
 	/** camera num */
 	uint32_t camera_num;
 	/** capture width */

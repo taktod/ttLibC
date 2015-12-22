@@ -20,7 +20,7 @@ extern "C" {
 /**
  * theora frame type definition.
  */
-typedef enum {
+typedef enum ttLibC_Theora_Type {
 	TheoraType_identificationHeaderDecodeFrame,
 	TheoraType_commentHeaderFrame,
 	TheoraType_setupHeaderFrame,
@@ -31,7 +31,7 @@ typedef enum {
 /**
  * theora frame definition.
  */
-typedef struct {
+typedef struct ttLibC_Frame_Video_Theora {
 	/** inherit data from ttLibC_Video */
 	ttLibC_Video inherit_super;
 	ttLibC_Theora_Type type;

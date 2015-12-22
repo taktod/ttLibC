@@ -20,7 +20,7 @@ extern "C" {
 /**
  * definition of mp3 container.
  */
-typedef struct {
+typedef struct ttLibC_Container_Mp3 {
 	ttLibC_Container inherit_super;
 } ttLibC_Container_Mp3;
 
@@ -46,7 +46,7 @@ void ttLibC_Container_Mp3_close(ttLibC_Container_Mp3 **mp3);
 /**
  * definition of mp3ContainerReader
  */
-typedef struct {
+typedef struct ttLibC_ContainerReader_Mp3Reader {
 	ttLibC_ContainerReader inherit_super;
 } ttLibC_ContainerReader_Mp3Reader;
 
@@ -93,7 +93,7 @@ void ttLibC_Mp3Reader_close(ttLibC_Mp3Reader **reader);
 /**
  * definition of mp3 writer object.
  */
-typedef struct {
+typedef struct ttLibC_ContainerWriter_Mp3Writer {
 	ttLibC_ContainerWriter inherit_super;
 } ttLibC_ContainerWriter_Mp3Writer;
 

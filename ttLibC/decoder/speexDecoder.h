@@ -21,7 +21,7 @@ extern "C" {
 /**
  * speex decoder definition
  */
-typedef struct {
+typedef struct ttLibC_Decoder_SpeexDecoder {
 	uint32_t sample_rate;
 	uint32_t channel_num;
 } ttLibC_Decoder_SpeexDecoder;

@@ -26,7 +26,7 @@ extern "C" {
 /**
  * reading data status
  */
-typedef enum {
+typedef enum ttLibC_FlvReader_Status {
 	size,
 	body
 } ttLibC_FlvReader_Status;
@@ -34,7 +34,7 @@ typedef enum {
 /**
  * flvReader detail definition.
  */
-typedef struct {
+typedef struct ttLibC_ContainerReader_FlvReader_ {
 	ttLibC_FlvReader inherit_super;
 
 	// reuse for flvTag audioTag videoTag

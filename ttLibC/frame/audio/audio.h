@@ -20,7 +20,7 @@ extern "C" {
 /**
  * additional definition of audio frame.
  */
-typedef struct {
+typedef struct ttLibC_Frame_Audio {
 	/** inherit data from ttLibC_Frame */
 	ttLibC_Frame inherit_super;
 	/** sample rate for audio frame. */

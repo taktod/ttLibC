@@ -19,7 +19,7 @@ extern "C" {
 
 typedef bool (* ttLibC_RtmpDataWriteFunc)(void *ptr, void *data, size_t data_size);
 
-typedef enum {
+typedef enum ttLibC_RtmpHeader_Type {
 	RtmpHeaderType_0 = 0x00,
 	RtmpHeaderType_1 = 0x01,
 	RtmpHeaderType_2 = 0x02,
@@ -27,7 +27,7 @@ typedef enum {
 	RtmpHeaderType_default = 0xFF,
 } ttLibC_RtmpHeader_Type;
 
-typedef struct {
+typedef struct ttLibC_Net_RtmpHeader {
 	ttLibC_RtmpHeader_Type type; // typeはreadもしくはmakeするときに前のデータとの差分で決定するものとする。
 	uint32_t cs_id;
 	uint32_t timestamp;

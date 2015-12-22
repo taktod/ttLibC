@@ -20,7 +20,7 @@ extern "C" {
 /**
  * vorbis type
  */
-typedef enum {
+typedef enum ttLibC_Vorbis_Type {
 	VorbisType_identification,
 	VorbisType_comment,
 	VorbisType_setup,
@@ -30,7 +30,7 @@ typedef enum {
 /**
  * vorbis frame definition
  */
-typedef struct {
+typedef struct ttLibC_Frame_Audio_Vorbis {
 	/** inherit data from ttLibC_Audio */
 	ttLibC_Audio inherit_super;
 	/** frame type */

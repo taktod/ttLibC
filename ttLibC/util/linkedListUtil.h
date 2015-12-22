@@ -21,7 +21,7 @@ extern "C" {
 /**
  * definition of linked list object.
  */
-typedef struct {
+typedef struct ttLibC_Util_LinkedList {
 	/** element size */
 	size_t size;
 } ttLibC_Util_LinkedList;

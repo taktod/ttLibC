@@ -23,7 +23,7 @@ typedef bool (* ttLibC_AmfObjectWriteFunc)(void *ptr, void *amf_data, size_t amf
 /**
  * enum def for amf0 object type.
  */
-typedef enum {
+typedef enum ttLibC_Amf0_Type {
 	amf0Type_Number      = 0x00, // 00 8byte double bits.
 	amf0Type_Boolean     = 0x01, // 01 01 true 01 00 false
 	amf0Type_String      = 0x02, // 02 si ze data
@@ -47,7 +47,7 @@ typedef enum {
 /**
  * def for amf0 object.
  */
-typedef struct {
+typedef struct ttLibC_Util_Amf0Object {
 	ttLibC_Amf0_Type type;
 	void *object;
 	size_t data_size;
@@ -58,7 +58,7 @@ typedef ttLibC_Util_Amf0Object ttLibC_Amf0Object;
 /**
  * def for amf0 map object.
  */
-typedef struct {
+typedef struct ttLibC_Util_Amf0MapObject {
 	char *key;
 	ttLibC_Amf0Object *amf0_obj;
 } ttLibC_Util_Amf0MapObject;
@@ -149,7 +149,7 @@ bool ttLibC_Amf0_write(ttLibC_Amf0Object *object, ttLibC_AmfObjectWriteFunc call
  */
 void ttLibC_Amf0_close(ttLibC_Amf0Object **amf0_obj);
 
-typedef enum {
+typedef enum ttLibC_Amf3_Type {
 	amf3Type_Undefined    = 0x00,
 	amf3Type_Null         = 0x01,
 	amf3Type_False        = 0x02,
@@ -170,7 +170,7 @@ typedef enum {
 	amf3Type_Dictionary   = 0x11,
 } ttLibC_Amf3_Type;
 
-typedef struct {
+typedef struct ttLibC_Util_Amf3Object {
 	ttLibC_Amf3_Type type;
 } ttLibC_Util_Amf3Object;
 

@@ -20,7 +20,7 @@ extern "C" {
 /**
  * enum for flv tag type.
  */
-typedef enum {
+typedef enum ttLibC_Flv_Type {
 	FlvType_audio  = 0x08,
 	FlvType_header = 0x00,
 	FlvType_meta   = 0x12,
@@ -30,7 +30,7 @@ typedef enum {
 /**
  * definition of flv tag.
  */
-typedef struct {
+typedef struct ttLibC_Container_Flv {
 	ttLibC_Container inherit_super;
 	ttLibC_Flv_Type type;
 } ttLibC_Container_Flv;
@@ -60,7 +60,7 @@ void ttLibC_Flv_close(ttLibC_Flv **flv);
 /**
  * definition of flv reader.
  */
-typedef struct {
+typedef struct ttLibC_ContainerReader_FlvReader {
 	ttLibC_ContainerReader inherit_super;
 	bool has_audio;
 	bool has_video;
@@ -109,7 +109,7 @@ void ttLibC_FlvReader_close(ttLibC_FlvReader **reader);
 /**
  * definition of flv writer object.
  */
-typedef struct {
+typedef struct ttLibC_ContainerWriter_FlvWriter {
 	ttLibC_ContainerWriter inherit_super;
 } ttLibC_ContainerWriter_FlvWriter;
 

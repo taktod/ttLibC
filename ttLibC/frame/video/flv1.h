@@ -17,7 +17,7 @@ extern "C" {
 
 #include "video.h"
 
-typedef enum {
+typedef enum ttLibC_Flv1_Type {
 	Flv1Type_intra,
 	Flv1Type_inner,
 	Flv1Type_disposableInner,
@@ -26,7 +26,7 @@ typedef enum {
 /**
  * flv1 frame definition
  */
-typedef struct {
+typedef struct ttLibC_Frame_Video_Flv1 {
 	/** inherit data from ttLibC_Video */
 	ttLibC_Video inherit_super;
 	ttLibC_Flv1_Type type;

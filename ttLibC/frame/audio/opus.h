@@ -20,7 +20,7 @@ extern "C" {
 /**
  * opus type
  */
-typedef enum {
+typedef enum ttLibC_Opus_Type {
 	OpusType_header,
 	OpusType_comment,
 	OpusType_frame
@@ -29,7 +29,7 @@ typedef enum {
 /**
  * opus frame definition
  */
-typedef struct {
+typedef struct ttLibC_Frame_Audio_Opus {
 	/** inherit data from ttLibC_Audio */
 	ttLibC_Audio inherit_super;
 	/** frame type */

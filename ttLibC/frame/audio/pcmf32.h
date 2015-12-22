@@ -16,7 +16,7 @@
 /**
  * pcmf32 type
  */
-typedef enum {
+typedef enum ttLibC_PcmF32_Type {
 	/** 32bit float interleave pcm. lrlrlr.... */
 	PcmF32Type_interleave,
 	/** 32bit float planar pcm. lll...rrr... */
@@ -26,7 +26,7 @@ typedef enum {
 /**
  * pcmf32 frame definition
  */
-typedef struct {
+typedef struct ttLibC_Frame_Audio_PcmF32 {
 	/** inherit data from ttLibC_Audio */
 	ttLibC_Audio inherit_super;
 	/** pcmf32 type */

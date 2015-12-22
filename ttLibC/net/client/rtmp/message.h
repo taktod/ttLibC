@@ -22,11 +22,11 @@ extern "C" {
 
 #include "header.h"
 
-typedef struct {
+typedef struct ttLibC_RtmpMessage {
 	ttLibC_RtmpHeader *header; // header情報
 } ttLibC_RtmpMessage;
 
-typedef struct {
+typedef struct ttLibC_Rtmp4ByteMessage {
 	ttLibC_RtmpMessage inherit_super;
 	uint32_t value;
 } ttLibC_Rtmp4ByteMessage;

@@ -22,13 +22,13 @@ typedef ttLibC_Rtmp4ByteMessage ttLibC_RtmpWindowAcknowledgementSize;
 typedef ttLibC_Rtmp4ByteMessage ttLibC_RtmpSetChunkSize;
 typedef ttLibC_Rtmp4ByteMessage ttLibC_RtmpAcknowledgement;
 
-typedef struct {
+typedef struct ttLibC_RtmpSetPeerBandwidth {
 	ttLibC_RtmpMessage inherit_super;
 	uint32_t window_acknowledge_size;
 	uint8_t type;
 } ttLibC_RtmpSetPeerBandwidth;
 
-typedef enum {
+typedef enum ttLibC_RtmpUserControlMessage_EventType {
 	RtmpEventType_StreamBegin = 0,
 	RtmpEventType_StreamEof = 1,
 	RtmpEventType_StreamDry = 2,

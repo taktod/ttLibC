@@ -20,7 +20,7 @@ extern "C" {
 /**
  * nelymoser frame definition
  */
-typedef struct {
+typedef struct ttLibC_Frame_Audio_Nellymoser {
 	/** inherit data from ttLibC_Audio */
 	ttLibC_Audio inherit_super;
 } ttLibC_Frame_Audio_Nellymoser;

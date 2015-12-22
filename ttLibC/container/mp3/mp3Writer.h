@@ -21,7 +21,7 @@ extern "C" {
 /**
  * mp3writer detail definition.
  */
-typedef struct {
+typedef struct ttLibC_ContainerWriter_Mp3Writer_ {
 	ttLibC_Mp3Writer inherit_super;
 	bool is_first;
 } ttLibC_ContainerWriter_Mp3Writer_;

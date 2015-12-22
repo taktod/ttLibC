@@ -18,7 +18,7 @@ extern "C" {
 #include "../flvTag.h"
 #include "../flvWriter.h"
 
-typedef struct {
+typedef struct ttLibC_Container_Flv_FlvVideoTag {
 	ttLibC_FlvTag inherit_super;
 	ttLibC_Frame_Type frame_type;
 	uint8_t codec_id;

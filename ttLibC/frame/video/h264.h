@@ -20,7 +20,7 @@ extern "C" {
 /**
  * h264 nal type.
  */
-typedef enum {
+typedef enum ttLibC_H264_NalType {
 	H264NalType_unspecified1                       = 0x00,
 	H264NalType_slice                              = 0x01,
 	H264NalType_sliceDataPartitionA                = 0x02,
@@ -60,7 +60,7 @@ typedef enum {
 /**
  * h264 object type.
  */
-typedef enum {
+typedef enum ttLibC_H264_Type {
 	/** sps and pps(spsext also?) */
 	H264Type_configData,
 	/** sliceIdr frame data. */
@@ -76,7 +76,7 @@ typedef enum {
  * h264 nalinfo definition.
  * for analyze result.
  */
-typedef struct {
+typedef struct ttLibC_H264_NalInfo {
 	/* nal start position of buffer. now it's always 0, so removed. */
 //	size_t pos;
 	/** data_pos from buffer start pos. point the xx(00 00 01 xx) */
@@ -90,7 +90,7 @@ typedef struct {
 /**
  * h264 frame definition
  */
-typedef struct {
+typedef struct ttLibC_Frame_Video_H264 {
 	/** inherit data from ttLibC_Video */
 	ttLibC_Video inherit_super;
 	/** frame type */

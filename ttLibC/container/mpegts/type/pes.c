@@ -119,7 +119,7 @@ ttLibC_Pes *ttLibC_Pes_getPacket(
 
 	// read header.
 	ttLibC_ByteReader *reader = ttLibC_ByteReader_make(data, data_size, ByteUtilType_default);
-	ttLibC_MpegtsPacket_Header_t header_info;
+	ttLibC_MpegtsPacket_Header header_info;
 	if(!ttLibC_MpegtsPacket_loadMpegtsPacketHeader(reader, &header_info)) {
 		return NULL;
 	}

@@ -21,7 +21,7 @@ extern "C" {
 /**
  * detail definition of flvTag
  */
-typedef struct {
+typedef struct ttLibC_Container_FlvTag {
 	ttLibC_Flv inherit_super;
 	uint32_t track_id; // 1
 	ttLibC_Frame *frame;

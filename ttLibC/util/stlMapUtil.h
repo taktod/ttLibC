@@ -21,7 +21,7 @@ extern "C" {
 /**
  * definition of stlMap object.
  */
-typedef struct {
+typedef struct ttLibC_Util_StlMap {
 	/** element size */
 	size_t size;
 } ttLibC_Util_StlMap;

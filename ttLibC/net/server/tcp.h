@@ -23,7 +23,7 @@ extern "C" {
 #include <stdint.h>
 #include <stdbool.h>
 
-typedef struct {
+typedef struct ttLibC_TcpServerInfo {
 	int wait_socket;
 	struct sockaddr_in server_addr;
 	bool use_reuse_addr;
@@ -32,7 +32,7 @@ typedef struct {
 	void *ptr;
 } ttLibC_TcpServerInfo;
 
-typedef struct {
+typedef struct ttLibC_TcpClientInfo {
 	int data_socket;
 	struct sockaddr_in data_addr;
 	void *ptr;

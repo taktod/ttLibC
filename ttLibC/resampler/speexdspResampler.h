@@ -20,7 +20,7 @@ extern "C" {
 /**
  * speexdsp resampler definition.
  */
-typedef struct {
+typedef struct ttLibC_Resampler_SpeexdspResampler {
 	uint32_t channel_num;
 	uint32_t input_sample_rate;
 	uint32_t output_sample_rate;

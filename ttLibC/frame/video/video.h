@@ -20,7 +20,7 @@ extern "C" {
 /**
  * video frame type.
  */
-typedef enum {
+typedef enum ttLibC_Video_Type {
 	/** key frame */
 	videoType_key,
 	/** inner frame */
@@ -32,7 +32,7 @@ typedef enum {
 /**
  * additional definition of video frame.
  */
-typedef struct {
+typedef struct ttLibC_Frame_Video {
 	/** inherit data from ttLibC_Frame */
 	ttLibC_Frame inherit_super;
 	/** width */

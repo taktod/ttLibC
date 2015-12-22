@@ -20,7 +20,7 @@ extern "C" {
 /**
  * speex type
  */
-typedef enum {
+typedef enum ttLibC_Speex_Type {
 	SpeexType_header,
 	SpeexType_comment,
 	SpeexType_frame
@@ -29,7 +29,7 @@ typedef enum {
 /**
  * speex frame definition
  */
-typedef struct {
+typedef struct ttLibC_Frame_Audio_Speex {
 	/** inherit data from ttLibC_Audio */
 	ttLibC_Audio inherit_super;
 	/** frame type */

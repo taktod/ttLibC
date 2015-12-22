@@ -71,7 +71,7 @@ bool ttLibC_Mpegts_getFrame(ttLibC_Mpegts *mpegts, ttLibC_getFrameFunc callback,
  */
 bool ttLibC_MpegtsPacket_loadMpegtsPacketHeader(
 		ttLibC_ByteReader *reader,
-		ttLibC_MpegtsPacket_Header_t *header_info) {
+		ttLibC_MpegtsPacket_Header *header_info) {
 	if(ttLibC_ByteReader_bit(reader, 8) != 0x47) {
 		ERR_PRINT("sync bit is invalid.(not 0x47)");
 		return false;
@@ -135,7 +135,7 @@ bool ttLibC_MpegtsPacket_loadMpegtsPacketHeader(
  */
 bool ttLibC_MpegtsPacket_loadProgramPacketHeader(
 		ttLibC_ByteReader *reader,
-		ttLibC_ProgramPacket_Header_t *header_info) {
+		ttLibC_ProgramPacket_Header *header_info) {
 	if(!ttLibC_MpegtsPacket_loadMpegtsPacketHeader(reader, &header_info->header)) {
 		return false;
 	}

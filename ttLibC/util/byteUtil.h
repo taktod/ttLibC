@@ -22,7 +22,7 @@ extern "C" {
 /**
  * work type for byteUtil
  */
-typedef enum {
+typedef enum ttLibC_ByteUtil_Type {
 	/** normal */
 	ByteUtilType_default,
 	/** support of emulation prevention three byte for h264 h265 */
@@ -33,7 +33,7 @@ typedef enum {
  * data for ByteReader
  * get data from byte array.
  */
-typedef struct {
+typedef struct ttLibC_Util_ByteReader {
 	/** read type. */
 	ttLibC_ByteUtil_Type type;
 	/** reading_size */
@@ -139,7 +139,7 @@ void ttLibC_ByteReader_close(ttLibC_ByteReader **reader);
  * data for ByteConnector
  * make byte array from bit (expGolomb), and ebml
  */
-typedef struct {
+typedef struct ttLibC_Util_ByteConnector {
 	ttLibC_ByteUtil_Type type;
 	/** writing data size */
 	size_t write_size;

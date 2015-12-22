@@ -20,7 +20,7 @@ extern "C" {
 /**
  * yuv420 type
  */
-typedef enum {
+typedef enum ttLibC_Yuv420_Type {
 	/** planar data. yyy... uu... vv...*/
 	Yuv420Type_planar,
 	/** semiPlanar data. yyy... uvuv... */
@@ -34,7 +34,7 @@ typedef enum {
 /**
  * yuv420 frame definition.
  */
-typedef struct {
+typedef struct ttLibC_Frame_Video_Yuv420 {
 	/** inherit data from ttLibC_Video */
 	ttLibC_Video inherit_super;
 	/** yuv420 type */

@@ -17,7 +17,7 @@ extern "C" {
 
 #include "../flvTag.h"
 
-typedef struct {
+typedef struct ttLibC_Container_Flv_FlvMetaTag {
 	ttLibC_FlvTag inherit_super;
 	// meta data is just ignore for now.
 } ttLibC_Container_Flv_FlvMetaTag;

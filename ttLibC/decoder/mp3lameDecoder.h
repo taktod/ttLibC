@@ -21,7 +21,7 @@ extern "C" {
 /**
  * mp3lame decoder type
  * /
-typedef enum {
+typedef enum ttLibC_Mp3lameDecoder_Type {
 	;
 } ttLibC_Mp3lameDecoder_Type;
 */
@@ -29,7 +29,7 @@ typedef enum {
 /**
  * mp3lame decoder definition
  */
-typedef struct {
+typedef struct ttLibC_Decoder_Mp3lameDecoder {
 //	ttLibC_Mp3lameDecoder_Type type;
 	uint32_t sample_rate;
 	uint32_t channel_num;

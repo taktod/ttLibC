@@ -20,7 +20,7 @@ extern "C" {
 /**
  * data for beepGenerator
  */
-typedef struct {
+typedef struct ttLibC_Util_BeepUtil_BeepGenerator {
 	/** target pcms16 type. */
 	ttLibC_PcmS16_Type type;
 	/** target_Hz 440 for A sound. */

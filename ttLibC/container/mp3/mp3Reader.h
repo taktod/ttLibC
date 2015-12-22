@@ -23,7 +23,7 @@ extern "C" {
 /**
  * mp3Reader detail definition.
  */
-typedef struct {
+typedef struct ttLibC_ContainerReader_Mp3Reader_ {
 	ttLibC_Mp3Reader inherit_super;
 	ttLibC_Mp3Frame *frame;
 	ttLibC_DynamicBuffer *tmp_buffer;

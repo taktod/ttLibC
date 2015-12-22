@@ -18,14 +18,14 @@ extern "C" {
 #include "../mpegtsPacket.h"
 #include "../mpegtsWriter.h"
 
-typedef struct {
+typedef struct ttLibC_PmtElementaryField {
 	uint8_t stream_type;
 	uint16_t pid;
-} PmtElementaryField;
+} ttLibC_PmtElementaryField;
 
-typedef struct {
+typedef struct ttLibC_Container_Mpegts_Pmt {
 	ttLibC_MpegtsPacket inherit_super;
-	PmtElementaryField *pmtElementaryField_list;
+	ttLibC_PmtElementaryField *pmtElementaryField_list;
 	uint32_t pes_track_num;
 } ttLibC_Container_Mpegts_Pmt;
 

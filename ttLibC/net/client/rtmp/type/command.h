@@ -18,7 +18,7 @@ extern "C" {
 #include "../netConnection.h"
 #include "../message.h"
 
-typedef struct {
+typedef struct ttLibC_RtmpAmf0Command {
 	ttLibC_RtmpMessage inherit_super;
 	ttLibC_Amf0Object *command_name;
 	ttLibC_Amf0Object *command_id;

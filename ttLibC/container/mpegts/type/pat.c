@@ -47,7 +47,7 @@ ttLibC_Pat *ttLibC_Pat_getPacket(
 		uint8_t *data,
 		size_t data_size) {
 	ttLibC_ByteReader *reader = ttLibC_ByteReader_make(data, data_size, ByteUtilType_default);
-	ttLibC_ProgramPacket_Header_t header_info;
+	ttLibC_ProgramPacket_Header header_info;
 	if(!ttLibC_MpegtsPacket_loadProgramPacketHeader(reader, &header_info)) {
 		return NULL;
 	}

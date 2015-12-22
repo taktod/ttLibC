@@ -21,7 +21,7 @@ extern "C" {
 /**
  * enum for mpegts type.
  */
-typedef enum {
+typedef enum ttLibC_Mpegts_Type {
 	MpegtsType_pat = 0x0000,
 	MpegtsType_pes = 0x0100,
 	MpegtsType_pmt = 0x1000,
@@ -31,7 +31,7 @@ typedef enum {
 /**
  * definition of mpegts
  */
-typedef struct {
+typedef struct ttLibC_Container_Mpegts {
 	ttLibC_Container inherit_super;
 	ttLibC_Mpegts_Type type;
 	uint16_t pid;
@@ -61,7 +61,7 @@ void ttLibC_Mpegts_close(ttLibC_Mpegts **mpegts);
 /**
  * mpegts reader definition
  */
-typedef struct {
+typedef struct ttLibC_ContainerReader_MpegtsReader {
 	ttLibC_ContainerReader inherit_super;
 } ttLibC_ContainerReader_MpegtsReader;
 
@@ -107,7 +107,7 @@ void ttLibC_MpegtsReader_close(ttLibC_MpegtsReader **reader);
 /**
  * definition of mpegts track information.
  */
-typedef struct {
+typedef struct ttLibC_ContainerWriter_MpegtsTrackInfo {
 	uint16_t pid;
 	ttLibC_Frame_Type frame_type;
 } ttLibC_ContainerWriter_MpegtsTrackInfo;
@@ -117,7 +117,7 @@ typedef ttLibC_ContainerWriter_MpegtsTrackInfo ttLibC_MpegtsTrackInfo;
 /**
  * definition of mpegts writer object.
  */
-typedef struct {
+typedef struct ttLibC_ContainerWriter_MpegtsWriter {
 	ttLibC_ContainerWriter inherit_super;
 	/** ref the track info to get pid and frame type. */
 } ttLibC_ContainerWriter_MpegtsWriter;

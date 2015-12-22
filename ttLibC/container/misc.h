@@ -20,7 +20,7 @@ extern "C" {
 /**
  * definition of frame queue.
  */
-typedef struct {
+typedef struct ttLibC_Container_Misc_FrameQueue {
 	uint32_t track_id;
 	uint64_t pts;
 	uint32_t timebase;
