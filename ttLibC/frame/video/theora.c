@@ -10,7 +10,7 @@
 
 #include "theora.h"
 #include "../../log.h"
-#include "../../util/bitUtil.h"
+#include "../../util/byteUtil.h"
 
 typedef ttLibC_Frame_Video_Theora ttLibC_Theora_;
 
