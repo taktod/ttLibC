@@ -47,6 +47,14 @@ static bool StlList_addLast(
 	return true;
 }
 
+static void *StlList_refFirst(ttLibC_StlList_ *list) {
+	return (void *)list->list->front();
+}
+
+static void *StlList_refLast(ttLibC_StlList_ *list) {
+	return (void *)list->list->back();
+}
+
 static bool StlList_remove(
 		ttLibC_StlList_ *list,
 		void *remove_item) {
@@ -123,6 +131,14 @@ bool ttLibC_StlList_addLast(
 	return StlList_addLast(
 			(ttLibC_StlList_ *)list,
 			add_item);
+}
+
+void *ttLibC_StlList_refFirst(ttLibC_StlList *list) {
+	return StlList_refFirst((ttLibC_StlList_ *)list);
+}
+
+void *ttLibC_StlList_refLast(ttLibC_StlList *list) {
+	return StlList_refLast((ttLibC_StlList_ *)list);
 }
 
 bool ttLibC_StlList_remove(

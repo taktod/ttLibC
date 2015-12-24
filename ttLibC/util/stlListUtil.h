@@ -35,10 +35,11 @@ ttLibC_StlList *ttLibC_StlList_make();
 bool ttLibC_StlList_addFirst(
 		ttLibC_StlList *list,
 		void *add_item);
-
 bool ttLibC_StlList_addLast(
 		ttLibC_StlList *list,
 		void *add_item);
+void *ttLibC_StlList_refFirst(ttLibC_StlList *list);
+void *ttLibC_StlList_refLast(ttLibC_StlList *list);
 bool ttLibC_StlList_remove(
 		ttLibC_StlList *list,
 		void *remote_item);
