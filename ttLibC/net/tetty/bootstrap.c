@@ -193,7 +193,9 @@ static bool TettyBootstrap_syncEach(void *ptr, void *item) {
  * @param bootstrap bootstrap object.
  * @return true:new client_connection is established false:usual work.
  */
-bool ttLibC_TettyBootstrap_update(ttLibC_TettyBootstrap *bootstrap) {
+bool ttLibC_TettyBootstrap_update(
+		ttLibC_TettyBootstrap *bootstrap,
+		uint32_t wait_interval) {
 	ttLibC_TettyBootstrap_ *bootstrap_ = (ttLibC_TettyBootstrap_ *)bootstrap;
 
 	if(bootstrap_->server_info == NULL && bootstrap_->client_info_list->size == 0) {
@@ -207,7 +209,7 @@ bool ttLibC_TettyBootstrap_update(ttLibC_TettyBootstrap *bootstrap) {
 	memcpy(&bootstrap_->fdchkset, &bootstrap_->fdset, sizeof(fd_set));
 
 	timeout.tv_sec = 0;
-	timeout.tv_usec = 100000;
+	timeout.tv_usec = wait_interval;
 	bool response = false;
 
 	if(select(FD_SETSIZE, &bootstrap_->fdchkset, NULL, NULL, &timeout)) {
