@@ -12,6 +12,8 @@
 #include "../../allocator.h"
 #include "../../log.h"
 
+#include <sys/time.h>
+
 /*
  * make promise
  * @param bootstrap bootstrap object.
@@ -33,15 +35,15 @@ ttLibC_TettyPromise *ttLibC_TettyPromise_make_(ttLibC_TettyBootstrap *bootstrap)
 	return (ttLibC_TettyPromise *)promise;
 }
 
-/*
- * sync until promise/future done.
- * @param promise target promise
+/**
+ * await until promise/future done
+ * @param promise target promise/future
  */
-void ttLibC_TettyPromise_sync(ttLibC_TettyPromise *promise) {
+void ttLibC_TettyPromise_await(ttLibC_TettyPromise *promise) {
 	ttLibC_TettyPromise_* promise_ = (ttLibC_TettyPromise_ *)promise;
 	// wait until done...
 	while(!promise_->is_done) {
-		ttLibC_TettyBootstrap_update(promise_->bootstrap);
+		ttLibC_TettyBootstrap_update(promise_->bootstrap, 100000);
 		if(promise_->bootstrap->error_flag != 0) {
 			// if error occured, update promise as error.
 			if(!promise_->is_done) {
@@ -63,7 +65,48 @@ void ttLibC_TettyPromise_sync(ttLibC_TettyPromise *promise) {
 		}
 	}
 }
-//void ttLibC_TettyPromise_await();
+
+/**
+ * await util promise/future done or timeout.
+ * @param promise         target promise/future.
+ * @param timeout_milisec timeout time length in mili sec.
+ */
+void ttLibC_TettyPromise_awaitFor(ttLibC_TettyPromise *promise, uint32_t timeout_milisec) {
+	ttLibC_TettyPromise_* promise_ = (ttLibC_TettyPromise_ *)promise;
+
+	struct timeval start_time, end_time;
+	gettimeofday(&start_time, NULL);
+
+	while(!promise_->is_done) {
+		ttLibC_TettyBootstrap_update(promise_->bootstrap, 100000);
+		gettimeofday(&end_time, NULL);
+		time_t diffsec = difftime(end_time.tv_sec, start_time.tv_sec);
+		suseconds_t diffsub = end_time.tv_usec - start_time.tv_usec;
+		double milisec = diffsec * 1e3 + diffsub * 1e-3;
+		if(milisec > timeout_milisec) {
+			break;
+		}
+		if(promise_->bootstrap->error_flag != 0) {
+			// if error occured, update promise as error.
+			if(!promise_->is_done) {
+				promise_->is_done    = true;
+				promise_->is_success = false;
+				promise_->inherit_super.is_done    = true;
+				promise_->inherit_super.is_success = false;
+				if(promise_->listener != NULL) {
+					promise_->listener((ttLibC_TettyPromise *)promise_);
+				}
+			}
+			else {
+				promise_->is_done    = true;
+				promise_->is_success = false;
+				promise_->inherit_super.is_done    = true;
+				promise_->inherit_super.is_success = false;
+			}
+			break;
+		}
+	}
+}
 
 /**
  * event listener for promise/future done.

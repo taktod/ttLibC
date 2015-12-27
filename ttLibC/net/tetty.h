@@ -423,8 +423,20 @@ typedef void (* ttLibC_TettyPromiseListener)(ttLibC_TettyPromise *promise);
  * sync until promise/future done.
  * @param promise target promise
  */
-void ttLibC_TettyPromise_sync(ttLibC_TettyPromise *promise); // rethrow exception.
-//void ttLibC_TettyPromise_await(); // not throw exception.
+//void ttLibC_TettyPromise_sync(ttLibC_TettyPromise *promise); // rethrow exception.
+
+/**
+ * await until promise/future done
+ * @param promise target promise/future
+ */
+void ttLibC_TettyPromise_await(ttLibC_TettyPromise *promise); // not throw exception.
+
+/**
+ * await util promise/future done or timeout.
+ * @param promise         target promise/future.
+ * @param timeout_milisec timeout time length in mili sec.
+ */
+void ttLibC_TettyPromise_awaitFor(ttLibC_TettyPromise *promise, uint32_t timeout_milisec);
 
 /**
  * event listener for promise/future done.
