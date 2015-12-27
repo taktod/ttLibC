@@ -75,7 +75,7 @@ static void tettyClientTest() {
 	ttLibC_TettyBootstrap_connect(bootstrap, "localhost", 12345);
 
 	ttLibC_TettyFuture *future = ttLibC_TettyBootstrap_closeFuture(bootstrap);
-	ttLibC_TettyPromise_sync(future);
+	ttLibC_TettyPromise_await(future);
 
 	ttLibC_TettyBootstrap_close(&bootstrap);
 #endif
@@ -99,7 +99,7 @@ static void tettyServerTest() {
 	ttLibC_TettyBootstrap_bind(bootstrap, 12345);
 
 	ttLibC_TettyFuture *future = ttLibC_TettyBootstrap_closeFuture(bootstrap);
-	ttLibC_TettyPromise_sync(future);
+	ttLibC_TettyPromise_await(future);
 
 	ttLibC_TettyBootstrap_close(&bootstrap);
 #endif
