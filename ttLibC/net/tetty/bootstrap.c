@@ -28,6 +28,7 @@ ttLibC_TettyBootstrap *ttLibC_TettyBootstrap_make() {
 	bootstrap->inherit_super.channel_type = ChannelType_Tcp;
 	bootstrap->pipeline = ttLibC_StlList_make();
 	bootstrap->server_info = NULL;
+	bootstrap->inherit_super.server_info = NULL;
 	bootstrap->client_info_list = ttLibC_StlList_make();
 	bootstrap->so_keepalive = false;
 	bootstrap->so_reuseaddr = false;
@@ -96,6 +97,7 @@ bool ttLibC_TettyBootstrap_bind(
 	bootstrap_->server_info->use_keep_alive = bootstrap_->so_keepalive;
 	bootstrap_->server_info->use_reuse_addr = bootstrap_->so_reuseaddr;
 	bootstrap_->server_info->use_tcp_nodelay = bootstrap_->tcp_nodelay;
+	bootstrap_->inherit_super.server_info = bootstrap_->server_info; // hold ref of server_info
 
 	if(!ttLibC_TcpServer_open(bootstrap_->server_info)) {
 		ERR_PRINT("failed to open socket.");

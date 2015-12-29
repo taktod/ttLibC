@@ -51,6 +51,8 @@ typedef struct ttLibC_Net_TettyBootstrap {
 	tetty_errornum error_flag;
 	/** type of channel */
 	ttLibC_Tetty_ChannelType channel_type;
+	/** ref of server_info */
+	ttLibC_TcpServerInfo *server_info;
 } ttLibC_Net_TettyBootstrap;
 
 typedef ttLibC_Net_TettyBootstrap ttLibC_TettyBootstrap;
@@ -65,6 +67,8 @@ typedef struct ttLibC_Net_TettyContext {
 	ttLibC_Net_TettyBootstrap *bootstrap;
 	/** ref for working channel handler. */
 	ttLibC_TettyChannelHandler *channel_handler;
+	/** ref of target client_info */
+	ttLibC_TcpClientInfo *client_info;
 } ttLibC_Net_TettyContext;
 
 typedef ttLibC_Net_TettyContext ttLibC_TettyContext;

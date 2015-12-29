@@ -17,6 +17,26 @@
 #include <unistd.h>
 
 /*
+ * update clientContextInformation.
+ * @param ctx             target ttLibC_TettyContext
+ * @param bootstrap       ttLibC_TettyBootstrap object.
+ * @param channel_handler ttLibC_TettyChannelHandler object.
+ * @param client_info     ttLibC_TcpClientInfo object.
+ */
+static void TettyContext_updateContextInfo(
+		ttLibC_TettyContext_ *ctx,
+		ttLibC_TettyBootstrap *bootstrap,
+		ttLibC_TettyChannelHandler *channel_handler,
+		ttLibC_TcpClientInfo *client_info) {
+	ctx->bootstrap = bootstrap;
+	ctx->inherit_super.bootstrap = bootstrap;
+	ctx->channel_handler = channel_handler;
+	ctx->inherit_super.channel_handler = channel_handler;
+	ctx->client_info = client_info;
+	ctx->inherit_super.client_info = client_info;
+}
+
+/*
  * write data for one connection.
  * @param ctx       target context
  * @param data      data object.
@@ -34,11 +54,11 @@ tetty_errornum ttLibC_TettyContext_channel_write(
 	}
 	else {
 		ttLibC_TettyContext_ ctx;
-		ctx.bootstrap = ctx_->bootstrap;
-		ctx.inherit_super.bootstrap = ctx_->bootstrap;
-		ctx.channel_handler = NULL;
-		ctx.inherit_super.channel_handler = NULL;
-		ctx.client_info = ctx_->client_info;
+		TettyContext_updateContextInfo(
+				&ctx,
+				ctx_->bootstrap,
+				NULL,
+				ctx_->client_info);
 		ttLibC_TettyContext_super_write((ttLibC_TettyContext *)&ctx, data, data_size);
 		return ctx.error_no;
 	}
@@ -365,11 +385,11 @@ static bool TettyContext_super_writeEach_callback(void *ptr, void *item) {
 	void *data = ctx_->data;
 	size_t data_size = ctx_->data_size;
 	ttLibC_TettyContext_ ctx;
-	ctx.bootstrap = ctx_->bootstrap;
-	ctx.inherit_super.bootstrap = ctx_->bootstrap;
-	ctx.channel_handler = ctx_->channel_handler;
-	ctx.inherit_super.channel_handler = ctx_->channel_handler;
-	ctx.client_info = client_info;
+	TettyContext_updateContextInfo(
+			&ctx,
+			ctx_->bootstrap,
+			ctx_->channel_handler,
+			ctx_->client_info);
 	ttLibC_TettyContext_super_write((ttLibC_TettyContext *)&ctx, data, data_size);
 	return true;
 }
@@ -404,11 +424,11 @@ tetty_errornum ttLibC_TettyContext_channelActive_(
 		ttLibC_TettyBootstrap *bootstrap,
 		ttLibC_TcpClientInfo *client_info) {
 	ttLibC_TettyContext_ ctx;
-	ctx.bootstrap = bootstrap;
-	ctx.inherit_super.bootstrap = bootstrap;
-	ctx.channel_handler = NULL;
-	ctx.inherit_super.channel_handler = NULL;
-	ctx.client_info = client_info;
+	TettyContext_updateContextInfo(
+			&ctx,
+			bootstrap,
+			NULL,
+			client_info);
 	ttLibC_TettyContext_super_channelActive((ttLibC_TettyContext *)&ctx);
 	return ctx.error_no;
 }
@@ -423,11 +443,11 @@ tetty_errornum ttLibC_TettyContext_channelInactive_(
 		ttLibC_TettyBootstrap *bootstrap,
 		ttLibC_TcpClientInfo *client_info) {
 	ttLibC_TettyContext_ ctx;
-	ctx.bootstrap = bootstrap;
-	ctx.inherit_super.bootstrap = bootstrap;
-	ctx.channel_handler = NULL;
-	ctx.inherit_super.channel_handler = NULL;
-	ctx.client_info = client_info;
+	TettyContext_updateContextInfo(
+			&ctx,
+			bootstrap,
+			NULL,
+			client_info);
 	ttLibC_TettyContext_super_channelInactive((ttLibC_TettyContext *)&ctx);
 	return ctx.error_no;
 }
@@ -446,11 +466,11 @@ tetty_errornum ttLibC_TettyContext_channelRead_(
 		void *data,
 		size_t data_size) {
 	ttLibC_TettyContext_ ctx;
-	ctx.bootstrap = bootstrap;
-	ctx.inherit_super.bootstrap = bootstrap;
-	ctx.channel_handler = NULL;
-	ctx.inherit_super.channel_handler = NULL;
-	ctx.client_info = client_info;
+	TettyContext_updateContextInfo(
+			&ctx,
+			bootstrap,
+			NULL,
+			client_info);
 	ttLibC_TettyContext_super_channelRead((ttLibC_TettyContext *)&ctx, data, data_size);
 	return ctx.error_no;
 }
@@ -462,11 +482,11 @@ tetty_errornum ttLibC_TettyContext_channelRead_(
  */
 tetty_errornum ttLibC_TettyContext_bind_(ttLibC_TettyBootstrap *bootstrap) {
 	ttLibC_TettyContext_ ctx;
-	ctx.bootstrap = bootstrap;
-	ctx.inherit_super.bootstrap = bootstrap;
-	ctx.channel_handler = NULL;
-	ctx.inherit_super.channel_handler = NULL;
-	ctx.client_info = NULL;
+	TettyContext_updateContextInfo(
+			&ctx,
+			bootstrap,
+			NULL,
+			NULL);
 	ttLibC_TettyContext_super_bind((ttLibC_TettyContext *)&ctx);
 	return ctx.error_no;
 }
@@ -481,11 +501,11 @@ tetty_errornum ttLibC_TettyContext_connect_(
 		ttLibC_TettyBootstrap *bootstrap,
 		ttLibC_TcpClientInfo *client_info) {
 	ttLibC_TettyContext_ ctx;
-	ctx.bootstrap = bootstrap;
-	ctx.inherit_super.bootstrap = bootstrap;
-	ctx.channel_handler = NULL;
-	ctx.inherit_super.channel_handler = NULL;
-	ctx.client_info = client_info;
+	TettyContext_updateContextInfo(
+			&ctx,
+			bootstrap,
+			NULL,
+			client_info);
 	ttLibC_TettyContext_super_connect((ttLibC_TettyContext *)&ctx);
 	return ctx.error_no;
 }
@@ -500,11 +520,11 @@ tetty_errornum ttLibC_TettyContext_disconnect_(
 		ttLibC_TettyBootstrap *bootstrap,
 		ttLibC_TcpClientInfo *client_info) {
 	ttLibC_TettyContext_ ctx;
-	ctx.bootstrap = bootstrap;
-	ctx.inherit_super.bootstrap = bootstrap;
-	ctx.channel_handler = NULL;
-	ctx.inherit_super.channel_handler = NULL;
-	ctx.client_info = client_info;
+	TettyContext_updateContextInfo(
+			&ctx,
+			bootstrap,
+			NULL,
+			client_info);
 	ttLibC_TettyContext_super_disconnect((ttLibC_TettyContext *)&ctx);
 	return ctx.error_no;
 }
@@ -523,11 +543,11 @@ tetty_errornum ttLibC_TettyContext_channel_write_(
 		void *data,
 		size_t data_size) {
 	ttLibC_TettyContext_ ctx;
-	ctx.bootstrap = bootstrap;
-	ctx.inherit_super.bootstrap = bootstrap;
-	ctx.channel_handler = NULL;
-	ctx.inherit_super.channel_handler = NULL;
-	ctx.client_info = client_info;
+	TettyContext_updateContextInfo(
+			&ctx,
+			bootstrap,
+			NULL,
+			client_info);
 	ttLibC_TettyContext_super_write((ttLibC_TettyContext *)&ctx, data, data_size);
 	return ctx.error_no;
 }
@@ -542,11 +562,11 @@ tetty_errornum ttLibC_TettyContext_close_(
 		ttLibC_TettyBootstrap *bootstrap,
 		ttLibC_TcpClientInfo *client_info) {
 	ttLibC_TettyContext_ ctx;
-	ctx.bootstrap = bootstrap;
-	ctx.inherit_super.bootstrap = bootstrap;
-	ctx.channel_handler = NULL;
-	ctx.inherit_super.channel_handler = NULL;
-	ctx.client_info = client_info;
+	TettyContext_updateContextInfo(
+			&ctx,
+			bootstrap,
+			NULL,
+			client_info);
 	ttLibC_TettyContext_super_close((ttLibC_TettyContext *)&ctx);
 	return ctx.error_no;
 }
