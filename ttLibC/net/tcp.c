@@ -15,8 +15,8 @@
 #include <unistd.h>
 #include <errno.h>
 #include <netinet/tcp.h>
-#include "../../allocator.h"
-#include "../../log.h"
+#include "../allocator.h"
+#include "../log.h"
 
 ttLibC_TcpServerInfo *ttLibC_TcpServer_make(
 		uint64_t ip,

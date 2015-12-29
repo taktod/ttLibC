@@ -18,6 +18,7 @@ extern "C" {
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include "tcp.h"
 
 /**
  * def for return val.

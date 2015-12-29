@@ -25,6 +25,7 @@
 ttLibC_TettyBootstrap *ttLibC_TettyBootstrap_make() {
 	ttLibC_TettyBootstrap_ *bootstrap = ttLibC_malloc(sizeof(ttLibC_TettyBootstrap_));
 	bootstrap->channel_type = ChannelType_Tcp;
+	bootstrap->inherit_super.channel_type = ChannelType_Tcp;
 	bootstrap->pipeline = ttLibC_StlList_make();
 	bootstrap->server_info = NULL;
 	bootstrap->client_info_list = ttLibC_StlList_make();

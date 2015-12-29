@@ -24,7 +24,7 @@
 #	include <ttLibC/net/tetty.h>
 #endif
 
-#include <ttLibC/net/server/tcp.h>
+#include <ttLibC/net/tcp.h>
 
 #ifdef __ENABLE_FILE__
 #	include <ttLibC/util/forkUtil.h>

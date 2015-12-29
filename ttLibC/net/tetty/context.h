@@ -12,7 +12,7 @@
 #define TTLIBC_NET_TETTY_CONTEXT_H_
 
 #include "../tetty.h"
-#include "../server/tcp.h"
+#include "../tcp.h"
 #include "../../util/stlListUtil.h"
 
 /**

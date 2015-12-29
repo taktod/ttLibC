@@ -70,7 +70,7 @@ libttLibC_a_SOURCES= \
 	net/client/rtmp/message.c \
 	net/client/rtmp/netConnection.c \
 	net/client/rtmp/netStream.c \
-	net/server/tcp.c \
+	net/tcp.c \
 	net/tetty/bootstrap.c \
 	net/tetty/context.c \
 	net/tetty/promise.c \
