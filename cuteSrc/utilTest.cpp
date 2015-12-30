@@ -55,6 +55,140 @@
 #include <sys/uio.h>
 #include <unistd.h>
 
+#ifdef __ENABLE_APPLE__
+#include <ttLibC/util/audioUnitUtil.h>
+#endif
+
+#ifdef __ENABLE_MP3LAME_ENCODE__
+#include <ttLibC/encoder/mp3lameEncoder.h>
+#endif
+
+#if defined(__ENABLE_APPLE__) && defined(__ENABLE_MP3LAME_ENCODE__)
+typedef struct audioUnitRecordTest_t {
+	ttLibC_AuRecorder *recorder;
+	ttLibC_Mp3lameEncoder *encoder;
+	ttLibC_PcmS16 *resampled_pcm;
+	FILE *fp;
+	ttLibC_StlList *frame_list;
+	ttLibC_StlList *used_frame_list;
+} audioUnitRecordTest_t;
+
+static bool audioUnitRecordTest_mp3EncodeCallback(void *ptr, ttLibC_Mp3 *mp3) {
+	audioUnitRecordTest_t *testData = (audioUnitRecordTest_t *)ptr;
+	if(testData->fp != NULL) {
+		fwrite(
+				mp3->inherit_super.inherit_super.data,
+				1,
+				mp3->inherit_super.inherit_super.data_size,
+				testData->fp);
+	}
+	return true;
+}
+
+static bool audioUnitRecordTest_makePcmCallback(void *ptr, ttLibC_Audio *audio) {
+	audioUnitRecordTest_t *testData = (audioUnitRecordTest_t *)ptr;
+	if(audio->inherit_super.type != frameType_pcmS16) {
+		return false;
+	}
+	ttLibC_Frame *prev_frame = (ttLibC_Frame *)ttLibC_StlList_refFirst(testData->used_frame_list);
+	ttLibC_Frame *cloned_frame = ttLibC_Frame_clone(
+			prev_frame,
+			(ttLibC_Frame *)audio);
+	if(cloned_frame == NULL) {
+		return false;
+	}
+	if(prev_frame != NULL) {
+		ttLibC_StlList_remove(testData->used_frame_list, prev_frame);
+	}
+	ttLibC_StlList_addLast(testData->frame_list, cloned_frame);
+	return true;
+}
+
+static bool audioUnitRecordTest_closeAllFrame(void *ptr, void *item) {
+	if(item != NULL) {
+		ttLibC_Frame_close((ttLibC_Frame **)&item);
+	}
+	return true;
+}
+#endif
+
+static void audioUnitRecordTest() {
+	LOG_PRINT("audioUnitRecordTest");
+#if defined(__ENABLE_APPLE__) && defined(__ENABLE_MP3LAME_ENCODE__)
+	audioUnitRecordTest_t testData;
+	uint32_t sample_rate = 44100;
+	uint32_t channel_num = 2;
+	testData.fp = fopen("output.mp3", "wb");
+	testData.resampled_pcm = NULL;
+	testData.recorder = ttLibC_AuRecorder_make(
+			sample_rate,
+			channel_num,
+			AuRecorderType_DefaultInput,
+			0);
+	testData.encoder = ttLibC_Mp3lameEncoder_make(sample_rate, channel_num, 2);
+	testData.frame_list = ttLibC_StlList_make();
+	testData.used_frame_list = ttLibC_StlList_make();
+	ttLibC_AuRecorder_start(testData.recorder, audioUnitRecordTest_makePcmCallback, &testData);
+
+	for(int i = 0;i < 400;i ++) {
+		usleep(20000); // wait a little for recording.
+		if(!testData.recorder->is_recording) {
+			break;
+		}
+		// get frame from list.
+		ttLibC_Frame *frame = NULL;
+		while((frame = (ttLibC_Frame *)ttLibC_StlList_refFirst(testData.frame_list)) != NULL) {
+			// for example encode to mp3 and save.
+			ttLibC_Mp3lameEncoder_encode(
+					testData.encoder,
+					(ttLibC_PcmS16 *)frame,
+					audioUnitRecordTest_mp3EncodeCallback,
+					&testData);
+			// used frame is moved to used_frame_list.
+			ttLibC_StlList_remove(testData.frame_list, frame);
+			ttLibC_StlList_addLast(testData.used_frame_list, frame);
+		}
+	}
+	ttLibC_AuRecorder_stop(testData.recorder);
+	// once freeze here. why? need sleep for recorder thread?
+	ttLibC_Mp3lameEncoder_close(&testData.encoder);
+	ttLibC_StlList_forEach(testData.frame_list, audioUnitRecordTest_closeAllFrame, NULL);
+	ttLibC_StlList_close(&testData.frame_list);
+	ttLibC_StlList_forEach(testData.used_frame_list, audioUnitRecordTest_closeAllFrame, NULL);
+	ttLibC_StlList_close(&testData.used_frame_list);
+	ttLibC_AuRecorder_close(&testData.recorder);
+	ttLibC_PcmS16_close(&testData.resampled_pcm);
+	if(testData.fp) {
+		fclose(testData.fp);
+	}
+#endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
+
+static void audioUnitPlayTest() {
+	LOG_PRINT("audioUnitPlayTest");
+#ifdef __ENABLE_APPLE__
+	ttLibC_BeepGenerator *generator = ttLibC_BeepGenerator_make(PcmS16Type_littleEndian, 440, 44100, 2);
+	ttLibC_AuPlayer *auPlayer = ttLibC_AuPlayer_make(44100, 2, AuPlayerType_DefaultOutput);
+	ttLibC_PcmS16 *pcm = NULL;
+	for(int i = 0;i < 10;i ++) {
+		ttLibC_PcmS16 *p = ttLibC_BeepGenerator_makeBeepByMiliSec(generator, pcm, 1000);
+		if(p == NULL) {
+			break;
+		}
+		pcm = p;
+		while(!ttLibC_AuPlayer_queue(auPlayer, pcm)) {
+ 			usleep(100); // ...
+		}
+	}
+	ttLibC_PcmS16_close(&pcm);
+	ttLibC_AuPlayer_close(&auPlayer);
+	ttLibC_BeepGenerator_close(&generator);
+#endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
+
+
 static bool stlMapTest_findItem(void *ptr, void *key, void *item) {
 	LOG_PRINT("key:%s val:%s", (const char *)key, (const char *)item);
 	return true;
@@ -512,6 +646,8 @@ static void openalUtilTest() {
  */
 cute::suite utilTests(cute::suite s) {
 	s.clear();
+	s.push_back(CUTE(audioUnitRecordTest));
+	s.push_back(CUTE(audioUnitPlayTest));
 	s.push_back(CUTE(stlMapTest));
 	s.push_back(CUTE(stlListTest));
 	s.push_back(CUTE(linkedListTest));

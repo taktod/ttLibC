@@ -32,6 +32,7 @@ speex_flg=no
 opus_flg=no
 avcodec_flg=no
 faad_flg=no
+apple_flg=no
 
 # check result
 cute_check=no 
@@ -47,6 +48,7 @@ speex_check=no
 opus_check=no
 avcodec_check=no
 faad_decode_check=no
+apple_check=no
 
 AC_ARG_ENABLE(
 	[lgpl],
@@ -112,6 +114,7 @@ AC_ARG_ENABLE(
 		avcodec_flg=$enableval
 		faad_flg=$enableval
 		jpeg_flg=$enableval
+		apple_flg=$enableval
 	]
 )
 
@@ -185,6 +188,12 @@ AC_ARG_ENABLE(
 	[faad],
 	AS_HELP_STRING([--enable-faad/--disable-faad], [enable/disable faad2 code.]),
 	[faad_flg=$enableval]
+)
+
+AC_ARG_ENABLE(
+	[apple],
+	AS_HELP_STRING([--enable-apple/--disable-apple], [enable/disable OSX/IOS code.]),
+	[apple_flg=$enableval]
 )
 
 if test x$opencv_flg = "xyes"; then
@@ -320,7 +329,19 @@ if test x$faad_flg = "xyes"; then
 		],
 	)
 fi
-
+if test x$apple_flg = "xyes"; then
+	# check "gcc --help" has framework or not.
+	CC_CHECK=`$CC --help | grep framework`
+	if test "x$CC_CHECK" = "x"; then
+		apple_check=no
+	else 
+		apple_check=yes
+		APPLE_CFLAGS=''
+		APPLE_LIBS='-framework AudioToolbox -framework AudioUnit -framework VideoToolbox -framework CoreMedia -framework CoreFoundation -framework CoreVideo -framework CoreAudio'
+		AC_SUBST([APPLE_CFLAGS])
+		AC_SUBST([APPLE_LIBS])
+	fi
+fi
 if test x$gpl_flg = "xyes"; then
 	AC_DEFINE([__ENABLE_GPL__])
 else
@@ -402,6 +423,11 @@ if test x$faad_flg$gpl_flg$faad_decode_check = "xyesyesyes"; then
 	AC_DEFINE([__ENABLE_FAAD_DECODE__])
 fi
 AM_CONDITIONAL(ENABLE_FAAD_DECODE, test x$faad_flg$gpl_flg$faad_decode_check = "xyesyesyes")
+
+if test x$apple_flg$apple_check = "xyesyes"; then
+	AC_DEFINE([__ENABLE_APPLE__])
+fi
+AM_CONDITIONAL(ENABLE_APPLE, test x$apple_flg$apple_check = "xyesyes")
 
 AC_ARG_WITH(pkgconfigdir,
 	AS_HELP_STRING([--with-pkgconfigdir], [Use the specified pkgconfig dir.(default is $libdir/pkgconfig)]),
@@ -597,4 +623,13 @@ echo "jpeg:             off(libjpeg is missing)"
 	fi
 else
 echo "jpeg:             off"
+fi
+if test x$apple_flg = "xyes"; then
+	if test x$apple_check = "xyes"; then
+echo "apple:            on"
+	else
+echo "apple:            off(no framework detection.)"
+	fi
+else
+echo "apple:            off"
 fi

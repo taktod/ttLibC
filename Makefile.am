@@ -113,6 +113,11 @@ nobase_include_HEADERS += \
 	ttLibC/decoder/jpegDecoder.h
 endif
 
+if ENABLE_APPLE
+nobase_include_HEADERS += \
+	ttLibC/util/audioUnitUtil.h
+endif
+
 pkgconfigdir=@pkgconfigdir@
 pkgconfig_DATA=ttLibC.pc
 CLEANFILES=ttLibC.pc
