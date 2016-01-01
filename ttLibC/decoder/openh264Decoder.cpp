@@ -15,7 +15,7 @@
 #include "../allocator.h"
 
 #include <wels/codec_api.h>
-#include <limits.h>
+#include <climits>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -36,10 +36,7 @@ typedef struct {
 
 typedef ttLibC_Decoder_Openh264Decoder_ ttLibC_Openh264Decoder_;
 
-/*
- * make openh264 decoder (maybe add more params later.)
- */
-static ttLibC_Openh264Decoder *Openh264Decoder_make() {
+static ttLibC_Openh264Decoder *Openh264Decoder_make(SDecodingParam *param) {
 	ttLibC_Openh264Decoder_ *decoder = (ttLibC_Openh264Decoder_ *)ttLibC_malloc(sizeof(ttLibC_Openh264Decoder_));
 	if(decoder == NULL) {
 		ERR_PRINT("failed to alloc decoder object.");
@@ -53,11 +50,14 @@ static ttLibC_Openh264Decoder *Openh264Decoder_make() {
 	}
 	SDecodingParam decParam;
 	memset(&decParam, 0, sizeof(SDecodingParam));
-	decParam.sVideoProperty.eVideoBsType = VIDEO_BITSTREAM_SVC;
-	decParam.bParseOnly = false;
-	decParam.eOutputColorFormat = videoFormatI420;
-	decParam.uiTargetDqLayer = UCHAR_MAX;
-	decParam.eEcActiveIdc = ERROR_CON_SLICE_COPY;
+	decParam.bParseOnly          = param->bParseOnly;
+	decParam.eEcActiveIdc        = param->eEcActiveIdc;
+	decParam.eOutputColorFormat  = param->eOutputColorFormat;
+	decParam.pFileNameRestructed = param->pFileNameRestructed;
+	decParam.sVideoProperty.eVideoBsType = param->sVideoProperty.eVideoBsType;
+	decParam.sVideoProperty.size         = param->sVideoProperty.size;
+	decParam.uiCpuLoad           = param->uiCpuLoad;
+	decParam.uiTargetDqLayer     = param->uiTargetDqLayer;
 	res = decoder->decoder->Initialize(&decParam);
 	if(res != 0) {
 		ERR_PRINT("failed to initialize decoder.");
@@ -66,6 +66,8 @@ static ttLibC_Openh264Decoder *Openh264Decoder_make() {
 		return NULL;
 	}
 	decoder->yuv420 = NULL;
+	decoder->inherit_super.width  = 0;
+	decoder->inherit_super.height = 0;
 	return (ttLibC_Openh264Decoder *)decoder;
 }
 
@@ -144,7 +146,32 @@ extern "C" {
  * call make for c code.
  */
 ttLibC_Openh264Decoder *ttLibC_Openh264Decoder_make() {
-	return Openh264Decoder_make();
+	SDecodingParam pParam;
+	ttLibC_Openh264Decoder_getDefaultSDecodingParam(&pParam);
+	return Openh264Decoder_make(&pParam);
+}
+
+/*
+ * setup SDecodingParam with ttLibC default.
+ * @param param structore pointer for SDecodingParam on wels/codec_api.h
+ */
+void ttLibC_Openh264Decoder_getDefaultSDecodingParam(void *param) {
+	SDecodingParam *pParam = (SDecodingParam *)param;
+	memset(pParam, 0, sizeof(SDecodingParam));
+	pParam->sVideoProperty.eVideoBsType = VIDEO_BITSTREAM_SVC;
+	pParam->bParseOnly = false;
+	pParam->eOutputColorFormat = videoFormatI420;
+	pParam->uiTargetDqLayer = UCHAR_MAX;
+	pParam->eEcActiveIdc = ERROR_CON_SLICE_COPY;
+}
+
+/*
+ * make openh264 decoder with SDecodingParam
+ * @param param structore pointer for SDecodingParam on wels/codec_api.h
+ * @return ttLibC_Openh264Decoder object.
+ */
+ttLibC_Openh264Decoder *ttLibC_Openh264Decoder_makeWithSDecodingParam(void *param) {
+	return Openh264Decoder_make((SDecodingParam *)param);
 }
 
 /*

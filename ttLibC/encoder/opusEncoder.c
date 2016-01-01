@@ -61,7 +61,11 @@ ttLibC_OpusEncoder *ttLibC_OpusEncoder_make(
 		return NULL;
 	}
 	int error;
-	encoder->encoder = opus_encoder_create(sample_rate, channel_num, OPUS_APPLICATION_RESTRICTED_LOWDELAY, &error);
+	encoder->encoder = opus_encoder_create(
+			sample_rate,
+			channel_num,
+			OPUS_APPLICATION_RESTRICTED_LOWDELAY,
+			&error);
 	if(error != OPUS_OK) {
 		ERR_PRINT("error to create opus encoder:%s", opus_strerror(error));
 		ttLibC_free(encoder);
@@ -181,6 +185,18 @@ bool ttLibC_OpusEncoder_encode(
 		left_size -= encoder_->pcm_buffer_size;
 	}while(true);
 	return true;
+}
+
+/*
+ * ref libopus native encoder object (defined in opus/opus.h).
+ * @param decoder opus encoder object.
+ * @return OpusEncoder pointer.
+ */
+void *ttLibC_OpusEncoder_refNativeEncoder(ttLibC_OpusEncoder *encoder) {
+	if(encoder == NULL) {
+		return NULL;
+	}
+	return (void *)((ttLibC_OpusEncoder_ *)encoder)->encoder;
 }
 
 /*

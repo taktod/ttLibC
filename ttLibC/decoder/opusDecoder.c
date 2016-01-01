@@ -110,6 +110,18 @@ void ttLibC_OpusDecoder_decode(
 }
 
 /*
+ * ref libopus native decoder object (defined in opus/opus.h).
+ * @param decoder opus decoder object.
+ * @return OpusDecoder pointer.
+ */
+void *ttLibC_OpusDecoder_refNativeDecoder(ttLibC_OpusDecoder *decoder) {
+	if(decoder == NULL) {
+		return NULL;
+	}
+	return (void *)((ttLibC_OpusDecoder_ *)decoder)->decoder;
+}
+
+/*
  * close opus decoder.
  * @param decoder
  */

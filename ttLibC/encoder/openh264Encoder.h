@@ -56,7 +56,7 @@ typedef bool (* ttLibC_Openh264EncodeFunc)(void *ptr, ttLibC_H264 *h264);
  * make openh264 encoder(baseline only.) (maybe add more params later)
  * @param width  target width
  * @param height target height
- * @return openh264 encoder object.
+ * @return ttLibC_Openh264Encoder object.
  */
 ttLibC_Openh264Encoder *ttLibC_Openh264Encoder_make(
 		uint32_t width,
@@ -69,7 +69,7 @@ ttLibC_Openh264Encoder *ttLibC_Openh264Encoder_make(
  * @param max_quantizer max q value
  * @param min_quantizer min q value
  * @param bitrate       target bitrate (bit / sec)
- * @return openh264 encoder object.
+ * @return ttLibC_Openh264Encoder object.
  */
 ttLibC_Openh264Encoder *ttLibC_Openh264Encoder_make_ex(
 		uint32_t width,
@@ -92,7 +92,7 @@ void ttLibC_Openh264Encoder_getDefaultSEncParamExt(
 /**
  * make openh264 encoder with SEncParamExt
  * @param paramExt structure pointer for SEncParamExt on wels/codec_api.h
- * @return openh264 encoder object.
+ * @return ttLibC_Openh264Encoder object.
  */
 ttLibC_Openh264Encoder *ttLibC_Openh264Encoder_makeWithSEncParamExt(void *paramExt);
 

@@ -37,8 +37,22 @@ typedef bool (* ttLibC_Openh264DecodeFunc)(void *ptr, ttLibC_Yuv420 *yuv420);
 
 /**
  * make openh264 decoder (maybe add more params later.)
+ * @return ttLibC_Openh264Decoder object.
  */
 ttLibC_Openh264Decoder *ttLibC_Openh264Decoder_make();
+
+/**
+ * setup SDecodingParam with ttLibC default.
+ * @param param structore pointer for SDecodingParam on wels/codec_api.h
+ */
+void ttLibC_Openh264Decoder_getDefaultSDecodingParam(void *param);
+
+/**
+ * make openh264 decoder with SDecodingParam
+ * @param param structore pointer for SDecodingParam on wels/codec_api.h
+ * @return ttLibC_Openh264Decoder object.
+ */
+ttLibC_Openh264Decoder *ttLibC_Openh264Decoder_makeWithSDecodingParam(void *param);
 
 /**
  * decode frame.

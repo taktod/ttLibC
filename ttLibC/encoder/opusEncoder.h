@@ -70,6 +70,13 @@ bool ttLibC_OpusEncoder_encode(
 		void *ptr);
 
 /**
+ * ref libopus native encoder object (defined in opus/opus.h).
+ * @param decoder opus encoder object.
+ * @return OpusEncoder pointer.
+ */
+void *ttLibC_OpusEncoder_refNativeEncoder(ttLibC_OpusEncoder *encoder);
+
+/**
  * update bitrate for opus encoder.
  * @param encoder opus encoder object
  * @param bitrate target bitrate.

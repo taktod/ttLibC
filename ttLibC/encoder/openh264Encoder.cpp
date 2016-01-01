@@ -452,8 +452,8 @@ void ttLibC_Openh264Encoder_getDefaultSEncParamExt(
 	pParamExt->fMaxFrameRate  = 15;
 	pParamExt->iPicWidth      = width;
 	pParamExt->iPicHeight     = height;
-	pParamExt->iTargetBitrate = 250000;
-	pParamExt->iMaxBitrate    = 250000;
+	pParamExt->iTargetBitrate = 650000;
+	pParamExt->iMaxBitrate    = 650000;
 	pParamExt->iMinQp         = 4;
 	pParamExt->iMaxQp         = 20;
 
