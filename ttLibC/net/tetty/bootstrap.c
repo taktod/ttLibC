@@ -200,6 +200,9 @@ bool ttLibC_TettyBootstrap_update(
 		ttLibC_TettyBootstrap *bootstrap,
 		uint32_t wait_interval) {
 	ttLibC_TettyBootstrap_ *bootstrap_ = (ttLibC_TettyBootstrap_ *)bootstrap;
+	if(bootstrap_->inherit_super.error_flag != 0) {
+		return false;
+	}
 
 	if(bootstrap_->server_info == NULL && bootstrap_->client_info_list->size == 0) {
 		// no more socket.
@@ -361,6 +364,9 @@ tetty_errornum ttLibC_TettyBootstrap_channels_write(
 		ttLibC_TettyBootstrap *bootstrap,
 		void *data,
 		size_t data_size) {
+	if(bootstrap->error_flag != 0) {
+		return bootstrap->error_flag;
+	}
 	return ttLibC_TettyContext_channel_write_(
 			bootstrap,
 			NULL,
@@ -389,6 +395,9 @@ tetty_errornum ttLibC_TettyBootstrap_channelEach_write(
 		ttLibC_TettyBootstrap *bootstrap,
 		void *data,
 		size_t data_size) {
+	if(bootstrap->error_flag != 0) {
+		return bootstrap->error_flag;
+	}
 	ttLibC_TettyContext_ ctx;
 	ctx.bootstrap = bootstrap;
 	ctx.data = data;
@@ -403,6 +412,9 @@ tetty_errornum ttLibC_TettyBootstrap_channelEach_write(
  * @param bootstrap
  */
 ttLibC_TettyPromise *ttLibC_TettyBootstrap_makePromise(ttLibC_TettyBootstrap *bootstrap) {
+	if(bootstrap->error_flag != 0) {
+		return NULL;
+	}
 	return ttLibC_TettyPromise_make_(bootstrap);
 }
 
