@@ -168,7 +168,7 @@ bool ttLibC_TettyBootstrap_connect(
 /**
  * do sync task for each client_connection.
  */
-static bool TettyBootstrap_syncEach(void *ptr, void *item) {
+static bool TettyBootstrap_updateEach(void *ptr, void *item) {
 	ttLibC_TettyBootstrap_ *bootstrap_ = (ttLibC_TettyBootstrap_ *)ptr;
 	ttLibC_TcpClientInfo *client_info = (ttLibC_TcpClientInfo *)item;
 	// check fd_set
@@ -240,7 +240,7 @@ bool ttLibC_TettyBootstrap_update(
 		}
 		if(bootstrap_->client_info_list != NULL) {
 			// check client sockets
-			ttLibC_StlList_forEach(bootstrap_->client_info_list, TettyBootstrap_syncEach, bootstrap_);
+			ttLibC_StlList_forEach(bootstrap_->client_info_list, TettyBootstrap_updateEach, bootstrap_);
 		}
 	}
 	return response;
