@@ -41,6 +41,9 @@ ttLibC_TettyPromise *ttLibC_TettyPromise_make_(ttLibC_TettyBootstrap *bootstrap)
  */
 void ttLibC_TettyPromise_await(ttLibC_TettyPromise *promise) {
 	ttLibC_TettyPromise_* promise_ = (ttLibC_TettyPromise_ *)promise;
+	if(promise == NULL) {
+		return;
+	}
 	// wait until done...
 	while(!promise_->is_done) {
 		ttLibC_TettyBootstrap_update(promise_->bootstrap, 100000);
@@ -73,7 +76,9 @@ void ttLibC_TettyPromise_await(ttLibC_TettyPromise *promise) {
  */
 void ttLibC_TettyPromise_awaitFor(ttLibC_TettyPromise *promise, uint32_t timeout_milisec) {
 	ttLibC_TettyPromise_* promise_ = (ttLibC_TettyPromise_ *)promise;
-
+	if(promise == NULL) {
+		return;
+	}
 	struct timeval start_time, end_time;
 	gettimeofday(&start_time, NULL);
 
@@ -117,6 +122,9 @@ void ttLibC_TettyPromise_addEventListener(
 		ttLibC_TettyPromise *promise,
 		ttLibC_TettyPromiseListener listener) {
 	ttLibC_TettyPromise_ *promise_ = (ttLibC_TettyPromise_ *)promise;
+	if(promise == NULL) {
+		return;
+	}
 	promise_->listener = listener;
 }
 
@@ -129,6 +137,9 @@ void ttLibC_TettyPromise_setSuccess(
 		ttLibC_TettyPromise *promise,
 		void *data) {
 	ttLibC_TettyPromise_ *promise_ = (ttLibC_TettyPromise_ *)promise;
+	if(promise == NULL) {
+		return;
+	}
 	if(promise_->promise_type != PromiseType_Promise) {
 		ERR_PRINT("set function works on promise only.");
 		return;
@@ -151,6 +162,9 @@ void ttLibC_TettyPromise_setSuccess(
  */
 void ttLibC_TettyPromise_setFailure(ttLibC_TettyPromise *promise, void *data) {
 	ttLibC_TettyPromise_ *promise_ = (ttLibC_TettyPromise_ *)promise;
+	if(promise == NULL) {
+		return;
+	}
 	if(promise_->promise_type != PromiseType_Promise) {
 		ERR_PRINT("set function works on promise only.");
 		return;
