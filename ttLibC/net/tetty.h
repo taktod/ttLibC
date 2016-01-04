@@ -57,6 +57,8 @@ typedef struct ttLibC_Net_TettyBootstrap {
 
 typedef ttLibC_Net_TettyBootstrap ttLibC_TettyBootstrap;
 
+struct ttLibC_Net_TettyChannelHandler;
+
 typedef struct ttLibC_Net_TettyChannelHandler ttLibC_TettyChannelHandler;
 
 /**
@@ -137,8 +139,6 @@ typedef struct ttLibC_Net_TettyChannelHandler {
 	/** event for exception.(just ignore now.) */
 	ttLibC_Tetty_ExceptionFunc exceptionCaught;
 } ttLibC_Net_TettyChannelHandler;
-
-typedef ttLibC_Net_TettyChannelHandler ttLibC_TettyChannelHandler;
 
 /**
  * make bootstrap object.
