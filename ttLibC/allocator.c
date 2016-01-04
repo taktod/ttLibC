@@ -11,6 +11,7 @@
 #include "log.h"
 
 #include "allocator.h"
+#include <stdint.h>
 
 #if __DEBUG_FLG__ == 1
 #	include "khash.h"
