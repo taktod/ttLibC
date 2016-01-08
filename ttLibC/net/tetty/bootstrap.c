@@ -165,14 +165,14 @@ bool ttLibC_TettyBootstrap_connect(
 		bootstrap->error_flag = -4;
 		return false;
 	}
-	// call pipeline->connect
-	ttLibC_TettyContext_connect_(bootstrap, client_info);
-	// call pipeline->channelActive
-	ttLibC_TettyContext_channelActive_(bootstrap, client_info);
 	// update fd_set
 	FD_SET(client_info->data_socket, &bootstrap_->fdset);
 	// put it on the list.
 	ttLibC_StlList_addLast(bootstrap_->client_info_list, client_info);
+	// call pipeline->connect
+	ttLibC_TettyContext_connect_(bootstrap, client_info);
+	// call pipeline->channelActive
+	ttLibC_TettyContext_channelActive_(bootstrap, client_info);
 	return true;
 }
 
