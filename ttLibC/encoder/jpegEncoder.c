@@ -110,7 +110,7 @@ bool ttLibC_JpegEncoder_encode(
 		return false;
 	}
 	if(yuv == NULL) {
-		return false;
+		return true;
 	}
 	switch(yuv->type) {
 	case Yuv420Type_planar:

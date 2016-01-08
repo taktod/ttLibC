@@ -184,7 +184,7 @@ bool ttLibC_FaacEncoder_encode(
 		return false;
 	}
 	if(pcm == NULL) {
-		return false;
+		return true;
 	}
 	ttLibC_FaacEncoder_ *encoder_ = (ttLibC_FaacEncoder_ *)encoder;
 	// support only little endian & interleave.

@@ -158,7 +158,7 @@ bool ttLibC_Mp3lameEncoder_encode(ttLibC_Mp3lameEncoder *encoder, ttLibC_PcmS16 
 		return false;
 	}
 	if(pcm == NULL) {
-		return false;
+		return true;
 	}
 	ttLibC_Mp3lameEncoder_ *encoder_ = (ttLibC_Mp3lameEncoder_ *)encoder;
 	switch(pcm->type) {

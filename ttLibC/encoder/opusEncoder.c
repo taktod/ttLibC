@@ -139,7 +139,7 @@ bool ttLibC_OpusEncoder_encode(
 		return false;
 	}
 	if(pcm == NULL) {
-		return false;
+		return true;
 	}
 	ttLibC_OpusEncoder_ *encoder_ = (ttLibC_OpusEncoder_ *)encoder;
 	switch(pcm->type) {

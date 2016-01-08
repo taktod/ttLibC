@@ -155,7 +155,7 @@ bool ttLibC_SpeexEncoder_encode(
 		return false;
 	}
 	if(pcm == NULL) {
-		return false;
+		return true;
 	}
 	ttLibC_SpeexEncoder_ *encoder_ = (ttLibC_SpeexEncoder_ *)encoder;
 	switch(pcm->type) {

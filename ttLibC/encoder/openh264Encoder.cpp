@@ -340,7 +340,7 @@ static bool Openh264Encoder_encode(
 		return false;
 	}
 	if(yuv == NULL) {
-		return false;
+		return true;
 	}
 	switch(yuv->type) {
 	case Yuv420Type_planar:
