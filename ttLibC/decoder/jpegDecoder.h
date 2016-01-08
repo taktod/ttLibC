@@ -45,8 +45,9 @@ ttLibC_JpegDecoder *ttLibC_JpegDecoder_make();
  * @param jpeg     source jpeg data
  * @param callback callback func for jpeg decode
  * @param ptr      pointer for use def value, which will call in callback.
+ * @return true / false
  */
-void ttLibC_JpegDecoder_decode(
+bool ttLibC_JpegDecoder_decode(
 		ttLibC_JpegDecoder *decoder,
 		ttLibC_Jpeg *jpeg,
 		ttLibC_JpegDecodeFunc callback,

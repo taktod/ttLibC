@@ -93,24 +93,25 @@ ttLibC_SpeexDecoder *ttLibC_SpeexDecoder_make(
  * @param speex    source speex data.
  * @param callback callback func for speex decode.
  * @param ptr      pointer for user def value.
+ * @return true / false
  */
-void ttLibC_SpeexDecoder_decode(
+bool ttLibC_SpeexDecoder_decode(
 		ttLibC_SpeexDecoder *decoder,
 		ttLibC_Speex *speex,
 		ttLibC_SpeexDecodeFunc callback,
 		void *ptr) {
 	if(decoder == NULL) {
-		return;
+		return false;
 	}
 	if(speex == NULL) {
-		return;
+		return true;
 	}
 	ttLibC_SpeexDecoder_ *decoder_ = (ttLibC_SpeexDecoder_ *)decoder;
 	speex_bits_read_from(&decoder_->bits, (char *)speex->inherit_super.inherit_super.data, speex->inherit_super.inherit_super.buffer_size);
 	int result = speex_decode_int(decoder_->dec_state, &decoder_->bits, decoder_->pcm_buffer);
 	if(result != 0) {
 		ERR_PRINT("failed to decode.%d", result);
-		return;
+		return false;
 	}
 	uint32_t sample_num = decoder_->inherit_super.sample_rate / 50;
 	ttLibC_PcmS16 *p = ttLibC_PcmS16_make(
@@ -129,10 +130,13 @@ void ttLibC_SpeexDecoder_decode(
 			speex->inherit_super.inherit_super.pts,
 			speex->inherit_super.inherit_super.timebase);
 	if(p == NULL) {
-		return;
+		return false;
 	}
 	decoder_->pcms16 = p;
-	callback(ptr, decoder_->pcms16);
+	if(!callback(ptr, decoder_->pcms16)) {
+		return false;
+	}
+	return true;
 }
 
 /*

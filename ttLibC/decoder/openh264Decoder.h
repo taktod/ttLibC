@@ -60,8 +60,9 @@ ttLibC_Openh264Decoder *ttLibC_Openh264Decoder_makeWithSDecodingParam(void *para
  * @param h264     source h264 data.
  * @param callback callback func for h264 decode.
  * @param ptr      pointer for user def value, which will call in callback.
+ * @return true / false
  */
-void ttLibC_Openh264Decoder_decode(
+bool ttLibC_Openh264Decoder_decode(
 		ttLibC_Openh264Decoder *decoder,
 		ttLibC_H264 *h264,
 		ttLibC_Openh264DecodeFunc callback,

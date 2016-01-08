@@ -48,8 +48,9 @@ ttLibC_OpusDecoder *ttLibC_OpusDecoder_make(
  * @param opus     source opus data.
  * @param callback callback func for opus decode.
  * @param ptr      pointer for user def value.
+ * @return true / false
  */
-void ttLibC_OpusDecoder_decode(
+bool ttLibC_OpusDecoder_decode(
 		ttLibC_OpusDecoder *decoder,
 		ttLibC_Opus *opus,
 		ttLibC_OpusDecodeFunc callback,

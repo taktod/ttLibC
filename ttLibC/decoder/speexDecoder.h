@@ -51,8 +51,9 @@ ttLibC_SpeexDecoder *ttLibC_SpeexDecoder_make(
  * @param speex    source speex data.
  * @param callback callback func for speex decode.
  * @param ptr      pointer for user def value.
+ * @return true / false
  */
-void ttLibC_SpeexDecoder_decode(
+bool ttLibC_SpeexDecoder_decode(
 		ttLibC_SpeexDecoder *decoder,
 		ttLibC_Speex *speex,
 		ttLibC_SpeexDecodeFunc callback,

@@ -77,29 +77,30 @@ static ttLibC_Openh264Decoder *Openh264Decoder_make(SDecodingParam *param) {
  * @param h264     source h264 data.
  * @param callback callback func for h264 decode.
  * @param ptr      pointer for user def value, which will call in callback.
+ * @return true / false
  */
-static void Openh264Decoder_decode(
+static bool Openh264Decoder_decode(
 		ttLibC_Openh264Decoder *decoder,
 		ttLibC_H264 *h264,
 		ttLibC_Openh264DecodeFunc callback,
 		void *ptr) {
 	ttLibC_Openh264Decoder_ *decoder_ = (ttLibC_Openh264Decoder_ *)decoder;
 	if(decoder == NULL) {
-		return;
+		return false;
 	}
 	if(h264 == NULL) {
-		return;
+		return true;
 	}
 	uint8_t *decodeBuf[3] = {0};
 	uint32_t res = decoder_->decoder->DecodeFrame2((const unsigned char *)h264->inherit_super.inherit_super.data, h264->inherit_super.inherit_super.buffer_size, decodeBuf, &decoder_->bufInfo);
 	if(res != 0) {
 		ERR_PRINT("failed to decode data.:%x", res);
-		return;
+		return false;
 	}
 	if(decoder_->bufInfo.UsrData.sSystemBuffer.iWidth == 0
 	|| decoder_->bufInfo.UsrData.sSystemBuffer.iHeight == 0) {
 		// dimention is null. happen on first buffer. or supply configData.
-		return;
+		return true;
 	}
 	decoder_->inherit_super.width  = decoder_->bufInfo.UsrData.sSystemBuffer.iWidth;
 	decoder_->inherit_super.height = decoder_->bufInfo.UsrData.sSystemBuffer.iHeight;
@@ -116,10 +117,13 @@ static void Openh264Decoder_decode(
 			h264->inherit_super.inherit_super.pts, h264->inherit_super.inherit_super.timebase);
 	if(yuv == NULL) {
 		ERR_PRINT("failed to make yuv420 frame.");
-		return;
+		return false;
 	}
 	decoder_->yuv420 = yuv;
-	callback(ptr, yuv);
+	if(!callback(ptr, yuv)) {
+		return false;
+	}
+	return true;
 }
 
 /*
@@ -177,12 +181,12 @@ ttLibC_Openh264Decoder *ttLibC_Openh264Decoder_makeWithSDecodingParam(void *para
 /*
  * call decoder for c code.
  */
-void ttLibC_Openh264Decoder_decode(
+bool ttLibC_Openh264Decoder_decode(
 		ttLibC_Openh264Decoder *decoder,
 		ttLibC_H264 *h264,
 		ttLibC_Openh264DecodeFunc callback,
 		void *ptr) {
-	Openh264Decoder_decode(decoder, h264, callback, ptr);
+	return Openh264Decoder_decode(decoder, h264, callback, ptr);
 }
 
 /*

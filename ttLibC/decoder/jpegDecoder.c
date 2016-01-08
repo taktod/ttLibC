@@ -58,12 +58,19 @@ ttLibC_JpegDecoder *ttLibC_JpegDecoder_make() {
  * @param jpeg     source jpeg data
  * @param callback callback func for jpeg decode
  * @param ptr      pointer for use def value, which will call in callback.
+ * @return true / false
  */
-void ttLibC_JpegDecoder_decode(
+bool ttLibC_JpegDecoder_decode(
 		ttLibC_JpegDecoder *decoder,
 		ttLibC_Jpeg *jpeg,
 		ttLibC_JpegDecodeFunc callback,
 		void *ptr) {
+	if(decoder == NULL) {
+		return false;
+	}
+	if(jpeg == NULL) {
+		return true;
+	}
 	ttLibC_JpegDecoder_ *decoder_ = (ttLibC_JpegDecoder_ *)decoder;
 	// set memory source.
 	jpeg_mem_src(&decoder_->dinfo, (unsigned char *)jpeg->inherit_super.inherit_super.data, jpeg->inherit_super.inherit_super.buffer_size);
@@ -98,7 +105,7 @@ void ttLibC_JpegDecoder_decode(
 			decoder_->dummy_buffer = ttLibC_malloc(dummy_size);
 			if(decoder_->dummy_buffer == NULL) {
 				ERR_PRINT("failed to make dummy buffer.");
-				return;
+				return false;
 			}
 			decoder_->dummy_buffer_size = dummy_size;
 		}
@@ -189,12 +196,15 @@ void ttLibC_JpegDecoder_decode(
 			jpeg->inherit_super.inherit_super.timebase);
 	if(yuv == NULL) {
 		ERR_PRINT("yuv is not generated.");
-		return;
+		return false;
 	}
 	yuv->inherit_super.inherit_super.is_non_copy = false;
 	yuv->inherit_super.inherit_super.buffer_size = wh + (wh >> 1);
 	decoder_->yuv420 = yuv;
-	callback(ptr, yuv);
+	if(!callback(ptr, yuv)) {
+		return false;
+	}
+	return true;
 }
 
 /*

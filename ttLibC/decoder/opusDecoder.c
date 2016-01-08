@@ -70,22 +70,23 @@ ttLibC_OpusDecoder *ttLibC_OpusDecoder_make(
  * @param opus     source opus data.
  * @param callback callback func for opus decode.
  * @param ptr      pointer for user def value.
+ * @return true / false
  */
-void ttLibC_OpusDecoder_decode(
+bool ttLibC_OpusDecoder_decode(
 		ttLibC_OpusDecoder *decoder,
 		ttLibC_Opus *opus,
 		ttLibC_OpusDecodeFunc callback,
 		void *ptr) {
 	if(decoder == NULL) {
-		return;
+		return false;
 	}
 	if(opus == NULL) {
-		return;
+		return true;
 	}
 	ttLibC_OpusDecoder_ *decoder_ = (ttLibC_OpusDecoder_ *)decoder;
 	int size = opus_decode(decoder_->decoder, opus->inherit_super.inherit_super.data, opus->inherit_super.inherit_super.buffer_size, decoder_->pcm_buffer, decoder_->pcm_buffer_size, 0);
 	if(size == 0) {
-		return;
+		return true;
 	}
 	// TODO put the pts and timebase from opus, however, this value should correspond with sample_rate for decoded data?
 	ttLibC_PcmS16 *pcm = ttLibC_PcmS16_make(
@@ -103,10 +104,13 @@ void ttLibC_OpusDecoder_decode(
 			true, opus->inherit_super.inherit_super.pts,
 			opus->inherit_super.inherit_super.timebase);
 	if(pcm == NULL) {
-		return;
+		return false;
 	}
 	decoder_->pcms16 = pcm;
-	callback(ptr, decoder_->pcms16);
+	if(!callback(ptr, decoder_->pcms16)) {
+		return false;
+	}
+	return true;
 }
 
 /*

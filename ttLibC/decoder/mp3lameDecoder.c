@@ -78,22 +78,23 @@ ttLibC_Mp3lameDecoder *ttLibC_Mp3lameDecoder_make() {
  * @param mp3      source mp3 data.
  * @param callback callback func for mp3 decode.
  * @param ptr      pointer for user def value, which willl call in callback.
+ * @return true / false
  */
-void ttLibC_Mp3lameDecoder_decode(
+bool ttLibC_Mp3lameDecoder_decode(
 		ttLibC_Mp3lameDecoder *decoder,
 		ttLibC_Mp3 *mp3,
 		ttLibC_Mp3lameDecodeFunc callback,
 		void *ptr) {
 	if(decoder == NULL) {
-		return;
+		return false;
 	}
 	if(mp3 == NULL) {
-		return;
+		return true;
 	}
 	ttLibC_Mp3lameDecoder_ *decoder_ = (ttLibC_Mp3lameDecoder_ *)decoder;
 	if(decoder_->buffer == NULL) {
 		ERR_PRINT("buffer is null. something wrong is happen!!!");
-		return;
+		return false;
 	}
 	switch(decoder_->inherit_super.channel_num) {
 	case 0:
@@ -102,7 +103,7 @@ void ttLibC_Mp3lameDecoder_decode(
 	default:
 		if(decoder_->inherit_super.channel_num != mp3->inherit_super.channel_num) {
 			ERR_PRINT("mp3 channel number is changed.");
-			return;
+			return false;
 		}
 		break;
 	}
@@ -113,7 +114,7 @@ void ttLibC_Mp3lameDecoder_decode(
 	default:
 		if(decoder_->inherit_super.sample_rate != mp3->inherit_super.sample_rate) {
 			ERR_PRINT("mp3 samplerate is changed.");
-			return;
+			return false;
 		}
 		break;
 	}
@@ -127,7 +128,7 @@ void ttLibC_Mp3lameDecoder_decode(
 		decoder_->buffer = ttLibC_malloc(decoder_->buffer_size);
 		if(decoder_->buffer == NULL) {
 			ERR_PRINT("failed to realloc buffer.");
-			return;
+			return false;
 		}
 		decoder_->left_buffer  = (int16_t *) decoder_->buffer;
 		decoder_->right_buffer = (int16_t *)(decoder_->buffer + (decoder_->buffer_size >> 2));
@@ -136,7 +137,7 @@ void ttLibC_Mp3lameDecoder_decode(
 	int num = hip_decode(decoder_->hip_gflags, mp3->inherit_super.inherit_super.data, mp3->inherit_super.inherit_super.buffer_size, decoder_->left_buffer, decoder_->right_buffer);
 	// for begin of decode. num can be 0, and get the chunk of num.
 	if(num == 0) {
-		return;
+		return true;
 	}
 /*	if(num != mp3->inherit_super.sample_num) {
 		LOG_PRINT("decode output is invalid. must be the same as mp3 sample_num. %d = %d(mp3)", num, mp3->inherit_super.sample_num);
@@ -173,11 +174,14 @@ void ttLibC_Mp3lameDecoder_decode(
 			mp3->inherit_super.inherit_super.pts,
 			mp3->inherit_super.inherit_super.timebase);
 	if(p == NULL) {
-		return;
+		return false;
 	}
 	decoder_->pcms16 = p;
 	// call
-	callback(ptr, decoder_->pcms16);
+	if(!callback(ptr, decoder_->pcms16)) {
+		return false;
+	}
+	return true;
 }
 
 /*

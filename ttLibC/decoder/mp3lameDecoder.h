@@ -55,8 +55,9 @@ ttLibC_Mp3lameDecoder *ttLibC_Mp3lameDecoder_make();
  * @param mp3      source mp3 data.
  * @param callback callback func for mp3 decode.
  * @param ptr      pointer for user def value, which willl call in callback.
+ * @return true / false
  */
-void ttLibC_Mp3lameDecoder_decode(
+bool ttLibC_Mp3lameDecoder_decode(
 		ttLibC_Mp3lameDecoder *decoder,
 		ttLibC_Mp3 *mp3,
 		ttLibC_Mp3lameDecodeFunc callback,
