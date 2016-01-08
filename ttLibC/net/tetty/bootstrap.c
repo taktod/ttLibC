@@ -17,6 +17,7 @@
 #include "../../log.h"
 #include "../../util/forkUtil.h"
 #include <netdb.h>
+#include <netinet/tcp.h>
 
 /*
  * make bootstrap object.
@@ -146,6 +147,16 @@ bool ttLibC_TettyBootstrap_connect(
 		ttLibC_free(client_info);
 		bootstrap->error_flag = -3;
 		return false;
+	}
+	int optval = 1;
+	if(bootstrap_->so_keepalive) {
+		setsockopt(client_info->data_socket, SOL_SOCKET, SO_KEEPALIVE, &optval, sizeof(optval));
+	}
+/*	if(bootstrap_->so_reuseaddr) {
+		setsockopt(client_info->data_socket, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
+	}*/
+	if(bootstrap_->tcp_nodelay) {
+		setsockopt(client_info->data_socket, IPPROTO_TCP, TCP_NODELAY, &optval, sizeof(optval));
 	}
 	// connect
 	if(connect(client_info->data_socket, (struct sockaddr *)&client_info->data_addr, sizeof(client_info->data_addr)) == -1) {
