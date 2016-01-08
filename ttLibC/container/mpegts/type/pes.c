@@ -494,13 +494,17 @@ bool ttLibC_Pes_writeH264Packet(
 				h264 = NULL;
 			}
 			else {
-				callback(ptr, buf, 188);
+				if(!callback(ptr, buf, 188)) {
+					return false;
+				}
 				break;
 			}
 		}
 		if(p_buf_left_size == 0) {
 			// packet is complete, need to go next.
-			callback(ptr, buf, 188);
+			if(!callback(ptr, buf, 188)) {
+				return false;
+			}
 			// prepare data.
 			if(nal_size >= 184) {
 				// 4byte header and frame data.
@@ -641,7 +645,10 @@ bool Pes_writeAudioData(void *ptr, ttLibC_Frame *frame) {
 		-- audioData->total_size;
 		if(audioData->p_buf_left_size == 0) {
 			// 188 byte packet is complete.
-			audioData->callback(audioData->ptr, audioData->buf, 188);
+			if(!audioData->callback(audioData->ptr, audioData->buf, 188)) {
+				audioData->error_flg = true;
+				return false;
+			}
 
 			if(audioData->total_size > 0) {
 				audioData->p_buf = audioData->buf;

@@ -313,15 +313,21 @@ bool ttLibC_MpegtsWriter_write(
 		// sdt
 		writer_->sdt_buf[3] = (writer_->sdt_buf[3] & 0xF0) | writer_->cc_sdt;
 		writer_->cc_sdt = (writer_->cc_sdt + 1) & 0x0F;
-		callback(ptr, writer_->sdt_buf, 188);
+		if(!callback(ptr, writer_->sdt_buf, 188)) {
+			return false;
+		}
 		// pat
 		writer_->pat_buf[3] = (writer_->pat_buf[3] & 0xF0) | writer_->cc_pat;
 		writer_->cc_pat = (writer_->cc_pat + 1) & 0x0F;
-		callback(ptr, writer_->pat_buf, 188);
+		if(!callback(ptr, writer_->pat_buf, 188)) {
+			return false;
+		}
 		// pmt
 		writer_->pmt_buf[3] = (writer_->pmt_buf[3] & 0xF0) | writer_->cc_pmt;
 		writer_->cc_pmt = (writer_->cc_pmt + 1) & 0x0F;
-		callback(ptr, writer_->pmt_buf, 188);
+		if(!callback(ptr, writer_->pmt_buf, 188)) {
+			return false;
+		}
 	}
 	// no frame -> just update sdt pat pmt only.
 	if(frame == NULL) {
