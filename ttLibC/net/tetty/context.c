@@ -338,6 +338,9 @@ tetty_errornum ttLibC_TettyContext_super_write(ttLibC_TettyContext *ctx, void *d
 		LOG_PRINT("failed to ref the bootstrap.");
 		return 0;
 	}
+	if(bootstrap->inherit_super.error_flag != 0) {
+		return 0;
+	}
 	ctx_->data = data;
 	ctx_->data_size = data_size;
 	ttLibC_TettyChannelHandler *channel_handler = ctx_->channel_handler; // handlerを一旦保持しておいて、あとで復元する。
