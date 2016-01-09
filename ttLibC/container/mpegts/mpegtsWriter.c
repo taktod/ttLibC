@@ -34,8 +34,8 @@ typedef struct {
 	ttLibC_MpegtsTrack *track;
 	ttLibC_ContainerWriteFunc callback;
 	void *ptr;
-	/** error_flg in the case of error,true */
-	bool error_flg;
+	/** error_number, 0 is no error */
+	bool error_number;
 } MpegtsWriter_CallbackPtr_t;
 
 /**
@@ -130,7 +130,7 @@ static bool MpegtsWriter_H264TrackAdd(void *ptr, ttLibC_Frame *frame) {
 		return false;
 	}
 	if(!ttLibC_Pes_writeH264Packet(callbackData->track, frame, callbackData->callback, callbackData->ptr)) {
-		callbackData->error_flg = true;
+		callbackData->error_number = 1;
 		return false;
 	}
 	if(callbackData->writer->inherit_super.inherit_super.pts > frame->pts) {
@@ -214,7 +214,7 @@ static bool MpegtsWriter_writeFromQueue(
 		{
 			MpegtsWriter_CallbackPtr_t callbackData;
 			callbackData.callback = callback;
-			callbackData.error_flg = false;
+			callbackData.error_number = 0;
 			callbackData.ptr = ptr;
 			callbackData.writer = writer;
 			for(int i = 0;i < writer->pes_track_num;++ i) {
@@ -223,7 +223,7 @@ static bool MpegtsWriter_writeFromQueue(
 					callbackData.track = &writer->track_list[i];
 					ttLibC_FrameQueue_dequeue(writer->track_list[i].frame_queue, MpegtsWriter_H264TrackAdd, &callbackData);
 					// if error occured.
-					if(callbackData.error_flg) {
+					if(callbackData.error_number != 0) {
 						ERR_PRINT("error happen during video frame writing.");
 						return false;
 					}

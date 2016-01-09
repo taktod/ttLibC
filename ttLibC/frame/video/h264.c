@@ -691,7 +691,7 @@ ttLibC_H264 *ttLibC_H264_analyzeAvccTag(
 		uint32_t *length_size) {
 	size_t buffer_size = data_size; // assume sps is one pps is one.
 	uint8_t *buffer = NULL;
-	bool is_alloc_flg = false;
+	bool alloc_flag = false;
 	if(prev_frame != NULL) {
 		if(!prev_frame->inherit_super.inherit_super.is_non_copy) {
 			if(prev_frame->inherit_super.inherit_super.data_size > buffer_size) {
@@ -708,7 +708,7 @@ ttLibC_H264 *ttLibC_H264_analyzeAvccTag(
 	}
 	if(buffer == NULL) {
 		buffer = ttLibC_malloc(buffer_size);
-		is_alloc_flg = true;
+		alloc_flag = true;
 	}
 	uint8_t *buf = buffer;
 	size_t buf_pos = 0;
@@ -735,7 +735,7 @@ ttLibC_H264 *ttLibC_H264_analyzeAvccTag(
 	uint32_t sps_count = data[5] & 0x1F;
 	if(sps_count != 1) {
 		ERR_PRINT("sps count is not 1.:%d", sps_count);
-		if(is_alloc_flg) {
+		if(alloc_flag) {
 			ttLibC_free(buffer);
 		}
 		return NULL;
@@ -756,7 +756,7 @@ ttLibC_H264 *ttLibC_H264_analyzeAvccTag(
 	uint32_t pps_count = data[0];
 	if(pps_count != 1) {
 		ERR_PRINT("pps count is not 1.:%d", pps_count);
-		if(is_alloc_flg) {
+		if(alloc_flag) {
 			ttLibC_free(buffer);
 		}
 		return NULL;
@@ -774,7 +774,7 @@ ttLibC_H264 *ttLibC_H264_analyzeAvccTag(
 	buf_pos += pps_size;
 	if(data_size != 0) {
 		ERR_PRINT("data loading is not complete, there is some more.");
-		if(is_alloc_flg) {
+		if(alloc_flag) {
 			ttLibC_free(buffer);
 		}
 		return NULL;
@@ -788,7 +788,7 @@ ttLibC_H264 *ttLibC_H264_analyzeAvccTag(
 			0,
 			1000);
 	if(h264 == NULL) {
-		if(is_alloc_flg) {
+		if(alloc_flag) {
 			ttLibC_free(buffer);
 		}
 		return NULL;

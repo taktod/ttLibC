@@ -32,7 +32,7 @@ ttLibC_Yuv420 *ttLibC_ImageResampler_makeYuv420FromBgr(
 	uint32_t wh = width * height;
 
 	size_t data_size = wh + (wh >> 1);
-	bool is_alloc_flg = false;
+	bool alloc_flag = false;
 	switch(type) {
 	case Yuv420Type_planar:
 	case Yuv420Type_semiPlanar:
@@ -66,7 +66,7 @@ ttLibC_Yuv420 *ttLibC_ImageResampler_makeYuv420FromBgr(
 	}
 	if(data == NULL) {
 		data = ttLibC_malloc(data_size);
-		is_alloc_flg = true;
+		alloc_flag = true;
 	}
 	// now start to convert.
 	uint8_t *y_data = NULL;
@@ -156,7 +156,7 @@ ttLibC_Yuv420 *ttLibC_ImageResampler_makeYuv420FromBgr(
 		break;
 	default:
 		ERR_PRINT("found unknown bgr type for src_frame:%d", src_frame->type);
-		if(is_alloc_flg) {
+		if(alloc_flag) {
 			ttLibC_free(data);
 		}
 		return NULL;
@@ -241,7 +241,7 @@ ttLibC_Yuv420 *ttLibC_ImageResampler_makeYuv420FromBgr(
 	}
 	yuv420 = ttLibC_Yuv420_make(yuv420, type, width, height, data, data_size, y_data, y_stride, u_data, u_stride, v_data, v_stride, true, src_frame->inherit_super.inherit_super.pts, src_frame->inherit_super.inherit_super.timebase);
 	if(yuv420 == NULL) {
-		if(is_alloc_flg) {
+		if(alloc_flag) {
 			ttLibC_free(data);
 		}
 		return NULL;
@@ -268,7 +268,7 @@ ttLibC_Bgr *ttLibC_ImageResampler_makeBgrFromYuv420(
 	uint32_t height = src_frame->inherit_super.height;
 	uint32_t wh = width * height;
 	size_t data_size = wh + (wh << 1);
-	bool is_alloc_flg = false;
+	bool alloc_flag = false;
 	switch(type) {
 	case BgrType_bgr:
 		break;
@@ -302,7 +302,7 @@ ttLibC_Bgr *ttLibC_ImageResampler_makeBgrFromYuv420(
 	}
 	if(data == NULL) {
 		data = ttLibC_malloc(data_size);
-		is_alloc_flg = true;
+		alloc_flag = true;
 	}
 	// now start to convert.
 	uint8_t *b_data = NULL;
@@ -313,6 +313,11 @@ ttLibC_Bgr *ttLibC_ImageResampler_makeBgrFromYuv420(
 	uint32_t width_stride = width + (width << 1);
 	switch(type) {
 	default:
+		if(alloc_flag) {
+			ttLibC_free(data);
+			return NULL;
+		}
+		break;
 	case BgrType_bgr:
 		b_data = data;
 		g_data = data + 1;
@@ -402,7 +407,7 @@ ttLibC_Bgr *ttLibC_ImageResampler_makeBgrFromYuv420(
 	}
 	bgr = ttLibC_Bgr_make(bgr, type, width, height, width_stride, data, data_size, true, src_frame->inherit_super.inherit_super.pts, src_frame->inherit_super.inherit_super.timebase);
 	if(bgr == NULL) {
-		if(is_alloc_flg) {
+		if(alloc_flag) {
 			ttLibC_free(data);
 		}
 		return NULL;

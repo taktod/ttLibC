@@ -261,7 +261,7 @@ ttLibC_Audio *ttLibC_AudioResampler_convertFormat(
 	size_t data_size = 0;
 	size_t buffer_size = 0;
 	uint8_t *data = NULL;
-	bool is_alloc_flg = false;
+	bool alloc_flag = false;
 	switch(frame_type) {
 	case frameType_pcmS16:
 		data_size = 2 * sample_num * channel_num;
@@ -308,13 +308,17 @@ ttLibC_Audio *ttLibC_AudioResampler_convertFormat(
 	// if data is null, we need to allocate.
 	if(data == NULL) {
 		data = ttLibC_malloc(data_size);
-		is_alloc_flg = true;
+		alloc_flag = true;
 	}
 	uint8_t *l_data = NULL;
 	uint8_t *r_data = NULL;
 	uint32_t step = 0;
 	switch(frame_type) {
 	default:
+		if(alloc_flag) {
+			ttLibC_free(data);
+		}
+		return NULL;
 	case frameType_pcmS16:
 		switch(type) {
 		case PcmS16Type_bigEndian:
@@ -456,7 +460,7 @@ ttLibC_Audio *ttLibC_AudioResampler_convertFormat(
 			return (ttLibC_Audio *)pcmf32;
 		}
 	}
-	if(is_alloc_flg) {
+	if(alloc_flag) {
 		ttLibC_free(data);
 	}
 	return NULL;

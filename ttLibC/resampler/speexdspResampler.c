@@ -90,7 +90,7 @@ ttLibC_PcmS16 *ttLibC_SpeexdspResampler_resample(ttLibC_SpeexdspResampler *resam
 	// estimate result data size.
 	size_t data_size = out_sample_num * sizeof(int16_t) * resampler_->inherit_super.channel_num;
 	uint8_t *data = NULL;
-	bool is_alloc_flg = false;
+	bool alloc_flag = false;
 	if(pcms16 != NULL) {
 		if(!pcms16->inherit_super.inherit_super.is_non_copy) {
 			if(pcms16->inherit_super.inherit_super.data_size >= data_size) {
@@ -106,13 +106,13 @@ ttLibC_PcmS16 *ttLibC_SpeexdspResampler_resample(ttLibC_SpeexdspResampler *resam
 	}
 	if(data == NULL) {
 		data = ttLibC_malloc(data_size);
-		is_alloc_flg = true;
+		alloc_flag = true;
 	}
 	int res;
 	switch(src_pcms16->type) {
 	default:
 		ERR_PRINT("no way to be here..");
-		if(is_alloc_flg) {
+		if(alloc_flag) {
 			ttLibC_free(data);
 		}
 		return NULL;
@@ -125,7 +125,7 @@ ttLibC_PcmS16 *ttLibC_SpeexdspResampler_resample(ttLibC_SpeexdspResampler *resam
 	}
 	if(res != 0) {
 		ERR_PRINT("failed to resampler: %s", speex_resampler_strerror(res));
-		if(is_alloc_flg) {
+		if(alloc_flag) {
 			ttLibC_free(data);
 		}
 		return NULL;
@@ -167,7 +167,7 @@ ttLibC_PcmS16 *ttLibC_SpeexdspResampler_resample(ttLibC_SpeexdspResampler *resam
 			pts,
 			resampler_->inherit_super.output_sample_rate);
 	if(pcms16 == NULL) {
-		if(is_alloc_flg) {
+		if(alloc_flag) {
 			ttLibC_free(data);
 		}
 		return NULL;

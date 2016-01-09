@@ -135,7 +135,7 @@ ttLibC_Pes *ttLibC_Pes_getPacket(
 		 * 1bit priority
 		 * 1bit dataAlignmentIndicator
 		 * 1bit copyright
-		 * 1bit originalFlg 0:original 1:copy
+		 * 1bit originalFlag 0:original 1:copy
 		 * 2bit ptsDtsIndicator 11: for both 10 for pts only
 		 * 1bit escrFlag
 		 * 1bit esRateFlag
@@ -200,7 +200,7 @@ ttLibC_Pes *ttLibC_Pes_getPacket(
 			// assume as non copy.
 			prev_pes->inherit_super.inherit_super.inherit_super.is_non_copy = true;
 		}
-		bool alloc_flg = false;
+		bool alloc_flag = false;
 		// if no data, alloc.
 		if(frame_buffer == NULL) {
 			frame_buffer_size = 65536;
@@ -209,7 +209,7 @@ ttLibC_Pes *ttLibC_Pes_getPacket(
 				ERR_PRINT("failed to allocate frame buffer for pes.");
 				return NULL;
 			}
-			alloc_flg = true;
+			alloc_flag = true;
 			frame_buffer_next_pos = 0;
 		}
 		ttLibC_Pes *pes = ttLibC_Pes_make(
@@ -224,7 +224,7 @@ ttLibC_Pes *ttLibC_Pes_getPacket(
 				stream_type);
 		if(pes == NULL) {
 			LOG_PRINT("failed to make pes.");
-			if(alloc_flg) {
+			if(alloc_flag) {
 				ttLibC_free(frame_buffer);
 			}
 			return NULL;
@@ -565,7 +565,7 @@ typedef struct {
 	ttLibC_ContainerWriteFunc callback;
 	ttLibC_MpegtsTrack *track;
 	void *ptr;
-	bool error_flg;
+	bool error_number;
 } audio_data_t;
 
 /*
@@ -603,7 +603,7 @@ bool Pes_checkAudioTotalSize(
 		break;
 	default:
 		ERR_PRINT("unexpected frame.:%d", frame->type);
-		audioData->error_flg = true;
+		audioData->error_number = 1;
 		return false;
 	}
 	return true;
@@ -625,7 +625,7 @@ bool Pes_writeAudioData(void *ptr, ttLibC_Frame *frame) {
 	if(frame->type == frameType_aac && ((ttLibC_Aac *)frame)->type == AacType_raw) {
 		if(ttLibC_Aac_readAdtsHeader((ttLibC_Aac *)frame, aac_header_buf, 7) == 0) {
 			LOG_PRINT("failed to get adts header information.");
-			audioData->error_flg = true;
+			audioData->error_number = 1;
 			return false;
 		}
 		audioData->data = aac_header_buf;
@@ -646,7 +646,7 @@ bool Pes_writeAudioData(void *ptr, ttLibC_Frame *frame) {
 		if(audioData->p_buf_left_size == 0) {
 			// 188 byte packet is complete.
 			if(!audioData->callback(audioData->ptr, audioData->buf, 188)) {
-				audioData->error_flg = true;
+				audioData->error_number = 1;
 				return false;
 			}
 
@@ -717,7 +717,7 @@ bool ttLibC_Pes_writeAudioPacket(
 	audioData.target_pts = writer->target_pos;
 	audioData.callback = callback;
 	audioData.ptr = ptr;
-	audioData.error_flg = false;
+	audioData.error_number = 0;
 
 	// firstly, check total size of frame.
 	ttLibC_FrameQueue_ref(track->frame_queue, Pes_checkAudioTotalSize, &audioData);
@@ -808,7 +808,7 @@ bool ttLibC_Pes_writeAudioPacket(
 	audioData.p_buf_left_size -= 14;
 	// then put frame data.
 	ttLibC_FrameQueue_dequeue(track->frame_queue, Pes_writeAudioData, &audioData);
-	if(audioData.error_flg) {
+	if(audioData.error_number != 0) {
 		return false;
 	}
 	return true;

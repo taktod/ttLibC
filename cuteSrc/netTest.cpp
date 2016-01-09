@@ -142,7 +142,7 @@ static void tcpServerTest() {
 
 #ifdef __ENABLE_FILE__
 typedef struct {
-	bool work_flg;
+	bool is_running;
 	ttLibC_RtmpConnection *netConnection;
 	ttLibC_RtmpStream *netStream;
 	uint32_t work_id;
@@ -165,7 +165,7 @@ bool rtmpTest_onStatusEvent(void *ptr, ttLibC_Amf0Object *amf0_obj) {
 			LOG_PRINT("code:%s", (const char *)code->object);
 			if(code != NULL && strcmp((const char *)code->object, "NetConnection.Connect.Success") == 0) {
 				LOG_PRINT("connect success.");
-				testData->work_flg = false;
+				testData->is_running = false;
 				// make netStream
 				testData->netStream = ttLibC_RtmpStream_make(testData->netConnection);
 				if(testData->netStream != NULL) {
@@ -186,7 +186,7 @@ bool rtmpTest_onStatusEvent(void *ptr, ttLibC_Amf0Object *amf0_obj) {
 static void rtmpTest() {
 #ifdef __ENABLE_FILE__
 	rtmpTest_t testData;
-	testData.work_flg = true;
+	testData.is_running = true;
 	testData.netConnection = ttLibC_RtmpConnection_make();
 	testData.netStream = NULL;
 	ttLibC_RtmpConnection_connect(
@@ -195,7 +195,7 @@ static void rtmpTest() {
 			rtmpTest_onStatusEvent,
 			&testData);
 	while(ttLibC_RtmpConnection_read(testData.netConnection)) {
-		if(!testData.work_flg) {
+		if(!testData.is_running) {
 			break;
 		}
 //		ttLibC_RtmpStream_feed(testData.netStream, testData.work_id, frame);

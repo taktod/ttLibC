@@ -13,7 +13,7 @@
 #include "allocator.h"
 #include <stdint.h>
 
-#if __DEBUG_FLG__ == 1
+#if __DEBUG_FLAG__ == 1
 #	include "khash.h"
 
 KHASH_MAP_INIT_INT64(ttLibC_Allocator, void *)
@@ -36,7 +36,7 @@ typedef struct {
 void *ttLibC_Allocator_malloc(size_t size, const char *file_name, int line, const char *func_name) {
 	int ret;
 	void *ptr = malloc(size);
-#if __DEBUG_FLG__ == 1
+#if __DEBUG_FLAG__ == 1
 	if(ptr) {
 		if(ttLibC_Allocator_Table != NULL) {
 			ttLibC_Allocator_Info *info = malloc(sizeof(ttLibC_Allocator_Info));
@@ -56,7 +56,7 @@ void *ttLibC_Allocator_malloc(size_t size, const char *file_name, int line, cons
  */
 void ttLibC_Allocator_free(void *ptr) {
 	if(ptr) {
-#if __DEBUG_FLG__ == 1
+#if __DEBUG_FLAG__ == 1
 		if(ttLibC_Allocator_Table != NULL) {
 			khiter_t it = kh_get(ttLibC_Allocator, ttLibC_Allocator_Table, (uint64_t)ptr);
 			free(kh_value(ttLibC_Allocator_Table, it));
@@ -72,7 +72,7 @@ void ttLibC_Allocator_free(void *ptr) {
  * @return true:success false:error(ignore info collecting.)
  */
 bool ttLibC_Allocator_init() {
-#if __DEBUG_FLG__ == 1
+#if __DEBUG_FLAG__ == 1
 	if(ttLibC_Allocator_Table == NULL) {
 		ttLibC_Allocator_Table = kh_init(ttLibC_Allocator);
 	}
@@ -87,7 +87,7 @@ bool ttLibC_Allocator_init() {
  * @return total size of allocate.
  */
 size_t ttLibC_Allocator_dump() {
-#if __DEBUG_FLG__ == 1
+#if __DEBUG_FLAG__ == 1
 	if(ttLibC_Allocator_Table == NULL) {
 		return 0;
 	}
@@ -112,7 +112,7 @@ size_t ttLibC_Allocator_dump() {
  * close information table.
  */
 void ttLibC_Allocator_close() {
-#if __DEBUG_FLG__ == 1
+#if __DEBUG_FLAG__ == 1
 	khiter_t it;
 	for(it = kh_begin(ttLibC_Allocator_Table);it != kh_end(ttLibC_Allocator_Table); ++ it) {
 		if(kh_exist(ttLibC_Allocator_Table, it)) {

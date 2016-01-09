@@ -23,11 +23,11 @@ extern "C" {
 
 /**
  * dump memory data.
- * @param ptr			target data
- * @param length		data length
- * @param separator_flg	insert space among each byte
+ * @param ptr            target data
+ * @param length         data length
+ * @param separator_flag insert space among each byte
  */
-void ttLibC_HexUtil_dump(void *ptr, size_t length, bool separator_flg);
+void ttLibC_HexUtil_dump(void *ptr, size_t length, bool separator_flag);
 
 /**
  * make void* buffer according to hex string
@@ -40,14 +40,14 @@ uint32_t ttLibC_HexUtil_makeBuffer(const char *target, void *ptr, size_t length)
 
 /**
  * dump memory data. only for debug compile
- * @param ptr			target data
- * @param length		data length
- * @param separator_flg	insert space among each byte
+ * @param ptr            target data
+ * @param length         data length
+ * @param separator_flag insert space among each byte
  */
-#if __DEBUG_FLG__ == 1
-#	define	LOG_DUMP(ptr, length, separator_flg) ttLibC_HexUtil_dump(ptr, length, separator_flg)
+#if __DEBUG_FLAG__ == 1
+#	define	LOG_DUMP(ptr, length, separator_flag) ttLibC_HexUtil_dump(ptr, length, separator_flag)
 #else
-#	define	LOG_DUMP(ptr, length, separator_flg)
+#	define	LOG_DUMP(ptr, length, separator_flag)
 #endif
 
 #ifdef __cplusplus

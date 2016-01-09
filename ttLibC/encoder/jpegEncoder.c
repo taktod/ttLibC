@@ -127,7 +127,7 @@ bool ttLibC_JpegEncoder_encode(
 	size_t wh = yuv->inherit_super.width * yuv->inherit_super.height;
 	uint8_t *data = NULL;
 	size_t data_size = wh + (wh >> 1);
-	bool is_alloc_flg = false;
+	bool alloc_flag = false;
 	// check prev data.
 	ttLibC_Jpeg *jpeg = encoder_->jpeg;
 
@@ -156,7 +156,7 @@ bool ttLibC_JpegEncoder_encode(
 			ERR_PRINT("failed to allocate data buffer.");
 			return false;
 		}
-		is_alloc_flg = true;
+		alloc_flag = true;
 	}
 	// do convert.
 	encoder_->dmgr.next_output_byte = data;
@@ -199,7 +199,7 @@ bool ttLibC_JpegEncoder_encode(
 	jpeg = ttLibC_Jpeg_make(jpeg, encoder_->inherit_super.width, encoder_->inherit_super.height, data, data_size, true, 0, 1000);
 	if(jpeg == NULL) {
 		LOG_PRINT("jpeg output is null.");
-		if(is_alloc_flg) {
+		if(alloc_flag) {
 			ttLibC_free(data);
 		}
 		return false;

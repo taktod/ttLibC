@@ -20,16 +20,16 @@ static char hex_digits[16] = { \
 
 /*
  * dump memory data.
- * @param ptr			target data
- * @param length		data length
- * @param separator_flg	insert space among each byte
+ * @param ptr            target data
+ * @param length         data length
+ * @param separator_flag insert space among each byte
  */
-void ttLibC_HexUtil_dump(void *ptr, size_t length, bool separator_flg) {
+void ttLibC_HexUtil_dump(void *ptr, size_t length, bool separator_flag) {
 	char *cptr = ptr;
 	for(uint32_t i = 0;i < length;++ i) {
 		printf("%c", hex_digits[(cptr[i] & 0xF0) >> 4]);
 		printf("%c", hex_digits[(cptr[i] & 0x0F)]);
-		if(separator_flg) {
+		if(separator_flag) {
 			printf(" ");
 		}
 	}

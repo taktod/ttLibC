@@ -94,7 +94,7 @@ bool ttLibC_JpegDecoder_decode(
 	decoder_->inherit_super.height = decoder_->dinfo.output_height;
 	size_t wh = decoder_->inherit_super.width * decoder_->inherit_super.height;
 	size_t data_size = wh + (wh >> 1);
-	bool is_alloc_flg = false;
+	bool alloc_flag = false;
 	// check the size is multiple of 16 or not.
 	if(decoder_->inherit_super.height % 16 > 0) {
 		size_t dummy_size = decoder_->inherit_super.width * 3;
@@ -133,7 +133,7 @@ bool ttLibC_JpegDecoder_decode(
 	}
 	if(data == NULL) {
 		data = ttLibC_malloc(data_size);
-		is_alloc_flg = true;
+		alloc_flag = true;
 	}
 
 	uint8_t *y_data = data;
@@ -196,6 +196,9 @@ bool ttLibC_JpegDecoder_decode(
 			jpeg->inherit_super.inherit_super.timebase);
 	if(yuv == NULL) {
 		ERR_PRINT("yuv is not generated.");
+		if(alloc_flag) {
+			ttLibC_free(data);
+		}
 		return false;
 	}
 	yuv->inherit_super.inherit_super.is_non_copy = false;
