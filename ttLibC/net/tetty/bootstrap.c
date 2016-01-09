@@ -241,6 +241,17 @@ bool ttLibC_TettyBootstrap_update(
 					bootstrap_->inherit_super.error_number = -6;
 					return true;
 				}
+				// set tcp_nodelay and SO_KEEPALIVE
+				int optval = 1;
+				if(bootstrap_->so_keepalive) {
+					setsockopt(client_info->data_socket, SOL_SOCKET, SO_KEEPALIVE, &optval, sizeof(optval));
+				}
+/*				if(bootstrap_->so_reuseaddr) {
+					setsockopt(client_info->data_socket, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
+				}*/
+				if(bootstrap_->tcp_nodelay) {
+					setsockopt(client_info->data_socket, IPPROTO_TCP, TCP_NODELAY, &optval, sizeof(optval));
+				}
 				// update fdset with new data_socket.
 				FD_SET(client_info->data_socket, &bootstrap_->fdset);
 				// call pipeline->channelActive
