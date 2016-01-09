@@ -47,8 +47,8 @@ typedef enum ttLibC_Tetty_Option {
  * definition of bootstrap.
  */
 typedef struct ttLibC_Net_TettyBootstrap {
-	/** ref of error_flag */
-	tetty_errornum error_flag;
+	/** ref of error_number */
+	tetty_errornum error_number;
 	/** type of channel */
 	ttLibC_Tetty_ChannelType channel_type;
 	/** ref of server_info */

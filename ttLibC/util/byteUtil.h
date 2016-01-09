@@ -38,8 +38,8 @@ typedef struct ttLibC_Util_ByteReader {
 	ttLibC_ByteUtil_Type type;
 	/** reading_size */
 	size_t read_size;
-	/** flag for reading error */
-	bool error_flag;
+	/** number for reading error */
+	bool error_number;
 } ttLibC_Util_ByteReader;
 
 typedef ttLibC_Util_ByteReader ttLibC_ByteReader;
@@ -143,8 +143,8 @@ typedef struct ttLibC_Util_ByteConnector {
 	ttLibC_ByteUtil_Type type;
 	/** writing data size */
 	size_t write_size;
-	/** flag for connecting error */
-	bool error_flag;
+	/** connecting error number */
+	bool error_number;
 } ttLibC_Util_ByteConnector;
 
 typedef ttLibC_Util_ByteConnector ttLibC_ByteConnector;

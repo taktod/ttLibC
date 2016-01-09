@@ -621,7 +621,7 @@ bool Pes_writeAudioData(void *ptr, ttLibC_Frame *frame) {
 		return false;
 	}
 	uint8_t aac_header_buf[7];
-	bool is_body_flag = true;
+	bool is_write_target_body = true;
 	if(frame->type == frameType_aac && ((ttLibC_Aac *)frame)->type == AacType_raw) {
 		if(ttLibC_Aac_readAdtsHeader((ttLibC_Aac *)frame, aac_header_buf, 7) == 0) {
 			LOG_PRINT("failed to get adts header information.");
@@ -630,7 +630,7 @@ bool Pes_writeAudioData(void *ptr, ttLibC_Frame *frame) {
 		}
 		audioData->data = aac_header_buf;
 		audioData->data_size = 7;
-		is_body_flag = false;
+		is_write_target_body = false;
 	}
 	else {
 		audioData->data = frame->data;
@@ -686,10 +686,10 @@ bool Pes_writeAudioData(void *ptr, ttLibC_Frame *frame) {
 			}
 		}
 		if(audioData->data_size == 0) {
-			if(!is_body_flag) {
+			if(!is_write_target_body) {
 				audioData->data = frame->data;
 				audioData->data_size = frame->buffer_size;
-				is_body_flag = true;
+				is_write_target_body = true;
 			}
 			else {
 				break;

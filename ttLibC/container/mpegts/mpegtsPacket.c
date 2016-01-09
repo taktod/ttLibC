@@ -96,7 +96,10 @@ bool ttLibC_MpegtsPacket_loadMpegtsPacketHeader(
 		header_info->adaptationField.size = ttLibC_ByteReader_bit(reader, 8);
 		left_size = header_info->adaptationField.size;
 		if(left_size == 0) {
-			return !reader->error_flag;
+			if(reader->error_number != 0) {
+				return false;
+			}
+			return true;
 		}
 		header_info->adaptationField.discontinuityIndicator = ttLibC_ByteReader_bit(reader, 1);
 		header_info->adaptationField.randomAccessIndicator = ttLibC_ByteReader_bit(reader, 1);
@@ -108,7 +111,10 @@ bool ttLibC_MpegtsPacket_loadMpegtsPacketHeader(
 		ttLibC_ByteReader_bit(reader, 1);
 		-- left_size;
 		if(left_size == 0) {
-			return !reader->error_flag;
+			if(reader->error_number != 0) {
+				return false;
+			}
+			return true;
 		}
 		if(header_info->adaptationField.pcrFlag == 1) {
 			if(left_size < 6) {
@@ -124,7 +130,10 @@ bool ttLibC_MpegtsPacket_loadMpegtsPacketHeader(
 			ttLibC_ByteReader_skipByte(reader, left_size);
 		}
 	}
-	return !reader->error_flag;
+	if(reader->error_number != 0) {
+		return false;
+	}
+	return true;
 }
 
 /*
@@ -151,7 +160,10 @@ bool ttLibC_MpegtsPacket_loadProgramPacketHeader(
 	ttLibC_ByteReader_bit(reader, 1);
 	ttLibC_ByteReader_bit(reader, 8);
 	ttLibC_ByteReader_bit(reader, 8);
-	return !reader->error_flag;
+	if(reader->error_number != 0) {
+		return false;
+	}
+	return true;
 }
 
 /*

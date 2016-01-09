@@ -292,24 +292,24 @@ static bool MpegtsWriter_writeFromQueue(
 	return true;
 }
 
-/**
+/*
  * write mpegts data.
- * @param writer           mpegtsWriter object
- * @param update_info_flag true:write info data(sdt pat pmt)
- * @param pid              pid for target frame.
- * @param frame,           target frame.
- * @param callback         callback for write process.
- * @param ptr              user def data pointer for callback.
+ * @param writer      mpegtsWriter object
+ * @param update_info true:write info data(sdt pat pmt)
+ * @param pid         pid for target frame.
+ * @param frame       target frame.
+ * @param callback    callback for write process.
+ * @param ptr         user def data pointer for callback.
  */
 bool ttLibC_MpegtsWriter_write(
 		ttLibC_MpegtsWriter *writer,
-		bool update_info_flag,
+		bool update_info,
 		uint16_t pid,
 		ttLibC_Frame *frame,
 		ttLibC_ContainerWriteFunc callback,
 		void *ptr) {
 	ttLibC_MpegtsWriter_ *writer_ = (ttLibC_MpegtsWriter_ *)writer;
-	if(writer_->is_first || update_info_flag) {
+	if(writer_->is_first || update_info) {
 		// sdt
 		writer_->sdt_buf[3] = (writer_->sdt_buf[3] & 0xF0) | writer_->cc_sdt;
 		writer_->cc_sdt = (writer_->cc_sdt + 1) & 0x0F;

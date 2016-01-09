@@ -47,7 +47,7 @@ void ttLibC_TettyPromise_await(ttLibC_TettyPromise *promise) {
 	// wait until done...
 	while(!promise_->is_done) {
 		ttLibC_TettyBootstrap_update(promise_->bootstrap, 100000);
-		if(promise_->bootstrap->error_flag != 0) {
+		if(promise_->bootstrap->error_number != 0) {
 			// if error occured, update promise as error.
 			if(!promise_->is_done) {
 				promise_->is_done    = true;
@@ -91,7 +91,7 @@ void ttLibC_TettyPromise_awaitFor(ttLibC_TettyPromise *promise, uint32_t timeout
 		if(milisec > timeout_milisec) {
 			break;
 		}
-		if(promise_->bootstrap->error_flag != 0) {
+		if(promise_->bootstrap->error_number != 0) {
 			// if error occured, update promise as error.
 			if(!promise_->is_done) {
 				promise_->is_done    = true;

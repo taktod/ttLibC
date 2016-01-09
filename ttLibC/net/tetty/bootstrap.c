@@ -34,7 +34,7 @@ ttLibC_TettyBootstrap *ttLibC_TettyBootstrap_make() {
 	bootstrap->so_keepalive = false;
 	bootstrap->so_reuseaddr = false;
 	bootstrap->tcp_nodelay  = false;
-	bootstrap->inherit_super.error_flag = 0;
+	bootstrap->inherit_super.error_number = 0;
 	bootstrap->close_future = NULL;
 	FD_ZERO(&bootstrap->fdset);
 	return (ttLibC_TettyBootstrap *)bootstrap;
@@ -102,7 +102,7 @@ bool ttLibC_TettyBootstrap_bind(
 
 	if(!ttLibC_TcpServer_open(bootstrap_->server_info)) {
 		ERR_PRINT("failed to open socket.");
-		bootstrap->error_flag = -1; // bind failed.
+		bootstrap->error_number = -1; // bind failed.
 		return false;
 	}
 	// call pipeline->bind
@@ -133,7 +133,7 @@ bool ttLibC_TettyBootstrap_connect(
 	ttLibC_TcpClientInfo *client_info = ttLibC_malloc(sizeof(ttLibC_TcpClientInfo));
 	if(client_info == NULL) {
 		ERR_PRINT("failed to make client info object.");
-		bootstrap->error_flag = -2;
+		bootstrap->error_number = -2;
 		return false;
 	}
 	memset(&client_info->data_addr, 0, sizeof(client_info->data_addr));
@@ -145,7 +145,7 @@ bool ttLibC_TettyBootstrap_connect(
 	if((client_info->data_socket = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
 		ERR_PRINT("failed to make socket.");
 		ttLibC_free(client_info);
-		bootstrap->error_flag = -3;
+		bootstrap->error_number = -3;
 		return false;
 	}
 	int optval = 1;
@@ -162,7 +162,7 @@ bool ttLibC_TettyBootstrap_connect(
 	if(connect(client_info->data_socket, (struct sockaddr *)&client_info->data_addr, sizeof(client_info->data_addr)) == -1) {
 		ERR_PRINT("failed to connect.");
 		ttLibC_free(client_info);
-		bootstrap->error_flag = -4;
+		bootstrap->error_number = -4;
 		return false;
 	}
 	// update fd_set
@@ -211,13 +211,13 @@ bool ttLibC_TettyBootstrap_update(
 		ttLibC_TettyBootstrap *bootstrap,
 		uint32_t wait_interval) {
 	ttLibC_TettyBootstrap_ *bootstrap_ = (ttLibC_TettyBootstrap_ *)bootstrap;
-	if(bootstrap_->inherit_super.error_flag != 0) {
+	if(bootstrap_->inherit_super.error_number != 0) {
 		return false;
 	}
 
 	if(bootstrap_->server_info == NULL && bootstrap_->client_info_list->size == 0) {
 		// no more socket.
-		bootstrap_->inherit_super.error_flag = -5;
+		bootstrap_->inherit_super.error_number = -5;
 		return false;
 	}
 
@@ -238,7 +238,7 @@ bool ttLibC_TettyBootstrap_update(
 				ttLibC_TcpClientInfo *client_info = ttLibC_TcpServer_wait(bootstrap_->server_info);
 				if(client_info == NULL) {
 					ERR_PRINT("failed to make client socket.");
-					bootstrap_->inherit_super.error_flag = -6;
+					bootstrap_->inherit_super.error_number = -6;
 					return true;
 				}
 				// update fdset with new data_socket.
@@ -375,8 +375,8 @@ tetty_errornum ttLibC_TettyBootstrap_channels_write(
 		ttLibC_TettyBootstrap *bootstrap,
 		void *data,
 		size_t data_size) {
-	if(bootstrap->error_flag != 0) {
-		return bootstrap->error_flag;
+	if(bootstrap->error_number != 0) {
+		return bootstrap->error_number;
 	}
 	return ttLibC_TettyContext_channel_write_(
 			bootstrap,
@@ -406,8 +406,8 @@ tetty_errornum ttLibC_TettyBootstrap_channelEach_write(
 		ttLibC_TettyBootstrap *bootstrap,
 		void *data,
 		size_t data_size) {
-	if(bootstrap->error_flag != 0) {
-		return bootstrap->error_flag;
+	if(bootstrap->error_number != 0) {
+		return bootstrap->error_number;
 	}
 	ttLibC_TettyContext_ ctx;
 	ctx.bootstrap = bootstrap;
@@ -423,7 +423,7 @@ tetty_errornum ttLibC_TettyBootstrap_channelEach_write(
  * @param bootstrap
  */
 ttLibC_TettyPromise *ttLibC_TettyBootstrap_makePromise(ttLibC_TettyBootstrap *bootstrap) {
-	if(bootstrap->error_flag != 0) {
+	if(bootstrap->error_number != 0) {
 		return NULL;
 	}
 	return ttLibC_TettyPromise_make_(bootstrap);

@@ -34,7 +34,7 @@
 tetty_errornum tettyServerTest_channelRead(ttLibC_TettyContext *ctx, void *data, size_t data_size) {
 	if(strncmp((const char *)data, "closeServer", 11) == 0) {
 		LOG_PRINT("close server is called.");
-		ctx->bootstrap->error_flag = 1; // treat as error, quit server.
+		ctx->bootstrap->error_number = 1; // treat as error, quit server.
 		return 0;
 	}
 	if(strncmp((const char *)data, "close", 5) == 0) {

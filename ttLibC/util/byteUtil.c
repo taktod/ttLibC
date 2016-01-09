@@ -56,7 +56,7 @@ ttLibC_ByteReader *ttLibC_ByteReader_make(
 	reader->data_size = data_size;
 	reader->inherit_super.type = type;
 	reader->inherit_super.read_size = 0;
-	reader->inherit_super.error_flag = false;
+	reader->inherit_super.error_number = 0;
 	if(*reader->data == 0) {
 		++ reader->zero_count;
 	}
@@ -92,7 +92,7 @@ uint64_t ttLibC_ByteReader_bit(
 			++ reader_->data;
 			if(reader_->data_size <= 0) {
 				ERR_PRINT("no more data buffer.");
-				reader_->inherit_super.error_flag = true;
+				reader_->inherit_super.error_number = 1;
 				return 0;
 			}
 			++ reader_->inherit_super.read_size;
@@ -105,7 +105,7 @@ uint64_t ttLibC_ByteReader_bit(
 				++ reader_->data;
 				if(reader_->data_size) {
 					ERR_PRINT("no more data.");
-					reader_->inherit_super.error_flag = true;
+					reader_->inherit_super.error_number = 1;
 					return 0;
 				}
 				-- reader_->data_size;
@@ -152,7 +152,7 @@ int32_t ttLibC_ByteReader_expGolomb(
 			++ reader_->data;
 			if(reader_->data_size == 0) {
 				ERR_PRINT("no more data.");
-				reader_->inherit_super.error_flag = true;
+				reader_->inherit_super.error_number = 1;
 				return 0;
 			}
 			++ reader_->inherit_super.read_size;
@@ -165,7 +165,7 @@ int32_t ttLibC_ByteReader_expGolomb(
 				++ reader_->data;
 				if(reader_->data_size == 0) {
 					ERR_PRINT("no more data.");
-					reader_->inherit_super.error_flag = true;
+					reader_->inherit_super.error_number = 1;
 					return 0;
 				}
 				++ reader_->inherit_super.read_size;
@@ -186,7 +186,7 @@ int32_t ttLibC_ByteReader_expGolomb(
 	} while(true);
 	if(count > 32) {
 		ERR_PRINT("too big exp golomb.");
-		reader_->inherit_super.error_flag = true;
+		reader_->inherit_super.error_number = 1;
 		return 0;
 	}
 	val = ttLibC_ByteReader_bit(reader, count);
@@ -218,12 +218,12 @@ uint64_t ttLibC_ByteReader_ebml(
 	ttLibC_ByteReader_ *reader_ = (ttLibC_ByteReader_ *)reader;
 	if(reader_->data_size == 0) {
 		ERR_PRINT("no more data.");
-		reader_->inherit_super.error_flag = true;
+		reader_->inherit_super.error_number = 1;
 		return 0;
 	}
 	if(reader_->pos != 0) {
 		ERR_PRINT("ebml value need to begin with full byte");
-		reader_->inherit_super.error_flag = true;
+		reader_->inherit_super.error_number = 1;
 		return 0;
 	}
 	uint64_t val = *reader_->data;
@@ -243,7 +243,7 @@ uint64_t ttLibC_ByteReader_ebml(
 			ERR_PRINT("no more data.");
 			reader_->data += reader_->data_size;
 			reader_->data_size = 0;
-			reader_->inherit_super.error_flag = true;
+			reader_->inherit_super.error_number = 1;
 			return 0;
 		}
 		val = (val << 8) | (*reader_->data);
@@ -262,7 +262,7 @@ uint64_t ttLibC_ByteReader_ebml(
 			ERR_PRINT("no more data.");
 			reader_->data += reader_->data_size;
 			reader_->data_size = 0;
-			reader_->inherit_super.error_flag = true;
+			reader_->inherit_super.error_number = 1;
 			return 0;
 		}
 		val = (val << 16) | (*(reader_->data) << 8) | (*(reader_->data + 1));
@@ -281,7 +281,7 @@ uint64_t ttLibC_ByteReader_ebml(
 			ERR_PRINT("no more data.");
 			reader_->data += reader_->data_size;
 			reader_->data_size = 0;
-			reader_->inherit_super.error_flag = true;
+			reader_->inherit_super.error_number = 1;
 			return 0;
 		}
 		val = (val << 24) | (*(reader_->data) << 16) | (*(reader_->data + 1) << 8) | (*(reader_->data + 2));
@@ -300,7 +300,7 @@ uint64_t ttLibC_ByteReader_ebml(
 			ERR_PRINT("no more data.");
 			reader_->data += reader_->data_size;
 			reader_->data_size = 0;
-			reader_->inherit_super.error_flag = true;
+			reader_->inherit_super.error_number = 1;
 			return 0;
 		}
 		val = (val << 32) | (*(reader_->data) << 24) | (*(reader_->data + 1) << 16) | (*(reader_->data + 2) << 8) | (*(reader_->data + 3));
@@ -319,7 +319,7 @@ uint64_t ttLibC_ByteReader_ebml(
 			ERR_PRINT("no more data.");
 			reader_->data += reader_->data_size;
 			reader_->data_size = 0;
-			reader_->inherit_super.error_flag = true;
+			reader_->inherit_super.error_number = 1;
 			return 0;
 		}
 		val = (val << 8) | (*(reader_->data));
@@ -339,7 +339,7 @@ uint64_t ttLibC_ByteReader_ebml(
 			ERR_PRINT("no more data.");
 			reader_->data += reader_->data_size;
 			reader_->data_size = 0;
-			reader_->inherit_super.error_flag = true;
+			reader_->inherit_super.error_number = 1;
 			return 0;
 		}
 		val = (val << 16) | (*(reader_->data) << 8) | (*(reader_->data + 1));
@@ -359,7 +359,7 @@ uint64_t ttLibC_ByteReader_ebml(
 			ERR_PRINT("no more data.");
 			reader_->data += reader_->data_size;
 			reader_->data_size = 0;
-			reader_->inherit_super.error_flag = true;
+			reader_->inherit_super.error_number = 1;
 			return 0;
 		}
 		val = (val << 24) | (*(reader_->data) << 16) | (*(reader_->data + 1) << 8) | (*(reader_->data + 2));
@@ -500,7 +500,7 @@ ttLibC_ByteConnector *ttLibC_ByteConnector_make(
 	connector->data_size = data_size;
 	connector->inherit_super.type = type;
 	connector->inherit_super.write_size = 0;
-	connector->inherit_super.error_flag = false;
+	connector->inherit_super.error_number = 0;
 	return (ttLibC_ByteConnector *)connector;
 }
 
@@ -579,12 +579,12 @@ bool ttLibC_ByteConnector_ebml(
 	ttLibC_ByteConnector_ *connector_ = (ttLibC_ByteConnector_ *)connector;
 	if(connector_->pos != 0) {
 		ERR_PRINT("ebml writing must start with complete byte.");
-		connector_->inherit_super.error_flag = true;
+		connector_->inherit_super.error_number = 1;
 		return false;
 	}
 	if(value < 0x80) {
 		if(connector_->data_size < 1) {
-			connector_->inherit_super.error_flag = true;
+			connector_->inherit_super.error_number = 1;
 			return false;
 		}
 		connector_->data[0] = (0x80 | value);
@@ -595,7 +595,7 @@ bool ttLibC_ByteConnector_ebml(
 	}
 	if(value < 0x4000) {
 		if(connector_->data_size < 2) {
-			connector_->inherit_super.error_flag = true;
+			connector_->inherit_super.error_number = 1;
 			return false;
 		}
 		connector_->data[0] = (0x40 | ((value >> 8) & 0xFF));
@@ -607,7 +607,7 @@ bool ttLibC_ByteConnector_ebml(
 	}
 	if(value < 0x200000) {
 		if(connector_->data_size < 3) {
-			connector_->inherit_super.error_flag = true;
+			connector_->inherit_super.error_number = 1;
 			return false;
 		}
 		connector_->data[0] = (0x20 | ((value >> 16) & 0xFF));
@@ -620,7 +620,7 @@ bool ttLibC_ByteConnector_ebml(
 	}
 	if(value < 0x10000000L) {
 		if(connector_->data_size < 4) {
-			connector_->inherit_super.error_flag = true;
+			connector_->inherit_super.error_number = 1;
 			return false;
 		}
 		connector_->data[0] = (0x10 | ((value >> 24) & 0xFF));
@@ -632,7 +632,7 @@ bool ttLibC_ByteConnector_ebml(
 	}
 	if(value < 0x0800000000L) {
 		if(connector_->data_size < 5) {
-			connector_->inherit_super.error_flag = true;
+			connector_->inherit_super.error_number = 1;
 			return false;
 		}
 		connector_->data[0] = (0x08 | ((value >> 32) & 0xFF));
@@ -647,7 +647,7 @@ bool ttLibC_ByteConnector_ebml(
 	}
 	if(value < 0x040000000000L) {
 		if(connector_->data_size < 6) {
-			connector_->inherit_super.error_flag = true;
+			connector_->inherit_super.error_number = 1;
 			return false;
 		}
 		connector_->data[0] = (0x04 | ((value >> 40) & 0xFF));
@@ -663,7 +663,7 @@ bool ttLibC_ByteConnector_ebml(
 	}
 	if(value < 0x02000000000000L) {
 		if(connector_->data_size < 7) {
-			connector_->inherit_super.error_flag = true;
+			connector_->inherit_super.error_number = 1;
 			return false;
 		}
 		connector_->data[0] = (0x02 | ((value >> 48) & 0xFF));
@@ -680,7 +680,7 @@ bool ttLibC_ByteConnector_ebml(
 	}
 	if(value < 0x0100000000000000L) {
 		if(connector_->data_size < 8) {
-			connector_->inherit_super.error_flag = true;
+			connector_->inherit_super.error_number = 1;
 			return false;
 		}
 		connector_->data[0] = 0x01;
@@ -713,12 +713,12 @@ bool ttLibC_ByteConnector_string(
 	ttLibC_ByteConnector_ *connector_ = (ttLibC_ByteConnector_ *)connector;
 	if(connector_->pos != 0) {
 		ERR_PRINT("string writing must start with complete byte.");
-		connector_->inherit_super.error_flag = true;
+		connector_->inherit_super.error_number = 1;
 		return false;
 	}
 	if(connector_->data_size < str_size) {
 		ERR_PRINT("buffer doesn't have enough size for string write.");
-		connector_->inherit_super.error_flag = true;
+		connector_->inherit_super.error_number = 1;
 		return false;
 	}
 	// データbufferも十分あるので、データを書き込んでおく

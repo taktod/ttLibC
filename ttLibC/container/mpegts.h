@@ -150,17 +150,17 @@ ttLibC_MpegtsWriter *ttLibC_MpegtsWriter_make_ex(
 
 /**
  * write frame on mpegts writer.
- * @param writer           mpegts writer object
- * @param update_info_flag if true try to write sdt pat pmt infromation.
- * @param pid              target pid.
- * @param frame            add frame object.
- * @param callback         callback func
- * @param ptr              user def pointer.
+ * @param writer      mpegts writer object
+ * @param update_info if true try to write sdt pat pmt infromation.
+ * @param pid         target pid.
+ * @param frame       add frame object.
+ * @param callback    callback func
+ * @param ptr         user def pointer.
  * @return true:success false:error
  */
 bool ttLibC_MpegtsWriter_write(
 		ttLibC_MpegtsWriter *writer,
-		bool update_info_flag,
+		bool update_info,
 		uint16_t pid,
 		ttLibC_Frame *frame,
 		ttLibC_ContainerWriteFunc callback,

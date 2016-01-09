@@ -29,12 +29,14 @@ typedef struct ttLibC_TcpServerInfo {
 	bool use_reuse_addr;
 	bool use_keep_alive;
 	bool use_tcp_nodelay;
+	int error_num;
 	void *ptr;
 } ttLibC_TcpServerInfo;
 
 typedef struct ttLibC_TcpClientInfo {
 	int data_socket;
 	struct sockaddr_in data_addr;
+	int error_num;
 	void *ptr;
 } ttLibC_TcpClientInfo;
 
