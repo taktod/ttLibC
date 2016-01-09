@@ -281,7 +281,7 @@ size_t ttLibC_Aac_readAdtsHeader(
 	 * 4bit sampling frequence index
 	 * 1bit private bit 1いれておく。
 	 * 3bit channel configuration.
-	 * 1bit origin flag
+	 * 1bit original flag
 	 * 1bit home
 	 * 1bit copyright identification bit
 	 * 1bit copyright identification start

@@ -47,10 +47,6 @@ ttLibC_FlvMetaTag *ttLibC_FlvMetaTag_getTag(
 	 * 3byte timestamp
 	 * 1byte timestamp-ext
 	 * 3byte track_id
-	 * 4bit codec_type
-	 * 2bit sample_rate flag
-	 * 1bit bit count flag
-	 * 1bit channel flag
 	 */
 	size_t size = ((data[1] << 16) & 0xFF0000) | ((data[2] << 8) & 0xFF00) | (data[3] & 0xFF);
 	uint32_t timestamp = ((data[4] << 16) & 0xFF0000) | ((data[5] << 8) & 0xFF00) | (data[6] & 0xFF) | ((data[7] << 24) & 0xFF000000);
