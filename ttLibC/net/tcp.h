@@ -31,14 +31,18 @@ typedef struct ttLibC_TcpServerInfo {
 	bool use_tcp_nodelay;
 	int error_num;
 	void *ptr;
-} ttLibC_TcpServerInfo;
+} ttLibC_Net_TcpServerInfo;
+
+typedef ttLibC_Net_TcpServerInfo ttLibC_TcpServerInfo;
 
 typedef struct ttLibC_TcpClientInfo {
 	int data_socket;
 	struct sockaddr_in data_addr;
 	int error_num;
 	void *ptr;
-} ttLibC_TcpClientInfo;
+} ttLibC_Net_TcpClientInfo;
+
+typedef ttLibC_Net_TcpClientInfo ttLibC_TcpClientInfo;
 
 ttLibC_TcpServerInfo *ttLibC_TcpServer_make(
 		uint64_t ip,

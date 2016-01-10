@@ -13,6 +13,7 @@
 
 #include "bootstrap.h"
 #include "promise.h"
+#include "../tcpmisc.h"
 #include "../../allocator.h"
 #include "../../log.h"
 #include "../../util/forkUtil.h"
@@ -130,19 +131,21 @@ bool ttLibC_TettyBootstrap_connect(
 		ERR_PRINT("failed to get ip addres from [%s]", host);
 		return false;
 	}
-	ttLibC_TcpClientInfo *client_info = ttLibC_malloc(sizeof(ttLibC_TcpClientInfo));
+	ttLibC_TcpClientInfo_ *client_info = ttLibC_malloc(sizeof(ttLibC_TcpClientInfo_));
 	if(client_info == NULL) {
 		ERR_PRINT("failed to make client info object.");
 		bootstrap->error_number = -2;
 		return false;
 	}
-	memset(&client_info->data_addr, 0, sizeof(client_info->data_addr));
+	memset(client_info, 0, sizeof(ttLibC_TcpClientInfo_));
+	client_info->write_buffer = NULL;
+	memset(&client_info->inherit_super.data_addr, 0, sizeof(client_info->inherit_super.data_addr));
 
-	memcpy(&client_info->data_addr.sin_addr, servhost->h_addr_list[0], servhost->h_length);
-	client_info->data_addr.sin_family = AF_INET;
-	client_info->data_addr.sin_port = htons(port);
+	memcpy(&client_info->inherit_super.data_addr.sin_addr, servhost->h_addr_list[0], servhost->h_length);
+	client_info->inherit_super.data_addr.sin_family = AF_INET;
+	client_info->inherit_super.data_addr.sin_port = htons(port);
 	// make socket
-	if((client_info->data_socket = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+	if((client_info->inherit_super.data_socket = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
 		ERR_PRINT("failed to make socket.");
 		ttLibC_free(client_info);
 		bootstrap->error_number = -3;
@@ -150,29 +153,29 @@ bool ttLibC_TettyBootstrap_connect(
 	}
 	int optval = 1;
 	if(bootstrap_->so_keepalive) {
-		setsockopt(client_info->data_socket, SOL_SOCKET, SO_KEEPALIVE, &optval, sizeof(optval));
+		setsockopt(client_info->inherit_super.data_socket, SOL_SOCKET, SO_KEEPALIVE, &optval, sizeof(optval));
 	}
 /*	if(bootstrap_->so_reuseaddr) {
-		setsockopt(client_info->data_socket, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
+		setsockopt(client_info->inherit_super.data_socket, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
 	}*/
 	if(bootstrap_->tcp_nodelay) {
-		setsockopt(client_info->data_socket, IPPROTO_TCP, TCP_NODELAY, &optval, sizeof(optval));
+		setsockopt(client_info->inherit_super.data_socket, IPPROTO_TCP, TCP_NODELAY, &optval, sizeof(optval));
 	}
 	// connect
-	if(connect(client_info->data_socket, (struct sockaddr *)&client_info->data_addr, sizeof(client_info->data_addr)) == -1) {
+	if(connect(client_info->inherit_super.data_socket, (struct sockaddr *)&client_info->inherit_super.data_addr, sizeof(client_info->inherit_super.data_addr)) == -1) {
 		ERR_PRINT("failed to connect.");
 		ttLibC_free(client_info);
 		bootstrap->error_number = -4;
 		return false;
 	}
 	// update fd_set
-	FD_SET(client_info->data_socket, &bootstrap_->fdset);
+	FD_SET(client_info->inherit_super.data_socket, &bootstrap_->fdset);
 	// put it on the list.
 	ttLibC_StlList_addLast(bootstrap_->client_info_list, client_info);
 	// call pipeline->connect
-	ttLibC_TettyContext_connect_(bootstrap, client_info);
+	ttLibC_TettyContext_connect_(bootstrap, (ttLibC_TcpClientInfo *)client_info);
 	// call pipeline->channelActive
-	ttLibC_TettyContext_channelActive_(bootstrap, client_info);
+	ttLibC_TettyContext_channelActive_(bootstrap, (ttLibC_Net_TcpClientInfo *)client_info);
 	return true;
 }
 
@@ -427,6 +430,64 @@ tetty_errornum ttLibC_TettyBootstrap_channelEach_write(
 	ttLibC_TettyBootstrap_ *bootstrap_ = (ttLibC_TettyBootstrap_ *)bootstrap;
 	ttLibC_StlList_forEach(bootstrap_->client_info_list, TettyBootstrap_channelEach_write_callback, &ctx);
 	return 0;
+}
+
+static bool TettyBootstrap_channelEach_callPipelineFlush_callback(void *ptr, void *item) {
+	// call pipeline->flush
+	ttLibC_TettyContext_flush_((ttLibC_TettyBootstrap *)ptr, (ttLibC_TcpClientInfo *)item);
+	return true;
+}
+
+static bool TettyBootstrap_channelEach_flush_callback(void *ptr, void *item) {
+	ttLibC_TcpClientInfo_ *client_info = (ttLibC_TcpClientInfo_ *)item;
+	// check target write buffer.
+	if(ttLibC_DynamicBuffer_refSize(client_info->write_buffer) == 0) {
+		return true;
+	}
+	// send message.
+	write(
+			client_info->inherit_super.data_socket,
+			ttLibC_DynamicBuffer_refData(client_info->write_buffer),
+			ttLibC_DynamicBuffer_refSize(client_info->write_buffer));
+	// empty used buffer.
+	ttLibC_DynamicBuffer_empty(client_info->write_buffer);
+	return true;
+}
+
+tetty_errornum ttLibC_TettyBootstrap_channels_flush(ttLibC_TettyBootstrap *bootstrap) {
+	ttLibC_TettyBootstrap_ *bootstrap_ = (ttLibC_TettyBootstrap_ *)bootstrap;
+	// call pipeline->flush
+	ttLibC_StlList_forEach(bootstrap_->client_info_list, TettyBootstrap_channelEach_callPipelineFlush_callback, bootstrap);
+	// update socket reading.
+	ttLibC_TettyBootstrap_update(bootstrap, 0);
+	// do flush buffers.
+	ttLibC_StlList_forEach(bootstrap_->client_info_list, TettyBootstrap_channelEach_flush_callback, NULL);
+	return 0;
+}
+
+tetty_errornum ttLibC_TettyBootstrap_channels_writeAndFlush(
+		ttLibC_TettyBootstrap *bootstrap,
+		void *data,
+		size_t data_size) {
+	tetty_errornum error_num = ttLibC_TettyBootstrap_channels_write(bootstrap, data, data_size);
+	if(error_num != 0) {
+		return error_num;
+	}
+	error_num = ttLibC_TettyBootstrap_channels_flush(bootstrap);
+	return error_num;
+}
+
+tetty_errornum ttLibC_TettyBootstrap_channelEach_writeAndFlush(
+		ttLibC_TettyBootstrap *bootstrap,
+		void *data,
+		size_t data_size) {
+	tetty_errornum error_num = ttLibC_TettyBootstrap_channelEach_write(
+			bootstrap, data, data_size);
+	if(error_num != 0) {
+		return error_num;
+	}
+	error_num = ttLibC_TettyBootstrap_channels_flush(bootstrap);
+	return error_num;
 }
 
 /*

@@ -43,7 +43,7 @@ tetty_errornum tettyServerTest_channelRead(ttLibC_TettyContext *ctx, void *data,
 		return 0;
 	}
 	LOG_PRINT("got data:%s", (const char *)data);
-	ttLibC_TettyBootstrap_channels_write(ctx->bootstrap, data, data_size);
+	ttLibC_TettyBootstrap_channels_writeAndFlush(ctx->bootstrap, data, data_size);
 	return 0;
 }
 
@@ -53,7 +53,7 @@ tetty_errornum tettyClientTest_channelRead(ttLibC_TettyContext *ctx, void *data,
 }
 
 tetty_errornum tettyClientTest_channelActive(ttLibC_TettyContext *ctx) {
-	ttLibC_TettyContext_channel_write(ctx, (void *)"hello", 5);
+	ttLibC_TettyContext_channel_writeAndFlush(ctx, (void *)"hello", 5);
 	return 0;
 }
 #endif

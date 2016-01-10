@@ -9,6 +9,7 @@
  */
 
 #include "tcp.h"
+#include "tcpmisc.h"
 
 #include <sys/types.h>
 #include <strings.h>
@@ -74,19 +75,20 @@ bool ttLibC_TcpServer_open(ttLibC_TcpServerInfo *server_info) {
 
 ttLibC_TcpClientInfo *ttLibC_TcpServer_wait(
 		ttLibC_TcpServerInfo *server_info) {
-	ttLibC_TcpClientInfo *client_info = (ttLibC_TcpClientInfo *)ttLibC_malloc(sizeof(ttLibC_TcpClientInfo));
+	ttLibC_TcpClientInfo_ *client_info = (ttLibC_TcpClientInfo_ *)ttLibC_malloc(sizeof(ttLibC_TcpClientInfo_));
 	if(client_info == NULL) {
 		ERR_PRINT("failed to allocate client_info.");
 		return NULL;
 	}
-	memset(client_info, 0, sizeof(ttLibC_TcpClientInfo));
+	memset(client_info, 0, sizeof(ttLibC_TcpClientInfo_));
+	client_info->write_buffer = NULL;
 	while(true) {
-		socklen_t client_addr_len = sizeof(client_info->data_addr);
-		client_info->data_socket = accept(
+		socklen_t client_addr_len = sizeof(client_info->inherit_super.data_addr);
+		client_info->inherit_super.data_socket = accept(
 				server_info->wait_socket,
-				(struct sockaddr *)&client_info->data_addr,
+				(struct sockaddr *)&client_info->inherit_super.data_addr,
 				&client_addr_len);
-		if(client_info->data_socket != -1) {
+		if(client_info->inherit_super.data_socket != -1) {
 			break;
 		}
 		if(errno == EINTR) {
@@ -96,7 +98,7 @@ ttLibC_TcpClientInfo *ttLibC_TcpServer_wait(
 		ttLibC_free(client_info);
 		return NULL;
 	}
-	return client_info;
+	return (ttLibC_TcpClientInfo *)client_info;
 }
 
 void ttLibC_TcpServer_close(ttLibC_TcpServerInfo **server_info) {
@@ -113,14 +115,15 @@ void ttLibC_TcpServer_close(ttLibC_TcpServerInfo **server_info) {
 }
 
 void ttLibC_TcpClient_close(ttLibC_TcpClientInfo **client_info) {
-	ttLibC_TcpClientInfo *target = *client_info;
+	ttLibC_TcpClientInfo_ *target = (ttLibC_TcpClientInfo_ *)*client_info;
 	if(target == NULL) {
 		return;
 	}
-	if(target->data_socket != -1) {
-		close(target->data_socket);
-		target->data_socket = -1;
+	if(target->inherit_super.data_socket != -1) {
+		close(target->inherit_super.data_socket);
+		target->inherit_super.data_socket = -1;
 	}
+	ttLibC_DynamicBuffer_close(&target->write_buffer);
 	ttLibC_free(target);
 	*client_info = NULL;
 }

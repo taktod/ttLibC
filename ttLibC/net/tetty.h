@@ -75,6 +75,9 @@ typedef struct ttLibC_Net_TettyContext {
 
 typedef ttLibC_Net_TettyContext ttLibC_TettyContext;
 
+/**
+ * definition of promise/future.
+ */
 typedef struct ttLibC_Net_TettyPromise {
 	ttLibC_TettyBootstrap *bootstrap;
 	bool is_done;
@@ -127,14 +130,14 @@ typedef struct ttLibC_Net_TettyChannelHandler {
 	ttLibC_Tetty_ContextFunc bind;
 	/** event for connect for tcp client. */
 	ttLibC_Tetty_ContextFunc connect;
-	/** event for disconnect for tcp client.  */
+	/** event for disconnect for tcp client. */
 	ttLibC_Tetty_ContextFunc disconnect;
 	/** event for close socket. */
 	ttLibC_Tetty_ContextFunc close;
-	/** event for write data to socket. */
+	/** event for write data to buffer. */
 	ttLibC_Tetty_DataFunc    write;
-	/** event for write data flush.(not supported.) */
-//	ttLibC_Tetty_ContextFunc flush;
+	/** event for write buffer flush. */
+	ttLibC_Tetty_ContextFunc flush;
 
 	/** event for exception.(just ignore now.) */
 	ttLibC_Tetty_ExceptionFunc exceptionCaught;
@@ -263,9 +266,42 @@ ttLibC_TettyFuture *ttLibC_TettyBootstrap_channels_writeFuture(
  * @param bootstrap
  * @param data
  * @param data_size
- * @return errornum
+ * @return error_num
  */
 tetty_errornum ttLibC_TettyBootstrap_channelEach_write(
+		ttLibC_TettyBootstrap *bootstrap,
+		void *data,
+		size_t data_size);
+
+/**
+ * flush written data to socket for all connection of bootstrap.
+ * @param bootstrap
+ * @return error_num
+ */
+tetty_errornum ttLibC_TettyBootstrap_channels_flush(ttLibC_TettyBootstrap *bootstrap);
+
+/**
+ * do write and flush at once
+ * write data for all connect socket.(share one task for all connection.)
+ * @param bootstrap
+ * @param data
+ * @param data_size
+ * @return error_num
+ */
+tetty_errornum ttLibC_TettyBootstrap_channels_writeAndFlush(
+		ttLibC_TettyBootstrap *bootstrap,
+		void *data,
+		size_t data_size);
+
+/**
+ * do write and flush at once
+ * write data for all connect socket.(do all task for each connection.)
+ * @param bootstrap
+ * @param data
+ * @param data_size
+ * @return error_num
+ */
+tetty_errornum ttLibC_TettyBootstrap_channelEach_writeAndFlush(
 		ttLibC_TettyBootstrap *bootstrap,
 		void *data,
 		size_t data_size);
@@ -308,6 +344,26 @@ ttLibC_TettyFuture *ttLibC_TettyContext_channel_writeFuture(
 		void *data,
 		size_t data_size);
 */
+
+/**
+ * flush written data to socket for target context.
+ * (however, do the same as ttLibC_TettyBootstrap_channels_flush for now.)
+ * @param ctx
+ * @return error_num
+ */
+tetty_errornum ttLibC_TettyContext_channel_flush(ttLibC_TettyContext *ctx);
+
+/**
+ * do write and flush at once for target context.
+ * @param ctx
+ * @param data
+ * @param data_sizes
+ * @return error_num
+ */
+tetty_errornum ttLibC_TettyContext_channel_writeAndFlush(
+		ttLibC_TettyContext *ctx,
+		void *data,
+		size_t data_size);
 
 /**
  * close data connection for target context.
@@ -394,7 +450,7 @@ tetty_errornum ttLibC_TettyContext_super_write(
  * @param ctx
  * @return errornum
  */
-//tetty_errornum ttLibC_TettyContext_super_flush(ttLibC_TettyContext *ctx);
+tetty_errornum ttLibC_TettyContext_super_flush(ttLibC_TettyContext *ctx);
 
 /**
  * call exceptionCaught to next channel_handler.

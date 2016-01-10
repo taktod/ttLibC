@@ -10,9 +10,11 @@
 
 #include "context.h"
 #include "bootstrap.h"
+#include "../tcpmisc.h"
 #include "../../allocator.h"
 #include "../../log.h"
 #include "../../util/hexUtil.h"
+#include "../../util/dynamicBufferUtil.h"
 #include <string.h>
 #include <unistd.h>
 
@@ -62,6 +64,28 @@ tetty_errornum ttLibC_TettyContext_channel_write(
 		ttLibC_TettyContext_super_write((ttLibC_TettyContext *)&ctx, data, data_size);
 		return ctx.error_no;
 	}
+}
+
+tetty_errornum ttLibC_TettyContext_channel_flush(ttLibC_TettyContext *ctx) {
+	/*
+	 * ttLibC_TettyContext_super_writeEach can expand the write target from ctx to bootstrap.
+	 * in this case, target for flush must be all connection of bootstrap.
+	 * and, flush for one context is not enough.
+	 */
+	tetty_errornum error_num = ttLibC_TettyBootstrap_channels_flush(ctx->bootstrap);
+	return error_num;
+}
+
+tetty_errornum ttLibC_TettyContext_channel_writeAndFlush(
+		ttLibC_TettyContext *ctx,
+		void *data,
+		size_t data_size) {
+	tetty_errornum error_num = ttLibC_TettyContext_channel_write(ctx, data, data_size);
+	if(error_num != 0) {
+		return error_num;
+	}
+	error_num = ttLibC_TettyContext_channel_flush(ctx);
+	return error_num;
 }
 
 /*
@@ -151,6 +175,14 @@ static bool TettyContext_callNextForEach(void *ptr, void *item) {
 			ctx->channel_handler = channel_handler;
 			ctx->inherit_super.channel_handler = channel_handler;
 			ctx->error_no = channel_handler->write((ttLibC_TettyContext *)ctx, ctx->data, ctx->data_size);
+			return false;
+		case Command_flush:
+			if(channel_handler->flush == NULL) {
+				return true;
+			}
+			ctx->channel_handler = channel_handler;
+			ctx->inherit_super.channel_handler = channel_handler;
+			ctx->error_no = channel_handler->flush((ttLibC_TettyContext *)ctx);
 			return false;
 		case Command_close:
 			if(channel_handler->close == NULL) {
@@ -307,6 +339,19 @@ tetty_errornum ttLibC_TettyContext_super_close(ttLibC_TettyContext *ctx) {
 	return ctx_->error_no;
 }
 
+/**
+ * put binary data on write cache buffer.
+ */
+static bool TettyContext_write_contextWriteBuffer(
+		ttLibC_TcpClientInfo_ *client_info,
+		void *data,
+		size_t data_size) {
+	if(client_info->write_buffer == NULL) {
+		client_info->write_buffer = ttLibC_DynamicBuffer_make();
+	}
+	return ttLibC_DynamicBuffer_append(client_info->write_buffer, data, data_size);
+}
+
 /*
  * callback for broadcast writing.
  * @param ptr  context
@@ -315,10 +360,7 @@ tetty_errornum ttLibC_TettyContext_super_close(ttLibC_TettyContext *ctx) {
  */
 static bool TettyContext_super_write_callback(void *ptr, void *item) {
 	ttLibC_TettyContext_ *ctx_ = (ttLibC_TettyContext_ *)ptr;
-	ttLibC_TcpClientInfo *client_info = (ttLibC_TcpClientInfo *)item;
-	void *data = ctx_->data;
-	size_t data_size = ctx_->data_size;
-	write(client_info->data_socket, ctx_->data, ctx_->data_size);
+	TettyContext_write_contextWriteBuffer((ttLibC_TcpClientInfo_ *)item, ctx_->data, ctx_->data_size);
 	// TODO do something in the case of error.
 	return true;
 }
@@ -339,11 +381,12 @@ tetty_errornum ttLibC_TettyContext_super_write(ttLibC_TettyContext *ctx, void *d
 		return 0;
 	}
 	if(bootstrap->inherit_super.error_number != 0) {
+		// if errored, do nothing.
 		return 0;
 	}
 	ctx_->data = data;
 	ctx_->data_size = data_size;
-	ttLibC_TettyChannelHandler *channel_handler = ctx_->channel_handler; // handlerを一旦保持しておいて、あとで復元する。
+	ttLibC_TettyChannelHandler *channel_handler = ctx_->channel_handler;
 	if(ttLibC_StlList_forEachReverse(bootstrap->pipeline, TettyContext_callNextForEach, ctx)) {
 		// if finish the iterator, we need to write.
 		if(ctx_->data != NULL) {
@@ -352,8 +395,8 @@ tetty_errornum ttLibC_TettyContext_super_write(ttLibC_TettyContext *ctx, void *d
 				ttLibC_StlList_forEach(bootstrap->client_info_list, TettyContext_super_write_callback, ctx_);
 			}
 			else {
-				// writing.
-				write(ctx_->client_info->data_socket, ctx_->data, ctx_->data_size);
+				// user must call flush later to send message.
+				TettyContext_write_contextWriteBuffer((ttLibC_TcpClientInfo_ *)ctx_->client_info, ctx_->data, ctx_->data_size);
 			}
 			ctx_->data = NULL;
 			ctx_->data_size = 0;
@@ -362,10 +405,25 @@ tetty_errornum ttLibC_TettyContext_super_write(ttLibC_TettyContext *ctx, void *d
 	ctx_->channel_handler = channel_handler;
 	return ctx_->error_no;
 }
+
 /*
+ * call flush to next channel_handler.
+ * @param ctx
+ * @return errornum
+ */
 tetty_errornum ttLibC_TettyContext_super_flush(ttLibC_TettyContext *ctx) {
-	return 0;
-}*/
+	ttLibC_TettyContext_ *ctx_ = (ttLibC_TettyContext_ *)ctx;
+	ctx_->command = Command_flush;
+	ttLibC_TettyBootstrap_ *bootstrap = (ttLibC_TettyBootstrap_ *)ctx_->bootstrap;
+	if(bootstrap == NULL) {
+		LOG_PRINT("failed to ref the bootstrap.");
+		return 0;
+	}
+	ttLibC_TettyChannelHandler *channel_handler = ctx_->channel_handler;
+	ttLibC_StlList_forEachReverse(bootstrap->pipeline, TettyContext_callNextForEach, ctx);
+	ctx_->channel_handler = channel_handler;
+	return ctx_->error_no;
+}
 
 /*
  * call exceptionCaught to next channel_handler.
@@ -552,6 +610,25 @@ tetty_errornum ttLibC_TettyContext_channel_write_(
 			NULL,
 			client_info);
 	ttLibC_TettyContext_super_write((ttLibC_TettyContext *)&ctx, data, data_size);
+	return ctx.error_no;
+}
+
+/*
+ * call for flush from bootstrap
+ * @param bootstrap
+ * @param client_info
+ * @return
+ */
+tetty_errornum ttLibC_TettyContext_flush_(
+		ttLibC_TettyBootstrap *bootstrap,
+		ttLibC_TcpClientInfo *client_info) {
+	ttLibC_TettyContext_ ctx;
+	TettyContext_updateContextInfo(
+			&ctx,
+			bootstrap,
+			NULL,
+			client_info);
+	ttLibC_TettyContext_super_flush((ttLibC_TettyContext *)&ctx);
 	return ctx.error_no;
 }
 

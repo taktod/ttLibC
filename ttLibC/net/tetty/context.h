@@ -28,7 +28,7 @@ typedef enum ttLibC_TettyContextCommand {
 	Command_disconnect,
 	Command_close,
 	Command_write,
-//	Command_flush
+	Command_flush
 } ttLibC_TettyContextCommand;
 
 /**
@@ -130,6 +130,16 @@ tetty_errornum ttLibC_TettyContext_channel_write_(
 		ttLibC_TcpClientInfo *client_info,
 		void *data,
 		size_t data_size);
+
+/**
+ * call for flush from bootstrap
+ * @param bootstrap
+ * @param client_info
+ * @return
+ */
+tetty_errornum ttLibC_TettyContext_flush_(
+		ttLibC_TettyBootstrap *bootstrap,
+		ttLibC_TcpClientInfo *client_info);
 
 /**
  * call for close from bootstrap
