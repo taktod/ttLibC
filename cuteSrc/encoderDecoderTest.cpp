@@ -302,6 +302,7 @@ bool openh264EncoderTestCallback(void *ptr, ttLibC_H264 *h264) {
 	if(h264->type == H264Type_unknown) {
 		return true;
 	}
+	LOG_PRINT("h264_type:%d", h264->type);
 	ttLibC_Openh264Decoder_decode(testData->decoder, h264, openh264DecoderTestCallback, testData);
 	return true;
 }
@@ -318,7 +319,9 @@ static void openh264Test() {
 	ttLibC_Openh264Decoder *decoder = ttLibC_Openh264Decoder_make();
 	ttLibC_Bgr    *bgr = NULL, *dbgr = NULL, *b;
 	ttLibC_Yuv420 *yuv = NULL, *y;
+	int count = 0;
 	while(true) {
+		count ++;
 		b = ttLibC_CvCapture_queryFrame(capture, bgr);
 		if(b == NULL) {
 			break;
@@ -335,6 +338,9 @@ static void openh264Test() {
 		testData.dec_win = dec_win;
 
 		testData.dbgr = dbgr;
+		if(count == 20) {
+			ttLibC_Openh264Encoder_forceNextKeyFrame(encoder);
+		}
 		ttLibC_Openh264Encoder_encode(encoder, yuv, openh264EncoderTestCallback, &testData);
 		dbgr = testData.dbgr;
 		uint8_t key = ttLibC_CvWindow_waitForKeyInput(10);

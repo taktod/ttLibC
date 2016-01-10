@@ -41,6 +41,7 @@ typedef struct ttLibC_Encoder_Openh264Encoder {
 	uint32_t max_bitrate;
 	uint32_t max_qval;
 	uint32_t min_qval;
+	int32_t  idr_interval;
 } ttLibC_Encoder_Openh264Encoder;
 
 typedef ttLibC_Encoder_Openh264Encoder ttLibC_Openh264Encoder;
@@ -108,6 +109,29 @@ bool ttLibC_Openh264Encoder_encode(
 		ttLibC_Yuv420 *yuv420,
 		ttLibC_Openh264EncodeFunc callback,
 		void *ptr);
+
+/**
+ * ref liopenh264 native encoder object.
+ * @param encoder openh264 encoder object.
+ * @return ISVCEncoder pointer.
+ */
+void *ttLibC_Openh264Encoder_refNativeEncoder(ttLibC_Openh264Encoder *encoder);
+
+/**
+ * set idr interval
+ * @param encoder
+ * @param interval -1 means no keyFrame.(first picture is only one keyFrame.)
+ * @return true / false
+ */
+bool ttLibC_Openh264Encoder_setIDRInterval(
+		ttLibC_Openh264Encoder *encoder,
+		int32_t interval);
+
+/**
+ * force next encode picture will be key frame(sliceIDR).
+ * @param
+ */
+bool ttLibC_Openh264Encoder_forceNextKeyFrame(ttLibC_Openh264Encoder *encoder);
 
 /**
  * close openh264 encoder

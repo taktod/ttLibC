@@ -22,7 +22,7 @@
 /*
  * h264 encoder detail definition.
  */
-typedef struct {
+typedef struct ttLibC_Encoder_Openh264Encoder_ {
 	/** inherit data from ttLibC_Openh264Encoder */
 	ttLibC_Openh264Encoder inherit_super;
 	/** svcencoder object (openh264) */
@@ -35,6 +35,8 @@ typedef struct {
 	ttLibC_H264 *configData;
 	/** h264 frame (only ref) */
 	ttLibC_H264 *h264;
+	/** for control idr */
+	uint32_t idr_interval_count;
 } ttLibC_Encoder_Openh264Encoder_;
 
 typedef ttLibC_Encoder_Openh264Encoder_ ttLibC_Openh264Encoder_;
@@ -140,8 +142,9 @@ static ttLibC_Openh264Encoder *Openh264Encoder_make(SEncParamExt *pParamExt) {
 	encoder->encoder->SetOption(ENCODER_OPTION_TRACE_LEVEL,  &iTraceLevel);
 	int videoFormat = videoFormatI420;
 	encoder->encoder->SetOption(ENCODER_OPTION_DATAFORMAT,   &videoFormat);
-	int iIDRPeriod  = 15;
-	encoder->encoder->SetOption(ENCODER_OPTION_IDR_INTERVAL, &iIDRPeriod);
+	ttLibC_Openh264Encoder_setIDRInterval((ttLibC_Openh264Encoder *)encoder, 15);
+//	int iIDRPeriod  = 15;
+//	encoder->encoder->SetOption(ENCODER_OPTION_IDR_INTERVAL, &iIDRPeriod);
 	bool bval       = false;
 	encoder->encoder->SetOption(ENCODER_OPTION_ENABLE_SPS_PPS_ID_ADDITION, &bval);
 
@@ -366,6 +369,17 @@ static bool Openh264Encoder_encode(
 		ERR_PRINT("failed to encode picture.");
 		return false;
 	}
+	if(encoder_->inherit_super.idr_interval <= 0) {
+		++ encoder_->idr_interval_count;
+		int iIDRPeriod = encoder_->idr_interval_count;
+		encoder_->encoder->SetOption(ENCODER_OPTION_IDR_INTERVAL, &iIDRPeriod);
+	}
+	else {
+		if(encoder_->inherit_super.idr_interval != encoder_->idr_interval_count) {
+			int iIDRPeriod = encoder_->inherit_super.idr_interval;
+			encoder_->encoder->SetOption(ENCODER_OPTION_IDR_INTERVAL, &iIDRPeriod);
+		}
+	}
 /*
 	switch(encoder_->info.eFrameType) {
 	case videoFrameTypeI:
@@ -497,6 +511,55 @@ bool ttLibC_Openh264Encoder_encode(
 		void *ptr) {
 	return Openh264Encoder_encode(
 			encoder, yuv420, callback, ptr);
+}
+
+/*
+ * ref liopenh264 native encoder object.
+ * @param encoder openh264 encoder object.
+ * @return ISVCEncoder pointer.
+ */
+void *ttLibC_Openh264Encoder_refNativeEncoder(ttLibC_Openh264Encoder *encoder) {
+	ttLibC_Openh264Encoder_ *encoder_ = (ttLibC_Openh264Encoder_ *)encoder;
+	return encoder_->encoder;
+}
+
+/*
+ * set idr interval
+ * @param encoder
+ * @param interval
+ * @return true / false
+ */
+bool ttLibC_Openh264Encoder_setIDRInterval(
+		ttLibC_Openh264Encoder *encoder,
+		int32_t interval) {
+	ttLibC_Openh264Encoder_ *encoder_ = (ttLibC_Openh264Encoder_ *)encoder;
+	int iIDRPeriod = interval;
+	if(interval == -1) {
+		iIDRPeriod = 1;
+		encoder_->idr_interval_count = 1;
+	}
+	else if(interval == 0 || interval < 1){
+		return false;
+	}
+	else {
+		iIDRPeriod = interval;
+		encoder_->idr_interval_count = interval;
+	}
+	encoder_->inherit_super.idr_interval = interval;
+	encoder_->encoder->SetOption(ENCODER_OPTION_IDR_INTERVAL, &iIDRPeriod);
+	return true;
+}
+
+/*
+ * force next encode picture will be key frame(sliceIDR).
+ * @param
+ */
+bool ttLibC_Openh264Encoder_forceNextKeyFrame(ttLibC_Openh264Encoder *encoder) {
+	ttLibC_Openh264Encoder_ *encoder_ = (ttLibC_Openh264Encoder_ *)encoder;
+	int iIDRPeriod  = 1;
+	encoder_->idr_interval_count = 1;
+	encoder_->encoder->SetOption(ENCODER_OPTION_IDR_INTERVAL, &iIDRPeriod);
+	return true;
 }
 
 /*
