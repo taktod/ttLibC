@@ -71,7 +71,7 @@ bool ttLibC_OpusEncoder_encode(
 
 /**
  * ref libopus native encoder object (defined in opus/opus.h).
- * @param decoder opus encoder object.
+ * @param encoder opus encoder object.
  * @return OpusEncoder pointer.
  */
 void *ttLibC_OpusEncoder_refNativeEncoder(ttLibC_OpusEncoder *encoder);
