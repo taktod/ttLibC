@@ -1,7 +1,7 @@
 /**
  * @file   tcpmisc.h
  * @brief  
- * @author todatakahiko
+ * @author taktod
  * @date   2016/01/08
  */
 

@@ -62,7 +62,6 @@ static void faadTest() {
 	NeAACDecConfigurationPtr config;
 
 	hDecoder = NeAACDecOpen();
-	// ここで処理する。
 	config = NeAACDecGetCurrentConfiguration(hDecoder);
 	config->defObjectType = MAIN;
 	config->outputFormat = FAAD_FMT_16BIT;

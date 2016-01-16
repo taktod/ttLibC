@@ -153,7 +153,7 @@ static void mpegtsTest() {
 	testData.writer = (ttLibC_ContainerWriter *)ttLibC_MpegtsWriter_make_ex(
 			frameTypes,
 			2,
-			15000); // 0.5秒ごとに、書き込むようにしておこうと思う。
+			15000); // write task with 0.5 sec each.
 	testData.fp_in = fopen("test.ts", "rb");
 	testData.fp_out = fopen("test_out.ts", "wb");
 	do {
@@ -183,7 +183,7 @@ static void mpegtsH264Mp3Test() {
 	testData.writer = (ttLibC_ContainerWriter *)ttLibC_MpegtsWriter_make_ex(
 			frameTypes,
 			2,
-			15000); // 0.5秒ごとに、書き込むようにしておこうと思う。
+			15000); // write task with 0.5 sec each.
 	testData.fp_in = fopen("test_h264_mp3.ts", "rb");
 	testData.fp_out = fopen("test_h264_mp3_out.ts", "wb");
 	do {
@@ -213,7 +213,7 @@ static void mpegtsVlcTest() {
 	testData.writer = (ttLibC_ContainerWriter *)ttLibC_MpegtsWriter_make_ex(
 			frameTypes,
 			2,
-			15000); // 0.5秒ごとに、書き込むようにしておこうと思う。
+			15000); // write task with 0.5 sec each.
 	testData.fp_in = fopen("test_vlc_h264_aac.ts", "rb");
 	testData.fp_out = fopen("test_vlc_h264_aac_out.ts", "wb");
 	do {

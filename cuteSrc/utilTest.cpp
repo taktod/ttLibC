@@ -228,7 +228,7 @@ static bool stlListTest_findItem2(void *ptr, void *item) {
 	ttLibC_StlList *list = (ttLibC_StlList *)ptr;
 	LOG_PRINT("fi2:%d", *((int *)item));
 	if(*((int *)item) == 5) {
-		LOG_PRINT("削除対象アイテムみつけた。:%d", *((int *)item));
+		LOG_PRINT("find delete target:%d", *((int *)item));
 		ttLibC_StlList_remove(list, item);
 	}
 	return true;
@@ -252,10 +252,9 @@ static void stlListTest() {
 }
 
 static bool findItem(void *ptr, void *item, size_t item_size) {
-	// intの配列であると仮定させてやらないとだめなわけか・・・面倒だね。
 	LOG_PRINT("value:%d", *((int *)item));
 	if(*(int *)item == 5) {
-		LOG_PRINT("削除すべきデータを見つけた。");
+		LOG_PRINT("find delete target.");
 		ttLibC_LinkedList *linkedList = (ttLibC_LinkedList *)ptr;
 		ttLibC_LinkedList_remove(linkedList, item);
 	}
@@ -263,7 +262,6 @@ static bool findItem(void *ptr, void *item, size_t item_size) {
 }
 
 static bool findItem2(void *ptr, void *item, size_t item_size) {
-	// intの配列であると仮定させてやらないとだめなわけか・・・面倒だね。
 	LOG_PRINT("value:%d", *((int *)item));
 	return true;
 }
@@ -351,34 +349,34 @@ static void dynamicBufferTest() {
 	uint8_t data[256];
 	size_t size = ttLibC_HexUtil_makeBuffer("010203040506", data, 256);
 	LOG_PRINT("size:%llu", size);
-	// データを追記する。
+	// add data.
 	ttLibC_DynamicBuffer_append(buffer, data, size);
-	// 中身確認
+	// check data.
 	LOG_DUMP(ttLibC_DynamicBuffer_refData(buffer),
 			ttLibC_DynamicBuffer_refSize(buffer), true);
 	LOG_PRINT("bs:%llu, ts:%llu", buffer->buffer_size, buffer->target_size);
-	// 5byte処理済みにする。
+	// set 5 byte is read.
 	ttLibC_DynamicBuffer_markAsRead(buffer, 5);
-	// データを追記する。
+	// add more data.
 	size = ttLibC_HexUtil_makeBuffer("AABBCCDD", data, 256);
 	ttLibC_DynamicBuffer_append(buffer, data, size);
 	LOG_PRINT("bs:%llu, ts:%llu", buffer->buffer_size, buffer->target_size);
-	// 中身確認
+	// check data.
 	LOG_DUMP(ttLibC_DynamicBuffer_refData(buffer),
 			ttLibC_DynamicBuffer_refSize(buffer), true);
-	// 読み込み済みデータをクリアする。
+	// clear read data.
 	ttLibC_DynamicBuffer_reset(buffer);
-	// さらに中身確認
+	// check data again.
 	LOG_DUMP(ttLibC_DynamicBuffer_refData(buffer),
 			ttLibC_DynamicBuffer_refSize(buffer), true);
-	// 4byte処理済みにする。
+	/// set 4 byte is read.
 	ttLibC_DynamicBuffer_markAsRead(buffer, 4);
-	// さらに中身確認
+	// check data.
 	LOG_DUMP(ttLibC_DynamicBuffer_refData(buffer),
 			ttLibC_DynamicBuffer_refSize(buffer), true);
-	// 読み込み済みデータをクリアする。
+	// clear
 	ttLibC_DynamicBuffer_clear(buffer);
-	// さらに中身確認
+	// check data.
 	LOG_DUMP(ttLibC_DynamicBuffer_refData(buffer),
 			ttLibC_DynamicBuffer_refSize(buffer), true);
 	size = ttLibC_HexUtil_makeBuffer("EEFF", data, 256);
