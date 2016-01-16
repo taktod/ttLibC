@@ -40,7 +40,7 @@ typedef struct ttLibC_Net_TettyContext_ {
 	ttLibC_TettyBootstrap *bootstrap;
 
 	/** target client_info */
-	ttLibC_TcpClientInfo *client_info;
+	ttLibC_SocketInfo *socket_info;
 	/** current channel_handler object */
 	ttLibC_TettyChannelHandler *channel_handler;
 
@@ -64,7 +64,7 @@ typedef ttLibC_Net_TettyContext_ ttLibC_TettyContext_;
  */
 tetty_errornum ttLibC_TettyContext_channelActive_(
 		ttLibC_TettyBootstrap *bootstrap,
-		ttLibC_TcpClientInfo *client_info);
+		ttLibC_SocketInfo *socket_info);
 
 /**
  * call for channelInactive from bootstrap
@@ -74,7 +74,7 @@ tetty_errornum ttLibC_TettyContext_channelActive_(
  */
 tetty_errornum ttLibC_TettyContext_channelInactive_(
 		ttLibC_TettyBootstrap *bootstrap,
-		ttLibC_TcpClientInfo *client_info);
+		ttLibC_SocketInfo *socket_info);
 
 /**
  * call for channelRead from bootstrap
@@ -86,7 +86,7 @@ tetty_errornum ttLibC_TettyContext_channelInactive_(
  */
 tetty_errornum ttLibC_TettyContext_channelRead_(
 		ttLibC_TettyBootstrap *bootstrap,
-		ttLibC_TcpClientInfo *client_info,
+		ttLibC_SocketInfo *socket_info,
 		void *data,
 		size_t data_size);
 
@@ -105,7 +105,7 @@ tetty_errornum ttLibC_TettyContext_bind_(ttLibC_TettyBootstrap *bootstrap);
  */
 tetty_errornum ttLibC_TettyContext_connect_(
 		ttLibC_TettyBootstrap *bootstrap,
-		ttLibC_TcpClientInfo *client_info);
+		ttLibC_SocketInfo *socket_info);
 
 /**
  * call for disconnect from bootstrap
@@ -115,7 +115,7 @@ tetty_errornum ttLibC_TettyContext_connect_(
  */
 tetty_errornum ttLibC_TettyContext_disconnect_(
 		ttLibC_TettyBootstrap *bootstrap,
-		ttLibC_TcpClientInfo *client_info);
+		ttLibC_SocketInfo *socket_info);
 
 /**
  * call for write from bootstrap
@@ -127,7 +127,7 @@ tetty_errornum ttLibC_TettyContext_disconnect_(
  */
 tetty_errornum ttLibC_TettyContext_channel_write_(
 		ttLibC_TettyBootstrap *bootstrap,
-		ttLibC_TcpClientInfo *client_info,
+		ttLibC_SocketInfo *socket_info,
 		void *data,
 		size_t data_size);
 
@@ -139,7 +139,7 @@ tetty_errornum ttLibC_TettyContext_channel_write_(
  */
 tetty_errornum ttLibC_TettyContext_flush_(
 		ttLibC_TettyBootstrap *bootstrap,
-		ttLibC_TcpClientInfo *client_info);
+		ttLibC_SocketInfo *socket_info);
 
 /**
  * call for close from bootstrap
@@ -149,6 +149,6 @@ tetty_errornum ttLibC_TettyContext_flush_(
  */
 tetty_errornum ttLibC_TettyContext_close_(
 		ttLibC_TettyBootstrap *bootstrap,
-		ttLibC_TcpClientInfo *client_info);
+		ttLibC_SocketInfo *socket_info);
 
 #endif /* TTLIBC_NET_TETTY_CONTEXT_H_ */

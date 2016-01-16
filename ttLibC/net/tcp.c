@@ -28,10 +28,10 @@ ttLibC_TcpServerInfo *ttLibC_TcpServer_make(
 		return NULL;
 	}
 	memset(server_info, 0, sizeof(ttLibC_TcpServerInfo));
-	server_info->wait_socket = -1;
-	server_info->server_addr.sin_family = AF_INET;
-	server_info->server_addr.sin_addr.s_addr = htonl(ip);
-	server_info->server_addr.sin_port = htons(port);
+	server_info->inherit_super.socket = -1;
+	server_info->inherit_super.addr.sin_family = AF_INET;
+	server_info->inherit_super.addr.sin_addr.s_addr = htonl(ip);
+	server_info->inherit_super.addr.sin_port = htons(port);
 	server_info->use_reuse_addr  = false;
 	server_info->use_keep_alive  = false;
 	server_info->use_tcp_nodelay = false;
@@ -42,8 +42,8 @@ bool ttLibC_TcpServer_open(ttLibC_TcpServerInfo *server_info) {
 	if(server_info == NULL) {
 		return false;
 	}
-	server_info->wait_socket = socket(PF_INET, SOCK_STREAM, 0);
-	if(server_info->wait_socket == -1) {
+	server_info->inherit_super.socket = socket(PF_INET, SOCK_STREAM, 0);
+	if(server_info->inherit_super.socket == -1) {
 		ERR_PRINT("failed to open socket.");
 		return false;
 	}
@@ -51,22 +51,22 @@ bool ttLibC_TcpServer_open(ttLibC_TcpServerInfo *server_info) {
 	int optval = 1;
 	// TODO need to check return value.
 	if(server_info->use_keep_alive) {
-		setsockopt(server_info->wait_socket, SOL_SOCKET, SO_KEEPALIVE, &optval, sizeof(optval));
+		setsockopt(server_info->inherit_super.socket, SOL_SOCKET, SO_KEEPALIVE, &optval, sizeof(optval));
 	}
 	if(server_info->use_reuse_addr) {
-		setsockopt(server_info->wait_socket, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
+		setsockopt(server_info->inherit_super.socket, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
 	}
 	if(server_info->use_tcp_nodelay) {
-		setsockopt(server_info->wait_socket, IPPROTO_TCP, TCP_NODELAY, &optval, sizeof(optval));
+		setsockopt(server_info->inherit_super.socket, IPPROTO_TCP, TCP_NODELAY, &optval, sizeof(optval));
 	}
 	if(bind(
-			server_info->wait_socket,
-			(struct sockaddr *)&server_info->server_addr,
-			sizeof(server_info->server_addr)) == -1) {
+			server_info->inherit_super.socket,
+			(struct sockaddr *)&server_info->inherit_super.addr,
+			sizeof(server_info->inherit_super.addr)) == -1) {
 		ERR_PRINT("failed to bind.");
 		return false;
 	}
-	if(listen(server_info->wait_socket, 5) == -1) {
+	if(listen(server_info->inherit_super.socket, 5) == -1) {
 		ERR_PRINT("failed to listen");
 		return false;
 	}
@@ -83,12 +83,12 @@ ttLibC_TcpClientInfo *ttLibC_TcpServer_wait(
 	memset(client_info, 0, sizeof(ttLibC_TcpClientInfo_));
 	client_info->write_buffer = NULL;
 	while(true) {
-		socklen_t client_addr_len = sizeof(client_info->inherit_super.data_addr);
-		client_info->inherit_super.data_socket = accept(
-				server_info->wait_socket,
-				(struct sockaddr *)&client_info->inherit_super.data_addr,
+		socklen_t client_addr_len = sizeof(client_info->inherit_super.addr);
+		client_info->inherit_super.socket = accept(
+				server_info->inherit_super.socket,
+				(struct sockaddr *)&client_info->inherit_super.addr,
 				&client_addr_len);
-		if(client_info->inherit_super.data_socket != -1) {
+		if(client_info->inherit_super.socket != -1) {
 			break;
 		}
 		if(errno == EINTR) {
@@ -106,9 +106,9 @@ void ttLibC_TcpServer_close(ttLibC_TcpServerInfo **server_info) {
 	if(target == NULL) {
 		return;
 	}
-	if(target->wait_socket != -1) {
-		close(target->wait_socket);
-		target->wait_socket = -1;
+	if(target->inherit_super.socket != -1) {
+		close(target->inherit_super.socket);
+		target->inherit_super.socket = -1;
 	}
 	ttLibC_free(target);
 	*server_info = NULL;
@@ -119,9 +119,9 @@ void ttLibC_TcpClient_close(ttLibC_TcpClientInfo **client_info) {
 	if(target == NULL) {
 		return;
 	}
-	if(target->inherit_super.data_socket != -1) {
-		close(target->inherit_super.data_socket);
-		target->inherit_super.data_socket = -1;
+	if(target->inherit_super.socket != -1) {
+		close(target->inherit_super.socket);
+		target->inherit_super.socket = -1;
 	}
 	ttLibC_DynamicBuffer_close(&target->write_buffer);
 	ttLibC_free(target);

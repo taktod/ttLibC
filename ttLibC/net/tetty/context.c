@@ -10,6 +10,7 @@
 
 #include "context.h"
 #include "bootstrap.h"
+#include "../udp.h"
 #include "../tcpmisc.h"
 #include "../../allocator.h"
 #include "../../log.h"
@@ -29,13 +30,13 @@ static void TettyContext_updateContextInfo(
 		ttLibC_TettyContext_ *ctx,
 		ttLibC_TettyBootstrap *bootstrap,
 		ttLibC_TettyChannelHandler *channel_handler,
-		ttLibC_TcpClientInfo *client_info) {
+		ttLibC_SocketInfo *socket_info) {
 	ctx->bootstrap = bootstrap;
 	ctx->inherit_super.bootstrap = bootstrap;
 	ctx->channel_handler = channel_handler;
 	ctx->inherit_super.channel_handler = channel_handler;
-	ctx->client_info = client_info;
-	ctx->inherit_super.client_info = client_info;
+	ctx->socket_info = socket_info;
+	ctx->inherit_super.socket_info = socket_info;
 }
 
 /*
@@ -50,7 +51,7 @@ tetty_errornum ttLibC_TettyContext_channel_write(
 		void *data,
 		size_t data_size) {
 	ttLibC_TettyContext_ *ctx_ = (ttLibC_TettyContext_ *)ctx;
-	if(ctx_->client_info == NULL) {
+	if(ctx_->socket_info == NULL) {
 		ERR_PRINT("only support invidial channel. to call broadcast, use ttLibC_TettyBootstrap_channels_write");
 		return -1;
 	}
@@ -60,7 +61,7 @@ tetty_errornum ttLibC_TettyContext_channel_write(
 				&ctx,
 				ctx_->bootstrap,
 				NULL,
-				ctx_->client_info);
+				ctx_->socket_info);
 		ttLibC_TettyContext_super_write((ttLibC_TettyContext *)&ctx, data, data_size);
 		return ctx.error_no;
 	}
@@ -96,15 +97,15 @@ tetty_errornum ttLibC_TettyContext_channel_writeAndFlush(
 tetty_errornum ttLibC_TettyContext_close(
 		ttLibC_TettyContext *ctx) {
 	ttLibC_TettyContext_ *ctx_ = (ttLibC_TettyContext_ *)ctx;
-	if(ctx_->client_info == NULL) {
+	if(ctx_->socket_info == NULL) {
 		ERR_PRINT("target context is not invidual channel.");
 		return 0;
 	}
 	// do close.
-	ttLibC_TettyBootstrap_closeClient_(ctx_->bootstrap, ctx_->client_info);
+	ttLibC_TettyBootstrap_closeClient_(ctx_->bootstrap, ctx_->socket_info);
+	// remove from stlList. (only for tcp.)
  	ttLibC_TettyBootstrap_ *bootstrap = (ttLibC_TettyBootstrap_ *)ctx_->bootstrap;
-	// remove from stlList.
-	ttLibC_StlList_remove(bootstrap->client_info_list, ctx_->client_info);
+	ttLibC_StlList_remove(bootstrap->tcp_client_info_list, ctx_->socket_info);
 	return 0;
 }
 
@@ -390,13 +391,23 @@ tetty_errornum ttLibC_TettyContext_super_write(ttLibC_TettyContext *ctx, void *d
 	if(ttLibC_StlList_forEachReverse(bootstrap->pipeline, TettyContext_callNextForEach, ctx)) {
 		// if finish the iterator, we need to write.
 		if(ctx_->data != NULL) {
-			if(ctx_->client_info == NULL) {
-				// broadcast writing.
-				ttLibC_StlList_forEach(bootstrap->client_info_list, TettyContext_super_write_callback, ctx_);
-			}
-			else {
-				// user must call flush later to send message.
-				TettyContext_write_contextWriteBuffer((ttLibC_TcpClientInfo_ *)ctx_->client_info, ctx_->data, ctx_->data_size);
+			switch(bootstrap->channel_type) {
+			default:
+			case ChannelType_Tcp:
+				if(ctx_->socket_info == NULL) {
+					// broadcast writing.
+					ttLibC_StlList_forEach(bootstrap->tcp_client_info_list, TettyContext_super_write_callback, ctx_);
+				}
+				else {
+					// user must call flush later to send message.
+					TettyContext_write_contextWriteBuffer((ttLibC_TcpClientInfo_ *)ctx_->socket_info, ctx_->data, ctx_->data_size);
+				}
+				break;
+			case ChannelType_Udp:
+				{
+					ttLibC_UdpSocket_write((ttLibC_UdpSocketInfo *)bootstrap->socket_info, (ttLibC_DatagramPacket *)data);
+				}
+				break;
 			}
 			ctx_->data = NULL;
 			ctx_->data_size = 0;
@@ -450,7 +461,7 @@ static bool TettyContext_super_writeEach_callback(void *ptr, void *item) {
 			&ctx,
 			ctx_->bootstrap,
 			ctx_->channel_handler,
-			ctx_->client_info);
+			client_info);
 	ttLibC_TettyContext_super_write((ttLibC_TettyContext *)&ctx, data, data_size);
 	return true;
 }
@@ -471,7 +482,7 @@ tetty_errornum ttLibC_TettyContext_super_writeEach(ttLibC_TettyContext *ctx, voi
 	}
 	ctx_->data = data;
 	ctx_->data_size = data_size;
-	ttLibC_StlList_forEach(bootstrap->client_info_list, TettyContext_super_writeEach_callback, ctx_);
+	ttLibC_StlList_forEach(bootstrap->tcp_client_info_list, TettyContext_super_writeEach_callback, ctx_);
 	return 0;
 }
 
@@ -483,13 +494,13 @@ tetty_errornum ttLibC_TettyContext_super_writeEach(ttLibC_TettyContext *ctx, voi
  */
 tetty_errornum ttLibC_TettyContext_channelActive_(
 		ttLibC_TettyBootstrap *bootstrap,
-		ttLibC_TcpClientInfo *client_info) {
+		ttLibC_SocketInfo *socket_info) {
 	ttLibC_TettyContext_ ctx;
 	TettyContext_updateContextInfo(
 			&ctx,
 			bootstrap,
 			NULL,
-			client_info);
+			socket_info);
 	ttLibC_TettyContext_super_channelActive((ttLibC_TettyContext *)&ctx);
 	return ctx.error_no;
 }
@@ -502,13 +513,13 @@ tetty_errornum ttLibC_TettyContext_channelActive_(
  */
 tetty_errornum ttLibC_TettyContext_channelInactive_(
 		ttLibC_TettyBootstrap *bootstrap,
-		ttLibC_TcpClientInfo *client_info) {
+		ttLibC_SocketInfo *socket_info) {
 	ttLibC_TettyContext_ ctx;
 	TettyContext_updateContextInfo(
 			&ctx,
 			bootstrap,
 			NULL,
-			client_info);
+			socket_info);
 	ttLibC_TettyContext_super_channelInactive((ttLibC_TettyContext *)&ctx);
 	return ctx.error_no;
 }
@@ -523,7 +534,7 @@ tetty_errornum ttLibC_TettyContext_channelInactive_(
  */
 tetty_errornum ttLibC_TettyContext_channelRead_(
 		ttLibC_TettyBootstrap *bootstrap,
-		ttLibC_TcpClientInfo *client_info,
+		ttLibC_SocketInfo *socket_info,
 		void *data,
 		size_t data_size) {
 	ttLibC_TettyContext_ ctx;
@@ -531,7 +542,7 @@ tetty_errornum ttLibC_TettyContext_channelRead_(
 			&ctx,
 			bootstrap,
 			NULL,
-			client_info);
+			socket_info);
 	ttLibC_TettyContext_super_channelRead((ttLibC_TettyContext *)&ctx, data, data_size);
 	return ctx.error_no;
 }
@@ -560,13 +571,13 @@ tetty_errornum ttLibC_TettyContext_bind_(ttLibC_TettyBootstrap *bootstrap) {
  */
 tetty_errornum ttLibC_TettyContext_connect_(
 		ttLibC_TettyBootstrap *bootstrap,
-		ttLibC_TcpClientInfo *client_info) {
+		ttLibC_SocketInfo *socket_info) {
 	ttLibC_TettyContext_ ctx;
 	TettyContext_updateContextInfo(
 			&ctx,
 			bootstrap,
 			NULL,
-			client_info);
+			socket_info);
 	ttLibC_TettyContext_super_connect((ttLibC_TettyContext *)&ctx);
 	return ctx.error_no;
 }
@@ -579,13 +590,13 @@ tetty_errornum ttLibC_TettyContext_connect_(
  */
 tetty_errornum ttLibC_TettyContext_disconnect_(
 		ttLibC_TettyBootstrap *bootstrap,
-		ttLibC_TcpClientInfo *client_info) {
+		ttLibC_SocketInfo *socket_info) {
 	ttLibC_TettyContext_ ctx;
 	TettyContext_updateContextInfo(
 			&ctx,
 			bootstrap,
 			NULL,
-			client_info);
+			socket_info);
 	ttLibC_TettyContext_super_disconnect((ttLibC_TettyContext *)&ctx);
 	return ctx.error_no;
 }
@@ -600,7 +611,7 @@ tetty_errornum ttLibC_TettyContext_disconnect_(
  */
 tetty_errornum ttLibC_TettyContext_channel_write_(
 		ttLibC_TettyBootstrap *bootstrap,
-		ttLibC_TcpClientInfo *client_info,
+		ttLibC_SocketInfo *socket_info,
 		void *data,
 		size_t data_size) {
 	ttLibC_TettyContext_ ctx;
@@ -608,7 +619,7 @@ tetty_errornum ttLibC_TettyContext_channel_write_(
 			&ctx,
 			bootstrap,
 			NULL,
-			client_info);
+			socket_info);
 	ttLibC_TettyContext_super_write((ttLibC_TettyContext *)&ctx, data, data_size);
 	return ctx.error_no;
 }
@@ -621,13 +632,13 @@ tetty_errornum ttLibC_TettyContext_channel_write_(
  */
 tetty_errornum ttLibC_TettyContext_flush_(
 		ttLibC_TettyBootstrap *bootstrap,
-		ttLibC_TcpClientInfo *client_info) {
+		ttLibC_SocketInfo *socket_info) {
 	ttLibC_TettyContext_ ctx;
 	TettyContext_updateContextInfo(
 			&ctx,
 			bootstrap,
 			NULL,
-			client_info);
+			socket_info);
 	ttLibC_TettyContext_super_flush((ttLibC_TettyContext *)&ctx);
 	return ctx.error_no;
 }
@@ -640,13 +651,13 @@ tetty_errornum ttLibC_TettyContext_flush_(
  */
 tetty_errornum ttLibC_TettyContext_close_(
 		ttLibC_TettyBootstrap *bootstrap,
-		ttLibC_TcpClientInfo *client_info) {
+		ttLibC_SocketInfo *socket_info) {
 	ttLibC_TettyContext_ ctx;
 	TettyContext_updateContextInfo(
 			&ctx,
 			bootstrap,
 			NULL,
-			client_info);
+			socket_info);
 	ttLibC_TettyContext_super_close((ttLibC_TettyContext *)&ctx);
 	return ctx.error_no;
 }

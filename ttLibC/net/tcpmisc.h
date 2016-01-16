@@ -1,6 +1,9 @@
 /**
  * @file   tcpmisc.h
- * @brief  
+ * @brief  misc for tcp.
+ *
+ * this code is under 3-Cause BSD license.
+ *
  * @author taktod
  * @date   2016/01/08
  */

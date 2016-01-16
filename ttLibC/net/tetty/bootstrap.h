@@ -36,10 +36,10 @@ typedef struct ttLibC_Net_TettyBootstrap_ {
 	/** channel handler pipeline. */
 	ttLibC_StlList *pipeline;
 
-	/** server socket.(wait socket) */
-	ttLibC_TcpServerInfo *server_info;
-	/** client socket.(data socket) */
-	ttLibC_StlList *client_info_list;
+	/** bootstrap socket(waitsocket for server or data socket for udp.) */
+	ttLibC_SocketInfo *socket_info;
+	/** client socket list(for tcp only). */
+	ttLibC_StlList *tcp_client_info_list;
 
 	/** fdset object for select. */
 	fd_set fdset;
@@ -59,7 +59,7 @@ typedef ttLibC_Net_TettyBootstrap_ ttLibC_TettyBootstrap_;
  */
 bool ttLibC_TettyBootstrap_closeClient_(
 		ttLibC_TettyBootstrap *bootstrap,
-		ttLibC_TcpClientInfo *client_info);
+		ttLibC_SocketInfo *socket_info);
 
 #ifdef __cplusplus
 } /* extern "C" */

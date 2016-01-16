@@ -18,7 +18,7 @@ extern "C" {
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include "tcp.h"
+#include "net.h"
 
 /**
  * def for return val.
@@ -52,7 +52,7 @@ typedef struct ttLibC_Net_TettyBootstrap {
 	/** type of channel */
 	ttLibC_Tetty_ChannelType channel_type;
 	/** ref of server_info */
-	ttLibC_TcpServerInfo *server_info;
+	ttLibC_SocketInfo *socket_info;
 } ttLibC_Net_TettyBootstrap;
 
 typedef ttLibC_Net_TettyBootstrap ttLibC_TettyBootstrap;
@@ -70,7 +70,7 @@ typedef struct ttLibC_Net_TettyContext {
 	/** ref for working channel handler. */
 	ttLibC_TettyChannelHandler *channel_handler;
 	/** ref of target client_info */
-	ttLibC_TcpClientInfo *client_info;
+	ttLibC_SocketInfo *socket_info;
 } ttLibC_Net_TettyContext;
 
 typedef ttLibC_Net_TettyContext ttLibC_TettyContext;
@@ -111,7 +111,7 @@ typedef tetty_errornum (* ttLibC_Tetty_DataFunc)(ttLibC_TettyContext *ctx, void 
  * @param ctx      working context.
  * @param error_no error number for the exception.
  */
-typedef void (* ttLibC_Tetty_ExceptionFunc)(ttLibC_TettyContext *ctx, int32_t error_no);
+typedef void (* ttLibC_Tetty_ExceptionFunc)(ttLibC_TettyContext *ctx, tetty_errornum error_no);
 
 /**
  * definition of channel_handler.

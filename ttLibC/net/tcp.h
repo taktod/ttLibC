@@ -1,6 +1,6 @@
 /**
  * @file   tcp.h
- * @brief  base for tcp server.
+ * @brief  base for tcp.
  *
  * this code is under 3-Cause BSD License.
  *
@@ -17,44 +17,62 @@
 extern "C" {
 #endif
 
-#include <sys/socket.h>
-#include <netinet/in.h>
+#include "net.h"
 #include <stdio.h>
-#include <stdint.h>
 #include <stdbool.h>
 
+/**
+ * definition for server information.
+ */
 typedef struct ttLibC_TcpServerInfo {
-	int wait_socket;
-	struct sockaddr_in server_addr;
+	ttLibC_SocketInfo inherit_super;
 	bool use_reuse_addr;
 	bool use_keep_alive;
 	bool use_tcp_nodelay;
-	int error_num;
-	void *ptr;
 } ttLibC_Net_TcpServerInfo;
 
 typedef ttLibC_Net_TcpServerInfo ttLibC_TcpServerInfo;
 
-typedef struct ttLibC_TcpClientInfo {
-	int data_socket;
-	struct sockaddr_in data_addr;
-	int error_num;
-	void *ptr;
-} ttLibC_Net_TcpClientInfo;
+/**
+ * definition of tcp client information.
+ */
+typedef ttLibC_SocketInfo ttLibC_TcpClientInfo;
 
-typedef ttLibC_Net_TcpClientInfo ttLibC_TcpClientInfo;
-
+/**
+ * make tcp wait socket
+ * @param ip
+ * @param port
+ * @return ttLibC_TcpServerInfo object
+ */
 ttLibC_TcpServerInfo *ttLibC_TcpServer_make(
 		uint64_t ip,
 		uint16_t port);
 
+/**
+ * bind tcp socket.
+ * @param server_info
+ * @return true / false
+ */
 bool ttLibC_TcpServer_open(ttLibC_TcpServerInfo *server_info);
 
+/**
+ * accept tcp connection from client.
+ * @param server_info
+ * @return ttLibC_TcpClientInfo object.
+ */
 ttLibC_TcpClientInfo *ttLibC_TcpServer_wait(
 		ttLibC_TcpServerInfo *server_info);
 
+/**
+ * close server socket
+ * @param server_info
+ */
 void ttLibC_TcpServer_close(ttLibC_TcpServerInfo **server_info);
 
+/**
+ * close client socket
+ * @param client_info
+ */
 void ttLibC_TcpClient_close(ttLibC_TcpClientInfo **client_info);
 
 #ifdef __cplusplus

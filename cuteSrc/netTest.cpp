@@ -25,10 +25,126 @@
 #endif
 
 #include <ttLibC/net/tcp.h>
+#include <ttLibC/net/udp.h>
 
 #ifdef __ENABLE_FILE__
 #	include <ttLibC/util/forkUtil.h>
 #endif
+
+static tetty_errornum udpTettyServerTest_channelActive(ttLibC_TettyContext *ctx) {
+	LOG_PRINT("channelActive");
+	return 0;
+}
+
+static tetty_errornum udpTettyServerTest_channelInactive(ttLibC_TettyContext *ctx) {
+	LOG_PRINT("channelInactive");
+	return 0;
+}
+
+static tetty_errornum udpTettyServerTest_channelRead(ttLibC_TettyContext *ctx, void *data, size_t data_size) {
+	LOG_PRINT("channelRead");
+	ttLibC_DatagramPacket *datagramPacket = (ttLibC_DatagramPacket *)data;
+	LOG_PRINT("address:%x port:%x", ctx->socket_info->addr.sin_addr.s_addr, ctx->socket_info->addr.sin_port);
+	return 0;
+}
+
+static tetty_errornum udpTettyServerTest_bind(ttLibC_TettyContext *ctx) {
+	LOG_PRINT("bind");
+	return 0;
+}
+
+static tetty_errornum udpTettyServerTest_connect(ttLibC_TettyContext *ctx) {
+	LOG_PRINT("connect");
+	return 0;
+}
+
+static tetty_errornum udpTettyServerTest_disconnect(ttLibC_TettyContext *ctx) {
+	LOG_PRINT("disconnect");
+	return 0;
+}
+
+static tetty_errornum udpTettyServerTest_close(ttLibC_TettyContext *ctx) {
+	LOG_PRINT("close");
+	return 0;
+}
+
+static tetty_errornum udpTettyServerTest_write(ttLibC_TettyContext *ctx, void *data, size_t data_size) {
+	LOG_PRINT("write");
+	return 0;
+}
+
+static tetty_errornum udpTettyServerTest_flush(ttLibC_TettyContext *ctx) {
+	LOG_PRINT("flush");
+	return 0;
+}
+
+static void udpTettyServerTest_exceptionCaught(ttLibC_TettyContext *ctx, tetty_errornum error_num) {
+	LOG_PRINT("exception Caught");
+	return;
+}
+
+static void udpTettyServerTest() {
+	LOG_PRINT("udpTettyServerTest");
+	// write in tetty format for udp server.
+	ttLibC_TettyBootstrap *bootstrap = ttLibC_TettyBootstrap_make();
+	ttLibC_TettyBootstrap_channel(bootstrap, ChannelType_Udp); // udp
+	// pipeline
+	ttLibC_TettyChannelHandler channelHandler;
+	memset(&channelHandler, 0, sizeof(ttLibC_TettyChannelHandler));
+	channelHandler.channelActive = udpTettyServerTest_channelActive;
+	channelHandler.channelInactive = udpTettyServerTest_channelInactive;
+	channelHandler.channelRead = udpTettyServerTest_channelRead;
+	channelHandler.bind = udpTettyServerTest_bind;
+	channelHandler.connect = udpTettyServerTest_connect;
+	channelHandler.disconnect = udpTettyServerTest_disconnect;
+	channelHandler.close = udpTettyServerTest_close;
+	channelHandler.write = udpTettyServerTest_write;
+	channelHandler.flush = udpTettyServerTest_flush;
+	ttLibC_TettyBootstrap_pipeline_addLast(bootstrap, &channelHandler);
+	// bind
+	ttLibC_TettyBootstrap_bind(bootstrap, 12345);
+	for(int i = 0;i < 10;i ++) {
+		ttLibC_TettyBootstrap_update(bootstrap, 1200000);
+	}
+	ttLibC_TettyBootstrap_close(&bootstrap);
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
+
+static void udpClientTest() {
+	LOG_PRINT("udpClientTest");
+	ttLibC_UdpSocketInfo *socket_info = ttLibC_UdpSocket_make(6543);
+	ttLibC_UdpSocket_open(socket_info);
+	uint8_t buf[6] = {0, 1, 2, 3, 4, 5};
+	LOG_PRINT("try to make packet.");
+	ttLibC_DatagramPacket *packet = ttLibC_DatagramPacket_makeWithTarget(buf, 6, "127.0.0.1", 12345);
+	LOG_PRINT("write data to packet.");
+	ttLibC_UdpSocket_write(socket_info, packet);
+	ttLibC_DatagramPacket_close(&packet);
+	ttLibC_UdpSocket_close(&socket_info);
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
+
+static void udpServerTest() {
+	LOG_PRINT("udpServerTest");
+	ttLibC_UdpSocketInfo *socket_info = ttLibC_UdpSocket_make(12345);
+	if(socket_info == NULL) {
+		ERR_PRINT("no socket");
+		return;
+	}
+	if(!ttLibC_UdpSocket_open(socket_info)) {
+		ERR_PRINT("failed to open socket.");
+		return;
+	}
+	uint8_t buf[256];
+	ttLibC_DatagramPacket *packet = ttLibC_DatagramPacket_make(
+			buf, 256);
+	ssize_t sz = ttLibC_UdpSocket_read(socket_info, packet);
+	LOG_PRINT("read_size:%ld", sz);
+	LOG_DUMP(buf, sz, true);
+	ttLibC_DatagramPacket_close(&packet);
+	ttLibC_UdpSocket_close(&socket_info);
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
 
 #ifdef __ENABLE_FILE__
 tetty_errornum tettyServerTest_channelRead(ttLibC_TettyContext *ctx, void *data, size_t data_size) {
@@ -284,6 +400,9 @@ static void echoServerTest() {
  */
 cute::suite netTests(cute::suite s) {
 	s.clear();
+	s.push_back(CUTE(udpTettyServerTest));
+	s.push_back(CUTE(udpClientTest));
+	s.push_back(CUTE(udpServerTest));
 	s.push_back(CUTE(tettyClientTest));
 	s.push_back(CUTE(tettyServerTest));
 	s.push_back(CUTE(tcpServerTest));

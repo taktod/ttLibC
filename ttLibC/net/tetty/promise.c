@@ -79,16 +79,19 @@ void ttLibC_TettyPromise_awaitFor(ttLibC_TettyPromise *promise, uint32_t timeout
 	if(promise == NULL) {
 		return;
 	}
+	// get start time.
 	struct timeval start_time, end_time;
 	gettimeofday(&start_time, NULL);
 
 	while(!promise_->is_done) {
 		ttLibC_TettyBootstrap_update(promise_->bootstrap, 100000);
+		// get current time.
 		gettimeofday(&end_time, NULL);
 		time_t diffsec = difftime(end_time.tv_sec, start_time.tv_sec);
 		suseconds_t diffsub = end_time.tv_usec - start_time.tv_usec;
 		double milisec = diffsec * 1e3 + diffsub * 1e-3;
 		if(milisec > timeout_milisec) {
+			// timeout done.
 			break;
 		}
 		if(promise_->bootstrap->error_number != 0) {
