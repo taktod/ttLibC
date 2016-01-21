@@ -193,6 +193,14 @@ static bool TettyContext_callNextForEach(void *ptr, void *item) {
 			ctx->inherit_super.channel_handler = channel_handler;
 			ctx->error_no = channel_handler->close((ttLibC_TettyContext *)ctx);
 			return false;
+		case Command_userEventTriggered:
+			if(channel_handler->userEventTriggered == NULL) {
+				return true;
+			}
+			ctx->channel_handler = channel_handler;
+			ctx->inherit_super.channel_handler = channel_handler;
+			ctx->error_no = channel_handler->userEventTriggered((ttLibC_TettyContext *)ctx, ctx->data, ctx->data_size);
+			return false;
 		default:
 			break;
 		}
@@ -336,6 +344,32 @@ tetty_errornum ttLibC_TettyContext_super_close(ttLibC_TettyContext *ctx) {
 	}
 	ttLibC_TettyChannelHandler *channel_handler = ctx_->channel_handler;
 	ttLibC_StlList_forEachReverse(bootstrap->pipeline, TettyContext_callNextForEach, ctx);
+	ctx_->channel_handler = channel_handler;
+	return ctx_->error_no;
+}
+
+/**
+ * call userEventTriggered to next channel_handler.
+ * @param ctx
+ * @param data
+ * @param data_size
+ * @return error_no
+ */
+tetty_errornum ttLibC_TettyContext_super_userEventTriggered(
+		ttLibC_TettyContext *ctx,
+		void *data,
+		size_t data_size) {
+	ttLibC_TettyContext_ *ctx_ = (ttLibC_TettyContext_ *)ctx;
+	ctx_->command = Command_userEventTriggered;
+	ttLibC_TettyBootstrap_ *bootstrap = (ttLibC_TettyBootstrap_ *)ctx_->bootstrap;
+	if(bootstrap == NULL) {
+		LOG_PRINT("failed to ref the bootstrap.");
+		return 0;
+	}
+	ctx_->data = data;
+	ctx_->data_size = data_size;
+	ttLibC_TettyChannelHandler *channel_handler = ctx_->channel_handler;
+	ttLibC_StlList_forEach(bootstrap->pipeline, TettyContext_callNextForEach, ctx);
 	ctx_->channel_handler = channel_handler;
 	return ctx_->error_no;
 }
@@ -662,3 +696,23 @@ tetty_errornum ttLibC_TettyContext_close_(
 	return ctx.error_no;
 }
 
+/**
+ * call for userEventTriggered
+ */
+tetty_errornum ttLibC_TettyContext_userEventTriggered_(
+		ttLibC_TettyBootstrap *bootstrap,
+		ttLibC_SocketInfo *socket_info,
+		void *data,
+		size_t data_size) {
+	ttLibC_TettyContext_ ctx;
+	TettyContext_updateContextInfo(
+			&ctx,
+			bootstrap,
+			NULL,
+			socket_info);
+	ttLibC_TettyContext_super_userEventTriggered(
+			(ttLibC_TettyContext *)&ctx,
+			data,
+			data_size);
+	return ctx.error_no;
+}

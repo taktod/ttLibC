@@ -125,6 +125,7 @@ bool ttLibC_TettyBootstrap_bind(
 				return false;
 			}
 			bootstrap_->socket_info = (ttLibC_SocketInfo *)socket_info;
+			bootstrap_->inherit_super.socket_info = bootstrap_->socket_info; // hold ref of socket_info
 		}
 		break;
 	}
@@ -444,6 +445,20 @@ void ttLibC_TettyBootstrap_pipeline_remove(
 		ttLibC_TettyChannelHandler *channel_handler) {
 	ttLibC_TettyBootstrap_ *bootstrap_ = (ttLibC_TettyBootstrap_ *)bootstrap;
 	ttLibC_StlList_remove(bootstrap_->pipeline, channel_handler);
+}
+
+/*
+ * user defined event trigger.
+ * @param bootstrap bootstrap object.
+ * @param data      passing data
+ * @param data_size passing data_size
+ */
+tetty_errornum ttLibC_TettyBootstrap_pipeline_fireUserEventTriggered(
+		ttLibC_TettyBootstrap *bootstrap,
+		ttLibC_SocketInfo *socket_info,
+		void *data,
+		size_t data_size) {
+	return ttLibC_TettyContext_userEventTriggered_(bootstrap, socket_info, data, data_size);
 }
 
 /*

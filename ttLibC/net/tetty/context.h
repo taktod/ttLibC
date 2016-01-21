@@ -28,7 +28,8 @@ typedef enum ttLibC_TettyContextCommand {
 	Command_disconnect,
 	Command_close,
 	Command_write,
-	Command_flush
+	Command_flush,
+	Command_userEventTriggered,
 } ttLibC_TettyContextCommand;
 
 /**
@@ -150,5 +151,14 @@ tetty_errornum ttLibC_TettyContext_flush_(
 tetty_errornum ttLibC_TettyContext_close_(
 		ttLibC_TettyBootstrap *bootstrap,
 		ttLibC_SocketInfo *socket_info);
+
+/**
+ * call for userEventTriggered
+ */
+tetty_errornum ttLibC_TettyContext_userEventTriggered_(
+		ttLibC_TettyBootstrap *bootstrap,
+		ttLibC_SocketInfo *socket_info,
+		void *data,
+		size_t data_size);
 
 #endif /* TTLIBC_NET_TETTY_CONTEXT_H_ */

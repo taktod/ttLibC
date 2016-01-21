@@ -141,6 +141,8 @@ typedef struct ttLibC_Net_TettyChannelHandler {
 
 	/** event for exception.(just ignore now.) */
 	ttLibC_Tetty_ExceptionFunc exceptionCaught;
+	/** event for pg defined. */
+	ttLibC_Tetty_DataFunc    userEventTriggered;
 } ttLibC_Net_TettyChannelHandler;
 
 /**
@@ -241,6 +243,18 @@ void ttLibC_TettyBootstrap_pipeline_addLast(
 void ttLibC_TettyBootstrap_pipeline_remove(
 		ttLibC_TettyBootstrap *bootstrap,
 		ttLibC_TettyChannelHandler *channel_handler);
+
+/**
+ * user defined event trigger.
+ * @param bootstrap bootstrap object.
+ * @param data      passing data
+ * @param data_size passing data_size
+ */
+tetty_errornum ttLibC_TettyBootstrap_pipeline_fireUserEventTriggered(
+		ttLibC_TettyBootstrap *bootstrap,
+		ttLibC_SocketInfo *socket_info,
+		void *data,
+		size_t data_size);
 
 /**
  * write data for all connect socket.(share one task for all connection.)
@@ -462,13 +476,25 @@ void ttLibC_TettyContext_super_exceptionCaught(
 		tetty_errornum error_no);
 
 /**
- * call write to next channel_hander as broadcast multi call.
+ * call write to next channel_handler as broadcast multi call.
  * @param ctx
  * @param data
  * @param data_size
  * @return error_no
  */
 tetty_errornum ttLibC_TettyContext_super_writeEach(
+		ttLibC_TettyContext *ctx,
+		void *data,
+		size_t data_size);
+
+/**
+ * call userEventTriggered to next channel_handler.
+ * @param ctx
+ * @param data
+ * @param data_size
+ * @return error_no
+ */
+tetty_errornum ttLibC_TettyContext_super_userEventTriggered(
 		ttLibC_TettyContext *ctx,
 		void *data,
 		size_t data_size);
