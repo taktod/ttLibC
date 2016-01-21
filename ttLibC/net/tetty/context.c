@@ -50,21 +50,17 @@ tetty_errornum ttLibC_TettyContext_channel_write(
 		ttLibC_TettyContext *ctx,
 		void *data,
 		size_t data_size) {
-	ttLibC_TettyContext_ *ctx_ = (ttLibC_TettyContext_ *)ctx;
-	if(ctx_->socket_info == NULL) {
-		ERR_PRINT("only support invidial channel. to call broadcast, use ttLibC_TettyBootstrap_channels_write");
-		return -1;
-	}
-	else {
-		ttLibC_TettyContext_ ctx;
-		TettyContext_updateContextInfo(
-				&ctx,
-				ctx_->bootstrap,
-				NULL,
-				ctx_->socket_info);
-		ttLibC_TettyContext_super_write((ttLibC_TettyContext *)&ctx, data, data_size);
-		return ctx.error_no;
-	}
+	ttLibC_TettyContext_ ctx_;
+	ttLibC_TettyContext_ *org_ctx_ = (ttLibC_TettyContext_ *)ctx;
+	ctx_.bootstrap = org_ctx_->bootstrap;
+	ctx_.channel_handler = NULL;
+	ctx_.error_no = 0;
+	ctx_.socket_info = org_ctx_->socket_info;
+	ctx_.inherit_super.bootstrap = org_ctx_->inherit_super.bootstrap;
+	ctx_.inherit_super.channel_handler = NULL;
+	ctx_.inherit_super.socket_info = org_ctx_->inherit_super.socket_info;
+	ttLibC_TettyContext_super_write((ttLibC_TettyContext *)&ctx_, data, data_size);
+	return ctx_.error_no;
 }
 
 tetty_errornum ttLibC_TettyContext_channel_flush(ttLibC_TettyContext *ctx) {
@@ -491,11 +487,13 @@ static bool TettyContext_super_writeEach_callback(void *ptr, void *item) {
 	void *data = ctx_->data;
 	size_t data_size = ctx_->data_size;
 	ttLibC_TettyContext_ ctx;
-	TettyContext_updateContextInfo(
-			&ctx,
-			ctx_->bootstrap,
-			ctx_->channel_handler,
-			client_info);
+
+	ctx.bootstrap = ctx_->bootstrap;
+	ctx.channel_handler = ctx_->channel_handler;
+	ctx.socket_info = (ttLibC_SocketInfo *)client_info;
+	ctx.inherit_super.bootstrap = ctx_->inherit_super.bootstrap;
+	ctx.inherit_super.channel_handler = ctx_->inherit_super.channel_handler;
+	ctx.inherit_super.socket_info = (ttLibC_SocketInfo *)client_info;
 	ttLibC_TettyContext_super_write((ttLibC_TettyContext *)&ctx, data, data_size);
 	return true;
 }
