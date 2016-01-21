@@ -29,6 +29,7 @@ ttLibC_TettyPromise *ttLibC_TettyPromise_make_(ttLibC_TettyBootstrap *bootstrap)
 	promise->is_done      = false;
 	promise->is_success   = false;
 	promise->listener     = NULL;
+	promise->ptr          = NULL;
 	promise->inherit_super.bootstrap  = bootstrap;
 	promise->inherit_super.is_done    = false;
 	promise->inherit_super.is_success = false;
@@ -55,7 +56,7 @@ void ttLibC_TettyPromise_await(ttLibC_TettyPromise *promise) {
 				promise_->inherit_super.is_done    = true;
 				promise_->inherit_super.is_success = false;
 				if(promise_->listener != NULL) {
-					promise_->listener((ttLibC_TettyPromise *)promise_);
+					promise_->listener(promise_->ptr, (ttLibC_TettyPromise *)promise_);
 				}
 			}
 			else {
@@ -102,7 +103,7 @@ void ttLibC_TettyPromise_awaitFor(ttLibC_TettyPromise *promise, uint32_t timeout
 				promise_->inherit_super.is_done    = true;
 				promise_->inherit_super.is_success = false;
 				if(promise_->listener != NULL) {
-					promise_->listener((ttLibC_TettyPromise *)promise_);
+					promise_->listener(promise_->ptr, (ttLibC_TettyPromise *)promise_);
 				}
 			}
 			else {
@@ -123,12 +124,14 @@ void ttLibC_TettyPromise_awaitFor(ttLibC_TettyPromise *promise, uint32_t timeout
  */
 void ttLibC_TettyPromise_addEventListener(
 		ttLibC_TettyPromise *promise,
-		ttLibC_TettyPromiseListener listener) {
-	ttLibC_TettyPromise_ *promise_ = (ttLibC_TettyPromise_ *)promise;
+		ttLibC_TettyPromiseListener listener,
+		void *ptr) {
 	if(promise == NULL) {
 		return;
 	}
+	ttLibC_TettyPromise_ *promise_ = (ttLibC_TettyPromise_ *)promise;
 	promise_->listener = listener;
+	promise_->ptr = ptr;
 }
 
 /*
@@ -154,7 +157,7 @@ void ttLibC_TettyPromise_setSuccess(
 	promise_->inherit_super.is_success = true;
 	promise_->inherit_super.return_val = data;
 	if(promise_->listener != NULL) {
-		promise_->listener((ttLibC_TettyPromise *)promise_);
+		promise_->listener(promise_->ptr, (ttLibC_TettyPromise *)promise_);
 	}
 }
 
@@ -179,7 +182,7 @@ void ttLibC_TettyPromise_setFailure(ttLibC_TettyPromise *promise, void *data) {
 	promise_->inherit_super.is_success = false;
 	promise_->inherit_super.return_val = data;
 	if(promise_->listener != NULL) {
-		promise_->listener((ttLibC_TettyPromise *)promise_);
+		promise_->listener(promise_->ptr, (ttLibC_TettyPromise *)promise_);
 	}
 }
 

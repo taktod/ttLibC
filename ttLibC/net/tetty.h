@@ -504,7 +504,7 @@ tetty_errornum ttLibC_TettyContext_super_userEventTriggered(
  * @param ptr     user def pointer.
  * @param promise target promise/future.
  */
-typedef void (* ttLibC_TettyPromiseListener)(ttLibC_TettyPromise *promise);
+typedef void (* ttLibC_TettyPromiseListener)(void *ptr, ttLibC_TettyPromise *promise);
 
 /**
  * sync until promise/future done.
@@ -529,10 +529,12 @@ void ttLibC_TettyPromise_awaitFor(ttLibC_TettyPromise *promise, uint32_t timeout
  * event listener for promise/future done.
  * @param promise  target promise/future
  * @param listener listener
+ * @param ptr      user def data pointer.
  */
 void ttLibC_TettyPromise_addEventListener(
 		ttLibC_TettyPromise *promise,
-		ttLibC_TettyPromiseListener listener);
+		ttLibC_TettyPromiseListener listener,
+		void *ptr);
 
 /**
  * notify success to promise.

@@ -36,6 +36,7 @@ typedef struct ttLibC_Net_TettyPromise_ {
 	bool is_success;
 	void *return_val;
 	ttLibC_TettyPromiseListener listener;
+	void *ptr;
 } ttLibC_Net_TettyPromise_;
 
 typedef ttLibC_Net_TettyPromise_ ttLibC_TettyPromise_;
