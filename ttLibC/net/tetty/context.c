@@ -93,15 +93,28 @@ tetty_errornum ttLibC_TettyContext_channel_writeAndFlush(
 tetty_errornum ttLibC_TettyContext_close(
 		ttLibC_TettyContext *ctx) {
 	ttLibC_TettyContext_ *ctx_ = (ttLibC_TettyContext_ *)ctx;
-	if(ctx_->socket_info == NULL) {
-		ERR_PRINT("target context is not invidual channel.");
-		return 0;
+	if(ctx_->bootstrap->channel_type == ChannelType_Udp) {
+		ttLibC_TettyContext_ ctx;
+		ctx.bootstrap = ctx_->bootstrap;
+		ctx.channel_handler = NULL;
+		ctx.error_no = 0;
+		ctx.socket_info = ctx_->socket_info;
+		ctx.inherit_super.bootstrap = ctx_->inherit_super.bootstrap;
+		ctx.inherit_super.channel_handler = NULL;
+		ctx.inherit_super.socket_info = ctx_->inherit_super.socket_info;
+		ttLibC_TettyContext_super_close((ttLibC_TettyContext *)&ctx);
 	}
-	// do close.
-	ttLibC_TettyBootstrap_closeClient_(ctx_->bootstrap, ctx_->socket_info);
-	// remove from stlList. (only for tcp.)
- 	ttLibC_TettyBootstrap_ *bootstrap = (ttLibC_TettyBootstrap_ *)ctx_->bootstrap;
-	ttLibC_StlList_remove(bootstrap->tcp_client_info_list, ctx_->socket_info);
+	else {
+		if(ctx_->socket_info == NULL) {
+			ERR_PRINT("target context is not invidual channel.");
+			return 0;
+		}
+		// do close.
+		ttLibC_TettyBootstrap_closeClient_(ctx_->bootstrap, ctx_->socket_info);
+		// remove from stlList. (only for tcp.)
+		ttLibC_TettyBootstrap_ *bootstrap = (ttLibC_TettyBootstrap_ *)ctx_->bootstrap;
+		ttLibC_StlList_remove(bootstrap->tcp_client_info_list, ctx_->socket_info);
+	}
 	return 0;
 }
 
