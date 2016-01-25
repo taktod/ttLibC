@@ -58,6 +58,7 @@ static bool StlMap_forEach(
 		ttLibC_StlMap_ *map,
 		ttLibC_StlMapRefFunc callback,
 		void *ptr) {
+	uint32_t original_size = map->map->size();
 	std::map<void *, void *>::iterator iter = map->map->begin();
 	while(iter != map->map->end()) {
 		void *key = iter->first;
@@ -65,6 +66,10 @@ static bool StlMap_forEach(
 		++ iter;
 		if(!callback(ptr, key, item)) {
 			return false;
+		}
+		if(map->map->size() != original_size) {
+			// element size is changed in loop.
+			break;
 		}
 	}
 	return true;

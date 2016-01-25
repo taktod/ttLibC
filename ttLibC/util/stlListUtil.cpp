@@ -74,12 +74,17 @@ static bool StlList_forEach(
 		ttLibC_StlList_ *list,
 		ttLibC_StlListRefFunc callback,
 		void *ptr) {
+	uint32_t original_size = list->list->size();
 	std::list<void *>::iterator iter = list->list->begin();
 	while(iter != list->list->end()) {
 		void *item = *iter;
 		++ iter;
 		if(!callback(ptr, item)) {
 			return false;
+		}
+		if(list->list->size() != original_size) {
+			// element size is changed in loop.
+			break;
 		}
 	}
 	return true;
@@ -89,12 +94,17 @@ bool StlList_forEachReverse(
 		ttLibC_StlList_ *list,
 		ttLibC_StlListRefFunc callback,
 		void *ptr) {
+	uint32_t original_size = list->list->size();
 	std::list<void *>::reverse_iterator iter = list->list->rbegin();
 	while(iter != list->list->rend()) {
 		void *item = *iter;
 		++ iter;
 		if(!callback(ptr, item)) {
 			return false;
+		}
+		if(list->list->size() != original_size) {
+			// element size is changed in loop.
+			break;
 		}
 	}
 	return true;
