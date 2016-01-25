@@ -13,6 +13,7 @@
 #include "../log.h"
 #include "../allocator.h"
 #include <string.h>
+#include <cstdint>
 
 typedef struct {
 	ttLibC_StlList inherit_super;

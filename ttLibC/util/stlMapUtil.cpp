@@ -13,6 +13,7 @@
 #include <map>
 #include "../allocator.h"
 #include "../log.h"
+#include <cstdint>
 
 typedef struct {
 	ttLibC_StlMap inherit_super;
