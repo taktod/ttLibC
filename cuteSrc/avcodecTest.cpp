@@ -307,7 +307,7 @@ static void vorbisTest() {
 	AVCodecContext *enc = (AVCodecContext *)ttLibC_AvcodecEncoder_getAVCodecContext(frameType_vorbis);
 	enc->bit_rate = 96000;
 	enc->sample_rate = sample_rate;
-	enc->time_base = (AVRational){1, sample_rate};
+	enc->time_base = (AVRational){1, (int)sample_rate};
 	enc->channels = channel_num;
 	enc->channel_layout = av_get_default_channel_layout(channel_num);
 	enc->sample_fmt = AV_SAMPLE_FMT_FLTP;
