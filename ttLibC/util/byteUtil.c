@@ -627,6 +627,8 @@ bool ttLibC_ByteConnector_ebml(
 		connector_->data[1] = ((value >> 16) & 0xFF);
 		connector_->data[2] = ((value >> 8) & 0xFF);
 		connector_->data[3] = (value & 0xFF);
+		connector_->data += 4;
+		connector_->data_size -= 4;
 		connector_->inherit_super.write_size += 4;
 		return true;
 	}
@@ -721,7 +723,6 @@ bool ttLibC_ByteConnector_string(
 		connector_->inherit_super.error_number = 1;
 		return false;
 	}
-	// データbufferも十分あるので、データを書き込んでおく
 	memcpy(connector_->data, str, str_size);
 	connector_->data += str_size;
 	connector_->data_size -= str_size;
