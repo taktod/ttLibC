@@ -15,9 +15,9 @@
 #include "../allocator.h"
 
 #include <wels/codec_api.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 /*
  * h264 encoder detail definition.
