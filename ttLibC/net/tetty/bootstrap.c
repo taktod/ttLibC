@@ -447,6 +447,13 @@ void ttLibC_TettyBootstrap_pipeline_remove(
 	ttLibC_StlList_remove(bootstrap_->pipeline, channel_handler);
 }
 
+static bool TettyBootstrap_pipeline_each_fireUserEventTriggered_callback(void *ptr, void *item) {
+	ttLibC_TettyContext_ *ctx = (ttLibC_TettyContext_ *)ptr;
+	ttLibC_TcpClientInfo *client_info = item;
+	ttLibC_TettyContext_userEventTriggered_(ctx->bootstrap, client_info, ctx->data, ctx->data_size);
+	return true;
+}
+
 /*
  * user defined event trigger.
  * @param bootstrap bootstrap object.
@@ -458,7 +465,24 @@ tetty_errornum ttLibC_TettyBootstrap_pipeline_fireUserEventTriggered(
 		ttLibC_SocketInfo *socket_info,
 		void *data,
 		size_t data_size) {
-	return ttLibC_TettyContext_userEventTriggered_(bootstrap, socket_info, data, data_size);
+	ttLibC_TettyBootstrap_ *bootstrap_ = (ttLibC_TettyBootstrap_ *)bootstrap;
+	if(socket_info != NULL) {
+		return ttLibC_TettyContext_userEventTriggered_(bootstrap, socket_info, data, data_size);
+	}
+	switch(bootstrap_->channel_type) {
+	case ChannelType_Tcp:
+		{
+			ttLibC_TettyContext_ ctx;
+			ctx.data = data;
+			ctx.data_size = data_size;
+			ctx.bootstrap = bootstrap;
+			ttLibC_StlList_forEach(bootstrap_->tcp_client_info_list, TettyBootstrap_pipeline_each_fireUserEventTriggered_callback, &ctx);
+		}
+		return 0;
+	default:
+	case ChannelType_Udp:
+		return ttLibC_TettyContext_userEventTriggered_(bootstrap, socket_info, data, data_size);
+	}
 }
 
 /*
