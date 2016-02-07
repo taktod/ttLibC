@@ -58,6 +58,8 @@ static ttLibC_Openh264Encoder *Openh264Encoder_make(SEncParamExt *pParamExt) {
 		ttLibC_free(encoder);
 		return NULL;
 	}
+	int iTraceLevel = WELS_LOG_QUIET;
+	encoder->encoder->SetOption(ENCODER_OPTION_TRACE_LEVEL,  &iTraceLevel);
 	SEncParamExt paramExt;
 	memset(&paramExt, 0, sizeof(SEncParamExt));
 	encoder->encoder->GetDefaultParams(&paramExt);
@@ -101,11 +103,11 @@ static ttLibC_Openh264Encoder *Openh264Encoder_make(SEncParamExt *pParamExt) {
 			paramExt.sSpatialLayers[i].sSliceCfg.uiSliceMode               = pParamExt->sSpatialLayers[0].sSliceCfg.uiSliceMode;
 		if(i == 0 || pParamExt->sSpatialLayers[i].sSliceCfg.sSliceArgument.uiSliceNum != 0)
 			paramExt.sSpatialLayers[i].sSliceCfg.sSliceArgument.uiSliceNum = pParamExt->sSpatialLayers[0].sSliceCfg.sSliceArgument.uiSliceNum;
-		if(pParamExt->sSpatialLayers[i].uiProfileIdc != 0)
+		if(i == 0 || pParamExt->sSpatialLayers[i].uiProfileIdc != 0)
 			paramExt.sSpatialLayers[i].uiProfileIdc                        = pParamExt->sSpatialLayers[i].uiProfileIdc;
-		if(pParamExt->sSpatialLayers[i].uiLevelIdc != 0)
+		if(i == 0 || pParamExt->sSpatialLayers[i].uiLevelIdc != 0)
 			paramExt.sSpatialLayers[i].uiLevelIdc                          = pParamExt->sSpatialLayers[i].uiLevelIdc;
-		if(pParamExt->sSpatialLayers[i].sSliceCfg.sSliceArgument.uiSliceSizeConstraint != 0) {
+		if(i == 0 || pParamExt->sSpatialLayers[i].sSliceCfg.sSliceArgument.uiSliceSizeConstraint != 0) {
 			paramExt.sSpatialLayers[i].sSliceCfg.sSliceArgument.uiSliceSizeConstraint =
 					pParamExt->sSpatialLayers[i].sSliceCfg.sSliceArgument.uiSliceSizeConstraint;
 		}
@@ -117,19 +119,18 @@ static ttLibC_Openh264Encoder *Openh264Encoder_make(SEncParamExt *pParamExt) {
 		}
 	}
 
-	if(pParamExt->iComplexityMode != 0)          paramExt.iComplexityMode          = pParamExt->iComplexityMode;
-	if(pParamExt->iNumRefFrame != 0)             paramExt.iNumRefFrame             = pParamExt->iNumRefFrame;
-	if(pParamExt->bEnableSSEI != 0)              paramExt.bEnableSSEI              = pParamExt->bEnableSSEI;
-	if(pParamExt->bSimulcastAVC != 0)            paramExt.bSimulcastAVC            = pParamExt->bSimulcastAVC;
-	if(pParamExt->iPaddingFlag != 0)             paramExt.iPaddingFlag             = pParamExt->iPaddingFlag;
-	if(pParamExt->uiMaxNalSize != 0)             paramExt.uiMaxNalSize             = pParamExt->uiMaxNalSize;
-	if(pParamExt->iLTRRefNum != 0)               paramExt.iLTRRefNum               = pParamExt->iLTRRefNum;
-	if(pParamExt->iLoopFilterAlphaC0Offset != 0) paramExt.iLoopFilterAlphaC0Offset = pParamExt->iLoopFilterAlphaC0Offset;
-	if(pParamExt->iLoopFilterBetaOffset != 0)    paramExt.iLoopFilterBetaOffset    = pParamExt->iLoopFilterBetaOffset;
-	if(pParamExt->bEnableFrameCroppingFlag != 0) paramExt.bEnableFrameCroppingFlag = pParamExt->bEnableFrameCroppingFlag;
-	if(pParamExt->bEnableSceneChangeDetect != 0) paramExt.bEnableSceneChangeDetect = pParamExt->bEnableSceneChangeDetect;
-	if(pParamExt->bIsLosslessLink != 0)          paramExt.bIsLosslessLink          = pParamExt->bIsLosslessLink;
-
+	paramExt.iComplexityMode          = pParamExt->iComplexityMode;
+	paramExt.iNumRefFrame             = pParamExt->iNumRefFrame;
+	paramExt.bEnableSSEI              = pParamExt->bEnableSSEI;
+	paramExt.bSimulcastAVC            = pParamExt->bSimulcastAVC;
+	paramExt.iPaddingFlag             = pParamExt->iPaddingFlag;
+	paramExt.uiMaxNalSize             = pParamExt->uiMaxNalSize;
+	paramExt.iLTRRefNum               = pParamExt->iLTRRefNum;
+	paramExt.iLoopFilterAlphaC0Offset = pParamExt->iLoopFilterAlphaC0Offset;
+	paramExt.iLoopFilterBetaOffset    = pParamExt->iLoopFilterBetaOffset;
+	paramExt.bEnableFrameCroppingFlag = pParamExt->bEnableFrameCroppingFlag;
+	paramExt.bEnableSceneChangeDetect = pParamExt->bEnableSceneChangeDetect;
+	paramExt.bIsLosslessLink          = pParamExt->bIsLosslessLink;
 	res = encoder->encoder->InitializeExt(&paramExt);
 	if(res != 0) {
 		ERR_PRINT("failed to initialize encoder params.");
@@ -138,15 +139,15 @@ static ttLibC_Openh264Encoder *Openh264Encoder_make(SEncParamExt *pParamExt) {
 		return NULL;
 	}
 	// append additional data.
-	int iTraceLevel = WELS_LOG_QUIET;
-	encoder->encoder->SetOption(ENCODER_OPTION_TRACE_LEVEL,  &iTraceLevel);
+//	iTraceLevel = WELS_LOG_QUIET;
+//	encoder->encoder->SetOption(ENCODER_OPTION_TRACE_LEVEL,  &iTraceLevel);
 	int videoFormat = videoFormatI420;
 	encoder->encoder->SetOption(ENCODER_OPTION_DATAFORMAT,   &videoFormat);
 	ttLibC_Openh264Encoder_setIDRInterval((ttLibC_Openh264Encoder *)encoder, 15);
 //	int iIDRPeriod  = 15;
 //	encoder->encoder->SetOption(ENCODER_OPTION_IDR_INTERVAL, &iIDRPeriod);
-	bool bval       = false;
-	encoder->encoder->SetOption(ENCODER_OPTION_ENABLE_SPS_PPS_ID_ADDITION, &bval);
+//	bool bval       = false;
+//	encoder->encoder->SetOption(ENCODER_OPTION_ENABLE_SPS_PPS_ID_ADDITION, &bval);
 
 	memset(&encoder->info,    0, sizeof(SFrameBSInfo));
 	memset(&encoder->picture, 0, sizeof(SSourcePicture));
@@ -463,38 +464,62 @@ void ttLibC_Openh264Encoder_getDefaultSEncParamExt(
 	SEncParamExt *pParamExt = (SEncParamExt *)paramExt;
 	memset(paramExt, 0, sizeof(SEncParamExt));
 	pParamExt->iUsageType     = CAMERA_VIDEO_REAL_TIME;
-	pParamExt->fMaxFrameRate  = 15;
 	pParamExt->iPicWidth      = width;
 	pParamExt->iPicHeight     = height;
 	pParamExt->iTargetBitrate = 650000;
-	pParamExt->iMaxBitrate    = 650000;
-	pParamExt->iMinQp         = 4;
-	pParamExt->iMaxQp         = 20;
+	pParamExt->iRCMode        = RC_BITRATE_MODE;
+	pParamExt->fMaxFrameRate  = 15;
 
-	pParamExt->iRCMode                    = RC_BITRATE_MODE;
-	pParamExt->iTemporalLayerNum          = 1;
-	pParamExt->iSpatialLayerNum           = 1;
-	pParamExt->bEnableDenoise             = true;
-	pParamExt->bEnableBackgroundDetection = false;
-	pParamExt->bEnableAdaptiveQuant       = true;
-	pParamExt->bEnableFrameSkip           = true;
-	pParamExt->bEnableLongTermReference   = false;
-	pParamExt->iLtrMarkPeriod             = 30;
-	pParamExt->uiIntraPeriod              = 15;
-	pParamExt->eSpsPpsIdStrategy          = CONSTANT_ID;
+	pParamExt->iTemporalLayerNum = 1;
+	pParamExt->iSpatialLayerNum  = 1;
 
-	pParamExt->bPrefixNalAddingCtrl   = false;
-	pParamExt->iLoopFilterDisableIdc  = 1;
+	pParamExt->iComplexityMode = MEDIUM_COMPLEXITY;
+	pParamExt->uiIntraPeriod   = 0;
+	pParamExt->iNumRefFrame    = 1;
+
+	pParamExt->eSpsPpsIdStrategy    = CONSTANT_ID;
+	pParamExt->bPrefixNalAddingCtrl = false;
+
+	pParamExt->bEnableSSEI            = false;
+	pParamExt->bSimulcastAVC          = false;
+	pParamExt->iPaddingFlag           = 0;
 	pParamExt->iEntropyCodingModeFlag = 0;
-	pParamExt->iMultipleThreadIdc     = 0;
 
-	pParamExt->sSpatialLayers[0].iVideoWidth                         = pParamExt->iPicWidth;
-	pParamExt->sSpatialLayers[0].iVideoHeight                        = pParamExt->iPicHeight;
-	pParamExt->sSpatialLayers[0].fFrameRate                          = pParamExt->fMaxFrameRate;
-	pParamExt->sSpatialLayers[0].iSpatialBitrate                     = pParamExt->iTargetBitrate;
-	pParamExt->sSpatialLayers[0].iMaxSpatialBitrate                  = pParamExt->iMaxBitrate;
-	pParamExt->sSpatialLayers[0].sSliceCfg.uiSliceMode               = SM_AUTO_SLICE;
-	pParamExt->sSpatialLayers[0].sSliceCfg.sSliceArgument.uiSliceNum = 0;
+	pParamExt->bEnableFrameSkip = true;
+	pParamExt->iMaxBitrate      = 0;
+	pParamExt->iMinQp           = 4;
+	pParamExt->iMaxQp           = 20;
+	pParamExt->uiMaxNalSize     = 0;
+
+	pParamExt->bEnableLongTermReference = false;
+	pParamExt->iLTRRefNum               = 0;
+	pParamExt->iLtrMarkPeriod           = 30;
+	pParamExt->iMultipleThreadIdc       = 1;
+
+	pParamExt->iLoopFilterDisableIdc      = 0;
+	pParamExt->iLoopFilterAlphaC0Offset   = 0;
+	pParamExt->iLoopFilterBetaOffset      = 0;
+	pParamExt->bEnableDenoise             = false;
+	pParamExt->bEnableBackgroundDetection = true;
+	pParamExt->bEnableAdaptiveQuant       = true;
+	pParamExt->bEnableFrameCroppingFlag   = false;
+	pParamExt->bEnableSceneChangeDetect   = false;
+	pParamExt->bIsLosslessLink            = false;
+
+	pParamExt->sSpatialLayers[0].iVideoWidth                                    = pParamExt->iPicWidth;
+	pParamExt->sSpatialLayers[0].iVideoHeight                                   = pParamExt->iPicHeight;
+	pParamExt->sSpatialLayers[0].fFrameRate                                     = pParamExt->fMaxFrameRate;
+	pParamExt->sSpatialLayers[0].iSpatialBitrate                                = pParamExt->iTargetBitrate;
+	pParamExt->sSpatialLayers[0].iMaxSpatialBitrate                             = pParamExt->iMaxBitrate;
+	pParamExt->sSpatialLayers[0].uiProfileIdc                                   = PRO_MAIN;
+	pParamExt->sSpatialLayers[0].uiLevelIdc                                     = LEVEL_UNKNOWN;
+	pParamExt->sSpatialLayers[0].iDLayerQp                                      = 0;
+	pParamExt->sSpatialLayers[0].sSliceCfg.uiSliceMode                          = SM_SINGLE_SLICE;
+	pParamExt->sSpatialLayers[0].sSliceCfg.sSliceArgument.uiSliceNum            = 1;
+	pParamExt->sSpatialLayers[0].sSliceCfg.sSliceArgument.uiSliceSizeConstraint = 1500;
+	for(int i = 0;i < MAX_SLICES_NUM_TMP;++ i) {
+		pParamExt->sSpatialLayers[0].sSliceCfg.sSliceArgument.uiSliceMbNum[i]   = 0;
+	}
 }
 
 ttLibC_Openh264Encoder *ttLibC_Openh264Encoder_makeWithSEncParamExt(void *paramExt) {
