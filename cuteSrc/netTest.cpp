@@ -18,6 +18,7 @@
 #include <ttLibC/util/amfUtil.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h> // require for calling close, and so on...
 
 #ifdef __ENABLE_FILE__
 #	include <ttLibC/net/client/rtmp.h>
