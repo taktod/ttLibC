@@ -21,9 +21,9 @@
 
 #ifdef __ENABLE_FILE__
 #	include <ttLibC/net/client/rtmp.h>
-#	include <ttLibC/net/tetty.h>
 #endif
 
+#include <ttLibC/net/tetty.h>
 #include <ttLibC/net/tcp.h>
 #include <ttLibC/net/udp.h>
 
