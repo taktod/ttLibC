@@ -143,7 +143,7 @@ static ttLibC_Openh264Encoder *Openh264Encoder_make(SEncParamExt *pParamExt) {
 //	encoder->encoder->SetOption(ENCODER_OPTION_TRACE_LEVEL,  &iTraceLevel);
 	int videoFormat = videoFormatI420;
 	encoder->encoder->SetOption(ENCODER_OPTION_DATAFORMAT,   &videoFormat);
-	ttLibC_Openh264Encoder_setIDRInterval((ttLibC_Openh264Encoder *)encoder, 15);
+//	ttLibC_Openh264Encoder_setIDRInterval((ttLibC_Openh264Encoder *)encoder, 15);
 //	int iIDRPeriod  = 15;
 //	encoder->encoder->SetOption(ENCODER_OPTION_IDR_INTERVAL, &iIDRPeriod);
 //	bool bval       = false;
