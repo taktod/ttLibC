@@ -563,7 +563,7 @@ if test x$faad_flag = "xyes"; then
 		if test x$faad_decode_check = "xyes"; then
 echo "faad(decoder):    on"
 		else
-echo "faad(decoder):    off(faac library is missing.)"
+echo "faad(decoder):    off(faad library is missing.)"
 		fi
 	else
 echo "faad(decoder):    off(under gpl only.)"
