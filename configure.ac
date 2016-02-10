@@ -200,14 +200,16 @@ if test x$opencv_flag = "xyes"; then
 	PKG_CHECK_MODULES(
 		[OPENCV],
 		[opencv],
-		[opencv_check=yes]
+		[opencv_check=yes],
+		[opencv_check=no]
 	)
 fi
 if test x$openal_flag = "xyes"; then
 	PKG_CHECK_MODULES(
 		[OPENAL],
 		[openal],
-		[openal_check=yes]
+		[openal_check=yes],
+		[openal_check=no]
 	)
 fi
 if test x$mp3lame_flag = "xyes"; then
@@ -276,7 +278,8 @@ if test x$openh264_flag = "xyes"; then
 	PKG_CHECK_MODULES(
 		[OPENH264],
 		[openh264],
-		[openh264_check=yes]
+		[openh264_check=yes],
+		[openh264_check=no]
 	)
 
 fi
@@ -284,28 +287,32 @@ if test x$speexdsp_flag = "xyes"; then
 	PKG_CHECK_MODULES(
 		[SPEEXDSP],
 		[speexdsp],
-		[speexdsp_check=yes]
+		[speexdsp_check=yes],
+		[speexdsp_check=no]
 	)
 fi
 if test x$speex_flag = "xyes"; then
 	PKG_CHECK_MODULES(
 		[SPEEX],
 		[speex],
-		[speex_check=yes]
+		[speex_check=yes],
+		[speex_check=no]
 	)
 fi
 if test x$opus_flag = "xyes"; then
 	PKG_CHECK_MODULES(
 		[OPUS],
 		[opus],
-		[opus_check=yes]
+		[opus_check=yes],
+		[opus_check=no]
 	)
 fi
 if test x$avcodec_flag = "xyes"; then
 	PKG_CHECK_MODULES(
 		[LIBAVCODEC],
 		[libavcodec, libavutil],
-		[avcodec_check=yes]
+		[avcodec_check=yes],
+		[avcodec_check=no]
 	)
 fi
 if test x$faad_flag = "xyes"; then
