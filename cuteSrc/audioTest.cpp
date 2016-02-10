@@ -27,7 +27,7 @@
 #	include <faaccfg.h>
 #endif
 
-#ifdef __ENABLE_FAAC_ENCODE__
+#ifdef __ENABLE_FAAD_DECODE__
 #	include <faad.h>
 #endif
 
