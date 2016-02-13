@@ -153,13 +153,15 @@ bool ttLibC_MpegtsReader_read(
 		size_t left_size = ttLibC_DynamicBuffer_refSize(reader_->tmp_buffer);
 		if(left_size < reader_->target_size) {
 			// no more enough size. do next time.
-			return true;
+			break;
 		}
 		if(!MpegtsReader_read(reader_, buffer, left_size, callback, ptr)) {
 			return false;
 		}
 		ttLibC_DynamicBuffer_markAsRead(reader_->tmp_buffer, reader_->target_size);
 	} while(true);
+	ttLibC_DynamicBuffer_clear(reader_->tmp_buffer);
+	return true;
 }
 
 /*
