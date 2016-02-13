@@ -20,26 +20,6 @@ extern "C" {
 #include "../../util/byteUtil.h"
 
 /**
- * definition of bit type. (just for information.)
- */
-typedef uint8_t ttLibC_uint1_t;
-typedef uint8_t ttLibC_uint2_t;
-typedef uint8_t ttLibC_uint3_t;
-typedef uint8_t ttLibC_uint4_t;
-typedef uint8_t ttLibC_uint5_t;
-typedef uint8_t ttLibC_uint6_t;
-typedef uint8_t ttLibC_uint7_t;
-typedef uint8_t ttLibC_uint8_t;
-typedef uint16_t ttLibC_uint9_t;
-typedef uint16_t ttLibC_uint10_t;
-typedef uint16_t ttLibC_uint11_t;
-typedef uint16_t ttLibC_uint12_t;
-typedef uint16_t ttLibC_uint13_t;
-typedef uint16_t ttLibC_uint14_t;
-typedef uint16_t ttLibC_uint15_t;
-typedef uint16_t ttLibC_uint16_t;
-
-/**
  * adaptation field
  */
 typedef struct ttLibC_AdaptationField {
