@@ -82,10 +82,6 @@ static bool AuPlayer_dequeue(
 			*(ptr + i) = 0;
 		}
 	}
-	// to prevent overflow, rewind index.
-	if(player_->read_index > max_index) {
-		player_->read_index -= max_index;
-	}
 	// for stereo, sample_num is double counted. fix the number.
 	if(player_->channel_num == 2) {
 		added_sample_num >>= 1;
@@ -111,10 +107,9 @@ static OSStatus AuPlayer_outputCallback(
 		AudioUnitRenderActionFlags *ioActionFlags,
 		const AudioTimeStamp *inTimeStamp,
 		uint32_t inBusNumber,
-		uint32_t inNumberFrames, // このサイズ分frameがある模様
+		uint32_t inNumberFrames,
 		AudioBufferList *ioData) {
 	OSStatus err = noErr;
-	// このpcmのデータをコピーする必要がある。
 	if(ioData->mNumberBuffers != 1) {
 		ERR_PRINT("only in buffers = 1.");
 	}
@@ -234,7 +229,7 @@ ttLibC_AuPlayer *ttLibC_AuPlayer_make(
 	player->read_index = 0;
 	player->write_index = 0;
 	// TODO wanna use extentable buffer.
-	player->buffer_size = sample_rate * sizeof(int16_t) * channel_num * 2; // 2秒分処理できるようにしておく。
+	player->buffer_size = sample_rate * sizeof(int16_t) * channel_num * 2; // for 2 sec.
 	player->buffer = (int16_t *)ttLibC_malloc(player->buffer_size);
 	err = AudioOutputUnitStart(player->outputUnit);
 	if(err != noErr) {
@@ -269,7 +264,7 @@ bool ttLibC_AuPlayer_queue(ttLibC_AuPlayer *player, ttLibC_PcmS16 *pcmS16) {
 	int max_index = player_->buffer_size / sizeof(int16_t);
 	int last_pos = player_->read_index + max_index;
 	int index_gap = last_pos - player_->write_index;
-	int target_sample = index_gap / player_->inherit_super.channel_num; // 設定できるサンプル数
+	int target_sample = index_gap / player_->inherit_super.channel_num;
 	if(target_sample < pcmS16->inherit_super.sample_num) {
 		// buffer doesn't have enough space for this pcm data.
 		// do nothing.
@@ -302,8 +297,9 @@ bool ttLibC_AuPlayer_queue(ttLibC_AuPlayer *player, ttLibC_PcmS16 *pcmS16) {
 		}
 	}
 	// to prevent overflow, rewind index.
-	if(player_->write_index > (max_index << 1)) {
+	if(player_->write_index > (max_index << 2)) {
 		player_->write_index -= max_index;
+		player_->read_index -= max_index;
 	}
 	return true;
 }
