@@ -13,6 +13,7 @@
 #include "openh264Encoder.h"
 #include "../log.h"
 #include "../allocator.h"
+#include "../util/dynamicBufferUtil.h"
 
 #include <wels/codec_api.h>
 #include <cstdio>
@@ -139,15 +140,11 @@ static ttLibC_Openh264Encoder *Openh264Encoder_make(SEncParamExt *pParamExt) {
 		return NULL;
 	}
 	// append additional data.
-//	iTraceLevel = WELS_LOG_QUIET;
-//	encoder->encoder->SetOption(ENCODER_OPTION_TRACE_LEVEL,  &iTraceLevel);
 	int videoFormat = videoFormatI420;
 	encoder->encoder->SetOption(ENCODER_OPTION_DATAFORMAT,   &videoFormat);
-//	ttLibC_Openh264Encoder_setIDRInterval((ttLibC_Openh264Encoder *)encoder, 15);
-//	int iIDRPeriod  = 15;
-//	encoder->encoder->SetOption(ENCODER_OPTION_IDR_INTERVAL, &iIDRPeriod);
-//	bool bval       = false;
-//	encoder->encoder->SetOption(ENCODER_OPTION_ENABLE_SPS_PPS_ID_ADDITION, &bval);
+//	iTraceLevel = WELS_LOG_QUIET;
+//	encoder->encoder->SetOption(ENCODER_OPTION_TRACE_LEVEL,  &iTraceLevel);
+	ttLibC_Openh264Encoder_setIDRInterval((ttLibC_Openh264Encoder *)encoder, paramExt.uiIntraPeriod);
 
 	memset(&encoder->info,    0, sizeof(SFrameBSInfo));
 	memset(&encoder->picture, 0, sizeof(SSourcePicture));
@@ -584,6 +581,35 @@ bool ttLibC_Openh264Encoder_forceNextKeyFrame(ttLibC_Openh264Encoder *encoder) {
 	int iIDRPeriod  = 1;
 	encoder_->idr_interval_count = 1;
 	encoder_->encoder->SetOption(ENCODER_OPTION_IDR_INTERVAL, &iIDRPeriod);
+	return true;
+}
+
+bool ttLibC_Openh264Encoder_setRCMode(
+		ttLibC_Openh264Encoder *encoder,
+		ttLibC_Openh264Encoder_RCType rcType) {
+	ttLibC_Openh264Encoder_ *encoder_ = (ttLibC_Openh264Encoder_ *)encoder;
+	RC_MODES rc_mode = RC_OFF_MODE;
+	switch(rcType) {
+	case Openh264EncoderRCType_BitrateMode:
+		rc_mode = RC_BITRATE_MODE;
+		break;
+	case Openh264EncoderRCType_BitrateModePostSkip:
+		rc_mode = RC_BITRATE_MODE_POST_SKIP;
+		break;
+	case Openh264EncoderRCType_BufferbasedMode:
+		rc_mode = RC_BUFFERBASED_MODE;
+		break;
+	default:
+	case Openh264EncoderRCType_OffMode:
+		break;
+	case Openh264EncoderRCType_QualityMode:
+		rc_mode = RC_QUALITY_MODE;
+		break;
+	case Openh264EncoderRCType_TimestampMode:
+		rc_mode = RC_TIMESTAMP_MODE;
+		break;
+	}
+	encoder_->encoder->SetOption(ENCODER_OPTION_RC_MODE, &rc_mode);
 	return true;
 }
 

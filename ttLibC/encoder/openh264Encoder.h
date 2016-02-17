@@ -26,6 +26,18 @@ typedef enum ttLibC_Openh264Encoder_Type {
 } ttLibC_Openh264Encoder_Type;
 
 /**
+ * openh264 ratecontrol type
+ */
+typedef enum ttLibC_Openh264Encoder_RCType {
+	Openh264EncoderRCType_QualityMode = 0,
+	Openh264EncoderRCType_BitrateMode = 1,
+	Openh264EncoderRCType_BufferbasedMode = 2,
+	Openh264EncoderRCType_TimestampMode = 3,
+	Openh264EncoderRCType_BitrateModePostSkip = 4,
+	Openh264EncoderRCType_OffMode = -1,
+} ttLibC_Openh264Encoder_RCType;
+
+/**
  * openh264 enoder definition
  */
 typedef struct ttLibC_Encoder_Openh264Encoder {
@@ -126,6 +138,10 @@ void *ttLibC_Openh264Encoder_refNativeEncoder(ttLibC_Openh264Encoder *encoder);
 bool ttLibC_Openh264Encoder_setIDRInterval(
 		ttLibC_Openh264Encoder *encoder,
 		int32_t interval);
+
+bool ttLibC_Openh264Encoder_setRCMode(
+		ttLibC_Openh264Encoder *encoder,
+		ttLibC_Openh264Encoder_RCType rcType);
 
 /**
  * force next encode picture will be key frame(sliceIDR).
