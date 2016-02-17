@@ -18,8 +18,13 @@
 #include <time.h>
 
 #include <stdlib.h>
-#include <AL/al.h>
-#include <AL/alc.h>
+#ifdef __ENABLE_APPLE__
+#	include <OpenAL/al.h>
+#	include <OpenAl/alc.h>
+#else
+#	include <AL/al.h>
+#	include <AL/alc.h>
+#endif
 
 typedef struct {
 	ttLibC_AlDevice inherit_super;

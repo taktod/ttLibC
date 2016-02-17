@@ -204,14 +204,6 @@ if test x$opencv_flag = "xyes"; then
 		[opencv_check=no]
 	)
 fi
-if test x$openal_flag = "xyes"; then
-	PKG_CHECK_MODULES(
-		[OPENAL],
-		[openal],
-		[openal_check=yes],
-		[openal_check=no]
-	)
-fi
 if test x$mp3lame_flag = "xyes"; then
 	if test -f /usr/local/include/lame/lame.h; then
 		AC_CHECK_LIB(
@@ -349,6 +341,22 @@ if test x$apple_flag = "xyes"; then
 		AC_SUBST([APPLE_LIBS])
 	fi
 fi
+if test x$openal_flag = "xyes"; then
+	if test x$apple_check = "xyes"; then
+		# use OpenAL.framework
+		OPENAL_CFLAGS=''
+		OPENAL_LIBS='-framework OpenAL'
+		openal_check=yes
+	else
+		PKG_CHECK_MODULES(
+			[OPENAL],
+			[openal],
+			[openal_check=yes],
+			[openal_check=no]
+		)
+	fi
+fi
+
 if test x$gpl_flag = "xyes"; then
 	AC_DEFINE([__ENABLE_GPL__])
 else
