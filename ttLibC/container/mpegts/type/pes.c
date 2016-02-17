@@ -246,7 +246,7 @@ ttLibC_Pes *ttLibC_Pes_getPacket(
 			ERR_PRINT("data is overflowed.");
 			return NULL;
 		}
-	 	memcpy(frame_buffer + frame_buffer_next_pos, data, data_size);
+		memcpy(frame_buffer + frame_buffer_next_pos, data, data_size);
 		prev_pes->inherit_super.inherit_super.inherit_super.buffer_size += data_size; // update copyed size.
 		return prev_pes;
 	}

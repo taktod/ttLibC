@@ -73,7 +73,7 @@ typedef enum ttLibC_AuRecorder_Type {
 } ttLibC_AuRecorder_Type;
 
 /**
- * definition of audioUnit Player
+ * definition of audioUnit Recorder
  */
 typedef struct ttLibC_Util_AudioUnit_AuRecorder {
 	/** work sample_rate */
