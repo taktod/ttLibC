@@ -74,6 +74,86 @@
 
 #include <ttLibC/util/hexUtil.h>
 
+#ifdef __ENABLE_X264__
+#	include <ttLibC/encoder/x264Encoder.h>
+#endif
+
+#if defined(__ENABLE_X264__) && defined(__ENABLE_OPENCV__) && defined(__ENABLE_OPENH264__)
+typedef struct x264TestData{
+	ttLibC_Openh264Decoder *decoder;
+	ttLibC_CvWindow *dec_win;
+	ttLibC_Bgr *dbgr;
+} x264TestData;
+
+bool x264Test_decodeCallback(void *ptr, ttLibC_Yuv420 *yuv420) {
+	x264TestData *testData = (x264TestData *)ptr;
+	ttLibC_Bgr *b = ttLibC_ImageResampler_makeBgrFromYuv420(testData->dbgr, BgrType_bgr, yuv420);
+	if(b == NULL) {
+		return false;
+	}
+	testData->dbgr = b;
+	ttLibC_CvWindow_showBgr(testData->dec_win, testData->dbgr);
+	return true;
+}
+
+bool x264Test_encodeCallback(void *ptr, ttLibC_H264 *h264) {
+	x264TestData *testData = (x264TestData *)ptr;
+	if(h264->type == H264Type_unknown) {
+		return true;
+	}
+	ttLibC_Openh264Decoder_decode(testData->decoder, h264, x264Test_decodeCallback, ptr);
+	return true;
+}
+#endif
+
+static void x264Test() {
+	LOG_PRINT("x264Test");
+#if defined(__ENABLE_X264__) && defined(__ENABLE_OPENCV__) && defined(__ENABLE_OPENH264__)
+	// x264 does not have decoder.
+	// encode with x264 and decode with openh264.
+	uint32_t width = 320, height = 180;
+	ttLibC_CvCapture *capture = ttLibC_CvCapture_make(0, width, height);
+	ttLibC_CvWindow *window = ttLibC_CvWindow_make("original");
+	ttLibC_CvWindow *dec_win = ttLibC_CvWindow_make("decode");
+	ttLibC_X264Encoder *encoder = ttLibC_X264Encoder_make(width, height);
+	ttLibC_Openh264Decoder *decoder = ttLibC_Openh264Decoder_make();
+	ttLibC_Bgr *bgr = NULL, *dbgr = NULL, *b;
+	ttLibC_Yuv420 *yuv = NULL, *y;
+	while(true) {
+		b = ttLibC_CvCapture_queryFrame(capture, bgr);
+		if(b == NULL) {
+			break;
+		}
+		bgr = b;
+		ttLibC_CvWindow_showBgr(window, bgr);
+		y = ttLibC_ImageResampler_makeYuv420FromBgr(yuv, Yuv420Type_planar, bgr);
+		if(y == NULL) {
+			break;
+		}
+		yuv = y;
+		x264TestData testData;
+		testData.dbgr = dbgr;
+		testData.dec_win = dec_win;
+		testData.decoder = decoder;
+		ttLibC_X264Encoder_encode(encoder, yuv, x264Test_encodeCallback, &testData);
+		dbgr = testData.dbgr;
+		uint8_t key = ttLibC_CvWindow_waitForKeyInput(10);
+		if(key == Keychar_Esc) {
+			break;
+		}
+	}
+	ttLibC_Bgr_close(&bgr);
+	ttLibC_Bgr_close(&dbgr);
+	ttLibC_Yuv420_close(&yuv);
+	ttLibC_Openh264Decoder_close(&decoder);
+	ttLibC_X264Encoder_close(&encoder);
+	ttLibC_CvWindow_close(&dec_win);
+	ttLibC_CvWindow_close(&window);
+	ttLibC_CvCapture_close(&capture);
+#endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
+
 #if defined(__ENABLE_JPEG__) && defined(__ENABLE_OPENCV__)
 typedef struct {
 	ttLibC_JpegDecoder *decoder;
@@ -280,7 +360,7 @@ static void speexdspResamplerTest() {
 
 #if defined(__ENABLE_OPENH264__) && defined(__ENABLE_OPENCV__)
 
-typedef struct {
+typedef struct openh264TestData{
 	ttLibC_Openh264Decoder *decoder;
 	ttLibC_CvWindow *dec_win;
 	ttLibC_Bgr *dbgr;
@@ -302,7 +382,6 @@ bool openh264EncoderTestCallback(void *ptr, ttLibC_H264 *h264) {
 	if(h264->type == H264Type_unknown) {
 		return true;
 	}
-	LOG_PRINT("h264_type:%d", h264->type);
 	ttLibC_Openh264Decoder_decode(testData->decoder, h264, openh264DecoderTestCallback, testData);
 	return true;
 }
@@ -505,6 +584,7 @@ static void imageResamplerTest() {
  */
 cute::suite encoderDecoderTests(cute::suite s) {
 	s.clear();
+	s.push_back(CUTE(x264Test));
 	s.push_back(CUTE(jpegTest));
 	s.push_back(CUTE(opusTest));
 	s.push_back(CUTE(speexTest));
@@ -515,6 +595,3 @@ cute::suite encoderDecoderTests(cute::suite s) {
 	s.push_back(CUTE(imageResamplerTest));
 	return s;
 }
-
-
-
