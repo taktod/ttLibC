@@ -47,7 +47,8 @@ typedef struct ttLibC_Encoder_Openh264Encoder {
 	uint32_t width;
 	/** target height */
 	uint32_t height;
-	/** under data is not used.(need to improve.) */
+
+	/** not used.(need to improve.) */
 	uint32_t max_framerate;
 	uint32_t target_bitrate;
 	uint32_t max_bitrate;
@@ -139,13 +140,20 @@ bool ttLibC_Openh264Encoder_setIDRInterval(
 		ttLibC_Openh264Encoder *encoder,
 		int32_t interval);
 
+/**
+ * update RateControl mode for openh264.
+ * @param encoder
+ * @param rcType
+ * @return true:success false:error.
+ */
 bool ttLibC_Openh264Encoder_setRCMode(
 		ttLibC_Openh264Encoder *encoder,
 		ttLibC_Openh264Encoder_RCType rcType);
 
 /**
  * force next encode picture will be key frame(sliceIDR).
- * @param
+ * @param encoder
+ * @return true:success false:error.
  */
 bool ttLibC_Openh264Encoder_forceNextKeyFrame(ttLibC_Openh264Encoder *encoder);
 
