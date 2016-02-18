@@ -174,12 +174,71 @@ static ttLibC_Openh264Encoder *Openh264Encoder_make(SEncParamExt *pParamExt) {
 }
 
 /*
+ * make h264 frame from analyzed buffer.
+ * @param target_type
+ * @param encoder
+ * @param buffer
+ * @param callback
+ * @param ptr
+ * @return true:success false:some error.(close buffer inside this function for error.)
+ */
+static bool Openh264Encoder_makeH264Frame(
+		ttLibC_H264_Type target_type,
+		ttLibC_Openh264Encoder_ *encoder,
+		ttLibC_DynamicBuffer *buffer,
+		ttLibC_Openh264EncodeFunc callback,
+		void *ptr) {
+	ttLibC_H264 *h264 = NULL;
+	if(target_type == H264Type_configData) {
+		h264 = ttLibC_H264_make(
+				encoder->configData,
+				target_type,
+				encoder->inherit_super.width,
+				encoder->inherit_super.height,
+				ttLibC_DynamicBuffer_refData(buffer),
+				ttLibC_DynamicBuffer_refSize(buffer),
+				false,
+				0,
+				1000);
+		if(h264 == NULL) {
+			ERR_PRINT("failed to make configData fro h264Frame");
+			ttLibC_DynamicBuffer_close(&buffer);
+			return false;
+		}
+		encoder->configData = h264;
+	}
+	else {
+		h264 = ttLibC_H264_make(
+				encoder->h264,
+				target_type,
+				encoder->inherit_super.width,
+				encoder->inherit_super.height,
+				ttLibC_DynamicBuffer_refData(buffer),
+				ttLibC_DynamicBuffer_refSize(buffer),
+				true,
+				encoder->info.uiTimeStamp,
+				1000);
+		if(h264 == NULL) {
+			ERR_PRINT("failed to make h264 frame.");
+			ttLibC_DynamicBuffer_close(&buffer);
+			return false;
+		}
+		encoder->h264 = h264;
+	}
+	if(!callback(ptr, h264)) {
+		ttLibC_DynamicBuffer_close(&buffer);
+		return false;
+	}
+	return true;
+}
+
+/*
  * handle encoded data after encode.
  * @param encoder  encoder object
  * @param callback callback func
  * @param ptr      user def data pointer
  */
-static bool checkEncodedData(
+static bool Openh264Encoder_checkEncodedData(
 		ttLibC_Openh264Encoder_ *encoder,
 		ttLibC_Openh264EncodeFunc callback,
 		void *ptr) {
@@ -188,8 +247,7 @@ static bool checkEncodedData(
 		// check nal and decide the size of data.
 		// for slice(with first mb in slice & 0x10 != 0x00 tells new frame.)
 		uint8_t *buf = layerInfo.pBsBuf;
-		uint8_t *target_buf = buf;
-		size_t target_size = 0;
+		ttLibC_DynamicBuffer *target_buffer = ttLibC_DynamicBuffer_make();
 		ttLibC_H264_NalInfo nalInfo;
 
 		ttLibC_H264_Type target_type = H264Type_unknown;
@@ -199,13 +257,13 @@ static bool checkEncodedData(
 				ERR_PRINT("h264 data is corrupted.");
 				return false;
 			}
-			target_size += layerInfo.pNalLengthInByte[j];
 			switch(nalInfo.nal_unit_type) {
 			case H264NalType_error:
 				ERR_PRINT("unknown nal type is found.");
+				ttLibC_DynamicBuffer_close(&target_buffer);
 				return false;
 			default:
-				LOG_PRINT("nal type for not implemented now.");
+				LOG_PRINT("nal type is not implemented now.");
 				break;
 			case H264NalType_slice:
 				if(target_type != H264Type_slice
@@ -225,6 +283,7 @@ static bool checkEncodedData(
 					break;
 				default:
 					ERR_PRINT("never come here.");
+					ttLibC_DynamicBuffer_close(&target_buffer);
 					return false;
 				}
 				break;
@@ -246,6 +305,7 @@ static bool checkEncodedData(
 					break;
 				default:
 					ERR_PRINT("never come here.");
+					ttLibC_DynamicBuffer_close(&target_buffer);
 					return false;
 				}
 				break;
@@ -255,6 +315,7 @@ static bool checkEncodedData(
 					if(target_type != H264Type_unknown) {
 						// not tested yet.(no way to here with openh264?)
 						ERR_PRINT("need to make h264 object.");
+						ttLibC_DynamicBuffer_close(&target_buffer);
 						return false;
 					}
 					// for first data. initialize target type.
@@ -268,59 +329,24 @@ static bool checkEncodedData(
 					break;
 				default:
 					ERR_PRINT("never come here.");
+					ttLibC_DynamicBuffer_close(&target_buffer);
 					return false;
 				}
 				break;
 			}
+			ttLibC_DynamicBuffer_append(target_buffer, buf, layerInfo.pNalLengthInByte[j]);
 			// go next position.
 			buf += layerInfo.pNalLengthInByte[j];
 		}
-		ttLibC_H264 *h264 = NULL;
-		if(target_type == H264Type_configData) {
-			// put the memory hold. in order to refer from enoder.
-			h264 = ttLibC_H264_make(
-					encoder->configData,
-					target_type,
-					encoder->inherit_super.width,
-					encoder->inherit_super.height,
-					target_buf,
-					target_size,
-					false,
-					encoder->info.uiTimeStamp,
-					1000);
-			if(h264 != NULL) {
-				encoder->configData = h264;
-				if(!callback(ptr, encoder->configData)) {
-					return false;
-				}
-			}
-			else {
-				ERR_PRINT("failed to make h264 object(type configData)");
-				return false;
-			}
+		if(!Openh264Encoder_makeH264Frame(
+				target_type,
+				encoder,
+				target_buffer,
+				callback,
+				ptr)) {
+			return false;
 		}
-		else {
-			h264 = ttLibC_H264_make(
-					encoder->h264,
-					target_type,
-					encoder->inherit_super.width,
-					encoder->inherit_super.height,
-					target_buf,
-					target_size,
-					true,
-					encoder->info.uiTimeStamp,
-					1000);
-			if(h264 != NULL) {
-				encoder->h264 = h264;
-				if(!callback(ptr, encoder->h264)) {
-					return false;
-				}
-			}
-			else {
-				ERR_PRINT("failed to make h264 object(type h264)");
-				return false;
-			}
-		}
+		ttLibC_DynamicBuffer_close(&target_buffer);
 	}
 	return true;
 }
@@ -399,7 +425,7 @@ static bool Openh264Encoder_encode(
 		LOG_PRINT("p timestamp: in %llu, out %llu", yuv->inherit_super.inherit_super.pts, encoder_->info.uiTimeStamp);
 		break;
 	}*/
-	return checkEncodedData(encoder_, callback, ptr);
+	return Openh264Encoder_checkEncodedData(encoder_, callback, ptr);
 }
 
 /*
