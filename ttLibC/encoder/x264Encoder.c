@@ -36,6 +36,10 @@ ttLibC_X264Encoder *ttLibC_X264Encoder_make(
 		uint32_t height) {
 	x264_param_t param;
 	ttLibC_X264Encoder_getDefaultX264ParamT(&param, width, height);
+	if(x264_param_apply_profile(&param, "baseline") < 0) {
+		ERR_PRINT("failed to apply baseline.");
+		return NULL;
+	}
 	return ttLibC_X264Encoder_makeWithX264ParamT(&param);
 }
 
@@ -50,6 +54,10 @@ ttLibC_X264Encoder *ttLibC_X264Encoder_make_ex(
 	param.rc.i_qp_max = max_quantizer;
 	param.rc.i_qp_min = min_quantizer;
 	param.rc.i_bitrate = bitrate / 1000;
+	if(x264_param_apply_profile(&param, "baseline") < 0) {
+		ERR_PRINT("failed to apply baseline.");
+		return NULL;
+	}
 	return ttLibC_X264Encoder_makeWithX264ParamT(&param);
 }
 
@@ -74,7 +82,6 @@ bool ttLibC_X264Encoder_getDefaultX264ParamT(
 	param->i_timebase_num = 1;
 	param->i_keyint_max = 15;
 	param->i_keyint_min = 15;
-
 	return true;
 }
 
