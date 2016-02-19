@@ -45,7 +45,12 @@ ttLibC_X264Encoder *ttLibC_X264Encoder_make_ex(
 		uint32_t max_quantizer,
 		uint32_t min_quantizer,
 		uint32_t bitrate) {
-	return NULL;
+	x264_param_t param;
+	ttLibC_X264Encoder_getDefaultX264ParamT(&param, width, height);
+	param.rc.i_qp_max = max_quantizer;
+	param.rc.i_qp_min = min_quantizer;
+	param.rc.i_bitrate = bitrate / 1000;
+	return ttLibC_X264Encoder_makeWithX264ParamT(&param);
 }
 
 bool ttLibC_X264Encoder_getDefaultX264ParamT(
@@ -70,10 +75,6 @@ bool ttLibC_X264Encoder_getDefaultX264ParamT(
 	param->i_keyint_max = 15;
 	param->i_keyint_min = 15;
 
-	if(x264_param_apply_profile(param, "baseline") < 0) {
-		ERR_PRINT("failed to set baseline profile.");
-		return false;
-	}
 	return true;
 }
 
@@ -257,7 +258,7 @@ static bool X264Encoder_checkEncodedData(
 	}
 	if(frame_size != 0) {
 		ERR_PRINT("nalSize or frame_size is corrupted.");
-		ttLibC_DynamicBuffer_close(target_buffer);
+		ttLibC_DynamicBuffer_close(&target_buffer);
 		return false;
 	}
 	if(!X264Encoder_makeH264Frame(
