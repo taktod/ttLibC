@@ -76,8 +76,8 @@ endif
 
 if ENABLE_OPENH264
 nobase_include_HEADERS += \
-	ttLibC/encoder/openh264Encoder.h \
-	ttLibC/decoder/openh264Decoder.h
+	ttLibC/decoder/openh264Decoder.h \
+	ttLibC/encoder/openh264Encoder.h
 endif
 
 if ENABLE_SPEEXDSP
@@ -87,8 +87,8 @@ endif
 
 if ENABLE_SPEEX
 nobase_include_HEADERS += \
-	ttLibC/encoder/speexEncoder.h \
-	ttLibC/decoder/speexDecoder.h
+	ttLibC/decoder/speexDecoder.h \
+	ttLibC/encoder/speexEncoder.h
 endif
 
 if ENABLE_FILE
@@ -99,8 +99,8 @@ endif
 
 if ENABLE_OPUS
 nobase_include_HEADERS += \
-	ttLibC/encoder/opusEncoder.h \
-	ttLibC/decoder/opusDecoder.h
+	ttLibC/decoder/opusDecoder.h \
+	ttLibC/encoder/opusEncoder.h
 endif
 
 if ENABLE_AVCODEC
@@ -115,8 +115,15 @@ nobase_include_HEADERS += \
 	ttLibC/decoder/jpegDecoder.h
 endif
 
+if ENABLE_X264
+nobase_include_HEADERS += \
+	ttLibC/encoder/x264Encoder.h
+endif
+
 if ENABLE_APPLE
 nobase_include_HEADERS += \
+	ttLibC/decoder/vtDecompressSessionH264Decoder.h \
+	ttLibC/encoder/vtCompressSessionH264Encoder.h \
 	ttLibC/util/audioUnitUtil.h
 endif
 

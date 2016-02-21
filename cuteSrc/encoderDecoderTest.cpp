@@ -61,6 +61,11 @@
 #	include <ttLibC/encoder/x264Encoder.h>
 #endif
 
+#ifdef __ENABLE_APPLE__
+#	include <ttLibC/encoder/vtCompressSessionH264Encoder.h>
+#	include <ttLibC/decoder/vtDecompressSessionH264Decoder.h>
+#endif
+
 #include <ttLibC/util/beepUtil.h>
 #include <ttLibC/frame/audio/pcms16.h>
 #include <ttLibC/frame/audio/mp3.h>
@@ -78,6 +83,75 @@
 
 #include <ttLibC/util/hexUtil.h>
 
+#if defined(__ENABLE_APPLE__) && defined(__ENABLE_OPENCV__)
+typedef struct vtH264Test_t {
+	ttLibC_VtH264Decoder *decoder;
+	ttLibC_CvWindow *target;
+	ttLibC_Bgr *dbgr;
+} vtH264Test_t;
+
+static bool vtH264Test_decodeCallback(void *ptr, ttLibC_Yuv420 *yuv) {
+	vtH264Test_t *testData = (vtH264Test_t *)ptr;
+	ttLibC_Bgr *b = ttLibC_ImageResampler_makeBgrFromYuv420(testData->dbgr, BgrType_bgr, yuv);
+	if(b == NULL) {
+		return false;
+	}
+	testData->dbgr = b;
+	ttLibC_CvWindow_showBgr(testData->target, testData->dbgr);
+	return true;
+}
+
+static bool vtH264Test_encodeCallback(void *ptr, ttLibC_H264 *h264) {
+	vtH264Test_t *testData = (vtH264Test_t *)ptr;
+	return ttLibC_VtH264Decoder_decode(testData->decoder, h264, vtH264Test_decodeCallback, ptr);
+}
+
+#endif
+
+static void vtH264Test() {
+	LOG_PRINT("vtH264Test");
+#if defined(__ENABLE_APPLE__) && defined(__ENABLE_OPENCV__)
+	uint32_t width = 320, height = 240;
+	ttLibC_CvCapture *capture = ttLibC_CvCapture_make(0, width, height);
+	ttLibC_CvWindow *original = ttLibC_CvWindow_make("original");
+	ttLibC_CvWindow *target = ttLibC_CvWindow_make("target");
+	ttLibC_VtH264Encoder *encoder = ttLibC_VtH264Encoder_make(width, height);
+	ttLibC_VtH264Decoder *decoder = ttLibC_VtH264Decoder_make();
+	ttLibC_Bgr *bgr = NULL, *b;
+	ttLibC_Yuv420 *yuv = NULL, *y;
+	vtH264Test_t testData;
+	testData.dbgr = NULL;
+	while(true) {
+		b = ttLibC_CvCapture_queryFrame(capture, bgr);
+		if(b == NULL) {
+			break;
+		}
+		bgr = b;
+		ttLibC_CvWindow_showBgr(original, bgr);
+		y = ttLibC_ImageResampler_makeYuv420FromBgr(yuv, Yuv420Type_planar, bgr);
+		if(y == NULL) {
+			break;
+		}
+		yuv = y;
+		testData.decoder = decoder;
+		testData.target = target;
+		ttLibC_VtH264Encoder_encode(encoder, yuv, vtH264Test_encodeCallback, &testData);
+		uint8_t key = ttLibC_CvWindow_waitForKeyInput(66);
+		if(key == Keychar_Esc) {
+			break;
+		}
+	}
+	ttLibC_VtH264Encoder_close(&encoder);
+	ttLibC_Bgr_close(&bgr);
+	ttLibC_Bgr_close(&testData.dbgr);
+	ttLibC_Yuv420_close(&yuv);
+	ttLibC_VtH264Decoder_close(&decoder);
+	ttLibC_CvWindow_close(&original);
+	ttLibC_CvWindow_close(&target);
+	ttLibC_CvCapture_close(&capture);
+#endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
 
 #if defined(__ENABLE_X264__) && defined(__ENABLE_OPENCV__) && defined(__ENABLE_OPENH264__)
 typedef struct x264TestData{
@@ -585,6 +659,7 @@ static void imageResamplerTest() {
  */
 cute::suite encoderDecoderTests(cute::suite s) {
 	s.clear();
+	s.push_back(CUTE(vtH264Test));
 	s.push_back(CUTE(x264Test));
 	s.push_back(CUTE(jpegTest));
 	s.push_back(CUTE(opusTest));
