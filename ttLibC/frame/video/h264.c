@@ -238,7 +238,7 @@ bool ttLibC_H264_getAvccInfo(ttLibC_H264_NalInfo* info, uint8_t *data, size_t da
 		// not enough data size.
 		return false;
 	}
-	info->data_pos = 0;
+	info->data_pos = 4;
 	info->nal_unit_type = H264NalType_error;
 	info->nal_size = ((data[0] << 24) | (data[1] << 16) | (data[2] << 8) | data[3]) + 4;
 	data += 4;
