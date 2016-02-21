@@ -57,6 +57,10 @@
 #	include <ttLibC/decoder/jpegDecoder.h>
 #endif
 
+#ifdef __ENABLE_X264__
+#	include <ttLibC/encoder/x264Encoder.h>
+#endif
+
 #include <ttLibC/util/beepUtil.h>
 #include <ttLibC/frame/audio/pcms16.h>
 #include <ttLibC/frame/audio/mp3.h>
@@ -74,9 +78,6 @@
 
 #include <ttLibC/util/hexUtil.h>
 
-#ifdef __ENABLE_X264__
-#	include <ttLibC/encoder/x264Encoder.h>
-#endif
 
 #if defined(__ENABLE_X264__) && defined(__ENABLE_OPENCV__) && defined(__ENABLE_OPENH264__)
 typedef struct x264TestData{
