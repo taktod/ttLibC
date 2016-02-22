@@ -87,8 +87,6 @@ static bool VtH264Encoder_makeH264Frame(
 	return true;
 }
 
-// 取得したnalデータを確認します。
-// とりあえずspsとppsは別途取得可能な状況にあるのでここには回さずに処理しようと思う。
 static bool VtH264Encoder_checkEncodedData(
 		ttLibC_VtH264Encoder_ *encoder,
 		uint8_t *data,
@@ -170,7 +168,6 @@ static void VtH264Encoder_encodeCallback(
 			return;
 		}
 		ttLibC_DynamicBuffer_close(&data_buffer);
-		// size nalをつくって応答した方がいいかなぁ・・・どうしたもんか・・・
 	}
 	uint8_t *bufferData;
 	size_t size;
@@ -229,9 +226,9 @@ ttLibC_VtH264Encoder *ttLibC_VtH264Encoder_make_ex(
 		CFNumberRef frameH = CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type, (const void *)(&height));
 		CFNumberRef boolYES = CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt8Type, (const void *)(&boolYESValue));
 
-		const void *pixelBufferOptionsDictKeys[] = {kCVPixelBufferPixelFormatTypeKey, kCVPixelBufferWidthKey, kCVPixelBufferHeightKey, kCVPixelBufferOpenGLCompatibilityKey, kCVPixelBufferIOSurfacePropertiesKey};
-		const void *pixelBufferOptionsDictValues[] = {cvPixelFormatType, frameW, frameH, boolYES, emptyDict};
-		CFDictionaryRef pixelBufferOptions = CFDictionaryCreate(kCFAllocatorDefault, pixelBufferOptionsDictKeys, pixelBufferOptionsDictValues, 5, NULL, NULL);
+		const void *pixelBufferOptionsDictKeys[] = {kCVPixelBufferPixelFormatTypeKey, kCVPixelBufferWidthKey, kCVPixelBufferHeightKey};
+		const void *pixelBufferOptionsDictValues[] = {cvPixelFormatType, frameW, frameH};
+		CFDictionaryRef pixelBufferOptions = CFDictionaryCreate(kCFAllocatorDefault, pixelBufferOptionsDictKeys, pixelBufferOptionsDictValues, 3, NULL, NULL);
 
 		err = VTCompressionSessionCreate(kCFAllocatorDefault,
 				width,
@@ -354,7 +351,7 @@ bool ttLibC_VtH264Encoder_encode(
 	void *v_data = CVPixelBufferGetBaseAddressOfPlane(encoder_->image_buffer, 2);
 	memcpy(v_data, yuv420->v_data, encoder_->chroma_size);
 	CVPixelBufferUnlockBaseAddress(encoder_->image_buffer, 0);
-	// keyFrameを強制する場合はここでちょっと手を加える必要がある
+	// if we want to force keyframe, do something here...
 	VTCompressionSessionEncodeFrame(encoder_->session, encoder_->image_buffer, pts, dur, NULL, NULL, &flags);
 	return true;
 }
