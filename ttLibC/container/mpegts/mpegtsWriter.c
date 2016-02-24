@@ -126,7 +126,7 @@ static bool MpegtsWriter_H264TrackAdd(void *ptr, ttLibC_Frame *frame) {
 	default:
 		return true; // only slice or sliceIDR
 	}
-	if(callbackData->writer->target_pos < h264->inherit_super.inherit_super.pts) {
+	if(callbackData->writer->target_pos <= h264->inherit_super.inherit_super.pts) {
 		return false;
 	}
 	if(!ttLibC_Pes_writeH264Packet(callbackData->writer, callbackData->track, frame)) {
