@@ -38,6 +38,8 @@ typedef struct ttLibC_Encoder_Openh264Encoder_ {
 	ttLibC_H264 *h264;
 	/** for control idr */
 	uint32_t idr_interval_count;
+	/** reduce_mode */
+	bool is_reduce_mode;
 } ttLibC_Encoder_Openh264Encoder_;
 
 typedef ttLibC_Encoder_Openh264Encoder_ ttLibC_Openh264Encoder_;
@@ -170,6 +172,7 @@ static ttLibC_Openh264Encoder *Openh264Encoder_make(SEncParamExt *pParamExt) {
 	encoder->inherit_super.height = pParamExt->iPicHeight;
 	encoder->configData = NULL;
 	encoder->h264       = NULL;
+	encoder->is_reduce_mode = false;
 	return (ttLibC_Openh264Encoder *)encoder;
 }
 
@@ -334,7 +337,19 @@ static bool Openh264Encoder_checkEncodedData(
 				}
 				break;
 			}
-			ttLibC_DynamicBuffer_append(target_buffer, buf, layerInfo.pNalLengthInByte[j]);
+			if(encoder->is_reduce_mode) {
+				if(nalInfo.data_pos == 4) {
+					// copy_data on buffer.
+					ttLibC_DynamicBuffer_append(target_buffer, buf + 1, layerInfo.pNalLengthInByte[j] - 1);
+				}
+				else {
+					// copy_data on buffer.
+					ttLibC_DynamicBuffer_append(target_buffer, buf, layerInfo.pNalLengthInByte[j]);
+				}
+			}
+			else {
+				ttLibC_DynamicBuffer_append(target_buffer, buf, layerInfo.pNalLengthInByte[j]);
+			}
 			// go next position.
 			buf += layerInfo.pNalLengthInByte[j];
 		}
@@ -638,6 +653,18 @@ bool ttLibC_Openh264Encoder_setRCMode(
 	encoder_->encoder->SetOption(ENCODER_OPTION_RC_MODE, &rc_mode);
 	return true;
 }
+
+bool ttLibC_Openh264Encoder_setReduceMode(
+		ttLibC_Openh264Encoder *encoder,
+		bool reduce_mode_flag) {
+	ttLibC_Openh264Encoder_ *encoder_ = (ttLibC_Openh264Encoder_ *)encoder;
+	if(encoder_ == NULL) {
+		return false;
+	}
+	encoder_->is_reduce_mode = reduce_mode_flag;
+	return true;
+}
+
 
 /*
  * call close for c code

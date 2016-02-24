@@ -158,6 +158,16 @@ bool ttLibC_Openh264Encoder_setRCMode(
 bool ttLibC_Openh264Encoder_forceNextKeyFrame(ttLibC_Openh264Encoder *encoder);
 
 /**
+ * try to reduce the nal header size. use 3byte.
+ * @param encoder
+ * @param reduce_mode_flag
+ * @return true:success false:error
+ */
+bool ttLibC_Openh264Encoder_setReduceMode(
+		ttLibC_Openh264Encoder *encoder,
+		bool reduce_mode_flag);
+
+/**
  * close openh264 encoder
  * @param encoder
  */
