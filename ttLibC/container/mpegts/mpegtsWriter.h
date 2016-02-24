@@ -64,6 +64,9 @@ typedef struct {
 	uint32_t max_unit_duration;
 
 	ttLibC_MpegtsWriter_Status status;
+
+	ttLibC_ContainerWriteFunc callback;
+	void *ptr;
 } ttLibC_ContainerWriter_MpegtsWriter_;
 
 typedef ttLibC_ContainerWriter_MpegtsWriter_ ttLibC_MpegtsWriter_;

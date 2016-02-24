@@ -359,10 +359,9 @@ bool ttLibC_Pes_getFrame(
 }
 
 bool ttLibC_Pes_writeH264Packet(
+		ttLibC_MpegtsWriter_ *writer,
 		ttLibC_MpegtsTrack *track,
-		ttLibC_Frame *frame,
-		ttLibC_ContainerWriteFunc callback,
-		void *ptr) {
+		ttLibC_Frame *frame) {
 	ttLibC_H264 *h264 = (ttLibC_H264 *)frame;
 	ttLibC_H264 *config = (ttLibC_H264 *)track->h264_configData;
 	uint32_t total_size = 0;
@@ -494,7 +493,7 @@ bool ttLibC_Pes_writeH264Packet(
 				h264 = NULL;
 			}
 			else {
-				if(!callback(ptr, buf, 188)) {
+				if(!writer->callback(writer->ptr, buf, 188)) {
 					return false;
 				}
 				break;
@@ -502,7 +501,7 @@ bool ttLibC_Pes_writeH264Packet(
 		}
 		if(p_buf_left_size == 0) {
 			// packet is complete, need to go next.
-			if(!callback(ptr, buf, 188)) {
+			if(!writer->callback(writer->ptr, buf, 188)) {
 				return false;
 			}
 			// prepare data.
@@ -558,13 +557,11 @@ typedef struct {
 	void    *buf;
 	uint8_t *p_buf;
 	uint32_t p_buf_left_size;
-	uint64_t target_pts;
 	uint64_t start_pts;
 	uint8_t *data;
 	size_t   data_size;
-	ttLibC_ContainerWriteFunc callback;
 	ttLibC_MpegtsTrack *track;
-	void *ptr;
+	ttLibC_MpegtsWriter_ *writer;
 	bool error_number;
 } audio_data_t;
 
@@ -577,7 +574,7 @@ bool Pes_checkAudioTotalSize(
 		void *ptr,
 		ttLibC_Frame *frame) {
 	audio_data_t *audioData = (audio_data_t *)ptr;
-	if(audioData->target_pts < frame->pts) {
+	if(audioData->writer->target_pos < frame->pts) {
 		return false;
 	}
 	if(audioData->start_pts > frame->pts) {
@@ -616,7 +613,7 @@ bool Pes_checkAudioTotalSize(
  */
 bool Pes_writeAudioData(void *ptr, ttLibC_Frame *frame) {
 	audio_data_t *audioData = (audio_data_t *)ptr;
-	if(audioData->target_pts < frame->pts) {
+	if(audioData->writer->target_pos < frame->pts) {
 		// done.
 		return false;
 	}
@@ -645,7 +642,7 @@ bool Pes_writeAudioData(void *ptr, ttLibC_Frame *frame) {
 		-- audioData->total_size;
 		if(audioData->p_buf_left_size == 0) {
 			// 188 byte packet is complete.
-			if(!audioData->callback(audioData->ptr, audioData->buf, 188)) {
+			if(!audioData->writer->callback(audioData->writer->ptr, audioData->buf, 188)) {
 				audioData->error_number = 1;
 				return false;
 			}
@@ -701,9 +698,7 @@ bool Pes_writeAudioData(void *ptr, ttLibC_Frame *frame) {
 
 bool ttLibC_Pes_writeAudioPacket(
 		ttLibC_MpegtsWriter_ *writer,
-		ttLibC_MpegtsTrack *track,
-		ttLibC_ContainerWriteFunc callback,
-		void *ptr) {
+		ttLibC_MpegtsTrack *track) {
 	uint8_t buf[188];
 	audio_data_t audioData;
 	audioData.track = track;
@@ -714,9 +709,7 @@ bool ttLibC_Pes_writeAudioPacket(
 	audioData.data = NULL;
 	audioData.data_size = 0;
 	audioData.start_pts = 0xFFFFFFFFFFFFFFFFL;
-	audioData.target_pts = writer->target_pos;
-	audioData.callback = callback;
-	audioData.ptr = ptr;
+	audioData.writer = writer;
 	audioData.error_number = 0;
 
 	// firstly, check total size of frame.

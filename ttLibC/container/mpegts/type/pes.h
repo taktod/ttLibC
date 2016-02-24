@@ -57,10 +57,9 @@ bool ttLibC_Pes_getFrame(
  * @param ptr
  */
 bool ttLibC_Pes_writeH264Packet(
+		ttLibC_MpegtsWriter_ *writer,
 		ttLibC_MpegtsTrack *track,
-		ttLibC_Frame *frame,
-		ttLibC_ContainerWriteFunc callback,
-		void *ptr);
+		ttLibC_Frame *frame);
 
 /**
  * write audio packet.
@@ -71,9 +70,7 @@ bool ttLibC_Pes_writeH264Packet(
  */
 bool ttLibC_Pes_writeAudioPacket(
 		ttLibC_MpegtsWriter_ *writer,
-		ttLibC_MpegtsTrack *track,
-		ttLibC_ContainerWriteFunc callback,
-		void *ptr);
+		ttLibC_MpegtsTrack *track);
 
 void ttLibC_Pes_close(ttLibC_Pes **pes);
 

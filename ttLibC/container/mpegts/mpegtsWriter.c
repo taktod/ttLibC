@@ -32,8 +32,6 @@
 typedef struct {
 	ttLibC_MpegtsWriter_ *writer;
 	ttLibC_MpegtsTrack *track;
-	ttLibC_ContainerWriteFunc callback;
-	void *ptr;
 	/** error_number, 0 is no error */
 	bool error_number;
 } MpegtsWriter_CallbackPtr_t;
@@ -129,7 +127,7 @@ static bool MpegtsWriter_H264TrackAdd(void *ptr, ttLibC_Frame *frame) {
 	if(callbackData->writer->target_pos < h264->inherit_super.inherit_super.pts) {
 		return false;
 	}
-	if(!ttLibC_Pes_writeH264Packet(callbackData->track, frame, callbackData->callback, callbackData->ptr)) {
+	if(!ttLibC_Pes_writeH264Packet(callbackData->writer, callbackData->track, frame)) {
 		callbackData->error_number = 1;
 		return false;
 	}
@@ -163,9 +161,7 @@ static bool MpegtsWriter_PcrH264TrackCheck(void *ptr, ttLibC_Frame *frame) {
 }
 
 static bool MpegtsWriter_writeFromQueue(
-		ttLibC_MpegtsWriter_ *writer,
-		ttLibC_ContainerWriteFunc callback,
-		void *ptr) {
+		ttLibC_MpegtsWriter_ *writer) {
 	switch(writer->status) {
 	case status_target_check:
 		{
@@ -186,7 +182,7 @@ static bool MpegtsWriter_writeFromQueue(
 			// if target_pos is updated, go next.
 			if(writer->target_pos != writer->current_pts_pos) {
 				writer->status = status_video_check;
-				return MpegtsWriter_writeFromQueue(writer, callback, ptr);
+				return MpegtsWriter_writeFromQueue(writer);
 			}
 			return true;
 		}
@@ -207,15 +203,13 @@ static bool MpegtsWriter_writeFromQueue(
 			}
 			// all track has enough data, go next.
 			writer->status = status_video_add;
-			return MpegtsWriter_writeFromQueue(writer, callback, ptr);
+			return MpegtsWriter_writeFromQueue(writer);
 		}
 		break;
 	case status_video_add:
 		{
 			MpegtsWriter_CallbackPtr_t callbackData;
-			callbackData.callback = callback;
 			callbackData.error_number = 0;
-			callbackData.ptr = ptr;
 			callbackData.writer = writer;
 			for(int i = 0;i < writer->pes_track_num;++ i) {
 				switch(writer->track_list[i].frame_type) {
@@ -234,7 +228,7 @@ static bool MpegtsWriter_writeFromQueue(
 			}
 			// done, go next.
 			writer->status = status_audio_check;
-			return MpegtsWriter_writeFromQueue(writer, callback, ptr);
+			return MpegtsWriter_writeFromQueue(writer);
 		}
 		break;
 	case status_audio_check:
@@ -254,7 +248,7 @@ static bool MpegtsWriter_writeFromQueue(
 			}
 			// ok, go next.
 			writer->status = status_audio_add;
-			return MpegtsWriter_writeFromQueue(writer, callback, ptr);
+			return MpegtsWriter_writeFromQueue(writer);
 		}
 		break;
 	case status_audio_add:
@@ -263,7 +257,7 @@ static bool MpegtsWriter_writeFromQueue(
 				switch(writer->track_list[i].frame_type) {
 				case frameType_aac:
 				case frameType_mp3:
-					if(!ttLibC_Pes_writeAudioPacket(writer, &writer->track_list[i], callback, ptr)) {
+					if(!ttLibC_Pes_writeAudioPacket(writer, &writer->track_list[i])) {
 						ERR_PRINT("error happen during audio frame writing.");
 						return false;
 					}
@@ -274,7 +268,7 @@ static bool MpegtsWriter_writeFromQueue(
 			}
 			// go next.
 			writer->status = status_current_update;
-			return MpegtsWriter_writeFromQueue(writer, callback, ptr);
+			return MpegtsWriter_writeFromQueue(writer);
 		}
 		break;
 	case status_current_update:
@@ -285,7 +279,7 @@ static bool MpegtsWriter_writeFromQueue(
 			}
 			// go back to first step.
 			writer->status = status_target_check;
-			return MpegtsWriter_writeFromQueue(writer, callback, ptr);
+			return MpegtsWriter_writeFromQueue(writer);
 		}
 		break;
 	}
@@ -393,7 +387,9 @@ bool ttLibC_MpegtsWriter_write(
 		ERR_PRINT("unexpected frame:%d", frame->type);
 		return false;
  	}
-	return MpegtsWriter_writeFromQueue(writer_, callback, ptr);
+	writer_->callback = callback;
+	writer_->ptr = ptr;
+	return MpegtsWriter_writeFromQueue(writer_);
 }
 
 /**
