@@ -67,6 +67,8 @@ typedef struct {
 
 	ttLibC_ContainerWriteFunc callback;
 	void *ptr;
+
+	bool is_reduce_mode;
 } ttLibC_ContainerWriter_MpegtsWriter_;
 
 typedef ttLibC_ContainerWriter_MpegtsWriter_ ttLibC_MpegtsWriter_;

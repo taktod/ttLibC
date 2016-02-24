@@ -371,7 +371,16 @@ bool ttLibC_Pes_writeH264Packet(
 	uint8_t *p_buf = buf;
 	uint32_t p_buf_left_size = 188;
 
+	uint32_t aud_size = 6;
 	uint8_t aud[] = {0x00, 0x00, 0x00, 0x01, 0x09, 0xF0};
+	if(writer->is_reduce_mode) {
+		aud[0] = 0x00;
+		aud[1] = 0x00;
+		aud[2] = 0x01;
+		aud[3] = 0x09;
+		aud[4] = 0xF0;
+		aud_size = 5;
+	}
 	uint8_t *nal    = NULL;
 	size_t nal_size = 0;
 
@@ -384,7 +393,7 @@ bool ttLibC_Pes_writeH264Packet(
 	case H264Type_slice:
 		// aud slice slice...
 		config = NULL; // no use
-		total_size = 6 + h264->inherit_super.inherit_super.buffer_size;
+		total_size = aud_size + h264->inherit_super.inherit_super.buffer_size;
 		// with adaptation field(pcr), should be better.
 		if(total_size < 170) {
 			p_buf[3] = 0x30 | (track->cc & 0x0F);
@@ -411,7 +420,7 @@ bool ttLibC_Pes_writeH264Packet(
 		break;
 	case H264Type_sliceIDR:
 		// aud sps pps sliceIDR sliceIDR ...
-		total_size = 6 + track->h264_configData->buffer_size + h264->inherit_super.inherit_super.buffer_size;
+		total_size = aud_size + track->h264_configData->buffer_size + h264->inherit_super.inherit_super.buffer_size;
 		p_buf[3] = 0x30 | (track->cc & 0x0F);
 		if(track->frame_queue->track_id == 0x100 // pcr
 				&& total_size < 162) { // less than 162byte
@@ -474,7 +483,7 @@ bool ttLibC_Pes_writeH264Packet(
 	p_buf_left_size -= 14;
 	// then put the h264 data.
 	nal = aud;
-	nal_size = 6;
+	nal_size = aud_size;
 	for(int i = 0;i < total_size;++ i) {
 		*p_buf = *nal;
 		++ nal;

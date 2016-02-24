@@ -167,6 +167,16 @@ bool ttLibC_MpegtsWriter_write(
 		void *ptr);
 
 /**
+ * try to reduce the mpegts data size.
+ * @param writer
+ * @param reduce_mode_flag
+ * @return true:success false:error
+ */
+bool ttLibC_MpegtsWriter_setReduceMode(
+		ttLibC_MpegtsWriter *writer,
+		bool reduce_mode_flag);
+
+/**
  * close mpegts writer
  * @param writer
  */

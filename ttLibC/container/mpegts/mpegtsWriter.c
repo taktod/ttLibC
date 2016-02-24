@@ -99,7 +99,9 @@ ttLibC_MpegtsWriter *ttLibC_MpegtsWriter_make_ex(
 		}
 	}
 	writer->inherit_super.inherit_super.timebase = 90000;
+	writer->inherit_super.inherit_super.pts = 0;
 	writer->is_first = true;
+	writer->is_reduce_mode = false;
 	writer->cc_pat = 0;
 	writer->cc_pmt = 0;
 	writer->cc_sdt = 0;
@@ -390,6 +392,17 @@ bool ttLibC_MpegtsWriter_write(
 	writer_->callback = callback;
 	writer_->ptr = ptr;
 	return MpegtsWriter_writeFromQueue(writer_);
+}
+
+bool ttLibC_MpegtsWriter_setReduceMode(
+		ttLibC_MpegtsWriter *writer,
+		bool reduce_mode_flag) {
+	ttLibC_MpegtsWriter_ *writer_ = (ttLibC_MpegtsWriter_ *)writer;
+	if(writer_ == NULL) {
+		return false;
+	}
+	writer_->is_reduce_mode = reduce_mode_flag;
+	return true;
 }
 
 /**
