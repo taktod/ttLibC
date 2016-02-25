@@ -105,8 +105,8 @@ ttLibC_FaacEncoder *ttLibC_FaacEncoder_make(
 	}
 	encoder->config->mpegVersion   = MPEG4;
 	encoder->config->useTns        = 0; // noise sharping
-	encoder->config->allowMidside  = 1; // 5.1ch's .1ch is allowed.
-	encoder->config->bitRate       = bitrate; // target bitrate
+	encoder->config->allowMidside  = 0; // 5.1ch's .1ch is not allowed.
+	encoder->config->bitRate       = bitrate / channel_num; // target bitrate
 	encoder->config->outputFormat  = 1; // use adts.
 	encoder->config->inputFormat   = FAAC_INPUT_16BIT; // accept pcms16
 	if(!faacEncSetConfiguration(encoder->handle, encoder->config)) {
