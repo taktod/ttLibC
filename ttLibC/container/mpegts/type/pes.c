@@ -730,58 +730,80 @@ bool ttLibC_Pes_writeAudioPacket(
 	audioData.p_buf[2] = track->frame_queue->track_id & 0xFF;
 	audioData.p_buf[3] = 0x30 | (track->cc & 0x0F); // must have adaptation field.(random access.)
 	track->cc ++;
-	if(track->frame_queue->track_id == 0x100 // pcr
-			&& audioData.total_size < 162) { // need adaptation field padding
-		uint32_t fill_size = 162 - audioData.total_size + 1;
-		audioData.p_buf[4] = fill_size;
-		audioData.p_buf[5] = 0x50;
-		// pcr
-		audioData.p_buf[6] = (audioData.start_pts >> 25) & 0xFF;
-		audioData.p_buf[7] = (audioData.start_pts >> 17) & 0xFF;
-		audioData.p_buf[8] = (audioData.start_pts >> 9) & 0xFF;
-		audioData.p_buf[9] = (audioData.start_pts >> 1) & 0xFF;
-		audioData.p_buf[10] = ((audioData.start_pts << 7) & 0x80) | 0x7E;
-		audioData.p_buf[11] = 0x00;
-		audioData.p_buf += 12;
-		audioData.p_buf_left_size -= 12;
-		for(uint32_t i = 0;i < fill_size - 7;i ++) {
-			*audioData.p_buf = 0xFF;
-			++ audioData.p_buf;
-			-- audioData.p_buf_left_size;
+	if(track->frame_queue->track_id == 0x100) { // pcr
+		if(audioData.total_size < 162) {
+			uint32_t fill_size = 162 - audioData.total_size + 1;
+			audioData.p_buf[4] = fill_size;
+			audioData.p_buf[5] = 0x50;
+			// pcr
+			audioData.p_buf[6] = (audioData.start_pts >> 25) & 0xFF;
+			audioData.p_buf[7] = (audioData.start_pts >> 17) & 0xFF;
+			audioData.p_buf[8] = (audioData.start_pts >> 9) & 0xFF;
+			audioData.p_buf[9] = (audioData.start_pts >> 1) & 0xFF;
+			audioData.p_buf[10] = ((audioData.start_pts << 7) & 0x80) | 0x7E;
+			audioData.p_buf[11] = 0x00;
+			audioData.p_buf += 12;
+			audioData.p_buf_left_size -= 12;
+			for(uint32_t i = 0;i < fill_size - 7;i ++) {
+				*audioData.p_buf = 0xFF;
+				++ audioData.p_buf;
+				-- audioData.p_buf_left_size;
+			}
+		}
+		else {
+			audioData.p_buf[4] = 0x07;
+			audioData.p_buf[5] = 0x50; // random access & pcr
+			// pcr
+			audioData.p_buf[6] = (audioData.start_pts >> 25) & 0xFF;
+			audioData.p_buf[7] = (audioData.start_pts >> 17) & 0xFF;
+			audioData.p_buf[8] = (audioData.start_pts >> 9) & 0xFF;
+			audioData.p_buf[9] = (audioData.start_pts >> 1) & 0xFF;
+			audioData.p_buf[10] = ((audioData.start_pts << 7) & 0x80) | 0x7E;
+			audioData.p_buf[11] = 0x00;
+			audioData.p_buf += 12;
+			audioData.p_buf_left_size -= 12;
 		}
 	}
-	else if(track->frame_queue->track_id != 0x100 // non pcr
-			&& audioData.total_size < 168) { // need adaptation field padding
-		uint32_t fill_size = 168 - audioData.total_size + 1;
-		audioData.p_buf[4] = fill_size;
-		audioData.p_buf[5] = 0x40;
-		audioData.p_buf += 6;
-		audioData.p_buf_left_size -= 6;
-		for(uint32_t i = 0;i < fill_size - 1;i ++) {
-			*audioData.p_buf = 0xFF;
-			++ audioData.p_buf;
-			-- audioData.p_buf_left_size;
+	else { // non pcr
+		if(audioData.writer->is_reduce_mode) {
+			if(audioData.total_size < 169) {
+				uint32_t fill_size = 169 - audioData.total_size + 1;
+				audioData.p_buf[4] = fill_size;
+				audioData.p_buf += 5;
+				audioData.p_buf_left_size -= 5;
+				for(uint32_t i = 0;i < fill_size - 1;i ++) {
+					*audioData.p_buf = 0xFF;
+					++ audioData.p_buf;
+					-- audioData.p_buf_left_size;
+				}
+			}
+			else {
+				audioData.p_buf[3] = (audioData.p_buf[3] & 0x1F);
+				audioData.p_buf += 4;
+				audioData.p_buf_left_size -= 4;
+			}
 		}
-	}
-	else if(track->frame_queue->track_id == 0x100) { // pcr
-		audioData.p_buf[4] = 0x07;
-		audioData.p_buf[5] = 0x50; // random access & pcr
-		// pcr
-		audioData.p_buf[6] = (audioData.start_pts >> 25) & 0xFF;
-		audioData.p_buf[7] = (audioData.start_pts >> 17) & 0xFF;
-		audioData.p_buf[8] = (audioData.start_pts >> 9) & 0xFF;
-		audioData.p_buf[9] = (audioData.start_pts >> 1) & 0xFF;
-		audioData.p_buf[10] = ((audioData.start_pts << 7) & 0x80) | 0x7E;
-		audioData.p_buf[11] = 0x00;
-		audioData.p_buf += 12;
-		audioData.p_buf_left_size -= 12;
-	}
-	else {
-		// adaptation field
-		audioData.p_buf[4] = 0x01;
-		audioData.p_buf[5] = 0x40; // random access
-		audioData.p_buf += 6;
-		audioData.p_buf_left_size -= 6;
+		else {
+			if(audioData.total_size < 168) {
+				uint32_t fill_size = 168 - audioData.total_size + 1;
+				audioData.p_buf[4] = fill_size;
+				audioData.p_buf[5] = 0x40;
+				audioData.p_buf += 6;
+				audioData.p_buf_left_size -= 6;
+				for(uint32_t i = 0;i < fill_size - 1;i ++) {
+					*audioData.p_buf = 0xFF;
+					++ audioData.p_buf;
+					-- audioData.p_buf_left_size;
+				}
+			}
+			else {
+				// adaptation field
+				audioData.p_buf[4] = 0x01;
+				audioData.p_buf[5] = 0x40; // random access
+				audioData.p_buf += 6;
+				audioData.p_buf_left_size -= 6;
+			}
+		}
 	}
 	audioData.p_buf[0] = 0x00;
 	audioData.p_buf[1] = 0x00;
