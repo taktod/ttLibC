@@ -27,8 +27,6 @@ typedef struct {
 	ttLibC_FaacEncoder inherit_super;
 	/** handle of faac */
 	faacEncHandle handle;
-	/** config information of faac */
-	faacEncConfiguration *config;
 	/** reuse aac object. */
 	ttLibC_Aac *aac;
 	/** length of input byte size */
@@ -60,57 +58,118 @@ ttLibC_FaacEncoder *ttLibC_FaacEncoder_make(
 		uint32_t sample_rate,
 		uint32_t channel_num,
 		uint32_t bitrate) {
+	faacEncConfiguration config;
+	ttLibC_FaacEncoder_getDefaultFaacEncConfiguration(&config);
+	switch(type) {
+	case FaacEncoderType_Main:
+		config.aacObjectType = MAIN;
+		break;
+	default:
+	case FaacEncoderType_Low:
+		config.aacObjectType = LOW;
+		break;
+	case FaacEncoderType_SSR:
+		config.aacObjectType = SSR;
+		break;
+	case FaacEncoderType_LTP:
+		config.aacObjectType = LTP;
+		break;
+	}
+	config.bitRate = bitrate / channel_num;
+	uint32_t band_width = 4000 + bitrate / 8;
+	if(band_width > 12000 + bitrate / 32) {
+		band_width = 12000 + bitrate / 32;
+	}
+	if(band_width > sample_rate / 2) {
+		band_width = sample_rate / 2;
+	}
+	config.bandWidth = band_width;
+	return ttLibC_FaacEncoder_makeWithFaacEncConfiguration(&config, sample_rate, channel_num);
+}
+
+void ttLibC_FaacEncoder_getDefaultFaacEncConfiguration(void *encConfig) {
+	faacEncConfigurationPtr config = (faacEncConfigurationPtr)encConfig;
+	if(config == NULL) {
+		return;
+	}
+	config->aacObjectType = LOW;
+	config->allowMidside = 0;
+	config->bandWidth = 0;
+	config->bitRate = 0;
+//	for(int i = 0;i < 64;++ i) {
+//		config->channel_map[i] = i;
+//	}
+	config->inputFormat = FAAC_INPUT_16BIT;
+	config->mpegVersion = MPEG4;
+//	config->name
+	config->outputFormat = 1; // use adts
+//	config->psymodelidx
+//	config->psymodellist
+	config->quantqual = 0;
+	config->shortctl = SHORTCTL_NORMAL;
+	config->useLfe = 0;
+	config->useTns = 0;
+//	config->version
+}
+
+ttLibC_FaacEncoder *ttLibC_FaacEncoder_makeWithFaacEncConfiguration(
+		void *encConfig,
+		uint32_t sample_rate,
+		uint32_t channel_num) {
 	ttLibC_FaacEncoder_ *encoder = ttLibC_malloc(sizeof(ttLibC_FaacEncoder_));
 	if(encoder == NULL) {
 		ERR_PRINT("failed to allocate memory for encoder.");
 		return NULL;
 	}
+	faacEncConfigurationPtr encConfig_ = (faacEncConfigurationPtr)encConfig;
 	unsigned long int samples_input, max_bytes_output;
-	encoder->handle = faacEncOpen(sample_rate, channel_num, &samples_input, &max_bytes_output);
+	encoder->handle = faacEncOpen(
+			sample_rate,
+			channel_num,
+			&samples_input,
+			&max_bytes_output);
 	if(!encoder->handle) {
 		ERR_PRINT("failed to open faac.");
 		ttLibC_free(encoder);
 		return NULL;
 	}
-	encoder->config = faacEncGetCurrentConfiguration(encoder->handle);
-	if(encoder->config == NULL) {
+	faacEncConfigurationPtr config = faacEncGetCurrentConfiguration(encoder->handle);
+	if(config == NULL) {
 		ERR_PRINT("failed to ref current configuration.");
 		faacEncClose(encoder->handle);
 		ttLibC_free(encoder);
 		return NULL;
 	}
-	if(encoder->config->version != FAAC_CFG_VERSION) {
+	if(config->version != FAAC_CFG_VERSION) {
 		ERR_PRINT("version is mismatch for faac.");
 		faacEncClose(encoder->handle);
 		ttLibC_free(encoder);
 		return NULL;
 	}
-	switch(type) {
-	case FaacEncoderType_Main:
-		encoder->config->aacObjectType = MAIN;
-		break;
-	case FaacEncoderType_Low:
-		encoder->config->aacObjectType = LOW;
-		break;
-	case FaacEncoderType_SSR:
-		encoder->config->aacObjectType = SSR;
-		break;
-	case FaacEncoderType_LTP:
-		encoder->config->aacObjectType = LTP;
-		break;
-	default:
-		ERR_PRINT("unknown faac encoder type:%d", type);
-		encoder->config->aacObjectType = LOW;
-		break;
+	config->aacObjectType = encConfig_->aacObjectType;
+	config->allowMidside = encConfig_->allowMidside;
+	if(encConfig_->bandWidth != 0) {
+		LOG_PRINT("bandWidth:%d", encConfig_->bandWidth);
+		config->bandWidth = encConfig_->bandWidth;
 	}
-	encoder->config->mpegVersion   = MPEG4;
-	encoder->config->useTns        = 0; // noise sharping
-	encoder->config->allowMidside  = 0; // 5.1ch's .1ch is not allowed.
-	encoder->config->bitRate       = bitrate / channel_num; // target bitrate
-	encoder->config->outputFormat  = 1; // use adts.
-	encoder->config->inputFormat   = FAAC_INPUT_16BIT; // accept pcms16
-	if(!faacEncSetConfiguration(encoder->handle, encoder->config)) {
-		ERR_PRINT("failed to set configuration.");
+	if(encConfig_->bitRate != 0) {
+		LOG_PRINT("bitrate:%d", encConfig_->bitRate);
+		config->bitRate = encConfig_->bitRate;
+	}
+//	config->inputFormat = encConfig_->inputFormat;
+	config->inputFormat = FAAC_INPUT_16BIT;
+	config->mpegVersion = encConfig_->mpegVersion;
+	config->outputFormat = 1; // adts fixed.
+//	config->psymodelidx
+//	config->psymodellist
+	if(encConfig_->quantqual != 0) {
+		config->quantqual = encConfig_->quantqual;
+	}
+	config->shortctl = encConfig_->shortctl;
+	config->useLfe = encConfig_->useLfe;
+	config->useTns = encConfig_->useTns;
+	if(!faacEncSetConfiguration(encoder->handle, config)) {
+		ERR_PRINT("failed to update configuration.");
 		faacEncClose(encoder->handle);
 		ttLibC_free(encoder);
 		return NULL;
@@ -125,8 +184,7 @@ ttLibC_FaacEncoder *ttLibC_FaacEncoder_make(
 	encoder->pts                       = 0;
 	encoder->inherit_super.channel_num = channel_num;
 	encoder->inherit_super.sample_rate = sample_rate;
-	encoder->inherit_super.bitrate     = bitrate;
-	// now ready to go.
+	encoder->inherit_super.bitrate     = config->bitRate * channel_num;
 	return (ttLibC_FaacEncoder *)encoder;
 }
 
@@ -265,4 +323,3 @@ void ttLibC_FaacEncoder_close(ttLibC_FaacEncoder **encoder) {
 }
 
 #endif
-

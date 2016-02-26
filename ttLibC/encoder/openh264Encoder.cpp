@@ -266,7 +266,7 @@ static bool Openh264Encoder_checkEncodedData(
 				ttLibC_DynamicBuffer_close(&target_buffer);
 				return false;
 			default:
-				LOG_PRINT("nal type is not implemented now.");
+//				LOG_PRINT("nal type is not implemented now.");
 				break;
 			case H264NalType_slice:
 				if(target_type != H264Type_slice

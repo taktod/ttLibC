@@ -61,6 +61,24 @@ ttLibC_FaacEncoder *ttLibC_FaacEncoder_make(
 		uint32_t bitrate);
 
 /**
+ * setup faacEncConfigration with ttLibC default.
+ * @param encConfig faacEncConfiguration
+ */
+void ttLibC_FaacEncoder_getDefaultFaacEncConfiguration(void *encConfig);
+
+/**
+ * make faac encoder with faacEncConfiguration
+ * @param encConfig   pointer for faacEncConfiguration
+ * @param sample_rate target sample_rate
+ * @param channel_num target channel_num
+ * @return faac encoder object.
+ */
+ttLibC_FaacEncoder *ttLibC_FaacEncoder_makeWithFaacEncConfiguration(
+		void *encConfig,
+		uint32_t sample_rate,
+		uint32_t channel_num);
+
+/**
  * encode frame.
  * @param encoder  faac encoder object.
  * @param pcm      source pcm data. support little endian interleave only.
