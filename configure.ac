@@ -34,6 +34,7 @@ avcodec_flag=no
 faad_flag=no
 apple_flag=no
 x264_flag=no
+x265_flag=no
 
 # check result
 cute_check=no 
@@ -51,6 +52,7 @@ avcodec_check=no
 faad_decode_check=no
 apple_check=no
 x264_check=no
+x265_check=no
 
 AC_ARG_ENABLE(
 	[lgpl],
@@ -118,6 +120,7 @@ AC_ARG_ENABLE(
 		jpeg_flag=$enableval
 		apple_flag=$enableval
 		x264_flag=$enableval
+		x265_flag=$enableval
 	]
 )
 
@@ -203,6 +206,12 @@ AC_ARG_ENABLE(
 	[x264],
 	AS_HELP_STRING([--enable-x264/--disable-x264], [enable/diable x264 code.]),
 	[x264_flag=$enableval]
+)
+
+AC_ARG_ENABLE(
+	[x265],
+	AS_HELP_STRING([--enable-x265/--disable-x265], [enable/diable x265 code.]),
+	[x265_flag=$enableval]
 )
 
 if test x$opencv_flag = "xyes"; then
@@ -373,6 +382,14 @@ if test x$x264_flag = "xyes"; then
 		[x264_check=no]
 	)
 fi
+if test x$x265_flag = "xyes"; then
+	PKG_CHECK_MODULES(
+		[X265],
+		[x265],
+		[x265_check=yes],
+		[x265_check=no]
+	)
+fi
 
 if test x$gpl_flag = "xyes"; then
 	AC_DEFINE([__ENABLE_GPL__])
@@ -466,6 +483,11 @@ if test x$x264_flag$gpl_flag$x264_check = "xyesyesyes"; then
 	AC_DEFINE([__ENABLE_X264__])
 fi
 AM_CONDITIONAL(ENABLE_X264, test x$x264_flag$gpl_flag$x264_check = "xyesyesyes")
+
+if test x$x265_flag$gpl_flag$x265_check = "xyesyesyes"; then
+	AC_DEFINE([__ENABLE_X265__])
+fi
+AM_CONDITIONAL(ENABLE_X265, test x$x265_flag$gpl_flag$x265_check = "xyesyesyes")
 
 AC_ARG_WITH(pkgconfigdir,
 	AS_HELP_STRING([--with-pkgconfigdir], [Use the specified pkgconfig dir.(default is $libdir/pkgconfig)]),
@@ -622,6 +644,19 @@ echo "x264:             off(under gpl only.)"
 	fi
 else
 echo "x264:             off"
+fi
+if test x$x265_flag = "xyes"; then
+	if test x$gpl_flag = "xyes"; then
+		if test x$x265_check = "xyes"; then
+echo "x265:             on"
+		else
+echo "x265:             off(x265 library is missing.)"
+		fi
+	else
+echo "x265:             off(under gpl only.)"
+	fi
+else
+echo "x265:             off"
 fi
 if test x$speexdsp_flag = "xyes"; then
 	if test x$speexdsp_check = "xyes"; then

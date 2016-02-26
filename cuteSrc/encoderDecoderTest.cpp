@@ -61,6 +61,10 @@
 #	include <ttLibC/encoder/x264Encoder.h>
 #endif
 
+#ifdef __ENABLE_X265__
+#	include <ttLibC/encoder/x265Encoder.h>
+#endif
+
 #ifdef __ENABLE_APPLE__
 #	include <ttLibC/encoder/vtCompressSessionH264Encoder.h>
 #	include <ttLibC/decoder/vtDecompressSessionH264Decoder.h>
@@ -76,6 +80,7 @@
 #include <ttLibC/frame/video/bgr.h>
 #include <ttLibC/frame/video/yuv420.h>
 #include <ttLibC/frame/video/h264.h>
+#include <ttLibC/frame/video/h265.h>
 #include <ttLibC/frame/video/jpeg.h>
 
 #include <ttLibC/resampler/imageResampler.h>
@@ -149,6 +154,53 @@ static void vtH264Test() {
 	ttLibC_CvWindow_close(&original);
 	ttLibC_CvWindow_close(&target);
 	ttLibC_CvCapture_close(&capture);
+#endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
+
+#if defined(__ENABLE_X265__) && defined(__ENABLE_OPENCV__)
+typedef struct x265TestData {
+
+} x265TestData;
+
+static bool x265Test_encodeCallback(void *ptr, ttLibC_H265 *h265) {
+	return true;
+}
+#endif
+
+static void x265Test() {
+	LOG_PRINT("x265Test");
+#if defined(__ENABLE_X265__) && defined(__ENABLE_OPENCV__)
+	uint32_t width = 320, height = 240;
+	ttLibC_CvCapture *capture = ttLibC_CvCapture_make(0, width, height);
+	ttLibC_CvWindow *original = ttLibC_CvWindow_make("original");
+	ttLibC_X265Encoder *encoder = ttLibC_X265Encoder_make(width, height);
+	ttLibC_Bgr *bgr = NULL, *b;
+	ttLibC_Yuv420 *yuv = NULL, *y;
+
+	while(true) {
+		b = ttLibC_CvCapture_queryFrame(capture, bgr);
+		if(b == NULL) {
+			break;
+		}
+		bgr = b;
+		ttLibC_CvWindow_showBgr(original, bgr);
+		y = ttLibC_ImageResampler_makeYuv420FromBgr(yuv, Yuv420Type_planar, bgr);
+		if(y == NULL) {
+			break;
+		}
+		yuv = y;
+		ttLibC_X265Encoder_encode(encoder, yuv, x265Test_encodeCallback, NULL);
+		uint8_t key_char = ttLibC_CvWindow_waitForKeyInput(10);
+		if(key_char == Keychar_Esc) {
+			break;
+		}
+	}
+	ttLibC_Bgr_close(&bgr);
+	ttLibC_Yuv420_close(&yuv);
+	ttLibC_CvCapture_close(&capture);
+	ttLibC_CvWindow_close(&original);
+	ttLibC_X265Encoder_close(&encoder);
 #endif
 	ASSERT(ttLibC_Allocator_dump() == 0);
 }
@@ -660,6 +712,7 @@ static void imageResamplerTest() {
 cute::suite encoderDecoderTests(cute::suite s) {
 	s.clear();
 	s.push_back(CUTE(vtH264Test));
+	s.push_back(CUTE(x265Test));
 	s.push_back(CUTE(x264Test));
 	s.push_back(CUTE(jpegTest));
 	s.push_back(CUTE(opusTest));
