@@ -149,11 +149,9 @@ ttLibC_FaacEncoder *ttLibC_FaacEncoder_makeWithFaacEncConfiguration(
 	config->aacObjectType = encConfig_->aacObjectType;
 	config->allowMidside = encConfig_->allowMidside;
 	if(encConfig_->bandWidth != 0) {
-		LOG_PRINT("bandWidth:%d", encConfig_->bandWidth);
 		config->bandWidth = encConfig_->bandWidth;
 	}
 	if(encConfig_->bitRate != 0) {
-		LOG_PRINT("bitrate:%d", encConfig_->bitRate);
 		config->bitRate = encConfig_->bitRate;
 	}
 //	config->inputFormat = encConfig_->inputFormat;
