@@ -121,6 +121,7 @@ ttLibC_Pes *ttLibC_Pes_getPacket(
 	ttLibC_ByteReader *reader = ttLibC_ByteReader_make(data, data_size, ByteUtilType_default);
 	ttLibC_MpegtsPacket_Header header_info;
 	if(!ttLibC_MpegtsPacket_loadMpegtsPacketHeader(reader, &header_info)) {
+		ttLibC_ByteReader_close(&reader);
 		return NULL;
 	}
 	if(header_info.payloadUnitStartIndicator == 1) {
@@ -583,7 +584,7 @@ bool Pes_checkAudioTotalSize(
 		void *ptr,
 		ttLibC_Frame *frame) {
 	audio_data_t *audioData = (audio_data_t *)ptr;
-	if(audioData->writer->target_pos < frame->pts) {
+	if(audioData->writer->target_pos <= frame->pts) {
 		return false;
 	}
 	if(audioData->start_pts > frame->pts) {
@@ -622,7 +623,7 @@ bool Pes_checkAudioTotalSize(
  */
 bool Pes_writeAudioData(void *ptr, ttLibC_Frame *frame) {
 	audio_data_t *audioData = (audio_data_t *)ptr;
-	if(audioData->writer->target_pos < frame->pts) {
+	if(audioData->writer->target_pos <= frame->pts) {
 		// done.
 		return false;
 	}
