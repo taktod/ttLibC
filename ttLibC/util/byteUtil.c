@@ -98,28 +98,30 @@ uint64_t ttLibC_ByteReader_bit(
 			++ reader_->inherit_super.read_size;
 			-- reader_->data_size;
 			val = *reader_->data;
-			if(val == 0) {
-				++ reader_->zero_count;
-			}
-			else if(val == 3 && reader_->zero_count == 2) {
-				++ reader_->data;
-				if(reader_->data_size) {
-					ERR_PRINT("no more data.");
-					reader_->inherit_super.error_number = 1;
-					return 0;
-				}
-				-- reader_->data_size;
-				++ reader_->inherit_super.read_size;
-				val = *reader_->data;
+			if(reader_->inherit_super.type == ByteUtilType_h26x) {
 				if(val == 0) {
-					reader_->zero_count = 1;
+					++ reader_->zero_count;
+				}
+				else if(val == 3 && reader_->zero_count == 2) {
+					++ reader_->data;
+					if(reader_->data_size == 0) {
+						ERR_PRINT("no more data.");
+						reader_->inherit_super.error_number = 1;
+						return 0;
+					}
+					-- reader_->data_size;
+					++ reader_->inherit_super.read_size;
+					val = *reader_->data;
+					if(val == 0) {
+						reader_->zero_count = 1;
+					}
+					else {
+						reader_->zero_count = 0;
+					}
 				}
 				else {
 					reader_->zero_count = 0;
 				}
-			}
-			else {
-				reader_->zero_count = 0;
 			}
 		}
 		reader_->pos = reader_->pos & 0x07;
@@ -158,28 +160,30 @@ int32_t ttLibC_ByteReader_expGolomb(
 			++ reader_->inherit_super.read_size;
 			-- reader_->data_size;
 			val = *reader_->data;
-			if(val == 0) {
-				++ reader_->zero_count;
-			}
-			else if(val == 3 && reader_->zero_count == 2) {
-				++ reader_->data;
-				if(reader_->data_size == 0) {
-					ERR_PRINT("no more data.");
-					reader_->inherit_super.error_number = 1;
-					return 0;
-				}
-				++ reader_->inherit_super.read_size;
-				-- reader_->data_size;
-				val = *reader_->data;
+			if(reader_->inherit_super.type == ByteUtilType_h26x) {
 				if(val == 0) {
-					reader_->zero_count = 1;
+					++ reader_->zero_count;
+				}
+				else if(val == 3 && reader_->zero_count == 2) {
+					++ reader_->data;
+					if(reader_->data_size == 0) {
+						ERR_PRINT("no more data.");
+						reader_->inherit_super.error_number = 1;
+						return 0;
+					}
+					++ reader_->inherit_super.read_size;
+					-- reader_->data_size;
+					val = *reader_->data;
+					if(val == 0) {
+						reader_->zero_count = 1;
+					}
+					else {
+						reader_->zero_count = 0;
+					}
 				}
 				else {
 					reader_->zero_count = 0;
 				}
-			}
-			else {
-				reader_->zero_count = 0;
 			}
 			reader_->pos = 0;
 		}
