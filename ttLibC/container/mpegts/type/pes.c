@@ -426,14 +426,40 @@ bool ttLibC_Pes_writeH264Packet(
 		if(track->frame_queue->track_id == 0x100 // pcr
 				&& total_size < 162) { // less than 162byte
 			// need to fill with adaptation field.
-			LOG_PRINT("data size is too small, need to have padding with adaptation field. :make later.");
-			return false;
+			uint8_t adaptation_field_size = 170 - total_size - 1;
+			p_buf[4] = adaptation_field_size;
+			p_buf[5] = 0x50; // random Access + pcr;
+			// pcrbase
+			p_buf[6] = (pts >> 25) & 0xFF;
+			p_buf[7] = (pts >> 17) & 0xFF;
+			p_buf[8] = (pts >> 9) & 0xFF;
+			p_buf[9] = (pts >> 1) & 0xFF;
+			p_buf[10] = ((pts << 7) & 0x80) | 0x7E;
+			// pcr extend
+			p_buf[11] = 0x00;
+			p_buf += 12;
+			p_buf_left_size -= 12;
+			adaptation_field_size -= 7;
+			for(int i = 0;i < adaptation_field_size;++ i) {
+				*p_buf = 0xFF;
+				++ p_buf;
+				-- p_buf_left_size;
+			}
 		}
 		else if(track->frame_queue->track_id != 0x100 // non pcr
 				&& total_size < 168) { // less than 168byte
 			// need to fill with adaptation field.
-			LOG_PRINT("data size is too small, need to have padding with adaptation field. :make later.");
-			return false;
+			uint8_t adaptation_field_size = 170 - total_size - 1;
+			p_buf[4] = adaptation_field_size;
+			p_buf[5] = 0x40; // random Access
+			p_buf += 6;
+			p_buf_left_size -= 6;
+			adaptation_field_size -= 1;
+			for(int i = 0;i < adaptation_field_size;++ i) {
+				*p_buf = 0xFF;
+				++ p_buf;
+				-- p_buf_left_size;
+			}
 		}
 		else if(track->frame_queue->track_id == 0x100) {
 			p_buf[4] = 0x07; // adaptation size = 7
