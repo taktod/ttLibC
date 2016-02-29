@@ -105,9 +105,10 @@ static bool MpegtsReader_read(
 				find = true;
 				// if unit start. we realize prev data is finished.
 				if((buffer[1] & 0x40) != 0) {
-					if(reader->pes_list[i] != NULL) {
+					if(reader->pes_list[i] != NULL && !reader->pes_list[i]->is_used) {
 						// if there is data, callback it.
 						result = callback(ptr, (ttLibC_Mpegts *)reader->pes_list[i]);
+						reader->pes_list[i]->is_used = true;
 					}
 				}
 				ttLibC_Pes *pes = ttLibC_Pes_getPacket(
@@ -120,6 +121,10 @@ static bool MpegtsReader_read(
 					return false;
 				}
 				reader->pes_list[i] = pes;
+				if(pes->frame_size != 0 && pes->frame_size == pes->inherit_super.inherit_super.inherit_super.buffer_size) {
+					result = callback(ptr, (ttLibC_Mpegts *)reader->pes_list[i]);
+					reader->pes_list[i]->is_used = true;
+				}
 				break;
 			}
 		}

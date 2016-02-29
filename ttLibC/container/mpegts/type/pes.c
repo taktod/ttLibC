@@ -50,6 +50,7 @@ ttLibC_Pes *ttLibC_Pes_make(
 			pid,
 			continuity_counter);
 	if(pes != NULL) {
+		pes->is_used = false;
 		pes->frame = prev_frame;
 		switch(stream_type) {
 		case 0x01: // mpeg1 video
@@ -173,6 +174,9 @@ ttLibC_Pes *ttLibC_Pes_getPacket(
 		ttLibC_ByteReader_bit(reader, 1);
 
 		uint8_t pes_length = ttLibC_ByteReader_bit(reader, 8);
+		if(frame_size != 0) {
+			frame_size -= (pes_length + 3);
+		}
 		uint64_t pts = 0;
 		if(has_pts) {
 			ttLibC_ByteReader_bit(reader, 4);
@@ -230,6 +234,7 @@ ttLibC_Pes *ttLibC_Pes_getPacket(
 			}
 			return NULL;
 		}
+		pes->frame_size = frame_size;
 		pes->inherit_super.inherit_super.inherit_super.is_non_copy = false;
 		memcpy(frame_buffer, data, data_size);
 		pes->inherit_super.inherit_super.inherit_super.buffer_size = data_size; // write the copyed size.

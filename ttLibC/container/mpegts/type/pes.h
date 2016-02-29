@@ -22,6 +22,8 @@ typedef struct ttLibC_Container_Mpegts_Pes {
 	ttLibC_MpegtsPacket inherit_super;
 	ttLibC_Frame_Type frame_type;
 	ttLibC_Frame *frame;
+	size_t frame_size;
+	bool is_used;
 } ttLibC_Container_Mpegts_Pes;
 
 typedef ttLibC_Container_Mpegts_Pes ttLibC_Pes;
