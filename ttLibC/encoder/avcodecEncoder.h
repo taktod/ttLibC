@@ -107,7 +107,6 @@ ttLibC_AvcodecEncoder *ttLibC_AvcodecVideoEncoder_make(
  * @param height     height
  * @param quality    q-value
  * @param bitrate    target bitrate in bit/sec
- * @param framerate  frame rate
  * @param timebase   time base
  */
 ttLibC_AvcodecEncoder *ttLibC_AvcodecVideoEncoder_make_ex(
@@ -116,7 +115,6 @@ ttLibC_AvcodecEncoder *ttLibC_AvcodecVideoEncoder_make_ex(
 		uint32_t height,
 		uint32_t quality,
 		uint32_t bitrate,
-		uint32_t framerate,
 		uint32_t timebase);
 
 /**

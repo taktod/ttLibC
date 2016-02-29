@@ -879,9 +879,11 @@ void *ttLibC_AvcodecEncoder_getAVCodecContext(ttLibC_Frame_Type frame_type) {
 	case frameType_h264:
 		codec = avcodec_find_encoder(AV_CODEC_ID_H264);
 		break;
+#ifdef AV_CODEC_ID_HEVC
 	case frameType_h265:
 		codec = avcodec_find_encoder(AV_CODEC_ID_HEVC);
 		break;
+#endif
 	case frameType_mp3:
 		codec = avcodec_find_encoder(AV_CODEC_ID_MP3);
 		break;
@@ -961,9 +963,11 @@ ttLibC_AvcodecEncoder *ttLibC_AvcodecEncoder_makeWithAVCodecContext(void *enc_co
 	case AV_CODEC_ID_H264:
 		frame_type = frameType_h264;
 		break;
+#ifdef AV_CODEC_ID_HEVC
 	case AV_CODEC_ID_HEVC:
 		frame_type = frameType_h265;
 		break;
+#endif
 	case AV_CODEC_ID_MP3:
 		frame_type = frameType_mp3;
 		break;
@@ -1245,7 +1249,6 @@ ttLibC_AvcodecEncoder *ttLibC_AvcodecVideoEncoder_make(
 			height,
 			0,
 			150000,
-			15,
 			1000);
 }
 
@@ -1256,7 +1259,6 @@ ttLibC_AvcodecEncoder *ttLibC_AvcodecVideoEncoder_make(
  * @param height     height
  * @param quality    q-value
  * @param bitrate    target bitrate in bit/sec
- * @param framerate  frame rate
  * @param timebase   time base
  */
 ttLibC_AvcodecEncoder *ttLibC_AvcodecVideoEncoder_make_ex(
@@ -1265,7 +1267,6 @@ ttLibC_AvcodecEncoder *ttLibC_AvcodecVideoEncoder_make_ex(
 		uint32_t height,
 		uint32_t quality,
 		uint32_t bitrate,
-		uint32_t framerate,
 		uint32_t timebase) {
 	AVCodecContext *enc = ttLibC_AvcodecEncoder_getAVCodecContext(frame_type);
 	if(enc == NULL) {
@@ -1275,7 +1276,8 @@ ttLibC_AvcodecEncoder *ttLibC_AvcodecVideoEncoder_make_ex(
 	enc->width = width;
 	enc->height = height;
 	enc->global_quality = quality;
-	enc->framerate = (AVRational){framerate, 1};
+	// unused for encoder.
+//	enc->framerate = (AVRational){framerate, 1};
 	enc->time_base = (AVRational){1, timebase};
 	enc->gop_size = 10;
 	enc->max_b_frames = 0;

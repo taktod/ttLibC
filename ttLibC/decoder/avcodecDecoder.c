@@ -259,9 +259,11 @@ void *ttLibC_AvcodecDecoder_getAVCodecContext(ttLibC_Frame_Type frame_type) {
 	case frameType_h264:
 		codec = avcodec_find_decoder(AV_CODEC_ID_H264);
 		break;
+#ifdef AV_CODEC_ID_HEVC
 	case frameType_h265:
 		codec = avcodec_find_decoder(AV_CODEC_ID_HEVC);
 		break;
+#endif
 	case frameType_mp3:
 		codec = avcodec_find_decoder(AV_CODEC_ID_MP3);
 		break;
@@ -344,9 +346,11 @@ ttLibC_AvcodecDecoder *ttLibC_AvcodecDecoder_makeWithAVCodecContext(void *dec_co
 	case AV_CODEC_ID_H264:
 		frame_type = frameType_h264;
 		break;
+#ifdef AV_CODEC_ID_HEVC
 	case AV_CODEC_ID_HEVC:
 		frame_type = frameType_h265;
 		break;
+#endif
 	case AV_CODEC_ID_MP3:
 		frame_type = frameType_mp3;
 		break;

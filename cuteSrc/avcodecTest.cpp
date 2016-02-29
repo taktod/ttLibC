@@ -397,7 +397,7 @@ static void flv1Test() {
 	ttLibC_Bgr    *bgr = NULL, *b;
 	ttLibC_Yuv420 *yuv = NULL, *y;
 	avcodecVideoTest_t testData;
-	ttLibC_AvcodecEncoder *encoder = ttLibC_AvcodecVideoEncoder_make_ex(frameType_flv1, width, height, 0, 650000, 15, 100);
+	ttLibC_AvcodecEncoder *encoder = ttLibC_AvcodecVideoEncoder_make_ex(frameType_flv1, width, height, 0, 650000, 100);
 	testData.window  = ttLibC_CvWindow_make("flv1 decode");
 	testData.bgr     = NULL;
 	testData.decoder = ttLibC_AvcodecVideoDecoder_make(frameType_flv1, width, height);
@@ -445,7 +445,7 @@ static void vp8Test() {
 	ttLibC_Bgr    *bgr = NULL, *b;
 	ttLibC_Yuv420 *yuv = NULL, *y;
 	avcodecVideoTest_t testData;
-	ttLibC_AvcodecEncoder *encoder = ttLibC_AvcodecVideoEncoder_make_ex(frameType_vp8, width, height, 0, 650000, 15, 100);
+	ttLibC_AvcodecEncoder *encoder = ttLibC_AvcodecVideoEncoder_make_ex(frameType_vp8, width, height, 0, 650000, 100);
 	testData.window  = ttLibC_CvWindow_make("vp8 decode");
 	testData.bgr     = NULL;
 	testData.decoder = ttLibC_AvcodecVideoDecoder_make(frameType_vp8, width, height);
@@ -493,7 +493,7 @@ static void wmv1Test() {
 	ttLibC_Bgr    *bgr = NULL, *b;
 	ttLibC_Yuv420 *yuv = NULL, *y;
 	avcodecVideoTest_t testData;
-	ttLibC_AvcodecEncoder *encoder = ttLibC_AvcodecVideoEncoder_make_ex(frameType_wmv1, width, height, 0, 650000, 15, 100);
+	ttLibC_AvcodecEncoder *encoder = ttLibC_AvcodecVideoEncoder_make_ex(frameType_wmv1, width, height, 0, 650000, 100);
 	testData.window  = ttLibC_CvWindow_make("wmv1 decode");
 	testData.bgr     = NULL;
 	testData.decoder = ttLibC_AvcodecVideoDecoder_make(frameType_wmv1, width, height);
