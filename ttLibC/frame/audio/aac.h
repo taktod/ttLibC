@@ -28,6 +28,22 @@ typedef enum ttLibC_Aac_Type {
 } ttLibC_Aac_Type;
 
 /**
+ * aac object(profile) information.
+ */
+typedef enum ttLibC_Aac_Object {
+	AacObject_Main = 1,
+	AacObject_Low  = 2,
+	AacObject_SSR  = 3,
+	AacObject_LTP  = 4,
+
+	AacObject_SBR      = 5,
+	AacObject_Scalable = 6,
+	AacObject_TwinVQ   = 7,
+	AacObject_CELP     = 8,
+	AacObject_HVXC     = 9
+} ttLibC_Aac_Object;
+
+/**
  * aac frame definition
  */
 typedef struct ttLibC_Frame_Audio_Aac {
@@ -125,6 +141,22 @@ uint32_t ttLibC_Aac_getConfigCrc32(ttLibC_Aac *aac);
  */
 size_t ttLibC_Aac_readDsiInfo(
 		ttLibC_Aac *aac,
+		void *data,
+		size_t data_size);
+
+/**
+ * make dsi buffer from information.
+ * @param object_type
+ * @param sample_rate
+ * @param channel_num
+ * @param data
+ * @param data_size
+ * @return size of generate dsi information.
+ */
+size_t ttLibC_Aac_getDsiInfo(
+		ttLibC_Aac_Object object_type,
+		uint32_t sample_rate,
+		uint32_t channel_num,
 		void *data,
 		size_t data_size);
 

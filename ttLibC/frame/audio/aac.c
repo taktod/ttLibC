@@ -6,7 +6,34 @@
  *
  * @author taktod
  * @date   2015/07/23
- * TODO need to make dsi analyze task. (needed for flv.)
+ */
+
+/*
+ * memo for data format.
+ * adts header.
+ * 12bit syncbit fill with 1
+ * 1bit id
+ * 2bit layer
+ * 1bit protection absent
+ * 2bit profile(object type - 1)
+ * 4bit sampling frequence index
+ * 1bit private bit
+ * 3bit channel configuration
+ * 1bit original flag
+ * 1bit home
+ * 1bit copyright identification bit
+ * 1bit copyright identification start
+ * 13bit frame size
+ * 11bit adts buffer full ness
+ * 2bit no raw data blocks in frame.
+ *
+ * for dsi info.
+ * 5bit object1 type.(profile + 1 same as ttLibC_Aac_Object)
+ * [6bit object2 type.(in the case of object1 = 31 only.)]
+ * 4bit frequencyIndex.(see sample_rate_table array.)
+ * [24bit frequency.(in the case of frequencyIndex = 15 only.)]
+ * 4bit channelConfiguration.(channel num 1:monoral 2:stereo.)
+ * bit (padding for 0.)
  */
 
 #include "aac.h"
@@ -170,24 +197,6 @@ ttLibC_Aac *ttLibC_Aac_getFrame(
 		bool non_copy_mode,
 		uint64_t pts,
 		uint32_t timebase) {
-	/*
-	 * bit memo for adts aac.
-	 * 12bit syncbit fill with 1
-	 * 1bit id
-	 * 2bit layer
-	 * 1bit protection absent
-	 * 2bit profile
-	 * 4bit sampling frequence index
-	 * 1bit private bit
-	 * 3bit channel configuration
-	 * 1bit original flag
-	 * 1bit home
-	 * 1bit copyright identification bit
-	 * 1bit copyright identification start
-	 * 13bit frame size
-	 * 11bit adts buffer full ness
-	 * 2bit no raw data blocks in frame.
-	 */
 	ttLibC_ByteReader *reader = ttLibC_ByteReader_make(data, data_size, ByteUtilType_default);
 	if(ttLibC_ByteReader_bit(reader, 12) != 0xFFF) {
 		ERR_PRINT("sync bit is invalid.");
@@ -245,58 +254,27 @@ size_t ttLibC_Aac_readAdtsHeader(
 	}
 	ttLibC_Aac_ *aac_ = (ttLibC_Aac_ *)target_aac;
 	ttLibC_ByteReader *reader = ttLibC_ByteReader_make(&aac_->dsi_info, sizeof(aac_->dsi_info), ByteUtilType_default);
-	/*
-	 * 内容メモ
-	 * 5bit object1 type
-	 * 6bit object2 type2 (object1 == 31の時のみ)
-	 * 4bit frequencyIndex
-	 * 24bit frequency (frequencyIndexが15の場合のみ)
-	 * 4bit channelConfigurtion.
-	 * bit 端数埋め
-	 */
 	uint32_t object_type = ttLibC_ByteReader_bit(reader, 5);
 	if(object_type == 31) {
-		LOG_PRINT("not tested yet. maybe work.");
+		ERR_PRINT("adts support only profile:main, low, ssr, and ltp.");
 		object_type = ttLibC_ByteReader_bit(reader, 6);
+		return 0;
 	}
 	uint32_t frequency_index = ttLibC_ByteReader_bit(reader, 4);
 	if(frequency_index == 15) {
 		ERR_PRINT("not tested yet. now return error.");
-		uint32_t frequency = ttLibC_ByteReader_bit(reader, 24); // たぶんこの値がそのまま周波数だと思われr。
+		uint32_t frequency = ttLibC_ByteReader_bit(reader, 24);
 		return 0;
 	}
 	uint32_t channel_conf = ttLibC_ByteReader_bit(reader, 4);
 	ttLibC_ByteReader_close(&reader);
 	-- object_type; // to make adts, need to decrement.
 	size_t aac_size = target_aac->inherit_super.inherit_super.buffer_size + 7;
-	// ready to work.
+	// ready to work. make adts header.
 	uint8_t *buf = (uint8_t *)data;
-	/*
-	 * つくるデータメモ
-	 * 12bit syncbit 1埋め
-	 * 1bit id
-	 * 2bit layer
-	 * 1bit protection absent 1いれとく。
-	 * 2bit profile
-	 * 4bit sampling frequence index
-	 * 1bit private bit 1いれておく。
-	 * 3bit channel configuration.
-	 * 1bit original flag
-	 * 1bit home
-	 * 1bit copyright identification bit
-	 * 1bit copyright identification start
-	 * 13bit frame size(adtsheaderも含む)
-	 * 11bit buffer fullness 1で埋め
-	 * 2bit no raw data blocks in frame.
-	 */
 	buf[0] = 0xFF;
 	buf[1] = 0xF1;
 	buf[2] = ((object_type & 0x03) << 6) | ((frequency_index & 0x0F) << 2) | 0x00 | ((channel_conf & 0x07) >> 2);
-	// 2bitだけframe size
-	// 11 bit
-	// 8bit frame size
-	// 3bit frame size + 5bit 0x1F
-	// 6bit 0x3F 2bit 0x00
 	buf[3] = ((channel_conf & 0x03) << 6) | ((aac_size >> 11) & 0x03);
 	buf[4] = (aac_size >> 3) & 0xFF;
 	buf[5] = ((aac_size & 0x07) << 5) | 0x1F;
@@ -416,6 +394,56 @@ size_t ttLibC_Aac_readDsiInfo(
 	default:
 		return 0;
 	}
+}
+
+/**
+ * make dsi buffer from information.
+ * @param object_type
+ * @param sample_rate
+ * @param channel_num
+ * @param data
+ * @param data_size
+ * @return size of generate dsi information.
+ */
+size_t ttLibC_Aac_getDsiInfo(
+		ttLibC_Aac_Object object_type,
+		uint32_t sample_rate,
+		uint32_t channel_num,
+		void *data,
+		size_t data_size) {
+	memset(data, 0, data_size);
+	ttLibC_ByteConnector *connector = ttLibC_ByteConnector_make(data, data_size, ByteUtilType_default);
+	// object_type
+	if((int)(object_type) > 31) {
+		ttLibC_ByteConnector_bit(connector, 31, 5);
+		ttLibC_ByteConnector_bit(connector, object_type, 6);
+	}
+	else {
+		ttLibC_ByteConnector_bit(connector, object_type, 5);
+	}
+	// frequency
+	bool found = false;
+	uint32_t index = 15;
+	for(int i = 0, max = sizeof(sample_rate_table) / sizeof(uint32_t);i < max;++ i) {
+		if(sample_rate_table[i] == sample_rate) {
+			found = true;
+			index = i;
+			break;
+		}
+	}
+	if(found) {
+		ttLibC_ByteConnector_bit(connector, index, 4);
+	}
+	else {
+		// not in index.
+		ttLibC_ByteConnector_bit(connector, 15, 4);
+		ttLibC_ByteConnector_bit(connector, sample_rate, 24);
+	}
+	// channel_configuration
+	ttLibC_ByteConnector_bit(connector, channel_num, 4);
+	size_t write_size = connector->write_size;
+	ttLibC_ByteConnector_close(&connector);
+	return write_size;
 }
 
 /*
