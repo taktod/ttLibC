@@ -22,6 +22,7 @@ libttLibC_a_SOURCES= \
 	container/mpegts/mpegtsWriter.c \
 	container/container.c \
 	container/misc.c \
+	decoder/audioConverterDecoder.c \
 	decoder/avcodecDecoder.c \
 	decoder/jpegDecoder.c \
 	decoder/mp3lameDecoder.c \
@@ -29,6 +30,7 @@ libttLibC_a_SOURCES= \
 	decoder/opusDecoder.c \
 	decoder/speexDecoder.c \
 	decoder/vtDecompressSessionH264Decoder.c \
+	encoder/audioConverterEncoder.c \
 	encoder/avcodecEncoder.c \
 	encoder/faacEncoder.c \
 	encoder/jpegEncoder.c \

@@ -66,6 +66,9 @@
 #endif
 
 #ifdef __ENABLE_APPLE__
+#	include <ttLibC/util/audioUnitUtil.h>
+#	include <ttLibC/encoder/audioConverterEncoder.h>
+#	include <ttLibC/decoder/audioConverterDecoder.h>
 #	include <ttLibC/encoder/vtCompressSessionH264Encoder.h>
 #	include <ttLibC/decoder/vtDecompressSessionH264Decoder.h>
 #endif
@@ -154,6 +157,131 @@ static void vtH264Test() {
 	ttLibC_CvWindow_close(&original);
 	ttLibC_CvWindow_close(&target);
 	ttLibC_CvCapture_close(&capture);
+#endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
+
+#if defined(__ENABLE_APPLE__) && defined(__ENABLE_MP3LAME_ENCODE__)
+typedef struct acMp3Test_t {
+	ttLibC_AuPlayer *player;
+	ttLibC_AcDecoder *decoder;
+} acMp3Test_t;
+
+static bool acMp3Test_decodeCallback(void *ptr, ttLibC_PcmS16 *pcm) {
+	acMp3Test_t *testData = (acMp3Test_t *)ptr;
+	while(!ttLibC_AuPlayer_queue(testData->player, pcm)) {
+		usleep(10);
+	}
+	return true;
+}
+
+static bool acMp3Test_encodeCallback(void *ptr, ttLibC_Mp3 *mp3) {
+	acMp3Test_t *testData = (acMp3Test_t *)ptr;
+	return ttLibC_AcDecoder_decode(testData->decoder, (ttLibC_Audio *)mp3, acMp3Test_decodeCallback, ptr);
+}
+#endif
+
+static void acMp3Test() {
+	LOG_PRINT("acMp3Test");
+#if defined(__ENABLE_APPLE__) && defined(__ENABLE_MP3LAME_ENCODE__)
+	uint32_t sample_rate = 44100, channel_num = 2;
+	ttLibC_BeepGenerator *generator = ttLibC_BeepGenerator_make(
+			PcmS16Type_littleEndian,
+			440,
+			sample_rate,
+			channel_num);
+	ttLibC_AuPlayer *player = ttLibC_AuPlayer_make(sample_rate, channel_num, AuPlayerType_DefaultOutput);
+	ttLibC_Mp3lameEncoder *encoder = ttLibC_Mp3lameEncoder_make(
+			sample_rate,
+			channel_num,
+			2);
+	ttLibC_AcDecoder *decoder = ttLibC_AcDecoder_make(
+			sample_rate,
+			channel_num,
+			frameType_mp3);
+	ttLibC_PcmS16 *pcm = NULL, *p;
+	acMp3Test_t testData;
+	generator->amplitude = 30000;
+	testData.decoder = decoder;
+	testData.player = player;
+	for(int i = 0;i < 100;++ i) {
+		p = ttLibC_BeepGenerator_makeBeepByMiliSec(generator, pcm, 100);
+		if(p == NULL) {
+			break;
+		}
+		pcm = p;
+		if(!ttLibC_Mp3lameEncoder_encode(encoder, pcm, acMp3Test_encodeCallback, &testData)) {
+			break;
+		}
+	}
+	ttLibC_Mp3lameEncoder_close(&encoder);
+	ttLibC_AcDecoder_close(&decoder);
+	ttLibC_PcmS16_close(&pcm);
+	ttLibC_AuPlayer_close(&player);
+	ttLibC_BeepGenerator_close(&generator);
+#endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
+
+#if defined(__ENABLE_APPLE__)
+typedef struct acAacTest_t{
+	ttLibC_AuPlayer *player;
+	ttLibC_AcDecoder *decoder;
+} acAacTest_t;
+
+static bool acAacTest_decodeCallback(void *ptr, ttLibC_PcmS16 *pcm) {
+	acAacTest_t *testData = (acAacTest_t *)ptr;
+	while(!ttLibC_AuPlayer_queue(testData->player, pcm)) {
+		usleep(10);
+	}
+	return true;
+}
+
+static bool acAacTest_encodeCallback(void *ptr, ttLibC_Audio *aac) {
+	acAacTest_t *testData = (acAacTest_t *)ptr;
+	return ttLibC_AcDecoder_decode(testData->decoder, aac, acAacTest_decodeCallback, ptr);
+}
+#endif
+
+static void acAacTest() {
+	LOG_PRINT("acAacTest");
+#if defined(__ENABLE_APPLE__)
+	uint32_t sample_rate = 44100, channel_num = 2;
+	ttLibC_BeepGenerator *generator = ttLibC_BeepGenerator_make(
+			PcmS16Type_littleEndian,
+			440,
+			sample_rate,
+			channel_num);
+	ttLibC_AuPlayer *player = ttLibC_AuPlayer_make(sample_rate, channel_num, AuPlayerType_DefaultOutput);
+	ttLibC_AcEncoder *encoder = ttLibC_AcEncoder_make(
+			sample_rate,
+			channel_num,
+			96000,
+			frameType_aac);
+	ttLibC_AcDecoder *decoder = ttLibC_AcDecoder_make(
+			sample_rate,
+			channel_num,
+			frameType_aac);
+	ttLibC_PcmS16 *pcm = NULL, *p;
+	acAacTest_t testData;
+	generator->amplitude = 30000;
+	testData.decoder = decoder;
+	testData.player = player;
+	for(int i = 0;i < 100;++ i) {
+		p = ttLibC_BeepGenerator_makeBeepByMiliSec(generator, pcm, 100);
+		if(p == NULL) {
+			break;
+		}
+		pcm = p;
+		if(!ttLibC_AcEncoder_encode(encoder, pcm, acAacTest_encodeCallback, &testData)) {
+			break;
+		}
+	}
+	ttLibC_AcDecoder_close(&decoder);
+	ttLibC_AcEncoder_close(&encoder);
+	ttLibC_PcmS16_close(&pcm);
+	ttLibC_AuPlayer_close(&player);
+	ttLibC_BeepGenerator_close(&generator);
 #endif
 	ASSERT(ttLibC_Allocator_dump() == 0);
 }
@@ -712,6 +840,8 @@ static void imageResamplerTest() {
 cute::suite encoderDecoderTests(cute::suite s) {
 	s.clear();
 	s.push_back(CUTE(vtH264Test));
+	s.push_back(CUTE(acMp3Test));
+	s.push_back(CUTE(acAacTest));
 	s.push_back(CUTE(x265Test));
 	s.push_back(CUTE(x264Test));
 	s.push_back(CUTE(jpegTest));
