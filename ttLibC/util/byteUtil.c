@@ -522,7 +522,7 @@ bool ttLibC_ByteConnector_bit(
 	ttLibC_ByteConnector_ *connector_ = (ttLibC_ByteConnector_ *)connector;
 	do {
 		if(connector_->pos == 0) {
-			if(connector_->data_size == connector_->inherit_super.write_size) {
+			if(connector_->data_size == 0) {
 				ERR_PRINT("buffer is fulled. no way to add more data.");
 				return false;
 			}
