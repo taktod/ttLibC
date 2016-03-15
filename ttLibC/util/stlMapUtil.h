@@ -37,6 +37,10 @@ bool ttLibC_StlMap_put(
 		void *key,
 		void *item);
 
+void *ttLibC_StlMap_get(
+		ttLibC_StlMap *map,
+		void *key);
+
 bool ttLibC_StlMap_remove(
 		ttLibC_StlMap *map,
 		void *key);

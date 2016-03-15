@@ -41,6 +41,16 @@ static bool StlMap_put(
 	return true;
 }
 
+static void *StlMap_get(
+		ttLibC_StlMap_ *map,
+		void *key) {
+	std::map<void *, void *>::iterator iter = map->map->find(key);
+	if(iter == map->map->end()) {
+		return NULL;
+	}
+	return iter->second;
+}
+
 static bool StlMap_remove(
 		ttLibC_StlMap_ *map,
 		void *key) {
@@ -100,6 +110,14 @@ bool ttLibC_StlMap_put(
 			(ttLibC_StlMap_ *)map,
 			key,
 			item);
+}
+
+void *ttLibC_StlMap_get(
+		ttLibC_StlMap *map,
+		void *key) {
+	return StlMap_get(
+			(ttLibC_StlMap_ *)map,
+			key);
 }
 
 bool ttLibC_StlMap_remove(
