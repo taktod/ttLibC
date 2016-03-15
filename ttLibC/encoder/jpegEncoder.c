@@ -196,7 +196,15 @@ bool ttLibC_JpegEncoder_encode(
 		jpeg_write_raw_data(&encoder_->cinfo, planes, 16);
 	}
 	jpeg_finish_compress(&encoder_->cinfo);
-	jpeg = ttLibC_Jpeg_make(jpeg, encoder_->inherit_super.width, encoder_->inherit_super.height, data, data_size, true, 0, 1000);
+	jpeg = ttLibC_Jpeg_make(
+			jpeg,
+			encoder_->inherit_super.width,
+			encoder_->inherit_super.height,
+			data,
+			data_size,
+			true,
+			yuv->inherit_super.inherit_super.pts,
+			yuv->inherit_super.inherit_super.timebase);
 	if(jpeg == NULL) {
 		LOG_PRINT("jpeg output is null.");
 		if(alloc_flag) {

@@ -101,7 +101,8 @@ bool ttLibC_OpusDecoder_decode(
 			size * sizeof(int16_t) * decoder_->inherit_super.channel_num,
 			NULL,
 			0,
-			true, opus->inherit_super.inherit_super.pts,
+			true,
+			opus->inherit_super.inherit_super.pts,
 			opus->inherit_super.inherit_super.timebase);
 	if(pcm == NULL) {
 		return false;

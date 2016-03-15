@@ -35,6 +35,7 @@ typedef struct {
 	size_t data_start_pos;
 	/** pts data for next mp3 object. */
 	uint64_t pts;
+	bool is_pts_initialized;
 } ttLibC_Encoder_Mp3lameEncoder_;
 
 typedef ttLibC_Encoder_Mp3lameEncoder_ ttLibC_Mp3lameEncoder_;
@@ -94,6 +95,7 @@ ttLibC_Mp3lameEncoder *ttLibC_Mp3lameEncoder_make(
 	encoder->inherit_super.quality     = quality;
 	encoder->inherit_super.sample_rate = sample_rate;
 	encoder->inherit_super.type        = Mp3lameEncoderType_CBR;
+	encoder->is_pts_initialized = false;
 	if(encoder->data == NULL) {
 		ERR_PRINT("failed to allocate encode data buffer.");
 		lame_close(encoder->gflags);
@@ -161,6 +163,10 @@ bool ttLibC_Mp3lameEncoder_encode(ttLibC_Mp3lameEncoder *encoder, ttLibC_PcmS16 
 		return true;
 	}
 	ttLibC_Mp3lameEncoder_ *encoder_ = (ttLibC_Mp3lameEncoder_ *)encoder;
+	if(!encoder_->is_pts_initialized) {
+		encoder_->is_pts_initialized = true;
+		encoder_->pts = pcm->inherit_super.inherit_super.pts * encoder_->inherit_super.sample_rate / pcm->inherit_super.inherit_super.timebase;
+	}
 	switch(pcm->type) {
 	case PcmS16Type_bigEndian:
 	case PcmS16Type_bigEndian_planar:

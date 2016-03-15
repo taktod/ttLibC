@@ -58,8 +58,8 @@ static void VtH264Decoder_decodeCallback(
 		OSStatus status,
 		VTDecodeInfoFlags infoFlags,
 		CVImageBufferRef imageBuffer,
-		CMTime presentationTimestamp,
-		CMTime presentationDuration) {
+		CMTime pts,
+		CMTime dts) {
 	if(status != noErr) {
 		ERR_PRINT("error on decode h264 buffer.:%x(%d)", status, status);
 		return;
@@ -87,8 +87,8 @@ static void VtH264Decoder_decodeCallback(
 			uv_data + 1,
 			CVPixelBufferGetBytesPerRowOfPlane(imageBuffer, 1),
 			true,
-			0,
-			1000);
+			pts.value,
+			pts.timescale);
 	if(y != NULL) {
 		decoder->yuv420 = y;
 		if(decoder->callback != NULL) {
@@ -234,6 +234,7 @@ bool ttLibC_VtH264Decoder_decode(
 				CFRelease(blockBuffer);
 				return false;
 			}
+			CMSampleBufferSetOutputPresentationTimeStamp(sampleBuffer, CMTimeMake(h264->inherit_super.inherit_super.pts, h264->inherit_super.inherit_super.timebase));
 			if(decoder_->session) {
 				VTDecodeFrameFlags flags = 0;
 				VTDecodeInfoFlags flagsOut;

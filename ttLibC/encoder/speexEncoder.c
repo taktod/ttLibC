@@ -46,6 +46,7 @@ typedef struct {
 	size_t data_size;
 	/** pts counter */
 	uint64_t pts;
+	bool is_pts_initialized;
 } ttLibC_Encoder_SpeexEncoder_;
 
 typedef ttLibC_Encoder_SpeexEncoder_ ttLibC_SpeexEncoder_;
@@ -102,6 +103,7 @@ ttLibC_SpeexEncoder *ttLibC_SpeexEncoder_make(
  	encoder->pcm_buffer_size = sample_rate / 50 * channel_num * sizeof(int16_t); // 20milisec分保持しなければいけない。
 	encoder->pcm_buffer = ttLibC_malloc(encoder->pcm_buffer_size);
 	encoder->pcm_buffer_next_pos = 0;
+	encoder->is_pts_initialized = false;
 	if(encoder->data == NULL || encoder->pcm_buffer == NULL) {
 		ttLibC_SpeexEncoder_close((ttLibC_SpeexEncoder **)&encoder);
 		return NULL;
@@ -124,7 +126,17 @@ static bool doEncode(ttLibC_SpeexEncoder_ *encoder, void *data, ttLibC_SpeexEnco
 	// write for bits.
 	int write_size = speex_bits_write(&encoder->bits, (char *)encoder->data, encoder->data_size);
 	uint32_t sample_num = encoder->inherit_super.sample_rate / 50;
-	ttLibC_Speex *speex = ttLibC_Speex_make(encoder->speex, SpeexType_frame, encoder->inherit_super.sample_rate, sample_num, encoder->inherit_super.channel_num, encoder->data, write_size, true, encoder->pts, encoder->inherit_super.sample_rate);
+	ttLibC_Speex *speex = ttLibC_Speex_make(
+			encoder->speex,
+			SpeexType_frame,
+			encoder->inherit_super.sample_rate,
+			sample_num,
+			encoder->inherit_super.channel_num,
+			encoder->data,
+			write_size,
+			true,
+			encoder->pts,
+			encoder->inherit_super.sample_rate);
 	if(speex != NULL) {
 		encoder->speex = speex;
 		if(!callback(ptr, speex)) {
@@ -158,6 +170,10 @@ bool ttLibC_SpeexEncoder_encode(
 		return true;
 	}
 	ttLibC_SpeexEncoder_ *encoder_ = (ttLibC_SpeexEncoder_ *)encoder;
+	if(!encoder_->is_pts_initialized) {
+		encoder_->is_pts_initialized = true;
+		encoder_->pts = pcm->inherit_super.inherit_super.pts * encoder_->inherit_super.sample_rate / pcm->inherit_super.inherit_super.timebase;
+	}
 	switch(pcm->type) {
 	default:
 	case PcmS16Type_bigEndian:

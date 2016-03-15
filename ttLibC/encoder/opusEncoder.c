@@ -40,6 +40,7 @@ typedef struct {
 	size_t data_size;
 	/** pts counter */
 	uint64_t pts;
+	bool is_pts_initialized;
 } ttLibC_Encoder_OpusEncoder_;
 
 typedef ttLibC_Encoder_OpusEncoder_ ttLibC_OpusEncoder_;
@@ -91,6 +92,7 @@ ttLibC_OpusEncoder *ttLibC_OpusEncoder_make(
 	encoder->pcm_buffer_size = unit_sample_num * channel_num * sizeof(int16_t);
 	encoder->pcm_buffer = ttLibC_malloc(encoder->pcm_buffer_size);
 	encoder->pcm_buffer_next_pos = 0;
+	encoder->is_pts_initialized = false;
 	if(encoder->data == NULL || encoder->pcm_buffer == NULL) {
 		ttLibC_OpusEncoder_close((ttLibC_OpusEncoder **)&encoder);
 		return NULL;
@@ -111,7 +113,17 @@ static bool doEncode(ttLibC_OpusEncoder_ *encoder, void *data, ttLibC_OpusEncode
 		ERR_PRINT("failed to make opus.");
 		return false;
 	}
-	ttLibC_Opus *opus = ttLibC_Opus_make(encoder->opus, OpusType_frame, encoder->inherit_super.sample_rate, encoder->inherit_super.unit_sample_num, encoder->inherit_super.channel_num, encoder->data, size, true, encoder->pts, encoder->inherit_super.sample_rate);
+	ttLibC_Opus *opus = ttLibC_Opus_make(
+			encoder->opus,
+			OpusType_frame,
+			encoder->inherit_super.sample_rate,
+			encoder->inherit_super.unit_sample_num,
+			encoder->inherit_super.channel_num,
+			encoder->data,
+			size,
+			true,
+			encoder->pts,
+			encoder->inherit_super.sample_rate);
 	if(opus != NULL) {
 		encoder->opus = opus;
 		if(!callback(ptr, opus)) {
@@ -142,6 +154,10 @@ bool ttLibC_OpusEncoder_encode(
 		return true;
 	}
 	ttLibC_OpusEncoder_ *encoder_ = (ttLibC_OpusEncoder_ *)encoder;
+	if(!encoder_->is_pts_initialized) {
+		encoder_->is_pts_initialized = true;
+		encoder_->pts = pcm->inherit_super.inherit_super.pts * encoder_->inherit_super.sample_rate / pcm->inherit_super.inherit_super.timebase;
+	}
 	switch(pcm->type) {
 	default:
 	case PcmS16Type_bigEndian:

@@ -40,7 +40,8 @@ typedef ttLibC_Encoder_VtCompressionSession_VtH264Encoder_ ttLibC_VtH264Encoder_
 static bool VtH264Encoder_makeH264Frame(
 		ttLibC_H264_Type target_type,
 		ttLibC_VtH264Encoder_ *encoder,
-		ttLibC_DynamicBuffer *buffer) {
+		ttLibC_DynamicBuffer *buffer,
+		CMTime pts) {
 	ttLibC_H264 *h264 = NULL;
 	if(target_type == H264Type_configData) {
 		h264 = ttLibC_H264_make(
@@ -52,7 +53,7 @@ static bool VtH264Encoder_makeH264Frame(
 				ttLibC_DynamicBuffer_refSize(buffer),
 				false,
 				0,
-				1000);
+				pts.timescale);
 		if(h264 == NULL) {
 			ERR_PRINT("failed to make configData for h264Frame.");
 			ttLibC_DynamicBuffer_close(&buffer);
@@ -69,8 +70,8 @@ static bool VtH264Encoder_makeH264Frame(
 				ttLibC_DynamicBuffer_refData(buffer),
 				ttLibC_DynamicBuffer_refSize(buffer),
 				true,
-				0,
-				1000);
+				pts.value,
+				pts.timescale);
 		if(h264 == NULL) {
 			ERR_PRINT("failed to make h264 frame.");
 			ttLibC_DynamicBuffer_close(&buffer);
@@ -90,7 +91,8 @@ static bool VtH264Encoder_makeH264Frame(
 static bool VtH264Encoder_checkEncodedData(
 		ttLibC_VtH264Encoder_ *encoder,
 		uint8_t *data,
-		size_t data_size) {
+		size_t data_size,
+		CMTime pts) {
 	if(data_size == 0) {
 		return true;
 	}
@@ -120,7 +122,7 @@ static bool VtH264Encoder_checkEncodedData(
 		data += nal_info.nal_size;
 		data_size -= nal_info.nal_size;
 	}
-	if(!VtH264Encoder_makeH264Frame(target_type, encoder, data_buffer)) {
+	if(!VtH264Encoder_makeH264Frame(target_type, encoder, data_buffer, pts)) {
 		return false;
 	}
 	ttLibC_DynamicBuffer_close(&data_buffer);
@@ -163,7 +165,7 @@ static void VtH264Encoder_encodeCallback(
 		ttLibC_DynamicBuffer_append(data_buffer, sps, sps_size);
 		ttLibC_DynamicBuffer_append(data_buffer, separator, 4);
 		ttLibC_DynamicBuffer_append(data_buffer, pps, pps_size);
-		if(!VtH264Encoder_makeH264Frame(H264Type_configData, encoder, data_buffer)) {
+		if(!VtH264Encoder_makeH264Frame(H264Type_configData, encoder, data_buffer, pts)) {
 			ERR_PRINT("failed to make configData frame.");
 			return;
 		}
@@ -172,8 +174,7 @@ static void VtH264Encoder_encodeCallback(
 	uint8_t *bufferData;
 	size_t size;
 	CMBlockBufferGetDataPointer(block, 0, NULL, &size, (char **)&bufferData);
-//	LOG_DUMP(bufferData, 7, true);
-	VtH264Encoder_checkEncodedData(encoder, bufferData, size);
+	VtH264Encoder_checkEncodedData(encoder, bufferData, size, pts);
 }
 
 /**

@@ -36,6 +36,7 @@ typedef struct ttLibC_Encoder_AudioConverter_AcEncoder_ {
 	uint64_t pts;
 	uint32_t unit_samples;
 	uint64_t aac_dsi_info;
+	bool is_pts_initialized;
 
 	ttLibC_Audio *audio;
 } ttLibC_Encoder_AudioConverter_AcEncoder_;
@@ -62,6 +63,7 @@ ttLibC_AcEncoder *ttLibC_AcEncoder_make(
 	encoder->inherit_super.channel_num = channel_num;
 	encoder->inherit_super.frame_type = target_frame_type;
 	encoder->inherit_super.sample_rate = sample_rate;
+	encoder->is_pts_initialized = false;
 	OSStatus err = noErr;
 	AudioStreamBasicDescription srcFormat, dstFormat;
 	// input
@@ -204,6 +206,10 @@ bool ttLibC_AcEncoder_encode(
 		ttLibC_AcEncodeFunc callback,
 		void *ptr) {
 	ttLibC_AcEncoder_ *encoder_ = (ttLibC_AcEncoder_ *)encoder;
+	if(!encoder_->is_pts_initialized) {
+		encoder_->is_pts_initialized = true;
+		encoder_->pts = pcm->inherit_super.inherit_super.pts * encoder_->sample_rate / pcm->inherit_super.inherit_super.timebase;
+	}
 	AudioBufferList fillBufList;
 	fillBufList.mNumberBuffers = 1;
 	fillBufList.mBuffers[0].mNumberChannels = encoder_->channel_num;

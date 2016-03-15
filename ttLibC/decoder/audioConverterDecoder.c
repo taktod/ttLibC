@@ -37,6 +37,7 @@ typedef struct ttLibC_Decoder_AudioConverter_AcDecoder_ {
 	ttLibC_PcmS16 *pcms16;
 
 	uint64_t pts;
+	bool is_pts_initialized;
 	ttLibC_Audio *audio;
 	AudioStreamPacketDescription aspds;
 } ttLibC_Decoder_AudioConverter_AcDecoder_;
@@ -62,6 +63,7 @@ ttLibC_AcDecoder *ttLibC_AcDecoder_make(
 	decoder->inherit_super.channel_num = channel_num;
 	decoder->inherit_super.sample_rate = sample_rate;
 	decoder->inherit_super.frame_type = target_frame_type;
+	decoder->is_pts_initialized = false;
 	OSStatus err = noErr;
 	AudioStreamBasicDescription srcFormat, dstFormat;
 	// input
@@ -171,6 +173,10 @@ bool ttLibC_AcDecoder_decode(
 		return true;
 	}
 	ttLibC_AcDecoder_ *decoder_ = (ttLibC_AcDecoder_ *)decoder;
+	if(!decoder_->is_pts_initialized) {
+		decoder_->is_pts_initialized = true;
+		decoder_->pts = audio->inherit_super.pts * decoder_->sample_rate / audio->inherit_super.timebase;
+	}
 	AudioBufferList fillBufList;
 	fillBufList.mNumberBuffers = 1;
 	fillBufList.mBuffers[0].mNumberChannels = decoder_->channel_num;

@@ -43,6 +43,7 @@ typedef struct {
 	size_t data_size;
 	/** pts data for next aac object. */
 	uint64_t pts;
+	bool is_pts_initialized;
 } ttLibC_Encoder_FaacEncoder_;
 
 typedef ttLibC_Encoder_FaacEncoder_ ttLibC_FaacEncoder_;
@@ -183,6 +184,7 @@ ttLibC_FaacEncoder *ttLibC_FaacEncoder_makeWithFaacEncConfiguration(
 	encoder->inherit_super.channel_num = channel_num;
 	encoder->inherit_super.sample_rate = sample_rate;
 	encoder->inherit_super.bitrate     = config->bitRate * channel_num;
+	encoder->is_pts_initialized = false;
 	return (ttLibC_FaacEncoder *)encoder;
 }
 
@@ -243,6 +245,10 @@ bool ttLibC_FaacEncoder_encode(
 		return true;
 	}
 	ttLibC_FaacEncoder_ *encoder_ = (ttLibC_FaacEncoder_ *)encoder;
+	if(!encoder_->is_pts_initialized) {
+		encoder_->is_pts_initialized = true;
+		encoder_->pts = pcm->inherit_super.inherit_super.pts * encoder_->inherit_super.sample_rate / pcm->inherit_super.inherit_super.timebase;
+	}
 	// support only little endian & interleave.
 	switch(pcm->type) {
 	case PcmS16Type_bigEndian:
