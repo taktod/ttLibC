@@ -523,7 +523,15 @@ static bool Amf0_write(ttLibC_Amf0Object *amf0_obj, ttLibC_AmfObjectWriteFunc ca
 		}
 		break;
 //	case amf0Type_MovieClip:
-//	case amf0Type_Null:
+	case amf0Type_Null:
+		{
+			uint8_t buf[1];
+			buf[0] = amf0Type_Null;
+			if(!callback(ptr, buf, 1)) {
+				return false;
+			}
+		}
+		break;
 //	case amf0Type_Undefined:
 //	case amf0Type_Reference:
 	case amf0Type_Map:
