@@ -90,15 +90,18 @@ static bool audioUnitRecordTest_makePcmCallback(void *ptr, ttLibC_Audio *audio) 
 	if(audio->inherit_super.type != frameType_pcmS16) {
 		return false;
 	}
-	ttLibC_Frame *prev_frame = (ttLibC_Frame *)ttLibC_StlList_refFirst(testData->used_frame_list);
+	ttLibC_Frame *prev_frame = NULL;
+	if(testData->used_frame_list->size > 5) {
+		prev_frame = (ttLibC_Frame *)ttLibC_StlList_refFirst(testData->used_frame_list);
+		if(prev_frame != NULL) {
+			ttLibC_StlList_remove(testData->used_frame_list, prev_frame);
+		}
+	}
 	ttLibC_Frame *cloned_frame = ttLibC_Frame_clone(
 			prev_frame,
 			(ttLibC_Frame *)audio);
 	if(cloned_frame == NULL) {
 		return false;
-	}
-	if(prev_frame != NULL) {
-		ttLibC_StlList_remove(testData->used_frame_list, prev_frame);
 	}
 	ttLibC_StlList_addLast(testData->frame_list, cloned_frame);
 	return true;

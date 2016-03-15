@@ -491,7 +491,6 @@ bool opusDecoderCallback(void *ptr, ttLibC_PcmS16 *pcms16) {
 }
 
 bool opusEncoderCallback(void *ptr, ttLibC_Opus *opus) {
-//	LOG_PRINT("encoded.:%d", opus->inherit_super.inherit_super.pts);
 	opusTest_t *testData = (opusTest_t *)ptr;
 	ttLibC_OpusDecoder_decode(testData->decoder, opus, opusDecoderCallback, ptr);
 	return true;
