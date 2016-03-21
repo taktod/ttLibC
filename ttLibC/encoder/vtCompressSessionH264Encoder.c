@@ -52,7 +52,7 @@ static bool VtH264Encoder_makeH264Frame(
 				ttLibC_DynamicBuffer_refData(buffer),
 				ttLibC_DynamicBuffer_refSize(buffer),
 				false,
-				0,
+				pts.value,
 				pts.timescale);
 		if(h264 == NULL) {
 			ERR_PRINT("failed to make configData for h264Frame.");
