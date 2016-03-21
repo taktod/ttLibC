@@ -106,6 +106,7 @@ bool ttLibC_StlMap_put(
 		ttLibC_StlMap *map,
 		void *key,
 		void *item) {
+	ttLibC_StlMap_remove(map, key);
 	return StlMap_put(
 			(ttLibC_StlMap_ *)map,
 			key,
