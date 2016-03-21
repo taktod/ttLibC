@@ -306,10 +306,10 @@ static ttLibC_Amf0Object *Amf0_make(uint8_t *data, size_t data_size) {
 	case amf0Type_Object:
 		{
 			++ read_size;
-			// あとで作る
-			// とりあえず保持要素数は、仮に256としておく。(そんなでかいobjectつくらないと思うけど。)
+			// put limit, max is 255
 			size_t size = 255;
 			ttLibC_Amf0MapObject *map_objects = ttLibC_malloc(sizeof(ttLibC_Amf0MapObject) * (size + 1));
+			memset(map_objects, 0, sizeof(ttLibC_Amf0MapObject) * (size + 1));
 			for(int i = 0;i < size;++ i) {
 //				key
 				uint16_t key_size = be_uint16_t(*((uint16_t *)(data + read_size)));
@@ -340,7 +340,6 @@ static ttLibC_Amf0Object *Amf0_make(uint8_t *data, size_t data_size) {
 			if(*(data + read_size)     != 0x00
 			|| *(data + read_size + 1) != 0x00
 			|| *(data + read_size + 2) != 0x09) {
-				// ここでエラーになるはずだが・・・なんでだろう。
 				ERR_PRINT("object end is corrupted.");
 				ttLibC_Amf0_close((ttLibC_Amf0Object **)&amf0_obj);
 				return NULL;
@@ -374,11 +373,12 @@ static ttLibC_Amf0Object *Amf0_make(uint8_t *data, size_t data_size) {
 			read_size += 4;
 			// data holder.
 			ttLibC_Amf0MapObject *map_objects = ttLibC_malloc(sizeof(ttLibC_Amf0MapObject) * (size + 1));
+			memset(map_objects, 0, sizeof(ttLibC_Amf0MapObject) * (size + 1));
 			for(int i = 0;i < size;++ i) {
 //				key
 				uint16_t key_size = be_uint16_t(*((uint16_t *)(data + read_size)));
 				if(key_size == 0) {
-					// 終端である可能性がある。
+					// end of map
 					break;
 				}
 				read_size += 2;
@@ -509,7 +509,6 @@ static bool Amf0_write(ttLibC_Amf0Object *amf0_obj, ttLibC_AmfObjectWriteFunc ca
 				if(!callback(ptr, lists[i].key, key_size)) { // key
 					return false;
 				}
-				// あとは、objectを書き込めばOK
 				if(!Amf0_write(lists[i].amf0_obj, callback, ptr)) { // amfObject
 					return false;
 				}
@@ -558,7 +557,6 @@ static bool Amf0_write(ttLibC_Amf0Object *amf0_obj, ttLibC_AmfObjectWriteFunc ca
 				if(!callback(ptr, lists[i].key, key_size)) { // key
 					return false;
 				}
-				// あとは、objectを書き込めばOK
 				if(!Amf0_write(lists[i].amf0_obj, callback, ptr)) { // amfObject
 					return false;
 				}
