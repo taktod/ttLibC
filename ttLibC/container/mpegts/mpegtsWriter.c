@@ -151,6 +151,11 @@ static bool MpegtsWriter_PcrH264TrackCheck(void *ptr, ttLibC_Frame *frame) {
 		}
 		return true;
 	case H264Type_sliceIDR:
+		// if sliceIDR is too far away, use max_unit_duration.
+		if(writer->current_pts_pos + writer->max_unit_duration < h264->inherit_super.inherit_super.pts) {
+			writer->target_pos = writer->current_pts_pos + writer->max_unit_duration;
+			return false;
+		}
 		// find next sliceIDR.
 		if(writer->current_pts_pos != h264->inherit_super.inherit_super.pts) {
 			writer->target_pos = h264->inherit_super.inherit_super.pts;
