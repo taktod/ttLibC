@@ -91,6 +91,8 @@
 
 #include <ttLibC/util/hexUtil.h>
 
+#include <unistd.h>
+
 #if defined(__ENABLE_APPLE__) && defined(__ENABLE_OPENCV__)
 typedef struct vtH264Test_t {
 	ttLibC_VtH264Decoder *decoder;
