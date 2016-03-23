@@ -21,7 +21,7 @@ libttLibC_a_SOURCES= \
 	container/mpegts/mpegtsReader.c \
 	container/mpegts/mpegtsWriter.c \
 	container/container.c \
-	container/misc.c \
+	container/misc2.c \
 	decoder/audioConverterDecoder.c \
 	decoder/avcodecDecoder.c \
 	decoder/jpegDecoder.c \
