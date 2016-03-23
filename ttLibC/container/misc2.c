@@ -41,7 +41,6 @@ typedef ttLibC_Container_Misc_FrameQueue2_ ttLibC_FrameQueue2_;
 ttLibC_FrameQueue *ttLibC_FrameQueue_make(
 		uint32_t track_id,
 		uint32_t max_size) {
-	LOG_PRINT("misc2 used.");	
 	ttLibC_FrameQueue2_ *queue = ttLibC_malloc(sizeof(ttLibC_FrameQueue2_));
 	if(queue == NULL) {
 		ERR_PRINT("failed to allocate queue object.");
