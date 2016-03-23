@@ -200,7 +200,7 @@ bool ttLibC_TettyBootstrap_connect(
 
 /**
  * do update task.
- * @param bootstrap bootstrap object.
+ * @param bootstrap     bootstrap object.
  * @param wait_interval in micro sec.
  * @return true:new client_connection is established false:usual work.
  */
