@@ -98,7 +98,9 @@ ttLibC_Flv1 *ttLibC_Flv1_clone(
 			src_frame->inherit_super.inherit_super.timebase);
 }
 
-static int8_t Flv1_getPictureType(void *data, size_t data_size) {
+ttLibC_Flv1_Type ttLibC_Flv1_getPictureType(
+		void *data,
+		size_t data_size) {
 	/*
 	 * 17bit picture Start code 0000 0000 0000 0000 1
 	 * 5bit version
@@ -160,7 +162,7 @@ static int8_t Flv1_getPictureType(void *data, size_t data_size) {
  * @return true: key frame false:inter frame
  */
 bool ttLibC_Flv1_isKey(void *data, size_t data_size) {
-	return Flv1_getPictureType(data, data_size) == 0;
+	return ttLibC_Flv1_getPictureType(data, data_size) == 0;
 }
 
 /**
@@ -280,8 +282,7 @@ ttLibC_Flv1 *ttLibC_Flv1_getFrame(
 		bool non_copy_mode,
 		uint64_t pts,
 		uint32_t timebase) {
-//	bool key_frame = ttLibC_Flv1_isKey(data, data_size);
-	int8_t type = Flv1_getPictureType(data, data_size);
+	int8_t type = ttLibC_Flv1_getPictureType(data, data_size);
 	uint32_t width = ttLibC_Flv1_getWidth(data, data_size);
 	uint32_t height = ttLibC_Flv1_getHeight(data, data_size);
 	if((type != Flv1Type_intra && type != Flv1Type_inner && type != Flv1Type_disposableInner)
