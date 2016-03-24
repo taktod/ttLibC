@@ -90,6 +90,7 @@ libttLibC_a_SOURCES= \
 	util/byteUtil.c \
 	util/crc32Util.c \
 	util/dynamicBufferUtil.c \
+	util/flvFrameUtil.c \
 	util/forkUtil.c \
 	util/hexUtil.c \
 	util/httpUtil.c \
