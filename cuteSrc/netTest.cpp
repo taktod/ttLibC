@@ -16,21 +16,34 @@
 #include <sys/socket.h>
 #include <ttLibC/util/hexUtil.h>
 #include <ttLibC/util/amfUtil.h>
+#include <ttLibC/util/stlListUtil.h>
 #include <string.h>
 #include <time.h>
 #include <unistd.h> // require for calling close, and so on...
-
-#ifdef __ENABLE_FILE__
-#	include <ttLibC/net/client/rtmp.h>
-#endif
 
 #include <ttLibC/net/tetty.h>
 #include <ttLibC/net/tcp.h>
 #include <ttLibC/net/udp.h>
 
+#include <ttLibC/net/client/rtmp.h>
+
 #ifdef __ENABLE_FILE__
 #	include <ttLibC/util/forkUtil.h>
 #endif
+
+#ifdef __ENABLE_OPENCV__
+#	include <ttLibC/util/opencvUtil.h>
+#endif
+
+#ifdef __ENABLE_APPLE__
+#	include <ttLibC/util/audioUnitUtil.h>
+#	include <ttLibC/encoder/audioConverterEncoder.h>
+#	include <ttLibC/encoder/vtCompressSessionH264Encoder.h>
+#	include <ttLibC/decoder/audioConverterDecoder.h>
+#	include <ttLibC/decoder/vtDecompressSessionH264Decoder.h>
+#endif
+
+#include <ttLibC/resampler/imageResampler.h>
 
 static tetty_errornum udpTettyServerTest_channelActive(ttLibC_TettyContext *ctx) {
 	LOG_PRINT("channelActive");
@@ -257,68 +270,300 @@ static void tcpServerTest() {
 	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
-#ifdef __ENABLE_FILE__
-typedef struct {
-	bool is_running;
-	ttLibC_RtmpConnection *netConnection;
-	ttLibC_RtmpStream *netStream;
-	uint32_t work_id;
-} rtmpTest_t;
+#if defined(__ENABLE_OPENCV__) && defined(__ENABLE_APPLE__)
+typedef struct rtmpWatchTest_t {
+	ttLibC_CvWindow *window;
+//	ttLibC_AuPlayer *player;
 
-// callback for rtmp frame downloads.(play only)
-bool rtmpTest_frameReceiveCallback(void *ptr, ttLibC_Frame *frame) {
-	rtmpTest_t *testData = (rtmpTest_t *)ptr;
+	// decoder
+//	ttLibC_AcDecoder *aac_decoder;
+	ttLibC_VtH264Decoder *h264_decoder;
+
+	ttLibC_RtmpConnection *conn;
+	ttLibC_RtmpStream *stream;
+	ttLibC_Bgr *bgr;
+} rtmpWatchTest_t;
+
+static bool rtmpWatchTest_h264DecodeCallback(void *ptr, ttLibC_Yuv420 *yuv) {
+	rtmpWatchTest_t *testData = (rtmpWatchTest_t *)ptr;
+	ttLibC_Bgr *b = ttLibC_ImageResampler_makeBgrFromYuv420(testData->bgr, BgrType_bgr, yuv);
+	if(b == NULL) {
+		return false;
+	}
+	testData->bgr = b;
+	ttLibC_CvWindow_showBgr(testData->window, testData->bgr);
 	return true;
 }
 
-// callback for rtmp event
-bool rtmpTest_onStatusEvent(void *ptr, ttLibC_Amf0Object *amf0_obj) {
-	rtmpTest_t *testData = (rtmpTest_t *)ptr;
-	switch(amf0_obj->type) {
-	case amf0Type_Object:
-	case amf0Type_Map:
-		{
-			ttLibC_Amf0Object *code = ttLibC_Amf0_getElement(amf0_obj, "code");
-			LOG_PRINT("code:%s", (const char *)code->object);
-			if(code != NULL && strcmp((const char *)code->object, "NetConnection.Connect.Success") == 0) {
-				LOG_PRINT("connect success.");
-				testData->is_running = false;
-				// make netStream
-				testData->netStream = ttLibC_RtmpStream_make(testData->netConnection);
-				if(testData->netStream != NULL) {
-					// do publish
-					testData->work_id = ttLibC_RtmpStream_publish(testData->netStream, "test");
-//					testData->work_id = ttLibC_RtmpStream_play(testData->netStream, "test", rtmpTest_frameReceiveCallback, ptr);
-				}
-			}
+static bool rtmpWatchTest_getFrameCallback(void *ptr, ttLibC_Frame *frame) {
+	rtmpWatchTest_t *testData = (rtmpWatchTest_t *)ptr;
+	switch(frame->type) {
+	case frameType_h264:
+		if(testData->h264_decoder == NULL) {
+			return true;
 		}
+		if(((int32_t)frame->pts) < 0) {
+			return true;
+		}
+		return ttLibC_VtH264Decoder_decode(
+				testData->h264_decoder,
+				(ttLibC_H264 *)frame,
+				rtmpWatchTest_h264DecodeCallback,
+				testData);
+	case frameType_aac:
+		break;
+	case frameType_mp3:
 		break;
 	default:
-		return false;
+		break;
+	}
+	return true;
+}
+
+static bool rtmpWatchTest_onStatusEventCallback(
+		void *ptr,
+		ttLibC_Amf0Object *obj) {
+	rtmpWatchTest_t *testData = (rtmpWatchTest_t *)ptr;
+	ttLibC_Amf0Object *code = ttLibC_Amf0_getElement(obj, "code");
+	if(code != NULL && code->type == amf0Type_String) {
+		LOG_PRINT("code:%s", (const char *)code->object);
+		if(strcmp((const char *)code->object, "NetConnection.Connect.Success") == 0) {
+			// make netStream and play
+			testData->stream = ttLibC_RtmpStream_make(testData->conn);
+			ttLibC_RtmpStream_setBufferLength(testData->stream, 1000); // bufferLength = 1;
+			ttLibC_RtmpStream_addEventListener(testData->stream, rtmpWatchTest_onStatusEventCallback, testData);
+			ttLibC_RtmpStream_addFrameListener(testData->stream, rtmpWatchTest_getFrameCallback, testData);
+			testData->window = ttLibC_CvWindow_make("watch");
+			ttLibC_RtmpStream_play(testData->stream, "test", true, true);
+		}
 	}
 	return true;
 }
 #endif
 
-static void rtmpTest() {
-#ifdef __ENABLE_FILE__
-	rtmpTest_t testData;
-	testData.is_running = true;
-	testData.netConnection = ttLibC_RtmpConnection_make();
-	testData.netStream = NULL;
-	ttLibC_RtmpConnection_connect(
-			testData.netConnection,
-			"rtmp://localhost/live",
-			rtmpTest_onStatusEvent,
+static void rtmpWatchTest() {
+	LOG_PRINT("rtmpWatchTest");
+#if defined(__ENABLE_OPENCV__) && defined(__ENABLE_APPLE__)
+	rtmpWatchTest_t testData;
+//	testData.aac_decoder = NULL;
+	testData.h264_decoder = ttLibC_VtH264Decoder_make();
+
+//	testData.player = NULL;
+	testData.window = NULL;
+	testData.stream = NULL;
+	testData.conn = ttLibC_RtmpConnection_make();
+
+	testData.bgr = NULL;
+
+	ttLibC_RtmpConnection_addEventListener(
+			testData.conn,
+			rtmpWatchTest_onStatusEventCallback,
 			&testData);
-	while(ttLibC_RtmpConnection_read(testData.netConnection)) {
-		if(!testData.is_running) {
+	ttLibC_RtmpConnection_connect(
+			testData.conn,
+			"rtmp://localhost/live");
+	while(true) {
+		// check the socket status
+		if(!ttLibC_RtmpConnection_update(testData.conn, 10000)) {
 			break;
 		}
-//		ttLibC_RtmpStream_feed(testData.netStream, testData.work_id, frame);
+		if(testData.window != NULL) {
+			uint8_t keyChar = ttLibC_CvWindow_waitForKeyInput(1);
+			if(keyChar ==Keychar_Esc) {
+				break;
+			}
+		}
 	}
-	ttLibC_RtmpStream_close(&testData.netStream);
-	ttLibC_RtmpConnection_close(&testData.netConnection);
+//	ttLibC_AcDecoder_close(&testData.aac_decoder);
+	ttLibC_VtH264Decoder_close(&testData.h264_decoder);
+
+	ttLibC_RtmpStream_close(&testData.stream);
+	ttLibC_RtmpConnection_close(&testData.conn);
+
+//	ttLibC_AuPlayer_close(&testData.player);
+	ttLibC_CvWindow_close(&testData.window);
+
+	ttLibC_Bgr_close(&testData.bgr);
+#endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
+
+#if defined(__ENABLE_OPENCV__) && defined(__ENABLE_APPLE__)
+typedef struct rtmpPublishTest_t {
+	// setting
+	uint32_t sample_rate;
+	uint32_t channel_num;
+	uint32_t width;
+	uint32_t height;
+
+	// capture
+	ttLibC_CvCapture *capture;
+	ttLibC_CvWindow *window;
+	ttLibC_AuRecorder *recorder;
+	ttLibC_StlList *frame_list;
+	ttLibC_StlList *used_frame_list;
+
+	// encoder
+	ttLibC_AcEncoder *aac_encoder;
+	ttLibC_VtH264Encoder *h264_encoder;
+
+	// rtmp
+	ttLibC_RtmpConnection *conn;
+	ttLibC_RtmpStream *stream;
+} rtmpPublishTest_t;
+
+static bool rtmpPublishTest_aacEncodeCallback(void *ptr, ttLibC_Audio *aac) {
+	rtmpPublishTest_t *testData = (rtmpPublishTest_t *)ptr;
+	ttLibC_RtmpStream_addFrame(testData->stream, (ttLibC_Frame *)aac);
+	return true;
+}
+
+static bool rtmpPublishTest_h264EncodeCallback(void *ptr, ttLibC_H264 *h264) {
+	rtmpPublishTest_t *testData = (rtmpPublishTest_t *)ptr;
+	ttLibC_RtmpStream_addFrame(testData->stream, (ttLibC_Frame *)h264);
+	return true;
+}
+
+static bool rtmpPublishTest_makePcmCallback(void *ptr, ttLibC_Audio *audio) {
+	rtmpPublishTest_t *testData = (rtmpPublishTest_t *)ptr;
+	if(audio->inherit_super.type != frameType_pcmS16) {
+		// work with only pcms16
+		return false;
+	}
+	ttLibC_Frame *prev_frame = NULL;
+	if(testData->used_frame_list->size > 3) {
+		prev_frame = (ttLibC_Frame *)ttLibC_StlList_refFirst(testData->used_frame_list);
+		if(prev_frame != NULL) {
+			ttLibC_StlList_remove(testData->used_frame_list, prev_frame);
+		}
+	}
+	ttLibC_Frame *cloned_frame = ttLibC_Frame_clone(
+			prev_frame,
+			(ttLibC_Frame *)audio);
+	if(cloned_frame == NULL) {
+		return false;
+	}
+	ttLibC_StlList_addLast(testData->frame_list, cloned_frame);
+	return true;
+}
+
+static bool rtmpPublishTest_onStatusEventCallback(
+		void *ptr,
+		ttLibC_Amf0Object *obj) {
+	rtmpPublishTest_t *testData = (rtmpPublishTest_t *)ptr;
+	ttLibC_Amf0Object *code = ttLibC_Amf0_getElement(obj, "code");
+	if(code != NULL && code->type == amf0Type_String) {
+		LOG_PRINT("code:%s", (const char *)code->object);
+		if(strcmp((const char *)code->object, "NetConnection.Connect.Success") == 0) {
+			// make netStream and publish
+			testData->stream = ttLibC_RtmpStream_make(testData->conn);
+			ttLibC_RtmpStream_addEventListener(testData->stream, rtmpPublishTest_onStatusEventCallback, testData);
+			ttLibC_RtmpStream_publish(testData->stream, "test");
+			return true;
+		}
+		if(strcmp((const char *)code->object, "NetStream.Publish.Start") == 0) {
+			// now ready to make capture and recorder
+			testData->capture = ttLibC_CvCapture_make(0, testData->width, testData->height);
+			testData->recorder = ttLibC_AuRecorder_make(testData->sample_rate, testData->channel_num, AuRecorderType_DefaultInput, 0);
+			ttLibC_Bgr *bgr = ttLibC_CvCapture_queryFrame(testData->capture, NULL);
+			ttLibC_Bgr_close(&bgr);
+			ttLibC_AuRecorder_start(testData->recorder, rtmpPublishTest_makePcmCallback, testData);
+			testData->window = ttLibC_CvWindow_make("original");
+		}
+		if(strcmp((const char *)code->object, "NetStream.Unpublish.Success") == 0) {
+			// done
+		}
+	}
+	return true;
+}
+
+static bool rtmpPublishTest_closeAllFrame(void *ptr, void *item) {
+	if(item != NULL) {
+		ttLibC_Frame_close((ttLibC_Frame **)&item);
+	}
+	return true;
+}
+#endif
+
+static void rtmpPublishTest() {
+	LOG_PRINT("rtmpPublishTest");
+#if defined(__ENABLE_OPENCV__) && defined(__ENABLE_APPLE__)
+	rtmpPublishTest_t testData;
+	testData.sample_rate = 44100;
+	testData.channel_num = 1;
+	testData.width       = 320;
+	testData.height      = 240;
+
+	testData.capture         = NULL;
+	testData.window          = NULL;
+	testData.recorder        = NULL;
+	testData.frame_list      = ttLibC_StlList_make();
+	testData.used_frame_list = ttLibC_StlList_make();
+
+	testData.aac_encoder  = ttLibC_AcEncoder_make(testData.sample_rate, testData.channel_num, 96000, frameType_aac);
+	testData.h264_encoder = ttLibC_VtH264Encoder_make(testData.width, testData.height);
+
+	testData.conn = ttLibC_RtmpConnection_make();
+	testData.stream = NULL;
+
+	ttLibC_Bgr    *bgr = NULL;
+	ttLibC_Yuv420 *yuv = NULL;
+
+	ttLibC_RtmpConnection_addEventListener(
+			testData.conn,
+			rtmpPublishTest_onStatusEventCallback,
+			&testData);
+	ttLibC_RtmpConnection_connect(
+			testData.conn,
+			"rtmp://localhost/live");
+	while(true) {
+		// check the socket status
+		if(!ttLibC_RtmpConnection_update(testData.conn, 10000)) {
+			break;
+		}
+		if(testData.window != NULL) {
+			ttLibC_Bgr *b = ttLibC_CvCapture_queryFrame(testData.capture, bgr);
+			if(b == NULL) {
+				break;
+			}
+			bgr = b;
+			ttLibC_CvWindow_showBgr(testData.window, bgr);
+			ttLibC_Yuv420 *y = ttLibC_ImageResampler_makeYuv420FromBgr(yuv, Yuv420Type_planar, bgr);
+			if(y == NULL) {
+				break;
+			}
+			yuv = y;
+			ttLibC_VtH264Encoder_encode(testData.h264_encoder, yuv, rtmpPublishTest_h264EncodeCallback, &testData);
+			ttLibC_Frame *frame = NULL;
+			while(testData.frame_list->size > 2 && (frame = (ttLibC_Frame *)ttLibC_StlList_refFirst(testData.frame_list)) != NULL) {
+				ttLibC_StlList_remove(testData.frame_list, frame);
+				// encode to aac
+				ttLibC_AcEncoder_encode(testData.aac_encoder, (ttLibC_PcmS16 *)frame, rtmpPublishTest_aacEncodeCallback, &testData);
+				ttLibC_StlList_addLast(testData.used_frame_list, frame);
+			}
+			uint8_t keyChar = ttLibC_CvWindow_waitForKeyInput(1);
+			if(keyChar == Keychar_Esc) {
+				break;
+			}
+		}
+	}
+	// 1st close stream, 2nd close connection.
+	ttLibC_RtmpStream_close(&testData.stream);
+	ttLibC_RtmpConnection_close(&testData.conn);
+
+	ttLibC_AuRecorder_close(&testData.recorder);
+	ttLibC_CvCapture_close(&testData.capture);
+	ttLibC_CvWindow_close(&testData.window);
+	ttLibC_StlList_forEach(testData.frame_list, rtmpPublishTest_closeAllFrame, NULL);
+	ttLibC_StlList_close(&testData.frame_list);
+	ttLibC_StlList_forEach(testData.used_frame_list, rtmpPublishTest_closeAllFrame, NULL);
+	ttLibC_StlList_close(&testData.used_frame_list);
+
+	ttLibC_AcEncoder_close(&testData.aac_encoder);
+	ttLibC_VtH264Encoder_close(&testData.h264_encoder);
+
+	ttLibC_Bgr_close(&bgr);
+	ttLibC_Yuv420_close(&yuv);
 #endif
 	ASSERT(ttLibC_Allocator_dump() == 0);
 }
@@ -407,7 +652,8 @@ cute::suite netTests(cute::suite s) {
 	s.push_back(CUTE(tettyClientTest));
 	s.push_back(CUTE(tettyServerTest));
 	s.push_back(CUTE(tcpServerTest));
-	s.push_back(CUTE(rtmpTest));
+	s.push_back(CUTE(rtmpWatchTest));
+	s.push_back(CUTE(rtmpPublishTest));
 	s.push_back(CUTE(echoServerTest));
 	return s;
 }

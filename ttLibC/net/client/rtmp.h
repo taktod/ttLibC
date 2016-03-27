@@ -1,56 +1,32 @@
 /**
  * @file   rtmp.h
- * @brief  rtmp support.
+ * @brief  support for rtmp client.
  *
- * this code is under 3-Cause BSD license
+ * this code is under 3-Cause BSD License.
  *
  * @author taktod
- * @date   2015/08/26
+ * @date   2016/03/06
  */
 
-#ifndef TTLIBC_NET_RTMP_H_
-#define TTLIBC_NET_RTMP_H_
+#ifndef TTLIBC_NET_CLIENT_RTMP_H_
+ #define TTLIBC_NET_CLIENT_RTMP_H_
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+#include "../tetty.h"
 #include "../../util/amfUtil.h"
 #include "../../frame/frame.h"
 
-#include <stdint.h>
-
 /**
- * rtmpMessageType
+ * definition of rtmpConnection.
  */
-typedef enum ttLibC_RtmpMessage_Type {
-	RtmpMessageType_setChunkSize = 0x01,
-	RtmpMessageType_abortMessage = 0x02,
-	RtmpMessageType_acknowledgement = 0x03,
-	RtmpMessageType_userControlMessage = 0x04,
-	RtmpMessageType_windowAcknowledgementSize = 0x05,
-	RtmpMessageType_setPeerBandwidth = 0x06,
-	RtmpMessageType_audioMessage = 0x08,
-	RtmpMessageType_videoMessage = 0x09,
-	RtmpMessageType_amf3DataMessage = 0x0F,
-	RtmpMessageType_amf3SharedObjectMessage = 0x10,
-	RtmpMessageType_amf3Command = 0x11,
-	RtmpMessageType_amf0DataMessage = 0x12,
-	RtmpMessageType_amf0SharedObjectMessage = 0x13,
-	RtmpMessageType_amf0Command = 0x14,
-	RtmpMessageType_aggregateMessage = 0x16,
-} ttLibC_RtmpMessage_Type;
+typedef struct ttLibC_Net_Client_Rtmp_RtmpConnection {
 
-/**
- * information for rtmpConnection.
- */
-typedef struct ttLibC_Net_RtmpConnection {
-	char *server;
-	uint16_t port;
-	char *app;
-} ttLibC_Net_RtmpConnection;
+} ttLibC_Net_Client_Rtmp_RtmpConnection;
 
-typedef ttLibC_Net_RtmpConnection ttLibC_RtmpConnection;
+typedef ttLibC_Net_Client_Rtmp_RtmpConnection ttLibC_RtmpConnection;
 
 /**
  * callback for status event.
@@ -61,66 +37,144 @@ typedef ttLibC_Net_RtmpConnection ttLibC_RtmpConnection;
 typedef bool (* ttLibC_RtmpEventFunc)(void *ptr, ttLibC_Amf0Object *amf0_obj);
 
 /**
- * create new rtmpConnection.
- * @return connection object.
+ * make rtmpConnection object.
  */
 ttLibC_RtmpConnection *ttLibC_RtmpConnection_make();
 
 /**
- * try connect.
- * @param conn     rtmpConnection object.
- * @param address  target address.
- * @param callback event callback function.
- * @param ptr      user def object pointer.
- * @return true: success false: error
+ * add event listener for rtmpConnection.
+ * @param conn
+ * @param callback
+ * @param ptr
  */
-bool ttLibC_RtmpConnection_connect(
+void ttLibC_RtmpConnection_addEventListener(
 		ttLibC_RtmpConnection *conn,
-		const char *address,
 		ttLibC_RtmpEventFunc callback,
 		void *ptr);
 
-bool ttLibC_RtmpConnection_read(ttLibC_RtmpConnection *conn);
+/**
+ * connect
+ * @param conn    rtmpConnnection object.
+ * @param address for example: rtmp://localhost:1935/live
+ */
+bool ttLibC_RtmpConnection_connect(
+		ttLibC_RtmpConnection *conn,
+		const char *address);
 
 /**
- * close
+ * update connection event.
+ * @param conn          rtmpConnection object
+ * @param wait_interval interval in micro sec.
+ * @return true:success false:error
+ */
+bool ttLibC_RtmpConnection_update(
+		ttLibC_RtmpConnection* conn,
+		uint32_t wait_interval);
+
+/**
+ * close connection object.
+ * @param conn
  */
 void ttLibC_RtmpConnection_close(ttLibC_RtmpConnection **conn);
 
-// next to make netStream.
-typedef struct ttLibC_Net_RtmpStream {
-} ttLibC_Net_RtmpStream;
+/**
+ * definition of rtmpStream.
+ */
+typedef struct ttLibC_Net_Client_Rtmp_RtmpStream {
 
-typedef ttLibC_Net_RtmpStream ttLibC_RtmpStream;
+} ttLibC_Net_Client_Rtmp_RtmpStream;
 
-typedef bool (* ttLibC_RtmpFrameFunc)(void *ptr, ttLibC_Frame *frame);
+typedef ttLibC_Net_Client_Rtmp_RtmpStream ttLibC_RtmpStream;
 
-// makeすると、ttLibC_RtmpStreamのオブジェクトが帰ってくる。
+/**
+ * callback function to get frame object.
+ * @param ptr   user def pointer.
+ * @param frame analyzed frame from container.
+ * @return true: work properly, false: error occured.
+ */
+typedef bool (* ttLibC_RtmpStream_getFrameFunc)(void *ptr, ttLibC_Frame *frame);
+
+/**
+ * make rtmpStream
+ * @param conn rtmpConnection object.
+ * @return rtmpStream object.
+ */
 ttLibC_RtmpStream *ttLibC_RtmpStream_make(ttLibC_RtmpConnection *conn);
 
-uint32_t ttLibC_RtmpStream_play(
+/**
+ * add event listener
+ * @param stream
+ * @param callback
+ * @param ptr
+ */
+void ttLibC_RtmpStream_addEventListener(
 		ttLibC_RtmpStream *stream,
-		const char *name,
-		ttLibC_RtmpFrameFunc callback,
+		ttLibC_RtmpEventFunc callback,
 		void *ptr);
 
-uint32_t ttLibC_RtmpStream_publish(
+/**
+ * add frame listener.
+ * @param stream
+ * @param callback
+ * @@aram ptr
+ */
+void ttLibC_RtmpStream_addFrameListener(
+		ttLibC_RtmpStream *stream,
+		ttLibC_RtmpStream_getFrameFunc callback,
+		void *ptr);
+
+/**
+ * publish stream.
+ * @param stream target stream
+ * @param name   target name
+ */
+void ttLibC_RtmpStream_publish(
 		ttLibC_RtmpStream *stream,
 		const char *name);
 
-bool ttLibC_RtmpStream_stop(
+/**
+ * send frame object.
+ * @param stream
+ * @param frame
+ * @return true:success false:error
+ */
+bool ttLibC_RtmpStream_addFrame(
 		ttLibC_RtmpStream *stream,
-		uint32_t id);
-
-void ttLibC_RtmpStream_feed(
-		ttLibC_RtmpStream *stream,
-		uint32_t id,
 		ttLibC_Frame *frame);
 
+/**
+ * send buffer length for play.
+ */
+void ttLibC_RtmpStream_setBufferLength(
+		ttLibC_RtmpStream *stream,
+		uint32_t buffer_length);
+
+/**
+ * play stream.
+ * @param stream       target stream
+ * @param name         target name
+ * @param accept_video flag for video recv.
+ * @param accept_audio flag for audio recv.
+ */
+void ttLibC_RtmpStream_play(
+		ttLibC_RtmpStream *stream,
+		const char *name,
+		bool accept_video,
+		bool accept_audio);
+
+/**
+ * pause stream.
+ */
+void ttLibC_RtmpStream_pause(ttLibC_RtmpStream *stream);
+
+/**
+ * close rtmpStream
+ * @param stream
+ */
 void ttLibC_RtmpStream_close(ttLibC_RtmpStream **stream);
 
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
 
-#endif /* TTLIBC_NET_RTMP_H_ */
+#endif /* TTLIBC_NET_CLIENT_RTMP_H_ */

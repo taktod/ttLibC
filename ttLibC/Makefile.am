@@ -67,15 +67,26 @@ libttLibC_a_SOURCES= \
 	frame/video/wmv2.c \
 	frame/video/yuv420.c \
 	frame/frame.c \
-	net/client/rtmp/type/aggregate.c \
-	net/client/rtmp/type/audio.c \
-	net/client/rtmp/type/command.c \
-	net/client/rtmp/type/system.c \
-	net/client/rtmp/type/video.c \
-	net/client/rtmp/header.c \
-	net/client/rtmp/message.c \
-	net/client/rtmp/netConnection.c \
-	net/client/rtmp/netStream.c \
+	net/client/rtmp/data/clientObject.c \
+	net/client/rtmp/header/rtmpHeader.c \
+	net/client/rtmp/message/acknowledgement.c \
+	net/client/rtmp/message/aggregateMessage.c \
+	net/client/rtmp/message/amf0Command.c \
+	net/client/rtmp/message/amf0DataMessage.c \
+	net/client/rtmp/message/audioMessage.c \
+	net/client/rtmp/message/rtmpMessage.c \
+	net/client/rtmp/message/setChunkSize.c \
+	net/client/rtmp/message/setPeerBandwidth.c \
+	net/client/rtmp/message/userControlMessage.c \
+	net/client/rtmp/message/videoMessage.c \
+	net/client/rtmp/message/windowAcknowledgementSize.c \
+	net/client/rtmp/tetty/rtmpClientHandler.c \
+	net/client/rtmp/tetty/rtmpCommandHandler.c \
+	net/client/rtmp/tetty/rtmpDecoder.c \
+	net/client/rtmp/tetty/rtmpEncoder.c \
+	net/client/rtmp/tetty/rtmpHandshake.c \
+	net/client/rtmp/rtmpConnection.c \
+	net/client/rtmp/rtmpStream.c \
 	net/tcp.c \
 	net/tetty/bootstrap.c \
 	net/tetty/context.c \
