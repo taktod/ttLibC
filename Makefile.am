@@ -29,6 +29,7 @@ nobase_include_HEADERS= \
 	ttLibC/frame/video/wmv2.h \
 	ttLibC/frame/video/yuv420.h \
 	ttLibC/frame/frame.h \
+	ttLibC/net/client/rtmp.h \
 	ttLibC/net/net.h \
 	ttLibC/net/tcp.h \
 	ttLibC/net/tetty.h \
