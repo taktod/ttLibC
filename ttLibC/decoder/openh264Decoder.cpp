@@ -97,13 +97,20 @@ static bool Openh264Decoder_decode(
 		ERR_PRINT("failed to decode data.:%x", res);
 		return false;
 	}
+	if(h264->inherit_super.width == 0
+	|| h264->inherit_super.height == 0) {
+		// dimention for h264 is null. happen on first buffer. or supply configData.
+		return true;
+	}
 	if(decoder_->bufInfo.UsrData.sSystemBuffer.iWidth == 0
 	|| decoder_->bufInfo.UsrData.sSystemBuffer.iHeight == 0) {
 		// dimention is null. happen on first buffer. or supply configData.
 		return true;
 	}
-	decoder_->inherit_super.width  = decoder_->bufInfo.UsrData.sSystemBuffer.iWidth;
-	decoder_->inherit_super.height = decoder_->bufInfo.UsrData.sSystemBuffer.iHeight;
+//	decoder_->inherit_super.width  = decoder_->bufInfo.UsrData.sSystemBuffer.iWidth;
+//	decoder_->inherit_super.height = decoder_->bufInfo.UsrData.sSystemBuffer.iHeight;
+	decoder_->inherit_super.width  = h264->inherit_super.width;
+	decoder_->inherit_super.height = h264->inherit_super.height;
 	ttLibC_Yuv420 *yuv = ttLibC_Yuv420_make(
 			decoder_->yuv420,
 			Yuv420Type_planar,
