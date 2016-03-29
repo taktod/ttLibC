@@ -346,11 +346,49 @@ bool ttLibC_VtH264Encoder_encode(
 	// update image_buffer
 	CVPixelBufferLockBaseAddress(encoder_->image_buffer, 0);
 	void *y_data = CVPixelBufferGetBaseAddressOfPlane(encoder_->image_buffer, 0);
-	memcpy(y_data, yuv420->y_data, encoder_->luma_size);
+	uint32_t y_stride = CVPixelBufferGetBytesPerRowOfPlane(encoder_->image_buffer, 0);
+	if(yuv420->y_stride != y_stride) {
+		uint8_t *y_buf = y_data;
+		uint8_t *y_org_buf = yuv420->y_data;
+		for(int i = 0;i < yuv420->inherit_super.height;++ i) {
+			memcpy(y_buf, y_org_buf, yuv420->inherit_super.width);
+			y_buf += y_stride;
+			y_org_buf += yuv420->y_stride;
+		}
+	}
+	else {
+		memcpy(y_data, yuv420->y_data, encoder_->luma_size);
+	}
 	void *u_data = CVPixelBufferGetBaseAddressOfPlane(encoder_->image_buffer, 1);
-	memcpy(u_data, yuv420->u_data, encoder_->chroma_size);
+	uint32_t u_stride = CVPixelBufferGetBytesPerRowOfPlane(encoder_->image_buffer, 1);
+	uint32_t chroma_width = (yuv420->inherit_super.width >> 1);
+	uint32_t chroma_height = (yuv420->inherit_super.height >> 1);
+	if(yuv420->u_stride != u_stride) {
+		uint8_t *u_buf = u_data;
+		uint8_t *u_org_buf = yuv420->u_data;
+		for(int i = 0;i < chroma_height;++ i) {
+			memcpy(u_buf, u_org_buf, chroma_width);
+			u_buf += u_stride;
+			u_org_buf += yuv420->u_stride;
+		}
+	}
+	else {
+		memcpy(u_data, yuv420->u_data, encoder_->chroma_size);
+	}
 	void *v_data = CVPixelBufferGetBaseAddressOfPlane(encoder_->image_buffer, 2);
-	memcpy(v_data, yuv420->v_data, encoder_->chroma_size);
+	uint32_t v_stride = CVPixelBufferGetBytesPerRowOfPlane(encoder_->image_buffer, 2);
+	if(yuv420->v_stride != v_stride) {
+		uint8_t *v_buf = v_data;
+		uint8_t *v_org_buf = yuv420->v_data;
+		for(int i = 0;i < chroma_height;++ i) {
+			memcpy(v_buf, v_org_buf, chroma_width);
+			v_buf += v_stride;
+			v_org_buf += yuv420->v_stride;
+		}
+	}
+	else {
+		memcpy(v_data, yuv420->v_data, encoder_->chroma_size);
+	}
 	CVPixelBufferUnlockBaseAddress(encoder_->image_buffer, 0);
 	// if we want to force keyframe, do something here...
 	VTCompressionSessionEncodeFrame(encoder_->session, encoder_->image_buffer, pts, dur, NULL, NULL, &flags);
