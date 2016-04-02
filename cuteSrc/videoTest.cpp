@@ -33,6 +33,187 @@
 	}
 #endif
 
+#ifdef __ENABLE_THEORA__
+#	include <theora/theoraenc.h>
+#	include <theora/theoradec.h>
+#endif
+
+static void theoraTest() {
+	LOG_PRINT("theoraTest");
+#if defined(__ENABLE_THEORA__) && defined(__ENABLE_OPENCV__)
+	uint32_t width = 320, height = 240;
+	ttLibC_CvCapture *capture = ttLibC_CvCapture_make(0, width, height);
+	ttLibC_CvWindow *window   = ttLibC_CvWindow_make("original");
+	ttLibC_CvWindow *dec_win  = ttLibC_CvWindow_make("decode");
+
+	ttLibC_Bgr    *bgr = NULL, *dbgr = NULL, *b;
+	ttLibC_Yuv420 *yuv = NULL, *dyuv = NULL, *y;
+
+	// for decode
+	th_dec_ctx *dec_ctx = NULL;
+	th_setup_info *dec_ts = NULL;
+	th_info dec_ti;
+	th_comment dec_tc;
+	ogg_int64_t videobuf_granulepos = 0;
+
+	// for encode
+	ogg_packet o_packet;
+	th_enc_ctx *ctx = NULL;
+	th_info ti;
+	th_comment tc;
+	th_ycbcr_buffer t_imageBuffer;
+	th_info_init(&ti);
+	ti.frame_width = width; // should be 16x?
+	ti.frame_height = height;
+	ti.pic_width = width;
+	ti.pic_height = height;
+	ti.pic_x = 0;
+	ti.pic_y = 0;
+	ti.fps_numerator = 1;
+	ti.fps_denominator = 1000;
+
+	ti.aspect_numerator = 1;
+	ti.aspect_denominator = 1;
+
+	ti.pixel_fmt = TH_PF_420;
+
+	ti.target_bitrate = 320000;
+	ti.quality = 0;
+	ctx = th_encode_alloc(&ti);
+	if(ctx != NULL) {
+		// set gop?
+/*		int gop_size = 15;
+		if(th_encode_ctl(ctx, TH_ENCCTL_SET_KEYFRAME_FREQUENCY_FORCE, &gop_size, sizeof(gop_size))) {
+			ERR_PRINT("failed to set gop.");
+		}*/
+		th_comment_init(&tc);
+		// dec_ti need to zero clear, or failed to decode.
+		memset(&dec_ti, 0, sizeof(dec_ti));
+		while(th_encode_flushheader(ctx, &tc, &o_packet)) {
+//			LOG_DUMP(o_packet.packet, o_packet.bytes, true);
+			int res = th_decode_headerin(&dec_ti, &dec_tc, &dec_ts, &o_packet);
+			if(res == TH_EBADHEADER) {
+				LOG_PRINT("need more binary, or broken data.");
+			}
+			else if(res > 0) {
+				LOG_PRINT("header reading is complete.");
+			}
+		}
+		// setup decoder.
+		dec_ctx = th_decode_alloc(&dec_ti, dec_ts);
+		switch(dec_ti.pixel_fmt) {
+		case TH_PF_420:
+			LOG_PRINT("yuv420");
+			break;
+		default:
+			LOG_PRINT("unexpected frame.:%d", dec_ti.pixel_fmt);
+			break;
+		}
+		// what is pp level?
+		int pp_level_max;
+		int pp_level;
+		int pp_inc;
+		th_decode_ctl(dec_ctx, TH_DECCTL_GET_PPLEVEL_MAX, &pp_level_max, sizeof(pp_level_max));
+		pp_level = pp_level_max;
+		th_decode_ctl(dec_ctx, TH_DECCTL_SET_PPLEVEL, &pp_level, sizeof(pp_level));
+		pp_inc = 0;
+		if(dec_ts != NULL) {
+			th_setup_free(dec_ts);
+		}
+		// now ready for encoder and decoder.
+		while(true) {
+			b = ttLibC_CvCapture_queryFrame(capture, bgr);
+			if(b == NULL) {
+				break;
+			}
+			bgr = b;
+			ttLibC_CvWindow_showBgr(window, bgr);
+			y = ttLibC_ImageResampler_makeYuv420FromBgr(yuv, Yuv420Type_planar, bgr);
+			if(y == NULL) {
+				break;
+			}
+			yuv = y;
+			t_imageBuffer[0].width  = yuv->inherit_super.width;
+			t_imageBuffer[0].height = yuv->inherit_super.height;
+			t_imageBuffer[0].stride = yuv->y_stride;
+			t_imageBuffer[0].data   = yuv->y_data;
+			t_imageBuffer[1].width  = yuv->inherit_super.width >> 1;
+			t_imageBuffer[1].height = yuv->inherit_super.height >> 1;
+			t_imageBuffer[1].stride = yuv->u_stride;
+			t_imageBuffer[1].data   = yuv->u_data;
+			t_imageBuffer[2].width  = yuv->inherit_super.width >> 1;
+			t_imageBuffer[2].height = yuv->inherit_super.height >> 1;
+			t_imageBuffer[2].stride = yuv->v_stride;
+			t_imageBuffer[2].data   = yuv->v_data;
+			// register yuv image.
+			int result = th_encode_ycbcr_in(ctx, t_imageBuffer);
+			if(result != 0) {
+				ERR_PRINT("failed to register yuv image.");
+				break;
+			}
+			// pick up ogg packet binary.
+			result = th_encode_packetout(ctx, 0, &o_packet);
+			if(result != 1) {
+				ERR_PRINT("failed to get encode data.");
+				break;
+			}
+			else {
+				if(o_packet.granulepos >= 0) {
+					th_decode_ctl(dec_ctx, TH_DECCTL_SET_GRANPOS, &o_packet.granulepos, sizeof(o_packet.granulepos));
+				}
+				if((result = th_decode_packetin(dec_ctx, &o_packet, &videobuf_granulepos)) == 0) {
+					th_granule_time(dec_ctx, videobuf_granulepos);
+					th_ycbcr_buffer dec_yuv;
+					if(th_decode_ycbcr_out(dec_ctx, dec_yuv) == 0) {
+						// now convert yuv -> bgr and show image on window.
+						y = ttLibC_Yuv420_make(dyuv, Yuv420Type_planar, width, height, NULL, 0, dec_yuv[0].data, dec_yuv[0].stride, dec_yuv[1].data, dec_yuv[1].stride, dec_yuv[2].data, dec_yuv[2].stride, true, 0, 1000);
+						if(y == NULL) {
+							break;
+						}
+						dyuv = y;
+						b = ttLibC_ImageResampler_makeBgrFromYuv420(dbgr, BgrType_bgr, dyuv);
+						if(b == NULL) {
+							break;
+						}
+						dbgr = b;
+						ttLibC_CvWindow_showBgr(dec_win, dbgr);
+					}
+				}
+				else {
+					ERR_PRINT("failed to decode.:%d", result);
+					break;
+				}
+			}
+			uint8_t key_char = ttLibC_CvWindow_waitForKeyInput(33);
+			if(key_char == Keychar_Esc) {
+				// quit with esc key.
+				break;
+			}
+		}
+	}
+	th_info_clear(&ti);
+	th_info_clear(&dec_ti);
+
+	th_comment_clear(&tc);
+//	th_comment_clear(&dec_tc);
+	if(ctx != NULL) {
+		th_encode_free(ctx);
+		ctx = NULL;
+	}
+	if(dec_ctx != NULL) {
+		th_decode_free(dec_ctx);
+	}
+	ttLibC_CvCapture_close(&capture);
+	ttLibC_CvWindow_close(&window);
+	ttLibC_CvWindow_close(&dec_win);
+	ttLibC_Bgr_close(&dbgr);
+	ttLibC_Yuv420_close(&dyuv);
+	ttLibC_Bgr_close(&bgr);
+	ttLibC_Yuv420_close(&yuv);
+#endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
+
 static void avcodecTest() {
 	LOG_PRINT("avcodecTest");
 #if defined(__ENABLE_AVCODEC__) && defined(__ENABLE_OPENCV__)
@@ -465,6 +646,7 @@ static void openh264Test() {
  */
 cute::suite videoTests(cute::suite s) {
 	s.clear();
+	s.push_back(CUTE(theoraTest));
 	s.push_back(CUTE(avcodecTest));
 	s.push_back(CUTE(h264SequenceParameterSetAnalyzeTest));
 	s.push_back(CUTE(openh264Test));

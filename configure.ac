@@ -35,6 +35,7 @@ faad_flag=no
 apple_flag=no
 x264_flag=no
 x265_flag=no
+theora_flag=no
 
 # check result
 cute_check=no 
@@ -53,6 +54,7 @@ faad_decode_check=no
 apple_check=no
 x264_check=no
 x265_check=no
+theora_check=no
 
 AC_ARG_ENABLE(
 	[lgpl],
@@ -121,6 +123,7 @@ AC_ARG_ENABLE(
 		apple_flag=$enableval
 		x264_flag=$enableval
 		x265_flag=$enableval
+		theora_flag=$enableval
 	]
 )
 
@@ -212,6 +215,12 @@ AC_ARG_ENABLE(
 	[x265],
 	AS_HELP_STRING([--enable-x265/--disable-x265], [enable/diable x265 code.]),
 	[x265_flag=$enableval]
+)
+
+AC_ARG_ENABLE(
+	[theora],
+	AS_HELP_STRING([--enable-theora/--disable-theora], [enable/disable theora code.]),
+	[theora_flag=$enableval]
 )
 
 if test x$opencv_flag = "xyes"; then
@@ -390,6 +399,14 @@ if test x$x265_flag = "xyes"; then
 		[x265_check=no]
 	)
 fi
+if test x$theora_flag = "xyes"; then
+	PKG_CHECK_MODULES(
+		[THEORA],
+		[theora],
+		[theora_check=yes],
+		[theora_check=no]
+	)
+fi
 
 if test x$gpl_flag = "xyes"; then
 	AC_DEFINE([__ENABLE_GPL__])
@@ -488,6 +505,11 @@ if test x$x265_flag$gpl_flag$x265_check = "xyesyesyes"; then
 	AC_DEFINE([__ENABLE_X265__])
 fi
 AM_CONDITIONAL(ENABLE_X265, test x$x265_flag$gpl_flag$x265_check = "xyesyesyes")
+
+if test x$theora_flag$theora_check = "xyesyes"; then
+	AC_DEFINE([__ENABLE_THEORA__])
+fi
+AM_CONDITIONAL(ENABLE_THEORA, test x$theora_flag$theora_check = "xyesyes")
 
 AC_ARG_WITH(pkgconfigdir,
 	AS_HELP_STRING([--with-pkgconfigdir], [Use the specified pkgconfig dir.(default is $libdir/pkgconfig)]),
@@ -657,6 +679,15 @@ echo "x265:             off(under gpl only.)"
 	fi
 else
 echo "x265:             off"
+fi
+if test x$theora_flag = "xyes"; then
+	if test x$theora_check = "xyes"; then
+echo "theora:           on"
+	else
+echo "theora:           off(theora library is missing.)"
+	fi
+else
+echo "theora:           off"
 fi
 if test x$speexdsp_flag = "xyes"; then
 	if test x$speexdsp_check = "xyes"; then
