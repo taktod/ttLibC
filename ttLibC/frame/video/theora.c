@@ -11,6 +11,7 @@
 #include "theora.h"
 #include "../../log.h"
 #include "../../util/byteUtil.h"
+#include "../../util/ioUtil.h"
 
 typedef ttLibC_Frame_Video_Theora ttLibC_Theora_;
 
@@ -77,7 +78,7 @@ ttLibC_Theora *ttLibC_Theora_make(
  */
 bool ttLibC_Theora_isKey(void *data, size_t data_size) {
 	uint8_t first_byte = *((uint8_t *)data);
-	return (first_byte & 0xC0) == 0x40;
+	return (first_byte & 0xC0) != 0x40;
 }
 
 /*
@@ -90,7 +91,7 @@ bool ttLibC_Theora_isKey(void *data, size_t data_size) {
 uint32_t ttLibC_Theora_getWidth(ttLibC_Theora *prev_frame, uint8_t *data, size_t data_size) {
 	/*
 	 * 1bit header flag 1:header 0:frame
-	 * 1bit intra flag 1:keyframe 0:inner frame.
+	 * 1bit intra flag 0:keyframe 1:inner frame.
 	 * from here for identification header decode frame information.
 	 * 6bit padding.
 	 * 6byte(48bit) theora
@@ -138,7 +139,7 @@ uint32_t ttLibC_Theora_getWidth(ttLibC_Theora *prev_frame, uint8_t *data, size_t
 	uint32_t fmbW = *((uint16_t *)dat);
 	dat += 2;
 //	uint32_t fmbH = *((uint16_t *)dat);
-	return fmbW * 16;
+	return be_int16_t(fmbW) * 16;
 }
 
 /*
@@ -177,7 +178,7 @@ uint32_t ttLibC_Theora_getHeight(ttLibC_Theora *prev_frame, uint8_t *data, size_
 //	uint32_t fmbW = *((uint16_t *)dat);
 	dat += 2;
 	uint32_t fmbH = *((uint16_t *)dat);
-	return fmbH * 16;
+	return be_uint16_t(fmbH) * 16;
 }
 
 /*
