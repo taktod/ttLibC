@@ -16,6 +16,7 @@
 #include <AudioToolbox/AudioToolbox.h>
 #include <AudioUnit/AudioUnit.h>
 #include <string.h>
+#include <pthread.h>
 
 #ifdef __APPLE__
 #	include "TargetConditionals.h"
@@ -43,6 +44,12 @@ typedef struct {
 	uint32_t channel_num;
 	/** current played pts */
 	uint64_t pts;
+	/** current_played pts for ref */
+	uint64_t ref_pts;
+
+	// mutex
+	pthread_mutex_t pts_mutex; // mutex for pts
+	pthread_mutex_t index_mutex; // mutex for index
 } ttLibC_Util_AudioUnit_AuPlayer_;
 
 typedef ttLibC_Util_AudioUnit_AuPlayer_ ttLibC_AuPlayer_;
@@ -68,13 +75,26 @@ static bool AuPlayer_dequeue(
 	uint32_t err = 0;
 	int max_index = player_->buffer_size / sizeof(int16_t);
 	uint32_t added_sample_num = 0;
+	uint32_t read_index, write_index;
+	int r = pthread_mutex_lock(&player_->index_mutex);
+	if(r != 0) {
+		ERR_PRINT("failed lock.");
+		return false;
+	}
+	read_index = player_->read_index;
+	write_index = player_->write_index;
+	r = pthread_mutex_unlock(&player_->index_mutex);
+	if(r != 0) {
+		ERR_PRINT("failed to unlock.");
+		return false;
+	}
 	// try to fill ptr.
 	for(int i = 0;i < sample_num * player_->channel_num;++ i) {
-		if(player_->read_index < player_->write_index) {
+		if(read_index < write_index) {
 			++ added_sample_num;
-			*(ptr + i) = player_->buffer[(player_->read_index % max_index)];
+			*(ptr + i) = player_->buffer[(read_index % max_index)];
 			// update read_index.
-			++ player_->read_index;
+			++ read_index;
 		}
 		else {
 			// data is missing, try to fill with 0(no sound).
@@ -82,12 +102,42 @@ static bool AuPlayer_dequeue(
 			*(ptr + i) = 0;
 		}
 	}
+	r = pthread_mutex_lock(&player_->index_mutex);
+	if(r != 0) {
+		ERR_PRINT("failed lock2.");
+		return false;
+	}
+	player_->read_index = read_index;
+	r = pthread_mutex_unlock(&player_->index_mutex);
+	if(r != 0) {
+		ERR_PRINT("failed unlock2");
+		return false;
+	}
 	// for stereo, sample_num is double counted. fix the number.
 	if(player_->channel_num == 2) {
 		added_sample_num >>= 1;
 	}
 	// update pts.
 	player_->pts += added_sample_num;
+	r = pthread_mutex_trylock(&player_->pts_mutex);
+	if(r != 0) {
+		if(r != EBUSY) {
+			ERR_PRINT("failed to lock mutex.");
+			return false;
+		}
+		// just busy do next.
+	}
+	else {
+		player_->ref_pts = player_->pts;
+		r = pthread_mutex_unlock(&player_->pts_mutex);
+		if(r != 0) {
+			if(EBUSY == r) {
+				// in the case of busy, update next time.
+			}
+			ERR_PRINT("failed to unlock mutex.");
+			return false;
+		}
+	}
 	player_->inherit_super.pts = player_->pts;
 	return true;
 }
@@ -228,6 +278,8 @@ ttLibC_AuPlayer *ttLibC_AuPlayer_make(
 	player->inherit_super.pts = 0;
 	player->read_index = 0;
 	player->write_index = 0;
+	pthread_mutex_init(&player->pts_mutex, NULL);
+	pthread_mutex_init(&player->index_mutex, NULL);
 	// TODO wanna use extentable buffer.
 	player->buffer_size = sample_rate * sizeof(int16_t) * channel_num * 2; // for 2 sec.
 	player->buffer = (int16_t *)ttLibC_malloc(player->buffer_size);
@@ -262,9 +314,23 @@ bool ttLibC_AuPlayer_queue(ttLibC_AuPlayer *player, ttLibC_PcmS16 *pcmS16) {
 		player_->inherit_super.pts = player_->pts;
 	}
 	int max_index = player_->buffer_size / sizeof(int16_t);
-	int last_pos = player_->read_index + max_index;
-	int index_gap = last_pos - player_->write_index;
+
+	uint32_t read_index, write_index;
+	int r = pthread_mutex_lock(&player_->index_mutex);
+	if(r != 0) {
+		ERR_PRINT("failed to lock.");
+		return false;
+	}
+	read_index = player_->read_index;
+	write_index = player_->write_index;
+	int last_pos = read_index + max_index;
+	int index_gap = last_pos - write_index;
 	int target_sample = index_gap / player_->inherit_super.channel_num;
+	r = pthread_mutex_unlock(&player_->index_mutex);
+	if(r != 0) {
+		ERR_PRINT("failed to unlock.");
+		return false;
+	}
 	if(target_sample < pcmS16->inherit_super.sample_num) {
 		// buffer doesn't have enough space for this pcm data.
 		// do nothing.
@@ -280,8 +346,8 @@ bool ttLibC_AuPlayer_queue(ttLibC_AuPlayer *player, ttLibC_PcmS16 *pcmS16) {
 				int16_t *src_ptr = (int16_t *)pcmS16->l_data;
 				int16_t *dst_ptr = player_->buffer;
 				for(int i = 0;i < target_index;++ i) {
-					dst_ptr[(player_->write_index % max_index)] = src_ptr[i];
-					++ player_->write_index;
+					dst_ptr[(write_index % max_index)] = src_ptr[i];
+					++ write_index; //
 				}
 			}
 			break;
@@ -297,11 +363,49 @@ bool ttLibC_AuPlayer_queue(ttLibC_AuPlayer *player, ttLibC_PcmS16 *pcmS16) {
 		}
 	}
 	// to prevent overflow, rewind index.
+	r = pthread_mutex_lock(&player_->index_mutex);
+	if(r != 0) {
+		ERR_PRINT("failed to lock2.");
+		return false;
+	}
+	player_->write_index = write_index;
 	if(player_->write_index > (max_index << 2)) {
 		player_->write_index -= max_index;
 		player_->read_index -= max_index;
 	}
+	r = pthread_mutex_unlock(&player_->index_mutex);
+	if(r != 0) {
+		ERR_PRINT("failed to unlock2");
+		return false;
+	}
 	return true;
+}
+
+uint64_t ttLibC_AuPlayer_getPts(ttLibC_AuPlayer *player) {
+	if(player == NULL) {
+		return false;
+	}
+	ttLibC_AuPlayer_ *player_ = (ttLibC_AuPlayer_ *)player;
+	int r = pthread_mutex_lock(&player_->pts_mutex);
+	if(r != 0) {
+		ERR_PRINT("failed to lock.");
+		return 0;
+	}
+	uint64_t pts = player_->ref_pts;
+	r = pthread_mutex_unlock(&player_->pts_mutex);
+	if(r != 0) {
+		ERR_PRINT("failed to unlock.");
+		return 0;
+	}
+	return pts;
+}
+
+uint32_t ttLibC_AuPlayer_getTimebase(ttLibC_AuPlayer *player) {
+	if(player == NULL) {
+		return false;
+	}
+	ttLibC_AuPlayer_ *player_ = (ttLibC_AuPlayer_ *)player;
+	return player_->sample_rate;
 }
 
 /*
@@ -316,6 +420,8 @@ void ttLibC_AuPlayer_close(ttLibC_AuPlayer **player) {
 	AudioOutputUnitStop(target->outputUnit);
 	AudioUnitUninitialize(target->outputUnit);
 	AudioComponentInstanceDispose(target->outputUnit);
+	pthread_mutex_destroy(&target->pts_mutex);
+	pthread_mutex_destroy(&target->index_mutex);
 	ttLibC_free(target->buffer);
 	ttLibC_free(target);
 	*player = NULL;

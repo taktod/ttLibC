@@ -58,6 +58,10 @@ ttLibC_AuPlayer *ttLibC_AuPlayer_make(
  */
 bool ttLibC_AuPlayer_queue(ttLibC_AuPlayer *player, ttLibC_PcmS16 *pcmS16);
 
+uint64_t ttLibC_AuPlayer_getPts(ttLibC_AuPlayer *player);
+
+uint32_t ttLibC_AuPlayer_getTimebase(ttLibC_AuPlayer *player);
+
 /**
  * close player
  * @param player ttLibC_AuPlayer object.
