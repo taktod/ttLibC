@@ -69,8 +69,8 @@ static void theoraTest() {
 	ti.pic_height = height;
 	ti.pic_x = 0;
 	ti.pic_y = 0;
-	ti.fps_numerator = 1;
-	ti.fps_denominator = 1000;
+	ti.fps_numerator = 15;
+	ti.fps_denominator = 1;
 
 	ti.aspect_numerator = 1;
 	ti.aspect_denominator = 1;
@@ -88,7 +88,9 @@ static void theoraTest() {
 		}*/
 		th_comment_init(&tc);
 		// dec_ti need to zero clear, or failed to decode.
-		memset(&dec_ti, 0, sizeof(dec_ti));
+		th_info_init(&dec_ti);
+		th_comment_init(&dec_tc);
+//		memset(&dec_ti, 0, sizeof(dec_ti));
 		while(th_encode_flushheader(ctx, &tc, &o_packet)) {
 //			LOG_DUMP(o_packet.packet, o_packet.bytes, true);
 			int res = th_decode_headerin(&dec_ti, &dec_tc, &dec_ts, &o_packet);
@@ -190,12 +192,12 @@ static void theoraTest() {
 				break;
 			}
 		}
+		th_info_clear(&dec_ti);
+		th_comment_clear(&dec_tc);
 	}
 	th_info_clear(&ti);
-	th_info_clear(&dec_ti);
 
 	th_comment_clear(&tc);
-//	th_comment_clear(&dec_tc);
 	if(ctx != NULL) {
 		th_encode_free(ctx);
 		ctx = NULL;
