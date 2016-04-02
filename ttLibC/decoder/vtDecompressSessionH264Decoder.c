@@ -31,6 +31,7 @@ typedef struct ttLibC_Decoder_VtDecompressionSession_VtH264Decoder_ {
 	ttLibC_DynamicBuffer *buffer;
 
 	ttLibC_VtH264DecodeFunc callback;
+	ttLibC_VtH264DecodeRawFunc raw_callback;
 	void *ptr;
 } ttLibC_Decoder_VtDecompressionSession_VtH264Decoder_;
 
@@ -65,44 +66,51 @@ static void VtH264Decoder_decodeCallback(
 		return;
 	}
 	ttLibC_VtH264Decoder_ *decoder = (ttLibC_VtH264Decoder_ *)decompressionOutputRefCon;
-	uint32_t width = CVPixelBufferGetWidth(imageBuffer);
-	uint32_t height = CVPixelBufferGetHeight(imageBuffer);
-	decoder->inherit_super.width = width;
-	decoder->inherit_super.height = height;
-	CVPixelBufferLockBaseAddress(imageBuffer, 0);
-	uint8_t *y_data = (uint8_t *)CVPixelBufferGetBaseAddressOfPlane(imageBuffer, 0);
-	uint8_t *uv_data = (uint8_t *)CVPixelBufferGetBaseAddressOfPlane(imageBuffer, 1);
-
-	ttLibC_Yuv420 *y = ttLibC_Yuv420_make(
-			decoder->yuv420,
-			Yuv420Type_semiPlanar,
-			width,
-			height,
-			NULL,
-			0,
-			y_data,
-			CVPixelBufferGetBytesPerRowOfPlane(imageBuffer, 0),
-			uv_data,
-			CVPixelBufferGetBytesPerRowOfPlane(imageBuffer, 1),
-			uv_data + 1,
-			CVPixelBufferGetBytesPerRowOfPlane(imageBuffer, 1),
-			true,
-			pts.value,
-			pts.timescale);
-	if(y != NULL) {
-		decoder->yuv420 = y;
-		if(decoder->callback != NULL) {
-			if(!decoder->callback(decoder->ptr, decoder->yuv420)) {
-			}
+	if(decoder->raw_callback != NULL) {
+		if(!decoder->raw_callback(decoder->ptr, imageBuffer, &pts, &dts)) {
 		}
 	}
-	CVPixelBufferUnlockBaseAddress(imageBuffer, 0);
+	if(decoder->callback != NULL) {
+		uint32_t width = CVPixelBufferGetWidth(imageBuffer);
+		uint32_t height = CVPixelBufferGetHeight(imageBuffer);
+		decoder->inherit_super.width = width;
+		decoder->inherit_super.height = height;
+		CVPixelBufferLockBaseAddress(imageBuffer, 0);
+		uint8_t *y_data = (uint8_t *)CVPixelBufferGetBaseAddressOfPlane(imageBuffer, 0);
+		uint8_t *uv_data = (uint8_t *)CVPixelBufferGetBaseAddressOfPlane(imageBuffer, 1);
+
+		ttLibC_Yuv420 *y = ttLibC_Yuv420_make(
+				decoder->yuv420,
+				Yuv420Type_semiPlanar,
+				width,
+				height,
+				NULL,
+				0,
+				y_data,
+				CVPixelBufferGetBytesPerRowOfPlane(imageBuffer, 0),
+				uv_data,
+				CVPixelBufferGetBytesPerRowOfPlane(imageBuffer, 1),
+				uv_data + 1,
+				CVPixelBufferGetBytesPerRowOfPlane(imageBuffer, 1),
+				true,
+				pts.value,
+				pts.timescale);
+		if(y != NULL) {
+			decoder->yuv420 = y;
+			if(decoder->callback != NULL) {
+				if(!decoder->callback(decoder->ptr, decoder->yuv420)) {
+				}
+			}
+		}
+		CVPixelBufferUnlockBaseAddress(imageBuffer, 0);
+	}
 }
 
-bool ttLibC_VtH264Decoder_decode(
+static bool VtH264Decoder_decode(
 		ttLibC_VtH264Decoder *decoder,
 		ttLibC_H264 *h264,
 		ttLibC_VtH264DecodeFunc callback,
+		ttLibC_VtH264DecodeRawFunc raw_callback,
 		void *ptr) {
 	if(decoder == NULL) {
 		return false;
@@ -112,6 +120,7 @@ bool ttLibC_VtH264Decoder_decode(
 	}
 	ttLibC_VtH264Decoder_ *decoder_ = (ttLibC_VtH264Decoder_ *)decoder;
 	decoder_->callback = callback;
+	decoder_->raw_callback = raw_callback;
 	decoder_->ptr = ptr;
 	uint8_t *data = (uint8_t *)h264->inherit_super.inherit_super.data;
 	size_t data_size = h264->inherit_super.inherit_super.buffer_size;
@@ -255,6 +264,32 @@ bool ttLibC_VtH264Decoder_decode(
 		break;
 	}
 	return true;
+}
+
+bool ttLibC_VtH264Decoder_decode(
+		ttLibC_VtH264Decoder *decoder,
+		ttLibC_H264 *h264,
+		ttLibC_VtH264DecodeFunc callback,
+		void *ptr) {
+	return VtH264Decoder_decode(
+			decoder,
+			h264,
+			callback,
+			NULL,
+			ptr);
+}
+
+bool ttLibC_VtH264Decoder_rawDecode(
+		ttLibC_VtH264Decoder *decoder,
+		ttLibC_H264 *h264,
+		ttLibC_VtH264DecodeRawFunc callback,
+		void *ptr) {
+	return VtH264Decoder_decode(
+			decoder,
+			h264,
+			NULL,
+			callback,
+			ptr);
 }
 
 void ttLibC_VtH264Decoder_close(ttLibC_VtH264Decoder **decoder) {

@@ -27,12 +27,20 @@ typedef ttLibC_Decoder_VtDecompressionSession_VtH264Decoder ttLibC_VtH264Decoder
 
 typedef bool (* ttLibC_VtH264DecodeFunc)(void *ptr, ttLibC_Yuv420 *yuv420);
 
+typedef bool (* ttLibC_VtH264DecodeRawFunc)(void *ptr, void *cvImageBuffer, void *cmtimePts, void *cmtimeDts);
+
 ttLibC_VtH264Decoder *ttLibC_VtH264Decoder_make();
 
 bool ttLibC_VtH264Decoder_decode(
 		ttLibC_VtH264Decoder *decoder,
 		ttLibC_H264 *h264,
 		ttLibC_VtH264DecodeFunc callback,
+		void *ptr);
+
+bool ttLibC_VtH264Decoder_rawDecode(
+		ttLibC_VtH264Decoder *decoder,
+		ttLibC_H264 *h264,
+		ttLibC_VtH264DecodeRawFunc callback,
 		void *ptr);
 
 void ttLibC_VtH264Decoder_close(ttLibC_VtH264Decoder **decoder);
