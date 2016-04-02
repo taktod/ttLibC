@@ -38,6 +38,178 @@
 #	include <theora/theoradec.h>
 #endif
 
+
+#ifdef __ENABLE_DAALA_ENCODE__
+#	include <daala/daalaenc.h>
+#endif
+
+#ifdef __ENABLE_DAALA_DECODE__
+#	include <daala/daaladec.h>
+#endif
+
+static void daalaTest() {
+	LOG_PRINT("daalaTest");
+#if defined(__ENABLE_DAALA_ENCODE__) && defined(__ENABLE_DAALA_DECODE__) && defined(__ENABLE_OPENCV__)
+	uint32_t width = 320, height = 240;
+	ttLibC_CvCapture *capture = ttLibC_CvCapture_make(0, width, height);
+	ttLibC_CvWindow *window   = ttLibC_CvWindow_make("original");
+	ttLibC_CvWindow *dec_win  = ttLibC_CvWindow_make("decode");
+
+	ttLibC_Bgr    *bgr = NULL, *dbgr = NULL, *b;
+	ttLibC_Yuv420 *yuv = NULL, *dyuv = NULL, *y;
+
+	// decode
+	daala_dec_ctx *dec_ctx = NULL;
+	daala_setup_info *dec_ds = NULL;
+	daala_info dec_di;
+	daala_comment dec_dc;
+	daala_image dec_img;
+
+	// encode
+	daala_enc_ctx *ctx = NULL;
+	daala_info di;
+	daala_comment dc;
+	daala_packet dp;
+	daala_image img;
+	daala_info_init(&di);
+	di.pic_width = width;
+	di.pic_height = height;
+	di.frame_duration = 1;
+	di.bitdepth_mode = OD_BITDEPTH_MODE_8;
+	di.timebase_numerator = 15;
+	di.timebase_denominator = 1;
+	di.pixel_aspect_numerator = 1;
+	di.pixel_aspect_denominator = 1;
+	di.full_precision_references = 0;
+	di.nplanes = 3;
+	di.plane_info[0].xdec = 0;
+	di.plane_info[0].ydec = 0;
+	di.plane_info[1].xdec = 1;
+	di.plane_info[1].ydec = 1;
+	di.plane_info[2].xdec = 1;
+	di.plane_info[2].ydec = 1;
+	int result = 0;
+	ctx = daala_encode_create(&di);
+	if(ctx != NULL) {
+		daala_comment_init(&dc);
+		daala_info_init(&dec_di);
+		daala_comment_init(&dec_dc);
+		// for header information.
+		while(true) {
+			result = daala_encode_flush_header(ctx, &dc, &dp);
+			if(result > 0) {
+				LOG_PRINT("success to make header.");
+				int res = daala_decode_header_in(&dec_di, &dec_dc, &dec_ds, &dp);
+			}
+			if(result == 0) {
+				LOG_PRINT("header is finished.");
+				break;
+			}
+		}
+		// header is applyed for dec_di, make decoder now.
+		dec_ctx = daala_decode_create(&dec_di, dec_ds);
+		if(dec_ds != NULL) {
+			daala_setup_free(dec_ds);
+		}
+		daala_comment_clear(&dc);
+		while(true) {
+			// capture from opencv
+			b = ttLibC_CvCapture_queryFrame(capture, bgr);
+			if(b == NULL) {
+				break;
+			}
+			bgr = b;
+			// show the image.
+			ttLibC_CvWindow_showBgr(window, bgr);
+			// make yuv
+			y = ttLibC_ImageResampler_makeYuv420FromBgr(yuv, Yuv420Type_planar, bgr);
+			if(y == NULL) {
+				break;
+			}
+			yuv = y;
+			// put into daala image buffer.
+			img.width = width;
+			img.height = height;
+			img.nplanes = 3;
+			img.planes[0].bitdepth = 8;
+			img.planes[0].data = yuv->y_data;
+			img.planes[0].xdec = 0;
+			img.planes[0].ydec = 0;
+			img.planes[0].xstride = 1;
+			img.planes[0].ystride = yuv->y_stride;
+			img.planes[1].bitdepth = 8;
+			img.planes[1].data = yuv->u_data;
+			img.planes[1].xdec = 1;
+ 			img.planes[1].ydec = 1;
+			img.planes[1].xstride = 1;
+			img.planes[1].ystride = yuv->u_stride;
+			img.planes[2].bitdepth = 8;
+			img.planes[2].data = yuv->v_data;
+			img.planes[2].xdec = 1;
+ 			img.planes[2].ydec = 1;
+			img.planes[2].xstride = 1;
+			img.planes[2].ystride = yuv->v_stride;
+			result = daala_encode_img_in(ctx, &img, yuv->inherit_super.inherit_super.pts);
+			if(result == 0) {
+				LOG_PRINT("success apply yuv image.");
+				while((result = daala_encode_packet_out(ctx, 0, &dp)) != 0) {
+					LOG_PRINT("result:%d", result);
+					// daala binary is ready, now try to decode.
+					result = daala_decode_packet_in(dec_ctx, &dp);
+					if(result == 0) {
+						// pick up image.
+						if(daala_decode_img_out(dec_ctx, &dec_img) == 1) {
+							// get image.
+							y = ttLibC_Yuv420_make(dyuv, Yuv420Type_planar, width, height, NULL, 0,
+									dec_img.planes[0].data, width,
+									dec_img.planes[1].data, width >> 1,
+									dec_img.planes[2].data, width >> 1,
+									true, 0, 1000);
+							if(y == NULL) {
+								break;
+							}
+							dyuv = y;
+							// back to bgr
+							b = ttLibC_ImageResampler_makeBgrFromYuv420(dbgr, BgrType_bgr, dyuv);
+							if(b == NULL) {
+								break;
+							}
+							dbgr = b;
+							// show image with opencv window.
+							ttLibC_CvWindow_showBgr(dec_win, dbgr);
+						}
+					}
+				}
+			}
+			else {
+				LOG_PRINT("failed to apply yuv image:%d", result);
+			}
+			uint8_t key_char = ttLibC_CvWindow_waitForKeyInput(33);
+			if(key_char == Keychar_Esc) {
+				break;
+			}
+		}
+		daala_info_clear(&dec_di);
+		daala_comment_clear(&dec_dc);
+	}
+	if(ctx != NULL) {
+		daala_encode_free(ctx);
+	}
+	if(dec_ctx != NULL) {
+		daala_decode_free(dec_ctx);
+	}
+	daala_info_clear(&di);
+	ttLibC_CvCapture_close(&capture);
+	ttLibC_CvWindow_close(&window);
+	ttLibC_CvWindow_close(&dec_win);
+	ttLibC_Bgr_close(&dbgr);
+	ttLibC_Yuv420_close(&dyuv);
+	ttLibC_Bgr_close(&bgr);
+	ttLibC_Yuv420_close(&yuv);
+#endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
+
 static void theoraTest() {
 	LOG_PRINT("theoraTest");
 #if defined(__ENABLE_THEORA__) && defined(__ENABLE_OPENCV__)
@@ -648,6 +820,7 @@ static void openh264Test() {
  */
 cute::suite videoTests(cute::suite s) {
 	s.clear();
+	s.push_back(CUTE(daalaTest));
 	s.push_back(CUTE(theoraTest));
 	s.push_back(CUTE(avcodecTest));
 	s.push_back(CUTE(h264SequenceParameterSetAnalyzeTest));

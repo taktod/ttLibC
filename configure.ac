@@ -36,6 +36,7 @@ apple_flag=no
 x264_flag=no
 x265_flag=no
 theora_flag=no
+daala_flag=no
 
 # check result
 cute_check=no 
@@ -55,6 +56,8 @@ apple_check=no
 x264_check=no
 x265_check=no
 theora_check=no
+daala_encode_check=no
+daala_decode_check=no
 
 AC_ARG_ENABLE(
 	[lgpl],
@@ -124,6 +127,7 @@ AC_ARG_ENABLE(
 		x264_flag=$enableval
 		x265_flag=$enableval
 		theora_flag=$enableval
+		daala_flag=$enableval
 	]
 )
 
@@ -221,6 +225,12 @@ AC_ARG_ENABLE(
 	[theora],
 	AS_HELP_STRING([--enable-theora/--disable-theora], [enable/disable theora code.]),
 	[theora_flag=$enableval]
+)
+
+AC_ARG_ENABLE(
+	[daala],
+	AS_HELP_STRING([--enable-daala/--disable-daala], [enable/disable daala code.]),
+	[daala_flag=$enableval]
 )
 
 if test x$opencv_flag = "xyes"; then
@@ -407,6 +417,20 @@ if test x$theora_flag = "xyes"; then
 		[theora_check=no]
 	)
 fi
+if test x$daala_flag = "xyes"; then
+	PKG_CHECK_MODULES(
+		[DAALAENC],
+		[daalaenc],
+		[daala_encode_check=yes],
+		[daala_encode_check=no]
+	)
+	PKG_CHECK_MODULES(
+		[DAALADEC],
+		[daaladec],
+		[daala_decode_check=yes],
+		[daala_decode_check=no]
+	)
+fi
 
 if test x$gpl_flag = "xyes"; then
 	AC_DEFINE([__ENABLE_GPL__])
@@ -510,6 +534,15 @@ if test x$theora_flag$theora_check = "xyesyes"; then
 	AC_DEFINE([__ENABLE_THEORA__])
 fi
 AM_CONDITIONAL(ENABLE_THEORA, test x$theora_flag$theora_check = "xyesyes")
+
+if test x$daala_flag$daala_encode_check = "xyesyes"; then
+	AC_DEFINE([__ENABLE_DAALA_ENCODE__])
+fi
+AM_CONDITIONAL(ENABLE_DAALA_ENCODE, test x$daala_flag$daala_encode_check = "xyesyes")
+if test x$daala_flag$daala_decode_check = "xyesyes"; then
+	AC_DEFINE([__ENABLE_DAALA_DECODE__])
+fi
+AM_CONDITIONAL(ENABLE_DAALA_DECODE, test x$daala_flag$daala_decode_check = "xyesyes")
 
 AC_ARG_WITH(pkgconfigdir,
 	AS_HELP_STRING([--with-pkgconfigdir], [Use the specified pkgconfig dir.(default is $libdir/pkgconfig)]),
@@ -630,7 +663,7 @@ echo "faac(encoder):    off(faac library is missing.)"
 echo "faac(encoder):    off(under lgpl only.)"
 	fi
 else
-echo "faac(encode):     off"
+echo "faac(encoder):    off"
 fi
 if test x$faad_flag = "xyes"; then
 	if test x$gpl_flag = "xyes"; then
@@ -643,7 +676,7 @@ echo "faad(decoder):    off(faad library is missing.)"
 echo "faad(decoder):    off(under gpl only.)"
 	fi
 else
-echo "faad(decode):     off"
+echo "faad(decoder):    off"
 fi
 if test x$openh264_flag = "xyes"; then
 	if test x$openh264_check = "xyes"; then
@@ -688,6 +721,21 @@ echo "theora:           off(theora library is missing.)"
 	fi
 else
 echo "theora:           off"
+fi
+if test x$daala_flag = "xyes"; then
+	if test x$daala_encode_check = "xyes"; then
+echo "daala(encoder):   on"
+	else
+echo "daala(encoder):   off(daalaenc library is missing.)"
+	fi
+	if test x$daala_decode_check = "xyes"; then
+echo "daala(decoder):   on"
+	else
+echo "daala(decoder):   off(daaladec library is missing.)"
+	fi
+else
+echo "daala(encoder):   off"
+echo "daala(decoder):   off"
 fi
 if test x$speexdsp_flag = "xyes"; then
 	if test x$speexdsp_check = "xyes"; then
