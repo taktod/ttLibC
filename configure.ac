@@ -23,41 +23,50 @@ file_flag=no
 
 opencv_flag=no
 openal_flag=no
-mp3lame_flag=no
-faac_flag=no
+
 jpeg_flag=no
 openh264_flag=no
-speexdsp_flag=no
-speex_flag=no
-opus_flag=no
-avcodec_flag=no
-faad_flag=no
-apple_flag=no
 x264_flag=no
 x265_flag=no
 theora_flag=no
 daala_flag=no
 
+mp3lame_flag=no
+faac_flag=no
+speexdsp_flag=no
+speex_flag=no
+opus_flag=no
+faad_flag=no
+vorbis_flag=no
+
+avcodec_flag=no
+apple_flag=no
+
 # check result
 cute_check=no 
 opencv_check=no
 openal_check=no
-mp3lame_encode_check=no
-mp3lame_decode_check=no
-faac_encode_check=no
+
 jpeg_check=no
 openh264_check=no
-speexdsp_check=no
-speex_check=no
-opus_check=no
-avcodec_check=no
-faad_decode_check=no
-apple_check=no
 x264_check=no
 x265_check=no
 theora_check=no
 daala_encode_check=no
 daala_decode_check=no
+
+mp3lame_encode_check=no
+mp3lame_decode_check=no
+faac_encode_check=no
+speexdsp_check=no
+speex_check=no
+opus_check=no
+faad_decode_check=no
+vorbis_encode_check=no
+vorbis_decode_check=no
+
+avcodec_check=no
+apple_check=no
 
 AC_ARG_ENABLE(
 	[lgpl],
@@ -128,6 +137,7 @@ AC_ARG_ENABLE(
 		x265_flag=$enableval
 		theora_flag=$enableval
 		daala_flag=$enableval
+		vorbis_flag=$enableval
 	]
 )
 
@@ -231,6 +241,12 @@ AC_ARG_ENABLE(
 	[daala],
 	AS_HELP_STRING([--enable-daala/--disable-daala], [enable/disable daala code.]),
 	[daala_flag=$enableval]
+)
+
+AC_ARG_ENABLE(
+	[vorbis],
+	AS_HELP_STRING([--enable-vorbis/--disable-vorbis], [enable/disable vorbis code.]),
+	[vorbis_flag=$enableval]
 )
 
 if test x$opencv_flag = "xyes"; then
@@ -431,6 +447,20 @@ if test x$daala_flag = "xyes"; then
 		[daala_decode_check=no]
 	)
 fi
+if test x$vorbis_flag = "xyes"; then
+	PKG_CHECK_MODULES(
+		[VORBISENC],
+		[vorbisenc],
+		[vorbis_encode_check=yes],
+		[vorbis_encode_check=no]
+	)
+	PKG_CHECK_MODULES(
+		[VORBISDEC],
+		[vorbis],
+		[vorbis_decode_check=yes],
+		[vorbis_decode_check=no]
+	)
+fi
 
 if test x$gpl_flag = "xyes"; then
 	AC_DEFINE([__ENABLE_GPL__])
@@ -543,6 +573,15 @@ if test x$daala_flag$daala_decode_check = "xyesyes"; then
 	AC_DEFINE([__ENABLE_DAALA_DECODE__])
 fi
 AM_CONDITIONAL(ENABLE_DAALA_DECODE, test x$daala_flag$daala_decode_check = "xyesyes")
+
+if test x$vorbis_flag$vorbis_encode_check = "xyesyes"; then
+	AC_DEFINE([__ENABLE_VORBIS_ENCODE__])
+fi
+AM_CONDITIONAL(ENABLE_VORBIS_ENCODE, test x$vorbis_flag$vorbis_encode_check = "xyesyes")
+if test x$vorbis_flag$vorbis_decode_check = "xyesyes"; then
+	AC_DEFINE([__ENABLE_VORBIS_DECODE__])
+fi
+AM_CONDITIONAL(ENABLE_VORBIS_DECODE, test x$vorbis_flag$vorbis_decode_check = "xyesyes")
 
 AC_ARG_WITH(pkgconfigdir,
 	AS_HELP_STRING([--with-pkgconfigdir], [Use the specified pkgconfig dir.(default is $libdir/pkgconfig)]),
@@ -736,6 +775,21 @@ echo "daala(decoder):   off(daaladec library is missing.)"
 else
 echo "daala(encoder):   off"
 echo "daala(decoder):   off"
+fi
+if test x$vorbis_flag = "xyes"; then
+	if test x$vorbis_encode_check = "xyes"; then
+echo "vorbis(encoder):  on"
+	else
+echo "vorbis(encoder):  off(vorbisenc library is missing.)"
+	fi
+	if test x$vorbis_decode_check = "xyes"; then
+echo "vorbis(decoder):  on"
+	else
+echo "vorbis(decoder):  off(vorbis library is missing.)"
+	fi
+else
+echo "vorbis(encoder):  off"
+echo "vorbis(decoder):  off"
 fi
 if test x$speexdsp_flag = "xyes"; then
 	if test x$speexdsp_check = "xyes"; then

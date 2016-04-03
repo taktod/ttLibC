@@ -54,6 +54,116 @@
 #include <ttLibC/frame/audio/mp3.h>
 #include <ttLibC/allocator.h>
 
+#ifdef __ENABLE_VORBIS_ENCODE__
+#	include <vorbis/vorbisenc.h>
+#endif
+
+#ifdef __ENABLE_VORBIS_DECODE__
+#	include <vorbis/codec.h>
+#endif
+
+static void vorbisTest() {
+	LOG_PRINT("vorbisTest");
+#if defined(__ENABLE_VORBIS_ENCODE__) && defined(__ENABLE_VORBIS_DECODE__)
+	ttLibC_BeepGenerator *generator = ttLibC_BeepGenerator_make(PcmS16Type_littleEndian, 440, 44100, 1);
+	ttLibC_PcmS16 *pcm = NULL, *p;
+	generator->amplitude = 30000;
+
+	// decoder test
+	vorbis_info dec_vi;
+	vorbis_comment dec_vc;
+	vorbis_dsp_state dec_vd;
+	vorbis_block dec_vb;
+	char *buffer;
+	int bytes;
+
+	// encoder test
+	ogg_packet op;
+	vorbis_info vi;
+	vorbis_comment vc;
+	vorbis_dsp_state vd;
+	vorbis_block vb;
+
+	vorbis_info_init(&vi);
+	int ret = vorbis_encode_init_vbr(&vi, 1, 44100, 0.4);
+	if(ret != 0) {
+		LOG_PRINT("failed to init vorbis.");
+	}
+	vorbis_comment_init(&vc);
+	vorbis_comment_add_tag(&vc, "ENCODER", "ttLibC_test");
+
+	vorbis_analysis_init(&vd, &vi);
+	vorbis_block_init(&vd, &vb);
+
+	vorbis_info_init(&dec_vi);
+	vorbis_comment_init(&dec_vc);
+	ogg_packet header, header_comm, header_code;
+	vorbis_analysis_headerout(&vd, &vc, &header, &header_comm, &header_code);
+
+	LOG_DUMP(header.packet, header.bytes, true);
+	if(vorbis_synthesis_headerin(&dec_vi, &dec_vc, &header) < 0) {
+		LOG_PRINT("failed to read vorbis header.");
+	}
+	LOG_DUMP(header_comm.packet, header_comm.bytes, true);
+	if(vorbis_synthesis_headerin(&dec_vi, &dec_vc, &header_comm) < 0) {
+		LOG_PRINT("failed to read vorbis header.");
+	}
+	LOG_DUMP(header_code.packet, header_code.bytes, true);
+	if(vorbis_synthesis_headerin(&dec_vi, &dec_vc, &header_code) < 0) {
+		LOG_PRINT("failed to read vorbis header.");
+	}
+	if(vorbis_synthesis_init(&dec_vd, &dec_vi) == 0) {
+		LOG_PRINT("decoder init OK");
+		vorbis_block_init(&dec_vd, &dec_vb);
+	}
+
+	for(int i = 0;i < 5;++ i) {
+		p = ttLibC_BeepGenerator_makeBeepByMiliSec(generator, pcm, 500);
+		if(p == NULL) {
+			break;
+		}
+		pcm = p;
+		float **buffer = vorbis_analysis_buffer(&vd, p->inherit_super.sample_num);
+		int16_t *data = (int16_t *)pcm->inherit_super.inherit_super.data;
+		int j = 0;
+		for(j = 0;j < pcm->inherit_super.sample_num;++ j) {
+			buffer[0][j] = (*data) / 32768.f;
+		}
+		vorbis_analysis_wrote(&vd, j);
+		while(vorbis_analysis_blockout(&vd, &vb) == 1) {
+			vorbis_analysis(&vb, NULL);
+			vorbis_bitrate_addblock(&vb);
+
+			while(vorbis_bitrate_flushpacket(&vd, &op)) {
+				LOG_DUMP(op.packet, op.bytes, true);
+				if(vorbis_synthesis(&dec_vb, &op) == 0) {
+					LOG_PRINT("decode try, ok");
+					vorbis_synthesis_blockin(&dec_vd, &dec_vb);
+				}
+				float **pcm;
+				int samples;
+				while((samples = vorbis_synthesis_pcmout(&dec_vd, &pcm)) > 0) {
+					LOG_PRINT("decoded, samples:%d", samples);
+					vorbis_synthesis_read(&dec_vd, samples);
+				}
+			}
+		}
+	}
+	vorbis_block_clear(&dec_vb);
+	vorbis_dsp_clear(&dec_vd);
+	vorbis_comment_clear(&dec_vc);
+	vorbis_info_clear(&dec_vi);
+
+	vorbis_block_clear(&vb);
+	vorbis_dsp_clear(&vd);
+	vorbis_comment_clear(&vc);
+	vorbis_info_clear(&vi);
+	ttLibC_BeepGenerator_close(&generator);
+	ttLibC_PcmS16_close(&pcm);
+#endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
+
 static void faadTest() {
 	LOG_PRINT("faadTest");
 #if defined(__ENABLE_FAAD_DECODE__)
@@ -604,6 +714,7 @@ static void mp3lameTest() {
  */
 cute::suite audioTests(cute::suite s) {
 	s.clear();
+	s.push_back(CUTE(vorbisTest));
 	s.push_back(CUTE(faadTest));
 	s.push_back(CUTE(audioResamplerTest));
 	s.push_back(CUTE(opusTest));
