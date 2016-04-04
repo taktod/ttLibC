@@ -7,6 +7,7 @@
  * @author taktod
  * @date   2016/03/12
  */
+#ifdef __ENABLE_SOCKET__
 
 #include "userControlMessage.h"
 #include "../../../../log.h"
@@ -146,3 +147,5 @@ void ttLibC_UserControlMessage_close(ttLibC_UserControlMessage **message) {
 	ttLibC_free(target);
 	*message = NULL;
 }
+
+#endif

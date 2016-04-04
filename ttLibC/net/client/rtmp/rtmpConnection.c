@@ -7,6 +7,7 @@
  * @author taktod
  * @date   2016/03/06
  */
+#ifdef __ENABLE_SOCKET__
 
 #include "rtmpConnection.h"
 #include "../../../log.h"
@@ -167,3 +168,5 @@ void ttLibC_RtmpConnection_close(ttLibC_RtmpConnection **conn) {
 	ttLibC_free(target);
 	*conn = NULL;
 }
+
+#endif

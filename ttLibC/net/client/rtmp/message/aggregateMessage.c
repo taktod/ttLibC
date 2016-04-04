@@ -7,6 +7,7 @@
  * @author taktod
  * @date   2016/03/22
  */
+#ifdef __ENABLE_SOCKET__
 
 #include "aggregateMessage.h"
 #include "../../../../log.h"
@@ -123,3 +124,4 @@ void ttLibC_AggregateMessage_close(ttLibC_AggregateMessage **message) {
 	*message = NULL;
 }
 
+#endif

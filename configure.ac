@@ -20,6 +20,7 @@ gpl_flag=no
 debug_flag=0
 test_flag=no
 file_flag=no
+socket_flag=no
 
 opencv_flag=no
 openal_flag=no
@@ -121,6 +122,7 @@ AC_ARG_ENABLE(
 	AS_HELP_STRING([--enable-all], [enable all extra library support.]),
 	[
 		file_flag=$enableval
+		socket_flag=$enableval
 		opencv_flag=$enableval
 		openal_flag=$enableval
 		mp3lame_flag=$enableval
@@ -193,6 +195,12 @@ AC_ARG_ENABLE(
 	[file],
 	AS_HELP_STRING([--enable-file/--disable-file], [enable/disable FILE* code.]),
 	[file_flag=$enableval]
+)
+
+AC_ARG_ENABLE(
+	[socket],
+	AS_HELP_STRING([--enable-socket/--disable-socket], [enable/disable network code.]),
+	[socket_flag=$enableval]
 )
 
 AC_ARG_ENABLE(
@@ -530,6 +538,11 @@ if test x$file_flag = "xyes"; then
 fi
 AM_CONDITIONAL(ENABLE_FILE, test x$file_flag = "xyes")
 
+if test x$socket_flag = "xyes"; then
+	AC_DEFINE([__ENABLE_SOCKET__])
+fi
+AM_CONDITIONAL(ENABLE_SOCKET, test x$socket_flag = "xyes")
+
 if test x$opus_flag$opus_check = "xyesyes"; then
 	AC_DEFINE([__ENABLE_OPUS__])
 fi
@@ -642,6 +655,11 @@ if test x$file_flag = "xyes"; then
 echo "file feature:     on"
 else
 echo "file feature:     off"
+fi
+if test x$socket_flag = "xyes"; then
+echo "socket feature:   on"
+else
+echo "socket feature:   off"
 fi
 if test x$opencv_flag = "xyes"; then
 	if test x$opencv_check = "xyes"; then

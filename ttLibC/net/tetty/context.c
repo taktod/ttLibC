@@ -7,6 +7,7 @@
  * @author taktod
  * @date   2015/12/12
  */
+#ifdef __ENABLE_SOCKET__
 
 #include "context.h"
 #include "bootstrap.h"
@@ -727,3 +728,5 @@ tetty_errornum ttLibC_TettyContext_userEventTriggered_(
 			data_size);
 	return ctx.error_no;
 }
+
+#endif

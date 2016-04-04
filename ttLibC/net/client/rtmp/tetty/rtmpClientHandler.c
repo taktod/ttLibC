@@ -7,6 +7,7 @@
  * @author taktod
  * @date   2016/03/07
  */
+#ifdef __ENABLE_SOCKET__
 
 #include "rtmpClientHandler.h"
 #include "../../../../log.h"
@@ -179,3 +180,4 @@ void ttLibC_RtmpClientHandler_close(ttLibC_RtmpClientHandler **handler) {
 	*handler = NULL;
 }
 
+#endif

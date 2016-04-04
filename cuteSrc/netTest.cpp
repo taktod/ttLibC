@@ -9,6 +9,9 @@
  */
 
 #include <cute.h>
+
+#ifdef __ENABLE_SOCKET__
+
 #include <ttLibC/log.h>
 #include <ttLibC/allocator.h>
 #include <netdb.h>
@@ -639,6 +642,8 @@ static void echoServerTest() {
 	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
+#endif // end of __ENABLE_SOCKET__
+
 /**
  * define all test for net package.
  * @param s cute::suite obj
@@ -646,6 +651,7 @@ static void echoServerTest() {
  */
 cute::suite netTests(cute::suite s) {
 	s.clear();
+#ifdef __ENABLE_SOCKET__
 	s.push_back(CUTE(udpTettyServerTest));
 	s.push_back(CUTE(udpClientTest));
 	s.push_back(CUTE(udpServerTest));
@@ -655,5 +661,6 @@ cute::suite netTests(cute::suite s) {
 	s.push_back(CUTE(rtmpWatchTest));
 	s.push_back(CUTE(rtmpPublishTest));
 	s.push_back(CUTE(echoServerTest));
+#endif
 	return s;
 }

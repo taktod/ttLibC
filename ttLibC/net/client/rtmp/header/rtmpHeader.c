@@ -7,6 +7,7 @@
  * @author taktod
  * @date   2016/03/08
  */
+#ifdef __ENABLE_SOCKET__
 
 #include "rtmpHeader.h"
 #include "../../../../log.h"
@@ -300,4 +301,6 @@ void ttLibC_RtmpHeader_close(ttLibC_RtmpHeader **header) {
 	ttLibC_free(target);
 	*header = NULL;
 }
+
+#endif
 

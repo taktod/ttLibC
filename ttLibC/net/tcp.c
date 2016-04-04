@@ -8,6 +8,8 @@
  * @date   2015/09/28
  */
 
+#ifdef __ENABLE_SOCKET__
+
 #include "tcp.h"
 #include "tcpmisc.h"
 
@@ -127,4 +129,6 @@ void ttLibC_TcpClient_close(ttLibC_TcpClientInfo **client_info) {
 	ttLibC_free(target);
 	*client_info = NULL;
 }
+
+#endif
 

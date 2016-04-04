@@ -7,7 +7,7 @@
  * @author taktod
  * @date   2016/03/12
  */
-
+#ifdef __ENABLE_SOCKET__
 
 #include "rtmpStream.h"
 #include "rtmpConnection.h"
@@ -275,3 +275,5 @@ void ttLibC_RtmpStream_close(ttLibC_RtmpStream **stream) {
 	ttLibC_FlvFrameManager_close(&target->frame_manager);
 	ttLibC_free(target);
 }
+
+#endif

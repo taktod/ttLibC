@@ -7,6 +7,7 @@
  * @author taktod
  * @date   2016/03/08
  */
+#ifdef __ENABLE_SOCKET__
 
 #include "rtmpMessage.h"
 #include "../../../../log.h"
@@ -242,3 +243,5 @@ void ttLibC_RtmpMessage_close(ttLibC_RtmpMessage **message) {
 		break;
 	}
 }
+
+#endif

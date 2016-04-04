@@ -7,6 +7,7 @@
  * @author taktod
  * @date   2016/03/13
  */
+#ifdef __ENABLE_SOCKET__
 
 #include "videoMessage.h"
 #include "../../../../log.h"
@@ -102,3 +103,5 @@ void ttLibC_VideoMessage_close(ttLibC_VideoMessage **message) {
 	ttLibC_free(target);
 	*message = NULL;
 }
+
+#endif

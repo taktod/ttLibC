@@ -7,6 +7,7 @@
  * @author taktod
  * @date   2016/03/11
  */
+#ifdef __ENABLE_SOCKET__
 
 #include "windowAcknowledgementSize.h"
 #include "../../../../log.h"
@@ -46,3 +47,5 @@ void ttLibC_WindowAcknowledgementSize_close(ttLibC_WindowAcknowledgementSize **w
 	ttLibC_free(target);
 	*win_ack = NULL;
 }
+
+#endif

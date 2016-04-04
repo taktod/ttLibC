@@ -7,6 +7,7 @@
  * @author taktod
  * @date   2016/03/21
  */
+#ifdef __ENABLE_SOCKET__
 
 #include "amf0DataMessage.h"
 #include "../../../../log.h"
@@ -80,3 +81,5 @@ void ttLibC_Amf0DataMessage_close(ttLibC_Amf0DataMessage **message) {
 	ttLibC_free(target);
 	*message = NULL;
 }
+
+#endif

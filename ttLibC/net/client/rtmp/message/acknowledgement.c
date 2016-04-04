@@ -7,6 +7,7 @@
  * @author taktod
  * @date   2016/03/11
  */
+#ifdef __ENABLE_SOCKET__
 
 #include "acknowledgement.h"
 #include "../../../../log.h"
@@ -37,3 +38,5 @@ void ttLibC_Acknowledgement_close(ttLibC_Acknowledgement **ack) {
 	ttLibC_free(target);
 	*ack = NULL;
 }
+
+#endif

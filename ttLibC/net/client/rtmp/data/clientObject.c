@@ -7,6 +7,7 @@
  * @author taktod
  * @date   2016/03/07
  */
+#ifdef __ENABLE_SOCKET__
 
 #include "clientObject.h"
 #include "../../../../log.h"
@@ -97,3 +98,4 @@ void ttLibC_ClientObject_close(ttLibC_ClientObject **client_object) {
 	*client_object = NULL;
 }
 
+#endif

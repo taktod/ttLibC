@@ -7,6 +7,7 @@
  * @author taktod
  * @date   2016/03/07
  */
+#ifdef __ENABLE_SOCKET__
 
 #include "rtmpHandshake.h"
 #include "../data/clientObject.h"
@@ -139,3 +140,4 @@ void ttLibC_RtmpHandshake_close(ttLibC_RtmpHandshake **handshake) {
 	*handshake = NULL;
 }
 
+#endif

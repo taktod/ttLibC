@@ -7,6 +7,7 @@
  * @author taktod
  * @date   2016/03/11
  */
+#ifdef __ENABLE_SOCKET__
 
 #include "setChunkSize.h"
 #include "../../../../log.h"
@@ -38,3 +39,5 @@ void ttLibC_SetChunkSize_close(ttLibC_SetChunkSize **chunk_size) {
 	ttLibC_free(target);
 	*chunk_size = NULL;
 }
+
+#endif

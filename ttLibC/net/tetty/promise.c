@@ -7,6 +7,7 @@
  * @author taktod
  * @date   2015/12/17
  */
+#ifdef __ENABLE_SOCKET__
 
 #include "promise.h"
 #include "../../allocator.h"
@@ -202,3 +203,5 @@ void ttLibC_TettyPromise_close(ttLibC_TettyPromise **promise) {
 	ttLibC_free(target);
 	*promise = NULL;
 }
+
+#endif

@@ -7,6 +7,7 @@
  * @author taktod
  * @date   2016/03/07
  */
+#ifdef __ENABLE_SOCKET__
 
 #include "rtmpEncoder.h"
 #include "../../../../log.h"
@@ -99,3 +100,5 @@ void ttLibC_RtmpEncoder_close(ttLibC_RtmpEncoder **encoder) {
 	ttLibC_free(target);
 	*encoder = NULL;
 }
+
+#endif

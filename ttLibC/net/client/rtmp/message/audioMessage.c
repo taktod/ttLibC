@@ -7,6 +7,7 @@
  * @author taktod
  * @date   2016/03/13
  */
+#ifdef __ENABLE_SOCKET__
 
 #include "audioMessage.h"
 #include "../../../../log.h"
@@ -107,3 +108,5 @@ void ttLibC_AudioMessage_close(ttLibC_AudioMessage **message) {
 	ttLibC_free(target);
 	*message = NULL;
 }
+
+#endif

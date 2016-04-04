@@ -7,6 +7,7 @@
  * @author taktod
  * @date   2016/03/08
  */
+#ifdef __ENABLE_SOCKET__
 
 #include "amf0Command.h"
 #include "../../../../log.h"
@@ -247,3 +248,5 @@ void ttLibC_Amf0Command_close(ttLibC_Amf0Command **command) {
 	ttLibC_free(target);
 	*command = NULL;
 }
+
+#endif

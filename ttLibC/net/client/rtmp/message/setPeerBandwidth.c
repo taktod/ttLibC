@@ -7,6 +7,7 @@
  * @author taktod
  * @date   2016/03/11
  */
+#ifdef __ENABLE_SOCKET__
 
 #include "setPeerBandwidth.h"
 #include "../../../../log.h"
@@ -40,3 +41,5 @@ void ttLibC_SetPeerBandwidth_close(ttLibC_SetPeerBandwidth **bandwidth) {
 	ttLibC_free(target);
 	*bandwidth = NULL;
 }
+
+#endif

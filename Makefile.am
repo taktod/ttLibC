@@ -29,11 +29,6 @@ nobase_include_HEADERS= \
 	ttLibC/frame/video/wmv2.h \
 	ttLibC/frame/video/yuv420.h \
 	ttLibC/frame/frame.h \
-	ttLibC/net/client/rtmp.h \
-	ttLibC/net/net.h \
-	ttLibC/net/tcp.h \
-	ttLibC/net/tetty.h \
-	ttLibC/net/udp.h \
 	ttLibC/resampler/audioResampler.h \
 	ttLibC/resampler/imageResampler.h \
 	ttLibC/util/amfUtil.h \
@@ -96,6 +91,15 @@ if ENABLE_FILE
 nobase_include_HEADERS += \
 	ttLibC/util/httpUtil.h \
 	ttLibC/util/forkUtil.h
+endif
+
+if ENABLE_SOCKET
+nobase_include_HEADERS += \
+	ttLibC/net/client/rtmp.h \
+	ttLibC/net/net.h \
+	ttLibC/net/tcp.h \
+	ttLibC/net/tetty.h \
+	ttLibC/net/udp.h
 endif
 
 if ENABLE_OPUS

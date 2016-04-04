@@ -7,6 +7,7 @@
  * @author taktod
  * @date   2015/11/24
  */
+#ifdef __ENABLE_SOCKET__
 
 #include <unistd.h>
 #include <string.h>
@@ -620,3 +621,5 @@ ttLibC_TettyFuture *ttLibC_TettyBootstrap_closeFuture(ttLibC_TettyBootstrap *boo
 	bootstrap_->close_future = (ttLibC_TettyFuture *)future;
 	return (ttLibC_TettyFuture *)future;
 }
+
+#endif

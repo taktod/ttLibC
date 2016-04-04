@@ -8,6 +8,8 @@
  * @date   2016/01/15
  */
 
+#ifdef __ENABLE_SOCKET__
+
 #include "udp.h"
 #include "../allocator.h"
 #include "../log.h"
@@ -148,4 +150,6 @@ void ttLibC_DatagramPacket_close(ttLibC_DatagramPacket **packet) {
 	ttLibC_free(target);
 	*packet = NULL;
 }
+
+#endif
 
