@@ -38,6 +38,7 @@ static tetty_errornum RtmpHandshake_channelActive(ttLibC_TettyContext *ctx) {
 	for(int i = 0;i < c2_size;++ i) {
 		c2[i] = (uint8_t)(i % 256);
 	}
+	c2[4] = 0; // for red5 handshake.
 	client_object->c2_value = c2;
 	ttLibC_TettyContext_super_write(ctx, c2, c2_size);
 	ttLibC_TettyContext_channel_flush(ctx);
