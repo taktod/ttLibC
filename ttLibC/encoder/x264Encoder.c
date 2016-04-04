@@ -8,6 +8,8 @@
  * @date   2016/02/18
  */
 
+#ifdef __ENABLE_X264__
+
 #include "x264Encoder.h"
 #include "../log.h"
 #include "../allocator.h"
@@ -327,3 +329,6 @@ void ttLibC_X264Encoder_close(ttLibC_X264Encoder **encoder) {
 	ttLibC_free(target);
 	*encoder = NULL;
 }
+
+#endif
+
