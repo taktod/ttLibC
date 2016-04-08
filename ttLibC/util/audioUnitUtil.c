@@ -47,9 +47,12 @@ typedef struct {
 	/** current_played pts for ref */
 	uint64_t ref_pts;
 
+	/** bool flag for first access. */
+	bool is_first_access;
 	// mutex
 	pthread_mutex_t pts_mutex; // mutex for pts
 	pthread_mutex_t index_mutex; // mutex for index
+	pthread_mutex_t first_access_mutex; // mutex for first access.
 } ttLibC_Util_AudioUnit_AuPlayer_;
 
 typedef ttLibC_Util_AudioUnit_AuPlayer_ ttLibC_AuPlayer_;
@@ -118,7 +121,17 @@ static bool AuPlayer_dequeue(
 		added_sample_num >>= 1;
 	}
 	// update pts.
+	r = pthread_mutex_lock(&player_->first_access_mutex);
+	if(r != 0) {
+		ERR_PRINT("failed to lock first access mutex.");
+		return false;
+	}
 	player_->pts += added_sample_num;
+	r = pthread_mutex_unlock(&player_->first_access_mutex);
+	if(r != 0) {
+		ERR_PRINT("failed to unlock first access mutex.");
+		return false;
+	}
 	r = pthread_mutex_trylock(&player_->pts_mutex);
 	if(r != 0) {
 		if(r != EBUSY) {
@@ -278,8 +291,10 @@ ttLibC_AuPlayer *ttLibC_AuPlayer_make(
 	player->inherit_super.pts = 0;
 	player->read_index = 0;
 	player->write_index = 0;
+	player->is_first_access = true;
 	pthread_mutex_init(&player->pts_mutex, NULL);
 	pthread_mutex_init(&player->index_mutex, NULL);
+	pthread_mutex_init(&player->first_access_mutex, NULL);
 	// TODO wanna use extentable buffer.
 	player->buffer_size = sample_rate * sizeof(int16_t) * channel_num * 2; // for 2 sec.
 	player->buffer = (int16_t *)ttLibC_malloc(player->buffer_size);
@@ -308,10 +323,19 @@ bool ttLibC_AuPlayer_queue(ttLibC_AuPlayer *player, ttLibC_PcmS16 *pcmS16) {
 		return false;
 	}
 	ttLibC_AuPlayer_ *player_ = (ttLibC_AuPlayer_ *)player;
-	if(player_->pts == 0) {
-		// if the pts is 0. merge the pts to pcm data.
+	if(player_->is_first_access) {
+		int r = pthread_mutex_lock(&player_->first_access_mutex);
+		if(r != 0) {
+			ERR_PRINT("failed lock.");
+			return false;
+		}
 		player_->pts = pcmS16->inherit_super.inherit_super.pts * player_->inherit_super.sample_rate / pcmS16->inherit_super.inherit_super.timebase;
-		player_->inherit_super.pts = player_->pts;
+		player_->is_first_access = false;
+		r = pthread_mutex_unlock(&player_->first_access_mutex);
+		if(r != 0) {
+			ERR_PRINT("failed to unlock.");
+			return false;
+		}
 	}
 	int max_index = player_->buffer_size / sizeof(int16_t);
 
@@ -422,6 +446,7 @@ void ttLibC_AuPlayer_close(ttLibC_AuPlayer **player) {
 	AudioComponentInstanceDispose(target->outputUnit);
 	pthread_mutex_destroy(&target->pts_mutex);
 	pthread_mutex_destroy(&target->index_mutex);
+	pthread_mutex_destroy(&target->first_access_mutex);
 	ttLibC_free(target->buffer);
 	ttLibC_free(target);
 	*player = NULL;
