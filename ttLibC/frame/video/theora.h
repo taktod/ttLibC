@@ -34,6 +34,8 @@ typedef enum ttLibC_Theora_Type {
 typedef struct ttLibC_Frame_Video_Theora {
 	/** inherit data from ttLibC_Video */
 	ttLibC_Video inherit_super;
+	/** information of granule position. */
+	uint64_t granule_pos;
 	ttLibC_Theora_Type type;
 } ttLibC_Frame_Video_Theora;
 

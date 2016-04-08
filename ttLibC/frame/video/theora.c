@@ -201,11 +201,23 @@ ttLibC_Theora *ttLibC_Theora_getFrame(
 	uint8_t first_byte = *data;
 	uint32_t width  = ttLibC_Theora_getWidth(prev_frame, data, data_size);
 	uint32_t height = ttLibC_Theora_getHeight(prev_frame, data, data_size);
-	if((first_byte & 0x80) != 0) {
-		ERR_PRINT("information header is not support on getFrame.");
-		return NULL;
-	}
 	ttLibC_Theora_Type type = TheoraType_innerFrame;
+	if((first_byte & 0x80) != 0) {
+		switch(first_byte) {
+		case 0x80: // info
+			type = TheoraType_identificationHeaderDecodeFrame;
+			break;
+		case 0x81: // comment
+			type = TheoraType_commentHeaderFrame;
+			break;
+		case 0x82: // setup
+			type = TheoraType_setupHeaderFrame;
+			break;
+		default:
+			ERR_PRINT("unknown theora header frame.");
+			return NULL;
+		}
+	}
 	if((first_byte & 0x40) != 0) {
 		type = TheoraType_intraFrame;
 	}
