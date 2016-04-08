@@ -54,7 +54,7 @@ ttLibC_PcmS16 *ttLibC_BeepGenerator_makeBeepByMiliSec(
 		ERR_PRINT("generator is NULL");
 		return NULL;
 	}
-	uint32_t target_sample_num = mili_sec * generator->sample_rate / 1000;
+	uint32_t target_sample_num = (uint32_t)(1L * mili_sec * generator->sample_rate / 1000);
 	return ttLibC_BeepGenerator_makeBeepBySampleNum(generator, prev_frame, target_sample_num);
 }
 
