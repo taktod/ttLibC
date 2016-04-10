@@ -73,6 +73,19 @@
 #	include <ttLibC/decoder/vtDecompressSessionH264Decoder.h>
 #endif
 
+#ifdef __ENABLE_THEORA__
+#	include <ttLibC/encoder/theoraEncoder.h>
+#	include <ttLibC/decoder/theoraDecoder.h>
+#endif
+
+#ifdef __ENABLE_VORBIS_ENCODE__
+#	include <ttLibC/encoder/vorbisEncoder.h>
+#endif
+
+#ifdef __ENABLE_VORBIS_DECODE__
+#	include <ttLibC/decoder/vorbisDecoder.h>
+#endif
+
 #include <ttLibC/util/beepUtil.h>
 #include <ttLibC/frame/audio/pcms16.h>
 #include <ttLibC/frame/audio/mp3.h>
@@ -92,6 +105,146 @@
 #include <ttLibC/util/hexUtil.h>
 
 #include <unistd.h>
+
+#if defined(__ENABLE_VORBIS_ENCODE__) && defined(__ENABLE_VORBIS_DECODE__) && defined(__ENABLE_OPENAL__)
+typedef struct vorbisTest_t {
+	ttLibC_VorbisDecoder *decoder;
+	ttLibC_PcmS16 *pcm;
+	ttLibC_AlPlayer *player;
+} vorbisTest_t;
+
+static bool vorbisTest_decodeCallback(void *ptr, ttLibC_PcmF32 *pcm) {
+	vorbisTest_t *testData = (vorbisTest_t *)ptr;
+	// make pcms16 from pcmf32
+	ttLibC_PcmS16 *p = ttLibC_AudioResampler_makePcmS16FromPcmF32(
+			testData->pcm,
+			PcmS16Type_littleEndian,
+			pcm);
+	if(p == NULL) {
+		return false;
+	}
+	testData->pcm = p;
+	while(!ttLibC_AlPlayer_queue(testData->player, testData->pcm)) {
+		usleep(100);
+	}
+	return true;
+}
+
+static bool vorbisTest_encodeCallback(void *ptr, ttLibC_Vorbis *vorbis) {
+	vorbisTest_t *testData = (vorbisTest_t *)ptr;
+	return ttLibC_VorbisDecoder_decode(testData->decoder, vorbis, vorbisTest_decodeCallback, ptr);
+}
+#endif
+
+static void vorbisTest() {
+	LOG_PRINT("vorbisTest");
+#if defined(__ENABLE_VORBIS_ENCODE__) && defined(__ENABLE_VORBIS_DECODE__) && defined(__ENABLE_OPENAL__)
+	uint32_t sample_rate = 44100, channel_num = 1;
+	ttLibC_BeepGenerator *generator = ttLibC_BeepGenerator_make(PcmS16Type_littleEndian, 440, sample_rate, channel_num);
+	generator->amplitude = 30000;
+	ttLibC_VorbisEncoder *encoder = ttLibC_VorbisEncoder_make(sample_rate, channel_num);
+	ttLibC_VorbisDecoder *decoder = ttLibC_VorbisDecoder_make();
+	ttLibC_PcmS16 *p, *pcm = NULL, *dpcm = NULL;
+	ttLibC_AlPlayer *player = ttLibC_AlPlayer_make();
+	vorbisTest_t testData;
+	testData.decoder = decoder;
+	testData.pcm = dpcm;
+	testData.player = player;
+
+	for(int i = 0;i < 5;++ i) {
+		p = ttLibC_BeepGenerator_makeBeepByMiliSec(generator, pcm, 500);
+		if(p == NULL) {
+			break;
+		}
+		pcm = p;
+		if(!ttLibC_VorbisEncoder_encode(encoder, (ttLibC_Audio *)pcm, vorbisTest_encodeCallback, &testData)) {
+			break;
+		}
+		dpcm = testData.pcm;
+	}
+
+	ttLibC_PcmS16_close(&pcm);
+	ttLibC_PcmS16_close(&dpcm);
+	ttLibC_BeepGenerator_close(&generator);
+	ttLibC_VorbisEncoder_close(&encoder);
+	ttLibC_VorbisDecoder_close(&decoder);
+	ttLibC_AlPlayer_close(&player);
+#endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
+
+#if defined(__ENABLE_THEORA__) && defined(__ENABLE_OPENCV__)
+typedef struct theoraTest_t {
+	ttLibC_TheoraDecoder *decoder;
+	ttLibC_CvWindow *target;
+	ttLibC_Bgr *dbgr;
+} theoraTest_t;
+
+static bool theoraTest_decodeCallback(void *ptr, ttLibC_Yuv420 *yuv) {
+	theoraTest_t *testData = (theoraTest_t *)ptr;
+	ttLibC_Bgr *b = ttLibC_ImageResampler_makeBgrFromYuv420(testData->dbgr, BgrType_bgr, yuv);
+	if(b == NULL) {
+		return false;
+	}
+	testData->dbgr = b;
+	ttLibC_CvWindow_showBgr(testData->target, testData->dbgr);
+	return true;
+}
+
+static bool theoraTest_encodeCallback(void *ptr, ttLibC_Theora *theora) {
+	theoraTest_t *testData = (theoraTest_t *)ptr;
+	return ttLibC_TheoraDecoder_decode(testData->decoder, theora, theoraTest_decodeCallback, ptr);
+}
+
+#endif
+
+static void theoraTest() {
+	LOG_PRINT("theoraTest");
+#if defined(__ENABLE_THEORA__) && defined(__ENABLE_OPENCV__)
+	uint32_t width = 320, height = 240;
+	ttLibC_CvCapture *capture = ttLibC_CvCapture_make(0, width, height);
+	ttLibC_CvWindow *window = ttLibC_CvWindow_make("original");
+	ttLibC_CvWindow *dec_win = ttLibC_CvWindow_make("decode");
+	ttLibC_TheoraEncoder *encoder = ttLibC_TheoraEncoder_make(width, height);
+	ttLibC_TheoraDecoder *decoder = ttLibC_TheoraDecoder_make();
+	ttLibC_Bgr    *b, *bgr = NULL, *dbgr = NULL;
+	ttLibC_Yuv420 *y, *yuv = NULL;
+	theoraTest_t testData;
+	testData.dbgr = NULL;
+	testData.decoder = decoder;
+	testData.target = dec_win;
+	while(true) {
+		b = ttLibC_CvCapture_queryFrame(capture, bgr);
+		if(b == NULL) {
+			break;
+		}
+		bgr = b;
+		ttLibC_CvWindow_showBgr(window, bgr);
+		y = ttLibC_ImageResampler_makeYuv420FromBgr(yuv, Yuv420Type_planar, bgr);
+		if(y == NULL) {
+			break;
+		}
+		yuv = y;
+		if(!ttLibC_TheoraEncoder_encode(encoder, yuv, theoraTest_encodeCallback, &testData)) {
+			break;
+		}
+		dbgr = testData.dbgr;
+		uint8_t keyChar = ttLibC_CvWindow_waitForKeyInput(33);
+		if(keyChar == Keychar_Esc) {
+			break;
+		}
+	}
+	ttLibC_Bgr_close(&bgr);
+	ttLibC_Bgr_close(&dbgr);
+	ttLibC_Yuv420_close(&yuv);
+	ttLibC_TheoraDecoder_close(&decoder);
+	ttLibC_TheoraEncoder_close(&encoder);
+	ttLibC_CvWindow_close(&dec_win);
+	ttLibC_CvWindow_close(&window);
+	ttLibC_CvCapture_close(&capture);
+#endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
 
 #if defined(__ENABLE_APPLE__) && defined(__ENABLE_OPENCV__)
 typedef struct vtH264Test_t {
@@ -840,6 +993,8 @@ static void imageResamplerTest() {
  */
 cute::suite encoderDecoderTests(cute::suite s) {
 	s.clear();
+	s.push_back(CUTE(vorbisTest));
+	s.push_back(CUTE(theoraTest));
 	s.push_back(CUTE(vtH264Test));
 	s.push_back(CUTE(acMp3Test));
 	s.push_back(CUTE(acAacTest));

@@ -125,6 +125,22 @@ nobase_include_HEADERS += \
 	ttLibC/encoder/x264Encoder.h
 endif
 
+if ENABLE_THEORA
+nobase_include_HEADERS += \
+	ttLibC/encoder/theoraEncoder.h \
+	ttLibC/decoder/theoraDecoder.h
+endif
+
+if ENABLE_VORBIS_ENCODE
+nobase_include_HEADERS += \
+	ttLibC/encoder/vorbisEncoder.h
+endif
+
+if ENABLE_VORBIS_DECODE
+nobase_include_HEADERS += \
+	ttLibC/decoder/vorbisDecoder.h
+endif
+
 if ENABLE_APPLE
 nobase_include_HEADERS += \
 	ttLibC/decoder/audioConverterDecoder.h \

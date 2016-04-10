@@ -29,6 +29,8 @@ libttLibC_a_SOURCES= \
 	decoder/openh264Decoder.cpp \
 	decoder/opusDecoder.c \
 	decoder/speexDecoder.c \
+	decoder/theoraDecoder.c \
+	decoder/vorbisDecoder.c \
 	decoder/vtDecompressSessionH264Decoder.c \
 	encoder/audioConverterEncoder.c \
 	encoder/avcodecEncoder.c \
@@ -38,6 +40,8 @@ libttLibC_a_SOURCES= \
 	encoder/openh264Encoder.cpp \
 	encoder/opusEncoder.c \
 	encoder/speexEncoder.c \
+	encoder/theoraEncoder.c \
+	encoder/vorbisEncoder.c \
 	encoder/vtCompressSessionH264Encoder.c \
 	encoder/x264Encoder.c \
 	encoder/x265Encoder.c \
