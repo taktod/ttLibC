@@ -91,7 +91,6 @@ bool ttLibC_AlDevice_queue(ttLibC_AlDevice *device, ttLibC_PcmS16 *pcms16) {
 	if(pcms16 == NULL) {
 		return false;
 	}
-	// overflowしたらデータqueueに追加できなくする予定だったのにそうなってない。
 	switch(pcms16->type) {
 	case PcmS16Type_bigEndian:
 	case PcmS16Type_bigEndian_planar:
@@ -245,4 +244,135 @@ void ttLibC_AlDevice_close(ttLibC_AlDevice **device) {
 	*device = NULL;
 }
 
+typedef struct ttLibC_Util_Openal_AlPlayer_ {
+	ttLibC_AlPlayer inherit_super;
+	ALCdevice *device;
+	ALCcontext *context;
+	ALuint source;
+	uint32_t total_buffer_num;
+	ALuint buffers[16];
+} ttLibC_Util_Openal_AlPlayer_;
+
+typedef ttLibC_Util_Openal_AlPlayer_ ttLibC_AlPlayer_;
+
+ttLibC_AlPlayer *ttLibC_AlPlayer_make() {
+	ttLibC_AlPlayer_ *player = ttLibC_malloc(sizeof(ttLibC_AlPlayer_));
+	if(player == NULL) {
+		ERR_PRINT("failed to allocate memory for alPlayer.");
+		return NULL;
+	}
+	player->device = alcOpenDevice(NULL);
+	if(player->device == NULL) {
+		ERR_PRINT("failed to open ALCdevice.");
+		ttLibC_free(player);
+		return NULL;
+	}
+	player->context = alcCreateContext(player->device, NULL);
+	if(player->context == NULL) {
+		ERR_PRINT("failed to create ALCcontext.");
+		alcCloseDevice(player->device);
+		ttLibC_free(player);
+		return NULL;
+	}
+	alcMakeContextCurrent(player->context);
+	alGenSources(1, &player->source);
+	player->total_buffer_num = 4;
+	for(int i = 0;i < player->total_buffer_num;++ i) {
+		player->buffers[i] = 0;
+	}
+	return (ttLibC_AlPlayer *)player;
+}
+
+bool ttLibC_AlPlayer_queue(ttLibC_AlPlayer *player, ttLibC_PcmS16 *pcmS16) {
+	if(player == NULL) {
+		return false;
+	}
+	if(pcmS16 == NULL) {
+		return false;
+	}
+	ttLibC_AlPlayer_ *player_ = (ttLibC_AlPlayer_ *)player;
+	switch(pcmS16->type) {
+	case PcmS16Type_bigEndian:
+	case PcmS16Type_bigEndian_planar:
+	case PcmS16Type_littleEndian_planar:
+	default:
+		ERR_PRINT("non support pcm type.");
+		return false;
+	case PcmS16Type_littleEndian:
+		break;
+	}
+	ALenum format = AL_FORMAT_MONO16;
+	switch(pcmS16->inherit_super.channel_num) {
+	case 1: // monoral
+		format = AL_FORMAT_MONO16;
+		break;
+	case 2: // stereo
+		format = AL_FORMAT_STEREO16;
+		break;
+	default:
+		ERR_PRINT("only support monoral or stereo.");
+		return false;
+	}
+	int num;
+	ALuint buffer = 0;
+	alGetSourcei(player_->source, AL_BUFFERS_PROCESSED, &num);
+	if(num != -1 && num != 0) {
+		alSourceUnqueueBuffers(player_->source, 1, &buffer);
+	}
+	else {
+		// check the space.
+		int empty_num = -1;
+		for(int i = 0;i < player_->total_buffer_num;++ i) {
+			if(player_->buffers[i] == 0) {
+				empty_num = i;
+				break;
+			}
+		}
+		if(empty_num == -1) {
+			return false;
+		}
+		alGenBuffers(1, &buffer);
+		player_->buffers[empty_num] = buffer;
+	}
+	alBufferData(buffer, format, pcmS16->l_data, pcmS16->l_stride, pcmS16->inherit_super.sample_rate);
+	alSourceQueueBuffers(player_->source, 1, &buffer);
+
+	int state;
+	alGetSourcei(player_->source, AL_SOURCE_STATE, &state);
+	if(state != AL_PLAYING) {
+		// try to start play.
+		alSourcePlay(player_->source);
+	}
+	else {
+		float pos;
+		alGetSourcef(player_->source, AL_SEC_OFFSET, &pos);
+//		LOG_PRINT("playing position:%f", pos);
+	}
+	return true;
+}
+
+void ttLibC_AlPlayer_close(ttLibC_AlPlayer **player) {
+	ttLibC_AlPlayer_ *target = (ttLibC_AlPlayer_ *)*player;
+	if(target == NULL) {
+		return;
+	}
+	if(target->source != 0) {
+		alDeleteSources(1, &target->source);
+	}
+	for(uint32_t i = 0;i < target->total_buffer_num;++ i) {
+		if(target->buffers[i] != 0) {
+			alDeleteBuffers(1, &target->buffers[i]);
+			target->buffers[i] = 0;
+		}
+	}
+	if(target->context != NULL) {
+		alcMakeContextCurrent(NULL);
+		alcDestroyContext(target->context);
+	}
+	if(target->device != NULL) {
+		alcCloseDevice(target->device);
+	}
+	ttLibC_free(target);
+	*player = NULL;
+}
 #endif /* __ENABLE_OPENAL__ */

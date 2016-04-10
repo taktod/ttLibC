@@ -61,6 +61,40 @@ void ttLibC_AlDevice_proceed(ttLibC_AlDevice *device, int32_t milisec);
  */
 void ttLibC_AlDevice_close(ttLibC_AlDevice **device);
 
+/**
+ * structure for openalPlayer.
+ */
+typedef struct ttLibC_Util_Openal_AlPlayer {
+	/** holding buffer num */
+	uint64_t pts;
+	/** target sample_rate */
+	uint32_t sample_rate;
+	/** target channel_num */
+	uint32_t channel_num;
+} ttLibC_Util_Openal_AlPlayer;
+
+typedef ttLibC_Util_Openal_AlPlayer ttLibC_AlPlayer;
+
+/**
+ * make alPlayer object.
+ * @return alPlayer object.
+ */
+ttLibC_AlPlayer *ttLibC_AlPlayer_make();
+
+/**
+ * add queue for alPlayer.
+ * @param player
+ * @param pcmS16
+ * @return true:accepted / false:need to retry later.
+ */
+bool ttLibC_AlPlayer_queue(ttLibC_AlPlayer *player, ttLibC_PcmS16 *pcmS16);
+
+/**
+ * close alPlayer.
+ * @param player
+ */
+void ttLibC_AlPlayer_close(ttLibC_AlPlayer **player);
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
