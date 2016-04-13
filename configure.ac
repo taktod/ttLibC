@@ -266,64 +266,65 @@ if test x$opencv_flag = "xyes"; then
 	)
 fi
 if test x$mp3lame_flag = "xyes"; then
-	if test -f /usr/local/include/lame/lame.h; then
-		AC_CHECK_LIB(
-			mp3lame,
-			get_lame_version,
-			[
-				MP3LAME_CFLAGS='-I/usr/local/include'
-				MP3LAME_LIBS='-L/usr/local/lib -lmp3lame'
-				AC_SUBST([MP3LAME_CFLAGS])
-				AC_SUBST([MP3LAME_LIBS])
-				AC_DEFINE([__ENABLE_MP3LAME__])
-				if test x$gpl_flag = "xyes"; then
-					mp3lame_decode_check=yes
-				fi
-				if test x$lgpl_flag = "xyes"; then
-					mp3lame_encode_check=yes
-				fi
-			]
-		)
-	fi
+	AC_PREPROC_IFELSE(
+		[AC_LANG_SOURCE([@%:@include <lame/lame.h>])],
+		[
+			MP3LAME_CFLAGS=''
+			MP3LAME_LIBS='-lmp3lame'
+			AC_SUBST([MP3LAME_CFLAGS])
+			AC_SUBST([MP3LAME_LIBS])
+			AC_DEFINE([__ENABLE_MP3LAME__])
+			if test x$gpl_flag = "xyes"; then
+				mp3lame_decode_check=yes
+			fi
+			if test x$lgpl_flag = "xyes"; then
+				mp3lame_encode_check=yes
+			fi
+			AC_MSG_CHECKING(for MP3LAME)
+			AC_MSG_RESULT([yes])
+		],
+		[
+			AC_MSG_CHECKING(for MP3LAME)
+			AC_MSG_RESULT([no])
+		]
+	)
 fi
 if test x$faac_flag = "xyes"; then
-	AC_CHECK_HEADER(
-		faac.h,
+	AC_MSG_CHECKING(for FAAC)
+	AC_PREPROC_IFELSE(
+		[AC_LANG_SOURCE([@%:@include <faac.h>])],
 		[
-			AC_CHECK_LIB(
-				faac,
-				faacEncGetVersion,
-				[
-					FAAC_CFLAGS='-I/usr/local/include'
-					FAAC_LIBS='-L/usr/local/lib -lfaac'
-					AC_SUBST([FAAC_CFLAGS])
-					AC_SUBST([FAAC_LIBS])
-					AC_DEFINE([__ENABLE_FAAC__])
-					if test x$lgpl_flag = "xyes"; then
-						faac_encode_check=yes
-					fi
-				]
-			)
+			FAAC_CFLAGS=''
+			FAAC_LIBS='-lfaac'
+			AC_SUBST([FAAC_CFLAGS])
+			AC_SUBST([FAAC_LIBS])
+			AC_DEFINE([__ENABLE_FAAC__])
+			if test x$lgpl_flag = "xyes"; then
+				faac_encode_check=yes
+			fi
+			AC_MSG_RESULT([yes])
 		],
+		[
+			AC_MSG_RESULT([no])
+		]
 	)
 fi
 
 if test x$jpeg_flag = "xyes"; then
-	AC_CHECK_HEADER(
-		jpeglib.h,
+	AC_MSG_CHECKING(for JPEG)
+	AC_PREPROC_IFELSE(
+		[AC_LANG_SOURCE([@%:@include <jpeglib.h>])],
 		[
-			AC_CHECK_LIB(
-				jpeg,
-				jpeg_set_quality,
-				[
-					JPEG_CFLAGS='-I/usr/local/include'
-					JPEG_LIBS='-L/usr/local/lib -ljpeg'
-					AC_SUBST([JPEG_CFLAGS])
-					AC_SUBST([JPEG_LIBS])
-					jpeg_check=yes
-				]
-			)
+			JPEG_CFLAGS=''
+			JPEG_LIBS='-ljpeg'
+			AC_SUBST([JPEG_CFLAGS])
+			AC_SUBST([JPEG_LIBS])
+			jpeg_check=yes
+			AC_MSG_RESULT([yes])
 		],
+		[
+			AC_MSG_RESULT([no])
+		]
 	)
 fi
 
@@ -369,28 +370,28 @@ if test x$avcodec_flag = "xyes"; then
 	)
 fi
 if test x$faad_flag = "xyes"; then
-	AC_CHECK_HEADER(
-		faad.h,
+	AC_MSG_CHECKING(for FAAD)
+	AC_PREPROC_IFELSE(
+		[AC_LANG_SOURCE([@%:@include <faad.h>])],
 		[
-			AC_CHECK_LIB(
-				faad,
-				NeAACDecGetErrorMessage,
-				[
-					FAAD_CFLAGS='-I/usr/local/include'
-					FAAD_LIBS='-L/usr/local/lib -lfaad'
-					AC_SUBST([FAAD_CFLAGS])
-					AC_SUBST([FAAD_LIBS])
-					AC_DEFINE([__ENABLE_FAAD__])
-					if test x$gpl_flag = "xyes"; then
-						faad_decode_check=yes
-					fi
-				]
-			)
+			FAAD_CFLAGS=''
+			FAAD_LIBS='-lfaad'
+			AC_SUBST([FAAD_CFLAGS])
+			AC_SUBST([FAAD_LIBS])
+			AC_DEFINE([__ENABLE_FAAD__])
+			if test x$gpl_flag = "xyes"; then
+				faad_decode_check=yes
+			fi
+			AC_MSG_RESULT([yes])
 		],
+		[
+			AC_MSG_RESULT([no])
+		]
 	)
 fi
 if test x$apple_flag = "xyes"; then
 	# check "gcc --help" has framework or not.
+	AC_MSG_CHECKING(for APPLE)
 	CC_CHECK=`$CC --help | grep framework`
 	if test "x$CC_CHECK" = "x"; then
 		apple_check=no
@@ -401,6 +402,7 @@ if test x$apple_flag = "xyes"; then
 		AC_SUBST([APPLE_CFLAGS])
 		AC_SUBST([APPLE_LIBS])
 	fi
+	AC_MSG_RESULT([$apple_check])
 fi
 if test x$openal_flag = "xyes"; then
 	if test x$apple_check = "xyes"; then
@@ -470,11 +472,16 @@ if test x$vorbis_flag = "xyes"; then
 	)
 fi
 
+AC_MSG_CHECKING(for license)
 if test x$gpl_flag = "xyes"; then
 	AC_DEFINE([__ENABLE_GPL__])
+	AC_MSG_RESULT([GPLv3])
 else
 	if test x$lgpl_flag = "xyes"; then
 		AC_DEFINE([__ENABLE_LGPL__])
+		AC_MSG_RESULT([LGPLv3])
+	else
+		AC_MSG_RESULT([The 3 Cause BSD])
 	fi
 fi
 
