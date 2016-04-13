@@ -65,7 +65,6 @@ static void VtDecoder_decodeCallback(
 		uint8_t *y_data = (uint8_t *)CVPixelBufferGetBaseAddressOfPlane(imageBuffer, 0);
 		uint8_t *uv_data = (uint8_t *)CVPixelBufferGetBaseAddressOfPlane(imageBuffer, 1);
 
-		LOG_PRINT("w:%d %d", CVPixelBufferGetBytesPerRowOfPlane(imageBuffer, 0), CVPixelBufferGetBytesPerRowOfPlane(imageBuffer, 1));
 		ttLibC_Yuv420 *y = ttLibC_Yuv420_make(
 				decoder->yuv420,
 				Yuv420Type_semiPlanar,
