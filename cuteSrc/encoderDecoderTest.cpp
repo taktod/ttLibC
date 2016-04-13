@@ -71,6 +71,8 @@
 #	include <ttLibC/decoder/audioConverterDecoder.h>
 #	include <ttLibC/encoder/vtCompressSessionH264Encoder.h>
 #	include <ttLibC/decoder/vtDecompressSessionH264Decoder.h>
+#	include <ttLibC/encoder/vtCompressSessionEncoder.h>
+#	include <ttLibC/decoder/vtDecompressSessionDecoder.h>
 #endif
 
 #ifdef __ENABLE_THEORA__
@@ -105,6 +107,78 @@
 #include <ttLibC/util/hexUtil.h>
 
 #include <unistd.h>
+
+#if defined(__ENABLE_APPLE__) && defined(__ENABLE_OPENCV__)
+typedef struct {
+	ttLibC_CvWindow *target;
+	ttLibC_VtDecoder *decoder;
+	ttLibC_Bgr *dbgr;
+} vtTest_t;
+
+static bool vtTest_decodeCallback(void *ptr, ttLibC_Yuv420 *yuv) {
+	vtTest_t *testData = (vtTest_t *)ptr;
+	ttLibC_Bgr *b = ttLibC_ImageResampler_makeBgrFromYuv420(testData->dbgr, BgrType_bgr, yuv);
+	if(b == NULL) {
+		return false;
+	}
+	testData->dbgr = b;
+	ttLibC_CvWindow_showBgr(testData->target, testData->dbgr);
+	return true;
+}
+
+static bool vtTest_encodeCallback(void *ptr, ttLibC_Video *video) {
+	vtTest_t *testData = (vtTest_t *)ptr;
+	return ttLibC_VtDecoder_decode(testData->decoder, video, vtTest_decodeCallback, ptr);
+}
+#endif
+
+static void vtTest() {
+	LOG_PRINT("vtTest");
+#if defined(__ENABLE_APPLE__) && defined(__ENABLE_OPENCV__)
+	uint32_t width =320, height = 240;
+	ttLibC_CvCapture *capture = ttLibC_CvCapture_make(0, width, height);
+	ttLibC_CvWindow *original = ttLibC_CvWindow_make("original");
+	ttLibC_CvWindow *target = ttLibC_CvWindow_make("target");
+	ttLibC_VtEncoder *encoder = ttLibC_VtEncoder_make(width, height, frameType_jpeg);
+	ttLibC_VtDecoder *decoder = ttLibC_VtDecoder_make(frameType_jpeg);
+	ttLibC_Bgr *bgr = NULL, *dbgr = NULL, *b;
+	ttLibC_Yuv420 *yuv = NULL, *y;
+	vtTest_t testData;
+	testData.dbgr = NULL;
+	testData.target = target;
+	testData.decoder = decoder;
+	while(true) {
+		b = ttLibC_CvCapture_queryFrame(capture, bgr);
+		if(b == NULL) {
+			break;
+		}
+		bgr = b;
+		ttLibC_CvWindow_showBgr(original, bgr);
+		y = ttLibC_ImageResampler_makeYuv420FromBgr(yuv, Yuv420Type_planar, bgr);
+		if(y == NULL) {
+			break;
+		}
+		yuv = y;
+		if(!ttLibC_VtEncoder_encode(encoder, yuv, vtTest_encodeCallback, &testData)) {
+			break;
+		}
+		dbgr = testData.dbgr;
+		uint8_t key = ttLibC_CvWindow_waitForKeyInput(66);
+		if(key == Keychar_Esc) {
+			break;
+		}
+	}
+	ttLibC_Bgr_close(&bgr);
+	ttLibC_Bgr_close(&dbgr);
+	ttLibC_Yuv420_close(&yuv);
+	ttLibC_VtDecoder_close(&decoder);
+	ttLibC_VtEncoder_close(&encoder);
+	ttLibC_CvWindow_close(&original);
+	ttLibC_CvWindow_close(&target);
+	ttLibC_CvCapture_close(&capture);
+#endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
 
 #if defined(__ENABLE_VORBIS_ENCODE__) && defined(__ENABLE_VORBIS_DECODE__) && defined(__ENABLE_OPENAL__)
 typedef struct vorbisTest_t {
@@ -993,6 +1067,7 @@ static void imageResamplerTest() {
  */
 cute::suite encoderDecoderTests(cute::suite s) {
 	s.clear();
+	s.push_back(CUTE(vtTest));
 	s.push_back(CUTE(vorbisTest));
 	s.push_back(CUTE(theoraTest));
 	s.push_back(CUTE(vtH264Test));

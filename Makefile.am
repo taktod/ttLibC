@@ -144,8 +144,10 @@ endif
 if ENABLE_APPLE
 nobase_include_HEADERS += \
 	ttLibC/decoder/audioConverterDecoder.h \
+	ttLibC/decoder/vtDecompressSessionDecoder.h \
 	ttLibC/decoder/vtDecompressSessionH264Decoder.h \
 	ttLibC/encoder/audioConverterEncoder.h \
+	ttLibC/encoder/vtCompressSessionEncoder.h \
 	ttLibC/encoder/vtCompressSessionH264Encoder.h \
 	ttLibC/util/audioUnitUtil.h
 endif

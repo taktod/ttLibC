@@ -31,6 +31,7 @@ libttLibC_a_SOURCES= \
 	decoder/speexDecoder.c \
 	decoder/theoraDecoder.c \
 	decoder/vorbisDecoder.c \
+	decoder/vtDecompressSessionDecoder.c \
 	decoder/vtDecompressSessionH264Decoder.c \
 	encoder/audioConverterEncoder.c \
 	encoder/avcodecEncoder.c \
@@ -42,6 +43,7 @@ libttLibC_a_SOURCES= \
 	encoder/speexEncoder.c \
 	encoder/theoraEncoder.c \
 	encoder/vorbisEncoder.c \
+	encoder/vtCompressSessionEncoder.c \
 	encoder/vtCompressSessionH264Encoder.c \
 	encoder/x264Encoder.c \
 	encoder/x265Encoder.c \
