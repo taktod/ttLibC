@@ -656,6 +656,10 @@ bool Pes_writeAudioData(void *ptr, ttLibC_Frame *frame) {
 	audio_data_t *audioData = (audio_data_t *)ptr;
 	if(audioData->writer->target_pos <= frame->pts) {
 		// done.
+		if(audioData->p_buf_left_size != 0) {
+			ERR_PRINT("some data is dropped, maybe generate invalid mpegts.");
+			audioData->error_number = 999;
+		}
 		return false;
 	}
 	uint8_t aac_header_buf[7];
@@ -764,7 +768,7 @@ bool ttLibC_Pes_writeAudioPacket(
 	track->cc ++;
 	if(track->frame_queue->track_id == 0x100) { // pcr
 		if(audioData.total_size < 162) {
-			uint32_t fill_size = 162 - audioData.total_size + 1;
+			uint32_t fill_size = 169 - audioData.total_size;
 			audioData.p_buf[4] = fill_size;
 			audioData.p_buf[5] = 0x50;
 			// pcr
@@ -798,13 +802,18 @@ bool ttLibC_Pes_writeAudioPacket(
 	}
 	else { // non pcr
 		if(audioData.writer->is_reduce_mode) {
-			if(audioData.total_size < 169) {
-				uint32_t fill_size = 169 - audioData.total_size + 1;
+			if(audioData.total_size < 170) {
+				uint32_t fill_size = 169 - audioData.total_size;
 				audioData.p_buf[4] = fill_size;
 				audioData.p_buf += 5;
 				audioData.p_buf_left_size -= 5;
-				for(uint32_t i = 0;i < fill_size - 1;i ++) {
-					*audioData.p_buf = 0xFF;
+				for(uint32_t i = 0;i < fill_size;i ++) {
+					if(i == 0) {
+						*audioData.p_buf = 0x00;
+					}
+					else {
+						*audioData.p_buf = 0xFF;
+					}
 					++ audioData.p_buf;
 					-- audioData.p_buf_left_size;
 				}
@@ -817,7 +826,7 @@ bool ttLibC_Pes_writeAudioPacket(
 		}
 		else {
 			if(audioData.total_size < 168) {
-				uint32_t fill_size = 168 - audioData.total_size + 1;
+				uint32_t fill_size = 169 - audioData.total_size;
 				audioData.p_buf[4] = fill_size;
 				audioData.p_buf[5] = 0x40;
 				audioData.p_buf += 6;
