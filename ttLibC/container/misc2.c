@@ -69,7 +69,9 @@ ttLibC_FrameQueue *ttLibC_FrameQueue_make(
 static bool FrameQueue_refCallback(void *ptr, void *item) {
 	ttLibC_FrameQueue2_ *queue = (ttLibC_FrameQueue2_ *)ptr;
 	if(queue->callback != NULL) {
-		queue->callback(queue->ptr, (ttLibC_Frame *)item);
+		if(!queue->callback(queue->ptr, (ttLibC_Frame *)item)) {
+			return false;
+		}
 	}
 	return true;
 }
