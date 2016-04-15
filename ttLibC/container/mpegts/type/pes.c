@@ -766,6 +766,9 @@ bool ttLibC_Pes_writeAudioPacket(
 
 	// firstly, check total size of frame.
 	ttLibC_FrameQueue_ref(track->frame_queue, Pes_checkAudioTotalSize, &audioData);
+	if(audioData.total_size == 0) {
+		return true;
+	}
 
 	// now write data.
 	audioData.p_buf[0] = 0x47;
