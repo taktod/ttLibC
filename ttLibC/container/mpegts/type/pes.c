@@ -615,6 +615,9 @@ bool Pes_checkAudioTotalSize(
 		void *ptr,
 		ttLibC_Frame *frame) {
 	audio_data_t *audioData = (audio_data_t *)ptr;
+	if(audioData->writer->current_pts_pos > frame->pts) {
+		return true;
+	}
 	if(audioData->writer->target_pos <= frame->pts) {
 		return false;
 	}
@@ -654,6 +657,10 @@ bool Pes_checkAudioTotalSize(
  */
 bool Pes_writeAudioData(void *ptr, ttLibC_Frame *frame) {
 	audio_data_t *audioData = (audio_data_t *)ptr;
+	if(audioData->writer->current_pts_pos > frame->pts) {
+		ERR_PRINT("found past data, dropped.");
+		return true;
+	}
 	if(audioData->writer->target_pos <= frame->pts) {
 		// done.
 		if(audioData->p_buf_left_size != 0) {
