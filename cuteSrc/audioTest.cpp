@@ -128,6 +128,7 @@ static void vorbisTest() {
 		int j = 0;
 		for(j = 0;j < pcm->inherit_super.sample_num;++ j) {
 			buffer[0][j] = (*data) / 32768.f;
+			++ data;
 		}
 		vorbis_analysis_wrote(&vd, j);
 		while(vorbis_analysis_blockout(&vd, &vb) == 1) {
