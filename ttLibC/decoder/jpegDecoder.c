@@ -139,7 +139,7 @@ bool ttLibC_JpegDecoder_decode(
 	uint8_t *y_data = data;
 	uint8_t *u_data = data + wh;
 	uint8_t *v_data = u_data + (wh >> 2);
-	for(int j = 0;j < jpeg->inherit_super.height;j += 16) {
+	for(int j = 0;j < decoder_->inherit_super.height;j += 16) {
 		int max = decoder_->inherit_super.height - j;
 		if(max >= 16) {
 			max = 16;
