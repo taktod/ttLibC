@@ -8,6 +8,8 @@
  * @date   2016/04/08
  */
 
+#ifdef __ENABLE_VORBIS_DECODE__
+
 #include "vorbisDecoder.h"
 #include "../allocator.h"
 #include "../log.h"
@@ -154,3 +156,5 @@ void ttLibC_VorbisDecoder_close(ttLibC_VorbisDecoder **decoder) {
 	ttLibC_free(target);
 	*decoder = NULL;
 }
+
+#endif
