@@ -13,6 +13,7 @@ AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_CC_STDC
 AM_PROG_CC_C_O
+AC_CHECK_TOOL(AR, ar, :)
 
 # user input flag
 lgpl_flag=no
