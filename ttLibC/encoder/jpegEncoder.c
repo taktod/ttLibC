@@ -76,6 +76,7 @@ ttLibC_JpegEncoder *ttLibC_JpegEncoder_make(
 	encoder->cinfo.comp_info[1].v_samp_factor = 1;
 	encoder->cinfo.comp_info[2].h_samp_factor = 1;
 	encoder->cinfo.comp_info[2].v_samp_factor = 1;
+	encoder->cinfo.optimize_coding = true;
 	jpeg_set_quality(&encoder->cinfo, quality, true);
 #if JPEG_LIB_VERSION >= 70
 	encoder->cinfo.do_fancy_downsampling = false;
