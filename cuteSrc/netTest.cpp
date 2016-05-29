@@ -48,6 +48,39 @@
 
 #include <ttLibC/resampler/imageResampler.h>
 
+#include <ttLibC/net/client/websocket.h>
+
+static bool websocketClientTest_onopen(ttLibC_WebSocketEvent *event) {
+	ttLibC_WebSocket_sendText(event->target, "hogehoge");
+	ttLibC_WebSocket_sendText(event->target, "12345");
+	return true;
+}
+
+static bool websocketClientTest_onmessage(ttLibC_WebSocketEvent *event) {
+	if(event->type == WebSocketOpcode_text) {
+		LOG_PRINT("message recieved:%s", event->data);
+	}
+	return true;
+}
+
+#include <ttLibC/util/ioUtil.h>
+
+static void websocketClientTest() {
+	LOG_PRINT("websocketClientTest");
+	// connect
+	ttLibC_WebSocket *client = ttLibC_WebSocket_make("ws://echo.websocket.org/");
+	client->onopen = websocketClientTest_onopen;
+	client->onmessage = websocketClientTest_onmessage;
+	// update to do recv task.
+	for(int i = 0;i < 10;i ++) {
+		if(!ttLibC_WebSocket_update(client, 1000000)) {
+			break;
+		}
+	}
+	ttLibC_WebSocket_close(&client);
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
+
 static tetty_errornum udpTettyServerTest_channelActive(ttLibC_TettyContext *ctx) {
 	LOG_PRINT("channelActive");
 	return 0;
@@ -652,6 +685,7 @@ static void echoServerTest() {
 cute::suite netTests(cute::suite s) {
 	s.clear();
 #ifdef __ENABLE_SOCKET__
+	s.push_back(CUTE(websocketClientTest));
 	s.push_back(CUTE(udpTettyServerTest));
 	s.push_back(CUTE(udpClientTest));
 	s.push_back(CUTE(udpServerTest));

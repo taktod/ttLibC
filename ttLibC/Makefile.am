@@ -93,6 +93,9 @@ libttLibC_a_SOURCES= \
 	net/client/rtmp/tetty/rtmpHandshake.c \
 	net/client/rtmp/rtmpConnection.c \
 	net/client/rtmp/rtmpStream.c \
+	net/client/websocket/handler.c \
+	net/client/websocket/handshake.c \
+	net/client/websocket/websocket.c \
 	net/tcp.c \
 	net/tetty/bootstrap.c \
 	net/tetty/context.c \

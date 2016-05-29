@@ -96,6 +96,7 @@ endif
 if ENABLE_SOCKET
 nobase_include_HEADERS += \
 	ttLibC/net/client/rtmp.h \
+	ttLibC/net/client/websocket.h \
 	ttLibC/net/net.h \
 	ttLibC/net/tcp.h \
 	ttLibC/net/tetty.h \
