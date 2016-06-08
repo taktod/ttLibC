@@ -111,6 +111,12 @@ static bool MpegtsReader_read(
 						reader->pes_list[i]->is_used = true;
 					}
 				}
+				else {
+					if(reader->pes_list[i] == NULL) {
+						// got pes without unit start. skip.
+						return true;
+					}
+				}
 				ttLibC_Pes *pes = ttLibC_Pes_getPacket(
 						reader->pes_list[i],
 						buffer,
@@ -131,7 +137,8 @@ static bool MpegtsReader_read(
 		if(!find) {
 			// in the case of not found.
 			// find pes before pmt?
-			return false;
+			// just skip.
+			return true;
 		}
 	}
 	return result;
