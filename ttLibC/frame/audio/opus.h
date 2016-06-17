@@ -64,8 +64,20 @@ ttLibC_Opus *ttLibC_Opus_make(
 		uint64_t pts,
 		uint32_t timebase);
 
+/**
+ * make opus frame from byte data.
+ * @param prev_frame reuse opus frame.
+ * @param data       opus binary data.
+ * @param data_size  data size
+ * @param pts        pts for opus frame.
+ * @param timebase   timebase for opus frame.
+ */
 ttLibC_Opus *ttLibC_Opus_makeFrame(
-		);
+		ttLibC_Opus *prev_frame,
+		void *data,
+		size_t data_size,
+		uint64_t pts,
+		uint32_t timebase);
 
 /**
  * close frame

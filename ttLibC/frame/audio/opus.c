@@ -102,9 +102,98 @@ ttLibC_Opus *ttLibC_Opus_make(
 	return (ttLibC_Opus *)opus;
 }
 
+uint32_t ttLibC_Opus_getChannelNum(void *data, size_t data_size) {
+	if(data_size < 1) {
+		ERR_PRINT("invalid opus data.");
+		return 0;
+	}
+	return (data[0] & 0x04) ? 2 : 1;
+}
+
+uint32_t ttLibC_Opus_getSampleRate(void *data, size_t data_size) {
+	return 48000;
+}
+
+uint32_t ttLibC_Opus_getNbFrameCount(void *data, size_t data_size) {
+	if(data_size < 1) {
+		ERR_PRINT("invalid opus data.");
+		return 0;
+	}
+	int count = (data[0] & 0x03);
+	if(count == 0) {
+		return 1;
+	}
+	else if(count != 3) {
+		return 2;
+	}
+	if(data_size < 2) {
+		ERR_PRINT("invalid opus data.");
+		return 0;
+	}
+	return data[1] & 0x3F;
+}
+
+uint32_t ttLibC_Opus_getSampleNum(void *data, size_t data_size) {
+	uint32_t nbFrameCount = ttLibC_Opus_getNbFrameCount(data, data_size);
+	if(nbFrameCount == 0) {
+		return 0;
+	}
+	uint8_t TOCConfig = (data[0] >> 3) & 0x1F;
+	switch(TOCConfig) {
+	case 0x00:case 0x04:case 0x08:case 0x0C:case 0x0E:
+		return 0.01 * ttLibC_Opus_getSampleRate(data, data_size) * nbFrameCount;
+	case 0x01:case 0x05:case 0x09:case 0x0D:case 0x0F:
+		return 0.02 * ttLibC_Opus_getSampleRate(data, data_size) * nbFrameCount;
+	case 0x02:case 0x06:case 0x0A:
+		return 0.04 * ttLibC_Opus_getSampleRate(data, data_size) * nbFrameCount;
+	case 0x03:case 0x07:case 0x0B:
+		return 0.06 * ttLibC_Opus_getSampleRate(data, data_size) * nbFrameCount;
+
+	case 0x10:case 0x14:case 0x18:case 0x1C:
+		return 0.0025 * ttLibC_Opus_getSampleRate(data, data_size) * nbFrameCount;
+	case 0x11:case 0x15:case 0x19:case 0x1D:
+		return 0.005 * ttLibC_Opus_getSampleRate(data, data_size) * nbFrameCount;
+	case 0x12:case 0x16:case 0x1A:case 0x1E:
+		return 0.01 * ttLibC_Opus_getSampleRate(data, data_size) * nbFrameCount;
+	case 0x13:case 0x17:case 0x1B:case 0x1F:
+		return 0.02 * ttLibC_Opus_getSampleRate(data, data_size) * nbFrameCount;
+	default: /* no way to be here. */
+		return 0;
+	}
+}
+
+/**
+ * make opus frame from byte data.
+ * @param prev_frame reuse opus frame.
+ * @param data       opus binary data.
+ * @param data_size  data size
+ * @param pts        pts for opus frame.
+ * @param timebase   timebase for opus frame.
+ */
 ttLibC_Opus *ttLibC_Opus_makeFrame(
-		) {
-	return NULL;
+		ttLibC_Opus *prev_frame,
+		void *data,
+		size_t data_size,
+		uint64_t pts,
+		uint32_t timebase) {
+	// header is not supported.
+	uint32_t channel_num = ttLibC_Opus_getChannelNum(data, data_size);
+	uint32_t sample_rate = ttLibC_Opus_getSampleRate(data, data_size);
+	uint32_t sample_num = ttLibC_Opus_getSampleNum(data, data_size);
+	if(channel_num == 0 || sample_rate == 0 || sample_num == 0) {
+		ERR_PRINT("failed to get opus frame information. corrupt.");
+		return NULL;
+	}
+	return ttLibC_Opus_make(prev_frame,
+			OpusType_frame,
+			sample_rate,
+			sample_num,
+			channel_num,
+			data,
+			data_size,
+			true,
+			pts,
+			timebase);
 }
 
 /*
