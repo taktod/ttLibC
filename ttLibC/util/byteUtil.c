@@ -91,7 +91,7 @@ uint64_t ttLibC_ByteReader_bit(
 		if(reader_->pos == 8) {
 			++ reader_->data;
 			if(reader_->data_size <= 0) {
-				ERR_PRINT("no more data buffer.");
+				LOG_PRINT("no more data buffer.");
 				reader_->inherit_super.error_number = 1;
 				return 0;
 			}
@@ -105,7 +105,7 @@ uint64_t ttLibC_ByteReader_bit(
 				else if(val == 3 && reader_->zero_count == 2) {
 					++ reader_->data;
 					if(reader_->data_size == 0) {
-						ERR_PRINT("no more data.");
+						LOG_PRINT("no more data.");
 						reader_->inherit_super.error_number = 1;
 						return 0;
 					}
@@ -153,7 +153,7 @@ int32_t ttLibC_ByteReader_expGolomb(
 		if(reader_->pos == 8) {
 			++ reader_->data;
 			if(reader_->data_size == 0) {
-				ERR_PRINT("no more data.");
+				LOG_PRINT("no more data.");
 				reader_->inherit_super.error_number = 1;
 				return 0;
 			}
@@ -167,7 +167,7 @@ int32_t ttLibC_ByteReader_expGolomb(
 				else if(val == 3 && reader_->zero_count == 2) {
 					++ reader_->data;
 					if(reader_->data_size == 0) {
-						ERR_PRINT("no more data.");
+						LOG_PRINT("no more data.");
 						reader_->inherit_super.error_number = 1;
 						return 0;
 					}
@@ -221,7 +221,7 @@ uint64_t ttLibC_ByteReader_ebml(
 		bool is_tag) {
 	ttLibC_ByteReader_ *reader_ = (ttLibC_ByteReader_ *)reader;
 	if(reader_->data_size == 0) {
-		ERR_PRINT("no more data.");
+		LOG_PRINT("no more data.");
 		reader_->inherit_super.error_number = 1;
 		return 0;
 	}
@@ -244,7 +244,7 @@ uint64_t ttLibC_ByteReader_ebml(
 	}
 	else if(val & 0x40) {
 		if(reader_->data_size < 1) {
-			ERR_PRINT("no more data.");
+			LOG_PRINT("no more data.");
 			reader_->data += reader_->data_size;
 			reader_->data_size = 0;
 			reader_->inherit_super.error_number = 1;
@@ -263,7 +263,7 @@ uint64_t ttLibC_ByteReader_ebml(
 	}
 	else if(val & 0x20) {
 		if(reader_->data_size < 2) {
-			ERR_PRINT("no more data.");
+			LOG_PRINT("no more data.");
 			reader_->data += reader_->data_size;
 			reader_->data_size = 0;
 			reader_->inherit_super.error_number = 1;
@@ -282,7 +282,7 @@ uint64_t ttLibC_ByteReader_ebml(
 	}
 	else if(val & 0x10) {
 		if(reader_->data_size < 3) {
-			ERR_PRINT("no more data.");
+			LOG_PRINT("no more data.");
 			reader_->data += reader_->data_size;
 			reader_->data_size = 0;
 			reader_->inherit_super.error_number = 1;
@@ -301,7 +301,7 @@ uint64_t ttLibC_ByteReader_ebml(
 	}
 	else if(val & 0x08) {
 		if(reader_->data_size < 4) {
-			ERR_PRINT("no more data.");
+			LOG_PRINT("no more data.");
 			reader_->data += reader_->data_size;
 			reader_->data_size = 0;
 			reader_->inherit_super.error_number = 1;
@@ -320,7 +320,7 @@ uint64_t ttLibC_ByteReader_ebml(
 	}
 	else if(val & 0x04) {
 		if(reader_->data_size < 5) {
-			ERR_PRINT("no more data.");
+			LOG_PRINT("no more data.");
 			reader_->data += reader_->data_size;
 			reader_->data_size = 0;
 			reader_->inherit_super.error_number = 1;
@@ -340,7 +340,7 @@ uint64_t ttLibC_ByteReader_ebml(
 	}
 	else if(val & 0x02) {
 		if(reader_->data_size < 6) {
-			ERR_PRINT("no more data.");
+			LOG_PRINT("no more data.");
 			reader_->data += reader_->data_size;
 			reader_->data_size = 0;
 			reader_->inherit_super.error_number = 1;
@@ -360,7 +360,7 @@ uint64_t ttLibC_ByteReader_ebml(
 	}
 	else if(val & 0x01) {
 		if(reader_->data_size < 7) {
-			ERR_PRINT("no more data.");
+			LOG_PRINT("no more data.");
 			reader_->data += reader_->data_size;
 			reader_->data_size = 0;
 			reader_->inherit_super.error_number = 1;
@@ -403,7 +403,8 @@ size_t ttLibC_ByteReader_string(
 		return 0;
 	}
 	if(reader_->data_size < target_size) {
-		ERR_PRINT("hold buffer size is smaller than target_size");
+		LOG_PRINT("hold buffer size is smaller than target_size");
+		reader_->inherit_super.error_number = 1;
 		return 0;
 	}
 	memcpy(buffer, reader_->data, target_size);
@@ -424,7 +425,8 @@ size_t ttLibC_ByteReader_skipByte(
 		size_t skip_size) {
 	ttLibC_ByteReader_ *reader_ = (ttLibC_ByteReader_ *)reader;
 	if(reader_->data_size < skip_size) {
-		ERR_PRINT("hold buffer size is smaller than skip_size.");
+		LOG_PRINT("hold buffer size is smaller than skip_size.");
+		reader_->inherit_super.error_number = 1;
 		return 0;
 	}
 	reader_->data += skip_size;
