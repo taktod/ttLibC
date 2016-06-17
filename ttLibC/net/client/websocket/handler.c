@@ -106,6 +106,9 @@ static tetty_errornum WebSocketHandler_channelRead(
 				// not continue means now is the beginning of chunk, so empty recv_buffer.
 				ttLibC_DynamicBuffer_empty(handler->recv_buffer);
 			}
+			else {
+				opcode = handler->opcode;
+			}
 			// now ready, update handler information.
 			ttLibC_DynamicBuffer_markAsRead(handler->read_buffer, need_size);
 			handler->is_last_chunk = is_last_chunk;
