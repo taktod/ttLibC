@@ -107,7 +107,8 @@ uint32_t ttLibC_Opus_getChannelNum(void *data, size_t data_size) {
 		ERR_PRINT("invalid opus data.");
 		return 0;
 	}
-	return (data[0] & 0x04) ? 2 : 1;
+	uint8_t *u = (uint8_t *)data;
+	return (u[0] & 0x04) ? 2 : 1;
 }
 
 uint32_t ttLibC_Opus_getSampleRate(void *data, size_t data_size) {
@@ -119,7 +120,8 @@ uint32_t ttLibC_Opus_getNbFrameCount(void *data, size_t data_size) {
 		ERR_PRINT("invalid opus data.");
 		return 0;
 	}
-	int count = (data[0] & 0x03);
+	uint8_t *u = (uint8_t *)data;
+	int count = (u[0] & 0x03);
 	if(count == 0) {
 		return 1;
 	}
@@ -130,7 +132,7 @@ uint32_t ttLibC_Opus_getNbFrameCount(void *data, size_t data_size) {
 		ERR_PRINT("invalid opus data.");
 		return 0;
 	}
-	return data[1] & 0x3F;
+	return u[1] & 0x3F;
 }
 
 uint32_t ttLibC_Opus_getSampleNum(void *data, size_t data_size) {
@@ -138,7 +140,8 @@ uint32_t ttLibC_Opus_getSampleNum(void *data, size_t data_size) {
 	if(nbFrameCount == 0) {
 		return 0;
 	}
-	uint8_t TOCConfig = (data[0] >> 3) & 0x1F;
+	uint8_t *u = (uint8_t *)data;
+	uint8_t TOCConfig = (u[0] >> 3) & 0x1F;
 	switch(TOCConfig) {
 	case 0x00:case 0x04:case 0x08:case 0x0C:case 0x0E:
 		return 0.01 * ttLibC_Opus_getSampleRate(data, data_size) * nbFrameCount;
