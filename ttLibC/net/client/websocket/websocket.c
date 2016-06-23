@@ -234,11 +234,12 @@ void ttLibC_WebSocket__sendMessage(
 	ttLibC_TettyBootstrap_channels_write(socket_->bootstrap, mask, 4);
 	// write data with masking.
 	uint8_t *data_buf = data;
-	for(int i = 0;i < data_size;++ i) {
+	for(int i = 0;i < data_size;) {
+		buf[i % 256] = mask[i % 4] ^ data_buf[i];
+		++ i;
 		if(i != 0 && i % 256 == 0) {
 			ttLibC_TettyBootstrap_channels_write(socket_->bootstrap, buf, 256);
 		}
-		buf[i % 256] = mask[i % 4] ^ data_buf[i];
 	}
 	ttLibC_TettyBootstrap_channels_write(socket_->bootstrap, buf, data_size % 256);
 	// all done, flush and send.
