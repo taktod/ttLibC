@@ -10,7 +10,6 @@
 #include "handler.h"
 #include "../../../allocator.h"
 #include "../../../log.h"
-#include "../../../util/hexUtil.h"
 #include "websocket.h"
 #include <string.h>
 
@@ -36,7 +35,6 @@ static tetty_errornum WebSocketHandler_channelRead(
 	// update read_buffer
 	ttLibC_DynamicBuffer_append(handler->read_buffer, data, data_size);
 	while(ttLibC_DynamicBuffer_refSize(handler->read_buffer) > 0) {
-//		LOG_DUMP(ttLibC_DynamicBuffer_refData(handler->read_buffer), ttLibC_DynamicBuffer_refSize(handler->read_buffer), true);
 		// pointer for received data.
 		uint8_t *buf = ttLibC_DynamicBuffer_refData(handler->read_buffer);
 		// in the case of header reading.
