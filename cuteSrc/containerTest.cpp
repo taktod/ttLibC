@@ -24,10 +24,12 @@ typedef struct {
 	ttLibC_ContainerWriter *writer;
 	FILE *fp_in;
 	FILE *fp_out;
+	size_t write_size;
 } containerTest_t;
 
 bool mpegtsToFlvTest_writeFuncCallback(void *ptr, void *data, size_t data_size) {
 	containerTest_t *testData = (containerTest_t *)ptr;
+	testData->write_size += data_size;
 	if(testData->fp_out) {
 		fwrite(data, 1, data_size, testData->fp_out);
 	}
@@ -53,6 +55,7 @@ bool mpegtsToFlvTest_getMpegtsPacketCallback(void *ptr, ttLibC_Mpegts *mpegts) {
 static void mpegtsToFlvTest() {
 	LOG_PRINT("mpegtsToFlvTest");
 	containerTest_t testData;
+	testData.write_size = 0;
 	testData.reader = (ttLibC_ContainerReader *)ttLibC_MpegtsReader_make();
 	testData.writer = (ttLibC_ContainerWriter *)ttLibC_FlvWriter_make(frameType_h264, frameType_aac);
 	testData.fp_in = fopen("test.ts", "rb");
@@ -78,6 +81,7 @@ static void mpegtsToFlvTest() {
 
 bool mp3Test_writeFrameCallback(void *ptr, void *data, size_t data_size) {
 	containerTest_t *testData = (containerTest_t *)ptr;
+	testData->write_size += data_size;
 	if(testData->fp_out) {
 		fwrite(data, 1, data_size, testData->fp_out);
 	}
@@ -96,27 +100,35 @@ bool mp3Test_getMp3Callback(void *ptr, ttLibC_Container_Mp3 *mp3) {
 static void mp3Test() {
 	LOG_PRINT("mp3Test");
 	containerTest_t testData;
+	testData.write_size = 0;
 	testData.reader = (ttLibC_ContainerReader *)ttLibC_Mp3Reader_make();
 	testData.writer = (ttLibC_ContainerWriter *)ttLibC_Mp3Writer_make();
 	testData.fp_in = fopen("test.mp3", "rb");
-	testData.fp_out = fopen("test_out.mp3", "wb");
-	do {
-		uint8_t buffer[65536];
-		size_t read_size = fread(buffer, 1, 65536, testData.fp_in);
-		if(!ttLibC_Mp3Reader_read((ttLibC_Mp3Reader *)testData.reader, buffer, read_size, mp3Test_getMp3Callback, &testData)) {
-			ERR_PRINT("error occured!");
-			break;
-		}
-	}while(!feof(testData.fp_in));
-	ttLibC_ContainerReader_close(&testData.reader);
-	ttLibC_ContainerWriter_close(&testData.writer);
-	if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
-	if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
+	if(testData.fp_in == NULL) {
+		LOG_PRINT("source data is missing.");
+	}
+	else {
+		testData.fp_out = fopen("test_out.mp3", "wb");
+		do {
+			uint8_t buffer[65536];
+			size_t read_size = fread(buffer, 1, 65536, testData.fp_in);
+			if(!ttLibC_Mp3Reader_read((ttLibC_Mp3Reader *)testData.reader, buffer, read_size, mp3Test_getMp3Callback, &testData)) {
+				ERR_PRINT("error occured!");
+				break;
+			}
+		}while(!feof(testData.fp_in));
+		ttLibC_ContainerReader_close(&testData.reader);
+		ttLibC_ContainerWriter_close(&testData.writer);
+		if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
+		if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
+		LOG_PRINT("write size is %d", testData.write_size);
+	}
 	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
 bool mpegtsTest_writePacketCallback(void *ptr, void *data, size_t data_size) {
 	containerTest_t *testData = (containerTest_t *)ptr;
+	testData->write_size += data_size;
 	if(testData->fp_out) {
 		fwrite(data, 1, data_size, testData->fp_out);
 	}
@@ -145,6 +157,7 @@ static void mpegtsTest() {
 	LOG_PRINT("mpegtsTest");
 
 	containerTest_t testData;
+	testData.write_size = 0;
 	testData.reader = (ttLibC_ContainerReader *)ttLibC_MpegtsReader_make();
 	ttLibC_Frame_Type frameTypes[] = {
 			frameType_h264,
@@ -155,19 +168,25 @@ static void mpegtsTest() {
 			2,
 			15000); // write task with 0.5 sec each.
 	testData.fp_in = fopen("test.ts", "rb");
-	testData.fp_out = fopen("test_out.ts", "wb");
-	do {
-		uint8_t buffer[65536];
-		size_t read_size = fread(buffer, 1, 65536, testData.fp_in);
-		if(!ttLibC_MpegtsReader_read((ttLibC_MpegtsReader *)testData.reader, buffer, read_size, mpegtsTest_getMpegtsCallback, &testData)) {
-			ERR_PRINT("error occured!");
-			break;
-		}
-	}while(!feof(testData.fp_in));
-	ttLibC_ContainerReader_close(&testData.reader);
-	ttLibC_ContainerWriter_close(&testData.writer);
-	if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
-	if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
+	if(testData.fp_in == NULL) {
+		LOG_PRINT("source data is missing.");
+	}
+	else {
+		testData.fp_out = fopen("test_out.ts", "wb");
+		do {
+			uint8_t buffer[65536];
+			size_t read_size = fread(buffer, 1, 65536, testData.fp_in);
+			if(!ttLibC_MpegtsReader_read((ttLibC_MpegtsReader *)testData.reader, buffer, read_size, mpegtsTest_getMpegtsCallback, &testData)) {
+				ERR_PRINT("error occured!");
+				break;
+			}
+		}while(!feof(testData.fp_in));
+		ttLibC_ContainerReader_close(&testData.reader);
+		ttLibC_ContainerWriter_close(&testData.writer);
+		if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
+		if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
+		LOG_PRINT("write size:%lld", testData.write_size);
+	}
 	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
@@ -175,6 +194,7 @@ static void mpegtsH264Mp3Test() {
 	LOG_PRINT("mpegtsH264Mp3Test");
 
 	containerTest_t testData;
+	testData.write_size = 0;
 	testData.reader = (ttLibC_ContainerReader *)ttLibC_MpegtsReader_make();
 	ttLibC_Frame_Type frameTypes[] = {
 			frameType_h264,
@@ -205,6 +225,7 @@ static void mpegtsVlcTest() {
 	LOG_PRINT("mpegtsVlcTest");
 
 	containerTest_t testData;
+	testData.write_size = 0;
 	testData.reader = (ttLibC_ContainerReader *)ttLibC_MpegtsReader_make();
 	ttLibC_Frame_Type frameTypes[] = {
 			frameType_h264,
@@ -233,6 +254,7 @@ static void mpegtsVlcTest() {
 
 bool flvTest_writeTagCallback(void *ptr, void *data, size_t data_size) {
 	containerTest_t *testData = (containerTest_t *)ptr;
+	testData->write_size += data_size;
 	if(testData->fp_out) {
 		fwrite(data, 1, data_size, testData->fp_out);
 	}
@@ -252,22 +274,29 @@ static void flvTest() {
 	LOG_PRINT("flvTest");
 
 	containerTest_t testData;
+	testData.write_size = 0;
 	testData.reader = (ttLibC_ContainerReader *)ttLibC_FlvReader_make();
 	testData.writer = (ttLibC_ContainerWriter *)ttLibC_FlvWriter_make(frameType_h264, frameType_aac);
 	testData.fp_in = fopen("test.flv", "rb");
-	testData.fp_out = fopen("test_out.flv", "wb");
-	do {
-		uint8_t buffer[65536];
-		size_t read_size = fread(buffer, 1, 65536, testData.fp_in);
-		if(!ttLibC_FlvReader_read((ttLibC_FlvReader *)testData.reader, buffer, read_size, flvTest_getFlvCallback, &testData)) {
-			ERR_PRINT("error occured!");
-			break;
-		}
-	}while(!feof(testData.fp_in));
-	ttLibC_ContainerReader_close(&testData.reader);
-	ttLibC_ContainerWriter_close(&testData.writer);
-	if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
-	if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
+	if(testData.fp_in == NULL) {
+		LOG_PRINT("sample data is missing.");
+	}
+	else {
+		testData.fp_out = fopen("test_out.flv", "wb");
+		do {
+			uint8_t buffer[65536];
+			size_t read_size = fread(buffer, 1, 65536, testData.fp_in);
+			if(!ttLibC_FlvReader_read((ttLibC_FlvReader *)testData.reader, buffer, read_size, flvTest_getFlvCallback, &testData)) {
+				ERR_PRINT("error occured!");
+				break;
+			}
+		}while(!feof(testData.fp_in));
+		ttLibC_ContainerReader_close(&testData.reader);
+		ttLibC_ContainerWriter_close(&testData.writer);
+		if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
+		if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
+		LOG_PRINT("write size:%lld", testData.write_size);
+	}
 	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
@@ -275,6 +304,7 @@ static void flvFlv1AacTest() {
 	LOG_PRINT("flvTest");
 
 	containerTest_t testData;
+	testData.write_size = 0;
 	testData.reader = (ttLibC_ContainerReader *)ttLibC_FlvReader_make();
 	testData.writer = (ttLibC_ContainerWriter *)ttLibC_FlvWriter_make(frameType_flv1, frameType_aac);
 	testData.fp_in = fopen("test_flv1_aac.flv", "rb");
@@ -294,17 +324,6 @@ static void flvFlv1AacTest() {
 	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
-static void miscTest() {
-	LOG_PRINT("miscTest");
-	ttLibC_Frame_Type types[2] = {
-			frameType_h264,
-			frameType_aac
-	};
-	ttLibC_MpegtsWriter *writer = ttLibC_MpegtsWriter_make(types, 2);
-	ttLibC_MpegtsWriter_close(&writer);
-	ASSERT(ttLibC_Allocator_dump() == 0);
-}
-
 /**
  * define all test for container package.
  * @param s cute::suite obj
@@ -315,11 +334,10 @@ cute::suite containerTests(cute::suite s) {
 //	s.push_back(CUTE(mpegtsVlcTest));
 //	s.push_back(CUTE(mpegtsH264Mp3Test));
 //	s.push_back(CUTE(flvFlv1AacTest));
-//	s.push_back(CUTE(miscTest));
 //	s.push_back(CUTE(mpegtsToFlvTest)); // h264/aac
-//	s.push_back(CUTE(mp3Test)); // none/mp3
-//	s.push_back(CUTE(mpegtsTest)); // h264/aac
-//	s.push_back(CUTE(flvTest)); // h264/aac
+	s.push_back(CUTE(mp3Test)); // none/mp3
+	s.push_back(CUTE(mpegtsTest)); // h264/aac
+	s.push_back(CUTE(flvTest)); // h264/aac
 	return s;
 }
 

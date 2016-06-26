@@ -29,6 +29,7 @@ typedef struct ttLibC_ContainerReader_Mp3Reader_ {
 	ttLibC_DynamicBuffer *tmp_buffer;
 	uint64_t current_pts;
 	uint32_t timebase;
+	bool is_reading;
 } ttLibC_ContainerReader_Mp3Reader_;
 
 typedef ttLibC_ContainerReader_Mp3Reader_ ttLibC_Mp3Reader_;

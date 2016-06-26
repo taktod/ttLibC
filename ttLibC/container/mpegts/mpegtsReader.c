@@ -34,6 +34,7 @@ ttLibC_MpegtsReader *ttLibC_MpegtsReader_make() {
 	reader->target_size = 188;
 
 	reader->tmp_buffer = ttLibC_DynamicBuffer_make();
+	reader->is_reading = false;
 	return (ttLibC_MpegtsReader *)reader;
 }
 
@@ -159,6 +160,10 @@ bool ttLibC_MpegtsReader_read(
 		return false;
 	}
 	ttLibC_DynamicBuffer_append(reader_->tmp_buffer, data, data_size);
+	if(reader_->is_reading) {
+		return true;
+	}
+	reader_->is_reading = true;
 	// do each 188 bytes.
 	do {
 		uint8_t *buffer = ttLibC_DynamicBuffer_refData(reader_->tmp_buffer);
@@ -168,11 +173,13 @@ bool ttLibC_MpegtsReader_read(
 			break;
 		}
 		if(!MpegtsReader_read(reader_, buffer, left_size, callback, ptr)) {
+			reader_->is_reading = false;
 			return false;
 		}
 		ttLibC_DynamicBuffer_markAsRead(reader_->tmp_buffer, reader_->target_size);
 	} while(true);
 	ttLibC_DynamicBuffer_clear(reader_->tmp_buffer);
+	reader_->is_reading = false;
 	return true;
 }
 

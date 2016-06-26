@@ -27,6 +27,7 @@ ttLibC_Mp3Reader *ttLibC_Mp3Reader_make() {
 	reader->frame = NULL;
 
 	reader->tmp_buffer = ttLibC_DynamicBuffer_make();
+	reader->is_reading = false;
 	return (ttLibC_Mp3Reader *)reader;
 }
 
@@ -83,11 +84,16 @@ bool ttLibC_Mp3Reader_read(
 	ttLibC_Mp3Reader_ *reader_ = (ttLibC_Mp3Reader_ *)reader;
 	ttLibC_Mp3 *mp3 = NULL;
 	ttLibC_DynamicBuffer_append(reader_->tmp_buffer, data, data_size);
+	if(reader_->is_reading) {
+		return true;
+	}
+	reader_->is_reading = true;
 	do {
 		mp3 = Mp3Reader_readMp3FromBinary(reader_, ttLibC_DynamicBuffer_refData(reader_->tmp_buffer), ttLibC_DynamicBuffer_refSize(reader_->tmp_buffer));
 		if(mp3 == NULL) {
 			// if mp3 is NULL, need more data.
 			ttLibC_DynamicBuffer_clear(reader_->tmp_buffer);
+			reader_->is_reading = false;
 			return true;
 		}
 		ttLibC_DynamicBuffer_markAsRead(reader_->tmp_buffer, mp3->inherit_super.inherit_super.buffer_size);
@@ -96,10 +102,12 @@ bool ttLibC_Mp3Reader_read(
 				mp3)) {
 			ERR_PRINT("failed to make mp3 frame");
 			ttLibC_DynamicBuffer_clear(reader_->tmp_buffer);
+			reader_->is_reading = false;
 			return false;
 		}
 		if(!callback(ptr, (ttLibC_Container_Mp3 *)reader_->frame)) {
 			ttLibC_DynamicBuffer_clear(reader_->tmp_buffer);
+			reader_->is_reading = false;
 			return false;
 		}
 	} while(true);

@@ -42,6 +42,7 @@ typedef struct ttLibC_ContainerReader_MpegtsReader_ {
 	uint16_t pmt_pid;
 
 	ttLibC_DynamicBuffer *tmp_buffer;
+	bool is_reading;
 } ttLibC_ContainerReader_MpegtsReader_;
 
 typedef ttLibC_ContainerReader_MpegtsReader_ ttLibC_MpegtsReader_;

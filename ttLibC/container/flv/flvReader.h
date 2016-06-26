@@ -48,6 +48,7 @@ typedef struct ttLibC_ContainerReader_FlvReader_ {
 	size_t target_size;
 
 	ttLibC_DynamicBuffer *tmp_buffer;
+	bool is_reading;
 } ttLibC_ContainerReader_FlvReader_;
 
 typedef ttLibC_ContainerReader_FlvReader_ ttLibC_FlvReader_;

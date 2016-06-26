@@ -33,6 +33,7 @@ ttLibC_FlvReader *ttLibC_FlvReader_make() {
 	reader->target_size = 13;
 
 	reader->tmp_buffer = ttLibC_DynamicBuffer_make();
+	reader->is_reading = false;
 	return (ttLibC_FlvReader *)reader;
 }
 
@@ -105,11 +106,16 @@ bool ttLibC_FlvReader_read(
 	}
 	ttLibC_FlvReader_ *reader_ = (ttLibC_FlvReader_ *)reader;
 	ttLibC_DynamicBuffer_append(reader_->tmp_buffer, (uint8_t *)data, data_size);
+	if(reader_->is_reading) {
+		return true;
+	}
+	reader_->is_reading = true;
 	do {
 		uint8_t *buffer = ttLibC_DynamicBuffer_refData(reader_->tmp_buffer);
 		size_t left_size = ttLibC_DynamicBuffer_refSize(reader_->tmp_buffer);
 		if(reader_->target_size > ttLibC_DynamicBuffer_refSize(reader_->tmp_buffer)) {
 			ttLibC_DynamicBuffer_clear(reader_->tmp_buffer);
+			reader_->is_reading = false;
 			return true; // continue
 		}
 		switch(reader_->status) {
@@ -123,6 +129,7 @@ bool ttLibC_FlvReader_read(
 		case body:
 			if(!FlvReader_read(reader_, buffer, reader_->target_size, callback, ptr)) {
 				ttLibC_DynamicBuffer_clear(reader_->tmp_buffer);
+				reader_->is_reading = false;
 				return false;
 			}
 			ttLibC_DynamicBuffer_markAsRead(reader_->tmp_buffer, reader_->target_size);
