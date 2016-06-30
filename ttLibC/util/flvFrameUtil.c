@@ -115,7 +115,8 @@ static ttLibC_Video *FlvFrameManager_readH264Binary(
 				buf += size;
 				buf_size -= size;
 			} while(buf_size > 0);
-			ttLibC_H264 *h264 = ttLibC_H264_getFrame((ttLibC_H264 *)manager->video_frame,
+			ttLibC_H264 *h264 = ttLibC_H264_getFrame(
+					(ttLibC_H264 *)manager->video_frame,
 					data,
 					data_size,
 					true,
