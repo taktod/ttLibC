@@ -109,6 +109,7 @@ typedef struct ttLibC_Frame {
 	 * if false, data will be freed on close method.
 	 */
 	bool is_non_copy;
+	uint32_t id;
 } ttLibC_Frame;
 
 /**
