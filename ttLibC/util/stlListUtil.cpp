@@ -35,6 +35,9 @@ static ttLibC_StlList_ *StlList_make() {
 static bool StlList_addFirst(
 		ttLibC_StlList_ *list,
 		void *add_item) {
+	if(list == NULL) {
+		return false;
+	}
 	list->list->push_front(add_item);
 	list->inherit_super.size = list->list->size();
 	return true;
@@ -43,22 +46,34 @@ static bool StlList_addFirst(
 static bool StlList_addLast(
 		ttLibC_StlList_ *list,
 		void *add_item) {
+	if(list == NULL) {
+		return false;
+	}
 	list->list->push_back(add_item);
 	list->inherit_super.size = list->list->size();
 	return true;
 }
 
 static void *StlList_refFirst(ttLibC_StlList_ *list) {
+	if(list == NULL) {
+		return NULL;
+	}
 	return (void *)list->list->front();
 }
 
 static void *StlList_refLast(ttLibC_StlList_ *list) {
+	if(list == NULL) {
+		return NULL;
+	}
 	return (void *)list->list->back();
 }
 
 static bool StlList_remove(
 		ttLibC_StlList_ *list,
 		void *remove_item) {
+	if(list == NULL) {
+		return false;
+	}
 	list->list->remove(remove_item);
 	list->inherit_super.size = list->list->size();
 //	list->list->erase(remove_item);
@@ -66,6 +81,9 @@ static bool StlList_remove(
 }
 
 static bool StlList_removeAll(ttLibC_StlList_ *list) {
+	if(list == NULL) {
+		return false;
+	}
 	list->list->clear();
 	list->inherit_super.size = list->list->size();
 	return true;
@@ -75,6 +93,9 @@ static bool StlList_forEach(
 		ttLibC_StlList_ *list,
 		ttLibC_StlListRefFunc callback,
 		void *ptr) {
+	if(list == NULL) {
+		return false;
+	}
 	uint32_t original_size = list->list->size();
 	std::list<void *>::iterator iter = list->list->begin();
 	while(iter != list->list->end()) {
@@ -95,6 +116,9 @@ bool StlList_forEachReverse(
 		ttLibC_StlList_ *list,
 		ttLibC_StlListRefFunc callback,
 		void *ptr) {
+	if(list == NULL) {
+		return false;
+	}
 	uint32_t original_size = list->list->size();
 	std::list<void *>::reverse_iterator iter = list->list->rbegin();
 	while(iter != list->list->rend()) {

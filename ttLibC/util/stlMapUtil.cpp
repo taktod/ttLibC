@@ -36,6 +36,9 @@ static bool StlMap_put(
 		ttLibC_StlMap_ *map,
 		void *key,
 		void *item) {
+	if(map == NULL) {
+		return false;
+	}
 	map->map->insert(std::pair<void *, void *>(key, item));
 	map->inherit_super.size = map->map->size();
 	return true;
@@ -44,6 +47,9 @@ static bool StlMap_put(
 static void *StlMap_get(
 		ttLibC_StlMap_ *map,
 		void *key) {
+	if(map == NULL) {
+		return NULL;
+	}
 	std::map<void *, void *>::iterator iter = map->map->find(key);
 	if(iter == map->map->end()) {
 		return NULL;
@@ -54,12 +60,18 @@ static void *StlMap_get(
 static bool StlMap_remove(
 		ttLibC_StlMap_ *map,
 		void *key) {
+	if(map == NULL) {
+		return false;
+	}
 	map->map->erase(key);
 	map->inherit_super.size = map->map->size();
 	return true;
 }
 
 static bool StlMap_removeAll(ttLibC_StlMap_ *map) {
+	if(map == NULL) {
+		return false;
+	}
 	map->map->clear();
 	map->inherit_super.size = map->map->size();
 	return true;
@@ -69,6 +81,9 @@ static bool StlMap_forEach(
 		ttLibC_StlMap_ *map,
 		ttLibC_StlMapRefFunc callback,
 		void *ptr) {
+	if(map == NULL) {
+		return false;
+	}
 	uint32_t original_size = map->map->size();
 	std::map<void *, void *>::iterator iter = map->map->begin();
 	while(iter != map->map->end()) {
