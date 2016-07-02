@@ -46,6 +46,17 @@ ttLibC_Jpeg *ttLibC_Jpeg_make(
 		uint32_t timebase);
 
 /**
+ * make frame object from jpeg binary data.
+ */
+ttLibC_Jpeg *ttLibC_Jpeg_getFrame(
+		ttLibC_Jpeg *pref_frame,
+		uint8_t *data,
+		size_t data_size,
+		bool non_copy_mode,
+		uint64_t pts,
+		uint32_t timebase);
+
+/**
  * close frame
  * @param frame
  */
