@@ -10,9 +10,21 @@ libttLibC_a_SOURCES= \
 	container/flv/flvReader.c \
 	container/flv/flvTag.c \
 	container/flv/flvWriter.c \
+	container/mkv/type/simpleBlock.c \
+	container/mkv/mkvReader.c \
+	container/mkv/mkvTag.c \
+	container/mkv/mkvWriter.c \
 	container/mp3/mp3Frame.c \
 	container/mp3/mp3Reader.c \
 	container/mp3/mp3Writer.c \
+	container/mp4/type/stco.c \
+	container/mp4/type/stsc.c \
+	container/mp4/type/stsz.c \
+	container/mp4/type/stts.c \
+	container/mp4/type/trun.c \
+	container/mp4/mp4Atom.c \
+	container/mp4/mp4Reader.c \
+	container/mp4/mp4Writer.c \
 	container/mpegts/type/pat.c \
 	container/mpegts/type/pes.c \
 	container/mpegts/type/pmt.c \

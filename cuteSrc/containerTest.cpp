@@ -18,6 +18,8 @@
 #include <ttLibC/container/flv.h>
 #include <ttLibC/container/mpegts.h>
 #include <ttLibC/container/mp3.h>
+#include <ttLibC/container/mp4.h>
+#include <ttLibC/container/mkv.h>
 
 typedef struct {
 	ttLibC_ContainerReader *reader;
@@ -26,6 +28,101 @@ typedef struct {
 	FILE *fp_out;
 	size_t write_size;
 } containerTest_t;
+
+static bool mp4Test_getFrameCallback(void *ptr, ttLibC_Frame *frame) {
+	switch(frame->type) {
+	case frameType_h264:
+		LOG_PRINT("h264:%f", 1.0f * frame->pts / frame->timebase);
+		break;
+	case frameType_aac:
+		LOG_PRINT("aac:%f", 1.0f * frame->pts / frame->timebase);
+		break;
+	default:
+		break;
+	}
+	return true;
+}
+
+static bool mp4Test_getMp4Callback(void *ptr, ttLibC_Mp4 *mp4) {
+	return ttLibC_Mp4_getFrame(mp4, mp4Test_getFrameCallback, ptr);
+}
+
+static void mp4Test() {
+	LOG_PRINT("mp4Test");
+	containerTest_t testData;
+	testData.write_size = 0;
+	testData.reader = (ttLibC_ContainerReader *)ttLibC_Mp4Reader_make();
+	testData.writer = (ttLibC_ContainerWriter *)ttLibC_Mp4Writer_make();
+	testData.fp_in = fopen("test.mp4", "rb");
+//	testData.fp_in = fopen("test_mod.mp4", "rb");
+//	testData.fp_in = fopen("test.fmp4", "rb");
+	testData.fp_out = fopen("test_out.mp4", "wb");
+	do {
+		uint8_t buffer[65536];
+		size_t read_size = fread(buffer, 1, 65536, testData.fp_in);
+		if(!ttLibC_Mp4Reader_read((ttLibC_Mp4Reader *)testData.reader, buffer, read_size, mp4Test_getMp4Callback, &testData)) {
+			ERR_PRINT("error occured!");
+			break;
+		}
+	} while(!feof(testData.fp_in));
+	ttLibC_ContainerReader_close(&testData.reader);
+	ttLibC_ContainerWriter_close(&testData.writer);
+	if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
+	if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
+
+bool mkvTest_getFrameCallback(void *ptr, ttLibC_Frame *frame) {
+	switch(frame->type) {
+	case frameType_h264:
+		LOG_PRINT("h264:%f", 1.0 * frame->pts / frame->timebase);
+		break;
+	case frameType_vp8:
+		LOG_PRINT("vp8:%f", 1.0 * frame->pts / frame->timebase);
+		break;
+	case frameType_aac:
+		LOG_PRINT("aac:%f", 1.0 * frame->pts / frame->timebase);
+		break;
+	case frameType_opus:
+		LOG_PRINT("opus:%f", 1.0 * frame->pts / frame->timebase);
+		break;
+	case frameType_vorbis:
+		LOG_PRINT("vorbis:%f", 1.0 * frame->pts / frame->timebase);
+		break;
+	default:
+		LOG_PRINT("frame:%f", 1.0 * frame->pts / frame->timebase);
+		break;
+	}
+	return true;
+}
+
+bool mkvTest_getMkvCallback(void *ptr, ttLibC_Mkv *mkv) {
+	return ttLibC_Mkv_getFrame(mkv, mkvTest_getFrameCallback, ptr);
+}
+
+static void mkvTest() {
+	LOG_PRINT("mkvTest");
+
+	containerTest_t testData;
+	testData.write_size = 0;
+	testData.reader = (ttLibC_ContainerReader *)ttLibC_MkvReader_make();
+	testData.writer = (ttLibC_ContainerWriter *)ttLibC_MkvWriter_make();
+	testData.fp_in = fopen("test.mkv", "rb");
+	testData.fp_out = fopen("test_out.mkv", "wb");
+	do {
+		uint8_t buffer[65536];
+		size_t read_size = fread(buffer, 1, 65536, testData.fp_in);
+		if(!ttLibC_MkvReader_read((ttLibC_MkvReader *)testData.reader, buffer, read_size, mkvTest_getMkvCallback, &testData)) {
+			ERR_PRINT("error occured!");
+			break;
+		}
+	} while(!feof(testData.fp_in));
+	ttLibC_ContainerReader_close(&testData.reader);
+	ttLibC_ContainerWriter_close(&testData.writer);
+	if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
+	if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
 
 bool mpegtsToFlvTest_writeFuncCallback(void *ptr, void *data, size_t data_size) {
 	containerTest_t *testData = (containerTest_t *)ptr;
@@ -335,6 +432,8 @@ cute::suite containerTests(cute::suite s) {
 //	s.push_back(CUTE(mpegtsH264Mp3Test));
 //	s.push_back(CUTE(flvFlv1AacTest));
 //	s.push_back(CUTE(mpegtsToFlvTest)); // h264/aac
+	s.push_back(CUTE(mp4Test));
+	s.push_back(CUTE(mkvTest));
 	s.push_back(CUTE(mp3Test)); // none/mp3
 	s.push_back(CUTE(mpegtsTest)); // h264/aac
 	s.push_back(CUTE(flvTest)); // h264/aac

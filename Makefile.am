@@ -1,7 +1,9 @@
 nobase_include_HEADERS= \
 	ttLibC/container/container.h \
 	ttLibC/container/flv.h \
+	ttLibC/container/mkv.h \
 	ttLibC/container/mp3.h \
+	ttLibC/container/mp4.h \
 	ttLibC/container/mpegts.h \
 	ttLibC/frame/audio/aac.h \
 	ttLibC/frame/audio/adpcmImaWav.h \

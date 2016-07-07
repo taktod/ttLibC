@@ -15,7 +15,9 @@
 #include <string.h>
 
 #include "flv.h"
+#include "mkv.h"
 #include "mp3.h"
+#include "mp4.h"
 #include "mpegts.h"
 #include "../log.h"
 #include "../allocator.h"
@@ -118,10 +120,12 @@ bool ttLibC_Container_getFrame(
 	switch(container->type) {
 	case containerType_flv:
 		return ttLibC_Flv_getFrame((ttLibC_Flv *)container, callback, ptr);
-//	case containerType_mkv:
+	case containerType_mkv:
+		return ttLibC_Mkv_getFrame((ttLibC_Mkv *)container, callback, ptr);
 	case containerType_mp3:
 		return ttLibC_Container_Mp3_getFrame((ttLibC_Container_Mp3 *)container, callback, ptr);
-//	case containerType_mp4:
+	case containerType_mp4:
+		return ttLibC_Mp4_getFrame((ttLibC_Mp4 *)container, callback, ptr);
 	case containerType_mpegts:
 		return ttLibC_Mpegts_getFrame((ttLibC_Mpegts *)container, callback, ptr);
 //	case containerType_riff:
@@ -207,10 +211,15 @@ void ttLibC_ContainerReader_close(ttLibC_ContainerReader **reader) {
 	case containerType_flv:
 		ttLibC_FlvReader_close((ttLibC_FlvReader **)reader);
 		return;
+	case containerType_mkv:
+		ttLibC_MkvReader_close((ttLibC_MkvReader **)reader);
+		return;
 	case containerType_mp3:
 		ttLibC_Mp3Reader_close((ttLibC_Mp3Reader **)reader);
 		return;
-//	case containerType_mp4:
+	case containerType_mp4:
+		ttLibC_Mp4Reader_close((ttLibC_Mp4Reader **)reader);
+		return;
 	case containerType_mpegts:
 		ttLibC_MpegtsReader_close((ttLibC_MpegtsReader **)reader);
 		return;
@@ -269,10 +278,15 @@ void ttLibC_ContainerWriter_close(ttLibC_ContainerWriter **writer) {
 	case containerType_flv:
 		ttLibC_FlvWriter_close((ttLibC_FlvWriter **)writer);
 		return;
+	case containerType_mkv:
+		ttLibC_MkvWriter_close((ttLibC_MkvWriter **)writer);
+		return;
 	case containerType_mp3:
 		ttLibC_Mp3Writer_close((ttLibC_Mp3Writer **)writer);
 		return;
-//	case containerType_mp4:
+	case containerType_mp4:
+		ttLibC_Mp4Writer_close((ttLibC_Mp4Writer **)writer);
+		return;
 	case containerType_mpegts:
 		ttLibC_MpegtsWriter_close((ttLibC_MpegtsWriter **)writer);
 		return;
