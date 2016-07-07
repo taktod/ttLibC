@@ -61,7 +61,7 @@ typedef struct {
 	bool is_first;
 	uint64_t current_pts_pos;
 	uint64_t target_pos;
-	uint32_t max_unit_duration;
+	uint32_t max_unit_duration; // max for audio frame chunk.
 
 	ttLibC_MpegtsWriter_Status status;
 
