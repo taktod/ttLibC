@@ -56,7 +56,6 @@ endif
 
 if ENABLE_FILE
 nobase_include_HEADERS += \
-	ttLibC/util/httpUtil.h \
 	ttLibC/util/forkUtil.h
 endif
 
