@@ -51,8 +51,6 @@ void *ttLibC_Allocator_malloc(size_t size, const char *file_name, int line, cons
 }
 
 /*
-<<<<<<< HEAD
-=======
  * calloc with information.
  * @param n         allocator object num
  * @param size      allocator unit size
@@ -79,7 +77,6 @@ void *ttLibC_Allocator_calloc(size_t n, size_t size, const char *file_name, int 
 }
 
 /*
->>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
  * free with information
  * @param ptr memory pointer
  */

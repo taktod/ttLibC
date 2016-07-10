@@ -87,13 +87,10 @@ uint32_t ttLibC_Vp6_getWidth(ttLibC_Vp6 *prev_frame, uint8_t *data, size_t data_
 	 * 8bit ...
 	 */
 	ttLibC_ByteReader *reader = ttLibC_ByteReader_make(data, data_size, ByteUtilType_default);
-<<<<<<< HEAD
-=======
 	if(reader == NULL) {
 		ERR_PRINT("failed to make byteReader.");
 		return 0;
 	}
->>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 	uint32_t frameMode = ttLibC_ByteReader_bit(reader, 1);
 	if(frameMode == 1) {
 		ttLibC_ByteReader_close(&reader);
@@ -113,14 +110,11 @@ uint32_t ttLibC_Vp6_getWidth(ttLibC_Vp6 *prev_frame, uint8_t *data, size_t data_
 	}
 	uint32_t width = ttLibC_ByteReader_bit(reader, 8) * 16;
 	ttLibC_ByteReader_bit(reader, 8);
-<<<<<<< HEAD
-=======
 	if(reader->error != Error_noError) {
 		LOG_ERROR(reader->error);
 		ttLibC_ByteReader_close(&reader);
 		return 0;
 	}
->>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 	ttLibC_ByteReader_close(&reader);
 	return width;
 }
@@ -134,13 +128,10 @@ uint32_t ttLibC_Vp6_getWidth(ttLibC_Vp6 *prev_frame, uint8_t *data, size_t data_
  */
 uint32_t ttLibC_Vp6_getHeight(ttLibC_Vp6 *prev_frame, uint8_t *data, size_t data_size) {
 	ttLibC_ByteReader *reader = ttLibC_ByteReader_make(data, data_size, ByteUtilType_default);
-<<<<<<< HEAD
-=======
 	if(reader == NULL) {
 		ERR_PRINT("failed to make byteReader.");
 		return 0;
 	}
->>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 	uint32_t frameMode = ttLibC_ByteReader_bit(reader, 1);
 	if(frameMode == 1) {
 		ttLibC_ByteReader_close(&reader);
@@ -160,14 +151,11 @@ uint32_t ttLibC_Vp6_getHeight(ttLibC_Vp6 *prev_frame, uint8_t *data, size_t data
 	}
 	ttLibC_ByteReader_bit(reader, 8);
 	uint32_t height = ttLibC_ByteReader_bit(reader, 8) * 16;
-<<<<<<< HEAD
-=======
 	if(reader->error != Error_noError) {
 		LOG_ERROR(reader->error);
 		ttLibC_ByteReader_close(&reader);
 		return 0;
 	}
->>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 	ttLibC_ByteReader_close(&reader);
 	return height;
 }

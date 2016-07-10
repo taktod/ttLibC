@@ -399,11 +399,7 @@ if test x$apple_flag = "xyes"; then
 	else 
 		apple_check=yes
 		APPLE_CFLAGS=''
-<<<<<<< HEAD
 		APPLE_LIBS='-framework AudioToolbox -framework AudioUnit -framework VideoToolbox -framework CoreMedia -framework CoreFoundation -framework CoreVideo -framework CoreAudio'
-=======
-		APPLE_LIBS='-framework AudioToolbox -framework AudioUnit -framework VideoToolbox -framework CoreMedia -framework CoreFoundation -framework CoreVideo -framework CoreAudio -framework OpenGL -framework GLKit -framework GLUT'
->>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 		AC_SUBST([APPLE_CFLAGS])
 		AC_SUBST([APPLE_LIBS])
 	fi
@@ -505,11 +501,7 @@ if test x$opencv_flag$opencv_check = "xyesyes"; then
 fi
 AM_CONDITIONAL(ENABLE_OPENCV, test x$opencv_flag$opencv_check = "xyesyes")
 
-<<<<<<< HEAD
-if test x$opencv_flag$gpl_flag$openal_check = "xyesyesyes"; then
-=======
 if test x$openal_flag$gpl_flag$openal_check = "xyesyesyes"; then
->>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 	AC_DEFINE([__ENABLE_OPENAL__])
 fi
 AM_CONDITIONAL(ENABLE_OPENAL, test x$openal_flag$gpl_flag$openal_check = "xyesyesyes")

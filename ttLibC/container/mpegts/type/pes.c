@@ -340,6 +340,7 @@ bool ttLibC_Pes_getFrame(
 						(ttLibC_Mp3 *)pes->frame,
 						buffer,
 						left_size,
+						true,
 						pts,
 						pes->inherit_super.inherit_super.inherit_super.timebase);
 				if(mp3 == NULL) {

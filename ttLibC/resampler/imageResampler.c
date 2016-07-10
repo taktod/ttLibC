@@ -66,12 +66,9 @@ ttLibC_Yuv420 *ttLibC_ImageResampler_makeYuv420FromBgr(
 	}
 	if(data == NULL) {
 		data = ttLibC_malloc(data_size);
-<<<<<<< HEAD
-=======
 		if(data == NULL) {
 			return NULL;
 		}
->>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 		alloc_flag = true;
 	}
 	// now start to convert.
@@ -308,12 +305,9 @@ ttLibC_Bgr *ttLibC_ImageResampler_makeBgrFromYuv420(
 	}
 	if(data == NULL) {
 		data = ttLibC_malloc(data_size);
-<<<<<<< HEAD
-=======
 		if(data == NULL) {
 			return NULL;
 		}
->>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 		alloc_flag = true;
 	}
 	// now start to convert.

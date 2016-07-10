@@ -16,10 +16,7 @@ extern "C" {
 #endif
 
 #include <stdint.h>
-<<<<<<< HEAD
-=======
 #include "../ttLibC.h"
->>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 
 /**
  * definition for crc32.
@@ -27,10 +24,7 @@ extern "C" {
 typedef struct ttLibC_Util_Crc32 {
 	/** calcurate value. */
 	uint64_t crc;
-<<<<<<< HEAD
-=======
 	Error_e error;
->>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 } ttLibC_Util_Crc32;
 
 typedef ttLibC_Util_Crc32 ttLibC_Crc32;

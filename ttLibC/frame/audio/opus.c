@@ -199,8 +199,6 @@ ttLibC_Opus *ttLibC_Opus_makeFrame(
 			timebase);
 }
 
-<<<<<<< HEAD
-=======
 /**
  * make opus frame from byte data.
  * @param prev_frame reuse opus frame.
@@ -237,7 +235,6 @@ ttLibC_Opus *ttLibC_Opus_getFrame(
 }
 
 
->>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 /*
  * close frame
  * @param frame

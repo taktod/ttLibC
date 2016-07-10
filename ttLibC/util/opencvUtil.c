@@ -15,10 +15,7 @@
 #include <opencv/highgui.h>
 #include "../log.h"
 #include "../allocator.h"
-<<<<<<< HEAD
-=======
 #include "../ttLibC_common.h"
->>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 
 #ifdef __APPLE__
 // for osx, mach_time is better than time.h.
@@ -48,13 +45,10 @@ ttLibC_CvWindow *ttLibC_CvWindow_make(const char *name) {
 	}
 	size_t len = strlen(name);
 	window->inherit_super.name = ttLibC_malloc(len + 1);
-<<<<<<< HEAD
-=======
 	if(window->inherit_super.name == NULL) {
 		ttLibC_free(window);
 		return NULL;
 	}
->>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 	sprintf(window->inherit_super.name, "%s", name);
 	cvNamedWindow(window->inherit_super.name, CV_WINDOW_NORMAL);
 	window->image = NULL;

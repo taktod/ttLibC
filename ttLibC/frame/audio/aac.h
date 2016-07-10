@@ -99,11 +99,7 @@ ttLibC_Aac *ttLibC_Aac_clone(
  * @param prev_frame    reuse frame
  * @param data          aac binary data.
  * @param data_size     data size
-<<<<<<< HEAD
- * @param non_copy_mode true:hold the data poointer. false:data will copy.
-=======
  * @param non_copy_mode true:hold the data pointer. false:data will copy.
->>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
  * @param pts           pts for aac frame.
  * @param timebase      timebase for pts.
  * @return aac object

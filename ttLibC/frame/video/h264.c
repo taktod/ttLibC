@@ -14,10 +14,7 @@
 #include <stdlib.h>
 #include "../../log.h"
 #include "../../allocator.h"
-<<<<<<< HEAD
-=======
 #include "../../ttLibC_common.h"
->>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 #include "../../util/ioUtil.h"
 #include "../../util/byteUtil.h"
 #include "../../util/hexUtil.h"
@@ -233,10 +230,7 @@ bool ttLibC_H264_getNalInfo(ttLibC_H264_NalInfo* info, uint8_t *data, size_t dat
  * @param data      data for analyze
  * @param data_size data size
  * @return true:analyze success
-<<<<<<< HEAD
-=======
  * @note work with 4byte size length only
->>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
  */
 bool ttLibC_H264_getAvccInfo(ttLibC_H264_NalInfo* info, uint8_t *data, size_t data_size) {
 	if(info == NULL) {
@@ -293,10 +287,7 @@ bool ttLibC_H264_isNal(uint8_t *data, size_t data_size) {
 
 /**
  * check data type is avcc or not.
-<<<<<<< HEAD
-=======
  * @note work with sizelength = 4 only.
->>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
  */
 bool ttLibC_H264_isAvcc(uint8_t *data, size_t data_size) {
 	if(data_size < 4) {
@@ -343,13 +334,6 @@ bool ttLibC_H264_isKey(uint8_t *data, size_t data_size) {
 	}
 }
 
-<<<<<<< HEAD
-static ttLibC_H264_Ref_t ref = {0};
-
-static void H264_analyzeSequenceParameterSet(ttLibC_H264_Ref_t *ref, uint8_t *data, size_t data_size) {
-	ttLibC_ByteReader *reader = ttLibC_ByteReader_make(data, data_size, ByteUtilType_h26x);
-
-=======
 // TODO fix this. this is not good for multi thread.
 //static ttLibC_H264_Ref_t ref = {0};
 
@@ -358,18 +342,13 @@ static Error_e H264_analyzeSequenceParameterSet(ttLibC_H264_Ref_t *ref, uint8_t 
 	if(reader == NULL) {
 		return ttLibC_updateError(Target_On_VideoFrame, Error_MemoryAllocate);
 	}
->>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 	ttLibC_ByteReader_bit(reader, 1);
 	ttLibC_ByteReader_bit(reader, 2);
 	uint8_t type = ttLibC_ByteReader_bit(reader, 5);
 	if(type != H264NalType_sequenceParameterSet) {
 		ERR_PRINT("get non sps data.");
 		ttLibC_ByteReader_close(&reader);
-<<<<<<< HEAD
-		return;
-=======
 		return ttLibC_updateError(Target_On_VideoFrame, Error_InvalidOperation);
->>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 	}
 	uint8_t profile_idc = ttLibC_ByteReader_bit(reader, 8);
 	ttLibC_ByteReader_bit(reader, 8);
@@ -400,11 +379,7 @@ static Error_e H264_analyzeSequenceParameterSet(ttLibC_H264_Ref_t *ref, uint8_t 
 			uint8_t seq_scaling_matrix_present_flag = ttLibC_ByteReader_bit(reader, 1);
 			if(seq_scaling_matrix_present_flag == 1) {
 				ERR_PRINT("not imprement for seq_scaling_matrix_present");
-<<<<<<< HEAD
-				return;
-=======
 				return ttLibC_updateError(Target_On_VideoFrame, Error_InvalidOperation);
->>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 			}
 		}
 		break;
@@ -448,13 +423,9 @@ static Error_e H264_analyzeSequenceParameterSet(ttLibC_H264_Ref_t *ref, uint8_t 
 	ref->width = ((pic_width_in_mbs_minus1 + 1) * 16) - frame_crop_left_offset * 2 - frame_crop_right_offset * 2;
 	ref->height = ((2 - frame_mbs_only_flag)* (pic_height_in_map_units_minus1 +1) * 16) - (frame_crop_top_offset * 2) - (frame_crop_bottom_offset * 2);
 
-<<<<<<< HEAD
-	ttLibC_ByteReader_close(&reader);
-=======
 	Error_e result = reader->error;
 	ttLibC_ByteReader_close(&reader);
 	return ttLibC_updateError(Target_On_VideoFrame, result);
->>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 }
 
 /*
@@ -469,17 +440,9 @@ uint32_t ttLibC_H264_getWidth(ttLibC_H264 *prev_frame, uint8_t *data, size_t dat
 	// for sps -> analyze to get width and height.
 	// for others -> get ref from prev_frame.
 	ttLibC_H264_NalInfo info;
-<<<<<<< HEAD
-	if(ref.analyze_data_ptr == data) {
-		return ref.width;
-	}
-	uint8_t *check_data = data;
-	size_t check_size = data_size;
-=======
 	uint8_t *check_data = data;
 	size_t check_size = data_size;
 	ttLibC_H264_Ref_t ref = {0};
->>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 	if(ttLibC_H264_isAvcc(check_data, check_size)) {
 		do {
 			if(!ttLibC_H264_getAvccInfo(&info, check_data, check_size)) {
@@ -493,10 +456,6 @@ uint32_t ttLibC_H264_getWidth(ttLibC_H264 *prev_frame, uint8_t *data, size_t dat
 				check_size -= info.nal_size;
 				break;
 			case H264NalType_sequenceParameterSet:
-<<<<<<< HEAD
-				// analyze data.
-				H264_analyzeSequenceParameterSet(&ref, check_data + info.data_pos, check_size - info.data_pos);
-=======
 				{
 					// analyze data.
 					Error_e result = H264_analyzeSequenceParameterSet(&ref, check_data + info.data_pos, check_size - info.data_pos);
@@ -505,7 +464,6 @@ uint32_t ttLibC_H264_getWidth(ttLibC_H264 *prev_frame, uint8_t *data, size_t dat
 						return 0;
 					}
 				}
->>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 				ref.analyze_data_ptr = data;
 				return ref.width;
 			default:
@@ -513,18 +471,11 @@ uint32_t ttLibC_H264_getWidth(ttLibC_H264 *prev_frame, uint8_t *data, size_t dat
 					return 0;
 				}
 				// return ref value
-<<<<<<< HEAD
-				ref.analyze_data_ptr = data;
-				ref.width  = prev_frame->inherit_super.width;
-				ref.height = prev_frame->inherit_super.height;
-				return ref.width;
-=======
 //				ref.analyze_data_ptr = data;
 //				ref.width  = prev_frame->inherit_super.width;
 //				ref.height = prev_frame->inherit_super.height;
 //				return ref.width;
 				return prev_frame->inherit_super.width;
->>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 			}
 		} while(check_size > 0);
 	}
@@ -542,9 +493,6 @@ uint32_t ttLibC_H264_getWidth(ttLibC_H264 *prev_frame, uint8_t *data, size_t dat
 				break;
 			case H264NalType_sequenceParameterSet:
 				// analyze data.
-<<<<<<< HEAD
-				H264_analyzeSequenceParameterSet(&ref, check_data + info.data_pos, check_size - info.data_pos);
-=======
 				{
 					Error_e result = H264_analyzeSequenceParameterSet(&ref, check_data + info.data_pos, check_size - info.data_pos);
 					if(result != Error_noError) {
@@ -552,27 +500,18 @@ uint32_t ttLibC_H264_getWidth(ttLibC_H264 *prev_frame, uint8_t *data, size_t dat
 						return 0;
 					}
 				}
->>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 				ref.analyze_data_ptr = data;
 				return ref.width;
 			default:
 				if(prev_frame == NULL) {
 					return 0;
 				}
-<<<<<<< HEAD
-				// return ref value
-				ref.analyze_data_ptr = data;
-				ref.width  = prev_frame->inherit_super.width;
-				ref.height = prev_frame->inherit_super.height;
-				return ref.width;
-=======
 /*				// return ref value
 				ref.analyze_data_ptr = data;
 				ref.width  = prev_frame->inherit_super.width;
 				ref.height = prev_frame->inherit_super.height;
 				return ref.width;*/
 				return prev_frame->inherit_super.width;
->>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 			}
 		} while(check_size > 0);
 	}
@@ -591,20 +530,12 @@ uint32_t ttLibC_H264_getHeight(ttLibC_H264 *prev_frame, uint8_t *data, size_t da
 	// for sps -> analyze to get width and height.
 	// for others -> get ref from prev_frame.
 	ttLibC_H264_NalInfo info;
-<<<<<<< HEAD
-	if(ref.analyze_data_ptr == data) {
-		return ref.height;
-	}
-	uint8_t *check_data = data;
-	size_t check_size = data_size;
-=======
 //	if(ref.analyze_data_ptr == data) {
 //		return ref.height;
 //	}
 	uint8_t *check_data = data;
 	size_t check_size = data_size;
 	ttLibC_H264_Ref_t ref = {0};
->>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 	if(ttLibC_H264_isAvcc(check_data, check_size)) {
 		do {
 			if(!ttLibC_H264_getAvccInfo(&info, check_data, check_size)) {
@@ -619,9 +550,6 @@ uint32_t ttLibC_H264_getHeight(ttLibC_H264 *prev_frame, uint8_t *data, size_t da
 				break;
 			case H264NalType_sequenceParameterSet:
 				// analyze data.
-<<<<<<< HEAD
-				H264_analyzeSequenceParameterSet(&ref, check_data + info.data_pos, check_size - info.data_pos);
-=======
 				{
 					Error_e result = H264_analyzeSequenceParameterSet(&ref, check_data + info.data_pos, check_size - info.data_pos);
 					if(result != Error_noError) {
@@ -629,7 +557,6 @@ uint32_t ttLibC_H264_getHeight(ttLibC_H264 *prev_frame, uint8_t *data, size_t da
 						return 0;
 					}
 				}
->>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 				ref.analyze_data_ptr = data;
 				return ref.height;
 			default:
@@ -637,18 +564,11 @@ uint32_t ttLibC_H264_getHeight(ttLibC_H264 *prev_frame, uint8_t *data, size_t da
 					return 0;
 				}
 				// return ref value
-<<<<<<< HEAD
-				ref.analyze_data_ptr = data;
-				ref.width  = prev_frame->inherit_super.width;
-				ref.height = prev_frame->inherit_super.height;
-				return ref.height;
-=======
 /*				ref.analyze_data_ptr = data;
 				ref.width  = prev_frame->inherit_super.width;
 				ref.height = prev_frame->inherit_super.height;
 				return ref.height;*/
 				return prev_frame->inherit_super.height;
->>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 			}
 		} while(check_size > 0);
 	}
@@ -666,9 +586,6 @@ uint32_t ttLibC_H264_getHeight(ttLibC_H264 *prev_frame, uint8_t *data, size_t da
 				break;
 			case H264NalType_sequenceParameterSet:
 				// analyze data.
-<<<<<<< HEAD
-				H264_analyzeSequenceParameterSet(&ref, check_data + info.data_pos, check_size - info.data_pos);
-=======
 				{
 					Error_e result = H264_analyzeSequenceParameterSet(&ref, check_data + info.data_pos, check_size - info.data_pos);
 					if(result != Error_noError) {
@@ -676,27 +593,18 @@ uint32_t ttLibC_H264_getHeight(ttLibC_H264 *prev_frame, uint8_t *data, size_t da
 						return 0;
 					}
 				}
->>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 				ref.analyze_data_ptr = data;
 				return ref.height;
 			default:
 				if(prev_frame == NULL) {
 					return 0;
 				}
-<<<<<<< HEAD
-				// return ref value
-				ref.analyze_data_ptr = data;
-				ref.width  = prev_frame->inherit_super.width;
-				ref.height = prev_frame->inherit_super.height;
-				return ref.height;
-=======
 /*				// return ref value
 				ref.analyze_data_ptr = data;
 				ref.width  = prev_frame->inherit_super.width;
 				ref.height = prev_frame->inherit_super.height;
 				return ref.height;*/
 				return prev_frame->inherit_super.height;
->>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 			}
 		} while(check_size > 0);
 	}
@@ -750,12 +658,9 @@ ttLibC_H264 *ttLibC_H264_getFrame(
 		target_size = nal_info.nal_size;
 		width = ttLibC_H264_getWidth(prev_frame, data, data_size);
 		height = ttLibC_H264_getHeight(prev_frame, data, data_size);
-<<<<<<< HEAD
-=======
 		if(width == 0 || height == 0) {
 			return NULL;
 		}
->>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 		// try to get next data.
 		if(!ttLibC_H264_getNalInfo(&nal_info, data + target_size, data_size - target_size)) {
 			ERR_PRINT("failed to get nal info.");
@@ -841,13 +746,10 @@ ttLibC_H264 *ttLibC_H264_analyzeAvccTag(
 	}
 	if(buffer == NULL) {
 		buffer = ttLibC_malloc(buffer_size);
-<<<<<<< HEAD
-=======
 		if(buffer == NULL) {
 			ERR_PRINT("failed to alloc.");
 			return NULL;
 		}
->>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 		alloc_flag = true;
 	}
 	uint8_t *buf = buffer;

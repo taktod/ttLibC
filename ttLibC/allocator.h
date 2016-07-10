@@ -29,8 +29,6 @@ extern "C" {
 #define ttLibC_malloc(size) ttLibC_Allocator_malloc(size, __FILE__, __LINE__, __func__)
 
 /**
-<<<<<<< HEAD
-=======
  * ttLibC_calloc
  * @param n    allocator object num
  * @param size allocator unit size
@@ -39,7 +37,6 @@ extern "C" {
 #define ttLibC_calloc(n, size) ttLibC_Allocator_calloc(n, size, __FILE__, __LINE__, __func__)
 
 /**
->>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
  * ttLibC_free
  * @param ptr memory pointer
  */
@@ -56,8 +53,6 @@ extern "C" {
 void *ttLibC_Allocator_malloc(size_t size, const char *file_name, int line, const char *func_name);
 
 /**
-<<<<<<< HEAD
-=======
  * calloc with information.
  * @param n         allocator object num
  * @param size      allocator unit size
@@ -69,7 +64,6 @@ void *ttLibC_Allocator_malloc(size_t size, const char *file_name, int line, cons
 void *ttLibC_Allocator_calloc(size_t n, size_t size, const char *file_name, int line, const char *func_name);
 
 /**
->>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
  * free with information
  * @param ptr memory pointer
  */

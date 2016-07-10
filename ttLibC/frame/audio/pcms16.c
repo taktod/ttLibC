@@ -149,10 +149,6 @@ ttLibC_PcmS16 *ttLibC_PcmS16_clone(
 		ERR_PRINT("original data have only reference, nothing to copy.");
 		return NULL;
 	}
-<<<<<<< HEAD
-	// データのコピーをします。
-=======
->>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 	switch(src_frame->type) {
 	case PcmS16Type_bigEndian:
 	case PcmS16Type_littleEndian:

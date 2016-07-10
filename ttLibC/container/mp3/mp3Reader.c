@@ -58,7 +58,7 @@ ttLibC_Mp3 *Mp3Reader_readMp3FromBinary(
 	if(reader->frame != NULL) {
 		prev_frame = (ttLibC_Mp3 *)reader->frame->frame;
 	}
-	mp3 = ttLibC_Mp3_getFrame(prev_frame, data, data_size, 0, 1000);
+	mp3 = ttLibC_Mp3_getFrame(prev_frame, data, data_size, true, 0, 1000);
 	if(mp3 != NULL) {
 		// fix timestamp information.
 		switch(mp3->type) {

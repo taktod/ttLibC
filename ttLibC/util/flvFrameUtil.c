@@ -200,6 +200,7 @@ static ttLibC_Audio *FlvFrameManager_readMp3Binary(
 			(ttLibC_Mp3 *)manager->audio_frame,
 			data,
 			data_size,
+			true,
 			pts,
 			1000);
 	if(mp3 == NULL) {

@@ -92,12 +92,9 @@ ttLibC_Jpeg *ttLibC_Jpeg_getFrame(
 			break;
 		}
 	} while(buf_size > 0);
-<<<<<<< HEAD
-=======
 	if(width == 0 || height == 0) {
 		return NULL;
 	}
->>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 
 	return ttLibC_Jpeg_make(
 			prev_frame,

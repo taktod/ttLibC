@@ -117,7 +117,7 @@ static bool checkEncodedData(ttLibC_Mp3lameEncoder_ *encoder, uint32_t encode_si
 	uint8_t *data = encoder->data;
 	ttLibC_Mp3 *mp3 = NULL;
 	do {
-		mp3 = ttLibC_Mp3_getFrame(encoder->mp3, data, encode_size, 0, 1000);
+		mp3 = ttLibC_Mp3_getFrame(encoder->mp3, data, encode_size, true, 0, 1000);
 		if(mp3 != NULL) {
 			// set the pts and timebase.
 			mp3->inherit_super.inherit_super.pts = encoder->pts;

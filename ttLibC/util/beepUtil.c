@@ -94,13 +94,10 @@ ttLibC_PcmS16 *ttLibC_BeepGenerator_makeBeepBySampleNum(
 	}
 	if(data == NULL) {
 		data = ttLibC_malloc(data_size);
-<<<<<<< HEAD
-=======
 		if(data == NULL) {
 			ERR_PRINT("failed to allocate memory.");
 			return NULL;
 		}
->>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 		alloc_flag = true;
 	}
 	// generator beep sound.

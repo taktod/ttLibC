@@ -16,10 +16,7 @@ extern "C" {
 #endif
 
 #include "../frame/audio/pcms16.h"
-<<<<<<< HEAD
-=======
 #include "../ttLibC.h"
->>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 
 /**
  * speexdsp resampler definition.
@@ -30,10 +27,7 @@ typedef struct ttLibC_Resampler_SpeexdspResampler {
 	uint32_t output_sample_rate;
 	/** speexdsp resample quality 0:low quality - 10:high quality */
 	uint32_t quality;
-<<<<<<< HEAD
-=======
 	Error_e error;
->>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 } ttLibC_Resampler_SpeexdspResampler;
 
 typedef ttLibC_Resampler_SpeexdspResampler ttLibC_SpeexdspResampler;

@@ -86,30 +86,19 @@ ttLibC_Mp3_Type ttLibC_Mp3_getMp3Type(
 
 /**
  * make mp3 frame from byte data.
-<<<<<<< HEAD
- * @param prev_frame reuse mp3 frame.
- * @param data       mp3 binary data
- * @param data_size  data size
- * @param pts        pts for mp3 frame.
- * @param timebase   timebase for mp3 frame.
-=======
  * @param prev_frame    reuse mp3 frame.
  * @param data          mp3 binary data
  * @param data_size     data size
  * @param non_copy_mode true:hold the data pointer. false:data will copy.
  * @param pts           pts for mp3 frame.
  * @param timebase      timebase for mp3 frame.
->>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
  * @return mp3 object.
  */
 ttLibC_Mp3 *ttLibC_Mp3_getFrame(
 		ttLibC_Mp3 *prev_frame,
 		void *data,
 		size_t data_size,
-<<<<<<< HEAD
-=======
 		bool non_copy_mode,
->>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 		uint64_t pts,
 		uint32_t timebase);
 

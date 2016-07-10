@@ -228,6 +228,7 @@ bool ttLibC_FlvAudioTag_getFrame(
 					(ttLibC_Mp3 *)audio_tag->inherit_super.frame,
 					buffer,
 					left_size,
+					true,
 					audio_tag->inherit_super.inherit_super.inherit_super.pts,
 					audio_tag->inherit_super.inherit_super.inherit_super.timebase);
 			if(mp3 == NULL) {

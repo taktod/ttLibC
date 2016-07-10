@@ -1,13 +1,10 @@
 nobase_include_HEADERS= \
-<<<<<<< HEAD
 	ttLibC/container/container.h \
 	ttLibC/container/flv.h \
 	ttLibC/container/mkv.h \
 	ttLibC/container/mp3.h \
 	ttLibC/container/mp4.h \
 	ttLibC/container/mpegts.h \
-=======
->>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 	ttLibC/frame/audio/aac.h \
 	ttLibC/frame/audio/adpcmImaWav.h \
 	ttLibC/frame/audio/audio.h \
@@ -43,10 +40,6 @@ nobase_include_HEADERS= \
 	ttLibC/util/dynamicBufferUtil.h \
 	ttLibC/util/hexUtil.h \
 	ttLibC/util/ioUtil.h \
-<<<<<<< HEAD
-	ttLibC/util/linkedListUtil.h \
-=======
->>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 	ttLibC/util/stlListUtil.h \
 	ttLibC/util/stlMapUtil.h \
 	ttLibC/allocator.h \
@@ -63,7 +56,6 @@ nobase_include_HEADERS += \
 	ttLibC/util/opencvUtil.h
 endif
 
-<<<<<<< HEAD
 if ENABLE_MP3LAME_ENCODE
 nobase_include_HEADERS += \
 	ttLibC/encoder/mp3lameEncoder.h
@@ -85,14 +77,11 @@ nobase_include_HEADERS += \
 	ttLibC/encoder/openh264Encoder.h
 endif
 
-=======
->>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 if ENABLE_SPEEXDSP
 nobase_include_HEADERS += \
 	ttLibC/resampler/speexdspResampler.h
 endif
 
-<<<<<<< HEAD
 if ENABLE_SPEEX
 nobase_include_HEADERS += \
 	ttLibC/decoder/speexDecoder.h \
@@ -165,13 +154,6 @@ nobase_include_HEADERS += \
 	ttLibC/util/audioUnitUtil.h
 endif
 
-=======
-if ENABLE_FILE
-nobase_include_HEADERS += \
-	ttLibC/util/forkUtil.h
-endif
-
->>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 pkgconfigdir=@pkgconfigdir@
 pkgconfig_DATA=ttLibC.pc
 CLEANFILES=ttLibC.pc

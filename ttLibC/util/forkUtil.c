@@ -6,11 +6,8 @@
  *
  * @author taktod
  * @date   2015/09/28
-<<<<<<< HEAD
-=======
  *
  * @note no use for multithread.
->>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
  */
 
 #ifdef __ENABLE_FILE__

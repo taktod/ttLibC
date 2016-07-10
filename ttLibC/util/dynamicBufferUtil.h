@@ -14,10 +14,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
-<<<<<<< HEAD
-=======
 #include "../ttLibC.h"
->>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 
 #ifdef __cplusplus
 extern "C" {
@@ -32,11 +29,8 @@ typedef struct ttLibC_Util_DynamicBuffer {
 	size_t buffer_size;
 	/** hold memory size, (less than buffer_size) */
 	size_t target_size;
-<<<<<<< HEAD
-=======
 	/** error */
 	Error_e error;
->>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 } ttLibC_Util_DynamicBuffer;
 
 typedef ttLibC_Util_DynamicBuffer ttLibC_DynamicBuffer;
