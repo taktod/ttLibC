@@ -399,7 +399,7 @@ if test x$apple_flag = "xyes"; then
 	else 
 		apple_check=yes
 		APPLE_CFLAGS=''
-		APPLE_LIBS='-framework AudioToolbox -framework AudioUnit -framework VideoToolbox -framework CoreMedia -framework CoreFoundation -framework CoreVideo -framework CoreAudio -framework OpenGL -framework GLKit -framework GLUT'
+		APPLE_LIBS='-framework AudioToolbox -framework AudioUnit -framework VideoToolbox -framework CoreMedia -framework CoreFoundation -framework CoreVideo -framework CoreAudio'
 		AC_SUBST([APPLE_CFLAGS])
 		AC_SUBST([APPLE_LIBS])
 	fi
