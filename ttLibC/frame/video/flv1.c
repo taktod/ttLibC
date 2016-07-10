@@ -121,6 +121,13 @@ ttLibC_Flv1_Type ttLibC_Flv1_getPictureType(
 	 * 1bit extra information flag -> 8bit extra information
 	 */
 	ttLibC_ByteReader *reader = ttLibC_ByteReader_make(data, data_size, ByteUtilType_default);
+<<<<<<< HEAD
+=======
+	if(reader == NULL) {
+		ERR_PRINT("failed to make byteReader.");
+		return -1;
+	}
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 	if(ttLibC_ByteReader_bit(reader, 17) != 1) {
 		ERR_PRINT("invalid flv1 data.");
 		ttLibC_ByteReader_close(&reader);
@@ -151,6 +158,14 @@ ttLibC_Flv1_Type ttLibC_Flv1_getPictureType(
 		return -1;
 	}
 	uint32_t picture_type = ttLibC_ByteReader_bit(reader, 2);
+<<<<<<< HEAD
+=======
+	if(reader->error != Error_noError) {
+		LOG_ERROR(reader->error);
+		ttLibC_ByteReader_close(&reader);
+		return -1;
+	}
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 	ttLibC_ByteReader_close(&reader);
 	return (int8_t)picture_type;
 }
@@ -173,6 +188,13 @@ bool ttLibC_Flv1_isKey(void *data, size_t data_size) {
  */
 uint32_t ttLibC_Flv1_getWidth(void *data, size_t data_size) {
 	ttLibC_ByteReader *reader = ttLibC_ByteReader_make(data, data_size, ByteUtilType_default);
+<<<<<<< HEAD
+=======
+	if(reader == NULL) {
+		ERR_PRINT("failed to make byteReader.");
+		return 0;
+	}
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 	if(ttLibC_ByteReader_bit(reader, 17) != 1) {
 		ERR_PRINT("invalid flv1 data.");
 		ttLibC_ByteReader_close(&reader);
@@ -210,6 +232,14 @@ uint32_t ttLibC_Flv1_getWidth(void *data, size_t data_size) {
 		ttLibC_ByteReader_close(&reader);
 		return 0;
 	}
+<<<<<<< HEAD
+=======
+	if(reader->error != Error_noError) {
+		LOG_ERROR(reader->error);
+		ttLibC_ByteReader_close(&reader);
+		return 0;
+	}
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 	ttLibC_ByteReader_close(&reader);
 	return width;
 }
@@ -222,6 +252,13 @@ uint32_t ttLibC_Flv1_getWidth(void *data, size_t data_size) {
  */
 uint32_t ttLibC_Flv1_getHeight(void *data, size_t data_size) {
 	ttLibC_ByteReader *reader = ttLibC_ByteReader_make(data, data_size, ByteUtilType_default);
+<<<<<<< HEAD
+=======
+	if(reader == NULL) {
+		ERR_PRINT("failed to make byteReader.");
+		return 0;
+	}
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 	if(ttLibC_ByteReader_bit(reader, 17) != 1) {
 		ERR_PRINT("invalid flv1 data.");
 		ttLibC_ByteReader_close(&reader);
@@ -261,6 +298,14 @@ uint32_t ttLibC_Flv1_getHeight(void *data, size_t data_size) {
 		ttLibC_ByteReader_close(&reader);
 		return 0;
 	}
+<<<<<<< HEAD
+=======
+	if(reader->error != Error_noError) {
+		LOG_ERROR(reader->error);
+		ttLibC_ByteReader_close(&reader);
+		return 0;
+	}
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 	ttLibC_ByteReader_close(&reader);
 	return height;
 }

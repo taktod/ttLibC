@@ -28,6 +28,12 @@ static const uint32_t POLYNOMINAL = 0x04C11DB7L;
  */
 ttLibC_Crc32 *ttLibC_Crc32_make(uint32_t initial_data) {
 	ttLibC_Crc32 *crc32 = ttLibC_malloc(sizeof(ttLibC_Crc32));
+<<<<<<< HEAD
+=======
+	if(crc32 == NULL) {
+		return NULL;
+	}
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 	if(crc_table[1] == 0) {
 		// not initialize.
 		uint64_t crc = 0;
@@ -49,6 +55,12 @@ ttLibC_Crc32 *ttLibC_Crc32_make(uint32_t initial_data) {
  * @param byte  update byte value.
  */
 void ttLibC_Crc32_update(ttLibC_Crc32 *crc32, uint8_t byte) {
+<<<<<<< HEAD
+=======
+	if(crc32 == NULL) {
+		return;
+	}
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 	crc32->crc = (crc32->crc << 8) ^ crc_table[(int)(((crc32->crc >> 24) ^ byte) & 0xFF)];
 }
 
@@ -57,6 +69,12 @@ void ttLibC_Crc32_update(ttLibC_Crc32 *crc32, uint8_t byte) {
  * @param crc32
  */
 uint32_t ttLibC_Crc32_getValue(ttLibC_Crc32 *crc32) {
+<<<<<<< HEAD
+=======
+	if(crc32 == NULL) {
+		return 0;
+	}
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 	return crc32->crc & 0xFFFFFFFFL;
 }
 

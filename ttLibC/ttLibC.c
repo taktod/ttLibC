@@ -7,9 +7,38 @@
  * @author taktod
  * @date   2015/07/20
  */
+
+#include "ttLibC_common.h"
+#include "log.h"
+
 static const char *const errors[] = {
 		"unknown"
 };
+
+static const char *const errorMessage[] = {
+		"no error",
+		"failed to memory allocate.",
+		"need more memory.",
+		"native library error.",
+		"require more data.",
+		"invalid operation."
+};
+
+static const char *const errorTarget[] = {
+		"",
+		"    at ContainerReader",
+		"    at ContainerWriter",
+		"    at Decoder",
+		"    at Enoder",
+		"    at VideoFrame",
+		"    at AudioFrame",
+		"    at NetClient",
+		"    at NetServer",
+		"    at Tetty",
+		"    at Resampler",
+		"    at Util",
+};
+
 static const char *version = "ttLibC"
 #if defined(__ENABLE_GPL__)
 		" GPLv3 version"
@@ -21,6 +50,51 @@ static const char *version = "ttLibC"
 #	endif
 #endif
 ;
+
+Error_e ttLibC_updateError(Error_Target_e target, Error_e error) {
+	if(error == Error_noError) {
+		return error;
+	}
+	if((error & 0xF0000000) == 0) {
+		return (target << 7) | error;
+	}
+	else if((error & 0x0F000000) == 0) {
+		return (target << 6) | error;
+	}
+	else if((error & 0x00F00000) == 0) {
+		return (target << 5) | error;
+	}
+	else {
+		return error;
+	}
+}
+
+void ttLibC_printLastError(Error_e error, bool is_errorMessage, const char *func, uint32_t line) {
+	if((error & 0x000FFFFF) == Error_noError) {
+		return;
+	}
+	FILE *target = stdout;
+	if(is_errorMessage) {
+		target = stderr;
+	}
+	fprintf(target, "[error]%s(%d) %s\n", func, line, errorMessage[(error & 0x000FFFFF)]);
+	if((error & 0xF0000000) != 0x00) {
+		fprintf(target, "%s\n", errorTarget[((error >> 28) & 0x0F)]);
+	}
+	else {
+		return;
+	}
+	if((error & 0x0F000000) != 0x00) {
+		fprintf(target, "%s\n", errorTarget[((error >> 24) & 0x0F)]);
+	}
+	else {
+		return;
+	}
+	if((error & 0x00F00000) != 0x00) {
+		fprintf(target, "%s\n", errorTarget[((error >> 20) & 0x0F)]);
+	}
+	return;
+}
 
 const char *ttLibC_getLastError(int error_no) {
 	int error_num = sizeof(errors) / sizeof(errors[0]) - 1;

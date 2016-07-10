@@ -51,6 +51,35 @@ void *ttLibC_Allocator_malloc(size_t size, const char *file_name, int line, cons
 }
 
 /*
+<<<<<<< HEAD
+=======
+ * calloc with information.
+ * @param n         allocator object num
+ * @param size      allocator unit size
+ * @param file_name caller file name
+ * @param line      caller line number
+ * @param func_name caller func name
+ * @return memory pointer
+ */
+void *ttLibC_Allocator_calloc(size_t n, size_t size, const char *file_name, int line, const char *func_name) {
+	int ret;
+	void *ptr = calloc(n, size);
+#if __DEBUG_FLAG__ == 1
+	if(ptr) {
+		if(ttLibC_Allocator_Table != NULL) {
+			ttLibC_Allocator_Info *info = malloc(sizeof(ttLibC_Allocator_Info));
+			info->alloc_size = n * size;
+			sprintf(info->alloc_info, "%s(%d) %s sz:%lu %x", file_name, line, func_name, size, (int)ptr);
+			khiter_t it = kh_put(ttLibC_Allocator, ttLibC_Allocator_Table, (uint64_t)ptr, &ret);
+			kh_value(ttLibC_Allocator_Table, it) = info;
+		}
+	}
+#endif
+	return ptr;
+}
+
+/*
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
  * free with information
  * @param ptr memory pointer
  */

@@ -95,6 +95,13 @@ uint32_t ttLibC_Vp9_getWidth(ttLibC_Vp9 *prev_frame, uint8_t *data, size_t data_
 	 * 16bit height - 1
 	 */
 	ttLibC_ByteReader *reader = ttLibC_ByteReader_make(data, data_size, ByteUtilType_default);
+<<<<<<< HEAD
+=======
+	if(reader == NULL) {
+		ERR_PRINT("failed to make byteReader.");
+		return 0;
+	}
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 	ttLibC_ByteReader_bit(reader, 2);
 	ttLibC_ByteReader_bit(reader, 1);
 	ttLibC_ByteReader_bit(reader, 1);
@@ -129,6 +136,14 @@ uint32_t ttLibC_Vp9_getWidth(ttLibC_Vp9 *prev_frame, uint8_t *data, size_t data_
 	ttLibC_ByteReader_bit(reader, 1);
 	uint32_t width_minus_1  = ttLibC_ByteReader_bit(reader, 16);
 	uint32_t height_minus_1 = ttLibC_ByteReader_bit(reader, 16);
+<<<<<<< HEAD
+=======
+	if(reader->error != Error_noError) {
+		LOG_ERROR(reader->error);
+		ttLibC_ByteReader_close(&reader);
+		return 0;
+	}
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 	ttLibC_ByteReader_close(&reader);
 	return width_minus_1 + 1;
 }
@@ -142,6 +157,13 @@ uint32_t ttLibC_Vp9_getWidth(ttLibC_Vp9 *prev_frame, uint8_t *data, size_t data_
  */
 uint32_t ttLibC_Vp9_getHeight(ttLibC_Vp9 *prev_frame, uint8_t *data, size_t data_size) {
 	ttLibC_ByteReader *reader = ttLibC_ByteReader_make(data, data_size, ByteUtilType_default);
+<<<<<<< HEAD
+=======
+	if(reader == NULL) {
+		ERR_PRINT("failed to make byteReader.");
+		return 0;
+	}
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 	ttLibC_ByteReader_bit(reader, 2);
 	ttLibC_ByteReader_bit(reader, 1);
 	ttLibC_ByteReader_bit(reader, 1);
@@ -176,6 +198,14 @@ uint32_t ttLibC_Vp9_getHeight(ttLibC_Vp9 *prev_frame, uint8_t *data, size_t data
 	ttLibC_ByteReader_bit(reader, 1);
 	uint32_t width_minus_1  = ttLibC_ByteReader_bit(reader, 16);
 	uint32_t height_minus_1 = ttLibC_ByteReader_bit(reader, 16);
+<<<<<<< HEAD
+=======
+	if(reader->error != Error_noError) {
+		LOG_ERROR(reader->error);
+		ttLibC_ByteReader_close(&reader);
+		return 0;
+	}
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 	ttLibC_ByteReader_close(&reader);
 	return height_minus_1 + 1;
 }

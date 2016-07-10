@@ -71,7 +71,11 @@ ttLibC_Opus *ttLibC_Opus_make(
  * @param data_size  data size
  * @param pts        pts for opus frame.
  * @param timebase   timebase for opus frame.
+<<<<<<< HEAD
  */
+=======
+ * /
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 ttLibC_Opus *ttLibC_Opus_makeFrame(
 		ttLibC_Opus *prev_frame,
 		void *data,
@@ -80,6 +84,25 @@ ttLibC_Opus *ttLibC_Opus_makeFrame(
 		uint32_t timebase);
 
 /**
+<<<<<<< HEAD
+=======
+ * make opus frame from byte data.
+ * @param prev_frame reuse opus frame.
+ * @param data       opus binary data
+ * @param data_size  data size
+ * @param pts        pts for opus frame.
+ * @param timebase   timebase for opus frame.
+ */
+ttLibC_Opus *ttLibC_Opus_getFrame(
+		ttLibC_Opus *prev_frame,
+		void *data,
+		size_t data_size,
+		bool non_copy_mode,
+		uint64_t pts,
+		uint32_t timebase);
+
+/**
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
  * close frame
  * @param frame
  */

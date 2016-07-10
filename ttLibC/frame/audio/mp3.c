@@ -195,11 +195,28 @@ static int sampleRateTableV1[]  = {44100, 48000, 32000};
 static int sampleRateTableV2[]  = {22050, 24000, 16000};
 static int sampleRateTableV25[] = {11025, 12000,  8000};
 
+<<<<<<< HEAD
 static ttLibC_Mp3 *Mp3_makeFrame(ttLibC_Mp3 *prev_frame, void *data, size_t data_size, uint64_t pts, uint32_t timebase) {
+=======
+static ttLibC_Mp3 *Mp3_makeFrame(
+		ttLibC_Mp3 *prev_frame,
+		void *data,
+		size_t data_size,
+		bool non_copy_mode,
+		uint64_t pts,
+		uint32_t timebase) {
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 	if(data_size < 4) {
 		return NULL;
 	}
 	ttLibC_ByteReader *reader = ttLibC_ByteReader_make(data, data_size, ByteUtilType_default);
+<<<<<<< HEAD
+=======
+	if(reader == NULL) {
+		ERR_PRINT("failed to allocate byteReader.");
+		return NULL;
+	}
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 	if(ttLibC_ByteReader_bit(reader, 11) != 0x07FF) {
 		ERR_PRINT("syncbit is invalid.");
 		ttLibC_ByteReader_close(&reader);
@@ -217,6 +234,14 @@ static ttLibC_Mp3 *Mp3_makeFrame(ttLibC_Mp3 *prev_frame, void *data, size_t data
 	ttLibC_ByteReader_bit(reader, 1);
 	ttLibC_ByteReader_bit(reader, 1);
 	ttLibC_ByteReader_bit(reader, 2);
+<<<<<<< HEAD
+=======
+	if(reader->error != Error_noError) {
+		LOG_ERROR(reader->error);
+		ttLibC_ByteReader_close(&reader);
+		return 0;
+	}
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 	ttLibC_ByteReader_close(&reader);
 
 	uint32_t bitrate = 0;
@@ -338,7 +363,11 @@ static ttLibC_Mp3 *Mp3_makeFrame(ttLibC_Mp3 *prev_frame, void *data, size_t data
 			channel_num,
 			data,
 			frame_size,
+<<<<<<< HEAD
 			true,
+=======
+			non_copy_mode,
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 			pts,
 			timebase);
 	if(mp3 == NULL) {
@@ -347,12 +376,29 @@ static ttLibC_Mp3 *Mp3_makeFrame(ttLibC_Mp3 *prev_frame, void *data, size_t data
 	return (ttLibC_Mp3 *)mp3;
 }
 
+<<<<<<< HEAD
 static ttLibC_Mp3 *Mp3_makeId3Frame(ttLibC_Mp3 *prev_frame, void *data, size_t data_size, uint64_t pts, uint32_t timebase) {
+=======
+static ttLibC_Mp3 *Mp3_makeId3Frame(
+		ttLibC_Mp3 *prev_frame,
+		void *data,
+		size_t data_size,
+		bool non_copy_mode,
+		uint64_t pts,
+		uint32_t timebase) {
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 	if(data_size < 10) {
 		return NULL;
 	}
 	// pts maybe 0.
 	ttLibC_ByteReader *reader = ttLibC_ByteReader_make(data, data_size, ByteUtilType_default);
+<<<<<<< HEAD
+=======
+	if(reader == NULL) {
+		ERR_PRINT("failed to make byteReader object.");
+		return NULL;
+	}
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 	/*
 	 * recipe
 	 * 24bit ID3
@@ -386,7 +432,16 @@ static ttLibC_Mp3 *Mp3_makeId3Frame(ttLibC_Mp3 *prev_frame, void *data, size_t d
 	size = (size << 7) | ttLibC_ByteReader_bit(reader, 7);
 	ttLibC_ByteReader_bit(reader, 1);
 	size = (size << 7) | ttLibC_ByteReader_bit(reader, 7);
+<<<<<<< HEAD
 	size += 10; // これがフレームサイズ
+=======
+	size += 10; // this is frame size.
+	if(reader->error != Error_noError) {
+		LOG_ERROR(reader->error);
+		ttLibC_ByteReader_close(&reader);
+		return NULL;
+	}
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 	ttLibC_ByteReader_close(&reader);
 	ttLibC_Mp3_ *mp3 = (ttLibC_Mp3_ *)ttLibC_Mp3_make(
 			prev_frame,
@@ -396,7 +451,11 @@ static ttLibC_Mp3 *Mp3_makeId3Frame(ttLibC_Mp3 *prev_frame, void *data, size_t d
 			0,
 			data,
 			size,
+<<<<<<< HEAD
 			true,
+=======
+			non_copy_mode,
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 			0,
 			44100);
 	if(mp3 == NULL) {
@@ -405,12 +464,23 @@ static ttLibC_Mp3 *Mp3_makeId3Frame(ttLibC_Mp3 *prev_frame, void *data, size_t d
 	return (ttLibC_Mp3 *)mp3;
 }
 
+<<<<<<< HEAD
 static ttLibC_Mp3 *Mp3_makeTagFrame(ttLibC_Mp3 *prev_frame, void *data, size_t data_size, uint64_t pts, uint32_t timebase) {
+=======
+static ttLibC_Mp3 *Mp3_makeTagFrame(
+		ttLibC_Mp3 *prev_frame,
+		void *data,
+		size_t data_size,
+		bool non_copy_mode,
+		uint64_t pts,
+		uint32_t timebase) {
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 	return NULL;
 }
 
 /*
  * make mp3 frame from byte data.
+<<<<<<< HEAD
  * @param prev_frame reuse mp3 frame.
  * @param data       mp3 binary data
  * @param data_size  data size
@@ -427,6 +497,49 @@ ttLibC_Mp3 *ttLibC_Mp3_getFrame(ttLibC_Mp3 *prev_frame, void *data, size_t data_
 		return Mp3_makeId3Frame(prev_frame, data, data_size, pts, timebase);
 	case Mp3Type_tag:
 		return Mp3_makeTagFrame(prev_frame, data, data_size, pts, timebase);
+=======
+ * @param prev_frame    reuse mp3 frame.
+ * @param data          mp3 binary data
+ * @param data_size     data size
+ * @param non_copy_mode true:hold the data pointer. false:data will copy.
+ * @param pts           pts for mp3 frame.
+ * @param timebase      timebase for mp3 frame.
+ * @return mp3 object.
+ */
+ttLibC_Mp3 *ttLibC_Mp3_getFrame(
+		ttLibC_Mp3 *prev_frame,
+		void *data,
+		size_t data_size,
+		bool non_copy_mode,
+		uint64_t pts,
+		uint32_t timebase) {
+	ttLibC_Mp3_Type type = ttLibC_Mp3_getMp3Type(data, data_size);
+	switch(type) {
+	case Mp3Type_frame:
+		return Mp3_makeFrame(
+				prev_frame,
+				data,
+				data_size,
+				non_copy_mode,
+				pts,
+				timebase);
+	case Mp3Type_id3:
+		return Mp3_makeId3Frame(
+				prev_frame,
+				data,
+				data_size,
+				non_copy_mode,
+				pts,
+				timebase);
+	case Mp3Type_tag:
+		return Mp3_makeTagFrame(
+				prev_frame,
+				data,
+				data_size,
+				non_copy_mode,
+				pts,
+				timebase);
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 	default:
 		// unknown mp3 frame. can be here, in the case of too short data. less than 1byte.
 		return NULL;

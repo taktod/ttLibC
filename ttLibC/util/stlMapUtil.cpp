@@ -28,6 +28,13 @@ static ttLibC_StlMap_ *StlMap_make() {
 		return NULL;
 	}
 	map->map = new std::map<void *, void *>();
+<<<<<<< HEAD
+=======
+	if(map->map == NULL) {
+		ttLibC_free(map);
+		return NULL;
+	}
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 	map->inherit_super.size = 0;
 	return map;
 }

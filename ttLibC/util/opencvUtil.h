@@ -17,6 +17,7 @@ extern "C" {
 #endif
 
 #include "../frame/video/bgr.h"
+#include "../ttLibC.h"
 
 /**
  * significant keychar value.
@@ -31,6 +32,7 @@ typedef enum ttLibC_Keychar {
 typedef struct ttLibC_Util_OpencvUtil_CvWindow {
 	/** name for window */
 	char *name;
+	Error_e error;
 } ttLibC_Util_OpencvUtil_CvWindow;
 
 typedef ttLibC_Util_OpencvUtil_CvWindow ttLibC_CvWindow;
@@ -74,6 +76,7 @@ typedef struct ttLibC_Util_OpencvUtil_CvCapture {
 	uint32_t width;
 	/** capture height */
 	uint32_t height;
+	Error_e error;
 } ttLibC_Util_OpencvUtil_CvCapture;
 
 typedef ttLibC_Util_OpencvUtil_CvCapture ttLibC_CvCapture;

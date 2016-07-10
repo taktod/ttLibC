@@ -218,6 +218,18 @@ ttLibC_Aac *ttLibC_Aac_getFrame(
 	uint32_t frame_size = ttLibC_ByteReader_bit(reader, 13);
 	ttLibC_ByteReader_bit(reader, 11);
 	ttLibC_ByteReader_bit(reader, 2);
+<<<<<<< HEAD
+=======
+	if(reader == NULL) {
+		ERR_PRINT("failed to make byteReader.");
+		return NULL;
+	}
+	if(reader->error != Error_noError) {
+		LOG_ERROR(reader->error);
+		ttLibC_ByteReader_close(&reader);
+		return NULL;
+	}
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 	ttLibC_ByteReader_close(&reader);
 	// this frame_size includes the adts header.
 	return ttLibC_Aac_make(
@@ -258,15 +270,35 @@ size_t ttLibC_Aac_readAdtsHeader(
 	if(object_type == 31) {
 		ERR_PRINT("adts support only profile:main, low, ssr, and ltp.");
 		object_type = ttLibC_ByteReader_bit(reader, 6);
+<<<<<<< HEAD
+=======
+		ttLibC_ByteReader_close(&reader);
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 		return 0;
 	}
 	uint32_t frequency_index = ttLibC_ByteReader_bit(reader, 4);
 	if(frequency_index == 15) {
 		ERR_PRINT("not tested yet. now return error.");
 		uint32_t frequency = ttLibC_ByteReader_bit(reader, 24);
+<<<<<<< HEAD
 		return 0;
 	}
 	uint32_t channel_conf = ttLibC_ByteReader_bit(reader, 4);
+=======
+		ttLibC_ByteReader_close(&reader);
+		return 0;
+	}
+	uint32_t channel_conf = ttLibC_ByteReader_bit(reader, 4);
+	if(reader == NULL) {
+		ERR_PRINT("failed to allocate byteReader.");
+		return NULL;
+	}
+	if(reader->error != Error_noError) {
+		LOG_ERROR(reader->error);
+		ttLibC_ByteReader_close(&reader);
+		return NULL;
+	}
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 	ttLibC_ByteReader_close(&reader);
 	-- object_type; // to make adts, need to decrement.
 	size_t aac_size = target_aac->inherit_super.inherit_super.buffer_size + 7;
@@ -291,6 +323,12 @@ size_t ttLibC_Aac_readAdtsHeader(
 uint32_t ttLibC_Aac_getConfigCrc32(ttLibC_Aac *aac) {
 	ttLibC_Aac_ *aac_ = (ttLibC_Aac_ *)aac;
 	ttLibC_Crc32 *crc32 = ttLibC_Crc32_make(0);
+<<<<<<< HEAD
+=======
+	if(crc32 == NULL) {
+		return 0;
+	}
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 	uint8_t *buf;
 	switch(aac->type) {
 	case AacType_raw:
@@ -311,6 +349,14 @@ uint32_t ttLibC_Aac_getConfigCrc32(ttLibC_Aac *aac) {
 		break;
 	}
 	uint32_t value = ttLibC_Crc32_getValue(crc32);
+<<<<<<< HEAD
+=======
+	if(crc32->error != Error_noError) {
+		LOG_ERROR(crc32->error);
+		ttLibC_Crc32_close(&crc32);
+		return 0;
+	}
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 	ttLibC_Crc32_close(&crc32);
 	return value;
 }
@@ -335,6 +381,13 @@ size_t ttLibC_Aac_readDsiInfo(
 			// however, need to check the length.
 			buf = (uint8_t *)(&aac_->dsi_info);
 			ttLibC_ByteReader *reader = ttLibC_ByteReader_make(buf, 8, ByteUtilType_default);
+<<<<<<< HEAD
+=======
+			if(reader == NULL) {
+				ERR_PRINT("failed to allocate byteReader");
+				return 0;
+			}
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 			uint32_t need_bit = 5;
 			if(ttLibC_ByteReader_bit(reader, 5) == 31) {
 				ttLibC_ByteReader_bit(reader, 6);
@@ -352,6 +405,14 @@ size_t ttLibC_Aac_readDsiInfo(
 			if(round_up) {
 				++ size;
 			}
+<<<<<<< HEAD
+=======
+			if(reader->error != Error_noError) {
+				LOG_ERROR(reader->error);
+				ttLibC_ByteReader_close(&reader);
+				return 0;
+			}
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 			ttLibC_ByteReader_close(&reader);
 			// copy the data.
 			uint8_t *dat = data;
@@ -367,10 +428,25 @@ size_t ttLibC_Aac_readDsiInfo(
 			buf = aac->inherit_super.inherit_super.data;
 			buf += 2;
 			ttLibC_ByteReader *reader = ttLibC_ByteReader_make(buf, 2, ByteUtilType_default);
+<<<<<<< HEAD
+=======
+			if(reader == NULL) {
+				ERR_PRINT("failed to make byteReader");
+				return 0;
+			}
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 			uint32_t object_type = ttLibC_ByteReader_bit(reader, 2) + 1;
 			uint32_t frequency_index = ttLibC_ByteReader_bit(reader, 4);
 			ttLibC_ByteReader_bit(reader, 1);
 			uint32_t channel_conf = ttLibC_ByteReader_bit(reader, 3);
+<<<<<<< HEAD
+=======
+			if(reader->error != Error_noError) {
+				LOG_ERROR(reader->error);
+				ttLibC_ByteReader_close(&reader);
+				return 0;
+			}
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 			// ready to go.
 			ttLibC_ByteReader_close(&reader);
 			uint8_t *dat = data;
@@ -413,6 +489,13 @@ size_t ttLibC_Aac_getDsiInfo(
 		size_t data_size) {
 	memset(data, 0, data_size);
 	ttLibC_ByteConnector *connector = ttLibC_ByteConnector_make(data, data_size, ByteUtilType_default);
+<<<<<<< HEAD
+=======
+	if(connector == NULL) {
+		ERR_PRINT("failed to make byteConnector.");
+		return 0;
+	}
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 	// object_type
 	if((int)(object_type) > 31) {
 		ttLibC_ByteConnector_bit(connector, 31, 5);
@@ -442,6 +525,14 @@ size_t ttLibC_Aac_getDsiInfo(
 	// channel_configuration
 	ttLibC_ByteConnector_bit(connector, channel_num, 4);
 	size_t write_size = connector->write_size;
+<<<<<<< HEAD
+=======
+	if(connector->error != Error_noError) {
+		LOG_ERROR(connector->error);
+		ttLibC_ByteConnector_close(&connector);
+		return 0;
+	}
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 	ttLibC_ByteConnector_close(&connector);
 	return write_size;
 }

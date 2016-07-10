@@ -6,6 +6,11 @@
  *
  * @author taktod
  * @date   2015/07/26
+<<<<<<< HEAD
+=======
+ *
+ * @note Is speexdsp thread safe?
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
  */
 
 #ifdef __ENABLE_SPEEXDSP__
@@ -13,6 +18,10 @@
 #include "speexdspResampler.h"
 #include "../log.h"
 #include "../allocator.h"
+<<<<<<< HEAD
+=======
+#include "../ttLibC_common.h"
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 #include <speex/speex_resampler.h>
 #include <stdlib.h>
 #include <string.h>
@@ -75,6 +84,10 @@ ttLibC_PcmS16 *ttLibC_SpeexdspResampler_resample(ttLibC_SpeexdspResampler *resam
 	switch(src_pcms16->type) {
 	case PcmS16Type_bigEndian:
 	case PcmS16Type_bigEndian_planar:
+<<<<<<< HEAD
+=======
+		resampler_->inherit_super.error = ttLibC_updateError(Target_On_Resampler, Error_InvalidOperation);
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 		return NULL;
 	default:
 		return NULL;
@@ -106,6 +119,13 @@ ttLibC_PcmS16 *ttLibC_SpeexdspResampler_resample(ttLibC_SpeexdspResampler *resam
 	}
 	if(data == NULL) {
 		data = ttLibC_malloc(data_size);
+<<<<<<< HEAD
+=======
+		if(data == NULL) {
+			resampler_->inherit_super.error = ttLibC_updateError(Target_On_Resampler, Error_MemoryAllocate);
+			return NULL;
+		}
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 		alloc_flag = true;
 	}
 	int res;
@@ -128,6 +148,10 @@ ttLibC_PcmS16 *ttLibC_SpeexdspResampler_resample(ttLibC_SpeexdspResampler *resam
 		if(alloc_flag) {
 			ttLibC_free(data);
 		}
+<<<<<<< HEAD
+=======
+		resampler_->inherit_super.error = ttLibC_updateError(Target_On_Resampler, Error_LibraryError);
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 		return NULL;
 	}
 	uint64_t pts = src_pcms16->inherit_super.inherit_super.pts * resampler_->inherit_super.output_sample_rate / resampler_->inherit_super.input_sample_rate;
@@ -170,6 +194,10 @@ ttLibC_PcmS16 *ttLibC_SpeexdspResampler_resample(ttLibC_SpeexdspResampler *resam
 		if(alloc_flag) {
 			ttLibC_free(data);
 		}
+<<<<<<< HEAD
+=======
+		resampler_->inherit_super.error = ttLibC_updateError(Target_On_Resampler, Error_MemoryAllocate);
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 		return NULL;
 	}
 	pcms16->inherit_super.inherit_super.is_non_copy = false;

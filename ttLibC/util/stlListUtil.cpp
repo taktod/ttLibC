@@ -28,6 +28,13 @@ static ttLibC_StlList_ *StlList_make() {
 		return NULL;
 	}
 	list->list = new std::list<void *>();
+<<<<<<< HEAD
+=======
+	if(list->list == NULL) {
+		ttLibC_free(list);
+		return NULL;
+	}
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 	list->inherit_super.size = 0;
 	return list;
 }

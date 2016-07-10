@@ -104,6 +104,7 @@ ttLibC_Speex *ttLibC_Speex_make(
 
 /*
  * make speex frame from byte data.
+<<<<<<< HEAD
  * @param prev_frame reuse speex frame.
  * @param data       speex binary data.
  * @param data_size  data size
@@ -115,6 +116,21 @@ ttLibC_Speex *ttLibC_Speex_makeFrame(
 		ttLibC_Speex *prev_frame,
 		void *data,
 		size_t data_size,
+=======
+ * @param prev_frame    reuse speex frame.
+ * @param data          speex binary data.
+ * @param data_size     data size
+ * @param non_copy_mode true:hold the data pointer. false:data will copy.
+ * @param pts           pts for speex frame.
+ * @param timebase      timebase for speex frame.
+ * @return speex object.
+ */
+ttLibC_Speex *ttLibC_Speex_getFrame(
+		ttLibC_Speex *prev_frame,
+		void *data,
+		size_t data_size,
+		bool non_copy_mode,
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 		uint64_t pts,
 		uint32_t timebase) {
 	// TODO make this.

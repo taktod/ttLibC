@@ -19,6 +19,7 @@ extern "C" {
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "../ttLibC.h"
 #include "../log.h"
 
 /**
@@ -30,13 +31,24 @@ extern "C" {
 void ttLibC_HexUtil_dump(void *ptr, size_t length, bool separator_flag);
 
 /**
+ * @deprecated
  * make void* buffer according to hex string
- * @param target	hex string
- * @param ptr		data to store
- * @param length	size of ptr
- * @return	size of filled data
+ * @param target hex string
+ * @param ptr    data to store
+ * @param length size of ptr
+ * @return size of filled data
  */
 uint32_t ttLibC_HexUtil_makeBuffer(const char *target, void *ptr, size_t length);
+
+/**
+ * make void* buffer according to hex string
+ * @param target       hex string
+ * @param ptr          data to store
+ * @param length       size of ptr
+ * @param written_size size of written
+ * @return true:finish to make buffer. false:need more buffer for ptr.
+ */
+Error_e ttLibC_HexUtil_makeBuffer2(const char *target, void *ptr, size_t length, uint64_t *written_size);
 
 /**
  * dump memory data. only for debug compile

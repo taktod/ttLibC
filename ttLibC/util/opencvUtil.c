@@ -15,6 +15,10 @@
 #include <opencv/highgui.h>
 #include "../log.h"
 #include "../allocator.h"
+<<<<<<< HEAD
+=======
+#include "../ttLibC_common.h"
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 
 #ifdef __APPLE__
 // for osx, mach_time is better than time.h.
@@ -44,9 +48,17 @@ ttLibC_CvWindow *ttLibC_CvWindow_make(const char *name) {
 	}
 	size_t len = strlen(name);
 	window->inherit_super.name = ttLibC_malloc(len + 1);
+<<<<<<< HEAD
+=======
+	if(window->inherit_super.name == NULL) {
+		ttLibC_free(window);
+		return NULL;
+	}
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 	sprintf(window->inherit_super.name, "%s", name);
 	cvNamedWindow(window->inherit_super.name, CV_WINDOW_NORMAL);
 	window->image = NULL;
+	window->inherit_super.error = Error_noError;
 	return (ttLibC_CvWindow* )window;
 }
 ttLibC_CvWindow *ttLibC_CvWindow_makeWindow(const char *name) {
@@ -75,8 +87,12 @@ void ttLibC_CvWindow_showBgr(ttLibC_CvWindow *window, ttLibC_Bgr *bgr) {
 	}
 	if(window_->image == NULL) {
 		window_->image = cvCreateImage(cvSize(bgr->inherit_super.width, bgr->inherit_super.height), 8, 3);
+		if(window_->image == NULL) {
+			window_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_LibraryError);
+			return;
+		}
 	}
-	uint8_t *image_data = (uint8_t *) window_->image->imageData;
+	uint8_t *image_data = (uint8_t *)window_->image->imageData;
 	uint8_t *src_data = bgr->inherit_super.inherit_super.data;
 	uint8_t *src_b_data;
 	uint8_t *src_g_data;
@@ -199,6 +215,7 @@ ttLibC_CvCapture *ttLibC_CvCapture_make(
 	capture->inherit_super.width      = width;
 	capture->inherit_super.height     = height;
 	capture->inherit_super.camera_num = camera_num;
+	capture->inherit_super.error      = Error_noError;
 	return (ttLibC_CvCapture *)capture;
 }
 
@@ -220,6 +237,10 @@ ttLibC_Bgr *ttLibC_CvCapture_queryFrame(ttLibC_CvCapture *capture, ttLibC_Bgr *p
 	}
 	ttLibC_CvCapture_ *capture_ = (ttLibC_CvCapture_*)capture;
 	IplImage *frame = cvQueryFrame(capture_->capture);
+	if(frame == NULL) {
+		capture_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_LibraryError);
+		return NULL;
+	}
 
 	uint32_t timebase = 1000;
 #ifdef __APPLE__

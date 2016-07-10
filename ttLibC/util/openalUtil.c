@@ -15,9 +15,16 @@
 #include "openalUtil.h"
 #include "../log.h"
 #include "../allocator.h"
+<<<<<<< HEAD
+=======
+#include "../ttLibC_common.h"
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 #include <time.h>
-
 #include <stdlib.h>
+<<<<<<< HEAD
+=======
+
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 #ifdef __ENABLE_APPLE__
 #	include <OpenAL/al.h>
 #	include <OpenAl/alc.h>
@@ -251,6 +258,11 @@ typedef struct ttLibC_Util_Openal_AlPlayer_ {
 	ALuint source;
 	uint32_t total_buffer_num;
 	ALuint buffers[16];
+<<<<<<< HEAD
+=======
+	double pts;
+	uint32_t timebase;
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 } ttLibC_Util_Openal_AlPlayer_;
 
 typedef ttLibC_Util_Openal_AlPlayer_ ttLibC_AlPlayer_;
@@ -277,6 +289,12 @@ ttLibC_AlPlayer *ttLibC_AlPlayer_make() {
 	alcMakeContextCurrent(player->context);
 	alGenSources(1, &player->source);
 	player->total_buffer_num = 4;
+<<<<<<< HEAD
+=======
+	player->pts = 0;
+	player->inherit_super.error = Error_noError;
+	player->timebase = 48000;
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 	for(int i = 0;i < player->total_buffer_num;++ i) {
 		player->buffers[i] = 0;
 	}
@@ -297,6 +315,10 @@ bool ttLibC_AlPlayer_queue(ttLibC_AlPlayer *player, ttLibC_PcmS16 *pcmS16) {
 	case PcmS16Type_littleEndian_planar:
 	default:
 		ERR_PRINT("non support pcm type.");
+<<<<<<< HEAD
+=======
+		player_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_InvalidOperation);
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 		return false;
 	case PcmS16Type_littleEndian:
 		break;
@@ -311,6 +333,10 @@ bool ttLibC_AlPlayer_queue(ttLibC_AlPlayer *player, ttLibC_PcmS16 *pcmS16) {
 		break;
 	default:
 		ERR_PRINT("only support monoral or stereo.");
+<<<<<<< HEAD
+=======
+		player_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_InvalidOperation);
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 		return false;
 	}
 	int num;
@@ -318,6 +344,16 @@ bool ttLibC_AlPlayer_queue(ttLibC_AlPlayer *player, ttLibC_PcmS16 *pcmS16) {
 	alGetSourcei(player_->source, AL_BUFFERS_PROCESSED, &num);
 	if(num != -1 && num != 0) {
 		alSourceUnqueueBuffers(player_->source, 1, &buffer);
+<<<<<<< HEAD
+=======
+		ALint frequency, channel, size, bits;
+		alGetBufferi(buffer, AL_FREQUENCY, &frequency);
+		alGetBufferi(buffer, AL_CHANNELS, &channel);
+		alGetBufferi(buffer, AL_SIZE, &size);
+		alGetBufferi(buffer, AL_BITS, &bits);
+		double val = 1.0 * size / (bits / 8) / frequency / channel;
+		player_->pts += val;
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 	}
 	else {
 		// check the space.
@@ -343,6 +379,7 @@ bool ttLibC_AlPlayer_queue(ttLibC_AlPlayer *player, ttLibC_PcmS16 *pcmS16) {
 		// try to start play.
 		alSourcePlay(player_->source);
 	}
+<<<<<<< HEAD
 	else {
 		float pos;
 		alGetSourcef(player_->source, AL_SEC_OFFSET, &pos);
@@ -351,6 +388,29 @@ bool ttLibC_AlPlayer_queue(ttLibC_AlPlayer *player, ttLibC_PcmS16 *pcmS16) {
 	return true;
 }
 
+=======
+	return true;
+}
+
+uint64_t ttLibC_AlPlayer_getPts(ttLibC_AlPlayer *player) {
+	ttLibC_AlPlayer_ *player_ = (ttLibC_AlPlayer_ *)player;
+	if(player_ == NULL) {
+		return 0;
+	}
+	float pos;
+	alGetSourcef(player_->source, AL_SEC_OFFSET, &pos);
+	return (uint64_t)((pos + player_->pts) * player_->timebase);
+}
+
+uint32_t ttLibC_AlPlayer_getTimebase(ttLibC_AlPlayer *player) {
+	ttLibC_AlPlayer_ *player_ = (ttLibC_AlPlayer_ *)player;
+	if(player_ == NULL) {
+		return 0;
+	}
+	return player_->timebase;
+}
+
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 void ttLibC_AlPlayer_close(ttLibC_AlPlayer **player) {
 	ttLibC_AlPlayer_ *target = (ttLibC_AlPlayer_ *)*player;
 	if(target == NULL) {
@@ -375,4 +435,8 @@ void ttLibC_AlPlayer_close(ttLibC_AlPlayer **player) {
 	ttLibC_free(target);
 	*player = NULL;
 }
+<<<<<<< HEAD
+=======
+
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 #endif /* __ENABLE_OPENAL__ */

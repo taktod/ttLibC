@@ -3,6 +3,7 @@ AUTOMAKE_OPTIONS=subdir-objects
 lib_LIBRARIES=libttLibC.a
 
 libttLibC_a_SOURCES= \
+<<<<<<< HEAD
 	container/flv/type/audioTag.c \
 	container/flv/type/headerTag.c \
 	container/flv/type/metaTag.c \
@@ -59,6 +60,8 @@ libttLibC_a_SOURCES= \
 	encoder/vtCompressSessionH264Encoder.c \
 	encoder/x264Encoder.c \
 	encoder/x265Encoder.c \
+=======
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 	frame/audio/aac.c \
 	frame/audio/adpcmImaWav.c \
 	frame/audio/audio.c \
@@ -85,6 +88,7 @@ libttLibC_a_SOURCES= \
 	frame/video/wmv2.c \
 	frame/video/yuv420.c \
 	frame/frame.c \
+<<<<<<< HEAD
 	net/client/rtmp/data/clientObject.c \
 	net/client/rtmp/header/rtmpHeader.c \
 	net/client/rtmp/message/acknowledgement.c \
@@ -118,16 +122,27 @@ libttLibC_a_SOURCES= \
 	resampler/speexdspResampler.c \
 	util/amfUtil.c \
 	util/audioUnitUtil.c \
+=======
+	resampler/audioResampler.c \
+	resampler/imageResampler.c \
+	resampler/speexdspResampler.c \
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 	util/beepUtil.c \
 	util/byteUtil.c \
 	util/crc32Util.c \
 	util/dynamicBufferUtil.c \
+<<<<<<< HEAD
 	util/flvFrameUtil.c \
 	util/forkUtil.c \
 	util/hexUtil.c \
 	util/httpUtil.c \
 	util/ioUtil.c \
 	util/linkedListUtil.c \
+=======
+	util/forkUtil.c \
+	util/hexUtil.c \
+	util/ioUtil.c \
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 	util/openalUtil.c \
 	util/opencvUtil.c \
 	util/stlListUtil.cpp \
@@ -135,5 +150,10 @@ libttLibC_a_SOURCES= \
 	allocator.c \
 	ttLibC.c
 
+<<<<<<< HEAD
 libttLibC_a_CFLAGS=$(OPENCV_CFLAGS) $(OPENAL_CFLAGS) $(MP3LAME_CFLAGS) $(FAAC_CFLAGS) $(OPENH264_CFLAGS) $(SPEEXDSP_CFLAGS) $(SPEEX_CFLAGS) $(OPUS_CFLAGS) $(LIBAVCODEC_CFLAGS) $(FAAD_CFLAGS) $(JPEG_CFLAGS) $(APPLE_CFLAGS) $(X264_CFLAGS) $(X265_CFLAGS) $(THEORA_CFLAGS) $(DAALAENC_CFLAGS) $(DAALADEC_CFLAGS) $(VORBISENC_CFLAGS) $(VORBISDEC_CFLAGS)
 libttLibC_a_CXXFLAGS=-std=c++0x $(OPENCV_CFLAGS) $(OPENAL_CFLAGS) $(MP3LAME_CFLAGS) $(FAAC_CFLAGS) $(OPENH264_CFLAGS) $(SPEEXDSP_CFLAGS) $(SPEEX_CFLAGS) $(OPUS_CFLAGS) $(LIBAVCODEC_CFLAGS) $(FAAD_CFLAGS) $(JPEG_CFLAGS) $(APPLE_CFLAGS) $(X264_CFLAGS) $(X265_CFLAGS) $(THEORA_CFLAGS) $(DAALAENC_CFLAGS) $(DAALADEC_CFLAGS) $(VORBISENC_CFLAGS) $(VORBISDEC_CFLAGS)
+=======
+libttLibC_a_CFLAGS=$(OPENCV_CFLAGS) $(OPENAL_CFLAGS) $(MP3LAME_CFLAGS) $(SPEEXDSP_CFLAGS)
+libttLibC_a_CXXFLAGS=-std=c++0x $(OPENCV_CFLAGS) $(OPENAL_CFLAGS) $(MP3LAME_CFLAGS) $(SPEEXDSP_CFLAGS)
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0

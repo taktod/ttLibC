@@ -18,6 +18,7 @@ extern "C" {
 #endif
 
 #include "../frame/audio/pcms16.h"
+#include "../ttLibC.h"
 
 /**
  * data for openal play device.
@@ -65,12 +66,16 @@ void ttLibC_AlDevice_close(ttLibC_AlDevice **device);
  * structure for openalPlayer.
  */
 typedef struct ttLibC_Util_Openal_AlPlayer {
+<<<<<<< HEAD
 	/** holding buffer num */
 	uint64_t pts;
 	/** target sample_rate */
 	uint32_t sample_rate;
 	/** target channel_num */
 	uint32_t channel_num;
+=======
+	Error_e error;
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 } ttLibC_Util_Openal_AlPlayer;
 
 typedef ttLibC_Util_Openal_AlPlayer ttLibC_AlPlayer;
@@ -89,6 +94,13 @@ ttLibC_AlPlayer *ttLibC_AlPlayer_make();
  */
 bool ttLibC_AlPlayer_queue(ttLibC_AlPlayer *player, ttLibC_PcmS16 *pcmS16);
 
+<<<<<<< HEAD
+=======
+uint64_t ttLibC_AlPlayer_getPts(ttLibC_AlPlayer *player);
+
+uint32_t ttLibC_AlPlayer_getTimebase(ttLibC_AlPlayer *player);
+
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 /**
  * close alPlayer.
  * @param player

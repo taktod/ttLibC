@@ -12,6 +12,10 @@
 #include "../allocator.h"
 #include <string.h>
 #include "../log.h"
+<<<<<<< HEAD
+=======
+#include "../ttLibC_common.h"
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 
 typedef struct {
 	ttLibC_DynamicBuffer inherit_super;
@@ -31,6 +35,10 @@ ttLibC_DynamicBuffer* ttLibC_DynamicBuffer_make() {
 	buffer->buffer = NULL;
 	buffer->inherit_super.buffer_size = 0;
 	buffer->inherit_super.target_size = 0;
+<<<<<<< HEAD
+=======
+	buffer->inherit_super.error = Error_noError;
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 	buffer->buffer_size = 0;
 	buffer->target_size = 0;
 	buffer->read_pos = 0;
@@ -50,6 +58,10 @@ bool ttLibC_DynamicBuffer_append(
 		buffer_->buffer = ttLibC_malloc(data_size);
 		if(buffer_->buffer == NULL) {
 			ERR_PRINT("failed to allocate memory for buffer.");
+<<<<<<< HEAD
+=======
+			buffer_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_MemoryAllocate);
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 			return false;
 		}
 		memcpy(buffer_->buffer, data, data_size);
@@ -75,6 +87,10 @@ bool ttLibC_DynamicBuffer_append(
 			uint8_t *new_buffer = ttLibC_malloc(target_size);
 			if(new_buffer == NULL) {
 				ERR_PRINT("failed to allocate memory for expand buffer.");
+<<<<<<< HEAD
+=======
+				buffer_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_MemoryAllocate);
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 				return false;
 			}
 			memcpy(new_buffer, buffer_->buffer, buffer_->target_size);
@@ -97,6 +113,10 @@ bool ttLibC_DynamicBuffer_markAsRead(ttLibC_DynamicBuffer *buffer, size_t read_s
 	}
 	if(buffer_->read_pos + read_size > buffer_->target_size) {
 		ERR_PRINT("read_size is bigger than target_size, overflowed.");
+<<<<<<< HEAD
+=======
+		buffer_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_InvalidOperation);
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 		return false;
 	}
 	buffer_->read_pos += read_size;
@@ -174,6 +194,10 @@ bool ttLibC_DynamicBuffer_alloc(
 		buffer_->buffer = ttLibC_malloc(size);
 		if(buffer_->buffer == NULL) {
 			ERR_PRINT("failed to allocate memory for buffer.");
+<<<<<<< HEAD
+=======
+			buffer_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_MemoryAllocate);
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 			return false;
 		}
 		buffer_->buffer_size = size;
@@ -194,6 +218,10 @@ bool ttLibC_DynamicBuffer_alloc(
 			uint8_t *new_buffer = ttLibC_malloc(size);
 			if(new_buffer == NULL) {
 				ERR_PRINT("failed to allocate memory for new size.");
+<<<<<<< HEAD
+=======
+				buffer_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_MemoryAllocate);
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 				return false;
 			}
 			// copy previous data.
@@ -220,10 +248,18 @@ bool ttLibC_DynamicBuffer_write(
 		return false;
 	}
 	if(buffer_->buffer == NULL) {
+<<<<<<< HEAD
+=======
+		buffer_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_MemoryAllocate);
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 		return false;
 	}
 	if(write_pos + data_size > buffer_->target_size) {
 		ERR_PRINT("data is overflowed.");
+<<<<<<< HEAD
+=======
+		buffer_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_MemoryShort);
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 		return false;
 	}
 	memcpy(buffer_->buffer + write_pos, data, data_size);

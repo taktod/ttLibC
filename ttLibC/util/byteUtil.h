@@ -19,6 +19,11 @@ extern "C" {
 #include <stdbool.h>
 #include <stdint.h>
 
+<<<<<<< HEAD
+=======
+#include "../ttLibC.h"
+
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 /**
  * work type for byteUtil
  */
@@ -40,6 +45,11 @@ typedef struct ttLibC_Util_ByteReader {
 	size_t read_size;
 	/** number for reading error */
 	bool error_number;
+<<<<<<< HEAD
+=======
+	/** error information */
+	Error_e error;
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 } ttLibC_Util_ByteReader;
 
 typedef ttLibC_Util_ByteReader ttLibC_ByteReader;
@@ -145,6 +155,11 @@ typedef struct ttLibC_Util_ByteConnector {
 	size_t write_size;
 	/** connecting error number */
 	bool error_number;
+<<<<<<< HEAD
+=======
+	/** error information */
+	Error_e error;
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 } ttLibC_Util_ByteConnector;
 
 typedef ttLibC_Util_ByteConnector ttLibC_ByteConnector;
@@ -198,6 +213,21 @@ bool ttLibC_ByteConnector_ebml(
 		uint64_t value);
 
 /**
+<<<<<<< HEAD
+=======
+ * write ebml data into ByteConnector
+ * @param connector
+ * @param value
+ * @param is_tag
+ * @return true:success false:error
+ */
+bool ttLibC_ByteConnector_ebml2(
+		ttLibC_ByteConnector *connector,
+		uint64_t value,
+		bool is_tag);
+
+/**
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
  * write string data into ByteConnector
  * @param connector
  * @param str

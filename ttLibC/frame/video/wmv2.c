@@ -57,6 +57,9 @@ void ttLibC_Wmv2_close(ttLibC_Wmv2 **frame) {
 	ttLibC_Video_close_((ttLibC_Video **)frame);
 }
 
+<<<<<<< HEAD
 
 
 
+=======
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0

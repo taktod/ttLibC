@@ -199,6 +199,45 @@ ttLibC_Opus *ttLibC_Opus_makeFrame(
 			timebase);
 }
 
+<<<<<<< HEAD
+=======
+/**
+ * make opus frame from byte data.
+ * @param prev_frame reuse opus frame.
+ * @param data       opus binary data
+ * @param data_size  data size
+ * @param pts        pts for opus frame.
+ * @param timebase   timebase for opus frame.
+ */
+ttLibC_Opus *ttLibC_Opus_getFrame(
+		ttLibC_Opus *prev_frame,
+		void *data,
+		size_t data_size,
+		bool non_copy_mode,
+		uint64_t pts,
+		uint32_t timebase) {
+	// header is not supported.
+	uint32_t channel_num = ttLibC_Opus_getChannelNum(data, data_size);
+	uint32_t sample_rate = ttLibC_Opus_getSampleRate(data, data_size);
+	uint32_t sample_num = ttLibC_Opus_getSampleNum(data, data_size);
+	if(channel_num == 0 || sample_rate == 0 || sample_num == 0) {
+		ERR_PRINT("failed to get opus frame information. corrupt.");
+		return NULL;
+	}
+	return ttLibC_Opus_make(prev_frame,
+			OpusType_frame,
+			sample_rate,
+			sample_num,
+			channel_num,
+			data,
+			data_size,
+			non_copy_mode,
+			pts,
+			timebase);
+}
+
+
+>>>>>>> 9bbbf00f57e1bb3b2a36a3faa606dbefb135e8a0
 /*
  * close frame
  * @param frame
