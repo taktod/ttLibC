@@ -18,11 +18,12 @@ extern "C" {
 #endif
 
 #include "../frame/audio/pcms16.h"
+#include "../ttLibC.h"
 
 /**
  * data for openal play device.
  */
-typedef struct {
+typedef struct ttLibC_Util_OpenalUtil_AlDevice {
 	/** holding buffer number. */
 	uint32_t buffer_num;
 } ttLibC_Util_OpenalUtil_AlDevice;
@@ -60,6 +61,39 @@ void ttLibC_AlDevice_proceed(ttLibC_AlDevice *device, int32_t milisec);
  * @param device.
  */
 void ttLibC_AlDevice_close(ttLibC_AlDevice **device);
+
+/**
+ * structure for openalPlayer.
+ */
+typedef struct ttLibC_Util_Openal_AlPlayer {
+	Error_e error;
+} ttLibC_Util_Openal_AlPlayer;
+
+typedef ttLibC_Util_Openal_AlPlayer ttLibC_AlPlayer;
+
+/**
+ * make alPlayer object.
+ * @return alPlayer object.
+ */
+ttLibC_AlPlayer *ttLibC_AlPlayer_make();
+
+/**
+ * add queue for alPlayer.
+ * @param player
+ * @param pcmS16
+ * @return true:accepted / false:need to retry later.
+ */
+bool ttLibC_AlPlayer_queue(ttLibC_AlPlayer *player, ttLibC_PcmS16 *pcmS16);
+
+uint64_t ttLibC_AlPlayer_getPts(ttLibC_AlPlayer *player);
+
+uint32_t ttLibC_AlPlayer_getTimebase(ttLibC_AlPlayer *player);
+
+/**
+ * close alPlayer.
+ * @param player
+ */
+void ttLibC_AlPlayer_close(ttLibC_AlPlayer **player);
 
 #ifdef __cplusplus
 } /* extern "C" */

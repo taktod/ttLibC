@@ -10,6 +10,7 @@
 
 #include "imageResampler.h"
 #include "../log.h"
+#include "../allocator.h"
 #include <stdlib.h>
 
 /*
@@ -31,7 +32,7 @@ ttLibC_Yuv420 *ttLibC_ImageResampler_makeYuv420FromBgr(
 	uint32_t wh = width * height;
 
 	size_t data_size = wh + (wh >> 1);
-	bool is_alloc_flg = false;
+	bool alloc_flag = false;
 	switch(type) {
 	case Yuv420Type_planar:
 	case Yuv420Type_semiPlanar:
@@ -54,7 +55,7 @@ ttLibC_Yuv420 *ttLibC_ImageResampler_makeYuv420FromBgr(
 			}
 			else {
 				// size is small for reuse.
-				free(yuv420->inherit_super.inherit_super.data);
+				ttLibC_free(yuv420->inherit_super.inherit_super.data);
 			}
 		}
 		if(data == NULL) {
@@ -64,8 +65,11 @@ ttLibC_Yuv420 *ttLibC_ImageResampler_makeYuv420FromBgr(
 		yuv420->inherit_super.inherit_super.is_non_copy = true;
 	}
 	if(data == NULL) {
-		data = malloc(data_size);
-		is_alloc_flg = true;
+		data = ttLibC_malloc(data_size);
+		if(data == NULL) {
+			return NULL;
+		}
+		alloc_flag = true;
 	}
 	// now start to convert.
 	uint8_t *y_data = NULL;
@@ -155,8 +159,8 @@ ttLibC_Yuv420 *ttLibC_ImageResampler_makeYuv420FromBgr(
 		break;
 	default:
 		ERR_PRINT("found unknown bgr type for src_frame:%d", src_frame->type);
-		if(is_alloc_flg) {
-			free(data);
+		if(alloc_flag) {
+			ttLibC_free(data);
 		}
 		return NULL;
 	}
@@ -240,8 +244,8 @@ ttLibC_Yuv420 *ttLibC_ImageResampler_makeYuv420FromBgr(
 	}
 	yuv420 = ttLibC_Yuv420_make(yuv420, type, width, height, data, data_size, y_data, y_stride, u_data, u_stride, v_data, v_stride, true, src_frame->inherit_super.inherit_super.pts, src_frame->inherit_super.inherit_super.timebase);
 	if(yuv420 == NULL) {
-		if(is_alloc_flg) {
-			free(data);
+		if(alloc_flag) {
+			ttLibC_free(data);
 		}
 		return NULL;
 	}
@@ -267,7 +271,7 @@ ttLibC_Bgr *ttLibC_ImageResampler_makeBgrFromYuv420(
 	uint32_t height = src_frame->inherit_super.height;
 	uint32_t wh = width * height;
 	size_t data_size = wh + (wh << 1);
-	bool is_alloc_flg = false;
+	bool alloc_flag = false;
 	switch(type) {
 	case BgrType_bgr:
 		break;
@@ -290,7 +294,7 @@ ttLibC_Bgr *ttLibC_ImageResampler_makeBgrFromYuv420(
 			}
 			else {
 				// size is too short.
-				free(bgr->inherit_super.inherit_super.data);
+				ttLibC_free(bgr->inherit_super.inherit_super.data);
 			}
 		}
 		if(data == NULL) {
@@ -300,8 +304,11 @@ ttLibC_Bgr *ttLibC_ImageResampler_makeBgrFromYuv420(
 		bgr->inherit_super.inherit_super.is_non_copy = true;
 	}
 	if(data == NULL) {
-		data = malloc(data_size);
-		is_alloc_flg = true;
+		data = ttLibC_malloc(data_size);
+		if(data == NULL) {
+			return NULL;
+		}
+		alloc_flag = true;
 	}
 	// now start to convert.
 	uint8_t *b_data = NULL;
@@ -312,6 +319,11 @@ ttLibC_Bgr *ttLibC_ImageResampler_makeBgrFromYuv420(
 	uint32_t width_stride = width + (width << 1);
 	switch(type) {
 	default:
+		if(alloc_flag) {
+			ttLibC_free(data);
+			return NULL;
+		}
+		break;
 	case BgrType_bgr:
 		b_data = data;
 		g_data = data + 1;
@@ -338,7 +350,6 @@ ttLibC_Bgr *ttLibC_ImageResampler_makeBgrFromYuv420(
 		break;
 	}
 	// yuv420 data
-	uint8_t *src_data = src_frame->inherit_super.inherit_super.data;
 	uint8_t *src_y_data = src_frame->y_data;
 	uint8_t *src_u_data = src_frame->u_data;
 	uint8_t *src_v_data = src_frame->v_data;
@@ -402,8 +413,8 @@ ttLibC_Bgr *ttLibC_ImageResampler_makeBgrFromYuv420(
 	}
 	bgr = ttLibC_Bgr_make(bgr, type, width, height, width_stride, data, data_size, true, src_frame->inherit_super.inherit_super.pts, src_frame->inherit_super.inherit_super.timebase);
 	if(bgr == NULL) {
-		if(is_alloc_flg) {
-			free(data);
+		if(alloc_flag) {
+			ttLibC_free(data);
 		}
 		return NULL;
 	}

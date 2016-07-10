@@ -12,6 +12,7 @@
 #include <math.h>
 #include "beepUtil.h"
 #include "../log.h"
+#include "../allocator.h"
 
 /*
  * make beep generator
@@ -25,7 +26,7 @@ ttLibC_BeepGenerator *ttLibC_BeepGenerator_make(
 		uint32_t target_Hz,
 		uint32_t sample_rate,
 		uint32_t channel_num) {
-	ttLibC_BeepGenerator *generator = (ttLibC_BeepGenerator *)malloc(sizeof(ttLibC_BeepGenerator));
+	ttLibC_BeepGenerator *generator = (ttLibC_BeepGenerator *)ttLibC_malloc(sizeof(ttLibC_BeepGenerator));
 	if(generator == NULL) {
 		ERR_PRINT("failed to allocate memory for beepGenerator.");
 		return NULL;
@@ -34,6 +35,7 @@ ttLibC_BeepGenerator *ttLibC_BeepGenerator_make(
 	generator->sample_rate = sample_rate;
 	generator->channel_num = channel_num;
 	generator->target_Hz   = target_Hz;
+	generator->amplitude   = 32767;
 	generator->pos = 0;
 	return generator;
 }
@@ -52,7 +54,7 @@ ttLibC_PcmS16 *ttLibC_BeepGenerator_makeBeepByMiliSec(
 		ERR_PRINT("generator is NULL");
 		return NULL;
 	}
-	uint32_t target_sample_num = mili_sec * generator->sample_rate / 1000;
+	uint32_t target_sample_num = (uint32_t)(1L * mili_sec * generator->sample_rate / 1000);
 	return ttLibC_BeepGenerator_makeBeepBySampleNum(generator, prev_frame, target_sample_num);
 }
 
@@ -73,7 +75,7 @@ ttLibC_PcmS16 *ttLibC_BeepGenerator_makeBeepBySampleNum(
 	ttLibC_PcmS16 *pcms16 = prev_frame;
 	size_t data_size = sample_num * generator->channel_num * 2;
 	void *data = NULL;
-	bool is_alloc_flg = false;
+	bool alloc_flag = false;
 	if(pcms16 != NULL) {
 		if(!pcms16->inherit_super.inherit_super.is_non_copy) {
 			if(pcms16->inherit_super.inherit_super.data_size >= data_size) {
@@ -81,7 +83,7 @@ ttLibC_PcmS16 *ttLibC_BeepGenerator_makeBeepBySampleNum(
 				data_size = pcms16->inherit_super.inherit_super.data_size;
 			}
 			else {
-				free(pcms16->inherit_super.inherit_super.data);
+				ttLibC_free(pcms16->inherit_super.inherit_super.data);
 			}
 		}
 		if(data == NULL) {
@@ -91,8 +93,12 @@ ttLibC_PcmS16 *ttLibC_BeepGenerator_makeBeepBySampleNum(
 		pcms16->inherit_super.inherit_super.is_non_copy = true;
 	}
 	if(data == NULL) {
-		data = malloc(data_size);
-		is_alloc_flg = true;
+		data = ttLibC_malloc(data_size);
+		if(data == NULL) {
+			ERR_PRINT("failed to allocate memory.");
+			return NULL;
+		}
+		alloc_flag = true;
 	}
 	// generator beep sound.
 	uint8_t *left_u_data = NULL;
@@ -145,8 +151,8 @@ ttLibC_PcmS16 *ttLibC_BeepGenerator_makeBeepBySampleNum(
 		break;
  	default:
 		ERR_PRINT("found unknown pcms16Type.%d", generator->type);
-		if(is_alloc_flg) {
-			free(data);
+		if(alloc_flag) {
+			ttLibC_free(data);
 		}
 		return NULL;
 	}
@@ -155,7 +161,7 @@ ttLibC_PcmS16 *ttLibC_BeepGenerator_makeBeepBySampleNum(
 	switch(generator->channel_num) {
 	case 1:
 		for(uint32_t i = 0;i < sample_num;++ i) {
-			beep = sin(generator->pos * 3.14159 * 2 * generator->target_Hz / generator->sample_rate) * 32767;
+			beep = sin(generator->pos * 3.14159 * 2 * generator->target_Hz / generator->sample_rate) * generator->amplitude;
 			++ generator->pos;
 			(*left_u_data) = ((beep >> 8) & 0xFF);
 			(*left_l_data) = (beep & 0xFF);
@@ -165,7 +171,7 @@ ttLibC_PcmS16 *ttLibC_BeepGenerator_makeBeepBySampleNum(
 		break;
 	case 2:
 		for(uint32_t i = 0;i < sample_num;++ i) {
-			beep = sin(generator->pos * 3.14159 * 2 * generator->target_Hz / generator->sample_rate) * 32767;
+			beep = sin(generator->pos * 3.14159 * 2 * generator->target_Hz / generator->sample_rate) * generator->amplitude;
 			++ generator->pos;
 			(*left_u_data)  = ((beep >> 8) & 0xFF);
 			(*left_l_data)  = (beep & 0xFF);
@@ -179,15 +185,49 @@ ttLibC_PcmS16 *ttLibC_BeepGenerator_makeBeepBySampleNum(
 		break;
 	default:
 		ERR_PRINT("channel = %d is undefined.", generator->channel_num);
-		if(is_alloc_flg) {
-			free(data);
+		if(alloc_flag) {
+			ttLibC_free(data);
 		}
 		return NULL;
 	}
-	pcms16 = ttLibC_PcmS16_make(pcms16, generator->type, generator->sample_rate, sample_num, generator->channel_num, data, data_size, true, pts, generator->sample_rate);
+	uint8_t *l_data = NULL;
+	uint32_t l_stride = 0;
+	uint8_t *r_data = NULL;
+	uint32_t r_stride = 0;
+	switch(generator->type) {
+	case PcmS16Type_bigEndian:
+	case PcmS16Type_littleEndian:
+		l_data = data;
+		l_stride = sample_num * 2 * generator->channel_num;
+		break;
+	case PcmS16Type_bigEndian_planar:
+	case PcmS16Type_littleEndian_planar:
+		l_data = data;
+		l_stride = sample_num * 2;
+		if(generator->channel_num == 2) {
+			r_data = data + l_stride;
+			r_stride = l_stride;
+		}
+		break;
+	}
+	pcms16 = ttLibC_PcmS16_make(
+			pcms16,
+			generator->type,
+			generator->sample_rate,
+			sample_num,
+			generator->channel_num,
+			data,
+			data_size,
+			l_data,
+			l_stride,
+			r_data,
+			r_stride,
+			true,
+			pts,
+			generator->sample_rate);
 	if(pcms16 == NULL) {
-		if(is_alloc_flg) {
-			free(data);
+		if(alloc_flag) {
+			ttLibC_free(data);
 		}
 		return NULL;
 	}
@@ -202,7 +242,7 @@ void ttLibC_BeepGenerator_close(ttLibC_BeepGenerator **generator) {
 	if(*generator == NULL) {
 		return;
 	}
-	free(*generator);
+	ttLibC_free(*generator);
 	*generator = NULL;
 }
 

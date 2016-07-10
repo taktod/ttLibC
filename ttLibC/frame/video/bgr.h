@@ -20,7 +20,7 @@ extern "C" {
 /**
  * bgr type.
  */
-typedef enum {
+typedef enum ttLibC_Bgr_Type {
 	/** 24bit bgr */
 	BgrType_bgr,
 	/** unknown bgr */
@@ -32,7 +32,7 @@ typedef enum {
 /**
  * bgr frame definition.
  */
-typedef struct {
+typedef struct ttLibC_Frame_Video_Bgr {
 	/** inherit data from ttLibC_Video */
 	ttLibC_Video inherit_super;
 	/** bgr type */

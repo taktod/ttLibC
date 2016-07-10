@@ -19,35 +19,47 @@ extern "C" {
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "../ttLibC.h"
 #include "../log.h"
 
 /**
  * dump memory data.
- * @param ptr			target data
- * @param length		data length
- * @param separator_flg	insert space among each byte
+ * @param ptr            target data
+ * @param length         data length
+ * @param separator_flag insert space among each byte
  */
-void ttLibC_HexUtil_dump(void *ptr, size_t length, bool separator_flg);
+void ttLibC_HexUtil_dump(void *ptr, size_t length, bool separator_flag);
 
 /**
+ * @deprecated
  * make void* buffer according to hex string
- * @param target	hex string
- * @param ptr		data to store
- * @param length	size of ptr
- * @return	size of filled data
+ * @param target hex string
+ * @param ptr    data to store
+ * @param length size of ptr
+ * @return size of filled data
  */
 uint32_t ttLibC_HexUtil_makeBuffer(const char *target, void *ptr, size_t length);
 
 /**
- * dump memory data. only for debug compile
- * @param ptr			target data
- * @param length		data length
- * @param separator_flg	insert space among each byte
+ * make void* buffer according to hex string
+ * @param target       hex string
+ * @param ptr          data to store
+ * @param length       size of ptr
+ * @param written_size size of written
+ * @return true:finish to make buffer. false:need more buffer for ptr.
  */
-#if __DEBUG_FLG__ == 1
-#	define	LOG_DUMP(ptr, length, separator_flg) ttLibC_HexUtil_dump(ptr, length, separator_flg)
+Error_e ttLibC_HexUtil_makeBuffer2(const char *target, void *ptr, size_t length, uint64_t *written_size);
+
+/**
+ * dump memory data. only for debug compile
+ * @param ptr            target data
+ * @param length         data length
+ * @param separator_flag insert space among each byte
+ */
+#if __DEBUG_FLAG__ == 1
+#	define	LOG_DUMP(ptr, length, separator_flag) ttLibC_HexUtil_dump(ptr, length, separator_flag)
 #else
-#	define	LOG_DUMP(ptr, length, separator_flg)
+#	define	LOG_DUMP(ptr, length, separator_flag)
 #endif
 
 #ifdef __cplusplus

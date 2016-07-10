@@ -14,6 +14,8 @@
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
 #include "../log.h"
+#include "../allocator.h"
+#include "../ttLibC_common.h"
 
 #ifdef __APPLE__
 // for osx, mach_time is better than time.h.
@@ -35,18 +37,26 @@ typedef ttLibC_Util_OpencvUtil_CvWindow_ ttLibC_CvWindow_;
  * @param name window name
  * @return ttLibC_CvWindow object
  */
-ttLibC_CvWindow *ttLibC_CvWindow_makeWindow(const char *name) {
-	ttLibC_CvWindow_ *window = malloc(sizeof(ttLibC_CvWindow_));
+ttLibC_CvWindow *ttLibC_CvWindow_make(const char *name) {
+	ttLibC_CvWindow_ *window = ttLibC_malloc(sizeof(ttLibC_CvWindow_));
 	if(window == NULL) {
 		ERR_PRINT("failed to allocate memory for window.");
 		return NULL;
 	}
 	size_t len = strlen(name);
-	window->inherit_super.name = malloc(len + 1);
+	window->inherit_super.name = ttLibC_malloc(len + 1);
+	if(window->inherit_super.name == NULL) {
+		ttLibC_free(window);
+		return NULL;
+	}
 	sprintf(window->inherit_super.name, "%s", name);
 	cvNamedWindow(window->inherit_super.name, CV_WINDOW_NORMAL);
 	window->image = NULL;
+	window->inherit_super.error = Error_noError;
 	return (ttLibC_CvWindow* )window;
+}
+ttLibC_CvWindow *ttLibC_CvWindow_makeWindow(const char *name) {
+	return ttLibC_CvWindow_make(name);
 }
 
 /*
@@ -71,8 +81,12 @@ void ttLibC_CvWindow_showBgr(ttLibC_CvWindow *window, ttLibC_Bgr *bgr) {
 	}
 	if(window_->image == NULL) {
 		window_->image = cvCreateImage(cvSize(bgr->inherit_super.width, bgr->inherit_super.height), 8, 3);
+		if(window_->image == NULL) {
+			window_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_LibraryError);
+			return;
+		}
 	}
-	uint8_t *image_data = (uint8_t *) window_->image->imageData;
+	uint8_t *image_data = (uint8_t *)window_->image->imageData;
 	uint8_t *src_data = bgr->inherit_super.inherit_super.data;
 	uint8_t *src_b_data;
 	uint8_t *src_g_data;
@@ -134,14 +148,14 @@ void ttLibC_CvWindow_close(ttLibC_CvWindow **window) {
 	}
 	ttLibC_CvWindow_ *window_ = (ttLibC_CvWindow_ *)(*window);
 	if(window_->inherit_super.name != NULL) {
-		free(window_->inherit_super.name);
+		ttLibC_free(window_->inherit_super.name);
 		window_->inherit_super.name = NULL;
 	}
 	if(window_->image != NULL) {
 		cvReleaseImage(&window_->image);
 		window_->image = NULL;
 	}
-	free(window_);
+	ttLibC_free(window_);
 	*window = NULL;
 }
 
@@ -174,11 +188,11 @@ typedef ttLibC_Util_OpencvUtil_CvCapture_ ttLibC_CvCapture_;
  * @param height     capture height
  * @return ttLibC_CvCapture object.
  */
-ttLibC_CvCapture *ttLibC_CvCapture_makeCapture(
+ttLibC_CvCapture *ttLibC_CvCapture_make(
 		uint32_t camera_num,
 		uint32_t width,
 		uint32_t height) {
-	ttLibC_CvCapture_ *capture = malloc(sizeof(ttLibC_CvCapture_));
+	ttLibC_CvCapture_ *capture = ttLibC_malloc(sizeof(ttLibC_CvCapture_));
 	if(capture == NULL) {
 		ERR_PRINT("failed to allocate memory for cvCapture.");
 		return NULL;
@@ -186,7 +200,7 @@ ttLibC_CvCapture *ttLibC_CvCapture_makeCapture(
 	capture->capture = cvCreateCameraCapture(camera_num);
 	if(capture->capture == NULL) {
 		ERR_PRINT("failed to open camera device.");
-		free(capture);
+		ttLibC_free(capture);
 		return NULL;
 	}
 	cvSetCaptureProperty(capture->capture, CV_CAP_PROP_FRAME_WIDTH, width);
@@ -195,7 +209,15 @@ ttLibC_CvCapture *ttLibC_CvCapture_makeCapture(
 	capture->inherit_super.width      = width;
 	capture->inherit_super.height     = height;
 	capture->inherit_super.camera_num = camera_num;
+	capture->inherit_super.error      = Error_noError;
 	return (ttLibC_CvCapture *)capture;
+}
+
+ttLibC_CvCapture *ttLibC_CvCapture_makeCapture(
+		uint32_t camera_num,
+		uint32_t width,
+		uint32_t height) {
+	return ttLibC_CvCapture_make(camera_num, width, height);
 }
 
 /**
@@ -209,6 +231,10 @@ ttLibC_Bgr *ttLibC_CvCapture_queryFrame(ttLibC_CvCapture *capture, ttLibC_Bgr *p
 	}
 	ttLibC_CvCapture_ *capture_ = (ttLibC_CvCapture_*)capture;
 	IplImage *frame = cvQueryFrame(capture_->capture);
+	if(frame == NULL) {
+		capture_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_LibraryError);
+		return NULL;
+	}
 
 	uint32_t timebase = 1000;
 #ifdef __APPLE__
@@ -240,7 +266,7 @@ void ttLibC_CvCapture_close(ttLibC_CvCapture **capture) {
 		cvReleaseCapture(&capture_->capture);
 		capture_->capture = NULL;
 	}
-	free(capture_);
+	ttLibC_free(capture_);
 	*capture = NULL;
 }
 

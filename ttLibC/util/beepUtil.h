@@ -20,7 +20,7 @@ extern "C" {
 /**
  * data for beepGenerator
  */
-typedef struct {
+typedef struct ttLibC_Util_BeepUtil_BeepGenerator {
 	/** target pcms16 type. */
 	ttLibC_PcmS16_Type type;
 	/** target_Hz 440 for A sound. */
@@ -29,6 +29,8 @@ typedef struct {
 	uint32_t sample_rate;
 	/** channel_num 1:monoral 2:stereo */
 	uint32_t channel_num;
+	/** amplitude for generate sound */
+	uint32_t amplitude;
 	/** beep position. */
 	uint64_t pos;
 } ttLibC_Util_BeepUtil_BeepGenerator;
@@ -72,6 +74,7 @@ ttLibC_PcmS16 *ttLibC_BeepGenerator_makeBeepBySampleNum(
 
 /**
  * close the generator object.
+ * @param generator
  */
 void ttLibC_BeepGenerator_close(ttLibC_BeepGenerator **generator);
 

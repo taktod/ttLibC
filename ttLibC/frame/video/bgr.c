@@ -13,6 +13,7 @@
 
 #include "bgr.h"
 #include "../../log.h"
+#include "../../allocator.h"
 
 /*
  * make bgr frame
@@ -40,6 +41,8 @@ ttLibC_Bgr *ttLibC_Bgr_make(
 		uint64_t pts,
 		uint32_t timebase) {
 	ttLibC_Bgr *bgr = prev_frame;
+	size_t data_size_ = data_size;
+	size_t buffer_size_ = data_size;
 	uint32_t unit_size = 3;
 	switch(type) {
 	case BgrType_bgr:
@@ -53,15 +56,22 @@ ttLibC_Bgr *ttLibC_Bgr_make(
 		return NULL;
 	}
 	if(bgr == NULL) {
-		bgr = (ttLibC_Bgr *)malloc(sizeof(ttLibC_Bgr));
+		bgr = (ttLibC_Bgr *)ttLibC_malloc(sizeof(ttLibC_Bgr));
 		if(bgr == NULL) {
 			ERR_PRINT("failed to allocate memory for bgr frame.");
 			return NULL;
 		}
+		bgr->inherit_super.inherit_super.data = NULL;
 	}
 	else {
 		if(!bgr->inherit_super.inherit_super.is_non_copy) {
-			free(bgr->inherit_super.inherit_super.data);
+			if(non_copy_mode || bgr->inherit_super.inherit_super.data_size < data_size_) {
+				ttLibC_free(bgr->inherit_super.inherit_super.data);
+				bgr->inherit_super.inherit_super.data = NULL;
+			}
+			else {
+				data_size_ = bgr->inherit_super.inherit_super.data_size;
+			}
 		}
 	}
 	bgr->width_stride                            = width_stride;
@@ -74,19 +84,21 @@ ttLibC_Bgr *ttLibC_Bgr_make(
 	bgr->inherit_super.inherit_super.pts         = pts;
 	bgr->inherit_super.inherit_super.timebase    = timebase;
 	bgr->inherit_super.inherit_super.type        = frameType_bgr;
-	bgr->inherit_super.inherit_super.data_size   = data_size;
-	bgr->inherit_super.inherit_super.buffer_size = data_size;
+	bgr->inherit_super.inherit_super.data_size   = data_size_;
+	bgr->inherit_super.inherit_super.buffer_size = buffer_size_;
 	if(non_copy_mode) {
 		bgr->inherit_super.inherit_super.data = data;
 	}
 	else {
-		bgr->inherit_super.inherit_super.data = malloc(data_size);
 		if(bgr->inherit_super.inherit_super.data == NULL) {
-			ERR_PRINT("failed to allocate memory for data.");
-			if(prev_frame == NULL) {
-				free(bgr);
+			bgr->inherit_super.inherit_super.data = ttLibC_malloc(data_size);
+			if(bgr->inherit_super.inherit_super.data == NULL) {
+				ERR_PRINT("failed to allocate memory for data.");
+				if(prev_frame == NULL) {
+					ttLibC_free(bgr);
+				}
+				return NULL;
 			}
-			return NULL;
 		}
 		memcpy(bgr->inherit_super.inherit_super.data, data, data_size);
 	}
@@ -107,9 +119,9 @@ void ttLibC_Bgr_close(ttLibC_Bgr **frame) {
 		return;
 	}
 	if(!target->inherit_super.inherit_super.is_non_copy) {
-		free(target->inherit_super.inherit_super.data);
+		ttLibC_free(target->inherit_super.inherit_super.data);
 	}
-	free(target);
+	ttLibC_free(target);
 	*frame = NULL;
 }
 

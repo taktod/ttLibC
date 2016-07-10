@@ -17,8 +17,8 @@ extern "C" {
 
 #include <stdio.h>
 
-#ifndef __DEBUG_FLG__
-#	define __DEBUG_FLG__ @debug_flg@
+#ifndef __DEBUG_FLAG__
+#	define __DEBUG_FLAG__ @debug_flag@
 #endif
 
 /**
@@ -26,9 +26,9 @@ extern "C" {
  * @param fmt format string
  * @param ... data for format string
  */
-#if __DEBUG_FLG__ == 1
+#if __DEBUG_FLAG__ == 1
 #	define	LOG_PRINT(fmt, ...) \
-			printf("[log]%s(): "fmt"\n", __func__, ## __VA_ARGS__)
+			printf("[log]%s(): " fmt "\n", __func__, ## __VA_ARGS__)
 #else
 #	define	LOG_PRINT(fmt, ...)
 #endif
@@ -39,7 +39,7 @@ extern "C" {
  * @param ... data for format string
  */
 #define	ERR_PRINT(fmt, ...) \
-		fprintf(stderr, "[log]%s(): "fmt"\n", __func__, ## __VA_ARGS__)
+		fprintf(stderr, "[log]%s(): " fmt "\n", __func__, ## __VA_ARGS__)
 
 #ifdef __cplusplus
 } /* extern "C" */
