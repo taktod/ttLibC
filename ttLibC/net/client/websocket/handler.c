@@ -71,14 +71,14 @@ static tetty_errornum WebSocketHandler_channelRead(
 					return 0;
 				}
 				read_size = \
-						(*buf & 0xFFL) << 56 | \
-						(*(buf + 1) & 0xFFL) << 48 | \
-						(*(buf + 2) & 0xFFL) << 40 | \
-						(*(buf + 3) & 0xFFL) << 32 | \
-						(*(buf + 4) & 0xFFL) << 24 | \
-						(*(buf + 5) & 0xFFL) << 16 | \
-						(*(buf + 6) & 0xFFL) << 8 | \
-						(*(buf + 7) & 0xFFL);
+						(*(buf + 2) & 0xFFL) << 56 | \
+						(*(buf + 3) & 0xFFL) << 48 | \
+						(*(buf + 4) & 0xFFL) << 40 | \
+						(*(buf + 5) & 0xFFL) << 32 | \
+						(*(buf + 6) & 0xFFL) << 24 | \
+						(*(buf + 7) & 0xFFL) << 16 | \
+						(*(buf + 8) & 0xFFL) << 8 | \
+						(*(buf + 9) & 0xFFL);
 				buf += 10;
 				break;
 			default:
@@ -130,6 +130,8 @@ static tetty_errornum WebSocketHandler_channelRead(
 		}
 		// copy data.
 		ttLibC_DynamicBuffer_append(handler->recv_buffer, buf, handler->current_size);
+		ttLibC_DynamicBuffer_markAsRead(handler->read_buffer, handler->current_size);
+		ttLibC_DynamicBuffer_clear(handler->read_buffer);
 		if(handler->is_last_chunk) {
 			// if current is last chunk. data is ready.
 			ttLibC_WebSocket *socket = (ttLibC_WebSocket *)ctx->socket_info->ptr;
@@ -170,9 +172,7 @@ static tetty_errornum WebSocketHandler_channelRead(
 				break;
 			}
 		}
-		ttLibC_DynamicBuffer_markAsRead(handler->read_buffer, handler->current_size);
 		handler->status = State_header;
-		ttLibC_DynamicBuffer_clear(handler->read_buffer);
 	}
 	return 0;
 }
