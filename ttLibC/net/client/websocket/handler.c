@@ -34,6 +34,10 @@ static tetty_errornum WebSocketHandler_channelRead(
 	ttLibC_WebSocketHandler *handler = (ttLibC_WebSocketHandler *)ctx->channel_handler;
 	// update read_buffer
 	ttLibC_DynamicBuffer_append(handler->read_buffer, data, data_size);
+	if(handler->in_reading) {
+		return 0;
+	}
+	handler->in_reading = true;
 	while(ttLibC_DynamicBuffer_refSize(handler->read_buffer) > 0) {
 		// pointer for received data.
 		uint8_t *buf = ttLibC_DynamicBuffer_refData(handler->read_buffer);
@@ -45,6 +49,7 @@ static tetty_errornum WebSocketHandler_channelRead(
 			// at least we need 2bytes.
 			if(ttLibC_DynamicBuffer_refSize(handler->read_buffer) < need_size) {
 				// if less, return and do it later.
+				handler->in_reading = false;
 				return 0;
 			}
 			bool is_masked = false;
@@ -59,6 +64,7 @@ static tetty_errornum WebSocketHandler_channelRead(
 				// size is defined in 16bit int.
 				need_size += 2;
 				if(ttLibC_DynamicBuffer_refSize(handler->read_buffer) < need_size) {
+					handler->in_reading = false;
 					return 0;
 				}
 				read_size = ((*(buf + 2) & 0xFF) << 8) | (*(buf + 3) & 0xFF);
@@ -68,6 +74,7 @@ static tetty_errornum WebSocketHandler_channelRead(
 				// size is defined in 64bit int.
 				need_size += 8;
 				if(ttLibC_DynamicBuffer_refSize(handler->read_buffer) < need_size) {
+					handler->in_reading = false;
 					return 0;
 				}
 				read_size = \
@@ -83,6 +90,7 @@ static tetty_errornum WebSocketHandler_channelRead(
 				break;
 			default:
 				if(ttLibC_DynamicBuffer_refSize(handler->read_buffer) < need_size) {
+					handler->in_reading = false;
 					return 0;
 				}
 				buf += 2;
@@ -119,6 +127,7 @@ static tetty_errornum WebSocketHandler_channelRead(
 		// current work for data body.
 		if(ttLibC_DynamicBuffer_refSize(handler->read_buffer) < handler->current_size) {
 			// need more data. do later.
+			handler->in_reading = false;
 			return 0;
 		}
 		if(handler->is_masked) {
@@ -174,6 +183,7 @@ static tetty_errornum WebSocketHandler_channelRead(
 		}
 		handler->status = State_header;
 	}
+	handler->in_reading = false;
 	return 0;
 }
 
@@ -205,6 +215,7 @@ ttLibC_WebSocketHandler *ttLibC_WebSocketHandler_make() {
 	handler->recv_buffer = ttLibC_DynamicBuffer_make();
 	handler->current_size = 0;
 	handler->status = State_header;
+	handler->in_reading = false;
 	return handler;
 }
 

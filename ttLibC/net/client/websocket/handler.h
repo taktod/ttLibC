@@ -38,6 +38,7 @@ typedef struct ttLibC_Net_Client_WebSocket_Handler {
 	ttLibC_WebSocketEvent_Opcode opcode;
 	int64_t current_size;
 	ttLibC_WebSocketHandler_State status;
+	bool in_reading;
 } ttLibC_Net_Client_WebSocket_Handler;
 
 typedef ttLibC_Net_Client_WebSocket_Handler ttLibC_WebSocketHandler;
