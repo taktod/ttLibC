@@ -618,9 +618,10 @@ static void openh264Test() {
 	paramExt.sSpatialLayers[0].fFrameRate = paramExt.fMaxFrameRate;
 	paramExt.sSpatialLayers[0].iSpatialBitrate = paramExt.iTargetBitrate;
 	paramExt.sSpatialLayers[0].iMaxSpatialBitrate = paramExt.iMaxBitrate;
+#ifndef __OPENH264_OVER_16__
 	paramExt.sSpatialLayers[0].sSliceCfg.uiSliceMode = SM_AUTO_SLICE;
 	paramExt.sSpatialLayers[0].sSliceCfg.sSliceArgument.uiSliceNum = 0;
-
+#endif
 	res = encoder->InitializeExt(&paramExt);
 	if(res != 0) {
 		ERR_PRINT("failed to initialize encoder params.");
@@ -671,7 +672,9 @@ static void openh264Test() {
 	SDecodingParam decParam = {0};
 	decParam.sVideoProperty.eVideoBsType = VIDEO_BITSTREAM_SVC;
 	decParam.bParseOnly = false;
+#ifndef __OPENH264_OVER_16__
 	decParam.eOutputColorFormat = videoFormatI420;
+#endif
 	decParam.uiTargetDqLayer = UCHAR_MAX;
 	decParam.eEcActiveIdc = ERROR_CON_SLICE_COPY;
 	res = decoder->Initialize(&decParam);

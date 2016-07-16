@@ -102,14 +102,18 @@ static ttLibC_Openh264Encoder *Openh264Encoder_make(SEncParamExt *pParamExt) {
 			paramExt.sSpatialLayers[i].iSpatialBitrate                     = pParamExt->sSpatialLayers[0].iSpatialBitrate;
 		if(i == 0 || pParamExt->sSpatialLayers[i].iMaxSpatialBitrate != 0)
 			paramExt.sSpatialLayers[i].iMaxSpatialBitrate                  = pParamExt->sSpatialLayers[0].iMaxSpatialBitrate;
+#ifndef __OPENH264_OVER_16__
 		if(i == 0 || pParamExt->sSpatialLayers[i].sSliceCfg.uiSliceMode != 0)
 			paramExt.sSpatialLayers[i].sSliceCfg.uiSliceMode               = pParamExt->sSpatialLayers[0].sSliceCfg.uiSliceMode;
 		if(i == 0 || pParamExt->sSpatialLayers[i].sSliceCfg.sSliceArgument.uiSliceNum != 0)
 			paramExt.sSpatialLayers[i].sSliceCfg.sSliceArgument.uiSliceNum = pParamExt->sSpatialLayers[0].sSliceCfg.sSliceArgument.uiSliceNum;
+#endif
 		if(i == 0 || pParamExt->sSpatialLayers[i].uiProfileIdc != 0)
 			paramExt.sSpatialLayers[i].uiProfileIdc                        = pParamExt->sSpatialLayers[i].uiProfileIdc;
 		if(i == 0 || pParamExt->sSpatialLayers[i].uiLevelIdc != 0)
 			paramExt.sSpatialLayers[i].uiLevelIdc                          = pParamExt->sSpatialLayers[i].uiLevelIdc;
+		// iDLayerQPがない
+#ifndef __OPENH264_OVER_16__
 		if(i == 0 || pParamExt->sSpatialLayers[i].sSliceCfg.sSliceArgument.uiSliceSizeConstraint != 0) {
 			paramExt.sSpatialLayers[i].sSliceCfg.sSliceArgument.uiSliceSizeConstraint =
 					pParamExt->sSpatialLayers[i].sSliceCfg.sSliceArgument.uiSliceSizeConstraint;
@@ -120,6 +124,7 @@ static ttLibC_Openh264Encoder *Openh264Encoder_make(SEncParamExt *pParamExt) {
 						pParamExt->sSpatialLayers[i].sSliceCfg.sSliceArgument.uiSliceMbNum[j];
 			}
 		}
+#endif
 	}
 
 	paramExt.iComplexityMode          = pParamExt->iComplexityMode;
@@ -552,12 +557,14 @@ void ttLibC_Openh264Encoder_getDefaultSEncParamExt(
 	pParamExt->sSpatialLayers[0].uiProfileIdc                                   = PRO_MAIN;
 	pParamExt->sSpatialLayers[0].uiLevelIdc                                     = LEVEL_UNKNOWN;
 	pParamExt->sSpatialLayers[0].iDLayerQp                                      = 0;
+#ifndef __OPENH264_OVER_16__
 	pParamExt->sSpatialLayers[0].sSliceCfg.uiSliceMode                          = SM_SINGLE_SLICE;
 	pParamExt->sSpatialLayers[0].sSliceCfg.sSliceArgument.uiSliceNum            = 1;
 	pParamExt->sSpatialLayers[0].sSliceCfg.sSliceArgument.uiSliceSizeConstraint = 1500;
 	for(int i = 0;i < MAX_SLICES_NUM_TMP;++ i) {
 		pParamExt->sSpatialLayers[0].sSliceCfg.sSliceArgument.uiSliceMbNum[i]   = 0;
 	}
+#endif
 }
 
 ttLibC_Openh264Encoder *ttLibC_Openh264Encoder_makeWithSEncParamExt(void *paramExt) {

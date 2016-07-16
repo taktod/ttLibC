@@ -52,7 +52,9 @@ static ttLibC_Openh264Decoder *Openh264Decoder_make(SDecodingParam *param) {
 	memset(&decParam, 0, sizeof(SDecodingParam));
 	decParam.bParseOnly          = param->bParseOnly;
 	decParam.eEcActiveIdc        = param->eEcActiveIdc;
+#ifndef __OPENH264_OVER_16__
 	decParam.eOutputColorFormat  = param->eOutputColorFormat;
+#endif
 	decParam.pFileNameRestructed = param->pFileNameRestructed;
 	decParam.sVideoProperty.eVideoBsType = param->sVideoProperty.eVideoBsType;
 	decParam.sVideoProperty.size         = param->sVideoProperty.size;
@@ -171,7 +173,9 @@ void ttLibC_Openh264Decoder_getDefaultSDecodingParam(void *param) {
 	memset(pParam, 0, sizeof(SDecodingParam));
 	pParam->sVideoProperty.eVideoBsType = VIDEO_BITSTREAM_SVC;
 	pParam->bParseOnly = false;
+#ifndef __OPENH264_OVER_16__
 	pParam->eOutputColorFormat = videoFormatI420;
+#endif
 	pParam->uiTargetDqLayer = UCHAR_MAX;
 	pParam->eEcActiveIdc = ERROR_CON_SLICE_COPY;
 }

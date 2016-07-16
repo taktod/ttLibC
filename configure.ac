@@ -332,11 +332,20 @@ fi
 if test x$openh264_flag = "xyes"; then
 	PKG_CHECK_MODULES(
 		[OPENH264],
-		[openh264],
+		[openh264 <= 1.5],
 		[openh264_check=yes],
-		[openh264_check=no]
+		[
+		PKG_CHECK_MODULES(
+			[OPENH264],
+			[openh264],
+			[
+				openh264_check=yes
+				AC_DEFINE([__OPENH264_OVER_16__])
+			],
+			[openh264_check=no]
+		)
+		]
 	)
-
 fi
 if test x$speexdsp_flag = "xyes"; then
 	PKG_CHECK_MODULES(
