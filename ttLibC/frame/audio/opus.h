@@ -71,7 +71,7 @@ ttLibC_Opus *ttLibC_Opus_make(
  * @param data_size  data size
  * @param pts        pts for opus frame.
  * @param timebase   timebase for opus frame.
- * /
+ */
 ttLibC_Opus *ttLibC_Opus_makeFrame(
 		ttLibC_Opus *prev_frame,
 		void *data,
