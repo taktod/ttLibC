@@ -15,6 +15,7 @@
 #include "../../allocator.h"
 #include "../../frame/video/h264.h"
 #include "../../frame/audio/vorbis.h"
+#include <string.h>
 
 ttLibC_MkvTag *ttLibC_MkvTag_make(
 		ttLibC_MkvTag *prev_tag,
