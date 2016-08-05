@@ -109,7 +109,7 @@ ttLibC_PcmS16 *ttLibC_SpeexdspResampler_resample(ttLibC_SpeexdspResampler *resam
 		pcms16->inherit_super.inherit_super.is_non_copy = true;
 	}
 	if(data == NULL) {
-		data = ttLibC_malloc(data_size);
+		data = ttLibC_malloc(data_size * 2); // let to hold x2 size of memory.
 		if(data == NULL) {
 			resampler_->inherit_super.error = ttLibC_updateError(Target_On_Resampler, Error_MemoryAllocate);
 			return NULL;
