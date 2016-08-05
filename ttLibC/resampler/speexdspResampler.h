@@ -40,7 +40,11 @@ typedef ttLibC_Resampler_SpeexdspResampler ttLibC_SpeexdspResampler;
  * @param quality            quality for speexdsp resampler. 0:low quality - 10:max quality.
  * @return resampler object.
  */
-ttLibC_SpeexdspResampler *ttLibC_SpeexdspResampler_make(uint32_t channel_num, uint32_t input_sample_rate, uint32_t output_sample_rate, uint32_t quality);
+ttLibC_SpeexdspResampler *ttLibC_SpeexdspResampler_make(
+		uint32_t channel_num,
+		uint32_t input_sample_rate,
+		uint32_t output_sample_rate,
+		uint32_t quality);
 
 /**
  * sample_rate resample.
@@ -49,7 +53,10 @@ ttLibC_SpeexdspResampler *ttLibC_SpeexdspResampler_make(uint32_t channel_num, ui
  * @param src_pcms16 source pcms16 data.
  * @return resampled pcms16 data.
  */
-ttLibC_PcmS16 *ttLibC_SpeexdspResampler_resample(ttLibC_SpeexdspResampler *resampler, ttLibC_PcmS16 *prev_frame, ttLibC_PcmS16 *src_pcms16);
+ttLibC_PcmS16 *ttLibC_SpeexdspResampler_resample(
+		ttLibC_SpeexdspResampler *resampler,
+		ttLibC_PcmS16 *prev_frame,
+		ttLibC_PcmS16 *src_pcms16);
 
 /**
  * close resampler.
