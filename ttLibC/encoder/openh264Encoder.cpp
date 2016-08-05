@@ -112,7 +112,6 @@ static ttLibC_Openh264Encoder *Openh264Encoder_make(SEncParamExt *pParamExt) {
 			paramExt.sSpatialLayers[i].uiProfileIdc                        = pParamExt->sSpatialLayers[i].uiProfileIdc;
 		if(i == 0 || pParamExt->sSpatialLayers[i].uiLevelIdc != 0)
 			paramExt.sSpatialLayers[i].uiLevelIdc                          = pParamExt->sSpatialLayers[i].uiLevelIdc;
-		// iDLayerQPがない
 #ifndef __OPENH264_OVER_16__
 		if(i == 0 || pParamExt->sSpatialLayers[i].sSliceCfg.sSliceArgument.uiSliceSizeConstraint != 0) {
 			paramExt.sSpatialLayers[i].sSliceCfg.sSliceArgument.uiSliceSizeConstraint =
