@@ -31,6 +31,7 @@ ttLibC_Crc32 *ttLibC_Crc32_make(uint32_t initial_data) {
 	if(crc32 == NULL) {
 		return NULL;
 	}
+	crc32->error = Error_noError;
 	if(crc_table[1] == 0) {
 		// not initialize.
 		uint64_t crc = 0;
