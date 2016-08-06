@@ -22,6 +22,7 @@ extern "C" {
 #include "type/videoTag.h"
 
 #include "../../util/dynamicBufferUtil.h"
+#include "../../util/flvFrameUtil.h"
 
 /**
  * reading data status
@@ -49,6 +50,8 @@ typedef struct ttLibC_ContainerReader_FlvReader_ {
 
 	ttLibC_DynamicBuffer *tmp_buffer;
 	bool is_reading;
+
+	ttLibC_FlvFrameManager *frameManager;
 } ttLibC_ContainerReader_FlvReader_;
 
 typedef ttLibC_ContainerReader_FlvReader_ ttLibC_FlvReader_;

@@ -34,6 +34,7 @@ ttLibC_FlvReader *ttLibC_FlvReader_make() {
 
 	reader->tmp_buffer = ttLibC_DynamicBuffer_make();
 	reader->is_reading = false;
+	reader->frameManager = ttLibC_FlvFrameManager_make();
 	return (ttLibC_FlvReader *)reader;
 }
 
@@ -54,6 +55,7 @@ static bool FlvReader_read(
 			ERR_PRINT("failed to get flv audio tag.");
 			return false;
 		}
+		tag->frameManager = reader->frameManager;
 		reader->audio_tag = (ttLibC_FlvAudioTag *)tag;
 		return callback(ptr, (ttLibC_Flv *)reader->audio_tag);
 	default:
@@ -66,6 +68,7 @@ static bool FlvReader_read(
 			ERR_PRINT("failed to get flv header tag.");
 			return false;
 		}
+		tag->frameManager = reader->frameManager;
 		reader->flv_tag = tag;
 		reader->inherit_super.has_audio = ((ttLibC_FlvHeaderTag *)tag)->has_audio;
 		reader->inherit_super.has_video = ((ttLibC_FlvHeaderTag *)tag)->has_video;
@@ -79,6 +82,7 @@ static bool FlvReader_read(
 			ERR_PRINT("failed to get flv meta tag.");
 			return false;
 		}
+		tag->frameManager = reader->frameManager;
 		reader->flv_tag = tag;
 		return callback(ptr, (ttLibC_Flv *)reader->flv_tag);
 	case FlvType_video:
@@ -90,6 +94,7 @@ static bool FlvReader_read(
 			ERR_PRINT("failed to get flv video tag.");
 			return false;
 		}
+		tag->frameManager = reader->frameManager;
 		reader->video_tag = (ttLibC_FlvVideoTag *)tag;
 		return callback(ptr, (ttLibC_Flv *)reader->video_tag);
 	}
@@ -152,6 +157,7 @@ void ttLibC_FlvReader_close(ttLibC_FlvReader **reader) {
 	ttLibC_FlvTag_close(&target->flv_tag);
 	ttLibC_FlvTag_close((ttLibC_FlvTag **)&target->audio_tag);
 	ttLibC_FlvTag_close((ttLibC_FlvTag **)&target->video_tag);
+	ttLibC_FlvFrameManager_close(&target->frameManager);
 	ttLibC_DynamicBuffer_close(&target->tmp_buffer);
 	ttLibC_free(target);
 	*reader = NULL;

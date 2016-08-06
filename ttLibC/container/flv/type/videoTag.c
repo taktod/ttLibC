@@ -106,8 +106,8 @@ ttLibC_FlvVideoTag *ttLibC_FlvVideoTag_getTag(
 	uint8_t frame_type = ((data[11] >> 4) & 0x0F);
 	uint8_t codec_id = data[11] & 0x0F;
 	uint32_t dts = 0;
-	data += 12;
-	data_size -= 12;
+	data += 11;
+	data_size -= 11;
 
 	size_t post_size = ((*(data + data_size - 4)) << 24) | ((*(data + data_size - 3)) << 16) | ((*(data + data_size - 2)) << 8) | (*(data + data_size - 1));
 	if(size + 11 != post_size) {
@@ -129,107 +129,19 @@ bool ttLibC_FlvVideoTag_getFrame(
 		ttLibC_FlvVideoTag *video_tag,
 		ttLibC_getFrameFunc callback,
 		void *ptr) {
-	uint8_t *buffer = video_tag->inherit_super.inherit_super.inherit_super.data;
-	size_t left_size = video_tag->inherit_super.inherit_super.inherit_super.buffer_size;
-	switch(video_tag->frame_type) {
-	case frameType_flv1:
-		{
-			ttLibC_Flv1 *flv1 = ttLibC_Flv1_getFrame(
-					(ttLibC_Flv1 *)video_tag->inherit_super.frame,
-					buffer,
-					left_size,
-					true,
-					video_tag->inherit_super.inherit_super.inherit_super.pts,
-					video_tag->inherit_super.inherit_super.inherit_super.timebase);
-			if(flv1 == NULL) {
-				return false;
-			}
-			video_tag->inherit_super.frame = (ttLibC_Frame *)flv1;
-			return callback(ptr, video_tag->inherit_super.frame);
-		}
-		break;
-	case frameType_h264:
-		{
-			uint32_t dts = (buffer[1] << 16) | (buffer[2] << 8) | buffer[3];
-			if(dts != 0) {
-				LOG_PRINT("found dts is non zero h264 data.");
-			}
-			if(buffer[0] == 0x00) {
-				// avcC information
-				buffer += 4;
-				left_size -= 4;
-				uint32_t length_size = 0;
-				ttLibC_H264 *h264 = ttLibC_H264_analyzeAvccTag((ttLibC_H264 *)video_tag->inherit_super.frame, buffer, left_size, &length_size);
-				if(h264 == NULL) {
-					ERR_PRINT("failed to make h264 configdata frame.");
-					return false;
-				}
-				if(length_size < 3) {
-					ERR_PRINT("avcc size length is too small.");
-					return false;
-				}
-				// h264_length_size can be changed, however, usually 4byte
-				video_tag->h264_length_size = length_size;
-				video_tag->inherit_super.frame = (ttLibC_Frame *)h264;
-				return callback(ptr, video_tag->inherit_super.frame);
-			}
-			else if(buffer[0] == 0x01) {
-				// normal frame.
-				// first 4 byte for type and 3byte dts.(just ignore.)
-				buffer += 4;
-				left_size -= 4;
-				uint8_t *buf = buffer;
-				size_t buf_size = left_size;
-				// change sizenal -> nal
-				do {
-					uint32_t size = 0;
-					for(int i = 1;i <= video_tag->h264_length_size;++ i) {
-						size = (size << 8) | *buf;
-						if(i != video_tag->h264_length_size) {
-							*buf = 0x00;
-						}
-						else {
-							*buf = 0x01;
-						}
-						++ buf;
-						-- buf_size;
-					}
-					buf += size;
-					buf_size -= size;
-				} while(buf_size > 0);
-				ttLibC_H264 *h264 = ttLibC_H264_getFrame(
-						(ttLibC_H264 *)video_tag->inherit_super.frame,
-						buffer,
-						left_size,
-						true,
-						video_tag->inherit_super.inherit_super.inherit_super.pts,
-						video_tag->inherit_super.inherit_super.inherit_super.timebase);
-				if(h264 == NULL) {
-					ERR_PRINT("failed to make h264 data.");
-					return false;
-				}
-				video_tag->inherit_super.frame = (ttLibC_Frame *)h264;
-				return callback(ptr, video_tag->inherit_super.frame);
-			}
-			else if(buffer[0] == 0x02) {
-				// flag for end of h264 stream.
-				return true;
-			}
-			else {
-				// others, unknown
-				LOG_PRINT("found unknown data. h264 end sign?");
-				LOG_DUMP(buffer, left_size, true);
+	ttLibC_Video *video = ttLibC_FlvFrameManager_readVideoBinary(
+			video_tag->inherit_super.frameManager,
+			video_tag->inherit_super.inherit_super.inherit_super.data,
+			video_tag->inherit_super.inherit_super.inherit_super.buffer_size,
+			video_tag->inherit_super.inherit_super.inherit_super.pts);
+	if(video != NULL) {
+		if(callback != NULL) {
+			if(!callback(ptr, video)) {
 				return false;
 			}
 		}
-		break;
-	case frameType_vp6:
-		// need to make
-		break;
-	default:
-		break;
 	}
-	return false;
+	return true;
 }
 
 bool ttLibC_FlvVideoTag_writeTag(

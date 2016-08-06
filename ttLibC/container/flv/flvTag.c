@@ -28,9 +28,6 @@ ttLibC_FlvTag *ttLibC_FlvTag_make(
 		ttLibC_Flv_Type type,
 		uint32_t track_id) {
 	ttLibC_Frame *prev_frame = NULL;
-	if(prev_tag != NULL) {
-		prev_frame = prev_tag->frame;
-	}
 	ttLibC_FlvTag *tag = (ttLibC_FlvTag *)ttLibC_Container_make(
 			(ttLibC_Container *)prev_tag,
 			sizeof(union {
@@ -46,7 +43,6 @@ ttLibC_FlvTag *ttLibC_FlvTag_make(
 			pts,
 			timebase);
 	if(tag != NULL) {
-		tag->frame = prev_frame;
 		tag->track_id = track_id;
 		tag->inherit_super.type = type;
 	}
@@ -60,10 +56,11 @@ bool ttLibC_Flv_getFrame(ttLibC_Flv *flv, ttLibC_getFrameFunc callback, void *pt
 	case FlvType_header:
 	case FlvType_meta:
 		// header and meta data doesn't have any frame.
-		return true;
+		break;
 	case FlvType_video:
 		return ttLibC_FlvVideoTag_getFrame((ttLibC_FlvVideoTag *)flv, callback, ptr);
 	}
+	return true;
 }
 
 void ttLibC_Flv_close(ttLibC_Flv **flv) {
@@ -79,7 +76,6 @@ void ttLibC_FlvTag_close(ttLibC_FlvTag **tag) {
 		ERR_PRINT("container type is not flv.");
 		return;
 	}
-	ttLibC_Frame_close(&target->frame);
 	if(!target->inherit_super.inherit_super.is_non_copy) {
 		ttLibC_free(target->inherit_super.inherit_super.data);
 	}

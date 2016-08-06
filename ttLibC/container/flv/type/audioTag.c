@@ -159,8 +159,8 @@ ttLibC_FlvAudioTag *ttLibC_FlvAudioTag_getTag(
 	uint8_t sample_rate_flag = (data[11] >> 2) & 0x03;
 	uint8_t bit_count_flag   = (data[11] >> 1) & 0x01;
 	uint8_t channel_flag     = (data[11]) & 0x01;
-	data += 12;
-	data_size -= 12;
+	data += 11;
+	data_size -= 11;
 
 	size_t post_size = ((*(data + data_size - 4)) << 24) | ((*(data + data_size - 3)) << 16) | ((*(data + data_size - 2)) << 8) | (*(data + data_size - 1));
 	if(size + 11 != post_size) {
@@ -185,77 +185,19 @@ bool ttLibC_FlvAudioTag_getFrame(
 		ttLibC_FlvAudioTag *audio_tag,
 		ttLibC_getFrameFunc callback,
 		void *ptr) {
-	uint8_t *buffer = audio_tag->inherit_super.inherit_super.inherit_super.data;
-	size_t left_size = audio_tag->inherit_super.inherit_super.inherit_super.buffer_size;
-	switch(audio_tag->frame_type) {
-	case frameType_aac:
-		if(buffer[0] == 0) {
-			uint8_t *dsi = (uint8_t *)&audio_tag->aac_dsi_info;
-			for(int i = 1;i < left_size;++ i) {
-				*dsi = buffer[i];
-				++ dsi;
-			}
-			return true;
-		}
-		else if(buffer[0] == 1) {
-			ttLibC_Aac *aac = ttLibC_Aac_make(
-					(ttLibC_Aac *)audio_tag->inherit_super.frame,
-					AacType_raw,
-					audio_tag->sample_rate,
-					1024,
-					audio_tag->channel_num,
-					buffer + 1,
-					left_size - 1,
-					true,
-					audio_tag->inherit_super.inherit_super.inherit_super.pts,
-					audio_tag->inherit_super.inherit_super.inherit_super.timebase,
-					audio_tag->aac_dsi_info);
-			if(aac == NULL) {
-				ERR_PRINT("failed to make raw aac frame.");
+	ttLibC_Audio *audio = ttLibC_FlvFrameManager_readAudioBinary(
+			audio_tag->inherit_super.frameManager,
+			audio_tag->inherit_super.inherit_super.inherit_super.data,
+			audio_tag->inherit_super.inherit_super.inherit_super.buffer_size,
+			audio_tag->inherit_super.inherit_super.inherit_super.pts);
+	if(audio != NULL) {
+		if(callback != NULL) {
+			if(!callback(ptr, audio)) {
 				return false;
 			}
-			audio_tag->inherit_super.frame = (ttLibC_Frame *)aac;
-			return callback(ptr, audio_tag->inherit_super.frame);
 		}
-		else {
-			return false;
-		}
-	case frameType_mp3:
-		{
-			ttLibC_Mp3 *mp3 = ttLibC_Mp3_getFrame(
-					(ttLibC_Mp3 *)audio_tag->inherit_super.frame,
-					buffer,
-					left_size,
-					true,
-					audio_tag->inherit_super.inherit_super.inherit_super.pts,
-					audio_tag->inherit_super.inherit_super.inherit_super.timebase);
-			if(mp3 == NULL) {
-				ERR_PRINT("failed to make mp3 frame.");
-				return false;
-			}
-			audio_tag->inherit_super.frame = (ttLibC_Frame *)mp3;
-			return callback(ptr, audio_tag->inherit_super.frame);
-		}
-		break;
-	case frameType_nellymoser:
-		LOG_PRINT("nellymoser: no read process.");
-		break;
-	case frameType_pcmS16:
-		LOG_PRINT("pcms16: no read process.");
-		break;
-	case frameType_pcm_alaw:
-		LOG_PRINT("pcm alaw: no read process.");
-		break;
-	case frameType_pcm_mulaw:
-		LOG_PRINT("pcm mulaw: no read process.");
-		break;
-	case frameType_speex:
-		LOG_PRINT("speex: no read process.");
-		break;
-	default:
-		break;
 	}
-	return false;
+	return true;
 }
 
 bool ttLibC_FlvAudioTag_writeTag(
