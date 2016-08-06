@@ -24,7 +24,7 @@ extern "C" {
 typedef struct ttLibC_Container_FlvTag {
 	ttLibC_Flv inherit_super;
 	uint32_t track_id; // 1
-	ttLibC_Frame *frame;
+	ttLibC_Frame *frame; // if we use flvFrameManager, we don't need this. manager hold the reuse frame.
 } ttLibC_Container_FlvTag;
 
 typedef ttLibC_Container_FlvTag ttLibC_FlvTag;

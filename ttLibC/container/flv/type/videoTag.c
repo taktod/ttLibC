@@ -15,6 +15,8 @@
 #include "../../../frame/video/flv1.h"
 #include "../../../util/hexUtil.h"
 #include "../../../util/ioUtil.h"
+#include "../../../util/flvFrameUtil.h"
+#include "../../../util/dynamicBufferUtil.h"
 
 ttLibC_FlvVideoTag *ttLibC_FlvVideoTag_make(
 		ttLibC_FlvTag *prev_tag,
@@ -235,205 +237,56 @@ bool ttLibC_FlvVideoTag_writeTag(
 		ttLibC_Frame *frame,
 		ttLibC_ContainerWriteFunc callback,
 		void *ptr) {
-	uint8_t buf[256]; // buffer for writing.
-	switch(frame->type) {
-	case frameType_flv1:
-		{
-			ttLibC_Video *video = (ttLibC_Video *)frame;
-			uint8_t *buffer = video->inherit_super.data;
-			uint32_t left_size = video->inherit_super.buffer_size;
-			buf[0]  = 0x09;
-			uint32_t pre_size = 1 + left_size;
-			buf[1]  = (pre_size >> 16) & 0xFF;
-			buf[2]  = (pre_size >> 8) & 0xFF;
-			buf[3]  = pre_size & 0xFF;
-			// pts
-			buf[4]  = (video->inherit_super.pts >> 16) & 0xFF;
-			buf[5]  = (video->inherit_super.pts >> 8) & 0xFF;
-			buf[6]  = video->inherit_super.pts & 0xFF;
-			buf[7]  = (video->inherit_super.pts >> 24) & 0xFF;
-			// track
-			buf[8]  = 0x00;
-			buf[9]  = 0x00;
-			buf[10] = 0x00;
-			// tag
-			ttLibC_Flv1 *flv1 = (ttLibC_Flv1 *)video;
-			switch(flv1->type) {
-			case Flv1Type_disposableInner:
-				buf[11] = 0x32;
-				break;
-			case Flv1Type_inner:
-				buf[11] = 0x22;
-				break;
-			case Flv1Type_intra:
-				buf[11] = 0x12;
-				break;
+	if(frame->type == frameType_h264) {
+		ttLibC_H264 *h264 = (ttLibC_H264 *)frame;
+		if(h264->type == H264Type_configData) {
+			uint32_t crc32_value = ttLibC_H264_getConfigCrc32(h264);
+			if(writer->video_track.crc32 != 0 && writer->video_track.crc32 == crc32_value) {
+				// already send msh data.
+				return true;
 			}
-			// header
-			if(!callback(ptr, buf, 12)) {
-				return false;
-			}
-			// data_body
-			if(!callback(ptr, buffer, left_size)) {
-				return false;
-			}
-			// post size
-			uint32_t post_size = pre_size + 11;
-			buf[0] = (post_size >> 24) & 0xFF;
-			buf[1] = (post_size >> 16) & 0xFF;
-			buf[2] = (post_size >> 8) & 0xFF;
-			buf[3] = post_size & 0xFF;
-			if(!callback(ptr, buf, 4)) {
-				return false;
-			}
-			// done.
-			return true;
+			writer->video_track.crc32 = crc32_value;
 		}
-		break;
-	case frameType_h264:
-		{
-			ttLibC_H264 *h264 = (ttLibC_H264*)frame;
-			switch(h264->type) {
-			case H264Type_configData:
-				// need to make media sequence header.
-				// if crc32 value is same, the data is same.
-				{
-					uint32_t crc32_value = ttLibC_H264_getConfigCrc32(h264);
-					if(writer->video_track.crc32 == 0 || writer->video_track.crc32 != crc32_value) {
-						/*
-						 * 09 s  i  ze ti me st mp tr ck id 17 00 00 00 00 avccTag
-						 */
-						uint8_t avcc[256];
-						size_t size = ttLibC_H264_readAvccTag(h264, avcc, sizeof(avcc));
-						// make up buf.
-						buf[0]  = 0x09;
-						uint32_t pre_size = size + 4 + 1;
-						buf[1]  = (pre_size >> 16) & 0xFF;
-						buf[2]  = (pre_size >> 8) & 0xFF;
-						buf[3]  = pre_size & 0xFF;
-						// pts
-						buf[4]  = (h264->inherit_super.inherit_super.pts >> 16) & 0xFF;
-						buf[5]  = (h264->inherit_super.inherit_super.pts >> 8) & 0xFF;
-						buf[6]  = h264->inherit_super.inherit_super.pts & 0xFF;
-						buf[7]  = (h264->inherit_super.inherit_super.pts >> 24) & 0xFF;
-						// track
-						buf[8]  = 0x00;
-						buf[9]  = 0x00;
-						buf[10] = 0x00;
-						// tag
-						buf[11] = 0x17;
-						// type
-						buf[12] = 0x00;
-						// dts
-						buf[13] = 0x00;
-						buf[14] = 0x00;
-						buf[15] = 0x00;
-						if(!callback(ptr, buf, 16)) {
-							return false;
-						}
-						// data
-						if(!callback(ptr, avcc, size)) {
-							return false;
-						}
-						// post size
-						uint32_t post_size = pre_size + 11;
-						buf[0] = (post_size >> 24) & 0xFF;
-						buf[1] = (post_size >> 16) & 0xFF;
-						buf[2] = (post_size >> 8) & 0xFF;
-						buf[3] = post_size & 0xFF;
-						if(!callback(ptr, buf, 4)) {
-							return false;
-						}
-						// all ok.
-						writer->video_track.crc32 = crc32_value;
-					}
-					return true;
-				}
-				break;
-			case H264Type_slice:
-			case H264Type_sliceIDR:
-				{
-					uint32_t pre_size = 5; // codec + type + dts(3byte)
-					ttLibC_H264_NalInfo nal_info;
-					uint8_t *data = h264->inherit_super.inherit_super.data;
-					size_t data_size = h264->inherit_super.inherit_super.buffer_size;
-					while(ttLibC_H264_getNalInfo(&nal_info, data, data_size)) {
-						pre_size += 4; // size;
-						pre_size += nal_info.nal_size - nal_info.data_pos;
-						data += nal_info.nal_size;
-						data_size -= nal_info.nal_size;
-					}
-					buf[0]  = 0x09;
-					buf[1]  = (pre_size >> 16) & 0xFF;
-					buf[2]  = (pre_size >> 8) & 0xFF;
-					buf[3]  = pre_size & 0xFF;
-					// pts
-					buf[4]  = (h264->inherit_super.inherit_super.pts >> 16) & 0xFF;
-					buf[5]  = (h264->inherit_super.inherit_super.pts >> 8) & 0xFF;
-					buf[6]  = h264->inherit_super.inherit_super.pts & 0xFF;
-					buf[7]  = (h264->inherit_super.inherit_super.pts >> 24) & 0xFF;
-					// track
-					buf[8]  = 0x00;
-					buf[9]  = 0x00;
-					buf[10] = 0x00;
-					// tag
-					if(h264->type == H264Type_slice) {
-						buf[11] = 0x27;
-					}
-					else {
-						buf[11] = 0x17;
-					}
-					// type
-					buf[12] = 0x01;
-					// dts
-					buf[13] = 0x00;
-					buf[14] = 0x00;
-					buf[15] = 0x00;
-					if(!callback(ptr, buf, 16)) {
-						return false;
-					}
-					// now ready to make data.
-					data = h264->inherit_super.inherit_super.data;
-					data_size = h264->inherit_super.inherit_super.buffer_size;
-					// nal -> sizenal.
-					while(ttLibC_H264_getNalInfo(&nal_info, data, data_size)) {
-						uint32_t size = nal_info.nal_size - nal_info.data_pos;
-						buf[0] = (size >> 24) & 0xFF;
-						buf[1] = (size >> 16) & 0xFF;
-						buf[2] = (size >> 8) & 0xFF;
-						buf[3] = size & 0xFF;
-						if(!callback(ptr, buf, 4)) {
-							return false;
-						}
-						if(!callback(ptr, data + nal_info.data_pos, size)) {
-							return false;
-						}
-						data += nal_info.nal_size;
-						data_size -= nal_info.nal_size;
-					}
-					// post size
-					uint32_t post_size = pre_size + 11;
-					buf[0] = (post_size >> 24) & 0xFF;
-					buf[1] = (post_size >> 16) & 0xFF;
-					buf[2] = (post_size >> 8) & 0xFF;
-					buf[3] = post_size & 0xFF;
-					if(!callback(ptr, buf, 4)) {
-						return false;
-					}
-					return true;
-				}
-				break;
-			default:
-				ERR_PRINT("unexpected h264 type.:%d", h264->type);
-				return false;
-			}
-		}
-		break;
-	case frameType_vp6:
-		break;
-	default:
-		ERR_PRINT("unexpected frame type of flv.");
-		return false;
 	}
-	return false;
+	ttLibC_DynamicBuffer *buffer = ttLibC_DynamicBuffer_make();
+	ttLibC_DynamicBuffer_alloc(buffer, 11);
+	uint8_t *data = ttLibC_DynamicBuffer_refData(buffer);
+	data[0] = 0x09;
+	// size is update later.
+	data[1]  = 0x00;
+	data[2]  = 0x00;
+	data[3]  = 0x00;
+	// get pts from frame information.
+	data[4]  = (frame->pts >> 16) & 0xFF;
+	data[5]  = (frame->pts >> 8) & 0xFF;
+	data[6]  = frame->pts & 0xFF;
+	data[7]  = (frame->pts >> 24) & 0xFF;
+	// streamId...
+	data[8]  = 0x00;
+	data[9]  = 0x00;
+	data[10] = 0x00;
+	// append frame data.
+	ttLibC_FlvFrameManager_getData(
+			frame,
+			buffer);
+	// update size.
+	uint32_t size = ttLibC_DynamicBuffer_refSize(buffer) - 11;
+	data = ttLibC_DynamicBuffer_refData(buffer);
+	data[1]  = (size >> 16) & 0xFF;
+	data[2]  = (size >> 8) & 0xFF;
+	data[3]  = size & 0xFF;
+	// update size 2.
+	uint32_t endSize = ttLibC_DynamicBuffer_refSize(buffer);
+	uint32_t be_endSize = be_uint32_t(endSize);
+	ttLibC_DynamicBuffer_append(buffer, &be_endSize, 4);
+
+	bool result = true;
+	if(callback != NULL) {
+		result = callback(
+				ptr,
+				ttLibC_DynamicBuffer_refData(buffer),
+				ttLibC_DynamicBuffer_refSize(buffer));
+	}
+	ttLibC_DynamicBuffer_close(&buffer);
+	return result;
 }

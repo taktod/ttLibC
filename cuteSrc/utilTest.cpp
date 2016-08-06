@@ -388,6 +388,29 @@ static void dynamicBufferTest() {
 	LOG_DUMP(ttLibC_DynamicBuffer_refData(buffer),
 			ttLibC_DynamicBuffer_refSize(buffer), true);
 	ttLibC_DynamicBuffer_close(&buffer);
+
+	LOG_PRINT("test no.2");
+	buffer = ttLibC_DynamicBuffer_make();
+	ttLibC_DynamicBuffer_alloc(buffer, 11);
+	uint8_t *dd = ttLibC_DynamicBuffer_refData(buffer);
+	dd[0] = 0x09;
+	dd[1] = 0x01;
+	size_t dd_size = ttLibC_DynamicBuffer_refSize(buffer);
+	LOG_DUMP(ttLibC_DynamicBuffer_refData(buffer),
+			ttLibC_DynamicBuffer_refSize(buffer), true);
+	data[0] = 0;
+	data[1] = 1;
+	data[2] = 2;
+	data[3] = 3;
+	data[4] = 4;
+	data[5] = 5;
+	ttLibC_DynamicBuffer_append(buffer, data, 6);
+	LOG_DUMP(ttLibC_DynamicBuffer_refData(buffer),
+			ttLibC_DynamicBuffer_refSize(buffer), true);
+	ttLibC_DynamicBuffer_alloc(buffer, 11);
+	LOG_DUMP(ttLibC_DynamicBuffer_refData(buffer),
+			ttLibC_DynamicBuffer_refSize(buffer), true);
+	ttLibC_DynamicBuffer_close(&buffer);
 	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 

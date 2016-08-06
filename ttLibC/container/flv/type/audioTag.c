@@ -15,6 +15,8 @@
 
 #include "../../../frame/audio/aac.h"
 #include "../../../frame/audio/mp3.h"
+#include "../../../util/dynamicBufferUtil.h"
+#include "../../../util/ioUtil.h"
 
 ttLibC_FlvAudioTag *ttLibC_FlvAudioTag_make(
 		ttLibC_FlvTag *prev_tag,
@@ -140,8 +142,7 @@ ttLibC_FlvAudioTag *ttLibC_FlvAudioTag_getTag(
 		uint8_t *data,
 		size_t data_size) {
 	/**
-	 * 内部メモ
-	 * 1byteフラグ
+	 * 1byte flag
 	 * 3byte size
 	 * 3byte timestamp
 	 * 1byte timestamp-ext
@@ -188,9 +189,6 @@ bool ttLibC_FlvAudioTag_getFrame(
 	size_t left_size = audio_tag->inherit_super.inherit_super.inherit_super.buffer_size;
 	switch(audio_tag->frame_type) {
 	case frameType_aac:
-		// aacの場合は始めのbyteが0なら、mshとなる。
-		// dsiを読み取って、他のaacに追加するべきheader情報を構築しないといけない。
-		// adtsをそこからつくる。
 		if(buffer[0] == 0) {
 			uint8_t *dsi = (uint8_t *)&audio_tag->aac_dsi_info;
 			for(int i = 1;i < left_size;++ i) {
@@ -265,243 +263,77 @@ bool ttLibC_FlvAudioTag_writeTag(
 		ttLibC_Frame *frame,
 		ttLibC_ContainerWriteFunc callback,
 		void *ptr) {
-	uint8_t buf[256];
-	switch(frame->type) {
-	case frameType_aac:
-		{
-			ttLibC_Aac *aac = (ttLibC_Aac *)frame;
-			uint32_t crc32_value = ttLibC_Aac_getConfigCrc32(aac);
-			if(writer->audio_track.crc32 == 0 || writer->audio_track.crc32 != crc32_value) {
-				// if crc32 is changed or first access.
-				// try to write media sequence header.
-				uint8_t dsi[16];
-				size_t size = ttLibC_Aac_readDsiInfo(aac, dsi, sizeof(dsi));
-				if(size == 0) {
-					ERR_PRINT("dsi data size is 0. something wrong.");
-					return false;
-				}
-				// write data.
-				buf[0]  = 0x08;
-				uint32_t pre_size = size + 2;
-				buf[1]  = (pre_size >> 16) & 0xFF;
-				buf[2]  = (pre_size >> 8) & 0xFF;
-				buf[3]  = pre_size & 0xFF;
-				// pts
-				buf[4]  = (aac->inherit_super.inherit_super.pts >> 16) & 0xFF;
-				buf[5]  = (aac->inherit_super.inherit_super.pts >> 8) & 0xFF;
-				buf[6]  = aac->inherit_super.inherit_super.pts & 0xFF;
-				buf[7]  = (aac->inherit_super.inherit_super.pts >> 24) & 0xFF;
-				// track
-				buf[8]  = 0x00;
-				buf[9]  = 0x00;
-				buf[10] = 0x00;
-				// tag
-				buf[11] = 0xA0;
-				buf[11] |= 0x02; // 16bit force.
-				switch(aac->inherit_super.channel_num) {
-				case 1:
-					buf[11] |= 0x00;
-					break;
-				case 2:
-					buf[11] |= 0x01;
-					break;
-				default:
-					return false;
-				}
-				switch(aac->inherit_super.sample_rate) {
-				case 44100:
-					buf[11] |= 0x0C;
-					break;
-				case 22050:
-					buf[11] |= 0x08;
-					break;
-				case 11025:
-					buf[11] |= 0x04;
-					break;
-				case 5512:
-					buf[11] |= 0x00;
-					break;
-				default:
-					return false;
-				}
-				// type
-				buf[12] = 0x00; // msh
-				// header
-				if(!callback(ptr, buf, 13)) {
-					return false;
-				}
-				// body
-				if(!callback(ptr, dsi, size)) {
-					return false;
-				}
-				// post size
-				uint32_t post_size = pre_size + 11;
-				buf[0] = (post_size >> 24) & 0xFF;
-				buf[1] = (post_size >> 16) & 0xFF;
-				buf[2] = (post_size >> 8) & 0xFF;
-				buf[3] = post_size & 0xFF;
-				if(!callback(ptr, buf, 4)) {
-					return false;
-				}
-				writer->audio_track.crc32 = crc32_value;
-			}
-			// write aac raw data.
-			uint8_t *audio_data = aac->inherit_super.inherit_super.data;
-			uint32_t audio_data_size = aac->inherit_super.inherit_super.buffer_size;
-			if(aac->type == AacType_adts) {
-				// for adts, need to skip first 7byte.
-				audio_data += 7;
-				audio_data_size -= 7;
-			}
-			buf[0]  = 0x08;
-			uint32_t pre_size = audio_data_size + 2;
-			buf[1]  = (pre_size >> 16) & 0xFF;
-			buf[2]  = (pre_size >> 8) & 0xFF;
-			buf[3]  = pre_size & 0xFF;
-			// pts
-			buf[4]  = (aac->inherit_super.inherit_super.pts >> 16) & 0xFF;
-			buf[5]  = (aac->inherit_super.inherit_super.pts >> 8) & 0xFF;
-			buf[6]  = aac->inherit_super.inherit_super.pts & 0xFF;
-			buf[7]  = (aac->inherit_super.inherit_super.pts >> 24) & 0xFF;
-			// track
-			buf[8]  = 0x00;
-			buf[9]  = 0x00;
-			buf[10] = 0x00;
-			buf[11] = 0xA0;
-			buf[11] |= 0x02; // 16bit force.
-			switch(aac->inherit_super.channel_num) {
-			case 1:
-				buf[11] |= 0x00;
-				break;
-			case 2:
-				buf[11] |= 0x01;
-				break;
-			default:
-				return false;
-			}
-			switch(aac->inherit_super.sample_rate) {
-			case 44100:
-				buf[11] |= 0x0C;
-				break;
-			case 22050:
-				buf[11] |= 0x08;
-				break;
-			case 11025:
-				buf[11] |= 0x04;
-				break;
-			case 5512:
-				buf[11] |= 0x00;
-				break;
-			default:
-				return false;
-			}
-			// type
-			buf[12] = 0x01;
-			// header
-			if(!callback(ptr, buf, 13)) {
-				return false;
-			}
-			// data_body
-			if(!callback(ptr, audio_data, audio_data_size)) {
-				return false;
-			}
-			// post size.
-			uint32_t post_size = pre_size + 11;
-			buf[0] = (post_size >> 24) & 0xFF;
-			buf[1] = (post_size >> 16) & 0xFF;
-			buf[2] = (post_size >> 8) & 0xFF;
-			buf[3] = post_size & 0xFF;
-			if(!callback(ptr, buf, 4)) {
-				return false;
-			}
+	ttLibC_DynamicBuffer *buffer = ttLibC_DynamicBuffer_make();
+	ttLibC_DynamicBuffer_alloc(buffer, 11);
+	uint8_t *data = ttLibC_DynamicBuffer_refData(buffer);
+	data[0] = 0x08;
+	// size(update later.)
+	data[1]  = 0x00;
+	data[2]  = 0x00;
+	data[3]  = 0x00;
+	// pts from frame information.
+	data[4]  = (frame->pts >> 16) & 0xFF;
+	data[5]  = (frame->pts >> 8) & 0xFF;
+	data[6]  = frame->pts & 0xFF;
+	data[7]  = (frame->pts >> 24) & 0xFF;
+	// streamId
+	data[8]  = 0x00;
+	data[9]  = 0x00;
+	data[10] = 0x00;
+	if(frame->type == frameType_aac) {
+		ttLibC_Aac *aac = (ttLibC_Aac *)frame;
+		// check crc32 to decide msh
+		uint32_t crc32_value = ttLibC_Aac_getConfigCrc32(aac);
+		if(writer->audio_track.crc32 == 0 || writer->audio_track.crc32 != crc32_value) {
+			// add information
+			ttLibC_FlvFrameManager_getAacDsiData(
+					frame,
+					buffer);
+			// update size
+			uint32_t size = ttLibC_DynamicBuffer_refSize(buffer) - 11;
+			data = ttLibC_DynamicBuffer_refData(buffer);
+			data[1]  = (size >> 16) & 0xFF;
+			data[2]  = (size >> 8) & 0xFF;
+			data[3]  = size & 0xFF;
+			uint32_t endSize = ttLibC_DynamicBuffer_refSize(buffer);
+			uint32_t be_endSize = be_uint32_t(endSize);
+			ttLibC_DynamicBuffer_append(buffer, &be_endSize, 4);
 			// done.
-			return true;
-		}
-		break;
-	case frameType_mp3:
-		{
-			ttLibC_Audio *audio = (ttLibC_Audio *)frame;
-			uint8_t *audio_data = audio->inherit_super.data;
-			uint32_t audio_data_size = audio->inherit_super.buffer_size;
-			buf[0]  = 0x08;
-			uint32_t pre_size = audio_data_size + 1;
-			buf[1]  = (pre_size >> 16) & 0xFF;
-			buf[2]  = (pre_size >> 8) & 0xFF;
-			buf[3]  = pre_size & 0xFF;
-			// pts
-			buf[4]  = (audio->inherit_super.pts >> 16) & 0xFF;
-			buf[5]  = (audio->inherit_super.pts >> 8) & 0xFF;
-			buf[6]  = audio->inherit_super.pts & 0xFF;
-			buf[7]  = (audio->inherit_super.pts >> 24) & 0xFF;
-			// track
-			buf[8]  = 0x00;
-			buf[9]  = 0x00;
-			buf[10] = 0x00;
-			if(frame->type == frameType_mp3) {
-				if(audio->sample_rate == 8000) {
-					buf[11] = 0xE0;
-				}
-				else {
-					buf[11] = 0x20;
+			if(callback != NULL) {
+				if(!callback(
+						ptr,
+						ttLibC_DynamicBuffer_refData(buffer),
+						ttLibC_DynamicBuffer_refSize(buffer))) {
+					ttLibC_DynamicBuffer_close(&buffer);
+					return false;
 				}
 			}
-			buf[11] |= 0x02; // 16bit force.
-			switch(audio->channel_num) {
-			case 1:
-				buf[11] |= 0x00;
-				break;
-			case 2:
-				buf[11] |= 0x01;
-				break;
-			default:
-				return false;
-			}
-			switch(audio->sample_rate) {
-			case 44100:
-				buf[11] |= 0x0C;
-				break;
-			case 22050:
-				buf[11] |= 0x08;
-				break;
-			case 11025:
-				buf[11] |= 0x04;
-				break;
-			case 5512:
-				buf[11] |= 0x00;
-				break;
-			default:
-				buf[11] |= 0x00;
-				break;
-			}
-			// header
-			if(!callback(ptr, buf, 12)) {
-				return false;
-			}
-			// data_body
-			if(!callback(ptr, audio_data, audio_data_size)) {
-				return false;
-			}
-			uint32_t post_size = pre_size + 11;
-			buf[0] = (post_size >> 24) & 0xFF;
-			buf[1] = (post_size >> 16) & 0xFF;
-			buf[2] = (post_size >> 8) & 0xFF;
-			buf[3] = post_size & 0xFF;
-			if(!callback(ptr, buf, 4)) {
-				return false;
-			}
-			return true;
+			// update buffer size to 11 byte.
+			ttLibC_DynamicBuffer_alloc(buffer, 11);
+			writer->audio_track.crc32 = crc32_value;
 		}
-		break;
-	case frameType_nellymoser:
-	case frameType_pcmS16:
-	case frameType_pcm_alaw:
-	case frameType_pcm_mulaw:
-	case frameType_speex:
-		LOG_PRINT("no write process for the frame.:%d", frame->type);
-		break;
-	default:
-		ERR_PRINT("unexpected data.");
-		return false;
 	}
-	return false;
+	// add body data.
+	ttLibC_FlvFrameManager_getData(
+			frame,
+			buffer);
+	// update size
+	uint32_t size = ttLibC_DynamicBuffer_refSize(buffer) - 11;
+	data = ttLibC_DynamicBuffer_refData(buffer);
+	data[1]  = (size >> 16) & 0xFF;
+	data[2]  = (size >> 8) & 0xFF;
+	data[3]  = size & 0xFF;
+	uint32_t endSize = ttLibC_DynamicBuffer_refSize(buffer);
+	uint32_t be_endSize = be_uint32_t(endSize);
+	ttLibC_DynamicBuffer_append(buffer, &be_endSize, 4);
+
+	bool result = true;
+	if(callback != NULL) {
+		result = callback(
+				ptr,
+				ttLibC_DynamicBuffer_refData(buffer),
+				ttLibC_DynamicBuffer_refSize(buffer));
+	}
+	ttLibC_DynamicBuffer_close(&buffer);
+	return result;
 }
