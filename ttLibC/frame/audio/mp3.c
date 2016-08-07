@@ -143,7 +143,7 @@ ttLibC_Mp3 *ttLibC_Mp3_clone(
 		ERR_PRINT("try to use non mp3 frame for reuse.");
 		return NULL;
 	}
-	return ttLibC_Mp3_make(
+	ttLibC_Mp3 *mp3 = ttLibC_Mp3_make(
 			prev_frame,
 			src_frame->type,
 			src_frame->inherit_super.sample_rate,
@@ -154,6 +154,10 @@ ttLibC_Mp3 *ttLibC_Mp3_clone(
 			false,
 			src_frame->inherit_super.inherit_super.pts,
 			src_frame->inherit_super.inherit_super.timebase);
+	if(mp3 != NULL) {
+		mp3->inherit_super.inherit_super.id = src_frame->inherit_super.inherit_super.id;
+	}
+	return mp3;
 }
 
 /*

@@ -86,7 +86,7 @@ ttLibC_Flv1 *ttLibC_Flv1_clone(
 		ERR_PRINT("try to use non flv1 frame for reuse.");
 		return NULL;
 	}
-	return ttLibC_Flv1_make(
+	ttLibC_Flv1 *flv1 = ttLibC_Flv1_make(
 			prev_frame,
 			src_frame->type,
 			src_frame->inherit_super.width,
@@ -96,6 +96,10 @@ ttLibC_Flv1 *ttLibC_Flv1_clone(
 			false,
 			src_frame->inherit_super.inherit_super.pts,
 			src_frame->inherit_super.inherit_super.timebase);
+	if(flv1 != NULL) {
+		flv1->inherit_super.inherit_super.id = src_frame->inherit_super.inherit_super.id;
+	}
+	return flv1;
 }
 
 ttLibC_Flv1_Type ttLibC_Flv1_getPictureType(

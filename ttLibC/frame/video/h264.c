@@ -160,7 +160,7 @@ ttLibC_H264 *ttLibC_H264_clone(
 		ERR_PRINT("try to use non h264 frame for reuse.");
 		return NULL;
 	}
-	return ttLibC_H264_make(
+	ttLibC_H264 *h264 = ttLibC_H264_make(
 			prev_frame,
 			src_frame->type,
 			src_frame->inherit_super.width,
@@ -170,6 +170,10 @@ ttLibC_H264 *ttLibC_H264_clone(
 			false,
 			src_frame->inherit_super.inherit_super.pts,
 			src_frame->inherit_super.inherit_super.timebase);
+	if(h264 != NULL) {
+		h264->inherit_super.inherit_super.id = src_frame->inherit_super.inherit_super.id;
+	}
+	return h264;
 }
 
 /*

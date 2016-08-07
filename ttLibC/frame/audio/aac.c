@@ -165,7 +165,7 @@ ttLibC_Aac *ttLibC_Aac_clone(
 		return NULL;
 	}
 	ttLibC_Aac_ *src_frame_ = (ttLibC_Aac_ *)src_frame;
-	return ttLibC_Aac_make(
+	ttLibC_Aac *aac = ttLibC_Aac_make(
 			prev_frame,
 			src_frame->type,
 			src_frame->inherit_super.sample_rate,
@@ -177,6 +177,10 @@ ttLibC_Aac *ttLibC_Aac_clone(
 			src_frame->inherit_super.inherit_super.pts,
 			src_frame->inherit_super.inherit_super.timebase,
 			src_frame_->dsi_info);
+	if(aac != NULL) {
+		aac->inherit_super.inherit_super.id = src_frame->inherit_super.inherit_super.id;
+	}
+	return aac;
 }
 
 /*
