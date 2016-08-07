@@ -89,7 +89,6 @@ static ttLibC_Video *FlvFrameManager_readH264Binary(
 			manager->size_length = size_length;
 			h264->inherit_super.inherit_super.pts = pts;
 			h264->inherit_super.inherit_super.timebase = 1000;
-			manager->video_frame = (ttLibC_Video *)h264;
 			return (ttLibC_Video *)h264;
 		}
 		break;
@@ -126,7 +125,6 @@ static ttLibC_Video *FlvFrameManager_readH264Binary(
 				ERR_PRINT("failed to make h264 data.");
 				return NULL;
 			}
-			manager->video_frame = (ttLibC_Video *)h264;
 			return (ttLibC_Video *)h264;
 		}
 		break;
@@ -163,9 +161,6 @@ ttLibC_Video *ttLibC_FlvFrameManager_readVideoBinary(
 					true,
 					pts,
 					1000);
-			if(video_frame != NULL) {
-				manager_->video_frame = video_frame;
-			}
 		}
 		break;
 	case FlvVideoCodec_screenVideo:
@@ -177,13 +172,20 @@ ttLibC_Video *ttLibC_FlvFrameManager_readVideoBinary(
 	case FlvVideoCodec_screenVideoV2:
 		return NULL;
 	case FlvVideoCodec_avc:
-		return FlvFrameManager_readH264Binary(
-				manager_,
-				buffer + 1,
-				data_size - 1,
-				pts);
+		{
+			video_frame = (ttLibC_Video *)FlvFrameManager_readH264Binary(
+					manager_,
+					buffer + 1,
+					data_size - 1,
+					pts);
+		}
+		break;
 	default:
 		return NULL;
+	}
+	if(video_frame != NULL) {
+		video_frame->inherit_super.id = 9; // flv related system, video id should be 9.
+		manager_->video_frame = video_frame;
 	}
 	return video_frame;
 }
@@ -206,7 +208,6 @@ static ttLibC_Audio *FlvFrameManager_readMp3Binary(
 	if(mp3 == NULL) {
 		return NULL;
 	}
-	manager->audio_frame = (ttLibC_Audio *)mp3;
 	return (ttLibC_Audio *)mp3;
 }
 
@@ -245,7 +246,6 @@ static ttLibC_Audio *FlvFrameManager_readAacBinary(
 				ERR_PRINT("failed to make aac raw frame.");
 				return NULL;
 			}
-			manager->audio_frame = (ttLibC_Audio *)aac;
 			return (ttLibC_Audio *)aac;
 		}
 	default:
@@ -266,6 +266,7 @@ ttLibC_Audio *ttLibC_FlvFrameManager_readAudioBinary(
 	if(data_size <= 1) {
 		return NULL;
 	}
+	ttLibC_Audio *audio = NULL;
 	// 1st byte tells codecID, sampleRate, bitdepth, channelnum
 	switch((*buffer >> 2) & 0x03) {
 	default:
@@ -306,14 +307,17 @@ ttLibC_Audio *ttLibC_FlvFrameManager_readAudioBinary(
 	case FlvAudioCodec_swfAdpcm:
 		return NULL;
 	case FlvAudioCodec_mp3:
-		return FlvFrameManager_readMp3Binary(
-				manager_,
-				sample_rate,
-				bit_depth,
-				channel_num,
-				buffer + 1,
-				data_size - 1,
-				pts);
+		{
+			audio = (ttLibC_Audio *)FlvFrameManager_readMp3Binary(
+					manager_,
+					sample_rate,
+					bit_depth,
+					channel_num,
+					buffer + 1,
+					data_size - 1,
+					pts);
+		}
+		break;
 	case FlvAudioCodec_pcmLittleEndian:
 		return NULL;
 	case FlvAudioCodec_nellymoser16:
@@ -329,14 +333,17 @@ ttLibC_Audio *ttLibC_FlvFrameManager_readAudioBinary(
 	case FlvAudioCodec_reserved:
 		return NULL;
 	case FlvAudioCodec_aac:
-		return FlvFrameManager_readAacBinary(
-				manager_,
-				sample_rate,
-				bit_depth,
-				channel_num,
-				buffer + 1,
-				data_size - 1,
-				pts);
+		{
+			audio = FlvFrameManager_readAacBinary(
+					manager_,
+					sample_rate,
+					bit_depth,
+					channel_num,
+					buffer + 1,
+					data_size - 1,
+					pts);
+		}
+		break;
 	case FlvAudioCodec_speex:
 		return NULL;
 	case FlvAudioCodec_unknown:
@@ -344,18 +351,25 @@ ttLibC_Audio *ttLibC_FlvFrameManager_readAudioBinary(
 	case FlvAudioCodec_undefined:
 		return NULL;
 	case FlvAudioCodec_mp38:
-		return FlvFrameManager_readMp3Binary(
-				manager_,
-				8000,
-				bit_depth,
-				channel_num,
-				buffer + 1,
-				data_size - 1,
-				pts);
+		{
+			audio = (ttLibC_Audio *)FlvFrameManager_readMp3Binary(
+					manager_,
+					8000,
+					bit_depth,
+					channel_num,
+					buffer + 1,
+					data_size - 1,
+					pts);
+		}
+		break;
 	case FlvAudioCodec_deviceSpecific:
 		return NULL;
 	}
-	return NULL;
+	if(audio != NULL) {
+		audio->inherit_super.id = 8;
+		manager_->audio_frame = audio;
+	}
+	return audio;
 }
 
 static bool FlvFrameManager_getAudioCodecByte(
