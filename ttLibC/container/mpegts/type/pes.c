@@ -290,6 +290,7 @@ bool ttLibC_Pes_getFrame(
 				}
 				sample_rate = aac->inherit_super.sample_rate;
 				sample_num_count += aac->inherit_super.sample_num;
+				aac->inherit_super.inherit_super.id = pes->inherit_super.inherit_super.pid;
 				pes->frame = (ttLibC_Frame *)aac;
 				if(!callback(ptr, pes->frame)) {
 					return false;
@@ -315,6 +316,7 @@ bool ttLibC_Pes_getFrame(
 				if(h264 == NULL) {
 					return false;
 				}
+				h264->inherit_super.inherit_super.id = pes->inherit_super.inherit_super.pid;
 				pes->frame = (ttLibC_Frame *)h264;
 				if(!callback(ptr, pes->frame)) {
 					return false;
@@ -349,6 +351,7 @@ bool ttLibC_Pes_getFrame(
 				}
 				sample_rate = mp3->inherit_super.sample_rate;
 				sample_num_count += mp3->inherit_super.sample_num;
+				mp3->inherit_super.inherit_super.id = pes->inherit_super.inherit_super.pid;
 				pes->frame = (ttLibC_Frame *)mp3;
 				if(!callback(ptr, pes->frame)) {
 					return false;
