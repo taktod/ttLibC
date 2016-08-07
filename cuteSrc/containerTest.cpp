@@ -32,10 +32,10 @@ typedef struct {
 static bool mp4Test_getFrameCallback(void *ptr, ttLibC_Frame *frame) {
 	switch(frame->type) {
 	case frameType_h264:
-		LOG_PRINT("h264:%f", 1.0f * frame->pts / frame->timebase);
+		LOG_PRINT("h264:%f, %d", 1.0f * frame->pts / frame->timebase, frame->id);
 		break;
 	case frameType_aac:
-		LOG_PRINT("aac:%f", 1.0f * frame->pts / frame->timebase);
+		LOG_PRINT("aac:%f, %d", 1.0f * frame->pts / frame->timebase, frame->id);
 		break;
 	default:
 		break;

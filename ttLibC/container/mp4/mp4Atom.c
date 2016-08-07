@@ -94,6 +94,7 @@ static bool Mp4Atom_getFrame(
 				ERR_PRINT("failed to make h264 data.");
 				return false;
 			}
+			h264->inherit_super.inherit_super.id = track->track_number;
 			track->frame = (ttLibC_Frame *)h264;
 			if(callback != NULL) {
 				if(!callback(ptr, track->frame)) {
@@ -120,6 +121,7 @@ static bool Mp4Atom_getFrame(
 				ERR_PRINT("failed to make aac data.");
 				return false;
 			}
+			aac->inherit_super.inherit_super.id = track->track_number;
 			track->frame = (ttLibC_Frame *)aac;
 			if(callback != NULL) {
 				if(!callback(ptr, track->frame)) {
@@ -291,6 +293,7 @@ static bool Mp4Atom_analyzeStsd(
 				track->size_length = size_length;
 				h264->inherit_super.inherit_super.pts = 0;
 				h264->inherit_super.inherit_super.timebase = track->timebase;
+				h264->inherit_super.inherit_super.id = track->track_number;
 				track->frame = (ttLibC_Frame *)h264;
 				if(callback != NULL) {
 					if(!callback(ptr, track->frame)) {
