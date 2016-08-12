@@ -28,8 +28,8 @@ extern "C" {
  * reading data status
  */
 typedef enum ttLibC_FlvReader_Status {
-	size,
-	body
+	readSize,
+	readBody
 } ttLibC_FlvReader_Status;
 
 /**

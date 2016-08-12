@@ -29,7 +29,7 @@ ttLibC_FlvReader *ttLibC_FlvReader_make() {
 
 	// first header has not size but data.
 	reader->type        = FlvType_header;
-	reader->status      = body;
+	reader->status      = readBody;
 	reader->target_size = 13;
 
 	reader->tmp_buffer = ttLibC_DynamicBuffer_make();
@@ -124,21 +124,21 @@ bool ttLibC_FlvReader_read(
 			return true; // continue
 		}
 		switch(reader_->status) {
-		case size:
+		case readSize:
 			reader_->type = *buffer;
 			uint32_t tag_size = be_uint32_t(*((uint32_t *)buffer)) & 0x00FFFFFF;
-			reader_->status = body;
+			reader_->status = readBody;
 			reader_->target_size = tag_size + 11 + 4;
 			break;
 		default:
-		case body:
+		case readBody:
 			if(!FlvReader_read(reader_, buffer, reader_->target_size, callback, ptr)) {
 				ttLibC_DynamicBuffer_clear(reader_->tmp_buffer);
 				reader_->is_reading = false;
 				return false;
 			}
 			ttLibC_DynamicBuffer_markAsRead(reader_->tmp_buffer, reader_->target_size);
-			reader_->status = size;
+			reader_->status = readSize;
 			reader_->target_size = 4;
 			break;
 		}
