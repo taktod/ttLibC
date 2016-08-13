@@ -402,6 +402,7 @@ static void avcodecTest() {
 	AVCodecContext *enc = NULL;
 	AVFrame *picture = NULL;
 
+	avcodec_register_all();
 	codec = avcodec_find_encoder(AV_CODEC_ID_FLV1);
 	if(!codec) {
 		ERR_PRINT("failed to get codec information.");
@@ -480,6 +481,9 @@ static void avcodecTest() {
 	uint8_t *outbuf = (uint8_t *)ttLibC_malloc(outbuf_size);
 
 	while(true) {
+		if(!codec || !decodec) {
+			break;
+		}
 		b = ttLibC_CvCapture_queryFrame(capture, bgr);
 		if(b == NULL) {
 			break;
@@ -498,6 +502,9 @@ static void avcodecTest() {
 
 		packet.data = NULL;
 		packet.size = 0;
+		picture->format = AV_PIX_FMT_YUV420P;
+		picture->width = width;
+		picture->height = height;
 		out_size = avcodec_encode_video2(enc, &packet, picture, &got_output);
 		if(out_size != 0) {
 			LOG_PRINT("failed to encode.");
