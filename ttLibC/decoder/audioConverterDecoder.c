@@ -134,10 +134,16 @@ static OSStatus AcDecoder_decodeDataProc(
 		{
 			ttLibC_Aac *aac = (ttLibC_Aac *)audio;
 			// use aac data as raw type.
-			if(aac->type == AacType_adts) {
-				// skip first 7byte(adts header.)
+			switch(aac->type) {
+			case AacType_adts:
 				data += 7;
 				data_size -= 7;
+				break;
+			case AacType_raw:
+				break;
+			case AacType_dsi:
+			default:
+				return 0;
 			}
 		}
 		break;
@@ -171,6 +177,17 @@ bool ttLibC_AcDecoder_decode(
 	}
 	if(audio == NULL) {
 		return true;
+	}
+	if(audio->inherit_super.type == frameType_aac) {
+		ttLibC_Aac *aac = (ttLibC_Aac *)audio;
+		switch(aac->type) {
+		case AacType_raw:
+		case AacType_adts:
+			break;
+		case AacType_dsi:
+		default:
+			return true;
+		}
 	}
 	ttLibC_AcDecoder_ *decoder_ = (ttLibC_AcDecoder_ *)decoder;
 	if(!decoder_->is_pts_initialized) {

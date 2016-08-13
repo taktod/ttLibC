@@ -183,6 +183,67 @@ ttLibC_Aac *ttLibC_Aac_clone(
 	return aac;
 }
 
+static ttLibC_Aac *Aac_getRawFrame(
+		ttLibC_Aac *prev_frame,
+		void *data,
+		size_t data_size,
+		bool non_copy_mode,
+		uint64_t pts,
+		uint32_t timebase) {
+	if(prev_frame == NULL || data_size <= 4) { // 6byte以下にしておいた方がしあわせかも・・・
+		ttLibC_ByteReader *reader = ttLibC_ByteReader_make(data, data_size, ByteUtilType_default);
+		// object_typeを保持しておかないとだめだけど、とりあえずdsi_infoが保持されているので、問題ないわけか・・・
+		uint64_t dsi_info;
+		memcpy(&dsi_info, data, data_size);
+		uint32_t object_type = ttLibC_ByteReader_bit(reader, 5);
+		if(object_type == 31) {
+			object_type = ttLibC_ByteReader_bit(reader, 6);
+		}
+		uint32_t sample_rate_index = ttLibC_ByteReader_bit(reader, 4);
+		uint32_t sample_rate = 44100;
+		if(sample_rate_index == 15) {
+			LOG_PRINT("sample_rate is not in index_table.");
+			sample_rate = ttLibC_ByteReader_bit(reader, 24);
+		}
+		else {
+			sample_rate = sample_rate_table[sample_rate_index];
+		}
+		uint32_t channel_num = ttLibC_ByteReader_bit(reader, 4);
+		ttLibC_ByteReader_close(&reader);
+		// 必要なデータが揃ったぜ。
+		// sample_numは1024固定
+		return ttLibC_Aac_make(
+				prev_frame,
+				AacType_dsi,
+				sample_rate,
+				0,
+				channel_num,
+				data,
+				data_size,
+				true,
+				pts,
+				timebase,
+				dsi_info);
+	}
+	else {
+		// それ以外jのフレームの場合はsample_num、sample_rate、channel_numは前のデータをコピー
+		// といった感じでせめる。
+		ttLibC_Aac_ *aac = prev_frame;
+		return ttLibC_Aac_make(
+				prev_frame,
+				AacType_raw,
+				aac->inherit_super.inherit_super.sample_rate,
+				1024,
+				aac->inherit_super.inherit_super.channel_num,
+				data,
+				data_size,
+				true,
+				pts,
+				timebase,
+				aac->dsi_info);
+	}
+}
+
 /*
  * analyze aac frame and make data.
  * only support adts.
@@ -203,9 +264,16 @@ ttLibC_Aac *ttLibC_Aac_getFrame(
 		uint32_t timebase) {
 	ttLibC_ByteReader *reader = ttLibC_ByteReader_make(data, data_size, ByteUtilType_default);
 	if(ttLibC_ByteReader_bit(reader, 12) != 0xFFF) {
-		ERR_PRINT("sync bit is invalid.");
-		ttLibC_ByteReader_close(&reader);
-		return NULL;
+//		ERR_PRINT("sync bit is invalid.");
+//		ttLibC_ByteReader_close(&reader);
+		// この場合はraw typeのaacである可能性があるため、そっちとして処理しなければならない。
+		return Aac_getRawFrame(
+				prev_frame,
+				data,
+				data_size,
+				non_copy_mode,
+				pts,
+				timebase);
 	}
 	ttLibC_ByteReader_bit(reader, 1);
 	ttLibC_ByteReader_bit(reader, 2);

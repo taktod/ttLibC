@@ -58,6 +58,9 @@ static void mp4Test() {
 //	testData.fp_in = fopen("test.fmp4", "rb");
 	testData.fp_out = fopen("test_out.mp4", "wb");
 	do {
+		if(!testData.fp_in || !testData.fp_out) {
+			break;
+		}
 		uint8_t buffer[65536];
 		size_t read_size = fread(buffer, 1, 65536, testData.fp_in);
 		if(!ttLibC_Mp4Reader_read((ttLibC_Mp4Reader *)testData.reader, buffer, read_size, mp4Test_getMp4Callback, &testData)) {
@@ -111,6 +114,9 @@ static void mkvTest() {
 	testData.fp_out = fopen("test_out.mkv", "wb");
 	do {
 		uint8_t buffer[65536];
+		if(!testData.fp_in) {
+			break;
+		}
 		size_t read_size = fread(buffer, 1, 65536, testData.fp_in);
 		if(!ttLibC_MkvReader_read((ttLibC_MkvReader *)testData.reader, buffer, read_size, mkvTest_getMkvCallback, &testData)) {
 			ERR_PRINT("error occured!");
@@ -201,25 +207,26 @@ static void mp3Test() {
 	testData.reader = (ttLibC_ContainerReader *)ttLibC_Mp3Reader_make();
 	testData.writer = (ttLibC_ContainerWriter *)ttLibC_Mp3Writer_make();
 	testData.fp_in = fopen("test.mp3", "rb");
-	if(testData.fp_in == NULL) {
-		LOG_PRINT("source data is missing.");
-	}
-	else {
-		testData.fp_out = fopen("test_out.mp3", "wb");
-		do {
-			uint8_t buffer[65536];
-			size_t read_size = fread(buffer, 1, 65536, testData.fp_in);
-			if(!ttLibC_Mp3Reader_read((ttLibC_Mp3Reader *)testData.reader, buffer, read_size, mp3Test_getMp3Callback, &testData)) {
-				ERR_PRINT("error occured!");
-				break;
-			}
-		}while(!feof(testData.fp_in));
-		ttLibC_ContainerReader_close(&testData.reader);
-		ttLibC_ContainerWriter_close(&testData.writer);
-		if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
-		if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
-		LOG_PRINT("write size is %d", testData.write_size);
-	}
+	testData.fp_out = fopen("test_out.mp3", "wb");
+	do {
+		uint8_t buffer[65536];
+		if(!testData.fp_in) {
+			break;
+		}
+		if(!testData.fp_out) {
+			break;
+		}
+		size_t read_size = fread(buffer, 1, 65536, testData.fp_in);
+		if(!ttLibC_Mp3Reader_read((ttLibC_Mp3Reader *)testData.reader, buffer, read_size, mp3Test_getMp3Callback, &testData)) {
+			ERR_PRINT("error occured!");
+			break;
+		}
+	}while(!feof(testData.fp_in));
+	ttLibC_ContainerReader_close(&testData.reader);
+	ttLibC_ContainerWriter_close(&testData.writer);
+	if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
+	if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
+	LOG_PRINT("write size is %d", testData.write_size);
 	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
@@ -265,25 +272,23 @@ static void mpegtsTest() {
 			2,
 			15000); // write task with 0.5 sec each.
 	testData.fp_in = fopen("test.ts", "rb");
-	if(testData.fp_in == NULL) {
-		LOG_PRINT("source data is missing.");
-	}
-	else {
-		testData.fp_out = fopen("test_out.ts", "wb");
-		do {
-			uint8_t buffer[65536];
-			size_t read_size = fread(buffer, 1, 65536, testData.fp_in);
-			if(!ttLibC_MpegtsReader_read((ttLibC_MpegtsReader *)testData.reader, buffer, read_size, mpegtsTest_getMpegtsCallback, &testData)) {
-				ERR_PRINT("error occured!");
-				break;
-			}
-		}while(!feof(testData.fp_in));
-		ttLibC_ContainerReader_close(&testData.reader);
-		ttLibC_ContainerWriter_close(&testData.writer);
-		if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
-		if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
-		LOG_PRINT("write size:%lld", testData.write_size);
-	}
+	testData.fp_out = fopen("test_out.ts", "wb");
+	do {
+		if(!testData.fp_in || !testData.fp_out) {
+			break;
+		}
+		uint8_t buffer[65536];
+		size_t read_size = fread(buffer, 1, 65536, testData.fp_in);
+		if(!ttLibC_MpegtsReader_read((ttLibC_MpegtsReader *)testData.reader, buffer, read_size, mpegtsTest_getMpegtsCallback, &testData)) {
+			ERR_PRINT("error occured!");
+			break;
+		}
+	}while(!feof(testData.fp_in));
+	ttLibC_ContainerReader_close(&testData.reader);
+	ttLibC_ContainerWriter_close(&testData.writer);
+	if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
+	if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
+	LOG_PRINT("write size:%lld", testData.write_size);
 	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
@@ -375,25 +380,23 @@ static void flvTest() {
 	testData.reader = (ttLibC_ContainerReader *)ttLibC_FlvReader_make();
 	testData.writer = (ttLibC_ContainerWriter *)ttLibC_FlvWriter_make(frameType_h264, frameType_aac);
 	testData.fp_in = fopen("test.flv", "rb");
-	if(testData.fp_in == NULL) {
-		LOG_PRINT("sample data is missing.");
-	}
-	else {
-		testData.fp_out = fopen("test_out.flv", "wb");
-		do {
-			uint8_t buffer[65536];
-			size_t read_size = fread(buffer, 1, 65536, testData.fp_in);
-			if(!ttLibC_FlvReader_read((ttLibC_FlvReader *)testData.reader, buffer, read_size, flvTest_getFlvCallback, &testData)) {
-				ERR_PRINT("error occured!");
-				break;
-			}
-		}while(!feof(testData.fp_in));
-		ttLibC_ContainerReader_close(&testData.reader);
-		ttLibC_ContainerWriter_close(&testData.writer);
-		if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
-		if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
-		LOG_PRINT("write size:%lld", testData.write_size);
-	}
+	testData.fp_out = fopen("test_out.flv", "wb");
+	do {
+		if(!testData.fp_in || !testData.fp_out) {
+			break;
+		}
+		uint8_t buffer[65536];
+		size_t read_size = fread(buffer, 1, 65536, testData.fp_in);
+		if(!ttLibC_FlvReader_read((ttLibC_FlvReader *)testData.reader, buffer, read_size, flvTest_getFlvCallback, &testData)) {
+			ERR_PRINT("error occured!");
+			break;
+		}
+	}while(!feof(testData.fp_in));
+	ttLibC_ContainerReader_close(&testData.reader);
+	ttLibC_ContainerWriter_close(&testData.writer);
+	if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
+	if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
+	LOG_PRINT("write size:%lld", testData.write_size);
 	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 

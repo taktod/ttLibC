@@ -25,6 +25,8 @@ typedef enum ttLibC_Aac_Type {
 	AacType_raw,
 	/** no global header. */
 	AacType_adts,
+	/** global header for aac raw frame. */
+	AacType_dsi,
 } ttLibC_Aac_Type;
 
 /**

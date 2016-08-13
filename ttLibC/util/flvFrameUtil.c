@@ -225,6 +225,9 @@ static ttLibC_Audio *FlvFrameManager_readAacBinary(
 	switch(*data) {
 	case 0x00:
 		{
+			// これもフレームを応答するようにすべきではある。
+			// フレーム応答するようにすると、dsi情報がはじめにこないこともありうるわけか・・・
+			// こまったね。
 			memcpy(&manager->dsi_info, data + 1, data_size - 1);
 		}
 		return NULL;
@@ -471,10 +474,20 @@ static bool FlvFrameManager_getAacData(
 			buffer)) {
 		return false;
 	}
+	switch(aac->type) {
+	case AacType_adts:
+	case AacType_raw:
+		break;
+	case AacType_dsi:
+	default:
+		return true;
+	}
 	uint8_t data = 0x01;
 	ttLibC_DynamicBuffer_append(buffer, &data, 1);
 	uint8_t *aac_data = aac->inherit_super.inherit_super.data;
 	size_t aac_data_size = aac->inherit_super.inherit_super.buffer_size;
+	// ここでrawTypeの場合は・・・という話しがでてくる。
+	// うーん。
 	if(aac->type == AacType_adts) {
 		aac_data += 7;
 		aac_data_size -= 7;

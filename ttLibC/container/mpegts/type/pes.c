@@ -632,11 +632,16 @@ bool Pes_checkAudioTotalSize(
 	case frameType_aac:
 		{
 			ttLibC_Aac *aac = (ttLibC_Aac *)frame;
-			if(aac->type == AacType_raw) {
+			switch(aac->type) {
+			case AacType_raw:
 				audioData->total_size += frame->buffer_size + 7;
-			}
-			else {
+				break;
+			case AacType_adts:
 				audioData->total_size += frame->buffer_size;
+				break;
+			case AacType_dsi:
+			default:
+				break;
 			}
 		}
 		break;
@@ -675,15 +680,28 @@ bool Pes_writeAudioData(void *ptr, ttLibC_Frame *frame) {
 	}
 	uint8_t aac_header_buf[7];
 	bool is_write_target_body = true;
-	if(frame->type == frameType_aac && ((ttLibC_Aac *)frame)->type == AacType_raw) {
-		if(ttLibC_Aac_readAdtsHeader((ttLibC_Aac *)frame, aac_header_buf, 7) == 0) {
-			LOG_PRINT("failed to get adts header information.");
-			audioData->error_number = 1;
-			return false;
+	// たぶんこれでいいはずだけど・・・ちょっと心配
+	if(frame->type == frameType_aac) {
+		ttLibC_Aac *aac = (ttLibC_Aac *)frame;
+		switch(aac->type) {
+		case AacType_raw:
+			if(ttLibC_Aac_readAdtsHeader((ttLibC_Aac *)frame, aac_header_buf, 7) == 0) {
+				LOG_PRINT("failed to get adts header information.");
+				audioData->error_number = 1;
+				return false;
+			}
+			audioData->data = aac_header_buf;
+			audioData->data_size = 7;
+			is_write_target_body = false;
+			break;
+		case AacType_adts:
+			audioData->data = frame->data;
+			audioData->data_size = frame->buffer_size;
+			break;
+		case AacType_dsi:
+		default:
+ 			return true;
 		}
-		audioData->data = aac_header_buf;
-		audioData->data_size = 7;
-		is_write_target_body = false;
 	}
 	else {
 		audioData->data = frame->data;
