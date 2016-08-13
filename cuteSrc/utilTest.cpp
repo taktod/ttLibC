@@ -520,11 +520,9 @@ static void crc32Test() {
 	ttLibC_Crc32 *crc32 = ttLibC_Crc32_make(0xFFFFFFFFL);
 	uint8_t buf[256] = "123456789";
 	// 2AB104B2
-//	uint32_t size = ttLibC_HexUtil_makeBuffer("00B00D0001C100000001F000", buf, sizeof(buf));
-	uint32_t size = 9;
+	uint32_t size = ttLibC_HexUtil_makeBuffer("00B00D0001C100000001F000", buf, sizeof(buf));
 	uint8_t *data = buf;
 	for(int i = 0;i < size;++ i, ++data) {
-		LOG_PRINT("%c", *data);
 		ttLibC_Crc32_update(crc32, *data);
 	}
 	LOG_PRINT("result:%llu", ttLibC_Crc32_getValue(crc32));
