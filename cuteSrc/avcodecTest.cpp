@@ -398,7 +398,7 @@ static void flv1Test() {
 	ttLibC_Yuv420 *yuv = NULL, *y;
 	avcodecVideoTest_t testData;
 	ttLibC_AvcodecEncoder *encoder = ttLibC_AvcodecVideoEncoder_make_ex(frameType_flv1, width, height, 0, 650000, 100);
-	testData.window  = ttLibC_CvWindow_make("flv1 decode");
+	testData.window  = ttLibC_CvWindow_make("target");
 	testData.bgr     = NULL;
 	testData.decoder = ttLibC_AvcodecVideoDecoder_make(frameType_flv1, width, height);
 	while(true) {
@@ -446,7 +446,7 @@ static void vp8Test() {
 	ttLibC_Yuv420 *yuv = NULL, *y;
 	avcodecVideoTest_t testData;
 	ttLibC_AvcodecEncoder *encoder = ttLibC_AvcodecVideoEncoder_make_ex(frameType_vp8, width, height, 0, 650000, 100);
-	testData.window  = ttLibC_CvWindow_make("vp8 decode");
+	testData.window  = ttLibC_CvWindow_make("target");
 	testData.bgr     = NULL;
 	testData.decoder = ttLibC_AvcodecVideoDecoder_make(frameType_vp8, width, height);
 	while(true) {
@@ -494,7 +494,7 @@ static void wmv1Test() {
 	ttLibC_Yuv420 *yuv = NULL, *y;
 	avcodecVideoTest_t testData;
 	ttLibC_AvcodecEncoder *encoder = ttLibC_AvcodecVideoEncoder_make_ex(frameType_wmv1, width, height, 0, 650000, 100);
-	testData.window  = ttLibC_CvWindow_make("wmv1 decode");
+	testData.window  = ttLibC_CvWindow_make("target");
 	testData.bgr     = NULL;
 	testData.decoder = ttLibC_AvcodecVideoDecoder_make(frameType_wmv1, width, height);
 	while(true) {
@@ -543,7 +543,7 @@ static void wmv2Test() {
 	ttLibC_Yuv420 *yuv = NULL, *y;
 	avcodecVideoTest_t testData;
 	ttLibC_AvcodecEncoder *encoder = ttLibC_AvcodecVideoEncoder_make_ex(frameType_wmv2, width, height, 0, 650000, 15, 12);
-	testData.window  = ttLibC_CvWindow_make("wmv2 decode");
+	testData.window  = ttLibC_CvWindow_make("target");
 	testData.bgr     = NULL;
 	testData.decoder = ttLibC_AvcodecVideoDecoder_make(frameType_wmv2, width, height);
 	while(true) {
@@ -624,7 +624,7 @@ static void h264Test() {
 	enc->flags = CODEC_FLAG_LOOP_FILTER | CODEC_FLAG_CLOSED_GOP | CODEC_FLAG_LOW_DELAY;
 	enc->pix_fmt = AV_PIX_FMT_YUV420P;
 	ttLibC_AvcodecEncoder *encoder = ttLibC_AvcodecEncoder_makeWithAVCodecContext(enc);
-	testData.window  = ttLibC_CvWindow_make("h264 decode");
+	testData.window  = ttLibC_CvWindow_make("target");
 	testData.bgr     = NULL;
 	testData.decoder = ttLibC_AvcodecVideoDecoder_make(frameType_h264, width, height);
 	while(true) {

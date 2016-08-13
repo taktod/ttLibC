@@ -369,7 +369,7 @@ static bool rtmpWatchTest_onStatusEventCallback(
 			ttLibC_RtmpStream_setBufferLength(testData->stream, 1000); // bufferLength = 1;
 			ttLibC_RtmpStream_addEventListener(testData->stream, rtmpWatchTest_onStatusEventCallback, testData);
 			ttLibC_RtmpStream_addFrameListener(testData->stream, rtmpWatchTest_getFrameCallback, testData);
-			testData->window = ttLibC_CvWindow_make("watch");
+			testData->window = ttLibC_CvWindow_make("target");
 			ttLibC_RtmpStream_play(testData->stream, "test", true, true);
 		}
 	}

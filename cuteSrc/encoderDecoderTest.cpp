@@ -278,7 +278,7 @@ static void theoraTest() {
 	uint32_t width = 320, height = 240;
 	ttLibC_CvCapture *capture = ttLibC_CvCapture_make(0, width, height);
 	ttLibC_CvWindow *window = ttLibC_CvWindow_make("original");
-	ttLibC_CvWindow *dec_win = ttLibC_CvWindow_make("decode");
+	ttLibC_CvWindow *dec_win = ttLibC_CvWindow_make("target");
 	ttLibC_TheoraEncoder *encoder = ttLibC_TheoraEncoder_make(width, height);
 	ttLibC_TheoraDecoder *decoder = ttLibC_TheoraDecoder_make();
 	ttLibC_Bgr    *b, *bgr = NULL, *dbgr = NULL;
@@ -598,7 +598,7 @@ static void x264Test() {
 	uint32_t width = 320, height = 240;
 	ttLibC_CvCapture *capture = ttLibC_CvCapture_make(0, width, height);
 	ttLibC_CvWindow *window = ttLibC_CvWindow_make("original");
-	ttLibC_CvWindow *dec_win = ttLibC_CvWindow_make("decode");
+	ttLibC_CvWindow *dec_win = ttLibC_CvWindow_make("target");
 	ttLibC_X264Encoder *encoder = ttLibC_X264Encoder_make(width, height);
 	ttLibC_Openh264Decoder *decoder = ttLibC_Openh264Decoder_make();
 	ttLibC_Bgr *bgr = NULL, *dbgr = NULL, *b;
@@ -674,7 +674,7 @@ static void jpegTest() {
 	ttLibC_Yuv420 *yuv = NULL, *y;
 	jpegTestData testData;
 	testData.dbgr = NULL;
-	testData.dec_win = ttLibC_CvWindow_make("decoded");
+	testData.dec_win = ttLibC_CvWindow_make("target");
 	testData.decoder = ttLibC_JpegDecoder_make();
 	while(true) {
 		b = ttLibC_CvCapture_queryFrame(capture, bgr);
@@ -876,7 +876,7 @@ static void openh264Test() {
 	uint32_t width = 320, height = 240;
 	ttLibC_CvCapture       *capture = ttLibC_CvCapture_make(0, width, height);
 	ttLibC_CvWindow        *window  = ttLibC_CvWindow_make("original");
-	ttLibC_CvWindow        *dec_win = ttLibC_CvWindow_make("decode");
+	ttLibC_CvWindow        *dec_win = ttLibC_CvWindow_make("target");
 	ttLibC_Openh264Encoder *encoder = ttLibC_Openh264Encoder_make(width, height);
 	ttLibC_Openh264Decoder *decoder = ttLibC_Openh264Decoder_make();
 	ttLibC_Bgr    *bgr = NULL, *dbgr = NULL, *b;
@@ -1022,8 +1022,8 @@ static void imageResamplerTest() {
 	LOG_PRINT("imageResamplerTest");
 #ifdef __ENABLE_OPENCV__
 	ttLibC_CvCapture *capture = ttLibC_CvCapture_make(0, 320, 240);
-	ttLibC_CvWindow *window = ttLibC_CvWindow_make("opencvTest");
-	ttLibC_CvWindow *resampled_window = ttLibC_CvWindow_make("resampled");
+	ttLibC_CvWindow *window = ttLibC_CvWindow_make("original");
+	ttLibC_CvWindow *resampled_window = ttLibC_CvWindow_make("target");
 	ttLibC_Bgr *bgr = NULL;
 	ttLibC_Yuv420 *yuv420 = NULL;
 	ttLibC_Bgr *resampled_bgr = NULL;

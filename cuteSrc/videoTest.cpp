@@ -53,7 +53,7 @@ static void daalaTest() {
 	uint32_t width = 320, height = 240;
 	ttLibC_CvCapture *capture = ttLibC_CvCapture_make(0, width, height);
 	ttLibC_CvWindow *window   = ttLibC_CvWindow_make("original");
-	ttLibC_CvWindow *dec_win  = ttLibC_CvWindow_make("decode");
+	ttLibC_CvWindow *dec_win  = ttLibC_CvWindow_make("target");
 
 	ttLibC_Bgr    *bgr = NULL, *dbgr = NULL, *b;
 	ttLibC_Yuv420 *yuv = NULL, *dyuv = NULL, *y;
@@ -216,7 +216,7 @@ static void theoraTest() {
 	uint32_t width = 320, height = 240;
 	ttLibC_CvCapture *capture = ttLibC_CvCapture_make(0, width, height);
 	ttLibC_CvWindow *window   = ttLibC_CvWindow_make("original");
-	ttLibC_CvWindow *dec_win  = ttLibC_CvWindow_make("decode");
+	ttLibC_CvWindow *dec_win  = ttLibC_CvWindow_make("target");
 
 	ttLibC_Bgr    *bgr = NULL, *dbgr = NULL, *b;
 	ttLibC_Yuv420 *yuv = NULL, *dyuv = NULL, *y;
@@ -394,7 +394,7 @@ static void avcodecTest() {
 	uint32_t width=320, height=240;
 	ttLibC_CvCapture *capture = ttLibC_CvCapture_make(0, width, height);
 	ttLibC_CvWindow *window   = ttLibC_CvWindow_make("original");
-	ttLibC_CvWindow *dec_win  = ttLibC_CvWindow_make("decoded");
+	ttLibC_CvWindow *dec_win  = ttLibC_CvWindow_make("target");
 	ttLibC_Bgr    *bgr = NULL, *b, *dbgr = NULL;
 	ttLibC_Yuv420 *yuv = NULL, *y, *dyuv = NULL;
 
@@ -699,7 +699,7 @@ static void openh264Test() {
 
 	ttLibC_CvCapture *capture = ttLibC_CvCapture_make(0, width, height);
 	ttLibC_CvWindow *window = ttLibC_CvWindow_make("original");
-	ttLibC_CvWindow *decode_window = ttLibC_CvWindow_make("decode");
+	ttLibC_CvWindow *decode_window = ttLibC_CvWindow_make("target");
 	// try to encode.
 	ttLibC_Bgr *bgr = NULL, *b;
 	ttLibC_Yuv420 *yuv = NULL, *y;
