@@ -14,6 +14,8 @@
 #include "../../log.h"
 
 #include <sys/time.h>
+#include <stdlib.h>
+#include <time.h>
 
 /*
  * make promise
