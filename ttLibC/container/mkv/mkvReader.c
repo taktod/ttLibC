@@ -89,6 +89,7 @@ static bool MkvReader_readTag(
 			}
 		}
 		break;
+	case MkvType_FlagInterlaced:
 	case MkvType_CodecName:
 	case MkvType_FrameRate:
 	case MkvType_Cues:
