@@ -50,6 +50,42 @@ ttLibC_Vp9 *ttLibC_Vp9_make(
 			timebase);
 }
 
+/**
+ * make clone frame.
+ * always make copy buffer on it.
+ * @param prev_frame reuse frame object.
+ * @param src_frame  source of clone.
+ */
+ttLibC_Vp9 *ttLibC_Vp9_clone(
+		ttLibC_Vp9 *prev_frame,
+		ttLibC_Vp9 *src_frame) {
+	if(src_frame == NULL) {
+		return NULL;
+	}
+	if(src_frame->inherit_super.inherit_super.type != frameType_vp9) {
+		ERR_PRINT("try to clone non vp9 frame.");
+		return NULL;
+	}
+	if(prev_frame != NULL && prev_frame->inherit_super.inherit_super.type != frameType_vp9) {
+		ERR_PRINT("try to use non vp9 frame for reuse.");
+		return NULL;
+	}
+	ttLibC_Vp9 *vp9 = ttLibC_Vp9_make(
+			prev_frame,
+			src_frame->inherit_super.type,
+			src_frame->inherit_super.width,
+			src_frame->inherit_super.height,
+			src_frame->inherit_super.inherit_super.data,
+			src_frame->inherit_super.inherit_super.buffer_size,
+			false,
+			src_frame->inherit_super.inherit_super.pts,
+			src_frame->inherit_super.inherit_super.timebase);
+	if(vp9 != NULL) {
+		vp9->inherit_super.inherit_super.id = src_frame->inherit_super.inherit_super.id;
+	}
+	return vp9;
+}
+
 /*
  * check if the vp9 binary is key frame.
  * @param data      vp9 data
@@ -173,7 +209,7 @@ uint32_t ttLibC_Vp9_getHeight(ttLibC_Vp9 *prev_frame, uint8_t *data, size_t data
 			ERR_PRINT("ref frame is missing.");
 			return 0;
 		}
-		return prev_frame->inherit_super.width;
+		return prev_frame->inherit_super.height;
 	}
 	uint32_t startCode1 = ttLibC_ByteReader_bit(reader, 8);
 	uint32_t startCode2 = ttLibC_ByteReader_bit(reader, 8);
@@ -222,6 +258,7 @@ ttLibC_Vp9 *ttLibC_Vp9_getFrame(
 	bool isKey = ttLibC_Vp9_isKey(data, data_size);
 	uint32_t width = ttLibC_Vp9_getWidth(prev_frame, data, data_size);
 	uint32_t height = ttLibC_Vp9_getHeight(prev_frame, data, data_size);
+	LOG_PRINT("width x height: %d x %d", width, height);
 	if(width == 0 || height == 0) {
 		return NULL;
 	}
