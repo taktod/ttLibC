@@ -15,11 +15,11 @@
 #include "../../../util/byteUtil.h"
 #include "../../../frame/video/h264.h"
 #include "../../../frame/video/vp8.h"
+#include "../../../frame/video/vp9.h"
 #include "../../../frame/audio/aac.h"
 #include "../../../frame/audio/opus.h"
 #include "../../../frame/audio/vorbis.h"
 #include "../../../frame/audio/mp3.h"
-
 
 static void SimpleBlock_getLace0Frame(
 		ttLibC_MkvReader_ *reader,
@@ -132,6 +132,30 @@ static void SimpleBlock_getLace0Frame(
 			}
 		}
 		break;
+	case frameType_vp9:
+		{
+			ttLibC_Vp9 *vp9 = ttLibC_Vp9_getFrame(
+					(ttLibC_Vp9 *)track->frame,
+					data,
+					data_size,
+					true,
+					pts,
+					timebase);
+			if(vp9 == NULL) {
+				ERR_PRINT("failed to make vp9 data.");
+				reader->error_number = 5;
+			}
+			else {
+				track->frame = (ttLibC_Frame *)vp9;
+				track->frame->id = track->track_number;
+				if(callback != NULL) {
+					if(!callback(ptr, track->frame)) {
+						reader->error_number = 5;
+					}
+				}
+			}
+		}
+		break;
 	case frameType_opus:
 		{
 			ttLibC_Opus *opus = ttLibC_Opus_makeFrame(
@@ -234,7 +258,7 @@ bool ttLibC_SimpleBlock_getFrame(
 		case 2:
 		case 3:
 		default:
-			ERR_PRINT("不明なlacingでした。");
+			ERR_PRINT("unknown lacing. make later.");
 			reader->error_number = 5;
 			break;
 		}

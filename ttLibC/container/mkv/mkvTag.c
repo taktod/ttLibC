@@ -47,6 +47,10 @@ bool ttLibC_Mkv_getFrame(ttLibC_Mkv *mkv, ttLibC_getFrameFunc callback, void *pt
 	case MkvType_SimpleBlock:
 		// just now, only simpleBlock support to get frame.
 		return ttLibC_SimpleBlock_getFrame((ttLibC_MkvTag *)mkv, callback, ptr);
+	case MkvType_Block:
+		LOG_PRINT("block");
+//		return ttLibC_Block_getFrame()
+		return ttLibC_SimpleBlock_getFrame((ttLibC_MkvTag *)mkv, callback, ptr);
 	default:
 		return true;
 	}

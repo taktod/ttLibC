@@ -57,6 +57,7 @@ static bool MkvReader_readTag(
 		return false;
 	}
 	switch(type) {
+	case MkvType_BlockGroup:
 	case MkvType_TrackEntry:
 	case MkvType_Segment:
 	case MkvType_Info:
@@ -89,6 +90,10 @@ static bool MkvReader_readTag(
 			}
 		}
 		break;
+	case MkvType_DiscardPadding:
+	case MkvType_Block:
+	case MkvType_SeekPreRoll:
+	case MkvType_CodecDelay:
 	case MkvType_FlagInterlaced:
 	case MkvType_CodecName:
 	case MkvType_FrameRate:
@@ -108,7 +113,7 @@ static bool MkvReader_readTag(
 	case MkvType_TrackType:
 	case MkvType_CodecID:
 	case MkvType_Language:
- 	case MkvType_FlagLacing:
+	case MkvType_FlagLacing:
 	case MkvType_TrackUID:
 	case MkvType_TrackNumber:
 	case MkvType_Duration:
@@ -140,6 +145,12 @@ static bool MkvReader_readTag(
 				return false;
 			}
 			switch(type) {
+			case MkvType_CodecDelay:
+				{
+					uint32_t delay = ttLibC_ByteReader_bit(byte_reader, size * 8);
+					LOG_PRINT("delay:%d", delay); // should I consider this? do later.
+				}
+				break;
 			case MkvType_TimecodeScale:
 				{
 					uint32_t timescale = ttLibC_ByteReader_bit(byte_reader, size * 8);
@@ -245,6 +256,9 @@ static bool MkvReader_readTag(
 						else if(strcmp(codecId, "V_VP8") == 0) {
 							reader->track->type = frameType_vp8;
 						}
+						else if(strcmp(codecId, "V_VP9") == 0) {
+							reader->track->type = frameType_vp9;
+						}
 						else if(strcmp(codecId, "A_OPUS") == 0) {
 							reader->track->type = frameType_opus;
 						}
@@ -304,10 +318,10 @@ static bool MkvReader_readTag(
 		break;
 	default:
 		LOG_PRINT("unknown tag.:%x", type);
+		LOG_DUMP(data, data_size, true);
 		reader->error_number = 1;
 		break;
 	}
-	// ここまできたら、読み込んだデータによって、tracksのサイズを引いていく。
 	if(reader->error_number == 0) {
 		reader->error_number = byte_reader->error_number;
 	}
