@@ -65,6 +65,16 @@ ttLibC_Opus *ttLibC_Opus_make(
 		uint32_t timebase);
 
 /**
+ * make clone frame
+ * always make copy buffer on it.
+ * @param prev_frame reuse frame object.
+ * @param src_frame  source of clone.
+ */
+ttLibC_Opus *ttLibC_Opus_clone(
+		ttLibC_Opus *prev_frame,
+		ttLibC_Opus *src_frame);
+
+/**
  * make opus frame from byte data.
  * @param prev_frame reuse opus frame.
  * @param data       opus binary data.

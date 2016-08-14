@@ -147,7 +147,10 @@ ttLibC_Audio *ttLibC_Audio_clone(
 				(ttLibC_Mp3 *)prev_frame,
 				(ttLibC_Mp3 *)src_frame);
 //	case frameType_nellymoser:
-//	case frameType_opus:
+	case frameType_opus:
+		return (ttLibC_Audio *)ttLibC_Opus_clone(
+				(ttLibC_Opus *)prev_frame,
+				(ttLibC_Opus *)src_frame);
 //	case frameType_pcm_alaw:
 //	case frameType_pcmF32:
 //		return (ttLibC_Audio *)ttLibC_PcmF32
