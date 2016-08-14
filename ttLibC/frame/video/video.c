@@ -161,7 +161,10 @@ ttLibC_Video *ttLibC_Video_clone(
 //	case frameType_h265:
 //	case frameType_theora:
 //	case frameType_vp6:
-//	case frameType_vp8:
+	case frameType_vp8:
+		return (ttLibC_Video *)ttLibC_Vp8_clone(
+				(ttLibC_Vp8 *)prev_frame,
+				(ttLibC_Vp8 *)src_frame);
 //	case frameType_vp9:
 //	case frameType_wmv1:
 //	case frameType_wmv2:

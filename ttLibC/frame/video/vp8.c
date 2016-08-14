@@ -49,6 +49,42 @@ ttLibC_Vp8 *ttLibC_Vp8_make(
 			timebase);
 }
 
+/**
+ * make clone frame.
+ * always make copy buffer on it.
+ * @param prev_frame reuse frame object.
+ * @param src_frame  source of clone.
+ */
+ttLibC_Vp8 *ttLibC_Vp8_clone(
+		ttLibC_Vp8 *prev_frame,
+		ttLibC_Vp8 *src_frame) {
+	if(src_frame == NULL) {
+		return NULL;
+	}
+	if(src_frame->inherit_super.inherit_super.type != frameType_vp8) {
+		ERR_PRINT("try to clone non vp8 frame.");
+		return NULL;
+	}
+	if(prev_frame != NULL && prev_frame->inherit_super.inherit_super.type != frameType_vp8) {
+		ERR_PRINT("try to use non vp8 frame for reuse.");
+		return NULL;
+	}
+	ttLibC_Vp8 *vp8 = ttLibC_Vp8_make(
+			prev_frame,
+			src_frame->inherit_super.type,
+			src_frame->inherit_super.width,
+			src_frame->inherit_super.height,
+			src_frame->inherit_super.inherit_super.data,
+			src_frame->inherit_super.inherit_super.buffer_size,
+			false,
+			src_frame->inherit_super.inherit_super.pts,
+			src_frame->inherit_super.inherit_super.timebase);
+	if(vp8 != NULL) {
+		vp8->inherit_super.inherit_super.id = src_frame->inherit_super.inherit_super.id;
+	}
+	return vp8;
+}
+
 /*
  * check if the vp8 binary is key frame.
  * @param data      vp8 data
