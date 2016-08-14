@@ -151,6 +151,7 @@ ttLibC_Video *ttLibC_FlvFrameManager_readVideoBinary(
 	ttLibC_Video *video_frame = NULL;
 	switch((*buffer) & 0x0F) {
 	case FlvVideoCodec_jpeg:
+		ERR_PRINT("jpeg is not ready.");
 		return NULL;
 	case FlvVideoCodec_flv1:
 		{
@@ -164,12 +165,16 @@ ttLibC_Video *ttLibC_FlvFrameManager_readVideoBinary(
 		}
 		break;
 	case FlvVideoCodec_screenVideo:
+		ERR_PRINT("screenVideo is not ready.");
 		return NULL;
 	case FlvVideoCodec_on2Vp6:
+		ERR_PRINT("vp6 is not ready.");
 		return NULL;
 	case FlvVideoCodec_on2Vp6Alpha:
+		ERR_PRINT("vp6 alpha is not ready.");
 		return NULL;
 	case FlvVideoCodec_screenVideoV2:
+		ERR_PRINT("screenVideoV2 is not ready.");
 		return NULL;
 	case FlvVideoCodec_avc:
 		{
@@ -181,6 +186,7 @@ ttLibC_Video *ttLibC_FlvFrameManager_readVideoBinary(
 		}
 		break;
 	default:
+		ERR_PRINT("unknown codec is not ready.");
 		return NULL;
 	}
 	if(video_frame != NULL) {
@@ -225,9 +231,6 @@ static ttLibC_Audio *FlvFrameManager_readAacBinary(
 	switch(*data) {
 	case 0x00:
 		{
-			// これもフレームを応答するようにすべきではある。
-			// フレーム応答するようにすると、dsi情報がはじめにこないこともありうるわけか・・・
-			// こまったね。
 			memcpy(&manager->dsi_info, data + 1, data_size - 1);
 			ttLibC_Aac *aac = ttLibC_Aac_make(
 					(ttLibC_Aac *)manager->audio_frame,
@@ -322,8 +325,10 @@ ttLibC_Audio *ttLibC_FlvFrameManager_readAudioBinary(
 	}
 	switch((*buffer >> 4) & 0x0F) {
 	case FlvAudioCodec_pcmBigEndian:
+		ERR_PRINT("pcmbe is not ready.");
 		return NULL;
 	case FlvAudioCodec_swfAdpcm:
+		ERR_PRINT("swfAdpcm is not ready.");
 		return NULL;
 	case FlvAudioCodec_mp3:
 		{
@@ -338,16 +343,22 @@ ttLibC_Audio *ttLibC_FlvFrameManager_readAudioBinary(
 		}
 		break;
 	case FlvAudioCodec_pcmLittleEndian:
+		ERR_PRINT("pcmle is not ready.");
 		return NULL;
 	case FlvAudioCodec_nellymoser16:
+		ERR_PRINT("nellymoser 16 is not ready.");
 		return NULL;
 	case FlvAudioCodec_nellymoser8:
+		ERR_PRINT("nellymoser 8 is not ready.");
 		return NULL;
 	case FlvAudioCodec_nellymoser:
+		ERR_PRINT("nellymoser is not ready.");
 		return NULL;
 	case FlvAudioCodec_pcmAlaw:
+		ERR_PRINT("pcm alaw is not ready.");
 		return NULL;
 	case FlvAudioCodec_pcmMulaw:
+		ERR_PRINT("pcm mulaw is not ready.");
 		return NULL;
 	case FlvAudioCodec_reserved:
 		return NULL;
@@ -364,6 +375,7 @@ ttLibC_Audio *ttLibC_FlvFrameManager_readAudioBinary(
 		}
 		break;
 	case FlvAudioCodec_speex:
+		ERR_PRINT("speex alaw is not ready.");
 		return NULL;
 	case FlvAudioCodec_unknown:
 		return NULL;
@@ -514,6 +526,22 @@ static bool FlvFrameManager_getAacData(
 static bool FlvFrameManager_getFlv1Data(
 		ttLibC_Flv1 *flv1,
 		ttLibC_DynamicBuffer *buffer) {
+	uint8_t codecByte[1] = {FlvVideoCodec_flv1};
+	switch(flv1->type) {
+	case Flv1Type_intra:
+		codecByte[0] |= 0x10;
+		break;
+	case Flv1Type_inner:
+		codecByte[0] |= 0x20;
+		break;
+	case Flv1Type_disposableInner:
+		codecByte[0] |= 0x30;
+		break;
+	default:
+		return false;
+	}
+	ttLibC_DynamicBuffer_append(buffer, codecByte, 1);
+	ttLibC_DynamicBuffer_append(buffer, flv1->inherit_super.inherit_super.data, flv1->inherit_super.inherit_super.buffer_size);
 	return true;
 }
 
@@ -583,32 +611,43 @@ static bool FlvFrameManager_getH264Data(
 static bool FlvFrameManager_getMp3Data(
 		ttLibC_Mp3 *mp3,
 		ttLibC_DynamicBuffer *buffer) {
+	if(!FlvFrameManager_getAudioCodecByte(
+			(ttLibC_Audio *)mp3,
+			buffer)) {
+		return false;
+	}
+	ttLibC_DynamicBuffer_append(buffer, mp3->inherit_super.inherit_super.data, mp3->inherit_super.inherit_super.buffer_size);
 	return true;
 }
 static bool FlvFrameManager_getNellymoserData(
 		ttLibC_Nellymoser *nellymoser,
 		ttLibC_DynamicBuffer *buffer) {
-	return true;
+	ERR_PRINT("FlvFrameManager_getNellymoserData is not ready");
+	return false;
 }
 static bool FlvFrameManager_getPcmAlawData(
 		ttLibC_PcmAlaw *pcm_alaw,
 		ttLibC_DynamicBuffer *buffer) {
-	return true;
+	ERR_PRINT("FlvFrameManager_getPcmAlawData is not ready");
+	return false;
 }
 static bool FlvFrameManager_getPcmMulawData(
 		ttLibC_PcmMulaw *pcm_mulaw,
 		ttLibC_DynamicBuffer *buffer) {
-	return true;
+	ERR_PRINT("FlvFrameManager_getPcmMulawData is not ready");
+	return false;
 }
 static bool FlvFrameManager_getSpeexData(
 		ttLibC_Speex *speex,
 		ttLibC_DynamicBuffer *buffer) {
-	return true;
+	ERR_PRINT("FlvFrameManager_getSpeexData is not ready");
+	return false;
 }
 static bool FlvFrameManager_getVp6Data(
 		ttLibC_Vp6 *vp6,
 		ttLibC_DynamicBuffer *buffer) {
-	return true;
+	ERR_PRINT("FlvFrameManager_getVp6Data is not ready");
+	return false;
 }
 
 bool ttLibC_FlvFrameManager_getData(
