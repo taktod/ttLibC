@@ -90,6 +90,7 @@ ttLibC_Aac *ttLibC_Aac_make(
 	switch(type) {
 	case AacType_adts:
 	case AacType_raw:
+	case AacType_dsi:
 		break;
 	default:
 		ERR_PRINT("unknown aac type.%d", type);
@@ -264,9 +265,7 @@ ttLibC_Aac *ttLibC_Aac_getFrame(
 		uint32_t timebase) {
 	ttLibC_ByteReader *reader = ttLibC_ByteReader_make(data, data_size, ByteUtilType_default);
 	if(ttLibC_ByteReader_bit(reader, 12) != 0xFFF) {
-//		ERR_PRINT("sync bit is invalid.");
-//		ttLibC_ByteReader_close(&reader);
-		// この場合はraw typeのaacである可能性があるため、そっちとして処理しなければならない。
+		ttLibC_ByteReader_close(&reader);
 		return Aac_getRawFrame(
 				prev_frame,
 				data,
