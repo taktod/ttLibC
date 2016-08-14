@@ -229,8 +229,24 @@ static ttLibC_Audio *FlvFrameManager_readAacBinary(
 			// フレーム応答するようにすると、dsi情報がはじめにこないこともありうるわけか・・・
 			// こまったね。
 			memcpy(&manager->dsi_info, data + 1, data_size - 1);
+			ttLibC_Aac *aac = ttLibC_Aac_make(
+					(ttLibC_Aac *)manager->audio_frame,
+					AacType_dsi,
+					sample_rate,
+					0,
+					channel_num,
+					data + 1,
+					data_size - 1,
+					true,
+					pts,
+					1000,
+					manager->dsi_info);
+			if(aac == NULL) {
+				ERR_PRINT("failed to make aac dsi frame.");
+				return NULL;
+			}
+			return (ttLibC_Audio *)aac;
 		}
-		return NULL;
 	case 0x01:
 		{
 			ttLibC_Aac *aac = ttLibC_Aac_make(
