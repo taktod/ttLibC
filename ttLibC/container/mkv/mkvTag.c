@@ -14,6 +14,7 @@
 #include "../../log.h"
 #include "../../allocator.h"
 #include "../../frame/video/h264.h"
+#include "../../frame/audio/aac.h"
 #include "../../frame/audio/vorbis.h"
 #include <string.h>
 
@@ -102,6 +103,28 @@ void ttLibC_MkvTag_getPrivateDataFrame(
 	case frameType_aac:
 		{
 			memcpy(&track->dsi_info, private_data, private_data_size);
+			// try to callback data.
+			ttLibC_Aac *aac = ttLibC_Aac_make(
+					NULL,
+					AacType_dsi,
+					track->sample_rate,
+					0,
+					track->channel_num,
+					private_data,
+					private_data_size,
+					true,
+					0,
+					reader_->timebase,
+					track->dsi_info);
+			if(aac != NULL) {
+				aac->inherit_super.inherit_super.id = track->track_number;
+				track->frame = (ttLibC_Frame *)aac;
+				if(callback != NULL) {
+					if(!callback(ptr, track->frame)) {
+						reader_->error_number = 5;
+					}
+				}
+			}
 		}
 		break;
 	case frameType_vorbis:
