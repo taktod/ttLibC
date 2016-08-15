@@ -127,6 +127,11 @@ nobase_include_HEADERS += \
 	ttLibC/encoder/x264Encoder.h
 endif
 
+if ENABLE_X265
+nobase_include_HEADERS += \
+	ttLibC/encoder/x265Encoder.h
+endif
+
 if ENABLE_THEORA
 nobase_include_HEADERS += \
 	ttLibC/encoder/theoraEncoder.h \
