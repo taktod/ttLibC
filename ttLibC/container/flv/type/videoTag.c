@@ -136,7 +136,7 @@ bool ttLibC_FlvVideoTag_getFrame(
 			video_tag->inherit_super.inherit_super.inherit_super.pts);
 	if(video != NULL) {
 		if(callback != NULL) {
-			if(!callback(ptr, video)) {
+			if(!callback(ptr, (ttLibC_Frame *)video)) {
 				return false;
 			}
 		}
@@ -190,7 +190,7 @@ bool ttLibC_FlvVideoTag_writeTag(
 	// update size 2.
 	uint32_t endSize = ttLibC_DynamicBuffer_refSize(buffer);
 	uint32_t be_endSize = be_uint32_t(endSize);
-	ttLibC_DynamicBuffer_append(buffer, &be_endSize, 4);
+	ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_endSize, 4);
 
 	bool result = true;
 	if(callback != NULL) {
