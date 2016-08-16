@@ -67,7 +67,6 @@ ttLibC_Flv1 *ttLibC_Flv1_clone(
 		ttLibC_Flv1 *prev_frame,
 		ttLibC_Flv1 *src_frame);
 
-
 ttLibC_Flv1_Type ttLibC_Flv1_getPictureType(
 		void *data,
 		size_t data_size);

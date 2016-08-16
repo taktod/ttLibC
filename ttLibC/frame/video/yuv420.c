@@ -195,6 +195,17 @@ ttLibC_Yuv420 *Yvu420_cloneSemiPlanar(
 ttLibC_Yuv420 *ttLibC_Yuv420_clone(
 		ttLibC_Yuv420 *prev_frame,
 		ttLibC_Yuv420 *src_frame) {
+	if(src_frame == NULL) {
+		return NULL;
+	}
+	if(src_frame->inherit_super.inherit_super.type != frameType_yuv420) {
+		ERR_PRINT("try to clone non yuv420 frame.");
+		return NULL;
+	}
+	if(prev_frame != NULL && prev_frame->inherit_super.inherit_super.type != frameType_yuv420) {
+		ERR_PRINT("try to use non yuv420 frame for reuse.");
+		return NULL;
+	}
 	ttLibC_Yuv420 *yuv = NULL;
 	switch(src_frame->type) {
 	case Yuv420Type_planar:
