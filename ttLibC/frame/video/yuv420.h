@@ -98,6 +98,16 @@ ttLibC_Yuv420 *ttLibC_Yuv420_make(
 		uint32_t timebase);
 
 /**
+ * make clone frame.
+ * always make copy buffer on it.
+ * @param prev_frame reuse frame object.
+ * @param src_frame  source of clone.
+ */
+ttLibC_Yuv420 *ttLibC_Yuv420_clone(
+		ttLibC_Yuv420 *prev_frame,
+		ttLibC_Yuv420 *src_frame);
+
+/**
  * close frame
  * @param frame
  */

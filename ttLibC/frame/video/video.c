@@ -171,7 +171,10 @@ ttLibC_Video *ttLibC_Video_clone(
 				(ttLibC_Vp9 *)src_frame);
 //	case frameType_wmv1:
 //	case frameType_wmv2:
-//	case frameType_yuv420:
+	case frameType_yuv420:
+		return (ttLibC_Video *)ttLibC_Yuv420_clone(
+				(ttLibC_Yuv420 *)prev_frame,
+				(ttLibC_Yuv420 *)src_frame);
 	default:
 		LOG_PRINT("no clone function, frame type:%d", src_frame->inherit_super.type);
 		return NULL;

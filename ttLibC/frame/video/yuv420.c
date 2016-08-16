@@ -129,6 +129,95 @@ ttLibC_Yuv420 *ttLibC_Yuv420_make(
 	return yuv420;
 }
 
+ttLibC_Yuv420 *Yuv420_clonePlanar(
+		ttLibC_Yuv420 *prev_frame,
+		ttLibC_Yuv420 *src_frame) {
+	uint32_t y_size = src_frame->inherit_super.height * src_frame->y_stride;
+	uint32_t u_size = src_frame->inherit_super.height / 2 * src_frame->u_stride;
+	uint32_t v_size = src_frame->inherit_super.height / 2 * src_frame->v_stride;
+	uint32_t buffer_size = y_size + u_size + v_size;
+	uint8_t *buffer = ttLibC_malloc(buffer_size);
+	if(buffer == NULL) {
+		return NULL;
+	}
+	memcpy(buffer, src_frame->y_data, y_size);
+	memcpy(buffer + y_size, src_frame->u_data, u_size);
+	memcpy(buffer + y_size + u_size, src_frame->v_data, v_size);
+	ttLibC_Yuv420 *cloned_frame = ttLibC_Yuv420_make(
+			prev_frame,
+			Yuv420Type_planar,
+			src_frame->inherit_super.width,
+			src_frame->inherit_super.height,
+			buffer,
+			buffer_size,
+			buffer,
+			src_frame->y_stride,
+			buffer + y_size,
+			src_frame->u_stride,
+			buffer + y_size + u_size,
+			src_frame->v_stride,
+			true,
+			src_frame->inherit_super.inherit_super.pts,
+			src_frame->inherit_super.inherit_super.timebase);
+	if(cloned_frame != NULL) {
+		cloned_frame->inherit_super.inherit_super.is_non_copy = false;
+	}
+	return cloned_frame;
+}
+
+ttLibC_Yuv420 *Yuv420_cloneSemiPlanar(
+		ttLibC_Yuv420 *prev_frame,
+		ttLibC_Yuv420 *src_frame) {
+	ERR_PRINT("clone for yuv420_semiPlanar is not created");
+	return NULL;
+}
+
+ttLibC_Yuv420 *Yvu420_clonePlanar(
+		ttLibC_Yuv420 *prev_frame,
+		ttLibC_Yuv420 *src_frame) {
+	ERR_PRINT("clone for yvu420_planar is not created");
+	return NULL;
+}
+
+ttLibC_Yuv420 *Yvu420_cloneSemiPlanar(
+		ttLibC_Yuv420 *prev_frame,
+		ttLibC_Yuv420 *src_frame) {
+	ERR_PRINT("clone for yvu420_semiPlanar is not created");
+	return NULL;
+}
+
+/*
+ * make clone frame.
+ * always make copy buffer on it.
+ * @param prev_frame reuse frame object.
+ * @param src_frame  source of clone.
+ */
+ttLibC_Yuv420 *ttLibC_Yuv420_clone(
+		ttLibC_Yuv420 *prev_frame,
+		ttLibC_Yuv420 *src_frame) {
+	ttLibC_Yuv420 *yuv = NULL;
+	switch(src_frame->type) {
+	case Yuv420Type_planar:
+		yuv = Yuv420_clonePlanar(prev_frame, src_frame);
+		break;
+	case Yuv420Type_semiPlanar:
+		yuv = Yuv420_cloneSemiPlanar(prev_frame, src_frame);
+		break;
+	case Yvu420Type_planar:
+		yuv = Yvu420_clonePlanar(prev_frame, src_frame);
+		break;
+	case Yvu420Type_semiPlanar:
+		yuv = Yvu420_cloneSemiPlanar(prev_frame, src_frame);
+		break;
+	default:
+		return NULL;
+	}
+	if(yuv != NULL) {
+		yuv->inherit_super.inherit_super.id = src_frame->inherit_super.inherit_super.id;
+	}
+	return yuv;
+}
+
 /*
  * close frame
  * @param frame
