@@ -46,6 +46,16 @@ ttLibC_Jpeg *ttLibC_Jpeg_make(
 		uint32_t timebase);
 
 /**
+ * make clone frame.
+ * always make copy buffer on it.
+ * @param prev_frame reuse frame object.
+ * @param src_frame  source of clone.
+ */
+ttLibC_Jpeg *ttLibC_Jpeg_clone(
+		ttLibC_Jpeg *prev_frame,
+		ttLibC_Jpeg *src_frame);
+
+/**
  * make frame object from jpeg binary data.
  */
 ttLibC_Jpeg *ttLibC_Jpeg_getFrame(
