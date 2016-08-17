@@ -197,10 +197,10 @@ ttLibC_PcmS16 *ttLibC_PcmS16_clone(
 					false,
 					src_frame->inherit_super.inherit_super.pts,
 					src_frame->inherit_super.inherit_super.timebase);
-			pcms16->l_data = pcms16->inherit_super.inherit_super.data;
 			if(pcms16 == NULL) {
 				return NULL;
 			}
+			pcms16->l_data = pcms16->inherit_super.inherit_super.data;
 			pcms16->inherit_super.inherit_super.id = src_frame->inherit_super.inherit_super.id;
 			if(src_frame->inherit_super.channel_num == 2) {
 				pcms16->r_data = pcms16->l_data + (size_t)(src_frame->r_data - src_frame->l_data);
