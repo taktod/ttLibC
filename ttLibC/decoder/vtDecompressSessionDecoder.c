@@ -61,7 +61,7 @@ static void VtDecoder_decodeCallback(
 		uint32_t height = CVPixelBufferGetHeight(imageBuffer);
 		decoder->inherit_super.width = width;
 		decoder->inherit_super.height = height;
-		CVPixelBufferLockBaseAddress(imageBuffer, 0);
+/*		CVPixelBufferLockBaseAddress(imageBuffer, 0);
 		uint8_t *y_data = (uint8_t *)CVPixelBufferGetBaseAddressOfPlane(imageBuffer, 0);
 		uint8_t *uv_data = (uint8_t *)CVPixelBufferGetBaseAddressOfPlane(imageBuffer, 1);
 
@@ -78,6 +78,35 @@ static void VtDecoder_decodeCallback(
 				CVPixelBufferGetBytesPerRowOfPlane(imageBuffer, 1),
 				uv_data + 1,
 				CVPixelBufferGetBytesPerRowOfPlane(imageBuffer, 1),
+				true,
+				pts.value,
+				pts.timescale);
+		if(y != NULL) {
+			decoder->yuv420 = y;
+			if(decoder->callback != NULL) {
+				if(!decoder->callback(decoder->ptr, decoder->yuv420)) {
+				}
+			}
+		}
+		CVPixelBufferUnlockBaseAddress(imageBuffer, 0);*/
+		CVPixelBufferLockBaseAddress(imageBuffer, 0);
+		uint8_t *y_data = (uint8_t *)CVPixelBufferGetBaseAddressOfPlane(imageBuffer, 0);
+		uint8_t *u_data = (uint8_t *)CVPixelBufferGetBaseAddressOfPlane(imageBuffer, 1);
+		uint8_t *v_data = (uint8_t *)CVPixelBufferGetBaseAddressOfPlane(imageBuffer, 2);
+
+		ttLibC_Yuv420 *y = ttLibC_Yuv420_make(
+				decoder->yuv420,
+				Yuv420Type_planar,
+				width,
+				height,
+				NULL,
+				0,
+				y_data,
+				CVPixelBufferGetBytesPerRowOfPlane(imageBuffer, 0),
+				u_data,
+				CVPixelBufferGetBytesPerRowOfPlane(imageBuffer, 1),
+				v_data,
+				CVPixelBufferGetBytesPerRowOfPlane(imageBuffer, 2),
 				true,
 				pts.value,
 				pts.timescale);
@@ -167,7 +196,8 @@ static bool VtDecoder_decodeH264(
 				destinationPixelBufferAttributes = CFDictionaryCreateMutable(NULL, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
 				CFNumberRef number;
 
-				int val = kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange;
+//				int val = kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange;
+				int val = kCVPixelFormatType_420YpCbCr8Planar;
 				number = CFNumberCreate(NULL, kCFNumberSInt32Type, &val);
 				CFDictionarySetValue(destinationPixelBufferAttributes, kCVPixelBufferPixelFormatTypeKey,number);
 				CFRelease(number);
@@ -284,7 +314,8 @@ static bool VtDecoder_decodeJpeg(
 		destinationPixelBufferAttributes = CFDictionaryCreateMutable(NULL, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
 		CFNumberRef number;
 
-		int val = kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange;
+//		int val = kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange;
+		int val = kCVPixelFormatType_420YpCbCr8Planar;
 		number = CFNumberCreate(NULL, kCFNumberSInt32Type, &val);
 		CFDictionarySetValue(destinationPixelBufferAttributes, kCVPixelBufferPixelFormatTypeKey,number);
 		CFRelease(number);
