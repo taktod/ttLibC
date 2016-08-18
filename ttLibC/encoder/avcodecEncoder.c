@@ -1102,6 +1102,7 @@ ttLibC_AvcodecEncoder *ttLibC_AvcodecEncoder_makeWithAVCodecContext(void *enc_co
 		}
 		break;
 	case AVMEDIA_TYPE_VIDEO:
+		encoder->avframe->format      = encoder->enc->pix_fmt;
 		encoder->avframe->width       = encoder->enc->width;
 		encoder->avframe->height      = encoder->enc->height;
 		encoder->inherit_super.width  = encoder->enc->width;
@@ -1200,6 +1201,7 @@ ttLibC_AvcodecEncoder *ttLibC_AvcodecAudioEncoder_make_ex(
 		uint32_t sample_rate,
 		uint32_t channel_num,
 		uint32_t bitrate) {
+	avcodec_register_all();
 	AVCodecContext *enc = ttLibC_AvcodecEncoder_getAVCodecContext(frame_type);
 	if(enc == NULL) {
 		return NULL;
@@ -1268,6 +1270,7 @@ ttLibC_AvcodecEncoder *ttLibC_AvcodecVideoEncoder_make_ex(
 		uint32_t quality,
 		uint32_t bitrate,
 		uint32_t timebase) {
+	avcodec_register_all();
 	AVCodecContext *enc = ttLibC_AvcodecEncoder_getAVCodecContext(frame_type);
 	if(enc == NULL) {
 		return NULL;

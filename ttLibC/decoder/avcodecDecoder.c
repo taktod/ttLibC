@@ -506,6 +506,7 @@ ttLibC_AvcodecDecoder *ttLibC_AvcodecAudioDecoder_make_ex(
 		uint32_t channel_num,
 		void *extradata,
 		size_t extradata_size) {
+	avcodec_register_all();
 	AVCodecContext *dec = (AVCodecContext *)ttLibC_AvcodecDecoder_getAVCodecContext(frame_type);
 	if(dec == NULL) {
 		return NULL;
@@ -550,6 +551,7 @@ ttLibC_AvcodecDecoder *ttLibC_AvcodecVideoDecoder_make_ex(
 		uint32_t height,
 		void *extradata,
 		size_t extradata_size) {
+	avcodec_register_all();
 	AVCodecContext *dec = (AVCodecContext *)ttLibC_AvcodecDecoder_getAVCodecContext(frame_type);
 	if(dec == NULL) {
 		return NULL;
