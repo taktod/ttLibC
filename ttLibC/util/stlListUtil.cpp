@@ -62,11 +62,17 @@ static void *StlList_refFirst(ttLibC_StlList_ *list) {
 	if(list == NULL) {
 		return NULL;
 	}
+	if(list->list->size() == 0) {
+		return NULL;
+	}
 	return (void *)list->list->front();
 }
 
 static void *StlList_refLast(ttLibC_StlList_ *list) {
 	if(list == NULL) {
+		return NULL;
+	}
+	if(list->list->size() == 0) {
 		return NULL;
 	}
 	return (void *)list->list->back();
