@@ -569,6 +569,7 @@ ttLibC_AvcodecDecoder *ttLibC_AvcodecVideoDecoder_make_ex(
  */
 ttLibC_AvcodecDecoder *ttLibC_AvcodecDecoder_make(
 		ttLibC_Frame_Type frame_type) {
+	avcodec_register_all();
 	AVCodecContext *dec = (AVCodecContext *)ttLibC_AvcodecDecoder_getAVCodecContext(frame_type);
 	if(dec == NULL) {
 		return NULL;
