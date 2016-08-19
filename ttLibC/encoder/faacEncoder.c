@@ -260,7 +260,7 @@ bool ttLibC_FaacEncoder_encode(
 	case PcmS16Type_littleEndian:
 		break;
 	}
-	size_t left_size = pcm->inherit_super.inherit_super.buffer_size;
+	size_t left_size = pcm->l_stride;
 	uint8_t *data = pcm->l_data;
 	if(encoder_->pcm_buffer_next_pos != 0) {
 		if(left_size < encoder_->samples_length - encoder_->pcm_buffer_next_pos) {

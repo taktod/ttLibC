@@ -154,10 +154,16 @@ static OSStatus AcEncoder_encodeDataProc(
 		// in the case of pcm = NULL, return something, to stop convert buffer.
 		return 15;
 	}
+/*
 	// update reply size.
 	*ioNumberDataPackets = pcm->inherit_super.inherit_super.buffer_size / 2 / pcm->inherit_super.channel_num;
 	ioData->mBuffers[0].mData = pcm->inherit_super.inherit_super.data;
 	ioData->mBuffers[0].mDataByteSize = pcm->inherit_super.inherit_super.buffer_size;
+	ioData->mBuffers[0].mNumberChannels = pcm->inherit_super.channel_num;*/
+
+	*ioNumberDataPackets = pcm->inherit_super.sample_num;
+	ioData->mBuffers[0].mData = pcm->l_data;
+	ioData->mBuffers[0].mDataByteSize = pcm->l_stride;
 	ioData->mBuffers[0].mNumberChannels = pcm->inherit_super.channel_num;
 	*inud = NULL; // put null for next callback.
 	return noErr;
@@ -206,6 +212,21 @@ bool ttLibC_AcEncoder_encode(
 		ttLibC_AcEncodeFunc callback,
 		void *ptr) {
 	ttLibC_AcEncoder_ *encoder_ = (ttLibC_AcEncoder_ *)encoder;
+	if(encoder_ == NULL) {
+		return false;
+	}
+	if(pcm == NULL) {
+		return true;
+	}
+	switch(pcm->type) {
+		case PcmS16Type_bigEndian:
+		case PcmS16Type_bigEndian_planar:
+		case PcmS16Type_littleEndian_planar:
+			ERR_PRINT("only support little endian interleave.");
+			return false;
+		default:
+			break;
+	}
 	if(!encoder_->is_pts_initialized) {
 		encoder_->is_pts_initialized = true;
 		encoder_->pts = pcm->inherit_super.inherit_super.pts * encoder_->sample_rate / pcm->inherit_super.inherit_super.timebase;

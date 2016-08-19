@@ -165,7 +165,7 @@ bool ttLibC_Mp3lameDecoder_decode(
 			num,
 			mp3->inherit_super.channel_num,
 			decoder_->pcm_buffer,
-			(decoder_->buffer_size >> 1),
+			num * 2 * mp3->inherit_super.channel_num,
 			decoder_->pcm_buffer,
 			num * 2 * mp3->inherit_super.channel_num,
 			NULL,

@@ -155,7 +155,11 @@ static bool checkEncodedData(ttLibC_Mp3lameEncoder_ *encoder, uint32_t encode_si
  * @param ptr      pointer for user def value, which will call in callback.
  * @return true / false
  */
-bool ttLibC_Mp3lameEncoder_encode(ttLibC_Mp3lameEncoder *encoder, ttLibC_PcmS16 *pcm, ttLibC_Mp3lameEncodeFunc callback, void *ptr) {
+bool ttLibC_Mp3lameEncoder_encode(
+		ttLibC_Mp3lameEncoder *encoder,
+		ttLibC_PcmS16 *pcm,
+		ttLibC_Mp3lameEncodeFunc callback,
+		void *ptr) {
 	if(encoder == NULL) {
 		return false;
 	}

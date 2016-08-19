@@ -379,6 +379,7 @@ bool ttLibC_AuPlayer_queue(ttLibC_AuPlayer *player, ttLibC_PcmS16 *pcmS16) {
 		case PcmS16Type_bigEndian_planar:
 			{
 				// TODO want to support planar data.
+				ERR_PRINT("planar pcm data is not supported.");
 				return false;
 			}
 			break;
