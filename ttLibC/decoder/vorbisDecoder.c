@@ -116,9 +116,11 @@ bool ttLibC_VorbisDecoder_decode(
 				NULL,
 				0,
 				pcm[0],
-				samples * 4,
-				pcm[1],
-				samples * 4,
+				samples * 4 * decoder_->vi.channels,
+/*				pcm[1],
+				samples * 4,*/
+				NULL,
+				0,
 				true,
 				vorbis->inherit_super.inherit_super.pts,
 				vorbis->inherit_super.inherit_super.timebase);
