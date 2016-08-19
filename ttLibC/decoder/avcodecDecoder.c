@@ -44,7 +44,7 @@ typedef ttLibC_Decoder_AvcodecDecoder_ ttLibC_AvcodecDecoder_;
  * @param callback callback func
  * @param ptr      user def pointer
  */
-static void AvcodecDecoder_decodeAudio(
+static bool AvcodecDecoder_decodeAudio(
 		ttLibC_AvcodecDecoder_ *decoder,
 		ttLibC_Audio *frame,
 		ttLibC_AvcodecDecodeFunc callback,
@@ -56,10 +56,10 @@ static void AvcodecDecoder_decodeAudio(
 	int result = avcodec_decode_audio4(decoder->dec, decoder->avframe, &got_frame, &decoder->packet);
 	if(result < 0) {
 		ERR_PRINT("failed to decode:%d", result);
-		return;
+		return false;
 	}
 	if(got_frame != 1) {
-		return;
+		return true;
 	}
 	// decode complete, now to make frame and call callback.
 	decoder->inherit_super.sample_rate = decoder->avframe->sample_rate;
@@ -87,7 +87,10 @@ static void AvcodecDecoder_decodeAudio(
 					frame->inherit_super.timebase);
 			if(pcmf32 != NULL) {
 				decoder->frame = (ttLibC_Frame *)pcmf32;
-				callback(ptr, decoder->frame);
+				if(callback == NULL) {
+					return true;
+				}
+				return callback(ptr, decoder->frame);
 			}
 		}
 		break;
@@ -113,7 +116,10 @@ static void AvcodecDecoder_decodeAudio(
 					frame->inherit_super.timebase);
 			if(pcmf32 != NULL) {
 				decoder->frame = (ttLibC_Frame *)pcmf32;
-				callback(ptr, decoder->frame);
+				if(callback == NULL) {
+					return true;
+				}
+				return callback(ptr, decoder->frame);
 			}
 		}
 		break;
@@ -139,7 +145,10 @@ static void AvcodecDecoder_decodeAudio(
 					frame->inherit_super.timebase);
 			if(pcms16 != NULL) {
 				decoder->frame = (ttLibC_Frame *)pcms16;
-				callback(ptr, decoder->frame);
+				if(callback == NULL) {
+					return true;
+				}
+				return callback(ptr, decoder->frame);
 			}
 		}
 		break;
@@ -165,14 +174,18 @@ static void AvcodecDecoder_decodeAudio(
 					frame->inherit_super.timebase);
 			if(pcms16 != NULL) {
 				decoder->frame = (ttLibC_Frame *)pcms16;
-				callback(ptr, decoder->frame);
+				if(callback == NULL) {
+					return true;
+				}
+				return callback(ptr, decoder->frame);
 			}
 		}
 		break;
 	default:
 		ERR_PRINT("unknown sample format:%d", decoder->dec->sample_fmt);
-		return;
+		return false;
 	}
+	return false;
 }
 
 /*
@@ -182,7 +195,7 @@ static void AvcodecDecoder_decodeAudio(
  * @param callback callback func
  * @param ptr      user def pointer.
  */
-static void AvcodecDecoder_decodeVideo(
+static bool AvcodecDecoder_decodeVideo(
 		ttLibC_AvcodecDecoder_ *decoder,
 		ttLibC_Video *frame,
 		ttLibC_AvcodecDecodeFunc callback,
@@ -194,10 +207,10 @@ static void AvcodecDecoder_decodeVideo(
 	int result = avcodec_decode_video2(decoder->dec, decoder->avframe, &got_picture, &decoder->packet);
 	if(result < 0) {
 		ERR_PRINT("failed to decode:%d", result);
-		return;
+		return false;
 	}
 	if(got_picture != 1) {
-		return;
+		return true;
 	}
 	// decode complete now make frame and call callback.
 	decoder->inherit_super.width  = decoder->avframe->width;
@@ -223,7 +236,10 @@ static void AvcodecDecoder_decodeVideo(
 					frame->inherit_super.timebase);
 			if(y != NULL) {
 				decoder->frame = (ttLibC_Frame *)y;
-				callback(ptr, decoder->frame);
+				if(callback == NULL) {
+					return true;
+				}
+				return callback(ptr, decoder->frame);
 			}
 		}
 		break;
@@ -233,11 +249,12 @@ static void AvcodecDecoder_decodeVideo(
 	case AV_PIX_FMT_ABGR:
 	case AV_PIX_FMT_BGRA:
 		ERR_PRINT("not make yet.");
-		return;
+		return false;
 	default:
 		ERR_PRINT("unknown pixfmt output.");
-		return;
+		return false;
 	}
+	return false;
 }
 
 /*
@@ -584,37 +601,35 @@ ttLibC_AvcodecDecoder *ttLibC_AvcodecDecoder_make(
  * @param callback callback func for avcodec decode.
  * @param ptr      pointer for user def value, which call in callback.
  */
-void ttLibC_AvcodecDecoder_decode(
+bool ttLibC_AvcodecDecoder_decode(
 		ttLibC_AvcodecDecoder *decoder,
 		ttLibC_Frame *frame,
 		ttLibC_AvcodecDecodeFunc callback,
 		void *ptr) {
 	if(decoder == NULL) {
-		return;
+		return false;
 	}
 	if(frame == NULL) {
-		return;
+		return true;
 	}
 	ttLibC_AvcodecDecoder_ *decoder_ = (ttLibC_AvcodecDecoder_ *)decoder;
 	if(frame->type != decoder_->inherit_super.frame_type) {
 		ERR_PRINT("input frame is different from target frame.:%d %d",
 				frame->type, decoder_->inherit_super.frame_type);
-		return;
+		return false;
 	}
 	if(decoder_->avframe == NULL) {
 		ERR_PRINT("avframe is not initialized yet.");
-		return;
+		return false;
 	}
 	switch(decoder_->dec->codec->type) {
 	case AVMEDIA_TYPE_AUDIO:
-		AvcodecDecoder_decodeAudio(decoder_, (ttLibC_Audio *)frame, callback, ptr);
-		return;
+		return AvcodecDecoder_decodeAudio(decoder_, (ttLibC_Audio *)frame, callback, ptr);
 	case AVMEDIA_TYPE_VIDEO:
-		AvcodecDecoder_decodeVideo(decoder_, (ttLibC_Video *)frame, callback, ptr);
-		return;
+		return AvcodecDecoder_decodeVideo(decoder_, (ttLibC_Video *)frame, callback, ptr);
 	default:
 		ERR_PRINT("unknown media type for codec:%d", decoder_->dec->codec->type);
-		return;
+		return false;
 	}
 }
 
