@@ -20,6 +20,7 @@
 #include "../frame/video/bgr.h"
 #include "../frame/video/yuv420.h"
 
+#include "../frame/audio/aac.h"
 #include "../frame/audio/pcms16.h"
 #include "../frame/audio/pcmf32.h"
 
@@ -49,6 +50,18 @@ static bool AvcodecDecoder_decodeAudio(
 		ttLibC_Audio *frame,
 		ttLibC_AvcodecDecodeFunc callback,
 		void *ptr) {
+	switch(frame->inherit_super.type) {
+	case frameType_aac:
+		{
+			ttLibC_Aac *aac = (ttLibC_Aac *)frame;
+			if(aac->type == AacType_dsi) {
+				return true;
+			}
+		}
+		break;
+	default:
+		break;
+	}
 	decoder->packet.data = frame->inherit_super.data;
 	decoder->packet.size = frame->inherit_super.buffer_size;
 	decoder->packet.pts = frame->inherit_super.pts;
@@ -465,7 +478,7 @@ ttLibC_AvcodecDecoder *ttLibC_AvcodecDecoder_makeWithAVCodecContext(void *dec_co
 		case AV_PIX_FMT_ABGR:
 		case AV_PIX_FMT_BGRA:
 		case AV_PIX_FMT_BGR24:
-			LOG_PRINT("該当ピクチャフォーマットは動作未確認です。");
+			LOG_PRINT("target picture data is not implemented. do later.");
 			break;
 		default:
 			ERR_PRINT("unsupport pix_fmt type:%d", dec->pix_fmt);
