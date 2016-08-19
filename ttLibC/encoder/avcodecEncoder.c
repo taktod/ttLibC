@@ -99,7 +99,7 @@ static bool AvcodecEncoder_encode_AudioDetail(
 	}
 //	LOG_PRINT("got_packet:%d", got_output);
 	if(got_output != 1) {
-		return false;
+		return true;
 	}
 	// now data is ready, make frame and call callback.
 	if(encoder->frame != NULL && encoder->frame->type != encoder->inherit_super.frame_type) {
@@ -122,8 +122,11 @@ static bool AvcodecEncoder_encode_AudioDetail(
 					encoder->inherit_super.sample_rate,
 					0);
 			if(aac != NULL) {
-				callback(ptr, (ttLibC_Frame *)aac);
 				encoder->frame = (ttLibC_Frame *)aac;
+				if(callback == NULL) {
+					return true;
+				}
+				return callback(ptr, (ttLibC_Frame *)aac);
 			}
 		}
 		break;
@@ -140,8 +143,11 @@ static bool AvcodecEncoder_encode_AudioDetail(
 					encoder->packet.pts,
 					encoder->inherit_super.sample_rate);
 			if(adpcm_ima_wav != NULL) {
-				callback(ptr, (ttLibC_Frame *)adpcm_ima_wav);
 				encoder->frame = (ttLibC_Frame *)adpcm_ima_wav;
+				if(callback == NULL) {
+					return true;
+				}
+				return callback(ptr, (ttLibC_Frame *)adpcm_ima_wav);
 			}
 		}
 		break;
@@ -161,8 +167,11 @@ static bool AvcodecEncoder_encode_AudioDetail(
 					encoder->packet.pts,
 					encoder->inherit_super.sample_rate);
 			if(mp3 != NULL) {
-				callback(ptr, (ttLibC_Frame *)mp3);
 				encoder->frame = (ttLibC_Frame *)mp3;
+				if(callback == NULL) {
+					return true;
+				}
+				return callback(ptr, (ttLibC_Frame *)mp3);
 			}
 		}
 		break;
@@ -180,8 +189,11 @@ static bool AvcodecEncoder_encode_AudioDetail(
 					encoder->packet.pts,
 					encoder->inherit_super.sample_rate);
 			if(nellymoser != NULL) {
-				callback(ptr, (ttLibC_Frame *)nellymoser);
 				encoder->frame = (ttLibC_Frame *)nellymoser;
+				if(callback == NULL) {
+					return true;
+				}
+				return callback(ptr, (ttLibC_Frame *)nellymoser);
 			}
 		}
 		break;
@@ -201,8 +213,11 @@ static bool AvcodecEncoder_encode_AudioDetail(
 					encoder->packet.pts,
 					encoder->inherit_super.sample_rate);
 			if(opus != NULL) {
-				callback(ptr, (ttLibC_Frame *)opus);
 				encoder->frame = (ttLibC_Frame *)opus;
+				if(callback == NULL) {
+					return true;
+				}
+				return callback(ptr, (ttLibC_Frame *)opus);
 			}
 		}
 		break;
@@ -219,8 +234,11 @@ static bool AvcodecEncoder_encode_AudioDetail(
 					encoder->packet.pts,
 					encoder->inherit_super.sample_rate);
 			if(pcm_alaw != NULL) {
-				callback(ptr, (ttLibC_Frame *)pcm_alaw);
 				encoder->frame = (ttLibC_Frame *)pcm_alaw;
+				if(callback == NULL) {
+					return true;
+				}
+				return callback(ptr, (ttLibC_Frame *)pcm_alaw);
 			}
 		}
 		break;
@@ -237,8 +255,11 @@ static bool AvcodecEncoder_encode_AudioDetail(
 					encoder->packet.pts,
 					encoder->inherit_super.sample_rate);
 			if(pcm_mulaw != NULL) {
-				callback(ptr, (ttLibC_Frame *)pcm_mulaw);
 				encoder->frame = (ttLibC_Frame *)pcm_mulaw;
+				if(callback == NULL) {
+					return true;
+				}
+				return callback(ptr, (ttLibC_Frame *)pcm_mulaw);
 			}
 		}
 		break;
@@ -258,8 +279,11 @@ static bool AvcodecEncoder_encode_AudioDetail(
 					encoder->packet.pts,
 					encoder->inherit_super.sample_rate);
 			if(speex != NULL) {
-				callback(ptr, (ttLibC_Frame *)speex);
 				encoder->frame = (ttLibC_Frame *)speex;
+				if(callback == NULL) {
+					return true;
+				}
+				return callback(ptr, (ttLibC_Frame *)speex);
 			}
 		}
 		break;
@@ -277,15 +301,18 @@ static bool AvcodecEncoder_encode_AudioDetail(
 					encoder->packet.pts,
 					encoder->inherit_super.sample_rate);
 			if(vorbis != NULL) {
-				callback(ptr, (ttLibC_Frame *)vorbis);
 				encoder->frame = (ttLibC_Frame *)vorbis;
+				if(callback == NULL) {
+					return true;
+				}
+				return callback(ptr, (ttLibC_Frame *)vorbis);
 			}
 		}
 		break;
 	default:
 		return false;
 	}
-	return true;
+	return false;
 }
 
 /*
@@ -296,20 +323,20 @@ static bool AvcodecEncoder_encode_AudioDetail(
  * @param callback callback func.
  * @param ptr      user def data pointer.
  */
-static void AvcodecEncoder_encode_PcmF32(
+static bool AvcodecEncoder_encode_PcmF32(
 		ttLibC_AvcodecEncoder_ *encoder,
 		ttLibC_PcmF32 *pcmf32,
 		ttLibC_AvcodecEncodeFunc callback,
 		void *ptr) {
 	if(encoder == NULL) {
-		return;
+		return false;
 	}
 	if(pcmf32 == NULL) {
-		return;
+		return true;
 	}
 	if(encoder->inherit_super.input_format_type != pcmf32->type) {
 		ERR_PRINT("not support by avcodec.");
-		return;
+		return false;
 	}
 	uint8_t *l_data = NULL;
 	uint8_t *r_data = NULL;
@@ -349,7 +376,7 @@ static void AvcodecEncoder_encode_PcmF32(
 				memcpy(encoder->pcm_buffer + encoder->frame_size * step + encoder->pcm_buffer_next_pos, r_data, left_size);
 			}
 			encoder->pcm_buffer_next_pos += left_size;
-			return;
+			return true;
 		}
 		memcpy(encoder->pcm_buffer + encoder->pcm_buffer_next_pos, l_data, encoder->frame_size * step - encoder->pcm_buffer_next_pos);
 		l_data += encoder->frame_size * step - encoder->pcm_buffer_next_pos;
@@ -372,7 +399,7 @@ static void AvcodecEncoder_encode_PcmF32(
 				encoder->frame_size,
 				callback,
 				ptr)) {
-			return;
+			return false;
 		}
 		encoder->pcm_buffer_next_pos = 0;
 	}
@@ -396,7 +423,7 @@ static void AvcodecEncoder_encode_PcmF32(
 				encoder->frame_size,
 				callback,
 				ptr)) {
-			return;
+			return false;
 		}
 		l_data += encoder->frame_size * step;
 		if(r_data != NULL) {
@@ -404,6 +431,7 @@ static void AvcodecEncoder_encode_PcmF32(
 		}
 		left_size -= encoder->frame_size * step;
 	} while(true);
+	return true;
 }
 
 /*
@@ -414,20 +442,20 @@ static void AvcodecEncoder_encode_PcmF32(
  * @param callback callback func.
  * @param ptr      user def data pointer.
  */
-static void AvcodecEncoder_encode_PcmS16(
+static bool AvcodecEncoder_encode_PcmS16(
 		ttLibC_AvcodecEncoder_ *encoder,
 		ttLibC_PcmS16 *pcms16,
 		ttLibC_AvcodecEncodeFunc callback,
 		void *ptr) {
 	if(encoder == NULL) {
-		return;
+		return false;
 	}
 	if(pcms16 == NULL) {
-		return;
+		return true;
 	}
 	if(encoder->inherit_super.input_format_type != pcms16->type) {
 		ERR_PRINT("not support by avcodec.");
-		return;
+		return false;
 	}
 	uint8_t *l_data = NULL;
 	uint8_t *r_data = NULL;
@@ -468,7 +496,7 @@ static void AvcodecEncoder_encode_PcmS16(
 				memcpy(encoder->pcm_buffer + encoder->frame_size * step + encoder->pcm_buffer_next_pos, r_data, left_size);
 			}
 			encoder->pcm_buffer_next_pos += left_size;
-			return;
+			return true;
 		}
 		memcpy(encoder->pcm_buffer + encoder->pcm_buffer_next_pos, l_data, encoder->frame_size * step - encoder->pcm_buffer_next_pos);
 		l_data += encoder->frame_size * step - encoder->pcm_buffer_next_pos;
@@ -491,7 +519,7 @@ static void AvcodecEncoder_encode_PcmS16(
 				encoder->frame_size,
 				callback,
 				ptr)) {
-			return;
+			return false;
 		}
 		encoder->pcm_buffer_next_pos = 0;
 	}
@@ -515,7 +543,7 @@ static void AvcodecEncoder_encode_PcmS16(
 				encoder->frame_size,
 				callback,
 				ptr)) {
-			return;
+			return false;
 		}
 		l_data += encoder->frame_size * step;
 		if(r_data != NULL) {
@@ -523,6 +551,7 @@ static void AvcodecEncoder_encode_PcmS16(
 		}
 		left_size -= encoder->frame_size * step;
 	} while(true);
+	return true;
 }
 
 /*
@@ -533,17 +562,19 @@ static void AvcodecEncoder_encode_PcmS16(
  * @param callback callback func.
  * @param ptr      user def data pointer.
  */
-static void AvcodecEncoder_encode_Bgr(
+static bool AvcodecEncoder_encode_Bgr(
 		ttLibC_AvcodecEncoder_ *encoder,
 		ttLibC_Bgr *bgr,
 		ttLibC_AvcodecEncodeFunc callback,
 		void *ptr) {
 	if(encoder == NULL) {
-		return;
+		return false;
 	}
 	if(bgr == NULL) {
-		return;
+		return true;
 	}
+	puts("encode bgr is not implemented. do later.");
+	return false;
 }
 
 /*
@@ -553,20 +584,20 @@ static void AvcodecEncoder_encode_Bgr(
  * @param callback callback func.
  * @param ptr      user def data pointer.
  */
-static void AvcodecEncoder_encode_Yuv420(
+static bool AvcodecEncoder_encode_Yuv420(
 		ttLibC_AvcodecEncoder_ *encoder,
 		ttLibC_Yuv420 *yuv420,
 		ttLibC_AvcodecEncodeFunc callback,
 		void *ptr) {
 	if(encoder == NULL) {
-		return;
+		return false;
 	}
 	if(yuv420 == NULL) {
-		return;
+		return true;
 	}
 	if(encoder->inherit_super.input_format_type != yuv420->type) {
 		ERR_PRINT("not support by avcodec.");
-		return;
+		return false;
 	}
 	encoder->avframe->pts = yuv420->inherit_super.inherit_super.pts;
 	switch(yuv420->type) {
@@ -587,7 +618,7 @@ static void AvcodecEncoder_encode_Yuv420(
 		break;
 	default:
 	case Yvu420Type_planar: // not supported by ffmpeg.
-		return;
+		return false;
 	}
 	encoder->packet.data = NULL;
 	encoder->packet.size = 0;
@@ -595,13 +626,13 @@ static void AvcodecEncoder_encode_Yuv420(
 	int result = avcodec_encode_video2(encoder->enc, &encoder->packet, encoder->avframe, &got_output);
 	if(result != 0) {
 		ERR_PRINT("failed to encode.:%d", result);
-		return;
+		return false;
 	}
 	if(got_output != 1) {
 		// encode is ok. however, output is none. this can be.
 		// just skip and wait for convert.
 //		ERR_PRINT("got output is not 1, failed to encode.:%d", got_output);
-		return;
+		return true;
 	}
 	// now check the output packet according to frame type.
 	if(encoder->frame != NULL && encoder->frame->type != encoder->inherit_super.frame_type) {
@@ -625,8 +656,11 @@ static void AvcodecEncoder_encode_Yuv420(
 					yuv420->inherit_super.inherit_super.pts,
 					yuv420->inherit_super.inherit_super.timebase);
 			if(flv1 != NULL) {
-				callback(ptr, (ttLibC_Frame *)flv1);
 				encoder->frame = (ttLibC_Frame *)flv1;
+				if(callback == NULL) {
+					return true;
+				}
+				return callback(ptr, (ttLibC_Frame *)flv1);
 			}
 		}
 		break;
@@ -637,6 +671,7 @@ static void AvcodecEncoder_encode_Yuv420(
 		if(encoder->packet.size > 10) {
 			ttLibC_HexUtil_dump(encoder->packet.data, 10, true);
 		}
+		puts("h264 is not implemented");
 		/*	if(encoder_->avframe != NULL) {
 				// video
 				ttLibC_Yuv420 *yuv420 = (ttLibC_Yuv420 *)frame;
@@ -775,13 +810,16 @@ static void AvcodecEncoder_encode_Yuv420(
 	case frameType_h265:
 		// does not work for convert.
 		// TODO do later
+		puts("h265 is not implemented.");
 		break;
 	case frameType_theora:
 		// unsupported on my pc.
 		// TODO do later
+		puts("theora is not implemented");
 		break;
 	case frameType_vp6:
 		// libavcodec is not support for encode.
+		puts("vp6 is not implemented");
 		break;
 	case frameType_vp8:
 		{
@@ -800,8 +838,11 @@ static void AvcodecEncoder_encode_Yuv420(
 					yuv420->inherit_super.inherit_super.pts,
 					yuv420->inherit_super.inherit_super.timebase);
 			if(vp8 != NULL) {
-				callback(ptr, (ttLibC_Frame *)vp8);
 				encoder->frame = (ttLibC_Frame *)vp8;
+				if(callback == NULL) {
+					return true;
+				}
+				return callback(ptr, (ttLibC_Frame *)vp8);
 			}
 		}
 		break;
@@ -809,6 +850,7 @@ static void AvcodecEncoder_encode_Yuv420(
 		// get some error.
 		// apply VP8E_SET_NOISE_SENSITIVITY for vp9, and struggle with error.
 		// TODO check later.
+		puts("vp9 is not implemented.");
 		break;
 	case frameType_wmv1:
 		{
@@ -827,8 +869,11 @@ static void AvcodecEncoder_encode_Yuv420(
 					yuv420->inherit_super.inherit_super.pts,
 					yuv420->inherit_super.inherit_super.timebase);
 			if(wmv1 != NULL) {
-				callback(ptr, (ttLibC_Frame *)wmv1);
 				encoder->frame = (ttLibC_Frame *)wmv1;
+				if(callback == NULL) {
+					return true;
+				}
+				return callback(ptr, (ttLibC_Frame *)wmv1);
 			}
 		}
 		break;
@@ -849,15 +894,19 @@ static void AvcodecEncoder_encode_Yuv420(
 					yuv420->inherit_super.inherit_super.pts,
 					yuv420->inherit_super.inherit_super.timebase);
 			if(wmv2 != NULL) {
-				callback(ptr, (ttLibC_Frame *)wmv2);
 				encoder->frame = (ttLibC_Frame *)wmv2;
+				if(callback == NULL) {
+					return true;
+				}
+				return callback(ptr, (ttLibC_Frame *)wmv2);
 			}
 		}
 		break;
 	default:
 		// something wrong.
-		return;
+		return false;
 	}
+	return false;
 }
 
 /*
@@ -1323,43 +1372,39 @@ ttLibC_AvcodecEncoder *ttLibC_AvcodecVideoEncoder_make_ex(
  * @param callback callback func for avcodec encode.
  * @param ptr      pointer for user def value, which will call in callback.
  */
-void ttLibC_AvcodecEncoder_encode(
+bool ttLibC_AvcodecEncoder_encode(
 		ttLibC_AvcodecEncoder *encoder,
 		ttLibC_Frame *frame,
 		ttLibC_AvcodecEncodeFunc callback,
 		void *ptr) {
 	if(encoder == NULL) {
-		return;
+		return false;
 	}
 	if(frame == NULL) {
-		return;
+		return true;
 	}
 	ttLibC_AvcodecEncoder_ *encoder_ = (ttLibC_AvcodecEncoder_ *)encoder;
 	// check the target data.
 	if(frame->type != encoder_->inherit_super.input_frame_type) {
 		ERR_PRINT("input frame is not supported by avcodec.");
-		return;
+		return false;
 	}
 	if(encoder_->avframe == NULL) {
 		ERR_PRINT("avframe is not initialized yet.");
-		return;
+		return false;
 	}
 	switch(frame->type) {
 	case frameType_pcmF32:
-		AvcodecEncoder_encode_PcmF32(encoder_, (ttLibC_PcmF32 *)frame, callback, ptr);
-		break;
+		return AvcodecEncoder_encode_PcmF32(encoder_, (ttLibC_PcmF32 *)frame, callback, ptr);
 	case frameType_pcmS16:
-		AvcodecEncoder_encode_PcmS16(encoder_, (ttLibC_PcmS16 *)frame, callback, ptr);
-		break;
+		return AvcodecEncoder_encode_PcmS16(encoder_, (ttLibC_PcmS16 *)frame, callback, ptr);
 	case frameType_bgr:
-		AvcodecEncoder_encode_Bgr(encoder_, (ttLibC_Bgr *)frame, callback, ptr);
-		break;
+		return AvcodecEncoder_encode_Bgr(encoder_, (ttLibC_Bgr *)frame, callback, ptr);
 	case frameType_yuv420:
-		AvcodecEncoder_encode_Yuv420(encoder_, (ttLibC_Yuv420 *)frame, callback, ptr);
-		break;
+		return AvcodecEncoder_encode_Yuv420(encoder_, (ttLibC_Yuv420 *)frame, callback, ptr);
 	default:
 		ERR_PRINT("unknown frame type for avcodec input:%d", frame->type);
-		return;
+		return false;
 	}
 }
 

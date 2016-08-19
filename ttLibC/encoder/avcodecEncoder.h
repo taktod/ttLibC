@@ -124,7 +124,7 @@ ttLibC_AvcodecEncoder *ttLibC_AvcodecVideoEncoder_make_ex(
  * @param callback callback func for avcodec encode.
  * @param ptr      pointer for user def value, which will call in callback.
  */
-void ttLibC_AvcodecEncoder_encode(
+bool ttLibC_AvcodecEncoder_encode(
 		ttLibC_AvcodecEncoder *encoder,
 		ttLibC_Frame *frame,
 		ttLibC_AvcodecEncodeFunc callback,
