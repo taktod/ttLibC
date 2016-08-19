@@ -438,6 +438,18 @@ bool ttLibC_VtEncoder_encode(
 	if(encoder_ == NULL) {
 		return false;
 	}
+	if(yuv420 == NULL) {
+		return true;
+	}
+	switch(yuv420->type) {
+	case Yuv420Type_planar:
+	case Yvu420Type_planar:
+		break;
+	case Yuv420Type_semiPlanar:
+	case Yvu420Type_semiPlanar:
+		ERR_PRINT("only support planar.");
+		return false;
+	}
 	encoder_->callback = callback;
 	encoder_->ptr = ptr;
 	// setup pts

@@ -390,9 +390,9 @@ static bool Openh264Encoder_encode(
 	}
 	switch(yuv->type) {
 	case Yuv420Type_planar:
+	case Yvu420Type_planar:
 		break;
 	case Yuv420Type_semiPlanar:
-	case Yvu420Type_planar:
 	case Yvu420Type_semiPlanar:
 		ERR_PRINT("support only yuv420 planar.");
 		return false;

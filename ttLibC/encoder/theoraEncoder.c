@@ -121,6 +121,15 @@ bool ttLibC_TheoraEncoder_encode(
 	if(yuv420 == NULL) {
 		return true;
 	}
+	switch(yuv420->type) {
+	case Yuv420Type_planar:
+	case Yvu420Type_planar:
+		break;
+	case Yuv420Type_semiPlanar:
+	case Yvu420Type_semiPlanar:
+		ERR_PRINT("only support planar.");
+		return false;
+	}
 	// y
 	encoder_->image_buffer[0].width  = yuv420->inherit_super.width;
 	encoder_->image_buffer[0].height = yuv420->inherit_super.height;

@@ -70,6 +70,21 @@ bool ttLibC_X265Encoder_encode(
 		void *ptr) {
 	// do encode.
 	ttLibC_X265Encoder_ *encoder_ = (ttLibC_X265Encoder_ *)encoder;
+	if(encoder_ == NULL) {
+		return false;
+	}
+	if(yuv420 == NULL) {
+		return true;
+	}
+	switch(yuv420->type) {
+	case Yuv420Type_planar:
+	case Yvu420Type_planar:
+		break;
+	case Yuv420Type_semiPlanar:
+	case Yvu420Type_semiPlanar:
+		ERR_PRINT("only support planar.");
+		return false;
+	}
 	// setup picture.
 	x265_picture pic;
 	encoder_->api->picture_init(encoder_->param, &pic);

@@ -288,6 +288,21 @@ bool ttLibC_X264Encoder_encode(
 		ttLibC_X264EncodeFunc callback,
 		void *ptr) {
 	ttLibC_X264Encoder_ *encoder_ = (ttLibC_X264Encoder_ *)encoder;
+	if(encoder_ == NULL) {
+		return false;
+	}
+	if(yuv420 == NULL) {
+		return true;
+	}
+	switch(yuv420->type) {
+	case Yuv420Type_planar:
+	case Yvu420Type_planar:
+		break;
+	case Yuv420Type_semiPlanar:
+	case Yvu420Type_semiPlanar:
+		ERR_PRINT("only support planar.");
+		return false;
+	}
 	// copy yuv data to pic.
 	// check: can I use ref copy?
 	memcpy(encoder_->pic.img.plane[0], yuv420->y_data, encoder_->luma_size);
