@@ -13,6 +13,8 @@
 #include "speexEncoder.h"
 #include "../log.h"
 #include "../allocator.h"
+#include "../util/hexUtil.h"
+#include "../util/ioUtil.h"
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -78,6 +80,10 @@ ttLibC_SpeexEncoder *ttLibC_SpeexEncoder_make(
 		ERR_PRINT("support only 8k 16k 32kHz");
 		return NULL;
 	}
+	if(channel_num != 1) {
+		ERR_PRINT("speex encoder support only monoral.");
+		return NULL;
+	}
 	ttLibC_SpeexEncoder_ *encoder = ttLibC_malloc(sizeof(ttLibC_SpeexEncoder_));
 	if(encoder == NULL) {
 		ERR_PRINT("failed to alloc encoder object.");
@@ -100,7 +106,7 @@ ttLibC_SpeexEncoder *ttLibC_SpeexEncoder_make(
 	encoder->inherit_super.type = SpeexEncoderType_CBR;
 	encoder->data_size = 512; // 512 for instance.
 	encoder->data = ttLibC_malloc(encoder->data_size);
- 	encoder->pcm_buffer_size = sample_rate / 50 * channel_num * sizeof(int16_t); // 20milisec分保持しなければいけない。
+ 	encoder->pcm_buffer_size = sample_rate / 50 * channel_num * sizeof(int16_t);
 	encoder->pcm_buffer = ttLibC_malloc(encoder->pcm_buffer_size);
 	encoder->pcm_buffer_next_pos = 0;
 	encoder->is_pts_initialized = false;
@@ -173,6 +179,29 @@ bool ttLibC_SpeexEncoder_encode(
 	if(!encoder_->is_pts_initialized) {
 		encoder_->is_pts_initialized = true;
 		encoder_->pts = pcm->inherit_super.inherit_super.pts * encoder_->inherit_super.sample_rate / pcm->inherit_super.inherit_super.timebase;
+		int size;
+		char *buf = speex_header_to_packet(&encoder_->header, &size);
+		// we need to callback this header frame for the initial response.
+		ttLibC_Speex *speex = ttLibC_Speex_make(
+				encoder_->speex,
+				SpeexType_header,
+				encoder_->header.rate,
+				encoder_->header.frame_size,
+				encoder_->header.nb_channels,
+				buf,
+				size,
+				true,
+				0,
+				encoder_->header.rate);
+		if(speex == NULL) {
+			return false;
+		}
+		encoder_->speex = speex;
+		if(callback != NULL) {
+			if(!callback(ptr, speex)) {
+				return false;
+			}
+		}
 	}
 	switch(pcm->type) {
 	default:
