@@ -11,6 +11,10 @@
 #ifndef TTLIBC_UTIL_IOUTIL_H_
 #define TTLIBC_UTIL_IOUTIL_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdint.h>
 
 #if !defined(__LITTLE_ENDIAN__) && (defined(WORDS_BIGENDIAN) || defined(__BIG_ENDIAN__))
@@ -46,6 +50,10 @@
 #define le_int32_t(i) ( (int32_t) i )
 #define be_int64_t(l) ( (int64_t) ( ((l << 56) & 0xFF00000000000000L) | ((l << 40) & 0x00FF000000000000L) | ((l << 24) & 0x0000FF0000000000L) | ((l << 8) & 0x000000FF00000000L) | ((l >> 8) & 0xFF000000) | ((l >> 24) & 0x00FF0000) | ((l >> 40) & 0x0000FF00) | ((l >> 56) & 0x000000FF) ) )
 #define le_int64_t(l) ( (int64_t) l )
+#endif
+
+#ifdef __cplusplus
+} /* extern "C" */
 #endif
 
 #endif /* TTLIBC_UTIL_IOUTIL_H_ */

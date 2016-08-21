@@ -94,3 +94,4 @@ ttLibC_PcmF32 *ttLibC_PcmF32_make(
 void ttLibC_PcmF32_close(ttLibC_PcmF32 **frame) {
 	ttLibC_Audio_close_((ttLibC_Audio **)frame);
 }
+

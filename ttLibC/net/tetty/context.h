@@ -11,6 +11,10 @@
 #ifndef TTLIBC_NET_TETTY_CONTEXT_H_
 #define TTLIBC_NET_TETTY_CONTEXT_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "../tetty.h"
 #include "../tcp.h"
 #include "../../util/stlListUtil.h"
@@ -160,5 +164,9 @@ tetty_errornum ttLibC_TettyContext_userEventTriggered_(
 		ttLibC_SocketInfo *socket_info,
 		void *data,
 		size_t data_size);
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
 
 #endif /* TTLIBC_NET_TETTY_CONTEXT_H_ */

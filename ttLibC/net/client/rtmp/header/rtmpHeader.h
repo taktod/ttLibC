@@ -11,6 +11,10 @@
 #ifndef TTLIBC_NET_CLIENT_RTMP_HEADER_RTMPHEADER_H_
 #define TTLIBC_NET_CLIENT_RTMP_HEADER_RTMPHEADER_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "../data/clientObject.h"
 
 /*
@@ -129,5 +133,9 @@ ttLibC_RtmpHeader *ttLibC_RtmpHeader_readBinary(
 		ttLibC_ClientObject *client_object);
 
 void ttLibC_RtmpHeader_close(ttLibC_RtmpHeader **header);
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
 
 #endif /* TTLIBC_NET_CLIENT_RTMP_HEADER_RTMPHEADER_H_ */

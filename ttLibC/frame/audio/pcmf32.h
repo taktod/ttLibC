@@ -11,6 +11,10 @@
 #ifndef TTLIBC_FRAME_AUDIO_PCMF32_H_
 #define TTLIBC_FRAME_AUDIO_PCMF32_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "audio.h"
 
 /**
@@ -86,5 +90,9 @@ ttLibC_PcmF32 *ttLibC_PcmF32_make(
  * @param frame
  */
 void ttLibC_PcmF32_close(ttLibC_PcmF32 **frame);
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
 
 #endif /* TTLIBC_FRAME_AUDIO_PCMF32_H_ */

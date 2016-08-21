@@ -232,4 +232,3 @@ void ttLibC_Audio_close(ttLibC_Audio **frame) {
 	}
 }
 
-
