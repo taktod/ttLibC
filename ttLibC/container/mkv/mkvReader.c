@@ -148,7 +148,7 @@ static bool MkvReader_readTag(
 			case MkvType_CodecDelay:
 				{
 					uint32_t delay = ttLibC_ByteReader_bit(byte_reader, size * 8);
-					LOG_PRINT("delay:%d", delay); // should I consider this? do later.
+//					LOG_PRINT("delay:%d", delay); // should I consider this? do later.
 				}
 				break;
 			case MkvType_TimecodeScale:
