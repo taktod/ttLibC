@@ -121,6 +121,12 @@ ttLibC_PcmS16 *ttLibC_PcmS16_make(
 			}
 		}
 		memcpy(pcms16->inherit_super.inherit_super.data, data, data_size);
+		if(l_data != NULL) {
+			pcms16->l_data = pcms16->inherit_super.inherit_super.data + (l_data - data);
+		}
+		if(r_data != NULL) {
+			pcms16->r_data = pcms16->inherit_super.inherit_super.data + (r_data - data);
+		}
 	}
 	return pcms16;
 }
@@ -208,6 +214,8 @@ ttLibC_PcmS16 *ttLibC_PcmS16_clone(
 			return pcms16;
 		}
 		break;
+	default:
+		return NULL;
 	}
 }
 
