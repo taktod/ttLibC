@@ -88,8 +88,8 @@ ttLibC_Yuv420 *ttLibC_Yuv420_make(
 			}
 		}
 	}
-	yuv420->inherit_super.inherit_super.data = NULL;
-	yuv420->inherit_super.inherit_super.data_size = 0;
+	yuv420->inherit_super.inherit_super.data        = NULL;
+	yuv420->inherit_super.inherit_super.data_size   = 0;
 	yuv420->type                                    = type;
 	yuv420->y_data                                  = y_data;
 	yuv420->y_stride                                = y_stride;
@@ -125,6 +125,16 @@ ttLibC_Yuv420 *ttLibC_Yuv420_make(
 			}
 		}
 		memcpy(yuv420->inherit_super.inherit_super.data, data, data_size);
+		// update inner ref to use copyed buffer.
+		if(y_data != NULL) {
+			yuv420->y_data = yuv420->inherit_super.inherit_super.data + (y_data - data);
+		}
+		if(u_data != NULL) {
+			yuv420->u_data = yuv420->inherit_super.inherit_super.data + (u_data - data);
+		}
+		if(v_data != NULL) {
+			yuv420->v_data = yuv420->inherit_super.inherit_super.data + (v_data - data);
+		}
 	}
 	return yuv420;
 }
@@ -136,9 +146,22 @@ ttLibC_Yuv420 *Yuv420_clonePlanar(
 	uint32_t u_size = src_frame->inherit_super.height / 2 * src_frame->u_stride;
 	uint32_t v_size = src_frame->inherit_super.height / 2 * src_frame->v_stride;
 	uint32_t buffer_size = y_size + u_size + v_size;
-	uint8_t *buffer = ttLibC_malloc(buffer_size);
+	uint8_t *buffer = NULL;
+	bool allogflag = false;
+	if(prev_frame != NULL) {
+		if(!prev_frame->inherit_super.inherit_super.is_non_copy) {
+			if(prev_frame->inherit_super.inherit_super.data_size > buffer_size) {
+				buffer = prev_frame->inherit_super.inherit_super.data;
+				buffer_size = prev_frame->inherit_super.inherit_super.data_size;
+			}
+		}
+	}
 	if(buffer == NULL) {
-		return NULL;
+		buffer = ttLibC_malloc(buffer_size);
+		if(buffer == NULL) {
+			ERR_PRINT("failed to allocate buffer for yuv420 clone.");
+			return NULL;
+		}
 	}
 	memcpy(buffer, src_frame->y_data, y_size);
 	memcpy(buffer + y_size, src_frame->u_data, u_size);
