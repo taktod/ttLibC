@@ -251,7 +251,7 @@ static bool AvcodecDecoder_decodeVideo(
 					decoder->avframe->data[1], decoder->avframe->linesize[1],
 					decoder->avframe->data[2], decoder->avframe->linesize[2],
 					true,
-					decoder->avframe->pts,
+					frame->inherit_super.pts,
 					frame->inherit_super.timebase);
 			if(y != NULL) {
 				decoder->frame = (ttLibC_Frame *)y;

@@ -139,7 +139,7 @@ ttLibC_PcmS16 *ttLibC_SpeexdspResampler_resample(ttLibC_SpeexdspResampler *resam
 		resampler_->inherit_super.error = ttLibC_updateError(Target_On_Resampler, Error_LibraryError);
 		return NULL;
 	}
-	uint64_t pts = src_pcms16->inherit_super.inherit_super.pts * resampler_->inherit_super.output_sample_rate / resampler_->inherit_super.input_sample_rate;
+	uint64_t pts = src_pcms16->inherit_super.inherit_super.pts * resampler_->inherit_super.output_sample_rate / src_pcms16->inherit_super.inherit_super.timebase;
 	uint8_t *l_data = NULL;
 	uint32_t l_stride = 0;
 	uint8_t *r_data = NULL;
