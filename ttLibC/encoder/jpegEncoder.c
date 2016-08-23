@@ -223,6 +223,23 @@ bool ttLibC_JpegEncoder_encode(
 	return true;
 }
 
+/**
+ * update jpeg quality.
+ * @param encoder jpeg encoder object.
+ * @param quality ftarget quality 0 - 100
+ * @return true:success false:error
+ */
+bool ttLibC_JpegEncoder_setQuality(
+		ttLibC_JpegEncoder *encoder,
+		uint32_t quality) {
+	if(encoder == NULL) {
+		return false;
+	}
+	ttLibC_JpegEncoder_ *encoder_ = encoder;
+	jpeg_set_quality(&encoder_->cinfo, quality, true);
+	return true;
+}
+
 /*
  * close jpeg encoder.
  * @param encoder
