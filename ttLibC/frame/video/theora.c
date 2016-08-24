@@ -71,6 +71,42 @@ ttLibC_Theora *ttLibC_Theora_make(
 }
 
 /*
+ * make clone frame.
+ * always make copy buffer on it.
+ * @param prev_frame reuse frame object.
+ * @param src_frame  source of clone.
+ */
+ttLibC_Theora *ttLibC_Theora_clone(
+		ttLibC_Theora *prev_frame,
+		ttLibC_Theora *src_frame) {
+	if(src_frame == NULL) {
+		return NULL;
+	}
+	if(src_frame->inherit_super.inherit_super.type != frameType_theora) {
+		ERR_PRINT("try to clone non theora frame.");
+		return NULL;
+	}
+	if(prev_frame != NULL && prev_frame->inherit_super.inherit_super.type != frameType_theora) {
+		ERR_PRINT("try to use non theora frame for reuse.");
+		return NULL;
+	}
+	ttLibC_Theora *theora = ttLibC_Theora_make(
+			prev_frame,
+			src_frame->type,
+			src_frame->inherit_super.width,
+			src_frame->inherit_super.height,
+			src_frame->inherit_super.inherit_super.data,
+			src_frame->inherit_super.inherit_super.buffer_size,
+			false,
+			src_frame->inherit_super.inherit_super.pts,
+			src_frame->inherit_super.inherit_super.timebase);
+	if(theora != NULL) {
+		theora->inherit_super.inherit_super.id = src_frame->inherit_super.inherit_super.id;
+	}
+	return theora;
+}
+
+/*
  * check if the theora binary is key frame.
  * @param data      theora data
  * @param data_size theora data size
@@ -78,7 +114,7 @@ ttLibC_Theora *ttLibC_Theora_make(
  */
 bool ttLibC_Theora_isKey(void *data, size_t data_size) {
 	uint8_t first_byte = *((uint8_t *)data);
-	return (first_byte & 0xC0) != 0x40;
+	return (first_byte & 0xC0) == 0x40;
 }
 
 /*

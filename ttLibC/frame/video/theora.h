@@ -65,6 +65,16 @@ ttLibC_Theora *ttLibC_Theora_make(
 		uint32_t timebase);
 
 /**
+ * make clone frame.
+ * always make copy buffer on it.
+ * @param prev_frame reuse frame object.
+ * @param src_frame  source of clone.
+ */
+ttLibC_Theora *ttLibC_Theora_clone(
+		ttLibC_Theora *prev_frame,
+		ttLibC_Theora *src_frame);
+
+/**
  * check if the theora binary is key frame.
  * @param data      theora data
  * @param data_size theora data size

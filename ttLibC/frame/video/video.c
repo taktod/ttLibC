@@ -163,7 +163,10 @@ ttLibC_Video *ttLibC_Video_clone(
 		return (ttLibC_Video *)ttLibC_Jpeg_clone(
  				(ttLibC_Jpeg *)prev_frame,
 				(ttLibC_Jpeg *)src_frame);
-//	case frameType_theora:
+	case frameType_theora:
+		return (ttLibC_Video *)ttLibC_Theora_clone(
+				(ttLibC_Theora *)prev_frame,
+				(ttLibC_Theora *)src_frame);
 //	case frameType_vp6:
 	case frameType_vp8:
 		return (ttLibC_Video *)ttLibC_Vp8_clone(

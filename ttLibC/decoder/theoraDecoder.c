@@ -140,6 +140,9 @@ bool ttLibC_TheoraDecoder_decode(
 	}
 	ogg_int64_t videoBuf_granulePos = 0;
 	int result = th_decode_packetin(decoder_->ctx, &op, &videoBuf_granulePos);
+	if(result == TH_DUPFRAME) { // skip dup frame.
+		return true;
+	}
 	if(result != 0) {
 		ERR_PRINT("error on decode. :%d %x", result, result);
 		return false;
