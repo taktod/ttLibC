@@ -10,6 +10,7 @@
 
 #include "pcmf32.h"
 #include "../../log.h"
+#include "../../allocator.h"
 
 typedef ttLibC_Frame_Audio_PcmF32 ttLibC_PcmF32_;
 
@@ -77,16 +78,170 @@ ttLibC_PcmF32 *ttLibC_PcmF32_make(
 			timebase);
 	if(pcmf32 != NULL) {
 		pcmf32->type     = type;
-		pcmf32->l_data   = l_data;
 		pcmf32->l_stride = l_stride;
 		pcmf32->l_step   = l_step;
-		pcmf32->r_data   = r_data;
 		pcmf32->r_stride = r_stride;
 		pcmf32->r_step   = r_step;
+		if(pcmf32->inherit_super.inherit_super.is_non_copy) {
+			pcmf32->l_data = l_data;
+			pcmf32->r_data = r_data;
+		}
+		else {
+			if(l_data != NULL) {
+				pcmf32->l_data = pcmf32->inherit_super.inherit_super.data + (l_data - data);
+			}
+			if(r_data != NULL) {
+				pcmf32->r_data = pcmf32->inherit_super.inherit_super.data + (r_data - data);
+			}
+		}
 	}
 	return (ttLibC_PcmF32 *)pcmf32;
 }
 
+static ttLibC_PcmF32 *PcmF32_cloneInterleave(
+		ttLibC_PcmF32 *prev_frame,
+		ttLibC_PcmF32 *src_frame) {
+	uint8_t *data = NULL;
+	uint32_t data_size = src_frame->inherit_super.sample_num * src_frame->inherit_super.channel_num * 4;
+	uint32_t buffer_size = data_size;
+	bool allocflag = false;
+	if(prev_frame != NULL) {
+		if(!prev_frame->inherit_super.inherit_super.is_non_copy) {
+			if(prev_frame->inherit_super.inherit_super.data_size >= data_size) {
+				data = prev_frame->inherit_super.inherit_super.data;
+				data_size = prev_frame->inherit_super.inherit_super.data_size;
+			}
+			else {
+				ttLibC_free(prev_frame->inherit_super.inherit_super.data);
+			}
+			prev_frame->inherit_super.inherit_super.data = NULL;
+			prev_frame->inherit_super.inherit_super.is_non_copy = true;
+		}
+	}
+	if(data == NULL) {
+		data = ttLibC_malloc(buffer_size);
+		if(data == NULL) {
+			ERR_PRINT("failed to allocate buffer for pcms16 clone.");
+			return NULL;
+		}
+		allocflag = true;
+	}
+	memcpy(data, src_frame->l_data, buffer_size);
+	ttLibC_PcmF32 *cloned_frame = ttLibC_PcmF32_make(
+			prev_frame,
+			PcmF32Type_interleave,
+			src_frame->inherit_super.sample_rate,
+			src_frame->inherit_super.sample_num,
+			src_frame->inherit_super.channel_num,
+			data,
+			data_size,
+			data,
+			buffer_size,
+			NULL,
+			0,
+			true,
+			src_frame->inherit_super.inherit_super.pts,
+			src_frame->inherit_super.inherit_super.timebase);
+	if(cloned_frame != NULL) {
+		cloned_frame->inherit_super.inherit_super.is_non_copy = false;
+	}
+	else {
+		if(allocflag) {
+			ttLibC_free(data);
+		}
+	}
+	return cloned_frame;
+}
+
+static ttLibC_PcmF32 *PcmF32_clonePlanar(
+		ttLibC_PcmF32 *prev_frame,
+		ttLibC_PcmF32 *src_frame) {
+	uint8_t *data = NULL;
+	uint32_t plane_size = src_frame->inherit_super.sample_num * 4;
+	uint32_t data_size = plane_size * src_frame->inherit_super.channel_num;
+	uint32_t buffer_size = data_size;
+	bool allocflag = false;
+	if(prev_frame != NULL) {
+		if(!prev_frame->inherit_super.inherit_super.is_non_copy) {
+			if(prev_frame->inherit_super.inherit_super.data_size >= data_size) {
+				data = prev_frame->inherit_super.inherit_super.data;
+				data_size = prev_frame->inherit_super.inherit_super.data_size;
+			}
+			else {
+				ttLibC_free(prev_frame->inherit_super.inherit_super.data);
+			}
+			prev_frame->inherit_super.inherit_super.data = NULL;
+			prev_frame->inherit_super.inherit_super.is_non_copy = true;
+		}
+	}
+	if(data == NULL) {
+		data = ttLibC_malloc(buffer_size);
+		if(data == NULL) {
+			ERR_PRINT("failed to allocate buffer for pcms16 clone.");
+			return NULL;
+		}
+		allocflag = true;
+	}
+	memcpy(data, src_frame->l_data, plane_size);
+	if(src_frame->r_data != NULL) {
+		memcpy(data + plane_size, src_frame->r_data, plane_size);
+	}
+	ttLibC_PcmF32 *cloned_frame = ttLibC_PcmF32_make(
+			prev_frame,
+			PcmF32Type_planar,
+			src_frame->inherit_super.sample_rate,
+			src_frame->inherit_super.sample_num,
+			src_frame->inherit_super.channel_num,
+			data,
+			data_size,
+			data,
+			plane_size,
+			data + plane_size,
+			plane_size,
+			true,
+			src_frame->inherit_super.inherit_super.pts,
+			src_frame->inherit_super.inherit_super.timebase);
+	if(cloned_frame != NULL) {
+		cloned_frame->inherit_super.inherit_super.is_non_copy = false;
+	}
+	else {
+		if(allocflag) {
+			ttLibC_free(data);
+		}
+	}
+	return cloned_frame;
+}
+
+/**
+ * make clone frame.
+ * always make copy buffer on it.
+ * @param prev_frame reuse frame object.
+ * @param src_frame  source of clone.
+ */
+ttLibC_PcmF32 *ttLibC_PcmF32_clone(
+		ttLibC_PcmF32 *prev_frame,
+		ttLibC_PcmF32 *src_frame) {
+	if(src_frame == NULL) {
+		return NULL;
+	}
+	if(src_frame->inherit_super.inherit_super.type != frameType_pcmF32) {
+		ERR_PRINT("try to clone non pcmf32 frame.");
+		return NULL;
+	}
+	if(prev_frame != NULL && prev_frame->inherit_super.inherit_super.type != frameType_pcmF32) {
+		ERR_PRINT("try to use non pcmf32 frame for reuse.");
+		return NULL;
+	}
+	switch(src_frame->type) {
+	case PcmF32Type_interleave:
+		return PcmF32_cloneInterleave(prev_frame, src_frame);
+	case PcmF32Type_planar:
+		return PcmF32_clonePlanar(prev_frame, src_frame);
+	default:
+		break;
+	}
+	return NULL;
+}
 /*
  * close frame
  * @param frame

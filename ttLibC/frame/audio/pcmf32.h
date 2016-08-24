@@ -86,6 +86,16 @@ ttLibC_PcmF32 *ttLibC_PcmF32_make(
 		uint32_t timebase);
 
 /**
+ * make clone frame.
+ * always make copy buffer on it.
+ * @param prev_frame reuse frame object.
+ * @param src_frame  source of clone.
+ */
+ttLibC_PcmF32 *ttLibC_PcmF32_clone(
+		ttLibC_PcmF32 *prev_frame,
+		ttLibC_PcmF32 *src_frame);
+
+/**
  * close frame
  * @param frame
  */

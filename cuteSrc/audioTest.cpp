@@ -63,6 +63,12 @@
 #	include <vorbis/codec.h>
 #endif
 
+#ifdef __ENABLE_APPLE__
+#	include <ttLibC/util/audioUnitUtil.h>
+#endif
+#include <stdio.h>
+#include <unistd.h>
+
 static void vorbisTest() {
 	LOG_PRINT("vorbisTest");
 #if defined(__ENABLE_VORBIS_ENCODE__) && defined(__ENABLE_VORBIS_DECODE__)
@@ -742,6 +748,87 @@ static void mp3lameTest() {
 	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
+static void pcmF32CloneTest() {
+	LOG_PRINT("pcmF32CloneTest");
+#ifdef __ENABLE_APPLE__
+	ttLibC_AuPlayer *player = ttLibC_AuPlayer_make(48000, 2, AuPlayerType_DefaultOutput);
+	ttLibC_BeepGenerator *generator = ttLibC_BeepGenerator_make(PcmS16Type_littleEndian_planar, 440, 48000, 2);
+	ttLibC_PcmS16 *pcm = NULL, *p;
+	ttLibC_PcmS16 *ppcm = NULL;
+	ttLibC_PcmF32 *fpcm = NULL, *cfpcm = NULL, *f;
+	for(int i = 0;i < 100;i ++) {
+		p = ttLibC_BeepGenerator_makeBeepBySampleNum(generator, pcm, 480);
+		if(p == NULL) {
+			break;
+		}
+		pcm = p;
+		f = ttLibC_AudioResampler_makePcmF32FromPcmS16(fpcm, PcmF32Type_planar, pcm);
+		if(f == NULL) {
+			break;
+		}
+		fpcm = f;
+		f = ttLibC_PcmF32_clone(cfpcm, fpcm);
+		if(f == NULL) {
+			break;
+		}
+		cfpcm = f;
+		p = (ttLibC_PcmS16 *)ttLibC_AudioResampler_convertFormat((ttLibC_Audio *)ppcm, frameType_pcmS16, PcmS16Type_littleEndian, 2, (ttLibC_Audio *)cfpcm);
+		if(p == NULL) {
+			break;
+		}
+		ppcm = p;
+		while(!ttLibC_AuPlayer_queue(player, ppcm)) {
+			usleep(100);
+		}
+	}
+	sleep(1);
+	ttLibC_AuPlayer_close(&player);
+	ttLibC_PcmS16_close(&pcm);
+	ttLibC_PcmF32_close(&fpcm);
+	ttLibC_PcmF32_close(&cfpcm);
+	ttLibC_PcmS16_close(&ppcm);
+	ttLibC_BeepGenerator_close(&generator);
+#endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
+
+static void pcmS16CloneTest() {
+	LOG_PRINT("pcmS16CloneTest");
+#ifdef __ENABLE_APPLE__
+	ttLibC_AuPlayer *player = ttLibC_AuPlayer_make(48000, 2, AuPlayerType_DefaultOutput);
+	ttLibC_BeepGenerator *generator = ttLibC_BeepGenerator_make(PcmS16Type_littleEndian, 440, 48000, 2);
+	ttLibC_PcmS16 *pcm = NULL, *cpcm = NULL, *p;
+	ttLibC_PcmS16 *ppcm = NULL;
+	for(int i = 0;i < 100;i ++) {
+		p = ttLibC_BeepGenerator_makeBeepBySampleNum(generator, pcm, 480);
+		if(p == NULL) {
+			break;
+		}
+		pcm = p;
+		p = ttLibC_PcmS16_clone(cpcm, pcm);
+		if(p == NULL) {
+			break;
+		}
+		cpcm = p;
+		p = (ttLibC_PcmS16 *)ttLibC_AudioResampler_convertFormat((ttLibC_Audio *)ppcm, frameType_pcmS16, PcmS16Type_littleEndian, 2, (ttLibC_Audio *)cpcm);
+		if(p == NULL) {
+			break;
+		}
+		ppcm = p;
+		while(!ttLibC_AuPlayer_queue(player, ppcm)) {
+			usleep(100);
+		}
+	}
+	sleep(1);
+	ttLibC_AuPlayer_close(&player);
+	ttLibC_PcmS16_close(&pcm);
+	ttLibC_PcmS16_close(&cpcm);
+	ttLibC_PcmS16_close(&ppcm);
+	ttLibC_BeepGenerator_close(&generator);
+#endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
+
 /**
  * define all test for audio package.
  * @param s cute::suite obj
@@ -759,5 +846,7 @@ cute::suite audioTests(cute::suite s) {
 	s.push_back(CUTE(speexdspResampleTest));
 	s.push_back(CUTE(faacTest));
 	s.push_back(CUTE(mp3lameTest));
+	s.push_back(CUTE(pcmF32CloneTest));
+	s.push_back(CUTE(pcmS16CloneTest));
 	return s;
 }
