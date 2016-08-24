@@ -131,6 +131,134 @@ ttLibC_PcmS16 *ttLibC_PcmS16_make(
 	return pcms16;
 }
 
+static ttLibC_PcmS16 *PcmS16_cloneBigEndian(
+		ttLibC_PcmS16 *prev_frame,
+		ttLibC_PcmS16 *src_frame) {
+	ERR_PRINT("clone bigendian is not created");
+	return NULL;
+}
+
+static ttLibC_PcmS16 *PcmS16_cloneLittleEndian(
+		ttLibC_PcmS16 *prev_frame,
+		ttLibC_PcmS16 *src_frame) {
+	uint8_t *data = NULL;
+	uint32_t data_size = src_frame->inherit_super.sample_num * src_frame->inherit_super.channel_num * 2;
+	uint32_t buffer_size = data_size;
+	bool allocflag = false;
+	if(prev_frame != NULL) {
+		if(!prev_frame->inherit_super.inherit_super.is_non_copy) {
+			if(prev_frame->inherit_super.inherit_super.data_size >= data_size) {
+				data = prev_frame->inherit_super.inherit_super.data;
+				data_size = prev_frame->inherit_super.inherit_super.data_size;
+			}
+			else {
+				ttLibC_free(prev_frame->inherit_super.inherit_super.data);
+			}
+			prev_frame->inherit_super.inherit_super.data = NULL;
+			prev_frame->inherit_super.inherit_super.is_non_copy = true;
+		}
+	}
+	if(data == NULL) {
+		data = ttLibC_malloc(buffer_size);
+		if(data == NULL) {
+			ERR_PRINT("failed to allocate buffer for pcms16 clone.");
+			return NULL;
+		}
+		allocflag = true;
+	}
+	memcpy(data, src_frame->l_data, buffer_size);
+	ttLibC_PcmS16 *cloned_frame = ttLibC_PcmS16_make(
+			prev_frame,
+			PcmS16Type_littleEndian,
+			src_frame->inherit_super.sample_rate,
+			src_frame->inherit_super.sample_num,
+			src_frame->inherit_super.channel_num,
+			data,
+			data_size,
+			data,
+			buffer_size,
+			NULL,
+			0,
+			true,
+			src_frame->inherit_super.inherit_super.pts,
+			src_frame->inherit_super.inherit_super.timebase);
+	if(cloned_frame != NULL) {
+		cloned_frame->inherit_super.inherit_super.is_non_copy = false;
+	}
+	else {
+		if(allocflag) {
+			ttLibC_free(data);
+		}
+	}
+	return cloned_frame;
+}
+
+static ttLibC_PcmS16 *PcmS16_cloneBigEndianPlanar(
+		ttLibC_PcmS16 *prev_frame,
+		ttLibC_PcmS16 *src_frame) {
+	ERR_PRINT("clone bigendian planar is not created");
+	return NULL;
+}
+
+static ttLibC_PcmS16 *PcmS16_cloneLittleEndianPlanar(
+		ttLibC_PcmS16 *prev_frame,
+		ttLibC_PcmS16 *src_frame) {
+	uint8_t *data = NULL;
+	uint32_t plane_size = src_frame->inherit_super.sample_num * 2;
+	uint32_t data_size = plane_size * src_frame->inherit_super.channel_num;
+	uint32_t buffer_size = data_size;
+	bool allocflag = false;
+	if(prev_frame != NULL) {
+		if(!prev_frame->inherit_super.inherit_super.is_non_copy) {
+			if(prev_frame->inherit_super.inherit_super.data_size >= data_size) {
+				data = prev_frame->inherit_super.inherit_super.data;
+				data_size = prev_frame->inherit_super.inherit_super.data_size;
+			}
+			else {
+				ttLibC_free(prev_frame->inherit_super.inherit_super.data);
+			}
+			prev_frame->inherit_super.inherit_super.data = NULL;
+			prev_frame->inherit_super.inherit_super.is_non_copy = true;
+		}
+	}
+	if(data == NULL) {
+		data = ttLibC_malloc(buffer_size);
+		if(data == NULL) {
+			ERR_PRINT("failed to allocate buffer for pcms16 clone.");
+			return NULL;
+		}
+		allocflag = true;
+	}
+	memcpy(data, src_frame->l_data, plane_size);
+	if(src_frame->r_data != NULL) {
+		memcpy(data + plane_size, src_frame->r_data, plane_size);
+	}
+	ttLibC_PcmS16 *cloned_frame = ttLibC_PcmS16_make(
+			prev_frame,
+			PcmS16Type_littleEndian_planar,
+			src_frame->inherit_super.sample_rate,
+			src_frame->inherit_super.sample_num,
+			src_frame->inherit_super.channel_num,
+			data,
+			data_size,
+			data,
+			plane_size,
+			data + plane_size,
+			plane_size,
+			true,
+			src_frame->inherit_super.inherit_super.pts,
+			src_frame->inherit_super.inherit_super.timebase);
+	if(cloned_frame != NULL) {
+		cloned_frame->inherit_super.inherit_super.is_non_copy = false;
+	}
+	else {
+		if(allocflag) {
+			ttLibC_free(data);
+		}
+	}
+	return cloned_frame;
+}
+
 /*
  * make clone frame.
  * always make copy buffer on it.
@@ -151,72 +279,19 @@ ttLibC_PcmS16 *ttLibC_PcmS16_clone(
 		ERR_PRINT("try to use non pcms16 frame for reuse.");
 		return NULL;
 	}
-	if(src_frame->inherit_super.inherit_super.data == NULL) {
-		ERR_PRINT("original data have only reference, nothing to copy.");
-		return NULL;
-	}
 	switch(src_frame->type) {
 	case PcmS16Type_bigEndian:
+		return PcmS16_cloneBigEndian(prev_frame, src_frame);
 	case PcmS16Type_littleEndian:
-		{
-			ttLibC_PcmS16 *pcms16 = ttLibC_PcmS16_make(
-					prev_frame,
-					src_frame->type,
-					src_frame->inherit_super.sample_rate,
-					src_frame->inherit_super.sample_num,
-					src_frame->inherit_super.channel_num,
-					src_frame->inherit_super.inherit_super.data,
-					src_frame->inherit_super.inherit_super.buffer_size,
-					NULL,
-					src_frame->l_stride,
-					NULL,
-					src_frame->r_stride,
-					false,
-					src_frame->inherit_super.inherit_super.pts,
-					src_frame->inherit_super.inherit_super.timebase);
-			if(pcms16 == NULL) {
-				return NULL;
-			}
-			pcms16->inherit_super.inherit_super.id = src_frame->inherit_super.inherit_super.id;
-			pcms16->l_data = pcms16->inherit_super.inherit_super.data;
-			if(src_frame->inherit_super.channel_num == 2) {
-				pcms16->r_data = pcms16->l_data + 2;
-			}
-			return pcms16;
-		}
-		break;
+		return PcmS16_cloneLittleEndian(prev_frame, src_frame);
 	case PcmS16Type_bigEndian_planar:
+		return PcmS16_cloneBigEndianPlanar(prev_frame, src_frame);
 	case PcmS16Type_littleEndian_planar:
-		{
-			ttLibC_PcmS16 *pcms16 = ttLibC_PcmS16_make(
-					prev_frame,
-					src_frame->type,
-					src_frame->inherit_super.sample_rate,
-					src_frame->inherit_super.sample_num,
-					src_frame->inherit_super.channel_num,
-					src_frame->inherit_super.inherit_super.data,
-					src_frame->inherit_super.inherit_super.buffer_size,
-					NULL,
-					src_frame->l_stride,
-					NULL,
-					src_frame->r_stride,
-					false,
-					src_frame->inherit_super.inherit_super.pts,
-					src_frame->inherit_super.inherit_super.timebase);
-			if(pcms16 == NULL) {
-				return NULL;
-			}
-			pcms16->l_data = pcms16->inherit_super.inherit_super.data;
-			pcms16->inherit_super.inherit_super.id = src_frame->inherit_super.inherit_super.id;
-			if(src_frame->inherit_super.channel_num == 2) {
-				pcms16->r_data = pcms16->l_data + (size_t)(src_frame->r_data - src_frame->l_data);
-			}
-			return pcms16;
-		}
-		break;
+		return PcmS16_cloneLittleEndianPlanar(prev_frame, src_frame);
 	default:
-		return NULL;
+		break;
 	}
+	return NULL;
 }
 
 /*
