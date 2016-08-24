@@ -823,6 +823,51 @@ static void openh264Test() {
 	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
+static void yuvCloneTest() {
+	LOG_PRINT("yuv data clone test");
+#ifdef __ENABLE_OPENCV__
+	uint32_t width = 320, height = 240;
+	ttLibC_CvCapture *capture = ttLibC_CvCapture_make(0, width, height);
+	ttLibC_CvWindow *window = ttLibC_CvWindow_make("test");
+	ttLibC_Bgr *bgr = NULL, *b, *rbgr = NULL;
+	ttLibC_Yuv420 *yuv = NULL, *y, *ryuv = NULL;
+	while(true) {
+		b = ttLibC_CvCapture_queryFrame(capture, bgr);
+		if(b == NULL) {
+			break;
+		}
+		bgr = b;
+		y = ttLibC_ImageResampler_makeYuv420FromBgr(yuv, Yvu420Type_semiPlanar, bgr);
+		if(y == NULL) {
+			break;
+		}
+		yuv = y;
+		y = ttLibC_Yuv420_clone(ryuv, yuv);
+		if(y == NULL) {
+			break;
+		}
+		ryuv =y;
+		b = ttLibC_ImageResampler_makeBgrFromYuv420(rbgr, BgrType_bgr, ryuv);
+		if(b == NULL) {
+			break;
+		}
+		rbgr = b;
+		ttLibC_CvWindow_showBgr(window, rbgr);
+		uint8_t key_char = ttLibC_CvWindow_waitForKeyInput(10);
+		if(key_char == Keychar_Esc) {
+			break;
+		}
+	}
+	ttLibC_Yuv420_close(&yuv);
+	ttLibC_Yuv420_close(&ryuv);
+	ttLibC_Bgr_close(&bgr);
+	ttLibC_Bgr_close(&rbgr);
+	ttLibC_CvWindow_close(&window);
+	ttLibC_CvCapture_close(&capture);
+#endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
+
 /**
  * define all test for video package.
  * @param s cute::suite obj
@@ -835,5 +880,6 @@ cute::suite videoTests(cute::suite s) {
 	s.push_back(CUTE(avcodecTest));
 	s.push_back(CUTE(h264SequenceParameterSetAnalyzeTest));
 	s.push_back(CUTE(openh264Test));
+	s.push_back(CUTE(yuvCloneTest));
 	return s;
 }
