@@ -329,7 +329,7 @@ ttLibC_Audio *ttLibC_AudioResampler_convertFormat(
 		case PcmS16Type_littleEndian:
 			l_data = data;
 			if(channel_num == 2) {
-//				r_data = l_data + 2;
+				r_data = l_data + 2;
 				step = 4;
 			}
 			else {
@@ -351,7 +351,7 @@ ttLibC_Audio *ttLibC_AudioResampler_convertFormat(
 		case PcmF32Type_interleave:
 			l_data = data;
 			if(channel_num == 2) {
-//				r_data = l_data + 4;
+				r_data = l_data + 4;
 				step = 8;
 			}
 			else {
