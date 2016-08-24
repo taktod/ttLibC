@@ -52,6 +52,7 @@
 #include <ttLibC/resampler/audioResampler.h>
 
 #include <ttLibC/frame/audio/mp3.h>
+#include <ttLibC/frame/audio/speex.h>
 #include <ttLibC/allocator.h>
 
 #ifdef __ENABLE_VORBIS_ENCODE__
@@ -410,6 +411,39 @@ static void mp3DecodeTest() {
 	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
+static void speexFrameTest() {
+	LOG_PRINT("speexFrameTest");
+	char buffer[512];
+	ttLibC_Speex *spx = NULL;
+	size_t buffer_size = 0;
+	// header
+/*	buffer_size = ttLibC_HexUtil_makeBuffer("53 70 65 65 78 20 20 20 31 2E 32 72 63 31 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 50 00 00 00 00 7D 00 00 02 00 00 00 04 00 00 00 01 00 00 00 A0 73 00 00 80 02 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00", buffer, 512);
+	spx = ttLibC_Speex_getFrame(spx, buffer, buffer_size, true, 0, 32000);
+	if(spx != NULL) {
+		LOG_PRINT("type:%d", spx->type);
+	}*/
+	// comment
+	buffer_size = ttLibC_HexUtil_makeBuffer("0D 00 00 00 4C 61 76 66 35 37 2E 34 31 2E 31 30 30 0A 00 00 00 1E 00 00 00 65 6E 63 6F 64 65 72 3D 4C 61 76 63 35 37 2E 34 38 2E 31 30 31 20 6C 69 62 73 70 65 65 78 0B 00 00 00 73 74 61 72 74 74 69 6D 65 3D 30 11 00 00 00 74 6F 74 61 6C 64 75 72 61 74 69 6F 6E 3D 31 33 32 11 00 00 00 74 6F 74 61 6C 64 61 74 61 72 61 74 65 3D 39 31 34 13 00 00 00 62 79 74 65 6C 65 6E 67 74 68 3D 31 35 30 39 36 31 31 37 12 00 00 00 63 61 6E 73 65 65 6B 6F 6E 74 69 6D 65 3D 74 72 75 65 26 00 00 00 73 6F 75 72 63 65 64 61 74 61 3D 42 44 41 42 30 46 32 30 37 48 48 31 33 31 36 33 31 32 33 32 37 39 38 36 32 36 31 05 00 00 00 70 75 72 6C 3D 05 00 00 00 70 6D 73 67 3D 47 00 00 00 68 74 74 70 68 6F 73 74 68 65 61 64 65 72 3D 6F 2D 6F 2E 70 72 65 66 65 72 72 65 64 2E 73 6F 66 74 62 61 6E 6B 62 62 2D 68 6E 64 31 2E 76 32 30 2E 6C 73 63 61 63 68 65 33 2E 63 2E 79 6F 75 74 75 62 65 2E 63 6F 6D", buffer, 512);
+	spx = ttLibC_Speex_getFrame(spx, buffer, buffer_size, true, 0, 32000);
+	if(spx != NULL) {
+		LOG_PRINT("type:%d", spx->type);
+	}
+	// frame n w sw
+	buffer_size = ttLibC_HexUtil_makeBuffer("36 9D 1B 9A 20 00 01 68 E8 E8 E8 E8 E8 E8 E8 84 00 B4 74 74 74 74 74 74 74 42 00 5A 3A 3A 3A 3A 3A 3A 3A 21 00 2D 1D 1D 1D 1D 1D 1D 1D 1B 3B 60 AB AB AB AB AB 0A BA BA BA BA B0 AB AB AB AB AB 0A BA BA BA BA B9 3B 60 00 00", buffer, 512);
+	spx = ttLibC_Speex_getFrame(spx, buffer, buffer_size, true, 0, 32000);
+	if(spx != NULL) {
+		LOG_PRINT("type:%d rate:%d num:%d", spx->type, spx->inherit_super.sample_rate, spx->inherit_super.sample_num);
+	}
+	// frame n w
+	buffer_size = ttLibC_HexUtil_makeBuffer("36 9D 1B 9A 20 00 01 68 E8 E8 E8 E8 E8 E8 E8 84 00 B4 74 74 74 74 74 74 74 42 00 5A 3A 3A 3A 3A 3A 3A 3A 21 00 2D 1D 1D 1D 1D 1D 1D 1D 1B 3B 60 AB AB AB AB AB 0A BA BA BA BA B0 AB AB AB AB AB 0A BA BA BA BA B0", buffer, 512);
+	spx = ttLibC_Speex_getFrame(spx, buffer, buffer_size, true, 0, 32000);
+	if(spx != NULL) {
+		LOG_PRINT("type:%d rate:%d num:%d", spx->type, spx->inherit_super.sample_rate, spx->inherit_super.sample_num);
+	}
+	ttLibC_Speex_close(&spx);
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
+
 static void speexTest() {
 	LOG_PRINT("speexTest");
 #if defined(__ENABLE_SPEEX__) && defined(__ENABLE_OPENAL__)
@@ -720,6 +754,7 @@ cute::suite audioTests(cute::suite s) {
 	s.push_back(CUTE(audioResamplerTest));
 	s.push_back(CUTE(opusTest));
 	s.push_back(CUTE(mp3DecodeTest));
+	s.push_back(CUTE(speexFrameTest));
 	s.push_back(CUTE(speexTest));
 	s.push_back(CUTE(speexdspResampleTest));
 	s.push_back(CUTE(faacTest));
