@@ -152,8 +152,10 @@ ttLibC_Audio *ttLibC_Audio_clone(
 				(ttLibC_Opus *)prev_frame,
 				(ttLibC_Opus *)src_frame);
 //	case frameType_pcm_alaw:
-//	case frameType_pcmF32:
-//		return (ttLibC_Audio *)ttLibC_PcmF32
+	case frameType_pcmF32:
+		return (ttLibC_Audio *)ttLibC_PcmF32_clone(
+				(ttLibC_PcmF32 *)prev_frame,
+				(ttLibC_PcmF32 *)src_frame);
 //	case frameType_pcm_mulaw:
 	case frameType_pcmS16:
 		return (ttLibC_Audio *)ttLibC_PcmS16_clone(
