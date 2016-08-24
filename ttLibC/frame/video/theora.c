@@ -218,11 +218,13 @@ ttLibC_Theora *ttLibC_Theora_getFrame(
 			return NULL;
 		}
 	}
-	if((first_byte & 0x40) != 0) {
-		type = TheoraType_intraFrame;
-	}
-	if(width == 0 || height == 0) {
-		return NULL;
+	else {
+		if((first_byte & 0x40) == 0) {
+			type = TheoraType_intraFrame;
+		}
+		if(width == 0 || height == 0) {
+			return NULL;
+		}
 	}
 	return ttLibC_Theora_make(
 			prev_frame,
