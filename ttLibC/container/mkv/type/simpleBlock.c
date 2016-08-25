@@ -14,6 +14,7 @@
 #include "../../../util/hexUtil.h"
 #include "../../../util/byteUtil.h"
 #include "../../../frame/video/h264.h"
+#include "../../../frame/video/theora.h"
 #include "../../../frame/video/vp8.h"
 #include "../../../frame/video/vp9.h"
 #include "../../../frame/audio/aac.h"
@@ -79,26 +80,21 @@ static void SimpleBlock_getLace0Frame(
 			}
 		}
 		break;
-	case frameType_aac:
+	case frameType_theora:
 		{
-			ttLibC_Aac *aac = ttLibC_Aac_make(
-					(ttLibC_Aac *)track->frame,
-					AacType_raw,
-					track->sample_rate,
-					1024,
-					track->channel_num,
+			ttLibC_Theora *theora = ttLibC_Theora_getFrame(
+					(ttLibC_Theora *)track->frame,
 					data,
 					data_size,
 					true,
 					pts,
-					timebase,
-					track->dsi_info);
-			if(aac == NULL) {
-				ERR_PRINT("failed to make aac data.");
+					timebase);
+			if(theora == NULL) {
+				ERR_PRINT("failed to make theora data.");
 				reader->error_number = 5;
 			}
 			else {
-				track->frame = (ttLibC_Frame *)aac;
+				track->frame = (ttLibC_Frame *)theora;
 				track->frame->id = track->track_number;
 				if(callback != NULL) {
 					if(!callback(ptr, track->frame)) {
@@ -147,6 +143,35 @@ static void SimpleBlock_getLace0Frame(
 			}
 			else {
 				track->frame = (ttLibC_Frame *)vp9;
+				track->frame->id = track->track_number;
+				if(callback != NULL) {
+					if(!callback(ptr, track->frame)) {
+						reader->error_number = 5;
+					}
+				}
+			}
+		}
+		break;
+	case frameType_aac:
+		{
+			ttLibC_Aac *aac = ttLibC_Aac_make(
+					(ttLibC_Aac *)track->frame,
+					AacType_raw,
+					track->sample_rate,
+					1024,
+					track->channel_num,
+					data,
+					data_size,
+					true,
+					pts,
+					timebase,
+					track->dsi_info);
+			if(aac == NULL) {
+				ERR_PRINT("failed to make aac data.");
+				reader->error_number = 5;
+			}
+			else {
+				track->frame = (ttLibC_Frame *)aac;
 				track->frame->id = track->track_number;
 				if(callback != NULL) {
 					if(!callback(ptr, track->frame)) {
@@ -209,6 +234,7 @@ static void SimpleBlock_getLace0Frame(
 		break;
 	case frameType_mp3:
 	default:
+		LOG_PRINT("frame analyze is not support yet.%d", track->type);
 		reader->error_number = 5;
 		break;
 	}

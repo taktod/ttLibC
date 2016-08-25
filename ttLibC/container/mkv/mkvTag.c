@@ -12,8 +12,10 @@
 #include "type/simpleBlock.h"
 #include "mkvReader.h"
 #include "../../log.h"
+#include "../../util/hexUtil.h"
 #include "../../allocator.h"
 #include "../../frame/video/h264.h"
+#include "../../frame/video/theora.h"
 #include "../../frame/audio/aac.h"
 #include "../../frame/audio/vorbis.h"
 #include <string.h>
@@ -99,6 +101,83 @@ void ttLibC_MkvTag_getPrivateDataFrame(
 			}
 		}
 		break;
+	case frameType_theora:
+		{
+			uint32_t diff[4];
+			diff[0] = private_data[0];
+			diff[1] = private_data[1];
+			diff[2] = private_data[2];
+			diff[3] = private_data_size - 3 - diff[1] - diff[2];
+			ttLibC_Theora *theora = NULL;
+			private_data += 3;
+			ttLibC_Theora *t = ttLibC_Theora_getFrame(
+					NULL,
+					private_data,
+					diff[1],
+					true,
+					reader_->pts,
+					reader_->timebase);
+			if(t == NULL) {
+				ERR_PRINT("failed to get theora identification frame.");
+				reader_->error_number = 5;
+				return;
+			}
+			theora = t;
+			theora->inherit_super.inherit_super.id = track->track_number;
+			if(callback != NULL) {
+				if(!callback(ptr, (ttLibC_Frame *)theora)) {
+					reader_->error_number = 5;
+					ttLibC_Theora_close(&theora);
+					return;
+				}
+			}
+			private_data += diff[1];
+			t = ttLibC_Theora_getFrame(
+					theora,
+					private_data,
+					diff[2],
+					true,
+					reader_->pts,
+					reader_->timebase);
+			if(t == NULL) {
+				ERR_PRINT("failed to get theora identification frame.");
+				reader_->error_number = 5;
+				return;
+			}
+			theora = t;
+			theora->inherit_super.inherit_super.id = track->track_number;
+			if(callback != NULL) {
+				if(!callback(ptr, (ttLibC_Frame *)theora)) {
+					reader_->error_number = 5;
+					ttLibC_Theora_close(&theora);
+					return;
+				}
+			}
+			private_data += diff[2];
+			t = ttLibC_Theora_getFrame(
+					theora,
+					private_data,
+					diff[3],
+					true,
+					reader_->pts,
+					reader_->timebase);
+			if(t == NULL) {
+				ERR_PRINT("failed to get theora identification frame.");
+				reader_->error_number = 5;
+				return;
+			}
+			theora = t;
+			theora->inherit_super.inherit_super.id = track->track_number;
+			if(callback != NULL) {
+				if(!callback(ptr, (ttLibC_Frame *)theora)) {
+					reader_->error_number = 5;
+					ttLibC_Theora_close(&theora);
+					return;
+				}
+			}
+			track->frame = (ttLibC_Frame *)theora;
+		}
+		break;
 	case frameType_aac:
 		{
 			memcpy(&track->dsi_info, private_data, private_data_size);
@@ -162,6 +241,8 @@ void ttLibC_MkvTag_getPrivateDataFrame(
 			if(callback != NULL) {
 				if(!callback(ptr, (ttLibC_Frame *)vorbis)) {
 					reader_->error_number = 5;
+					ttLibC_Vorbis_close(&vorbis);
+					return;
 				}
 			}
 			private_data += diff[1];
@@ -188,6 +269,8 @@ void ttLibC_MkvTag_getPrivateDataFrame(
 			if(callback != NULL) {
 				if(!callback(ptr, (ttLibC_Frame *)vorbis)) {
 					reader_->error_number = 5;
+					ttLibC_Vorbis_close(&vorbis);
+					return;
 				}
 			}
 			private_data += diff[2];
@@ -214,6 +297,8 @@ void ttLibC_MkvTag_getPrivateDataFrame(
 			if(callback != NULL) {
 				if(!callback(ptr, (ttLibC_Frame *)vorbis)) {
 					reader_->error_number = 5;
+					ttLibC_Vorbis_close(&vorbis);
+					return;
 				}
 			}
 			ttLibC_Vorbis_close(&vorbis);
