@@ -233,6 +233,29 @@ static void SimpleBlock_getLace0Frame(
 		}
 		break;
 	case frameType_mp3:
+		{
+			ttLibC_Mp3 *mp3 = ttLibC_Mp3_getFrame(
+					(ttLibC_Mp3 *)track->frame,
+					data,
+					data_size,
+					true,
+					pts,
+					timebase);
+			if(mp3 == NULL) {
+				ERR_PRINT("failed to make mp3 data.");
+				reader->error_number = 5;
+			}
+			else {
+				track->frame = (ttLibC_Frame *)mp3;
+				track->frame->id = track->track_number;
+				if(callback != NULL) {
+					if(!callback(ptr, track->frame)) {
+						reader->error_number = 5;
+					}
+				}
+			}
+		}
+		break;
 	default:
 		LOG_PRINT("frame analyze is not support yet.%d", track->type);
 		reader->error_number = 5;
