@@ -38,6 +38,69 @@ extern "C" {
 #include <ttLibC/frame/audio/audio.h>
 #include <ttLibC/frame/frame.h>
 
+#include <ttLibC/container/flv.h>
+
+#if defined(__ENABLE_AVCODEC__)
+typedef struct flvVp6DecodeTest_t {
+	ttLibC_AvcodecDecoder *vp6Decoder;
+} flvVp6DecodeTest_t;
+
+static bool flvVp6DecoderTest_vp6DecodeCallback(void *ptr, ttLibC_Frame *frame) {
+	ttLibC_Video *video = (ttLibC_Video *)frame;
+	LOG_PRINT("decode:type:%d %d x %d", frame->type, video->width, video->height);
+	return true;
+}
+
+static bool flvVp6DecodeTest_flvFrameCallback(void *ptr, ttLibC_Frame *frame) {
+	flvVp6DecodeTest_t *testData = (flvVp6DecodeTest_t *)ptr;
+	switch(frame->type) {
+	case frameType_vp6:
+		{
+			LOG_PRINT("vp6");
+			// just check to decode.
+			ttLibC_Frame *cloned_frame = ttLibC_Frame_clone(NULL, frame);
+			bool result = ttLibC_AvcodecDecoder_decode(testData->vp6Decoder, cloned_frame, flvVp6DecoderTest_vp6DecodeCallback, ptr);
+			ttLibC_Frame_close(&cloned_frame);
+			return result;
+		}
+	case frameType_mp3:
+		LOG_PRINT("mp3");
+		break;
+	default:
+		break;
+	}
+	return true;
+}
+
+static bool flvVp6DecodeTest_flvReadCallback(void *ptr, ttLibC_Flv *flv) {
+	return ttLibC_Flv_getFrame(flv, flvVp6DecodeTest_flvFrameCallback, ptr);
+}
+#endif
+
+static void flvVp6DecodeTest() {
+	LOG_PRINT("flvVp6DecodeTest");
+#if defined(__ENABLE_AVCODEC__)
+	FILE *fp = fopen("smile.vp6.mp3.flv", "rb");
+	if(fp != NULL) {
+		ttLibC_FlvReader *reader = ttLibC_FlvReader_make();
+		flvVp6DecodeTest_t testData;
+		testData.vp6Decoder = ttLibC_AvcodecVideoDecoder_make(frameType_vp6, 512, 384);
+		uint8_t buffer[65536];
+		while(!feof(fp)) {
+			size_t read_size = fread(buffer, 1, 65536, fp);
+			if(!ttLibC_FlvReader_read(reader, buffer, read_size, flvVp6DecodeTest_flvReadCallback, &testData)) {
+				LOG_PRINT("failed to get flv tag.");
+				break;
+			}
+		}
+		ttLibC_AvcodecDecoder_close(&testData.vp6Decoder);
+		ttLibC_FlvReader_close(&reader);
+		fclose(fp);
+	}
+#endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
+
 #if defined(__ENABLE_AVCODEC__) && defined(__ENABLE_OPENAL__)
 typedef struct {
 	ttLibC_AlDevice *device;
@@ -669,6 +732,7 @@ static void h264Test() {
  */
 cute::suite avcodecTests(cute::suite s) {
 	s.clear();
+	s.push_back(CUTE(flvVp6DecodeTest));
 	s.push_back(CUTE(aacTest));
 	s.push_back(CUTE(adpcmImaWavTest));
 	s.push_back(CUTE(mp3Test));

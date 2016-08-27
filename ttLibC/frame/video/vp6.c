@@ -50,6 +50,42 @@ ttLibC_Vp6 *ttLibC_Vp6_make(
 			timebase);
 }
 
+/**
+ * make clone frame.
+ * always make copy buffer on it.
+ * @param prev_frame reuse frame object.
+ * @param src_frame  source of clone.
+ */
+ttLibC_Vp6 *ttLibC_Vp6_clone(
+		ttLibC_Vp6 *prev_frame,
+		ttLibC_Vp6 *src_frame) {
+	if(src_frame == NULL) {
+		return NULL;
+	}
+	if(src_frame->inherit_super.inherit_super.type != frameType_vp6) {
+		ERR_PRINT("try to clone non vp6 frame.");
+		return NULL;
+	}
+	if(prev_frame != NULL && prev_frame->inherit_super.inherit_super.type != frameType_vp6) {
+		ERR_PRINT("try to use non vp6 frame for reuse.");
+		return NULL;
+	}
+	ttLibC_Vp6 *vp6 = ttLibC_Vp6_make(
+			prev_frame,
+			src_frame->inherit_super.type,
+			src_frame->inherit_super.width,
+			src_frame->inherit_super.height,
+			src_frame->inherit_super.inherit_super.data,
+			src_frame->inherit_super.inherit_super.buffer_size,
+			false,
+			src_frame->inherit_super.inherit_super.pts,
+			src_frame->inherit_super.inherit_super.timebase);
+	if(vp6 != NULL) {
+		vp6->inherit_super.inherit_super.id = src_frame->inherit_super.inherit_super.id;
+	}
+	return vp6;
+}
+
 /*
  * check if the vp6 binary is key frame.
  * @param data      vp6 data

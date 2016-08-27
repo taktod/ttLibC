@@ -168,8 +168,17 @@ ttLibC_Video *ttLibC_FlvFrameManager_readVideoBinary(
 		ERR_PRINT("screenVideo is not ready.");
 		return NULL;
 	case FlvVideoCodec_on2Vp6:
-		ERR_PRINT("vp6 is not ready.");
-		return NULL;
+		{
+			// first 4bit horizontal adjustment, next 4bit vertical adjustment. just skip.
+			video_frame = (ttLibC_Video *)ttLibC_Vp6_getFrame(
+					(ttLibC_Vp6 *)manager_->video_frame,
+					buffer + 2,
+					data_size - 2,
+					true,
+					pts,
+					1000);
+		}
+		break;
 	case FlvVideoCodec_on2Vp6Alpha:
 		ERR_PRINT("vp6 alpha is not ready.");
 		return NULL;

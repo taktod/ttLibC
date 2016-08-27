@@ -53,7 +53,7 @@ int main(int argc, const char *argv[]) {
 //	cute::makeRunner(lis, argc, argv)(netTests(s),            "netTests");
 	cute::makeRunner(lis, argc, argv)(utilTests(s),           "utilTests");
 	cute::makeRunner(lis, argc, argv)(encoderDecoderTests(s), "encoderDecoderTests");
-//	cute::makeRunner(lis, argc, argv)(avcodecTests(s),        "avcodecTests");
+	cute::makeRunner(lis, argc, argv)(avcodecTests(s),        "avcodecTests");
 	ttLibC_Allocator_close();
 	return 0;
 }

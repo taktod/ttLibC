@@ -51,6 +51,16 @@ ttLibC_Vp6 *ttLibC_Vp6_make(
 		uint32_t timebase);
 
 /**
+ * make clone frame.
+ * always make copy buffer on it.
+ * @param prev_frame reuse frame object.
+ * @param src_frame  source of clone.
+ */
+ttLibC_Vp6 *ttLibC_Vp6_clone(
+		ttLibC_Vp6 *prev_frame,
+		ttLibC_Vp6 *src_frame);
+
+/**
  * check if the vp6 binary is key frame.
  * @param data      vp6 data
  * @param data_size vp6 data size
