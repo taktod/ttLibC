@@ -205,27 +205,6 @@ ttLibC_Video *ttLibC_FlvFrameManager_readVideoBinary(
 	return video_frame;
 }
 
-static ttLibC_Audio *FlvFrameManager_readMp3Binary(
-		ttLibC_FlvFrameManager_ *manager,
-		uint32_t sample_rate,
-		uint32_t bit_depth,
-		uint32_t channel_num,
-		uint8_t *data,
-		size_t data_size,
-		uint64_t pts) {
-	ttLibC_Mp3 *mp3 = ttLibC_Mp3_getFrame(
-			(ttLibC_Mp3 *)manager->audio_frame,
-			data,
-			data_size,
-			true,
-			pts,
-			1000);
-	if(mp3 == NULL) {
-		return NULL;
-	}
-	return (ttLibC_Audio *)mp3;
-}
-
 static ttLibC_Audio *FlvFrameManager_readAacBinary(
 		ttLibC_FlvFrameManager_ *manager,
 		uint32_t sample_rate,
@@ -340,15 +319,15 @@ ttLibC_Audio *ttLibC_FlvFrameManager_readAudioBinary(
 		ERR_PRINT("swfAdpcm is not ready.");
 		return NULL;
 	case FlvAudioCodec_mp3:
+	case FlvAudioCodec_mp38:
 		{
-			audio = (ttLibC_Audio *)FlvFrameManager_readMp3Binary(
-					manager_,
-					sample_rate,
-					bit_depth,
-					channel_num,
+			audio = (ttLibC_Audio *)ttLibC_Mp3_getFrame(
+					(ttLibC_Mp3 *)manager_->audio_frame,
 					buffer + 1,
 					data_size - 1,
-					pts);
+					true,
+					pts,
+					1000);
 		}
 		break;
 	case FlvAudioCodec_pcmLittleEndian:
@@ -384,24 +363,21 @@ ttLibC_Audio *ttLibC_FlvFrameManager_readAudioBinary(
 		}
 		break;
 	case FlvAudioCodec_speex:
-		ERR_PRINT("speex alaw is not ready.");
-		return NULL;
+//		ERR_PRINT("speex is not ready.");
+		{
+			audio = (ttLibC_Audio *)ttLibC_Speex_getFrame(
+					(ttLibC_Speex *)manager_->audio_frame,
+					buffer + 1,
+					data_size - 1,
+					true,
+					pts,
+					1000);
+		}
+		break;
 	case FlvAudioCodec_unknown:
 		return NULL;
 	case FlvAudioCodec_undefined:
 		return NULL;
-	case FlvAudioCodec_mp38:
-		{
-			audio = (ttLibC_Audio *)FlvFrameManager_readMp3Binary(
-					manager_,
-					8000,
-					bit_depth,
-					channel_num,
-					buffer + 1,
-					data_size - 1,
-					pts);
-		}
-		break;
 	case FlvAudioCodec_deviceSpecific:
 		return NULL;
 	}

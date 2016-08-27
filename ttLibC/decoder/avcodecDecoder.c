@@ -464,8 +464,11 @@ ttLibC_AvcodecDecoder *ttLibC_AvcodecDecoder_makeWithAVCodecContext(void *dec_co
 		case AV_SAMPLE_FMT_S16P:
 		case AV_SAMPLE_FMT_FLT:
 			break;
+		case AV_SAMPLE_FMT_NONE:
+			LOG_PRINT("sampleFormat is unknown now. maybe decide later?");
+			break;
 		default:
-			ERR_PRINT("unsupport sample_fmt type:%d", dec->pix_fmt);
+			ERR_PRINT("unsupport sample_fmt type:%d", dec->sample_fmt);
 			av_free(decoder->avframe);
 			avcodec_close(decoder->dec);
 			av_free(decoder->dec);

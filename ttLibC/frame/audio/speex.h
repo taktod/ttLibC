@@ -65,6 +65,16 @@ ttLibC_Speex *ttLibC_Speex_make(
 		uint32_t timebase);
 
 /**
+ * make clone frame
+ * always make copy buffer on it.
+ * @param prev_frame reuse frame object.
+ * @param src_frame  source of clone.
+ */
+ttLibC_Speex *ttLibC_Speex_clone(
+		ttLibC_Speex *prev_frame,
+		ttLibC_Speex *src_frame);
+
+/**
  * make speex frame from byte data.
  * @param prev_frame    reuse speex frame.
  * @param data          speex binary data.

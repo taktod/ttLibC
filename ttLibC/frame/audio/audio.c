@@ -161,7 +161,10 @@ ttLibC_Audio *ttLibC_Audio_clone(
 		return (ttLibC_Audio *)ttLibC_PcmS16_clone(
 				(ttLibC_PcmS16 *)prev_frame,
 				(ttLibC_PcmS16 *)src_frame);
-//	case frameType_speex:
+	case frameType_speex:
+		return (ttLibC_Audio *)ttLibC_Speex_clone(
+				(ttLibC_Speex *)prev_frame,
+				(ttLibC_Speex *)src_frame);
 //	case frameType_vorbis:
 	default:
 		LOG_PRINT("no clone function, frame type:%d", src_frame->inherit_super.type);
