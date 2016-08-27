@@ -52,6 +52,16 @@ ttLibC_Nellymoser *ttLibC_Nellymoser_make(
 		uint32_t timebase);
 
 /**
+ * make clone frame
+ * always make copy buffer on it.
+ * @param prev_frame reuse frame object.
+ * @param src_frame  source of clone.
+ */
+ttLibC_Nellymoser *ttLibC_Nellymoser_clone(
+		ttLibC_Nellymoser *prev_frame,
+		ttLibC_Nellymoser *src_frame);
+
+/**
  * close frame
  * @param frame
  */

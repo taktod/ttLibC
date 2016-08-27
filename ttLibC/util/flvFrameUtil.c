@@ -334,14 +334,47 @@ ttLibC_Audio *ttLibC_FlvFrameManager_readAudioBinary(
 		ERR_PRINT("pcmle is not ready.");
 		return NULL;
 	case FlvAudioCodec_nellymoser16:
-		ERR_PRINT("nellymoser 16 is not ready.");
-		return NULL;
+		{
+			audio = (ttLibC_Audio *)ttLibC_Nellymoser_make(
+					(ttLibC_Nellymoser *)manager_->audio_frame,
+					8000,
+					(data_size - 1) / 0x40 * 256,
+					1,
+					buffer + 1,
+					data_size - 1,
+					true,
+					pts,
+					1000);
+		}
+		break;
 	case FlvAudioCodec_nellymoser8:
-		ERR_PRINT("nellymoser 8 is not ready.");
-		return NULL;
+		{
+			audio = (ttLibC_Audio *)ttLibC_Nellymoser_make(
+					(ttLibC_Nellymoser *)manager_->audio_frame,
+					8000,
+					(data_size - 1) / 0x40 * 256,
+					1,
+					buffer + 1,
+					data_size - 1,
+					true,
+					pts,
+					1000);
+		}
+		break;
 	case FlvAudioCodec_nellymoser:
-		ERR_PRINT("nellymoser is not ready.");
-		return NULL;
+	{
+		audio = (ttLibC_Audio *)ttLibC_Nellymoser_make(
+				(ttLibC_Nellymoser *)manager_->audio_frame,
+				sample_rate,
+				(data_size - 1) / 0x40 * 256,
+				channel_num,
+				buffer + 1,
+				data_size - 1,
+				true,
+				pts,
+				1000);
+	}
+	break;
 	case FlvAudioCodec_pcmAlaw:
 		ERR_PRINT("pcm alaw is not ready.");
 		return NULL;

@@ -117,11 +117,11 @@ ttLibC_Speex *ttLibC_Speex_clone(
 		return NULL;
 	}
 	if(src_frame->inherit_super.inherit_super.type != frameType_speex) {
-		ERR_PRINT("try to clone non opus frame.");
+		ERR_PRINT("try to clone non speex frame.");
 		return NULL;
 	}
 	if(prev_frame != NULL && prev_frame->inherit_super.inherit_super.type != frameType_speex) {
-		ERR_PRINT("try to use non opus frame for reuse.");
+		ERR_PRINT("try to use non speex frame for reuse.");
 		return NULL;
 	}
 	ttLibC_Speex *speex = ttLibC_Speex_make(

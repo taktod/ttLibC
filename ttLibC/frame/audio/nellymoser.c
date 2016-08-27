@@ -56,6 +56,42 @@ ttLibC_Nellymoser *ttLibC_Nellymoser_make(
 			timebase);
 }
 
+/**
+ * make clone frame
+ * always make copy buffer on it.
+ * @param prev_frame reuse frame object.
+ * @param src_frame  source of clone.
+ */
+ttLibC_Nellymoser *ttLibC_Nellymoser_clone(
+		ttLibC_Nellymoser *prev_frame,
+		ttLibC_Nellymoser *src_frame) {
+	if(src_frame == NULL) {
+		return NULL;
+	}
+	if(src_frame->inherit_super.inherit_super.type != frameType_nellymoser) {
+		ERR_PRINT("try to clone non nellymoser frame.");
+		return NULL;
+	}
+	if(prev_frame != NULL && prev_frame->inherit_super.inherit_super.type != frameType_nellymoser) {
+		ERR_PRINT("try to use non nellymoser frame for reuse.");
+		return NULL;
+	}
+	ttLibC_Nellymoser *nellymoser = ttLibC_Nellymoser_make(
+			prev_frame,
+			src_frame->inherit_super.sample_rate,
+			src_frame->inherit_super.sample_num,
+			src_frame->inherit_super.channel_num,
+			src_frame->inherit_super.inherit_super.data,
+			src_frame->inherit_super.inherit_super.buffer_size,
+			false,
+			src_frame->inherit_super.inherit_super.pts,
+			src_frame->inherit_super.inherit_super.timebase);
+	if(nellymoser != NULL) {
+		nellymoser->inherit_super.inherit_super.id = src_frame->inherit_super.inherit_super.id;
+	}
+	return nellymoser;
+}
+
 /*
  * close frame
  * @param frame
