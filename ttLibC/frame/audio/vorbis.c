@@ -13,6 +13,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "../../log.h"
+#include "../../util/ioUtil.h"
 
 typedef ttLibC_Frame_Audio_Vorbis ttLibC_Vorbis_;
 
@@ -57,6 +58,172 @@ ttLibC_Vorbis *ttLibC_Vorbis_make(
 		vorbis->type = type;
 	}
 	return (ttLibC_Vorbis *)vorbis;
+}
+
+/**
+ * make clone frame
+ * always make copy buffer on it.
+ * @param prev_frame reuse frame object.
+ * @param src_frame  source of clone.
+ */
+ttLibC_Vorbis *ttLibC_Vorbis_clone(
+		ttLibC_Vorbis *prev_frame,
+		ttLibC_Vorbis *src_frame) {
+	if(src_frame == NULL) {
+		return NULL;
+	}
+	if(src_frame->inherit_super.inherit_super.type != frameType_vorbis) {
+		ERR_PRINT("try to clone non vorbis frame.");
+		return NULL;
+	}
+	if(prev_frame != NULL && prev_frame->inherit_super.inherit_super.type != frameType_vorbis) {
+		ERR_PRINT("try to use non vorbis frame for reuse.");
+		return NULL;
+	}
+	ttLibC_Vorbis *vorbis = ttLibC_Vorbis_make(
+			prev_frame,
+			src_frame->type,
+			src_frame->inherit_super.sample_rate,
+			src_frame->inherit_super.sample_num,
+			src_frame->inherit_super.channel_num,
+			src_frame->inherit_super.inherit_super.data,
+			src_frame->inherit_super.inherit_super.buffer_size,
+			false,
+			src_frame->inherit_super.inherit_super.pts,
+			src_frame->inherit_super.inherit_super.timebase);
+	if(vorbis != NULL) {
+		vorbis->inherit_super.inherit_super.id = src_frame->inherit_super.inherit_super.id;
+		vorbis->block0 = src_frame->block0;
+		vorbis->block1 = src_frame->block1;
+	}
+	return vorbis;
+}
+
+/**
+ * make vorbis frame from byte data.
+ */
+ttLibC_Vorbis *ttLibC_Vorbis_getFrame(
+		ttLibC_Vorbis *prev_frame,
+		void *data,
+		size_t data_size,
+		bool non_copy_mode,
+		uint64_t pts,
+		uint32_t timebase) {
+	if(data_size > 7){
+		uint8_t *buf = (uint8_t *)data;
+		// check is header or not.
+		if(buf[1] == 'v'
+		&& buf[2] == 'o'
+		&& buf[3] == 'r'
+		&& buf[4] == 'b'
+		&& buf[5] == 'i'
+		&& buf[6] == 's') {
+			// maybe header.
+			switch(buf[0]) {
+			case 0x01: // identification
+				{
+					if(data_size < 29) {
+						// too small data size.
+						return NULL;
+					}
+					uint32_t channel_num = buf[11];
+					uint32_t *buf32 = (uint32_t *)buf + 12;
+					uint32_t sample_rate = le_uint32_t(*buf32);
+					uint32_t block0 = buf[28] & 0x0F;
+					uint32_t block1 = (buf[28] >> 4) & 0x0F;
+					uint32_t block0_value = (1 << block0);
+					uint32_t block1_value = (1 << block1);
+					ttLibC_Vorbis *vorbis = ttLibC_Vorbis_make(
+							prev_frame,
+							VorbisType_identification,
+							sample_rate,
+							0,
+							channel_num,
+							data,
+							data_size,
+							true,
+							pts,
+							timebase);
+					if(vorbis == NULL) {
+						ERR_PRINT("failed to make vorbisFrame.");
+						return NULL;
+					}
+					vorbis->block0 = block0_value;
+					vorbis->block1 = block1_value;
+					return vorbis;
+				}
+				break;
+			case 0x03: // comment
+				{
+					ttLibC_Vorbis *vorbis = ttLibC_Vorbis_make(
+							prev_frame,
+							VorbisType_comment,
+							prev_frame->inherit_super.sample_rate,
+							0,
+							prev_frame->inherit_super.channel_num,
+							data,
+							data_size,
+							true,
+							pts,
+							timebase);
+					if(vorbis == NULL) {
+						ERR_PRINT("failed to make vorbisFrame.");
+						return NULL;
+					}
+					vorbis->block0 = prev_frame->block0;
+					vorbis->block1 = prev_frame->block1;
+					return vorbis;
+				}
+				break;
+			case 0x05: // setup
+				{
+					ttLibC_Vorbis *vorbis = ttLibC_Vorbis_make(
+							prev_frame,
+							VorbisType_setup,
+							prev_frame->inherit_super.sample_rate,
+							0,
+							prev_frame->inherit_super.channel_num,
+							data,
+							data_size,
+							true,
+							pts,
+							timebase);
+					if(vorbis == NULL) {
+						ERR_PRINT("failed to make vorbisFrame.");
+						return NULL;
+					}
+					vorbis->block0 = prev_frame->block0;
+					vorbis->block1 = prev_frame->block1;
+					return vorbis;
+				}
+				break;
+			default:
+				return NULL;
+			}
+		}
+	}
+	if(prev_frame == NULL) {
+		return NULL;
+	}
+	// normal frame.
+	ttLibC_Vorbis *vorbis = ttLibC_Vorbis_make(
+			prev_frame,
+			VorbisType_frame,
+			prev_frame->inherit_super.sample_rate,
+			(prev_frame->inherit_super.sample_num == 0) ? (prev_frame->block0 + prev_frame->block1) / 4 : prev_frame->block1 / 2,
+			prev_frame->inherit_super.channel_num,
+			data,
+			data_size,
+			true,
+			pts,
+			timebase);
+	if(vorbis == NULL) {
+		ERR_PRINT("failed to make vorbisFrame.");
+		return NULL;
+	}
+	vorbis->block0 = prev_frame->block0;
+	vorbis->block1 = prev_frame->block1;
+	return vorbis;
 }
 
 /*

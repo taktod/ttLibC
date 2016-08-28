@@ -83,12 +83,8 @@ bool ttLibC_VorbisEncoder_encode(
 				&header_comment,
 				&header_code);
 		ttLibC_Vorbis *v;
-		v = ttLibC_Vorbis_make(
+		v = ttLibC_Vorbis_getFrame(
 				encoder_->vorbis,
-				VorbisType_identification,
-				encoder_->inherit_super.sample_rate,
-				0,
-				encoder_->inherit_super.channel_num,
 				header.packet,
 				header.bytes,
 				true,
@@ -103,13 +99,8 @@ bool ttLibC_VorbisEncoder_encode(
 				return false;
 			}
 		}
-
-		v = ttLibC_Vorbis_make(
+		v = ttLibC_Vorbis_getFrame(
 				encoder_->vorbis,
-				VorbisType_comment,
-				encoder_->inherit_super.sample_rate,
-				0,
-				encoder_->inherit_super.channel_num,
 				header_comment.packet,
 				header_comment.bytes,
 				true,
@@ -124,13 +115,8 @@ bool ttLibC_VorbisEncoder_encode(
 				return false;
 			}
 		}
-
-		v = ttLibC_Vorbis_make(
+		v = ttLibC_Vorbis_getFrame(
 				encoder_->vorbis,
-				VorbisType_setup,
-				encoder_->inherit_super.sample_rate,
-				0,
-				encoder_->inherit_super.channel_num,
 				header_code.packet,
 				header_code.bytes,
 				true,
@@ -150,6 +136,7 @@ bool ttLibC_VorbisEncoder_encode(
 	// encoder for input frame.
 	float **buffer = vorbis_analysis_buffer(&encoder_->vd, pcm->sample_num);
 	int i = 0;
+	// only for interleave
 	switch(pcm->inherit_super.type) {
 	case frameType_pcmF32:
 		{
@@ -214,12 +201,8 @@ bool ttLibC_VorbisEncoder_encode(
 		vorbis_bitrate_addblock(&encoder_->vb);
 		while(vorbis_bitrate_flushpacket(&encoder_->vd, &op)) {
 			ttLibC_Vorbis *v;
-			v = ttLibC_Vorbis_make(
+			v = ttLibC_Vorbis_getFrame(
 					encoder_->vorbis,
-					VorbisType_frame,
-					encoder_->inherit_super.sample_rate,
-					encoder_->vd.granulepos - op.granulepos,
-					encoder_->inherit_super.channel_num,
 					op.packet,
 					op.bytes,
 					true,

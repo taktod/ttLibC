@@ -206,12 +206,8 @@ static void SimpleBlock_getLace0Frame(
 		break;
 	case frameType_vorbis:
 		{
-			ttLibC_Vorbis *vorbis = ttLibC_Vorbis_make(
+			ttLibC_Vorbis *vorbis = ttLibC_Vorbis_getFrame(
 					(ttLibC_Vorbis *)track->frame,
-					VorbisType_frame,
-					track->sample_rate,
-					(track->frame == NULL ? (track->block0 + track->block1) / 4 : track->block1 / 2),
-					track->channel_num,
 					data,
 					data_size,
 					true,

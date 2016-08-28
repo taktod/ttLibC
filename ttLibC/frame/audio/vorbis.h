@@ -35,6 +35,9 @@ typedef struct ttLibC_Frame_Audio_Vorbis {
 	ttLibC_Audio inherit_super;
 	/** frame type */
 	ttLibC_Vorbis_Type type;
+	/** block data from identification frame. */
+	uint32_t block0;
+	uint32_t block1;
 } ttLibC_Frame_Audio_Vorbis;
 
 typedef ttLibC_Frame_Audio_Vorbis ttLibC_Vorbis;
@@ -59,6 +62,27 @@ ttLibC_Vorbis *ttLibC_Vorbis_make(
 		uint32_t sample_rate,
 		uint32_t sample_num,
 		uint32_t channel_num,
+		void *data,
+		size_t data_size,
+		bool non_copy_mode,
+		uint64_t pts,
+		uint32_t timebase);
+
+/**
+ * make clone frame
+ * always make copy buffer on it.
+ * @param prev_frame reuse frame object.
+ * @param src_frame  source of clone.
+ */
+ttLibC_Vorbis *ttLibC_Vorbis_clone(
+		ttLibC_Vorbis *prev_frame,
+		ttLibC_Vorbis *src_frame);
+
+/**
+ * make vorbis frame from byte data.
+ */
+ttLibC_Vorbis *ttLibC_Vorbis_getFrame(
+		ttLibC_Vorbis *prev_frame,
 		void *data,
 		size_t data_size,
 		bool non_copy_mode,

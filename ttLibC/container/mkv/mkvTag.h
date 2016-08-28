@@ -37,9 +37,6 @@ typedef struct ttLibC_MkvTrack {
 	uint32_t sample_rate;
 	uint32_t channel_num;
 
-	uint32_t block0; // need block information for vorbis(to calcurate samplenum)
-	uint32_t block1;
-
 	uint64_t dsi_info; // dsi_info for aac
 
 	uint32_t size_length; // for h264 size nal.

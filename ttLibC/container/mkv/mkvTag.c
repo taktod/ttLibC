@@ -214,18 +214,8 @@ void ttLibC_MkvTag_getPrivateDataFrame(
 			diff[3] = private_data_size - 3 - diff[1] - diff[2];
 
 			private_data += 3;
-			uint32_t block0 = private_data[28] & 0x0F;
-			uint32_t block1 = (private_data[28] >> 4) & 0x0F;
-			track->block0 = (1 << block0);
-			track->block1 = (1 << block1);
-			ttLibC_Vorbis *vorbis = NULL;
-			// identification frame.
-			ttLibC_Vorbis *v = ttLibC_Vorbis_make(
-					NULL,
-					VorbisType_identification,
-					track->sample_rate,
-					0,
-					track->channel_num,
+			ttLibC_Vorbis *v = ttLibC_Vorbis_getFrame(
+					(ttLibC_Vorbis *)track->frame,
 					private_data,
 					diff[1],
 					true,
@@ -236,23 +226,17 @@ void ttLibC_MkvTag_getPrivateDataFrame(
 				reader_->error_number = 5;
 				return;
 			}
-			vorbis = v;
-			vorbis->inherit_super.inherit_super.id = track->track_number;
+			track->frame = (ttLibC_Frame *)v;
+			track->frame->id = track->track_number;
 			if(callback != NULL) {
-				if(!callback(ptr, (ttLibC_Frame *)vorbis)) {
+				if(!callback(ptr, track->frame)) {
 					reader_->error_number = 5;
-					ttLibC_Vorbis_close(&vorbis);
 					return;
 				}
 			}
 			private_data += diff[1];
-			// next, comment frame.
-			v = ttLibC_Vorbis_make(
-					vorbis,
-					VorbisType_comment,
-					track->sample_rate,
-					0,
-					track->channel_num,
+			v = ttLibC_Vorbis_getFrame(
+					(ttLibC_Vorbis *)track->frame,
 					private_data,
 					diff[2],
 					true,
@@ -261,47 +245,37 @@ void ttLibC_MkvTag_getPrivateDataFrame(
 			if(v == NULL) {
 				ERR_PRINT("failed to get vorbis comment frame.");
 				reader_->error_number = 5;
-				ttLibC_Vorbis_close(&vorbis);
 				return;
 			}
-			vorbis = v;
-			vorbis->inherit_super.inherit_super.id = track->track_number;
+			track->frame = (ttLibC_Frame *)v;
+			track->frame->id = track->track_number;
 			if(callback != NULL) {
-				if(!callback(ptr, (ttLibC_Frame *)vorbis)) {
+				if(!callback(ptr, track->frame)) {
 					reader_->error_number = 5;
-					ttLibC_Vorbis_close(&vorbis);
 					return;
 				}
 			}
 			private_data += diff[2];
-			// the last, setup frame.
-			v = ttLibC_Vorbis_make(
-					vorbis,
-					VorbisType_setup,
-					track->sample_rate,
-					0,
-					track->channel_num,
+			v = ttLibC_Vorbis_getFrame(
+					(ttLibC_Vorbis *)track->frame,
 					private_data,
 					diff[3],
 					true,
 					reader_->pts,
 					reader_->timebase);
 			if(v == NULL) {
-				ERR_PRINT("failed to get vorbis comment frame.");
+				ERR_PRINT("failed to get vorbis setup frame.");
 				reader_->error_number = 5;
-				ttLibC_Vorbis_close(&vorbis);
 				return;
 			}
-			vorbis = v;
-			vorbis->inherit_super.inherit_super.id = track->track_number;
+			track->frame = (ttLibC_Frame *)v;
+			track->frame->id = track->track_number;
 			if(callback != NULL) {
-				if(!callback(ptr, (ttLibC_Frame *)vorbis)) {
+				if(!callback(ptr, track->frame)) {
 					reader_->error_number = 5;
-					ttLibC_Vorbis_close(&vorbis);
 					return;
 				}
 			}
-			ttLibC_Vorbis_close(&vorbis);
 		}
 		break;
 	default:
