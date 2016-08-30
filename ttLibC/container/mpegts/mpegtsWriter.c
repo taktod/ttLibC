@@ -57,7 +57,10 @@ ttLibC_MpegtsWriter *ttLibC_MpegtsWriter_make_ex(
 		ttLibC_Frame_Type* target_frame_types,
 		uint32_t types_num,
 		uint32_t max_unit_duration) {
-	ttLibC_MpegtsWriter_ *writer = (ttLibC_MpegtsWriter_ *)ttLibC_ContainerWriter_make(containerType_mpegts, sizeof(ttLibC_MpegtsWriter_), 90000);
+	ttLibC_MpegtsWriter_ *writer = (ttLibC_MpegtsWriter_ *)ttLibC_ContainerWriter_make(
+			containerType_mpegts,
+			sizeof(ttLibC_MpegtsWriter_),
+			90000);
 	if(writer == NULL) {
 		ERR_PRINT("failed to allocate writer.");
 		return NULL;
