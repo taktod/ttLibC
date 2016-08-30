@@ -182,7 +182,7 @@ void ttLibC_MkvTag_getPrivateDataFrame(
 		{
 			memcpy(&track->dsi_info, private_data, private_data_size);
 			// try to callback data.
-			ttLibC_Aac *aac = ttLibC_Aac_make(
+/*			ttLibC_Aac *aac = ttLibC_Aac_make(
 					NULL,
 					AacType_dsi,
 					track->sample_rate,
@@ -193,7 +193,14 @@ void ttLibC_MkvTag_getPrivateDataFrame(
 					true,
 					0,
 					reader_->timebase,
-					track->dsi_info);
+					track->dsi_info);*/
+			ttLibC_Aac *aac = ttLibC_Aac_getFrame(
+					NULL,
+					private_data,
+					private_data_size,
+					true,
+					0,
+					reader_->timebase);
 			if(aac != NULL) {
 				aac->inherit_super.inherit_super.id = track->track_number;
 				track->frame = (ttLibC_Frame *)aac;

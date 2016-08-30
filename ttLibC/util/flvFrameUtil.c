@@ -220,7 +220,7 @@ static ttLibC_Audio *FlvFrameManager_readAacBinary(
 	case 0x00:
 		{
 			memcpy(&manager->dsi_info, data + 1, data_size - 1);
-			ttLibC_Aac *aac = ttLibC_Aac_make(
+/*			ttLibC_Aac *aac = ttLibC_Aac_make(
 					(ttLibC_Aac *)manager->audio_frame,
 					AacType_dsi,
 					sample_rate,
@@ -231,7 +231,14 @@ static ttLibC_Audio *FlvFrameManager_readAacBinary(
 					true,
 					pts,
 					1000,
-					manager->dsi_info);
+					manager->dsi_info);*/
+			ttLibC_Aac *aac = ttLibC_Aac_getFrame(
+					(ttLibC_Aac *)manager->audio_frame,
+					data + 1,
+					data_size - 1,
+					true,
+					pts,
+					1000);
 			if(aac == NULL) {
 				ERR_PRINT("failed to make aac dsi frame.");
 				return NULL;

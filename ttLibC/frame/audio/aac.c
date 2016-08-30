@@ -191,29 +191,33 @@ static ttLibC_Aac *Aac_getRawFrame(
 		bool non_copy_mode,
 		uint64_t pts,
 		uint32_t timebase) {
-	if(prev_frame == NULL || data_size <= 4) { // 6byte以下にしておいた方がしあわせかも・・・
+	if(prev_frame == NULL || data_size <= 4) {
 		ttLibC_ByteReader *reader = ttLibC_ByteReader_make(data, data_size, ByteUtilType_default);
-		// object_typeを保持しておかないとだめだけど、とりあえずdsi_infoが保持されているので、問題ないわけか・・・
 		uint64_t dsi_info;
+		uint32_t bit_size = 0;
 		memcpy(&dsi_info, data, data_size);
 		uint32_t object_type = ttLibC_ByteReader_bit(reader, 5);
+		bit_size += 5;
 		if(object_type == 31) {
 			object_type = ttLibC_ByteReader_bit(reader, 6);
+			bit_size += 6;
 		}
 		uint32_t sample_rate_index = ttLibC_ByteReader_bit(reader, 4);
+		bit_size += 4;
 		uint32_t sample_rate = 44100;
 		if(sample_rate_index == 15) {
 			LOG_PRINT("sample_rate is not in index_table.");
 			sample_rate = ttLibC_ByteReader_bit(reader, 24);
+			bit_size += 24;
 		}
 		else {
 			sample_rate = sample_rate_table[sample_rate_index];
 		}
 		uint32_t channel_num = ttLibC_ByteReader_bit(reader, 4);
+		bit_size += 4;
+		uint32_t buffer_size = (uint32_t)((bit_size + 7) / 8);
 		ttLibC_ByteReader_close(&reader);
-		// 必要なデータが揃ったぜ。
-		// sample_numは1024固定
-		return ttLibC_Aac_make(
+		ttLibC_Aac *aac = ttLibC_Aac_make(
 				prev_frame,
 				AacType_dsi,
 				sample_rate,
@@ -225,10 +229,12 @@ static ttLibC_Aac *Aac_getRawFrame(
 				pts,
 				timebase,
 				dsi_info);
+		if(aac != NULL) {
+			aac->inherit_super.inherit_super.buffer_size = buffer_size;
+		}
+		return aac;
 	}
 	else {
-		// それ以外jのフレームの場合はsample_num、sample_rate、channel_numは前のデータをコピー
-		// といった感じでせめる。
 		ttLibC_Aac_ *aac = prev_frame;
 		return ttLibC_Aac_make(
 				prev_frame,
@@ -428,6 +434,13 @@ size_t ttLibC_Aac_readDsiInfo(
 	ttLibC_Aac_ *aac_ = (ttLibC_Aac_ *)aac;
 	uint8_t *buf;
 	switch(aac->type) {
+	case AacType_dsi:
+		{
+			// expect buffer_size is correct for dsi information.
+			memcpy(data, aac->inherit_super.inherit_super.data, aac->inherit_super.inherit_super.buffer_size);
+			return aac->inherit_super.inherit_super.buffer_size;
+		}
+		break;
 	case AacType_raw:
 		{
 			// dsi_info is just copy of dsi.

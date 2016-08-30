@@ -308,18 +308,13 @@ static bool Mp4Atom_analyzeStsd(
 		break;
 	case frameType_aac:
 		{
-			ttLibC_Aac *aac = ttLibC_Aac_make(
+			ttLibC_Aac *aac = ttLibC_Aac_getFrame(
 					(ttLibC_Aac *)track->frame,
-					AacType_dsi,
-					track->sample_rate,
-					0,
-					track->channel_num,
 					&track->dsi_info,
 					6,
 					true,
 					0,
-					track->timebase,
-					track->dsi_info); // dsi infoのサイズが蒸発してる・・・
+					track->timebase);
 			if(aac != NULL) {
 				aac->inherit_super.inherit_super.id = track->track_number;
 				track->frame = (ttLibC_Frame *)aac;
