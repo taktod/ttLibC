@@ -66,6 +66,12 @@ typedef struct ttLibC_Container_Mp4 {
 
 typedef ttLibC_Container_Mp4 ttLibC_Mp4;
 
+/**
+ * get frame from mp4 container object.
+ * @param mp4      target mp4 object.
+ * @param callback callback to get frame.
+ * @param ptr      user def data pointer.
+ */
 bool ttLibC_Mp4_getFrame(
 		ttLibC_Mp4 *mp4,
 		ttLibC_getFrameFunc callback,
@@ -81,8 +87,20 @@ typedef ttLibC_ContainerReader_Mp4Reader ttLibC_Mp4Reader;
 
 typedef bool (* ttLibC_Mp4ReadFunc)(void *ptr, ttLibC_Mp4 *mp4);
 
+/**
+ * make mp4 reader object.
+ */
 ttLibC_Mp4Reader *ttLibC_Mp4Reader_make();
 
+/**
+ * read data from binary data.
+ * @param reader
+ * @param data
+ * @param data_size
+ * @param callback
+ * @param ptr
+ * @return true:success / false:error
+ */
 bool ttLibC_Mp4Reader_read(
 		ttLibC_Mp4Reader *reader,
 		void *data,
@@ -90,25 +108,68 @@ bool ttLibC_Mp4Reader_read(
 		ttLibC_Mp4ReadFunc callback,
 		void *ptr);
 
+/**
+ * close reader object.
+ * @param reader
+ */
 void ttLibC_Mp4Reader_close(ttLibC_Mp4Reader **reader);
 
 // -------------------------------------------------------------- //
 // writer
+/**
+ * track info data.(not implemented.)
+ */
+typedef struct ttLibC_ContainerWriter_Mp4TrackInfo {
+	uint16_t track_id;
+	ttLibC_Frame_Type frame_type;
+} ttLibC_ContainerWriter_Mp4TrackInfo;
+
+/**
+ * target writer.
+ */
 typedef struct ttLibC_ContainerWriter_Mp4Writer {
 	ttLibC_ContainerWriter inherit_super;
 } ttLibC_ContainerWriter_Mp4Writer;
 
 typedef ttLibC_ContainerWriter_Mp4Writer ttLibC_Mp4Writer;
 
-// we will have choice, mp4 or fmp4.
-ttLibC_Mp4Writer *ttLibC_Mp4Writer_make();
+/**
+ * make mp4Writer
+ * @param target_frame_types array of use frame type list.
+ * @param types_num          number of array.
+ */
+ttLibC_Mp4Writer *ttLibC_Mp4Writer_make(
+		ttLibC_Frame_Type* target_frame_types,
+		uint32_t types_num);
 
+/**
+ * make mp4Writer with detail information.
+ * @param target_frame_types array of use frame type list.
+ * @param types_num          number of array.
+ * @param max_unit_duration  divide mp4 chunk unit with this duration at least(in milisec.)
+ */
+ttLibC_Mp4Writer *ttLibC_Mp4Writer_make_ex(
+		ttLibC_Frame_Type* target_frame_types,
+		uint32_t types_num,
+		uint32_t max_unit_duration);
+
+/**
+ * write frame data to writer.
+ * @param writer
+ * @param frame
+ * @param callback
+ * @param ptr
+ */
 bool ttLibC_Mp4Writer_write(
 		ttLibC_Mp4Writer *writer,
 		ttLibC_Frame *frame,
 		ttLibC_ContainerWriteFunc callback,
 		void *ptr);
 
+/**
+ * close writer.
+ * @param writer
+ */
 void ttLibC_Mp4Writer_close(ttLibC_Mp4Writer **writer);
 
 #ifdef __cplusplus

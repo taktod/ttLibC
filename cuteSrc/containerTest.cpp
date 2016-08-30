@@ -29,14 +29,30 @@ typedef struct {
 	size_t write_size;
 } containerTest_t;
 
+static bool mp4Test_writeDataCallback(void *ptr, void *data, size_t data_size) {
+	containerTest_t *testData = (containerTest_t *)ptr;
+	testData->write_size += data_size;
+	if(testData->fp_out) {
+		fwrite(data, 1, data_size, testData->fp_out);
+	}
+	return true;
+}
+
 static bool mp4Test_getFrameCallback(void *ptr, ttLibC_Frame *frame) {
+	containerTest_t *testData = (containerTest_t *)ptr;
 	switch(frame->type) {
 	case frameType_h264:
-		LOG_PRINT("h264:%f, %d", 1.0f * frame->pts / frame->timebase, frame->id);
-		break;
+		{
+			ttLibC_Mp4Writer_write((ttLibC_Mp4Writer *)testData->writer, frame, mp4Test_writeDataCallback, ptr);
+			// make clone frame for 2nd video track.
+			ttLibC_Frame *cloned_frame = ttLibC_Frame_clone(NULL, frame);
+			cloned_frame->id = 3;
+			ttLibC_Mp4Writer_write((ttLibC_Mp4Writer *)testData->writer, cloned_frame, mp4Test_writeDataCallback, ptr);
+			ttLibC_Frame_close(&cloned_frame);
+		}
+		return true;
 	case frameType_aac:
-		LOG_PRINT("aac:%f, %d", 1.0f * frame->pts / frame->timebase, frame->id);
-		break;
+		return ttLibC_Mp4Writer_write((ttLibC_Mp4Writer *)testData->writer, frame, mp4Test_writeDataCallback, ptr);
 	default:
 		break;
 	}
@@ -52,7 +68,12 @@ static void mp4Test() {
 	containerTest_t testData;
 	testData.write_size = 0;
 	testData.reader = (ttLibC_ContainerReader *)ttLibC_Mp4Reader_make();
-	testData.writer = (ttLibC_ContainerWriter *)ttLibC_Mp4Writer_make();
+	ttLibC_Frame_Type frameTypes[] = {
+			frameType_h264,
+			frameType_aac,
+			frameType_h264
+	};
+	testData.writer = (ttLibC_ContainerWriter *)ttLibC_Mp4Writer_make(frameTypes, 3);
 	testData.fp_in = fopen("test.mp4", "rb");
 //	testData.fp_in = fopen("test_mod.mp4", "rb");
 //	testData.fp_in = fopen("test.fmp4", "rb");
@@ -82,6 +103,12 @@ bool mkvTest_getFrameCallback(void *ptr, ttLibC_Frame *frame) {
 		break;
 	case frameType_vp8:
 		LOG_PRINT("vp8:%f", 1.0 * frame->pts / frame->timebase);
+		break;
+	case frameType_vp9:
+		LOG_PRINT("vp9:%f", 1.0 * frame->pts / frame->timebase);
+		break;
+	case frameType_theora:
+		LOG_PRINT("theora:%f", 1.0 * frame->pts / frame->timebase);
 		break;
 	case frameType_aac:
 		LOG_PRINT("aac:%f", 1.0 * frame->pts / frame->timebase);
