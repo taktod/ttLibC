@@ -271,11 +271,10 @@ static bool theoraTest_encodeCallback(void *ptr, ttLibC_Theora *theora) {
 }
 
 #endif
-
 static void theoraTest() {
 	LOG_PRINT("theoraTest");
 #if defined(__ENABLE_THEORA__) && defined(__ENABLE_OPENCV__)
-	uint32_t width = 320, height = 240;
+	uint32_t width = 480, height = 270;
 	ttLibC_CvCapture *capture = ttLibC_CvCapture_make(0, width, height);
 	ttLibC_CvWindow *window = ttLibC_CvWindow_make("original");
 	ttLibC_CvWindow *dec_win = ttLibC_CvWindow_make("target");
