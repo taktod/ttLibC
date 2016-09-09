@@ -48,6 +48,22 @@ ttLibC_TheoraEncoder *ttLibC_TheoraEncoder_make(
 		uint32_t height);
 
 /**
+ * make theora encoder with special values.
+ * @param width
+ * @param height
+ * @param quality 0-63
+ * @param bitrate in bit/sec
+ * @param key_frame_interval 1 - 31
+ * @return theoraEncoder object.
+ */
+ttLibC_TheoraEncoder *ttLibC_TheoraEncoder_make_ex(
+		uint32_t width,
+		uint32_t height,
+		uint32_t quality,
+		uint32_t bitrate,
+		uint32_t key_frame_interval);
+
+/**
  * make theora encoder with th_info
  * @param ti theora info object.
  * @return theoraEncoder object.

@@ -36,6 +36,24 @@ typedef ttLibC_Encoder_TheoraEncoder_ ttLibC_TheoraEncoder_;
 ttLibC_TheoraEncoder *ttLibC_TheoraEncoder_make(
 		uint32_t width,
 		uint32_t height) {
+	return ttLibC_TheoraEncoder_make_ex(width, height, 0, 320000, 15);
+}
+
+/**
+ * make theora encoder with special values.
+ * @param width
+ * @param height
+ * @param quality 0-63
+ * @param bitrate in bit/sec
+ * @param key_frame_interval 1 - 31
+ * @return theoraEncoder object.
+ */
+ttLibC_TheoraEncoder *ttLibC_TheoraEncoder_make_ex(
+		uint32_t width,
+		uint32_t height,
+		uint32_t quality,
+		uint32_t bitrate,
+		uint32_t key_frame_interval) {
 	th_info ti;
 	th_comment tc;
 	th_info_init(&ti);
@@ -50,8 +68,9 @@ ttLibC_TheoraEncoder *ttLibC_TheoraEncoder_make(
 	ti.aspect_numerator = 1;
 	ti.aspect_denominator = 1;
 	ti.pixel_fmt = TH_PF_420; // only support yuv420.
-	ti.target_bitrate = 320000;
-	ti.quality = 0;
+	ti.target_bitrate = bitrate;
+	ti.quality = quality;
+	ti.keyframe_granule_shift = key_frame_interval;
 	ttLibC_TheoraEncoder *encoder = ttLibC_TheoraEncoder_makeWithInfo(&ti);
 	th_info_clear(&ti);
 	return encoder;

@@ -252,6 +252,8 @@ typedef struct theoraTest_t {
 	ttLibC_TheoraDecoder *decoder;
 	ttLibC_CvWindow *target;
 	ttLibC_Bgr *dbgr;
+	uint32_t size;
+	uint32_t count;
 } theoraTest_t;
 
 static bool theoraTest_decodeCallback(void *ptr, ttLibC_Yuv420 *yuv) {
@@ -267,6 +269,29 @@ static bool theoraTest_decodeCallback(void *ptr, ttLibC_Yuv420 *yuv) {
 
 static bool theoraTest_encodeCallback(void *ptr, ttLibC_Theora *theora) {
 	theoraTest_t *testData = (theoraTest_t *)ptr;
+	switch(theora->type) {
+	case TheoraType_innerFrame:
+		{
+			LOG_PRINT("inner");
+			testData->size += theora->inherit_super.inherit_super.buffer_size;
+			testData->count ++;
+		}
+		break;
+	case TheoraType_intraFrame:
+		{
+			LOG_PRINT("key");
+			testData->size += theora->inherit_super.inherit_super.buffer_size;
+			testData->count ++;
+		}
+		break;
+	default:
+		break;
+	}
+	if(testData->count > 60) {
+		LOG_PRINT("sz:%d", testData->size);
+		testData->size = 0;
+		testData->count = 0;
+	}
 	return ttLibC_TheoraDecoder_decode(testData->decoder, theora, theoraTest_decodeCallback, ptr);
 }
 
@@ -274,15 +299,17 @@ static bool theoraTest_encodeCallback(void *ptr, ttLibC_Theora *theora) {
 static void theoraTest() {
 	LOG_PRINT("theoraTest");
 #if defined(__ENABLE_THEORA__) && defined(__ENABLE_OPENCV__)
-	uint32_t width = 480, height = 270;
+	uint32_t width = 320, height = 180;
 	ttLibC_CvCapture *capture = ttLibC_CvCapture_make(0, width, height);
 	ttLibC_CvWindow *window = ttLibC_CvWindow_make("original");
 	ttLibC_CvWindow *dec_win = ttLibC_CvWindow_make("target");
-	ttLibC_TheoraEncoder *encoder = ttLibC_TheoraEncoder_make(width, height);
+	ttLibC_TheoraEncoder *encoder = ttLibC_TheoraEncoder_make_ex(width, height, 30, 0, 4);
 	ttLibC_TheoraDecoder *decoder = ttLibC_TheoraDecoder_make();
 	ttLibC_Bgr    *b, *bgr = NULL, *dbgr = NULL;
 	ttLibC_Yuv420 *y, *yuv = NULL;
 	theoraTest_t testData;
+	testData.size = 0;
+	testData.count = 0;
 	testData.dbgr = NULL;
 	testData.decoder = decoder;
 	testData.target = dec_win;
