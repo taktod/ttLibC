@@ -116,6 +116,7 @@ static bool Mp4Reader_readAtom(
 	}
 	switch(tag) {
 	case Mp4Type_Sidx:
+	case Mp4Type_Styp:
 	case Mp4Type_Ftyp:
 	case Mp4Type_Free:
 	case Mp4Type_Mdat:

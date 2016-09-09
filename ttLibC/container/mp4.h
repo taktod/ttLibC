@@ -46,6 +46,7 @@ typedef enum ttLibC_Mp4_Type {
 			Mp4Type_Mehd = 'mehd',
 			Mp4Type_Trex = 'trex',
 			Mp4Type_Trep = 'trep',
+	Mp4Type_Styp = 'styp',
 	Mp4Type_Sidx = 'sidx',
 	Mp4Type_Moof = 'moof',
 		Mp4Type_Mfhd = 'mfhd',
