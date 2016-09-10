@@ -102,7 +102,7 @@
 #include <ttLibC/frame/video/jpeg.h>
 
 #include <ttLibC/resampler/imageResampler.h>
-#include <ttLibC/resampler/imageScaler.h>
+#include <ttLibC/resampler/imageResizer.h>
 #include <ttLibC/resampler/audioResampler.h>
 
 #include <ttLibC/util/hexUtil.h>
@@ -1042,8 +1042,8 @@ static void mp3lameTest() {
 	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
-static void imageScaleTest() {
-	LOG_PRINT("imageScaleTest");
+static void imageResizeTest() {
+	LOG_PRINT("imageResizeTest");
 #ifdef __ENABLE_OPENCV__
 	ttLibC_CvCapture *capture = ttLibC_CvCapture_make(0, 320, 240);
 	ttLibC_CvWindow *window = ttLibC_CvWindow_make("original");
@@ -1061,7 +1061,7 @@ static void imageScaleTest() {
 			break;
 		}
 		yuv = y;
-		y = ttLibC_ImageScaler_scaleYuv420(ryuv, Yuv420Type_planar, 480, 360, yuv, false);
+		y = ttLibC_ImageResizer_resizeYuv420(ryuv, Yuv420Type_planar, 480, 360, yuv, false);
 		if(y == NULL) {
 			break;
 		}
@@ -1163,7 +1163,7 @@ cute::suite encoderDecoderTests(cute::suite s) {
 	s.push_back(CUTE(openh264Test));
 	s.push_back(CUTE(faacEncoderTest));
 	s.push_back(CUTE(mp3lameTest));
-	s.push_back(CUTE(imageScaleTest));
+	s.push_back(CUTE(imageResizeTest));
 	s.push_back(CUTE(imageResamplerTest));
 	return s;
 }

@@ -1,6 +1,6 @@
 /**
- * @file  imageScaler.h
- * @brief library or image scaling.
+ * @file  imageResizer.h
+ * @brief library or image resizing.
  *
  * this code is under 3-Cause BSD license.
  *
@@ -8,8 +8,8 @@
  * @date   2016/9/10
  */
 
-#ifndef TTLIBC_RESAMPLER_IMAGESCALER_H_
-#define TTLIBC_RESAMPLER_IMAGESCALER_H_
+#ifndef TTLIBC_RESAMPLER_IMAGERESIZER_H_
+#define TTLIBC_RESAMPLER_IMAGERESIZER_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -19,7 +19,7 @@ extern "C" {
 #include "../frame/video/bgr.h"
 
 /**
- * scale yuv image.
+ * resize yuv image.
  * @param prev_frame reuse image object
  * @param type       target yuv420 image type.
  * @param width      target width
@@ -28,7 +28,7 @@ extern "C" {
  * @param is_quick
  * @return scaled yuv image.
  */
-ttLibC_Yuv420 *ttLibC_ImageScaler_scaleYuv420(
+ttLibC_Yuv420 *ttLibC_ImageResizer_resizeYuv420(
 		ttLibC_Yuv420 *prev_frame,
 		ttLibC_Yuv420_Type type,
 		uint32_t width,
@@ -37,7 +37,7 @@ ttLibC_Yuv420 *ttLibC_ImageScaler_scaleYuv420(
 		bool is_quick);
 
 /**
- * scale bgr image.
+ * resize bgr image.
  * @param prev_frame
  * @param type
  * @param width
@@ -45,7 +45,7 @@ ttLibC_Yuv420 *ttLibC_ImageScaler_scaleYuv420(
  * @param src_frame
  * @return scaled bgr image.
  */
-ttLibC_Bgr *ttLibC_ImageScaler_scaleBgr(
+ttLibC_Bgr *ttLibC_ImageResizer_resizeBgr(
 		ttLibC_Bgr *prev_frame,
 		ttLibC_Bgr_Type type,
 		uint32_t width,
@@ -56,4 +56,4 @@ ttLibC_Bgr *ttLibC_ImageScaler_scaleBgr(
 } /* extern "C" */
 #endif
 
-#endif /* TTLIBC_RESAMPLER_IMAGESCALER_H_ */
+#endif /* TTLIBC_RESAMPLER_IMAGERESIZER_H_ */

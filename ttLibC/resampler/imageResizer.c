@@ -1,6 +1,6 @@
 /**
- * @file  imageScaler.c
- * @brief library or image scaling.
+ * @file  imageResizer.c
+ * @brief library or image resizing.
  *
  * this code is under 3-Cause BSD license.
  *
@@ -8,21 +8,20 @@
  * @date   2016/9/10
  */
 
-#include "imageScaler.h"
-
 #include "../allocator.h"
 #include "../log.h"
+#include "imageResizer.h"
 
-typedef struct ImageScaler_point_t {
+typedef struct ImageResize_point_t {
 	uint32_t x;
 	uint32_t y;
 	uint32_t val;
-} ImageScaler_point_t;
+} ImageResize_point_t;
 
 /**
  * do for each plane.
  */
-static bool ImageScaler_scalePlane(
+static bool ImageResizer_resizePlane(
 		uint8_t *target_plane,
 		uint32_t target_width,
 		uint32_t target_height,
@@ -46,8 +45,8 @@ static bool ImageScaler_scalePlane(
 	 *
 	 * from the distance estimate the color of point.
 	 */
-	ImageScaler_point_t target = {0};
-	ImageScaler_point_t lt = {0}, lb = {0}, rt = {0}, rb = {0};
+	ImageResize_point_t target = {0};
+	ImageResize_point_t lt = {0}, lb = {0}, rt = {0}, rb = {0};
 	uint32_t lt_x = 0, lt_y = 0, rb_x = 0, rb_y = 0;
 	int32_t xxx = 0, yyy = 0;
 	uint32_t hmax = ((src_height - 1) * target_height) << 1;
@@ -118,7 +117,7 @@ static bool ImageScaler_scalePlane(
 }
 
 /**
- * scale yuv image.
+ * resize yuv image.
  * @param prev_frame reuse image object
  * @param type       target yuv420 image type.
  * @param width      target width
@@ -126,7 +125,7 @@ static bool ImageScaler_scalePlane(
  * @param src_frame
  * @return scaled yuv image.
  */
-ttLibC_Yuv420 *ttLibC_ImageScaler_scaleYuv420(
+ttLibC_Yuv420 *ttLibC_ImageResizer_resizeYuv420(
 		ttLibC_Yuv420 *prev_frame,
 		ttLibC_Yuv420_Type type,
 		uint32_t width,
@@ -240,7 +239,7 @@ ttLibC_Yuv420 *ttLibC_ImageScaler_scaleYuv420(
 		v_stride = width;
 		break;
 	}
-	ImageScaler_scalePlane(
+	ImageResizer_resizePlane(
 			y_data,
 			width,
 			height,
@@ -252,7 +251,7 @@ ttLibC_Yuv420 *ttLibC_ImageScaler_scaleYuv420(
 			src_frame->y_stride,
 			1,
 			is_quick);
-	ImageScaler_scalePlane(
+	ImageResizer_resizePlane(
 			u_data,
 			width >> 1,
 			height >> 1,
@@ -264,7 +263,7 @@ ttLibC_Yuv420 *ttLibC_ImageScaler_scaleYuv420(
 			src_frame->u_stride,
 			src_uv_step,
 			true);
-	ImageScaler_scalePlane(
+	ImageResizer_resizePlane(
 			v_data,
 			width >> 1,
 			height >> 1,
@@ -303,7 +302,7 @@ ttLibC_Yuv420 *ttLibC_ImageScaler_scaleYuv420(
 }
 
 /**
- * scale bgr image.
+ * resize bgr image.
  * @param prev_frame
  * @param type
  * @param width
@@ -311,7 +310,7 @@ ttLibC_Yuv420 *ttLibC_ImageScaler_scaleYuv420(
  * @param src_frame
  * @return scaled bgr image.
  */
-ttLibC_Bgr *ttLibC_ImageScaler_scaleBgr(
+ttLibC_Bgr *ttLibC_ImageResizer_resizeBgr(
 		ttLibC_Bgr *prev_frame,
 		ttLibC_Bgr_Type type,
 		uint32_t width,
@@ -431,7 +430,7 @@ ttLibC_Bgr *ttLibC_ImageScaler_scaleBgr(
 		src_step = 4;
 		break;
 	}
-	ImageScaler_scalePlane(
+	ImageResizer_resizePlane(
 			b_data,
 			width,
 			height,
@@ -443,7 +442,7 @@ ttLibC_Bgr *ttLibC_ImageScaler_scaleBgr(
 			src_stride,
 			src_step,
 			false);
-	ImageScaler_scalePlane(
+	ImageResizer_resizePlane(
 			g_data,
 			width,
 			height,
@@ -455,7 +454,7 @@ ttLibC_Bgr *ttLibC_ImageScaler_scaleBgr(
 			src_stride,
 			src_step,
 			false);
-	ImageScaler_scalePlane(
+	ImageResizer_resizePlane(
 			r_data,
 			width,
 			height,
