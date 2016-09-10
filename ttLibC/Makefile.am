@@ -115,6 +115,7 @@ libttLibC_a_SOURCES= \
 	net/udp.c \
 	resampler/audioResampler.c \
 	resampler/imageResampler.c \
+	resampler/imageScaler.c \
 	resampler/speexdspResampler.c \
 	util/amfUtil.c \
 	util/audioUnitUtil.c \
