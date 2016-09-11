@@ -72,6 +72,16 @@ ttLibC_Bgr *ttLibC_Bgr_make(
 		uint32_t timebase);
 
 /**
+ * make clone frame.
+ * always make copy buffer on it.
+ * @param prev_frame reuse frame object.
+ * @param src_frame  source of clone.
+ */
+ttLibC_Bgr *ttLibC_Bgr_clone(
+		ttLibC_Bgr *prev_frame,
+		ttLibC_Bgr *src_frame);
+
+/**
  * close frame
  * @param frame
  */

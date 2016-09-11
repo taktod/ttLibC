@@ -149,7 +149,10 @@ ttLibC_Video *ttLibC_Video_clone(
 		return NULL;
 	}
 	switch(src_frame->inherit_super.type) {
-//	case frameType_bgr:
+	case frameType_bgr:
+		return (ttLibC_Video *)ttLibC_Bgr_clone(
+				(ttLibC_Bgr *)prev_frame,
+				(ttLibC_Bgr *)src_frame);
 	case frameType_flv1:
 		return (ttLibC_Video *)ttLibC_Flv1_clone(
 				(ttLibC_Flv1 *)prev_frame,

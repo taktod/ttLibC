@@ -105,6 +105,43 @@ ttLibC_Bgr *ttLibC_Bgr_make(
 	return bgr;
 }
 
+/**
+ * make clone frame.
+ * always make copy buffer on it.
+ * @param prev_frame reuse frame object.
+ * @param src_frame  source of clone.
+ */
+ttLibC_Bgr *ttLibC_Bgr_clone(
+		ttLibC_Bgr *prev_frame,
+		ttLibC_Bgr *src_frame) {
+	if(src_frame == NULL) {
+		return NULL;
+	}
+	if(src_frame->inherit_super.inherit_super.type != frameType_bgr) {
+		ERR_PRINT("try to clone non bgr frame.");
+		return NULL;
+	}
+	if(prev_frame != NULL && prev_frame->inherit_super.inherit_super.type != frameType_bgr) {
+		ERR_PRINT("try to use non bgr frame for reuse.");
+		return NULL;
+	}
+	ttLibC_Bgr *bgr = ttLibC_Bgr_make(
+			prev_frame,
+			src_frame->type,
+			src_frame->inherit_super.width,
+			src_frame->inherit_super.height,
+			src_frame->width_stride,
+			src_frame->inherit_super.inherit_super.data,
+			src_frame->inherit_super.inherit_super.buffer_size,
+			false,
+			src_frame->inherit_super.inherit_super.pts,
+			src_frame->inherit_super.inherit_super.timebase);
+	if(bgr != NULL) {
+		bgr->inherit_super.inherit_super.id = src_frame->inherit_super.inherit_super.id;
+	}
+	return bgr;
+}
+
 /*
  * close frame
  * @param frame
