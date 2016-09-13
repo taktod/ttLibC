@@ -11,6 +11,7 @@
 #include "pcmf32.h"
 #include "../../log.h"
 #include "../../allocator.h"
+#include <string.h>
 
 typedef ttLibC_Frame_Audio_PcmF32 ttLibC_PcmF32_;
 
