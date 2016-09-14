@@ -94,6 +94,7 @@ static bool Openh264Decoder_decode(
 		return true;
 	}
 	uint8_t *decodeBuf[3] = {0};
+	decoder_->bufInfo.uiInBsTimeStamp = h264->inherit_super.inherit_super.pts;
 	uint32_t res = decoder_->decoder->DecodeFrame2((const unsigned char *)h264->inherit_super.inherit_super.data, h264->inherit_super.inherit_super.buffer_size, decodeBuf, &decoder_->bufInfo);
 	if(res != 0) {
 		ERR_PRINT("failed to decode data.:%x", res);
@@ -123,7 +124,8 @@ static bool Openh264Decoder_decode(
 			decodeBuf[1], decoder_->bufInfo.UsrData.sSystemBuffer.iStride[1],
 			decodeBuf[2], decoder_->bufInfo.UsrData.sSystemBuffer.iStride[1],
 			true,
-			h264->inherit_super.inherit_super.pts, h264->inherit_super.inherit_super.timebase);
+			decoder_->bufInfo.uiOutYuvTimeStamp,
+			h264->inherit_super.inherit_super.timebase);
 	if(yuv == NULL) {
 		ERR_PRINT("failed to make yuv420 frame.");
 		return false;
