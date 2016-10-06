@@ -35,6 +35,7 @@ cute::suite netTests(cute::suite s);
 cute::suite utilTests(cute::suite s);
 cute::suite encoderDecoderTests(cute::suite s);
 cute::suite avcodecTests(cute::suite s);
+cute::suite webrtcTests(cute::suite s);
 
 /**
  * main entry for cuteTest
@@ -54,6 +55,7 @@ int main(int argc, const char *argv[]) {
 	cute::makeRunner(lis, argc, argv)(utilTests(s),           "utilTests");
 	cute::makeRunner(lis, argc, argv)(encoderDecoderTests(s), "encoderDecoderTests");
 	cute::makeRunner(lis, argc, argv)(avcodecTests(s),        "avcodecTests");
+	cute::makeRunner(lis, argc, argv)(webrtcTests(s),         "webrtcTests");
 	ttLibC_Allocator_close();
 	return 0;
 }

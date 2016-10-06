@@ -6,6 +6,7 @@ AC_INIT(ttLibC, 1.0)
 TTLIBC_DESCRIPTION="ttLibC library."
 
 AC_CANONICAL_SYSTEM
+AC_CANONICAL_HOST
 AC_PROG_RANLIB
 AM_INIT_AUTOMAKE()
 
@@ -22,17 +23,14 @@ debug_flag=0
 test_flag=no
 file_flag=no
 socket_flag=no
-
 opencv_flag=no
 openal_flag=no
-
 jpeg_flag=no
 openh264_flag=no
 x264_flag=no
 x265_flag=no
 theora_flag=no
 daala_flag=no
-
 mp3lame_flag=no
 faac_flag=no
 speexdsp_flag=no
@@ -40,15 +38,14 @@ speex_flag=no
 opus_flag=no
 faad_flag=no
 vorbis_flag=no
-
 avcodec_flag=no
 apple_flag=no
+webrtc_flag=no
 
 # check result
-cute_check=no 
+cute_check=no
 opencv_check=no
 openal_check=no
-
 jpeg_check=no
 openh264_check=no
 x264_check=no
@@ -56,7 +53,6 @@ x265_check=no
 theora_check=no
 daala_encode_check=no
 daala_decode_check=no
-
 mp3lame_encode_check=no
 mp3lame_decode_check=no
 faac_encode_check=no
@@ -66,9 +62,9 @@ opus_check=no
 faad_decode_check=no
 vorbis_encode_check=no
 vorbis_decode_check=no
-
 avcodec_check=no
 apple_check=no
+webrtc_check=no
 
 AC_ARG_ENABLE(
 	[lgpl],
@@ -141,6 +137,7 @@ AC_ARG_ENABLE(
 		theora_flag=$enableval
 		daala_flag=$enableval
 		vorbis_flag=$enableval
+		webrtc_flag=$enableval
 	]
 )
 
@@ -256,6 +253,12 @@ AC_ARG_ENABLE(
 	[vorbis],
 	AS_HELP_STRING([--enable-vorbis/--disable-vorbis], [enable/disable vorbis code.]),
 	[vorbis_flag=$enableval]
+)
+
+AC_ARG_ENABLE(
+	[webrtc],
+	AS_HELP_STRING([--enable-webrtc/--disable-webrtc], [enable/disable/webrtc code.]),
+	[webrtc_flag=$enableval]
 )
 
 if test x$opencv_flag = "xyes"; then
@@ -482,6 +485,92 @@ if test x$vorbis_flag = "xyes"; then
 	)
 fi
 
+if test x$webrtc_flag = "xyes"; then
+	AC_MSG_CHECKING(for WEBRTC)
+	AC_ARG_VAR([WEBRTC_INCLUDE_PATH], [path for webrtc compiled directory.])
+	AC_ARG_VAR([WEBRTC_PATH], [path for webrtc compiled directory.])
+	if test x$WEBRTC_PATH = "x"; then
+		AC_MSG_RESULT([no])
+		webrtc_check=no
+	else
+		webrtc_check=yes
+		if test x$WEBRTC_INCLUDE_PATH = "x"; then
+			WEBRTC_INCLUDE_PATH=$WEBRTC_PATH/../../
+		fi
+		WEBRTC_CFLAGS="-I${WEBRTC_INCLUDE_PATH}"
+		WEBRTC_CFLAGS+=' -pthread'
+#		WEBRTC_CFLAGS+=' -fno-exceptions'
+		WEBRTC_CFLAGS+=' -fno-strict-aliasing'
+		WEBRTC_CFLAGS+=' -Wall'
+		WEBRTC_CFLAGS+=' -Wno-unused-parameter'
+		WEBRTC_CFLAGS+=' -Wno-missing-field-initializers'
+		WEBRTC_CFLAGS+=' -Wextra'
+		WEBRTC_CFLAGS+=' -Wno-unused-local-typedefs'
+		WEBRTC_CFLAGS+=' -Wno-uninitialized'
+		WEBRTC_CFLAGS+=' -Wno-unused-variable'
+#		WEBRTC_CFLAGS+=' -Wno-unused-but-set-variable'
+		WEBRTC_CFLAGS+=' -pipe'
+		WEBRTC_CFLAGS+=' -fno-ident'
+		WEBRTC_CFLAGS+=' -fdata-sections'
+		WEBRTC_CFLAGS+=' -ffunction-sections'
+		WEBRTC_CFLAGS+=' -fPIC'
+		WEBRTC_CFLAGS+=' -fpermissive'
+#		WEBRTC_CFLAGS+=' -std=c++11'
+		
+		WEBRTC_CFLAGS+=' -DWEBRTC_THREAD_RR'
+		WEBRTC_CFLAGS+=' -DEXPAT_RELATIVE_PATH'
+		WEBRTC_CFLAGS+=' -DGTEST_RELATIVE_PATH'
+		WEBRTC_CFLAGS+=' -DJSONCPP_RELATIVE_PATH'
+		WEBRTC_CFLAGS+=' -DWEBRTC_RELATIVE_PATH'
+
+		WEBRTC_LIBS=`find ${WEBRTC_PATH} -name lib*.a -exec echo {} +`
+		case "${host_os}" in
+		linux*)
+			WEBRTC_CFLAGS+=' -DWEBRTC_LINUX'
+			WEBRTC_CFLAGS+=' -DWEBRTC_POSIX=1'
+			WEBRTC_CFLAGS+=' -DNOMINMAX'
+			;;
+		cygwin*|mingw*)
+			WEBRTC_CFLAGS+=' -DWEBRTC_WIN'
+			WEBRTC_CFLAGS+=' -DNOGUI'
+			WEBRTC_CFLAGS+=' -DNOMINMAX'
+			;;
+		darwin*)
+#			WEBRTC_CFLAGS+=' -std=gnu++0x'
+			WEBRTC_CFLAGS+=' -Wno-c++0x-extensions'
+			WEBRTC_CFLAGS+=' -Wno-c++11-extensions'
+			WEBRTC_CFLAGS+=' -stdlib=libc++'
+			WEBRTC_CFLAGS+=' -DNOGUI'
+			WEBRTC_CFLAGS+=' -DWEBRTC_MAC'
+			WEBRTC_CFLAGS+=' -DWEBRTC_IOS'
+			WEBRTC_CFLAGS+=' -DWEBRTC_POSIX=1'
+			WEBRTC_LIBS+=' -stdlib=libc++'
+			WEBRTC_LIBS+=' -framework Foundation'
+			WEBRTC_LIBS+=' -framework Cocoa'
+			WEBRTC_LIBS+=' -framework IOKit'
+			WEBRTC_LIBS+=' -framework Security'
+			WEBRTC_LIBS+=' -framework SystemConfiguration'
+			WEBRTC_LIBS+=' -framework AVFoundation'
+			WEBRTC_LIBS+=' -framework ApplicationServices'
+			WEBRTC_LIBS+=' -framework CoreGraphics'
+			WEBRTC_LIBS+=' -framework CoreServices'
+			WEBRTC_LIBS+=' -framework AppKit'
+			WEBRTC_LIBS+=' -framework OpenGL'
+			WEBRTC_LIBS+=' -framework AudioToolbox'
+			WEBRTC_LIBS+=' -framework CoreMedia'
+			WEBRTC_LIBS+=' -framework CoreVideo'
+			WEBRTC_LIBS+=' -framework CoreAudio'
+			;;
+		*)
+			AC_MSG_ERROR(["OS $host_os is not supported"])
+			;;
+		esac
+		AC_SUBST([WEBRTC_CFLAGS])
+		AC_SUBST([WEBRTC_LIBS])
+		AC_MSG_RESULT([yes])
+	fi
+fi
+
 AC_MSG_CHECKING(for license)
 if test x$gpl_flag = "xyes"; then
 	AC_DEFINE([__ENABLE_GPL__])
@@ -612,6 +701,11 @@ if test x$vorbis_flag$vorbis_decode_check = "xyesyes"; then
 	AC_DEFINE([__ENABLE_VORBIS_DECODE__])
 fi
 AM_CONDITIONAL(ENABLE_VORBIS_DECODE, test x$vorbis_flag$vorbis_decode_check = "xyesyes")
+
+if test x$webrtc_flag$webrtc_check = "xyesyes"; then
+	AC_DEFINE([__ENABLE_WEBRTC__])
+fi
+AM_CONDITIONAL(ENABLE_WEBRTC, test x$webrtc_flag$webrtc_check = "xyesyes")
 
 AC_ARG_WITH(pkgconfigdir,
 	AS_HELP_STRING([--with-pkgconfigdir], [Use the specified pkgconfig dir.(default is $libdir/pkgconfig)]),
@@ -887,4 +981,13 @@ echo "apple:            off(no framework detection.)"
 	fi
 else
 echo "apple:            off"
+fi
+if test x$webrtc_flag = "xyes"; then
+	if test x$webrtc_check = "xyes"; then
+echo "webrtc:           on"
+	else
+echo "webrtc:           off(no compile data detection.)"
+	fi
+else
+echo "webrtc:           off"
 fi
