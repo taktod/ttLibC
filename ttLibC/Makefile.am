@@ -108,6 +108,9 @@ libttLibC_a_SOURCES= \
 	net/client/websocket/handler.c \
 	net/client/websocket/handshake.c \
 	net/client/websocket/websocket.c \
+	net/client/webrtc/factory.cpp \
+	net/client/webrtc/mediaStream.cpp \
+	net/client/webrtc/peerConnection.cpp \
 	net/tcp.c \
 	net/tetty/bootstrap.c \
 	net/tetty/context.c \
