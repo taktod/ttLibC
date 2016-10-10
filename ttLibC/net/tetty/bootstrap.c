@@ -237,6 +237,15 @@ static bool TettyBootstrap_updateEach(void *ptr, void *item) {
 	return true;
 }
 
+static bool TettyBootstrap_checkFdMaxValue(void *ptr, void *item) {
+	ttLibC_TcpClientInfo *client_info = (ttLibC_TcpClientInfo *)item;
+	int *pfd_max = (int *)ptr;
+	if(*pfd_max < client_info->socket) {
+		*pfd_max = client_info->socket;
+	}
+	return true;
+}
+
 /*
  * do sync task.
  * @param bootstrap bootstrap object.
@@ -264,7 +273,15 @@ bool ttLibC_TettyBootstrap_update(
 	timeout.tv_usec = wait_interval % 1000000;
 	bool response = false;
 
-	if(select(FD_SETSIZE, &bootstrap_->fdchkset, NULL, NULL, &timeout)) {
+	// check all socket to decide fd_max
+	int fd_max = 0;
+	if(bootstrap_->socket_info != NULL) {
+		fd_max = bootstrap_->socket_info->socket;
+	}
+	ttLibC_StlList_forEach(bootstrap_->tcp_client_info_list, TettyBootstrap_checkFdMaxValue, &fd_max);
+	++ fd_max;
+
+	if(select(fd_max, &bootstrap_->fdchkset, NULL, NULL, &timeout)) {
 		// there is read wait socket.
 		if(bootstrap_->socket_info != NULL) {
 			// check server wait_socket.
