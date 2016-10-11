@@ -13,63 +13,12 @@
 
 #include "../webrtc.h"
 #include <webrtc/api/peerconnectioninterface.h>
-#include <webrtc/api/mediaconstraintsinterface.h>
 
 using namespace webrtc;
 
 namespace ttLibC_webrtc {
 
 class FactoryWrapper;
-
-/**
- * constraint object
- * ttLibC_WebrtcConstraint -> MediaConstraintsInterfaceの仲だちさせる
- */
-class WebrtcConstraint : public MediaConstraintsInterface {
-public:
-	WebrtcConstraint() {};
-	virtual ~WebrtcConstraint() {};
-
-	virtual const Constraints& GetMandatory() const {
-		return _mandatory;
-	}
-	virtual const Constraints& GetOptional() const {
-		return _optional;
-	}
-	template<class T>
-	void AddMandatory(const std::string &key, const T &value) {
-		_mandatory.push_back(Constraint(key, rtc::ToString<T>(value)));
-	}
-
-	template<class T>
-	void SetMandatory(const std::string &key, const T &value) {
-		std::string value_str;
-		if(_mandatory.FindFirst(key, &value_str)) {
-			for(Constraints::iterator iter = _mandatory.begin();iter != _mandatory.end(); ++iter) {
-				if(iter->key == key) {
-					_mandatory.erase(iter);
-					break;
-				}
-			}
-		}
-		_mandatory.push_back(Constraint(key, rtc::ToString<T>(value)));
-	}
-
-	template<class T>
-	void AddOptional(const std::string &key, const T &value) {
-		_optional.push_back(Constraint(key, rtc::ToString<T>(value)));
-	}
-	// ttLibC_WebrtcConstraintの内容で更新する。
-	void update(ttLibC_WebrtcConstraint *constraint);
-private:
-	void analyze(Constraints& target, ttLibC_net_client_WebrtcConstraintData *data);
-	template<class T>
-	void add(Constraints& target, const std::string& key, const T &value) {
-		target.push_back(Constraint(key, rtc::ToString<T>(value)));
-	}
-	Constraints _mandatory;
-	Constraints _optional;
-};
 
 /**
  * sdpデータ生成時のobserver
@@ -121,6 +70,7 @@ public:
 	bool setLocalDescription(ttLibC_WebrtcSdp *sdp);
 	bool setRemoteDescription(ttLibC_WebrtcSdp *sdp);
 	bool addIceCandidate(ttLibC_WebrtcCandidate *candidate);
+	bool addStream(ttLibC_WebrtcMediaStream *stream);
 	// イベント
 	void OnSignalingChange(PeerConnectionInterface::SignalingState new_state);
 	void OnAddStream(rtc::scoped_refptr<MediaStreamInterface> stream);
@@ -139,14 +89,14 @@ private:
 	// nativePeerConnectionオブジェクト
 	rtc::scoped_refptr<webrtc::PeerConnectionInterface> _nativePeerConnection;
 	// nativePeerConnectionFactoryオブジェクト
-	rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> _nativePeerConnectionFactory;
+	FactoryWrapper *_factoryWrapper;
 	// イベントからcallback関数を呼ぶために構造体のデータを持っとく
 	ttLibC_WebrtcPeerConnection *_cPeerConnection;
 	// sdpの設定動作はobserberが必要らしい。とりあえず共通で使い回すものを準備しとく。
 	rtc::scoped_refptr<SetSdpObserver> _setSdpObserver;
 	// answerの場合sdpデータの設定をnativePeerConnection作成前にくることがある。
-	// その場合にsdpのrefを保持しておく。本当はrefじゃなくて、copyにしたい。
-	ttLibC_WebrtcSdp *_sdpCopy;
+	std::string _sdp_type;
+	std::string _sdp_value;
 };
 
 }

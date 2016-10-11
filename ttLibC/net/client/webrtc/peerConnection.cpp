@@ -13,133 +13,10 @@
 #include "peerConnection.h"
 #include "../../../allocator.h"
 #include "factory.h"
-
-#include <webrtc/api/mediastreaminterface.h>
+#include "mediaStream.h"
 
 using namespace webrtc;
 using namespace ttLibC_webrtc;
-
-void WebrtcConstraint::analyze(
-		Constraints& target,
-		ttLibC_net_client_WebrtcConstraintData *data) {
-	// ttLibCの中身データを取り込む
-	if(data->minAspectRatio != NULL) {
-		add(target, MediaConstraintsInterface::kMinAspectRatio, data->minAspectRatio);
-	}
-	if(data->maxAspectRatio != NULL) {
-		add(target, MediaConstraintsInterface::kMaxAspectRatio, data->maxAspectRatio);
-	}
-	if(data->maxWidth != NULL) {
-		add(target, MediaConstraintsInterface::kMaxWidth, data->maxWidth);
-	}
-	if(data->minWidth != NULL) {
-		add(target, MediaConstraintsInterface::kMinWidth, data->minWidth);
-	}
-	if(data->maxHeight != NULL) {
-		add(target, MediaConstraintsInterface::kMaxHeight, data->maxHeight);
-	}
-	if(data->minHeight != NULL) {
-		add(target, MediaConstraintsInterface::kMinHeight, data->minHeight);
-	}
-	if(data->maxFrameRate != NULL) {
-		add(target, MediaConstraintsInterface::kMaxFrameRate, data->maxFrameRate);
-	}
-	if(data->minFrameRate != NULL) {
-		add(target, MediaConstraintsInterface::kMinFrameRate, data->minFrameRate);
-	}
-	if(data->echoCancellation != NULL) {
-		add(target, MediaConstraintsInterface::kEchoCancellation, data->echoCancellation);
-	}
-	if(data->googEchoCancellation != NULL) {
-		add(target, MediaConstraintsInterface::kGoogEchoCancellation, data->googEchoCancellation);
-	}
-	if(data->googEchoCancellation2 != NULL) {
-		add(target, MediaConstraintsInterface::kExtendedFilterEchoCancellation, data->googEchoCancellation2);
-	}
-	if(data->googDAEchoCancellation != NULL) {
-		add(target, MediaConstraintsInterface::kDAEchoCancellation, data->googDAEchoCancellation);
-	}
-	if(data->googAutoGainControl != NULL) {
-		add(target, MediaConstraintsInterface::kAutoGainControl, data->googAutoGainControl);
-	}
-	if(data->googAutoGainControl2 != NULL) {
-		add(target, MediaConstraintsInterface::kExperimentalAutoGainControl, data->googAutoGainControl2);
-	}
-	if(data->googNoiseSuppression != NULL) {
-		add(target, MediaConstraintsInterface::kNoiseSuppression, data->googNoiseSuppression);
-	}
-	if(data->googNoiseSuppression2 != NULL) {
-		add(target, MediaConstraintsInterface::kExperimentalNoiseSuppression, data->googNoiseSuppression2);
-	}
-
-	// この２つはnode-webrtcに含まれるライブラリでは、存在してなかったやつ。
-	if(data->intelligibilityEnhancer != NULL) {
-		add(target, MediaConstraintsInterface::kIntelligibilityEnhancer, data->intelligibilityEnhancer);
-	}
-	if(data->levelControl != NULL) {
-		add(target, MediaConstraintsInterface::kLevelControl, data->levelControl);
-	}
-
-	if(data->googHighpassFilter != NULL) {
-		add(target, MediaConstraintsInterface::kHighpassFilter, data->googHighpassFilter);
-	}
-	if(data->googTypingNoiseDetection != NULL) {
-		add(target, MediaConstraintsInterface::kTypingNoiseDetection, data->googTypingNoiseDetection);
-	}
-	if(data->googAudioMirroring != NULL) {
-		add(target, MediaConstraintsInterface::kAudioMirroring, data->googAudioMirroring);
-	}
-	if(data->googNoiseReduction != NULL) {
-		add(target, MediaConstraintsInterface::kNoiseReduction, data->googNoiseReduction);
-	}
-	if(data->offerToReceiveVideo != NULL) {
-		add(target, MediaConstraintsInterface::kOfferToReceiveVideo, data->offerToReceiveVideo);
-	}
-	if(data->offerToReceiveAudio != NULL) {
-		add(target, MediaConstraintsInterface::kOfferToReceiveAudio, data->offerToReceiveAudio);
-	}
-	if(data->voiceActivityDetection != NULL) {
-		add(target, MediaConstraintsInterface::kVoiceActivityDetection, data->voiceActivityDetection);
-	}
-	if(data->iceRestart != NULL) {
-		add(target, MediaConstraintsInterface::kIceRestart, data->iceRestart);
-	}
-	if(data->googUseRtpMux != NULL) {
-		add(target, MediaConstraintsInterface::kUseRtpMux, data->googUseRtpMux);
-	}
-	if(data->EnableDTLS_SRTP != NULL) {
-		add(target, MediaConstraintsInterface::kEnableDtlsSrtp, data->EnableDTLS_SRTP);
-	}
-	if(data->EnableRTPDataChannels != NULL) {
-		add(target, MediaConstraintsInterface::kEnableRtpDataChannels, data->EnableRTPDataChannels);
-	}
-	if(data->googDscp != NULL) {
-		add(target, MediaConstraintsInterface::kEnableDscp, data->googDscp);
-	}
-	if(data->googIPv6 != NULL) {
-		add(target, MediaConstraintsInterface::kEnableIPv6, data->googIPv6);
-	}
-	if(data->googSuspendBelowMinBitrate != NULL) {
-		add(target, MediaConstraintsInterface::kEnableVideoSuspendBelowMinBitrate, data->googSuspendBelowMinBitrate);
-	}
-	if(data->googCombinedAudioVideoBwe != NULL) {
-		add(target, MediaConstraintsInterface::kCombinedAudioVideoBwe, data->googCombinedAudioVideoBwe);
-	}
-	if(data->googScreencastMinBitrate != NULL) {
-		add(target, MediaConstraintsInterface::kScreencastMinBitrate, data->googScreencastMinBitrate);
-	}
-	if(data->googCpuOveruseDetection != NULL) {
-		add(target, MediaConstraintsInterface::kCpuOveruseDetection, data->googCpuOveruseDetection);
-	}
-	if(data->googPayloadPadding != NULL) {
-		add(target, MediaConstraintsInterface::kPayloadPadding, data->googPayloadPadding);
-	}
-}
-
-void WebrtcConstraint::update(ttLibC_WebrtcConstraint *constraint) {
-	analyze(_mandatory, &constraint->mandatory);
-	analyze(_optional, &constraint->optional);
-}
 
 void CreateSdpObserver::OnSuccess(SessionDescriptionInterface *sdp) {
 	// sdpからttLibC_WebrtcSdpをつくって、funcを呼んでやる
@@ -174,7 +51,7 @@ PeerConnectionWrapper::PeerConnectionWrapper(
 	// ここでnativePeerConnectionを作ろうとすると、データが足りないので、必要なデータを保持しておいて、createOffer or createAnswerで作ることにする。
 	_nativePeerConnection = nullptr;
 	// factoryはそのままコピーしてもっとく。
-	_nativePeerConnectionFactory = factoryWrapper->refNativeFactory();
+	_factoryWrapper = factoryWrapper;
 	// configをコピーしておいとく。
 	for(int i = 0;i < config->size;++ i) {
 		PeerConnectionInterface::IceServer iceServer;
@@ -190,7 +67,8 @@ PeerConnectionWrapper::PeerConnectionWrapper(
 		_iceServers.push_back(iceServer);
 	}
 	_cPeerConnection = cPeerConnection; // callback処理で必要になる。
-	_sdpCopy = NULL;
+	_sdp_type = std::string();
+	_sdp_value = std::string();
 	// sdp設定で必要になるobserverを作っておく。
 	_setSdpObserver = new rtc::RefCountedObject<SetSdpObserver>();
 }
@@ -209,7 +87,7 @@ bool PeerConnectionWrapper::createOffer(
 	PeerConnectionInterface::RTCConfiguration configuration;
 	configuration.servers = _iceServers;
 	// Peerをつくる
-	_nativePeerConnection = _nativePeerConnectionFactory->CreatePeerConnection(
+	_nativePeerConnection = _factoryWrapper->refNativeFactory()->CreatePeerConnection(
 			configuration,
 			&nativeConstraint,
 			nullptr,
@@ -232,23 +110,20 @@ bool PeerConnectionWrapper::createAnswer(
 	PeerConnectionInterface::RTCConfiguration configuration;
 	configuration.servers = _iceServers;
 	// peerを作る。
-	_nativePeerConnection = _nativePeerConnectionFactory->CreatePeerConnection(
+	_nativePeerConnection = _factoryWrapper->refNativeFactory()->CreatePeerConnection(
 			configuration,
 			&nativeConstraint,
 			nullptr,
 			nullptr,
 			this);
 	// sdpのデータを保持している場合は、先にセットする(でないとcreateAnswerが失敗する)
-	if(_sdpCopy != NULL) {
-		setRemoteDescription(_sdpCopy);
-/*		char *type = (char *)_sdpCopy->type;
-		char *value = (char *)_sdpCopy->value;
-		puts("ここで死んでる気がする。");
-		ttLibC_free(type);
-		ttLibC_free(value);
-		ttLibC_free(_sdpCopy);*/
-		_sdpCopy = NULL;
-		puts("あとはanswerつくるだけ。");
+	if((_sdp_type != std::string()) && (_sdp_value != std::string())) {
+		ttLibC_WebrtcSdp sdp;
+		sdp.type = _sdp_type.c_str();
+		sdp.value = _sdp_value.c_str();
+		setRemoteDescription(&sdp);
+		_sdp_type = std::string();
+		_sdp_value = std::string();
 	}
 	// localStreamが設定されている場合は、ここでnativePeerConnectionに適応しなければならない。
 	_nativePeerConnection->CreateAnswer(new rtc::RefCountedObject<CreateSdpObserver>(func, _cPeerConnection), &nativeConstraint);
@@ -275,21 +150,12 @@ bool PeerConnectionWrapper::setLocalDescription(ttLibC_WebrtcSdp *sdp) {
 
 bool PeerConnectionWrapper::setRemoteDescription(ttLibC_WebrtcSdp *sdp) {
 	if(_nativePeerConnection == nullptr) {
-		if(_sdpCopy != NULL) {
-			puts("すでにsdpCopyが提供済みになってる。なにかがおかしい。");
+		if((_sdp_type != std::string()) || (_sdp_value != std::string())) {
+			puts("すでにsdp_type / valueが提供済みになってる。なにかがおかしい。");
 			return false;
 		}
-		// sdp情報の設定を先におこないたい場合は_sdpCopyにデータをいれておいて、createAnswerのときに利用する。
-		// メモリーコピーにしたかったけど、よくわからないエラーがでたので、とりあえずrefにした。
-/*		_sdpCopy = (ttLibC_WebrtcSdp *)ttLibC_malloc(sizeof(ttLibC_WebrtcSdp));
-		char *type = (char *)ttLibC_malloc(256);
-		strcpy(type, sdp->type);
-		char *value = (char *)ttLibC_malloc(1024);
-		strcpy(value, sdp->value);
-		_sdpCopy->type = type;
-		_sdpCopy->value = value;*/
-
-		_sdpCopy = sdp;
+		_sdp_type = std::string(sdp->type);
+		_sdp_value = std::string(sdp->value);
 		return true;
 	}
 	if(sdp == NULL) {
@@ -326,6 +192,14 @@ bool PeerConnectionWrapper::addIceCandidate(ttLibC_WebrtcCandidate *candidate) {
 	return true;
 }
 
+bool PeerConnectionWrapper::addStream(ttLibC_WebrtcMediaStream *stream) {
+	if(stream == NULL) {
+		return false;
+	}
+	ttLibC_WebrtcMediaStream_ *stream_ = (ttLibC_WebrtcMediaStream_ *)stream;
+	return _nativePeerConnection->AddStream(stream_->streamWrapper->refNativeStream());
+}
+
 void PeerConnectionWrapper::OnSignalingChange(PeerConnectionInterface::SignalingState new_state) {
 	ttLibC_WebrtcEvent event = {};
 	event.target = _cPeerConnection;
@@ -334,8 +208,20 @@ void PeerConnectionWrapper::OnSignalingChange(PeerConnectionInterface::Signaling
 	}
 }
 
+/*
 // テストで追加した、videoFrameの取得動作(あとでつくり込む)この処理は消すべし
+// AudioTrackSinkInterfaceをAudioSourceInterfaceにくっつければ、sample_rateやchannelsは変更できないけど、波形は変更できるのかも・・・
 namespace ttLibC_webrtc {
+class AudioFrameListener : public webrtc::AudioTrackSinkInterface {
+public:
+	void OnData(const void *audio_data,
+			int bits_per_sample,
+			int sample_rate,
+			size_t number_of_channels,
+			size_t number_of_frames) {
+		puts("音声");
+	}
+};
 class VideoFrameListener
 	: public rtc::VideoSinkInterface<cricket::VideoFrame> {
 public:
@@ -345,13 +231,13 @@ public:
 	virtual ~VideoFrameListener() {}
 };
 }
-
+*/
 void PeerConnectionWrapper::OnAddStream(rtc::scoped_refptr<MediaStreamInterface> stream) {
 	ttLibC_WebrtcEvent event = {};
 	event.target = _cPeerConnection;
 	// event.stream; // ここをいじってc言語側からトラックにアクセスできるようにしなければならない。
 	// データ通信できているかどうか調べるために、videoTrack１つ目について、データを取得しているか調査
-	VideoTrackVector videoTracks = stream->GetVideoTracks();
+/*	VideoTrackVector videoTracks = stream->GetVideoTracks();
 	if(videoTracks.size() != 0) {
 		VideoTrackInterface *videoTrack = videoTracks.front();
 		rtc::VideoSinkWants wants; // これ・・・よくわからないので、調査する必要がある。
@@ -359,6 +245,15 @@ void PeerConnectionWrapper::OnAddStream(rtc::scoped_refptr<MediaStreamInterface>
 		wants.black_frames = true;
 		videoTrack->AddOrUpdateSink(new VideoFrameListener(), wants);
 	}
+	AudioTrackVector audioTracks = stream->GetAudioTracks();
+	if(audioTracks.size() != 0) {
+		AudioTrackInterface *audioTrack = audioTracks.front();
+		audioTrack->AddSink(new AudioFrameListener());
+	}
+	*/
+	event.stream = ttLibC_WebrtcFactory_createRemoteStream(
+			_factoryWrapper,
+			stream);
 	// c言語側へのcallbackを流しておく。
 	if(_cPeerConnection->onAddStream != NULL) {
 		_cPeerConnection->onAddStream(&event);
@@ -367,6 +262,7 @@ void PeerConnectionWrapper::OnAddStream(rtc::scoped_refptr<MediaStreamInterface>
 void PeerConnectionWrapper::OnRemoveStream(rtc::scoped_refptr<MediaStreamInterface> stream) {
 	ttLibC_WebrtcEvent event = {};
 	event.target = _cPeerConnection;
+	event.stream = _factoryWrapper->getRemoteStream(stream->label());
 	// event.stream; // なにか設置したい。
 	if(_cPeerConnection->onRemoveStream != NULL) {
 		_cPeerConnection->onRemoveStream(&event);
@@ -489,6 +385,17 @@ void ttLibC_WebrtcPeerConnection_close(ttLibC_WebrtcPeerConnection **conn) {
 	ttLibC_free(target);
 	*conn = NULL;
 }
+
+bool ttLibC_WebrtcPeerConnection_AddStream(
+		ttLibC_WebrtcPeerConnection *conn,
+		ttLibC_WebrtcMediaStream *stream) {
+	if(conn == NULL) {
+		return false;
+	}
+	ttLibC_WebrtcPeerConnection_ *conn_ = (ttLibC_WebrtcPeerConnection_ *)conn;
+	return conn_->peerConnectionWrapper->addStream(stream);
+}
+
 } /* extern "C" */
 
 #endif

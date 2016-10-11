@@ -18,6 +18,7 @@ extern "C" {
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include "../../frame/frame.h"
 
 /**
  * constraint detail data.
@@ -163,8 +164,16 @@ typedef ttLibC_net_client_WebrtcPeerConnection ttLibC_WebrtcPeerConnection;
  * for media stream.(do later.)
  */
 typedef struct ttLibC_net_client_WebrtcMediaStream {
+	const char *name;
+	uint32_t videoTrackCount;
+	uint32_t audioTrackCount;
 } ttLibC_net_client_WebrtcMediaStream;
 typedef ttLibC_net_client_WebrtcMediaStream ttLibC_WebrtcMediaStream;
+
+/**
+ * webrtc callback frame func definition.
+ */
+typedef bool (* ttLibC_WebrtcMediaStreamFrameFunc)(void *ptr, ttLibC_WebrtcMediaStream *stream, ttLibC_Frame *frame);
 
 // methods
 /**
@@ -248,8 +257,41 @@ bool ttLibC_WebrtcPeerConnection_addIceCandidate(
 
 /**
  * close peer connection.
+ * これって・・・別にcloseしなくても、factoryのメモリー解放時に一緒にcloseするでもいい気がする。
  */
 void ttLibC_WebrtcPeerConnection_close(ttLibC_WebrtcPeerConnection **conn);
+
+/**
+ * make new localMediaStream from factory.
+ * @param factory
+ * このnameの部分はuuidで処理してしまっていいか・・・
+ * あとから再度参照することは基本ないだろうし・・・
+ */
+ttLibC_WebrtcMediaStream *ttLibC_WebrtcFactory_createLocalStream(
+		ttLibC_WebrtcFactory *factory);
+
+bool ttLibC_WebrtcPeerConnection_AddStream(
+		ttLibC_WebrtcPeerConnection *conn,
+		ttLibC_WebrtcMediaStream *stream);
+
+// だいぶすっきりした。
+bool ttLibC_WebrtcMediaStream_createNewVideoTrack(
+		ttLibC_WebrtcMediaStream *stream,
+		ttLibC_WebrtcConstraint *constraint);
+
+bool ttLibC_WebrtcMediaStream_createNewAudioTrack(
+		ttLibC_WebrtcMediaStream *stream,
+		ttLibC_WebrtcConstraint *constraint);
+
+bool ttLibC_WebrtcMediaStream_addFrameListener(
+		ttLibC_WebrtcMediaStream *stream,
+		ttLibC_WebrtcMediaStreamFrameFunc callback,
+		void *ptr);
+
+// indexはframe.idでなんとかすることにする。
+bool ttLibC_WebrtcMediaStream_addFrame(
+		ttLibC_WebrtcMediaStream *stream,
+		ttLibC_Frame *frame);
 
 #ifdef __cplusplus
 } /* extern "C" */
