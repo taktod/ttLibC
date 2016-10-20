@@ -513,9 +513,9 @@ cute::suite containerTests(cute::suite s) {
 //	s.push_back(CUTE(mpegtsH264Mp3Test));
 //	s.push_back(CUTE(flvFlv1AacTest));
 //	s.push_back(CUTE(mpegtsToFlvTest)); // h264/aac
-	s.push_back(CUTE(mp4Test));
-	s.push_back(CUTE(webmTest));
-	s.push_back(CUTE(mkvTest));
+	s.push_back(CUTE(mp4Test)); // h264/aac
+	s.push_back(CUTE(webmTest)); // vp8/opus
+	s.push_back(CUTE(mkvTest)); // h264/aac
 	s.push_back(CUTE(mp3Test)); // none/mp3
 	s.push_back(CUTE(mpegtsTest)); // h264/aac
 	s.push_back(CUTE(flvTest)); // h264/aac
