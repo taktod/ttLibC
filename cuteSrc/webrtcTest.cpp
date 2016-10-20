@@ -20,14 +20,6 @@
 #	include <webrtc/modules/audio_device/include/audio_device.h>
 #endif
 
-#if defined(__ENABLE_WEBRTC__) && defined(__ENABLE_SOCKET__)
-#endif
-
-static void peerConnectTest() {
-#if defined(__ENABLE_WEBRTC__) && defined(__ENABLE_SOCKET__)
-#endif
-}
-
 //#	include <webrtc/base/scoped_ref_ptr.h>
 //#	include <webrtc/modules/audio_device/include/audio_device.h>
 static void test() {
@@ -50,7 +42,6 @@ static void test() {
 
 cute::suite webrtcTests(cute::suite s) {
 	s.clear();
-	s.push_back(CUTE(peerConnectTest));
 	s.push_back(CUTE(test));
 	return s;
 }
