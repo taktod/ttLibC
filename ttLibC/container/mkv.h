@@ -195,6 +195,7 @@ void ttLibC_MkvReader_close(ttLibC_MkvReader **reader);
  */
 typedef struct ttLibC_ContainerWriter_MkvWriter {
 	ttLibC_ContainerWriter inherit_super;
+	bool is_webm; // if webm true, mkv false.
 } ttLibC_ContainerWriter_MkvWriter;
 
 typedef ttLibC_ContainerWriter_MkvWriter ttLibC_MkvWriter;

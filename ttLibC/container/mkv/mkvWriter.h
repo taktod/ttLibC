@@ -22,11 +22,12 @@ extern "C" {
 #include "../../util/stlMapUtil.h"
 #include "../../util/dynamicBufferUtil.h"
 
-typedef struct ttLibC_MkvTrack {
+typedef struct ttLibC_MkvWriteTrack {
 	ttLibC_FrameQueue *frame_queue;
 	ttLibC_Frame *h264_configData;
 	ttLibC_Frame_Type frame_type;
-} ttLibC_MkvTrack;
+} ttLibC_MkvWriteTrack;
+
 
 typedef struct ttLibC_ContainerWriter_MkvWriter_ {
 	ttLibC_MkvWriter inherit_super;
