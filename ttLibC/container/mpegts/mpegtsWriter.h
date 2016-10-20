@@ -31,18 +31,6 @@ typedef struct ttLibC_MpegtsTrack {
 } ttLibC_MpegtsTrack;
 
 /**
- * definition of mpegts
- * /
-typedef enum ttLibC_MpegtsWriter_Status {
-	status_target_check, // check next target duration by pcr track.
-	status_video_check,
-	status_video_add,
-	status_audio_check,
-	status_audio_add,
-	status_current_update,
-} ttLibC_MpegtsWriter_Status;
-
-/**
  * detail definition of mpegts writer.
  */
 typedef struct {

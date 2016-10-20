@@ -33,18 +33,6 @@ typedef struct ttLibC_Mp4Track {
 } ttLibC_Mp4Track;
 
 /**
- * definition of mp4 work.
- * /
-typedef enum ttLibC_Mp4Writer_Status {
-	status_init_check,
-	status_make_init,
-	status_target_check,
-	status_data_check,
-	status_make_data,
-	status_update,
-} ttLibC_Mp4Writer_Status;
-
-/**
  * detail definition of mp4 writer.
  */
 typedef struct ttLibC_ContainerWriter_Mp4Writer_ {
