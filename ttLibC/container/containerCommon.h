@@ -54,6 +54,20 @@ typedef uint32_t ttLibC_uint30_t;
 typedef uint32_t ttLibC_uint31_t;
 typedef uint32_t ttLibC_uint32_t;
 
+typedef enum ttLibC_ContainerWriter_Status {
+	status_init_check,
+	status_make_init,
+	status_target_check,
+	status_data_check,
+	status_make_data,
+	status_update,
+	status_video_check,
+	status_video_add,
+	status_audio_check,
+	status_audio_add,
+	status_current_update,
+} ttLibC_ContainerWriter_Status;
+
 /**
  * common function for container make.
  * @param prev_container reuse container object.

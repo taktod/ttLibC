@@ -199,7 +199,14 @@ typedef struct ttLibC_ContainerWriter_MkvWriter {
 
 typedef ttLibC_ContainerWriter_MkvWriter ttLibC_MkvWriter;
 
-ttLibC_MkvWriter *ttLibC_MkvWriter_make();
+ttLibC_MkvWriter *ttLibC_MkvWriter_make(
+		ttLibC_Frame_Type* target_frame_types,
+		uint32_t types_num);
+
+ttLibC_MkvWriter *ttLibC_MkvWriter_make_ex(
+		ttLibC_Frame_Type* target_frame_types,
+		uint32_t types_num,
+		uint32_t max_unit_duration);
 
 bool ttLibC_MkvWriter_write(
 		ttLibC_MkvWriter *writer,
