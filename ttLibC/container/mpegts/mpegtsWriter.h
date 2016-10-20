@@ -16,6 +16,7 @@ extern "C" {
 #endif
 
 #include "../mpegts.h"
+#include "../containerCommon.h"
 
 #include "../misc.h"
 
@@ -31,7 +32,7 @@ typedef struct ttLibC_MpegtsTrack {
 
 /**
  * definition of mpegts
- */
+ * /
 typedef enum ttLibC_MpegtsWriter_Status {
 	status_target_check, // check next target duration by pcr track.
 	status_video_check,
@@ -63,7 +64,7 @@ typedef struct {
 	uint64_t target_pos;
 	uint32_t max_unit_duration; // max for audio frame chunk.
 
-	ttLibC_MpegtsWriter_Status status;
+	ttLibC_ContainerWriter_Status status;
 
 	ttLibC_ContainerWriteFunc callback;
 	void *ptr;

@@ -14,6 +14,7 @@ extern"C" {
 
 #include "../mp4.h"
 #include "../misc.h"
+#include "../containerCommon.h"
 
 #include "../../util/stlMapUtil.h"
 #include "../../util/dynamicBufferUtil.h"
@@ -33,7 +34,7 @@ typedef struct ttLibC_Mp4Track {
 
 /**
  * definition of mp4 work.
- */
+ * /
 typedef enum ttLibC_Mp4Writer_Status {
 	status_init_check,
 	status_make_init,
@@ -51,7 +52,7 @@ typedef struct ttLibC_ContainerWriter_Mp4Writer_ {
 
 	ttLibC_StlMap *track_list;
 
-	ttLibC_Mp4Writer_Status status;
+	ttLibC_ContainerWriter_Status status;
 	ttLibC_ContainerWriteFunc callback;
 	void *ptr;
 	uint32_t max_unit_duration;
