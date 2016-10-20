@@ -44,14 +44,15 @@ static bool mp4Test_getFrameCallback(void *ptr, ttLibC_Frame *frame) {
 	case frameType_h264:
 		{
 			ttLibC_Mp4Writer_write((ttLibC_Mp4Writer *)testData->writer, frame, mp4Test_writeDataCallback, ptr);
-			// make clone frame for 2nd video track.
+/*			// make clone frame for 2nd video track.
 			ttLibC_Frame *cloned_frame = ttLibC_Frame_clone(NULL, frame);
 			cloned_frame->id = 3;
 			ttLibC_Mp4Writer_write((ttLibC_Mp4Writer *)testData->writer, cloned_frame, mp4Test_writeDataCallback, ptr);
-			ttLibC_Frame_close(&cloned_frame);
+			ttLibC_Frame_close(&cloned_frame);*/
 		}
 		return true;
 	case frameType_aac:
+//		frame->id = 1;
 		return ttLibC_Mp4Writer_write((ttLibC_Mp4Writer *)testData->writer, frame, mp4Test_writeDataCallback, ptr);
 	default:
 		break;
@@ -71,9 +72,9 @@ static void mp4Test() {
 	ttLibC_Frame_Type frameTypes[] = {
 			frameType_h264,
 			frameType_aac,
-			frameType_h264
+//			frameType_h264
 	};
-	testData.writer = (ttLibC_ContainerWriter *)ttLibC_Mp4Writer_make(frameTypes, 3);
+	testData.writer = (ttLibC_ContainerWriter *)ttLibC_Mp4Writer_make(frameTypes, 2);
 	testData.fp_in = fopen("test.mp4", "rb");
 //	testData.fp_in = fopen("test_mod.mp4", "rb");
 //	testData.fp_in = fopen("test.fmp4", "rb");
@@ -96,7 +97,12 @@ static void mp4Test() {
 	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
+static bool mkvTest_writeDataCallback(void *ptr, void *data, size_t data_size) {
+	return true;
+}
+
 bool mkvTest_getFrameCallback(void *ptr, ttLibC_Frame *frame) {
+	containerTest_t *testData = (containerTest_t *)ptr;
 	switch(frame->type) {
 	case frameType_h264:
 		LOG_PRINT("h264:%f", 1.0 * frame->pts / frame->timebase);
@@ -121,8 +127,9 @@ bool mkvTest_getFrameCallback(void *ptr, ttLibC_Frame *frame) {
 		break;
 	default:
 		LOG_PRINT("frame:%f", 1.0 * frame->pts / frame->timebase);
-		break;
+		return true;
 	}
+	ttLibC_MkvWriter_write((ttLibC_MkvWriter *)testData->writer, frame, mkvTest_writeDataCallback, ptr);
 	return true;
 }
 
@@ -136,7 +143,12 @@ static void mkvTest() {
 	containerTest_t testData;
 	testData.write_size = 0;
 	testData.reader = (ttLibC_ContainerReader *)ttLibC_MkvReader_make();
-	testData.writer = (ttLibC_ContainerWriter *)ttLibC_MkvWriter_make();
+	ttLibC_Frame_Type frameTypes[] = {
+			frameType_h264,
+			frameType_aac
+	};
+	testData.writer = (ttLibC_ContainerWriter *)ttLibC_MkvWriter_make(
+			frameTypes, 2);
 	testData.fp_in = fopen("test.mkv", "rb");
 	testData.fp_out = fopen("test_out.mkv", "wb");
 	do {
