@@ -98,11 +98,17 @@ static void mp4Test() {
 }
 
 static bool mkvTest_writeDataCallback(void *ptr, void *data, size_t data_size) {
+	containerTest_t *testData = (containerTest_t *)ptr;
+	testData->write_size += data_size;
+	if(testData->fp_out) {
+		fwrite(data, 1, data_size, testData->fp_out);
+	}
 	return true;
 }
 
 bool mkvTest_getFrameCallback(void *ptr, ttLibC_Frame *frame) {
 	containerTest_t *testData = (containerTest_t *)ptr;
+	/*
 	switch(frame->type) {
 	case frameType_h264:
 		LOG_PRINT("h264:%f", 1.0 * frame->pts / frame->timebase);
@@ -128,13 +134,46 @@ bool mkvTest_getFrameCallback(void *ptr, ttLibC_Frame *frame) {
 	default:
 		LOG_PRINT("frame:%f", 1.0 * frame->pts / frame->timebase);
 		return true;
-	}
+	}*/
 	ttLibC_MkvWriter_write((ttLibC_MkvWriter *)testData->writer, frame, mkvTest_writeDataCallback, ptr);
 	return true;
 }
 
 bool mkvTest_getMkvCallback(void *ptr, ttLibC_Mkv *mkv) {
 	return ttLibC_Mkv_getFrame(mkv, mkvTest_getFrameCallback, ptr);
+}
+
+static void webmTest() {
+	LOG_PRINT("webmTest");
+
+	containerTest_t testData;
+	testData.write_size = 0;
+	testData.reader = (ttLibC_ContainerReader *)ttLibC_MkvReader_make();
+	ttLibC_Frame_Type frameTypes[] = {
+			frameType_vp8,
+			frameType_opus
+	};
+	testData.writer = (ttLibC_ContainerWriter *)ttLibC_MkvWriter_make(
+			frameTypes, 2);
+	((ttLibC_MkvWriter *)testData.writer)->is_webm = true;
+	testData.fp_in = fopen("test.webm", "rb");
+	testData.fp_out = fopen("test_out.webm", "wb");
+	do {
+		uint8_t buffer[65536];
+		if(!testData.fp_in) {
+			break;
+		}
+		size_t read_size = fread(buffer, 1, 65536, testData.fp_in);
+		if(!ttLibC_MkvReader_read((ttLibC_MkvReader *)testData.reader, buffer, read_size, mkvTest_getMkvCallback, &testData)) {
+			ERR_PRINT("error occured!");
+			break;
+		}
+	} while(!feof(testData.fp_in));
+	ttLibC_ContainerReader_close(&testData.reader);
+	ttLibC_ContainerWriter_close(&testData.writer);
+	if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
+	if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
+	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
 static void mkvTest() {
@@ -475,6 +514,7 @@ cute::suite containerTests(cute::suite s) {
 //	s.push_back(CUTE(flvFlv1AacTest));
 //	s.push_back(CUTE(mpegtsToFlvTest)); // h264/aac
 	s.push_back(CUTE(mp4Test));
+	s.push_back(CUTE(webmTest));
 	s.push_back(CUTE(mkvTest));
 	s.push_back(CUTE(mp3Test)); // none/mp3
 	s.push_back(CUTE(mpegtsTest)); // h264/aac
