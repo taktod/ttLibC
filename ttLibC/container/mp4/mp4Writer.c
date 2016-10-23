@@ -38,12 +38,12 @@ ttLibC_Mp4Writer *ttLibC_Mp4Writer_make_ex(
 			sizeof(ttLibC_Mp4Writer_),
 			1000); // work with 1000 only for now.
 	if(writer == NULL) {
-		ERR_PRINT("failed to allocator writer.");
+		ERR_PRINT("failed to allocate writer.");
 		return NULL;
 	}
 	// setup tracks
 	writer->track_list = ttLibC_StlMap_make();
-	for(int i = 0;i < types_num;i ++) {
+	for(int i = 0;i < types_num;++ i) {
 		// trackをつくってから、track_listに登録しておく。
 		ttLibC_Mp4Track *track = ttLibC_malloc(sizeof(ttLibC_Mp4Track));
 		track->frame_queue     = ttLibC_FrameQueue_make(i + 1, 255);
@@ -807,12 +807,6 @@ bool ttLibC_Mp4Writer_write(
 	switch(frame->type) {
 	case frameType_h264:
 		{
-			if(writer_->is_first) {
-				writer_->current_pts_pos = pts;
-				writer_->target_pos = pts;
-				writer_->inherit_super.inherit_super.pts = pts;
-				writer_->is_first = false;
-			}
 			ttLibC_H264 *h264 = (ttLibC_H264 *)frame;
 			if(h264->type == H264Type_unknown) {
 				return true;
@@ -834,14 +828,23 @@ bool ttLibC_Mp4Writer_write(
 		/* no break */
 	default:
 		{
+			// queue入れるの失敗したらやめる。
 			if(!ttLibC_FrameQueue_queue(track->frame_queue, frame)) {
 				return false;
 			}
-			if(writer_->is_first) {
-				return true;
-			}
 		}
 		break;
+	}
+	// こういう書き方にすると音声onlyでもちゃんと動作するようになるけど、各トラックの先頭にkeyFrameのないデータがきてしまって、
+	if(writer_->is_first) {
+		// ptsを計算しなおして、1000に変更しなければいけない。
+		if(frame->timebase != 1000) {
+			pts = (uint64_t)(1.0 * frame->pts * 1000 / frame->timebase);
+		}
+		writer_->current_pts_pos = pts;
+		writer_->target_pos = pts;
+		writer_->inherit_super.inherit_super.pts = pts;
+		writer_->is_first = false;
 	}
 	writer_->callback = callback;
 	writer_->ptr = ptr;
