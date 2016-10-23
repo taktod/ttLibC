@@ -224,12 +224,35 @@ static void mkvCodecTest() {
 	ttLibC_ContainerWriter_close(&testData.writer);
 	if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
 	if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
-	ASSERT(ttLibC_Allocator_dump() == 1);
+	ASSERT(ttLibC_Allocator_dump() == 0);
 
 	LOG_PRINT("vp8 / vorbis");
 	testData.reader = (ttLibC_ContainerReader *)ttLibC_MkvReader_make();
 	testData.writer = NULL;
 	sprintf(file, "%s/tools/data/source/test.vp8.vorbis.webm", getenv("HOME"));
+	testData.fp_in = fopen(file, "rb");
+	testData.fp_out = NULL;
+	do {
+		uint8_t buffer[65536];
+		if(!testData.fp_in) {
+			break;
+		}
+		size_t read_size = fread(buffer, 1, 65536, testData.fp_in);
+		if(!ttLibC_MkvReader_read((ttLibC_MkvReader *)testData.reader, buffer, read_size, mkvTest_getMkvCallback, &testData)) {
+			ERR_PRINT("error occured!");
+			break;
+		}
+	} while(!feof(testData.fp_in));
+	ttLibC_ContainerReader_close(&testData.reader);
+	ttLibC_ContainerWriter_close(&testData.writer);
+	if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
+	if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
+	ASSERT(ttLibC_Allocator_dump() == 0);
+
+	LOG_PRINT("vp9 / opus");
+	testData.reader = (ttLibC_ContainerReader *)ttLibC_MkvReader_make();
+	testData.writer = NULL;
+	sprintf(file, "%s/tools/data/source/test.vp9.opus.webm", getenv("HOME"));
 	testData.fp_in = fopen(file, "rb");
 	testData.fp_out = NULL;
 	do {
