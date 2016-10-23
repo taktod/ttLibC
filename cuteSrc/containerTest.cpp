@@ -108,8 +108,10 @@ static bool mkvTest_writeDataCallback(void *ptr, void *data, size_t data_size) {
 
 bool mkvTest_getFrameCallback(void *ptr, ttLibC_Frame *frame) {
 	containerTest_t *testData = (containerTest_t *)ptr;
-	/*
 	switch(frame->type) {
+	case frameType_h265:
+		LOG_PRINT("h265:%f", 1.0 * frame->pts / frame->timebase);
+		break;
 	case frameType_h264:
 		LOG_PRINT("h264:%f", 1.0 * frame->pts / frame->timebase);
 		break;
@@ -131,16 +133,121 @@ bool mkvTest_getFrameCallback(void *ptr, ttLibC_Frame *frame) {
 	case frameType_vorbis:
 		LOG_PRINT("vorbis:%f", 1.0 * frame->pts / frame->timebase);
 		break;
+	case frameType_mp3:
+		LOG_PRINT("mp3:%f", 1.0 *frame->pts / frame->timebase);
+		break;
+	case frameType_speex:
+		LOG_PRINT("speex:%f", 1.0 *frame->pts / frame->timebase);
+		break;
 	default:
 		LOG_PRINT("frame:%f", 1.0 * frame->pts / frame->timebase);
 		return true;
-	}*/
-	ttLibC_MkvWriter_write((ttLibC_MkvWriter *)testData->writer, frame, mkvTest_writeDataCallback, ptr);
+	}
+	if(testData->writer != NULL) {
+		ttLibC_MkvWriter_write((ttLibC_MkvWriter *)testData->writer, frame, mkvTest_writeDataCallback, ptr);
+	}
 	return true;
 }
 
 bool mkvTest_getMkvCallback(void *ptr, ttLibC_Mkv *mkv) {
 	return ttLibC_Mkv_getFrame(mkv, mkvTest_getFrameCallback, ptr);
+}
+
+static void mkvCodecTest() {
+	LOG_PRINT("mkvCodecTest");
+	containerTest_t testData;
+	char file[256];
+	LOG_PRINT("h264 / aac");
+	testData.reader = (ttLibC_ContainerReader *)ttLibC_MkvReader_make();
+	testData.writer = NULL;
+	sprintf(file, "%s/tools/data/source/test.h264.aac.mkv", getenv("HOME"));
+	testData.fp_in = fopen(file, "rb");
+	testData.fp_out = NULL;
+	do {
+		uint8_t buffer[65536];
+		if(!testData.fp_in) {
+			break;
+		}
+		size_t read_size = fread(buffer, 1, 65536, testData.fp_in);
+		if(!ttLibC_MkvReader_read((ttLibC_MkvReader *)testData.reader, buffer, read_size, mkvTest_getMkvCallback, &testData)) {
+			ERR_PRINT("error occured!");
+			break;
+		}
+	} while(!feof(testData.fp_in));
+	ttLibC_ContainerReader_close(&testData.reader);
+	ttLibC_ContainerWriter_close(&testData.writer);
+	if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
+	if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
+	ASSERT(ttLibC_Allocator_dump() == 0);
+
+	LOG_PRINT("h265 / mp3");
+	testData.reader = (ttLibC_ContainerReader *)ttLibC_MkvReader_make();
+	testData.writer = NULL;
+	sprintf(file, "%s/tools/data/source/test.h265.mp3.mkv", getenv("HOME"));
+	testData.fp_in = fopen(file, "rb");
+	testData.fp_out = NULL;
+	do {
+		uint8_t buffer[65536];
+		if(!testData.fp_in) {
+			break;
+		}
+		size_t read_size = fread(buffer, 1, 65536, testData.fp_in);
+		if(!ttLibC_MkvReader_read((ttLibC_MkvReader *)testData.reader, buffer, read_size, mkvTest_getMkvCallback, &testData)) {
+			ERR_PRINT("error occured!");
+			break;
+		}
+	} while(!feof(testData.fp_in));
+	ttLibC_ContainerReader_close(&testData.reader);
+	ttLibC_ContainerWriter_close(&testData.writer);
+	if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
+	if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
+	ASSERT(ttLibC_Allocator_dump() == 0);
+
+	LOG_PRINT("theora / speex");
+	testData.reader = (ttLibC_ContainerReader *)ttLibC_MkvReader_make();
+	testData.writer = NULL;
+	sprintf(file, "%s/tools/data/source/test.theora.speex.mkv", getenv("HOME"));
+	testData.fp_in = fopen(file, "rb");
+	testData.fp_out = NULL;
+	do {
+		uint8_t buffer[65536];
+		if(!testData.fp_in) {
+			break;
+		}
+		size_t read_size = fread(buffer, 1, 65536, testData.fp_in);
+		if(!ttLibC_MkvReader_read((ttLibC_MkvReader *)testData.reader, buffer, read_size, mkvTest_getMkvCallback, &testData)) {
+			ERR_PRINT("error occured!");
+			break;
+		}
+	} while(!feof(testData.fp_in));
+	ttLibC_ContainerReader_close(&testData.reader);
+	ttLibC_ContainerWriter_close(&testData.writer);
+	if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
+	if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
+	ASSERT(ttLibC_Allocator_dump() == 1);
+
+	LOG_PRINT("vp8 / vorbis");
+	testData.reader = (ttLibC_ContainerReader *)ttLibC_MkvReader_make();
+	testData.writer = NULL;
+	sprintf(file, "%s/tools/data/source/test.vp8.vorbis.webm", getenv("HOME"));
+	testData.fp_in = fopen(file, "rb");
+	testData.fp_out = NULL;
+	do {
+		uint8_t buffer[65536];
+		if(!testData.fp_in) {
+			break;
+		}
+		size_t read_size = fread(buffer, 1, 65536, testData.fp_in);
+		if(!ttLibC_MkvReader_read((ttLibC_MkvReader *)testData.reader, buffer, read_size, mkvTest_getMkvCallback, &testData)) {
+			ERR_PRINT("error occured!");
+			break;
+		}
+	} while(!feof(testData.fp_in));
+	ttLibC_ContainerReader_close(&testData.reader);
+	ttLibC_ContainerWriter_close(&testData.writer);
+	if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
+	if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
+	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
 static void webmTest() {
@@ -519,6 +626,8 @@ cute::suite containerTests(cute::suite s) {
 	s.push_back(CUTE(mp3Test)); // none/mp3
 	s.push_back(CUTE(mpegtsTest)); // h264/aac
 	s.push_back(CUTE(flvTest)); // h264/aac
+
+	s.push_back(CUTE(mkvCodecTest));
 	return s;
 }
 

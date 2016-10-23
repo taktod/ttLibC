@@ -277,6 +277,9 @@ static bool MkvReader_readTag(
 						else if(strcmp(codecId, "A_MPEG/L3") == 0) {
 							reader->track->type = frameType_mp3;
  						}
+						else if(strcmp(codecId, "A_MS/ACM") == 0){
+							reader->track->type = frameType_unknown;
+						}
 						else {
 							ERR_PRINT("unknown codec Id:%s", codecId);
 						}

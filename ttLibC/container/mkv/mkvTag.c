@@ -18,7 +18,10 @@
 #include "../../frame/video/h265.h"
 #include "../../frame/video/theora.h"
 #include "../../frame/audio/aac.h"
+#include "../../frame/audio/speex.h"
 #include "../../frame/audio/vorbis.h"
+#include "../../util/ioUtil.h"
+#include "../../util/byteUtil.h"
 #include <string.h>
 
 ttLibC_MkvTag *ttLibC_MkvTag_make(
@@ -308,6 +311,73 @@ void ttLibC_MkvTag_getPrivateDataFrame(
 					return;
 				}
 			}
+		}
+		break;
+	case frameType_unknown:
+		// 音声の場合はspeexみたいなriffのデータの場合がありうる。
+		// とりあえずwave format exだったはず。
+		{
+			// wave format exであると仮定してbinaryをみてみることにする。
+			// check data as wave format ex.
+			if(!track->is_video) {
+				// 音声であることが条件(そりゃそうだ。)
+				ttLibC_ByteReader *reader = ttLibC_ByteReader_make(private_data, private_data_size, ByteUtilType_default);
+				uint16_t be_tag = ttLibC_ByteReader_bit(reader, 16);
+				uint16_t be_channels = ttLibC_ByteReader_bit(reader, 16);
+				uint32_t be_sample_rate = ttLibC_ByteReader_bit(reader, 32);
+				uint16_t tag = be_uint16_t(be_tag);
+				uint16_t channels = be_uint16_t(be_channels);
+				uint32_t sample_rate = be_uint32_t(be_sample_rate);
+				ttLibC_ByteReader_close(&reader);
+				if(channels == track->channel_num && sample_rate ==track->sample_rate) {
+					// トラックとsampleRateが一致するようなら、waveformatexであろう。
+					// 本当はcodecIDを保持しておいて、判定した方がいいと思う。
+					switch(tag) {
+					default:
+					case 0x0000: // unknown
+//					case 0x0001: // pcm
+//					case 0x0002: // ms adpcm
+//					case 0x0005: // ibm csvd
+//					case 0x0006: // pcmalaw
+//					case 0x0007: // pcmmulaw
+//					case 0x0010: // oki adpcm
+//					case 0x0011: // ima adpcm
+//					case 0x0055: // mp3
+//					case 0x00FF: // aac
+					case 0xA109: // speex
+						{
+							track->type = frameType_speex;
+							// とりあえず欲しい情報はすでに全部あるからこれでいいか。
+							// extraデータの部分でheaderを読み込まないとだめっぽい。
+							ttLibC_Speex *speex = ttLibC_Speex_getFrame(
+									(ttLibC_Speex *)track->frame,
+									private_data + 18,
+									private_data_size - 18,
+									true,
+									reader_->pts,
+									reader_->timebase);
+							if(speex == NULL) {
+								ERR_PRINT("failed to read speex frame.");
+								reader->error_number = 5;
+							}
+							else {
+								track->frame = (ttLibC_Frame *)speex;
+								track->frame->id = track->track_number;
+								if(callback != NULL) {
+									if(!callback(ptr, track->frame)) {
+										reader_->error_number = 5;
+										return;
+									}
+								}
+							}
+						}
+						break;
+//					case 0x566F: // vorbis
+					}
+				}
+			}
+			// そこからcodecがなにであるかわかるはず。
+//			reader_->error_number = 3;
 		}
 		break;
 	default:

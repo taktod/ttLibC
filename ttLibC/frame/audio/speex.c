@@ -304,7 +304,7 @@ ttLibC_Speex *ttLibC_Speex_getFrame(
 					// something wrong.
 					break;
 				}
-				sample_num = sample_rate /50 * frame_num;
+				sample_num = sample_rate / 50 * frame_num;
 			}
 			ttLibC_ByteReader_close(&reader);
 			// if sample_rate is not updated, frame is unknown.

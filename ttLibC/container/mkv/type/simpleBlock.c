@@ -14,13 +14,15 @@
 #include "../../../util/hexUtil.h"
 #include "../../../util/byteUtil.h"
 #include "../../../frame/video/h264.h"
+#include "../../../frame/video/h265.h"
 #include "../../../frame/video/theora.h"
 #include "../../../frame/video/vp8.h"
 #include "../../../frame/video/vp9.h"
 #include "../../../frame/audio/aac.h"
-#include "../../../frame/audio/opus.h"
-#include "../../../frame/audio/vorbis.h"
 #include "../../../frame/audio/mp3.h"
+#include "../../../frame/audio/opus.h"
+#include "../../../frame/audio/speex.h"
+#include "../../../frame/audio/vorbis.h"
 
 static void SimpleBlock_getLace0Frame(
 		ttLibC_MkvReader_ *reader,
@@ -37,6 +39,50 @@ static void SimpleBlock_getLace0Frame(
 	uint64_t pts = reader->pts + time_diff;
 	uint32_t timebase = reader->timebase;
 	switch(track->type) {
+	case frameType_h265:
+		{
+			// ここはframeの解析を実施するところ。
+			// あとはここで解析してれば大丈夫になるんだろうか・・・
+			uint8_t *buf = data;
+			size_t buf_size = data_size;
+			do {
+				uint32_t size = 0;
+				for(int i = 1;i <= track->size_length;++ i) {
+					size = (size << 8) | *buf;
+					if(i != track->size_length) {
+						*buf = 0x00;
+					}
+					else {
+						*buf = 0x01;
+					}
+					++ buf;
+					-- buf_size;
+				}
+				buf += size;
+				buf_size -= size;
+			} while(buf_size > 0);
+			ttLibC_H265 *h265 = ttLibC_H265_getFrame(
+					(ttLibC_H265 *)track->frame,
+					data,
+					data_size,
+					true,
+					pts,
+					timebase);
+			if(h265 == NULL) {
+				ERR_PRINT("failed to make h265 data.");
+				reader->error_number = 5;
+			}
+			else {
+				track->frame = (ttLibC_Frame *)h265;
+				track->frame->id = track->track_number;
+				if(callback != NULL) {
+					if(!callback(ptr, track->frame)) {
+						reader->error_number = 5;
+					}
+				}
+			}
+		}
+		break;
 	case frameType_h264:
 		{
 			uint8_t *buf = data;
@@ -243,6 +289,33 @@ static void SimpleBlock_getLace0Frame(
 			}
 			else {
 				track->frame = (ttLibC_Frame *)mp3;
+				track->frame->id = track->track_number;
+				if(callback != NULL) {
+					if(!callback(ptr, track->frame)) {
+						reader->error_number = 5;
+					}
+				}
+			}
+		}
+		break;
+	case frameType_speex:
+		{
+			ttLibC_Speex *speex = ttLibC_Speex_getFrame(
+					(ttLibC_Speex *)track->frame,
+					data,
+					data_size,
+					true,
+					pts,
+					timebase);
+			if(speex == NULL) {
+				ERR_PRINT("failed to make speex data.");
+				reader->error_number = 5;
+			}
+			else {
+				// とりあえずこれで上書きしておく。
+				speex->inherit_super.channel_num = track->channel_num;
+				speex->inherit_super.sample_rate = track->sample_rate;
+				track->frame = (ttLibC_Frame *)speex;
 				track->frame->id = track->track_number;
 				if(callback != NULL) {
 					if(!callback(ptr, track->frame)) {
