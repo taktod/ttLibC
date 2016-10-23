@@ -253,6 +253,9 @@ static bool MkvReader_readTag(
 						if(strstr(codecId, "AVC") != 0) {
 							reader->track->type = frameType_h264;
 						}
+						else if(strstr(codecId, "HEVC") != 0) {
+							reader->track->type = frameType_h265;
+						}
 						else if(strcmp(codecId, "V_VP8") == 0) {
 							reader->track->type = frameType_vp8;
 						}

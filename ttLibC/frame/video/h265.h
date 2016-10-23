@@ -69,7 +69,7 @@ typedef enum ttLibC_H265_NalType {
 	H265NalType_rsvNvcl45    = 0x2D,
 	H265NalType_rsvNvcl46    = 0x2E,
 	H265NalType_rsvNvcl47    = 0x2F,
-	H265NalType_unspeC48     = 0x30,
+	H265NalType_unspec48     = 0x30,
 	H265NalType_unspec49     = 0x31,
 	H265NalType_unspec50     = 0x32,
 	H265NalType_unspec51     = 0x33,
@@ -138,13 +138,20 @@ ttLibC_H265 *ttLibC_H265_make(
 		uint64_t pts,
 		uint32_t timebase);
 
+ttLibC_H265 *ttLibC_H265_clone(
+		ttLibC_H265 *prev_frame,
+		ttLibC_H265 *src_frame);
+
+// analyze info of one nal.
 bool ttLibC_H265_getNalInfo(ttLibC_H265_NalInfo* info, uint8_t *data, size_t data_size);
 
-bool ttLibC_H265_getAvccInfo(ttLibC_H265_NalInfo* info, uint8_t *data, size_t data_size);
+// analyze info of one nal for avcc data.
+bool ttLibC_H265_getHvccInfo(ttLibC_H265_NalInfo* info, uint8_t *data, size_t data_size);
 
+// chec data type is hvcc
 bool ttLibC_H265_isNal(uint8_t *data, size_t data_size);
 
-bool ttLibC_H265_isAvcc(uint8_t *data, size_t data_size);
+bool ttLibC_H265_isHvcc(uint8_t *data, size_t data_size);
 
 bool ttLibC_H265_isKey(uint8_t *data, size_t data_size);
 
@@ -159,6 +166,21 @@ ttLibC_H265 *ttLibC_H265_getFrame(
 		bool non_copy_mode,
 		uint64_t pts,
 		uint32_t timebase);
+
+// make h265 from hvcc binary.
+ttLibC_H265 *ttLibC_H265_analyzeHvccTag(
+		ttLibC_H265 *prev_frame,
+		uint8_t *data,
+		size_t data_size,
+		uint32_t *length_size);
+
+uint32_t ttLibC_H265_getConfigCrc32(ttLibC_H265 *h265);
+
+// make hvcc info from ttLibC_H265_configData
+size_t ttLibC_H265_readHvccTag(
+		ttLibC_H265 *h265,
+		void *data,
+		size_t data_size);
 
 void ttLibC_H265_close(ttLibC_H265 **frame);
 

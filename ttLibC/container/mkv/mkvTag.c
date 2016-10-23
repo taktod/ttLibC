@@ -15,6 +15,7 @@
 #include "../../util/hexUtil.h"
 #include "../../allocator.h"
 #include "../../frame/video/h264.h"
+#include "../../frame/video/h265.h"
 #include "../../frame/video/theora.h"
 #include "../../frame/audio/aac.h"
 #include "../../frame/audio/vorbis.h"
@@ -77,6 +78,30 @@ void ttLibC_MkvTag_getPrivateDataFrame(
 	uint8_t *private_data = track->private_data;
 	size_t private_data_size = track->private_data_size;
 	switch(track->type) {
+	case frameType_h265:
+		{
+			uint32_t size_length = 0;
+			ttLibC_H265 *h265 = ttLibC_H265_analyzeHvccTag(NULL, private_data, private_data_size, &size_length);
+			if(h265 == NULL) {
+				ERR_PRINT("failed to analyze hvccTag");
+				reader_->error_number = 3;
+				return;
+			}
+			track->frame = (ttLibC_Frame *)h265;
+			track->frame->id = track->track_number;
+			track->size_length = size_length;
+			if(size_length < 3) {
+				ERR_PRINT("hvcc size is too small.");
+				reader_->error_number = 1;
+				return;
+			}
+			if(callback != NULL) {
+				if(!callback(ptr, track->frame)) {
+					reader_->error_number = 5;
+				}
+			}
+		}
+		break;
 	case frameType_h264:
 		{
 			uint32_t size_length = 0;
