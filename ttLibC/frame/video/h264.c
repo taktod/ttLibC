@@ -31,9 +31,9 @@ typedef struct {
 
 /*
  * h264 frame definition(detail)
- */
+ * /
 typedef struct {
-	/** inherit data from ttLibC_H264 */
+	/** inherit data from ttLibC_H264 * /
 	ttLibC_H264 inherit_super;
 } ttLibC_Frame_Video_H264_;
 
@@ -61,7 +61,7 @@ ttLibC_H264 *ttLibC_H264_make(
 		bool non_copy_mode,
 		uint64_t pts,
 		uint32_t timebase) {
-	ttLibC_H264_ *h264 = (ttLibC_H264_ *)prev_frame;
+	ttLibC_H264 *h264 = prev_frame;
 	size_t buffer_size_ = data_size;
 	size_t data_size_ = data_size;
 	switch(type) {
@@ -75,37 +75,37 @@ ttLibC_H264 *ttLibC_H264_make(
 		return NULL;
 	}
 	if(h264 == NULL) {
-		h264 = ttLibC_malloc(sizeof(ttLibC_H264_));
+		h264 = ttLibC_malloc(sizeof(ttLibC_H264));
 		if(h264 == NULL) {
 			ERR_PRINT("failed to allocate memory for h264 frame.");
 			return NULL;
 		}
-		h264->inherit_super.inherit_super.inherit_super.data = NULL;
+		h264->inherit_super.inherit_super.data = NULL;
 	}
 	else {
-		if(!h264->inherit_super.inherit_super.inherit_super.is_non_copy) {
-			if(non_copy_mode || h264->inherit_super.inherit_super.inherit_super.data_size < data_size_) {
-				ttLibC_free(h264->inherit_super.inherit_super.inherit_super.data);
-				h264->inherit_super.inherit_super.inherit_super.data = NULL;
+		if(!h264->inherit_super.inherit_super.is_non_copy) {
+			if(non_copy_mode || h264->inherit_super.inherit_super.data_size < data_size_) {
+				ttLibC_free(h264->inherit_super.inherit_super.data);
+				h264->inherit_super.inherit_super.data = NULL;
 			}
 			else {
-				data_size_ = h264->inherit_super.inherit_super.inherit_super.data_size;
+				data_size_ = h264->inherit_super.inherit_super.data_size;
 			}
 		}
 	}
-	h264->inherit_super.type                 = type;
-	h264->inherit_super.inherit_super.width  = width;
-	h264->inherit_super.inherit_super.height = height;
+	h264->type                 = type;
+	h264->inherit_super.width  = width;
+	h264->inherit_super.height = height;
 	switch(type) {
 	case H264Type_configData:
 	case H264Type_unknown:
-		h264->inherit_super.inherit_super.type = videoType_info;
+		h264->inherit_super.type = videoType_info;
 		break;
 	case H264Type_slice:
-		h264->inherit_super.inherit_super.type = videoType_inner;
+		h264->inherit_super.type = videoType_inner;
 		break;
 	case H264Type_sliceIDR:
-		h264->inherit_super.inherit_super.type = videoType_key;
+		h264->inherit_super.type = videoType_key;
 		break;
 	default:
 		if(prev_frame == NULL) {
@@ -113,19 +113,19 @@ ttLibC_H264 *ttLibC_H264_make(
 		}
 		return NULL;
 	}
-	h264->inherit_super.inherit_super.inherit_super.buffer_size = buffer_size_;
-	h264->inherit_super.inherit_super.inherit_super.data_size   = data_size_;
-	h264->inherit_super.inherit_super.inherit_super.is_non_copy = non_copy_mode;
-	h264->inherit_super.inherit_super.inherit_super.pts         = pts;
-	h264->inherit_super.inherit_super.inherit_super.timebase    = timebase;
-	h264->inherit_super.inherit_super.inherit_super.type        = frameType_h264;
+	h264->inherit_super.inherit_super.buffer_size = buffer_size_;
+	h264->inherit_super.inherit_super.data_size   = data_size_;
+	h264->inherit_super.inherit_super.is_non_copy = non_copy_mode;
+	h264->inherit_super.inherit_super.pts         = pts;
+	h264->inherit_super.inherit_super.timebase    = timebase;
+	h264->inherit_super.inherit_super.type        = frameType_h264;
 	if(non_copy_mode) {
-		h264->inherit_super.inherit_super.inherit_super.data = data;
+		h264->inherit_super.inherit_super.data = data;
 	}
 	else {
-		if(h264->inherit_super.inherit_super.inherit_super.data == NULL) {
-			h264->inherit_super.inherit_super.inherit_super.data = ttLibC_malloc(data_size);
-			if(h264->inherit_super.inherit_super.inherit_super.data == NULL) {
+		if(h264->inherit_super.inherit_super.data == NULL) {
+			h264->inherit_super.inherit_super.data = ttLibC_malloc(data_size);
+			if(h264->inherit_super.inherit_super.data == NULL) {
 				ERR_PRINT("failed to allocate memory for data.");
 				if(prev_frame == NULL) {
 					ttLibC_free(h264);
@@ -133,9 +133,9 @@ ttLibC_H264 *ttLibC_H264_make(
 				return NULL;
 			}
 		}
-		memcpy(h264->inherit_super.inherit_super.inherit_super.data, data, data_size);
+		memcpy(h264->inherit_super.inherit_super.data, data, data_size);
 	}
-	return (ttLibC_H264 *)h264;
+	return h264;
 }
 
 /*
@@ -341,7 +341,10 @@ bool ttLibC_H264_isKey(uint8_t *data, size_t data_size) {
 // TODO fix this. this is not good for multi thread.
 //static ttLibC_H264_Ref_t ref = {0};
 
-static Error_e H264_analyzeSequenceParameterSet(ttLibC_H264_Ref_t *ref, uint8_t *data, size_t data_size) {
+static Error_e H264_analyzeSequenceParameterSet(
+		ttLibC_H264_Ref_t *ref,
+		uint8_t *data,
+		size_t data_size) {
 	ttLibC_ByteReader *reader = ttLibC_ByteReader_make(data, data_size, ByteUtilType_h26x);
 	if(reader == NULL) {
 		return ttLibC_updateError(Target_On_VideoFrame, Error_MemoryAllocate);
@@ -635,7 +638,6 @@ ttLibC_H264 *ttLibC_H264_getFrame(
 		ERR_PRINT("failed to get nal info.");
 		return NULL;
 	}
-	ttLibC_H264 *h264 = NULL;
 	size_t target_size = 0;
 	uint32_t width = 0, height = 0;
 	if(prev_frame != NULL) {
@@ -758,7 +760,7 @@ ttLibC_H264 *ttLibC_H264_analyzeAvccTag(
 	}
 	uint8_t *buf = buffer;
 	size_t buf_pos = 0;
-	/**
+	/*
 	 * 1byte version
 	 * 1byte profile
 	 * 1byte compatibility
@@ -964,16 +966,16 @@ size_t ttLibC_H264_readAvccTag(
  * @param frame
  */
 void ttLibC_H264_close(ttLibC_H264 **frame) {
-	ttLibC_H264_ *target = (ttLibC_H264_ *)*frame;
+	ttLibC_H264 *target = *frame;
 	if(target == NULL) {
 		return;
 	}
-	if(target->inherit_super.inherit_super.inherit_super.type != frameType_h264) {
+	if(target->inherit_super.inherit_super.type != frameType_h264) {
 		ERR_PRINT("found non h264 frame in h264_close.");
 		return;
 	}
-	if(!target->inherit_super.inherit_super.inherit_super.is_non_copy) {
-		ttLibC_free(target->inherit_super.inherit_super.inherit_super.data);
+	if(!target->inherit_super.inherit_super.is_non_copy) {
+		ttLibC_free(target->inherit_super.inherit_super.data);
 	}
 	ttLibC_free(target);
 	*frame = NULL;
