@@ -144,7 +144,7 @@ bool mkvTest_getFrameCallback(void *ptr, ttLibC_Frame *frame) {
 		return true;
 	}
 	if(testData->writer != NULL) {
-		ttLibC_MkvWriter_write((ttLibC_MkvWriter *)testData->writer, frame, mkvTest_writeDataCallback, ptr);
+		return ttLibC_MkvWriter_write((ttLibC_MkvWriter *)testData->writer, frame, mkvTest_writeDataCallback, ptr);
 	}
 	return true;
 }
@@ -157,12 +157,16 @@ static void mkvCodecTest() {
 	LOG_PRINT("mkvCodecTest");
 	containerTest_t testData;
 	char file[256];
+	ttLibC_Frame_Type types[2];
 	LOG_PRINT("h264 / aac");
 	testData.reader = (ttLibC_ContainerReader *)ttLibC_MkvReader_make();
-	testData.writer = NULL;
+	types[0] = frameType_h264;
+	types[1] = frameType_aac;
+	testData.writer = (ttLibC_ContainerWriter *)ttLibC_MkvWriter_make(types, 2);
 	sprintf(file, "%s/tools/data/source/test.h264.aac.mkv", getenv("HOME"));
 	testData.fp_in = fopen(file, "rb");
-	testData.fp_out = NULL;
+	sprintf(file, "%s/tools/data/c_out/test.h264.aac.mkv", getenv("HOME"));
+	testData.fp_out = fopen(file, "wb");
 	do {
 		uint8_t buffer[65536];
 		if(!testData.fp_in) {
@@ -182,10 +186,13 @@ static void mkvCodecTest() {
 
 	LOG_PRINT("h265 / mp3");
 	testData.reader = (ttLibC_ContainerReader *)ttLibC_MkvReader_make();
-	testData.writer = NULL;
+	types[0] = frameType_h265;
+	types[1] = frameType_mp3;
+	testData.writer = (ttLibC_ContainerWriter *)ttLibC_MkvWriter_make(types, 2);
 	sprintf(file, "%s/tools/data/source/test.h265.mp3.mkv", getenv("HOME"));
 	testData.fp_in = fopen(file, "rb");
-	testData.fp_out = NULL;
+	sprintf(file, "%s/tools/data/c_out/test.h265.mp3.mkv", getenv("HOME"));
+	testData.fp_out = fopen(file, "wb");
 	do {
 		uint8_t buffer[65536];
 		if(!testData.fp_in) {
@@ -201,7 +208,7 @@ static void mkvCodecTest() {
 	ttLibC_ContainerWriter_close(&testData.writer);
 	if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
 	if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
-	ASSERT(ttLibC_Allocator_dump() == 0);
+	ASSERT(ttLibC_Allocator_dump() == 1); // 強制でとめとく。
 
 	LOG_PRINT("theora / speex");
 	testData.reader = (ttLibC_ContainerReader *)ttLibC_MkvReader_make();

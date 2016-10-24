@@ -161,7 +161,10 @@ ttLibC_Video *ttLibC_Video_clone(
 		return (ttLibC_Video *)ttLibC_H264_clone(
  				(ttLibC_H264 *)prev_frame,
 				(ttLibC_H264 *)src_frame);
-//	case frameType_h265:
+	case frameType_h265:
+		return (ttLibC_Video *)ttLibC_H265_clone(
+				(ttLibC_H265 *)prev_frame,
+				(ttLibC_H265 *)src_frame);
 	case frameType_jpeg:
 		return (ttLibC_Video *)ttLibC_Jpeg_clone(
  				(ttLibC_Jpeg *)prev_frame,
@@ -229,6 +232,9 @@ void ttLibC_Video_close(ttLibC_Video **frame) {
 	case frameType_h264:
 		ttLibC_H264_close((ttLibC_H264 **)frame);
 		break;
+	case frameType_h265:
+		ttLibC_H265_close((ttLibC_H265 **)frame);
+		break;
 	case frameType_jpeg:
 		ttLibC_Jpeg_close((ttLibC_Jpeg **)frame);
 		break;
@@ -252,11 +258,6 @@ void ttLibC_Video_close(ttLibC_Video **frame) {
 		break;
 	case frameType_theora:
 		ttLibC_Theora_close((ttLibC_Theora **)frame);
-		break;
-	case frameType_h265:
-		{
-			ttLibC_Video_close_(frame);
-		}
 		break;
 	default:
 		ERR_PRINT("unknown type:%d", target->inherit_super.type);

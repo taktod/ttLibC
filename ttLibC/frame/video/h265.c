@@ -13,6 +13,7 @@
 #include "../../allocator.h"
 #include "../../util/hexUtil.h"
 #include "../../util/byteUtil.h"
+#include "../../util/crc32Util.h"
 #include <string.h>
 
 typedef struct {
@@ -620,12 +621,16 @@ ttLibC_H265 *ttLibC_H265_analyzeHvccTag(
 	 * 6bit reserved
 	 * 2bit parallelism type.(使わない?)
 	 * from sps
+	 *
 	 * 6bit reserved
 	 * 2bit chroma format.
+	 *
 	 * 5bit reserved
 	 * 3bit bit depth luma minux 8
+	 *
 	 * 5bit reserved
 	 * 3bit bit depth chroma minus 8
+	 *
 	 * 2byte framerate(使わない)
 	 * 2bit constant frame rate(使わない)
 	 * 3bit num temporal layers(vpsから)
@@ -648,7 +653,6 @@ ttLibC_H265 *ttLibC_H265_analyzeHvccTag(
 	uint32_t nal_count = data[22];
 	uint8_t *dat = data;
 	dat += 23;
-	LOG_PRINT("nal_count:%d", nal_count);
 	for(uint32_t i = 0;i < nal_count;++ i) {
 		// ループして、vps sps ppsについては、記録しておく。
 		// それ以外の場合は、撤去してしまう。(SEIとか)
@@ -681,7 +685,7 @@ ttLibC_H265 *ttLibC_H265_analyzeHvccTag(
 		}
 		dat += 5 + nal_size;
 	}
-	LOG_DUMP(buffer, buf_size, true);
+//	LOG_DUMP(buffer, buf_size, true);
 	// now make frame.
 	ttLibC_H265 *h265 = ttLibC_H265_getFrame(
 			prev_frame,
@@ -700,6 +704,152 @@ ttLibC_H265 *ttLibC_H265_analyzeHvccTag(
 	h265->inherit_super.inherit_super.is_non_copy = false;
 	// done.
 	return h265;
+}
+
+uint32_t ttLibC_H265_getConfigCrc32(ttLibC_H265 *h265) {
+	if(h265->type != H265Type_configData) {
+		return 0;
+	}
+	ttLibC_Crc32 *crc32 = ttLibC_Crc32_make(0);
+	uint8_t *data = h265->inherit_super.inherit_super.data;
+	for(uint32_t i = 0;i < h265->inherit_super.inherit_super.buffer_size;++ i) {
+		ttLibC_Crc32_update(crc32, *data);
+		++ data;
+	}
+	uint32_t value = ttLibC_Crc32_getValue(crc32);
+	ttLibC_Crc32_close(&crc32);
+	return value;
+}
+
+size_t ttLibC_H265_readHvccTag(
+		ttLibC_H265 *h265,
+		void *data,
+		size_t data_size) {
+	if(h265->type != H265Type_configData) {
+		return 0;
+	}
+	// まずvps sps ppsが全体でいくつあるか調べる
+	ttLibC_H265_NalInfo nal_info;
+	uint8_t *buf = h265->inherit_super.inherit_super.data;
+	size_t buf_size = h265->inherit_super.inherit_super.buffer_size;
+	// vps由来
+	uint8_t  generalInfo[12] = {0};
+	uint32_t num_temporal_layers = 1;
+	uint32_t temporal_id_nested_flag = 1;
+
+	// sps由来
+	uint32_t chroma_idc = 0;
+	uint32_t bitdepth_luna_minus8 = 0;
+	uint32_t bitdepth_chroma_minus8 = 0;
+
+	uint32_t nal_count = 0;
+
+	while(ttLibC_H265_getNalInfo(&nal_info, buf, buf_size)) {
+		nal_count ++;
+		switch(nal_info.nal_unit_type) {
+		case H265NalType_vpsNut:
+			{
+				ttLibC_ByteReader *reader = ttLibC_ByteReader_make(buf + nal_info.data_pos, nal_info.nal_size - nal_info.data_pos, ByteUtilType_h26x);
+				ttLibC_ByteReader_bit(reader, 28); // 16bit + 12bit読み飛ばし
+				num_temporal_layers = ttLibC_ByteReader_bit(reader, 3) + 1;
+				temporal_id_nested_flag = ttLibC_ByteReader_bit(reader, 1);
+				ttLibC_ByteReader_bit(reader, 16);
+				uint8_t buf[12];
+				for(int i = 0;i < 12;++ i) {
+					generalInfo[i] = ttLibC_ByteReader_bit(reader, 8);
+				}
+				ttLibC_ByteReader_close(&reader);
+			}
+			break;
+		case H265NalType_spsNut:
+			{
+//				LOG_DUMP(buf, nal_info.nal_size, true);
+				ttLibC_ByteReader *reader = ttLibC_ByteReader_make(buf + nal_info.data_pos, nal_info.nal_size - nal_info.data_pos, ByteUtilType_h26x);
+				// forbidden - temporal id nesting flag
+				ttLibC_ByteReader_bit(reader, 24);
+				// tier level profile
+				ttLibC_ByteReader_bit(reader, 8);
+				ttLibC_ByteReader_bit(reader, 32);
+				ttLibC_ByteReader_bit(reader, 16);
+				ttLibC_ByteReader_bit(reader, 32);
+				ttLibC_ByteReader_bit(reader, 8);
+				// sps seq parameter set id
+				ttLibC_ByteReader_expGolomb(reader, false);
+				chroma_idc = ttLibC_ByteReader_expGolomb(reader, false);
+				if(chroma_idc == 3) {
+					ttLibC_ByteReader_bit(reader, 1);
+				}
+				// width height
+				uint32_t width, height;
+				width = ttLibC_ByteReader_expGolomb(reader, false);
+				height = ttLibC_ByteReader_expGolomb(reader, false);
+//				LOG_PRINT("%d x %d", width, height);
+				if(ttLibC_ByteReader_bit(reader, 1) == 1) {
+					ttLibC_ByteReader_expGolomb(reader, false);
+					ttLibC_ByteReader_expGolomb(reader, false);
+					ttLibC_ByteReader_expGolomb(reader, false);
+					ttLibC_ByteReader_expGolomb(reader, false);
+				}
+				bitdepth_luna_minus8 = ttLibC_ByteReader_expGolomb(reader, false);
+				bitdepth_chroma_minus8 = ttLibC_ByteReader_expGolomb(reader, false);
+				ttLibC_ByteReader_close(&reader);
+			}
+			break;
+		default:
+			break;
+		}
+		buf += nal_info.nal_size;
+		buf_size -= nal_info.nal_size;
+	}
+	// vpsから必要な情報を取り出す。
+	// spsから必要な情報を取り出す。
+	// データをつくっていく。bitでコントロールしているので、大きさは固定できるかな？
+	ttLibC_ByteConnector *connector = ttLibC_ByteConnector_make(data, data_size, ByteUtilType_default);
+	// Hvccタグの初めのbyteデータを作る。
+	// 初めは01固定
+	ttLibC_ByteConnector_bit(connector, 1, 8);
+	// vpsの4byte目以降12byteをかく(ただしnalを復元しなければならない。00 00 03を取り去る的なやつ。)
+	ttLibC_ByteConnector_string(connector, (const char *)generalInfo, 12);
+	// F0 00
+	ttLibC_ByteConnector_bit(connector, 0xF000, 16);
+	// FC
+	ttLibC_ByteConnector_bit(connector, 0xFC, 8);
+	// 6bit埋め chroma
+	ttLibC_ByteConnector_bit(connector, 0x3F, 6);
+	ttLibC_ByteConnector_bit(connector, chroma_idc & 0x3, 2);
+	// 5bit埋め bitdepth luma minus 8
+	ttLibC_ByteConnector_bit(connector, 0x1F, 5);
+	ttLibC_ByteConnector_bit(connector, bitdepth_luna_minus8 & 0x7, 3);
+	// 5bit埋め bitdepth chroa minus 8
+	ttLibC_ByteConnector_bit(connector, 0x1F, 5);
+	ttLibC_ByteConnector_bit(connector, bitdepth_chroma_minus8 & 0x7, 3);
+	// 00 00
+	ttLibC_ByteConnector_bit(connector, 0x0000, 16);
+	// 2bit 00
+	ttLibC_ByteConnector_bit(connector, 0x0, 2);
+	//  3bit temporal layersは1の方が都合がいい。それ以外がきたら、要注意
+	ttLibC_ByteConnector_bit(connector, num_temporal_layers, 3);
+	// temporal id nested 1と思われ
+	ttLibC_ByteConnector_bit(connector, temporal_id_nested_flag, 1);
+	// 2bit 11(size lengthを4byteにする。これは固定したい)
+	ttLibC_ByteConnector_bit(connector, 3, 2);
+	ttLibC_ByteConnector_bit(connector, nal_count, 8);
+
+	buf = h265->inherit_super.inherit_super.data;
+	buf_size = h265->inherit_super.inherit_super.buffer_size;
+	while(ttLibC_H265_getNalInfo(&nal_info, buf, buf_size)) {
+		nal_count ++;
+		ttLibC_ByteConnector_bit(connector, nal_info.nal_unit_type, 8);
+		ttLibC_ByteConnector_bit(connector, 1, 16);
+		ttLibC_ByteConnector_bit(connector, nal_info.nal_size - nal_info.data_pos, 16);
+		ttLibC_ByteConnector_string(connector, buf + nal_info.data_pos, nal_info.nal_size - nal_info.data_pos);
+		buf += nal_info.nal_size;
+		buf_size -= nal_info.nal_size;
+	}
+	uint32_t write_size = connector->write_size;
+	// おしまい。
+	ttLibC_ByteConnector_close(&connector);
+	return write_size;
 }
 
 void ttLibC_H265_close(ttLibC_H265 **frame) {
