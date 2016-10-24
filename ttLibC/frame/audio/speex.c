@@ -141,7 +141,7 @@ ttLibC_Speex *ttLibC_Speex_clone(
 	return speex;
 }
 
-
+static int inBandSize[] = {1, 1, 4, 4, 4, 4, 4, 4, 8, 8, 16, 16, 32, 32, 64, 64};
 static int narrowSize[] = {5, 43, 119, 160, 220, 300, 364, 492, 79};
 static int wideSize[] = {4, 36, 112, 192, 352};
 typedef enum SpeexBand {
@@ -177,13 +177,19 @@ static bool Speex_analyzeFrameBuffer(
 			}
 			// next 4bit for type.
 			uint32_t type = ttLibC_ByteReader_bit(reader, 4);
-			if(type > 8) {
+			if(type <= 8) {
+				readingBitSize = narrowSize[type] - 5;
+			}
+			else if(type == 14) {
+				-- *frame_num;
+				uint32_t inner_type = ttLibC_ByteReader_bit(reader, 4);
+				readingBitSize = inBandSize[inner_type];
+			}
+			else {
 				*frame_num = 0;
 				*bandtype = unknown;
 				return false;
 			}
-			// update bit size to skip.
-			readingBitSize = narrowSize[type] - 5;
 			while(readingBitSize > 0) {
 				if(readingBitSize > 32) {
 					ttLibC_ByteReader_bit(reader, 32);
@@ -275,7 +281,7 @@ ttLibC_Speex *ttLibC_Speex_getFrame(
 					channel_num,
 					data,
 					data_size,
-					true,
+					non_copy_mode,
 					pts,
 					timebase);
 		}
@@ -320,7 +326,7 @@ ttLibC_Speex *ttLibC_Speex_getFrame(
 						1,
 						data,
 						data_size,
-						true,
+						non_copy_mode,
 						pts,
 						timebase);
 			}
@@ -330,7 +336,7 @@ ttLibC_Speex *ttLibC_Speex_getFrame(
 		if(prev_frame->type == SpeexType_header) {
 			// in the case of 1st frame is header. next frame can be comment.
 			// check the data is frame or not.
-			ttLibC_ByteReader *reader = ttLibC_ByteReader_make(data, data_size, ByteUtilType_default);;
+			ttLibC_ByteReader *reader = ttLibC_ByteReader_make(data, data_size, ByteUtilType_default);
 			uint32_t frame_num;
 			SpeexBand band;
 			Speex_analyzeFrameBuffer(reader, data_size, &frame_num, &band);
@@ -345,7 +351,7 @@ ttLibC_Speex *ttLibC_Speex_getFrame(
 						prev_frame->inherit_super.channel_num,
 						data,
 						data_size,
-						true,
+						non_copy_mode,
 						pts,
 						timebase);
 			}
@@ -358,7 +364,7 @@ ttLibC_Speex *ttLibC_Speex_getFrame(
 				prev_frame->inherit_super.channel_num,
 				data,
 				data_size,
-				true,
+				non_copy_mode,
 				pts,
 				timebase);
 	}
