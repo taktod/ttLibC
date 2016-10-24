@@ -881,6 +881,9 @@ size_t ttLibC_H264_readAvccTag(
 		ttLibC_H264 *h264,
 		void *data,
 		size_t data_size) {
+	if(h264->type != H264Type_configData) {
+		return 0;
+	}
 	// need to know the size of sps and pps.
 	ttLibC_H264_NalInfo nal_info;
 	uint8_t *buf = h264->inherit_super.inherit_super.data;
