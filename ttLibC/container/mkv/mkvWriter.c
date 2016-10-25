@@ -117,6 +117,7 @@ static bool MkvWriter_makeTrackEntry(void *ptr, void *key, void *item) {
 		case frameType_jpeg:
 		case frameType_theora:
 		case frameType_vp8:
+		case frameType_vp9:
 		case frameType_aac:
 		case frameType_adpcm_ima_wav:
 		case frameType_mp3:
@@ -291,6 +292,31 @@ static bool MkvWriter_makeTrackEntry(void *ptr, void *key, void *item) {
 				ttLibC_ByteConnector_ebml2(innerConnector, MkvType_PixelHeight, true);
 				ttLibC_ByteConnector_ebml2(innerConnector, 2, false);
 				ttLibC_ByteConnector_bit(innerConnector, vp8->inherit_super.height, 16);
+
+				ttLibC_ByteConnector_ebml2(connector, MkvType_Video, true);
+				ttLibC_ByteConnector_ebml2(connector, innerConnector->write_size, false);
+				ttLibC_ByteConnector_string(connector, (const char *)inner, innerConnector->write_size);
+				ttLibC_DynamicBuffer_append(trackEntryBuffer, buf, connector->write_size);
+			}
+			break;
+		case frameType_vp9:
+			{
+				// codecID
+				ttLibC_ByteConnector_ebml2(connector, MkvType_CodecID, true);
+				ttLibC_ByteConnector_ebml2(connector, 5, false);
+				ttLibC_ByteConnector_string(connector, "V_VP9", 5);
+				// trackType
+				ttLibC_ByteConnector_ebml2(connector, MkvType_TrackType, true);
+				ttLibC_ByteConnector_ebml2(connector, 1, false);
+				ttLibC_ByteConnector_bit(connector, 1, 8);
+				// video要素の中身をつくっていく。
+				ttLibC_Vp8 *vp9 = (ttLibC_Vp9 *)ttLibC_FrameQueue_ref_first(track->frame_queue);
+				ttLibC_ByteConnector_ebml2(innerConnector, MkvType_PixelWidth, true);
+				ttLibC_ByteConnector_ebml2(innerConnector, 2, false);
+				ttLibC_ByteConnector_bit(innerConnector, vp9->inherit_super.width, 16);
+				ttLibC_ByteConnector_ebml2(innerConnector, MkvType_PixelHeight, true);
+				ttLibC_ByteConnector_ebml2(innerConnector, 2, false);
+				ttLibC_ByteConnector_bit(innerConnector, vp9->inherit_super.height, 16);
 
 				ttLibC_ByteConnector_ebml2(connector, MkvType_Video, true);
 				ttLibC_ByteConnector_ebml2(connector, innerConnector->write_size, false);
@@ -1006,6 +1032,7 @@ static bool MkvWriter_makeData(
 			}
 			break;
 		case frameType_vp8:
+		case frameType_vp9:
 		case frameType_theora:
 		case frameType_jpeg:
 			{
@@ -1105,6 +1132,7 @@ static bool MkvWriter_writeFromQueue(
 			case frameType_h265:
 			case frameType_theora:
 			case frameType_vp8:
+			case frameType_vp9:
 				ttLibC_FrameQueue_ref(track->frame_queue, MkvWirter_PrimaryVideoTrackCheck, writer);
 				break;
 			case frameType_jpeg: // jpegの場合はすべてがkeyFrameなので、keyFrameわけすると、すごく小さなunitになってしまう。よってmax_unit_duration分とりにいく。

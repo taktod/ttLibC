@@ -258,7 +258,6 @@ ttLibC_Vp9 *ttLibC_Vp9_getFrame(
 	bool isKey = ttLibC_Vp9_isKey(data, data_size);
 	uint32_t width = ttLibC_Vp9_getWidth(prev_frame, data, data_size);
 	uint32_t height = ttLibC_Vp9_getHeight(prev_frame, data, data_size);
-	LOG_PRINT("width x height: %d x %d", width, height);
 	if(width == 0 || height == 0) {
 		return NULL;
 	}
