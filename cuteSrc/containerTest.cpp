@@ -250,7 +250,7 @@ static void mkvCodecTest() {
 	testData.writer = (ttLibC_ContainerWriter *)ttLibC_MkvWriter_make(types, 2);
 	sprintf(file, "%s/tools/data/source/test.mjpeg.adpcmimawav.mkv", getenv("HOME"));
 	testData.fp_in = fopen(file, "rb");
-	sprintf(file, "%s/tools/data/c_out/test.theora.speex.mkv", getenv("HOME"));
+	sprintf(file, "%s/tools/data/c_out/test.mjpeg.adpcmimawav.mkv", getenv("HOME"));
 	testData.fp_out = fopen(file, "wb");
 	do {
 		uint8_t buffer[65536];
