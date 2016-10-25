@@ -265,6 +265,9 @@ static bool MkvReader_readTag(
 						else if(strcmp(codecId, "V_THEORA") == 0) {
 							reader->track->type = frameType_theora;
 						}
+						else if(strcmp(codecId, "V_MJPEG") == 0) {
+							reader->track->type = frameType_jpeg;
+						}
 						else if(strcmp(codecId, "A_OPUS") == 0) {
 							reader->track->type = frameType_opus;
 						}

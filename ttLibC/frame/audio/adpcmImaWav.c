@@ -65,6 +65,42 @@ ttLibC_AdpcmImaWav *ttLibC_AdpcmImaWav_make(
 }
 
 /*
+ * make clone frame
+ * always make copy buffer on it.
+ * @param prev_frame reuse frame object.
+ * @param src_frame  source of clone.
+ * @return cloned frame.
+ */
+ttLibC_AdpcmImaWav *ttLibC_AdpcmImaWav_clone(
+		ttLibC_AdpcmImaWav *prev_frame,
+		ttLibC_AdpcmImaWav *src_frame) {
+	if(src_frame == NULL) {
+		return NULL;
+	}
+	if(src_frame->inherit_super.inherit_super.type != frameType_adpcm_ima_wav) {
+		ERR_PRINT("try to clone non adpcmimawav frame.");
+		return NULL;
+	}
+	if(prev_frame != NULL && prev_frame->inherit_super.inherit_super.type != frameType_adpcm_ima_wav) {
+		ERR_PRINT("try to use non adpcmimawav frame for reuse.");
+		return NULL;
+	}
+	ttLibC_AdpcmImaWav *adpcm = ttLibC_AdpcmImaWav_make(
+			prev_frame,
+			src_frame->inherit_super.sample_rate,
+			src_frame->inherit_super.sample_num,
+			src_frame->inherit_super.channel_num,
+			src_frame->inherit_super.inherit_super.data,
+			src_frame->inherit_super.inherit_super.buffer_size,
+			false,
+			src_frame->inherit_super.inherit_super.pts,
+			src_frame->inherit_super.inherit_super.timebase);
+	if(adpcm != NULL) {
+		adpcm->inherit_super.inherit_super.id = src_frame->inherit_super.inherit_super.id;
+	}
+	return adpcm;
+}
+/*
  * close frame
  * @param frame
  */

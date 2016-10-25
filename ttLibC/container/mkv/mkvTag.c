@@ -341,7 +341,11 @@ void ttLibC_MkvTag_getPrivateDataFrame(
 //					case 0x0006: // pcmalaw
 //					case 0x0007: // pcmmulaw
 //					case 0x0010: // oki adpcm
-//					case 0x0011: // ima adpcm
+					case 0x0011: // ima adpcm
+						{
+							track->type = frameType_adpcm_ima_wav;
+						}
+						break;
 //					case 0x0055: // mp3
 //					case 0x00FF: // aac
 					case 0xA109: // speex

@@ -52,6 +52,17 @@ ttLibC_AdpcmImaWav *ttLibC_AdpcmImaWav_make(
 		uint32_t timebase);
 
 /**
+ * make clone frame
+ * always make copy buffer on it.
+ * @param prev_frame reuse frame object.
+ * @param src_frame  source of clone.
+ * @return cloned frame.
+ */
+ttLibC_AdpcmImaWav *ttLibC_AdpcmImaWav_clone(
+		ttLibC_AdpcmImaWav *prev_frame,
+		ttLibC_AdpcmImaWav *src_frame);
+
+/**
  * close frame
  * @param frame
  */

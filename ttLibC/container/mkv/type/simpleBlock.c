@@ -15,10 +15,12 @@
 #include "../../../util/byteUtil.h"
 #include "../../../frame/video/h264.h"
 #include "../../../frame/video/h265.h"
+#include "../../../frame/video/jpeg.h"
 #include "../../../frame/video/theora.h"
 #include "../../../frame/video/vp8.h"
 #include "../../../frame/video/vp9.h"
 #include "../../../frame/audio/aac.h"
+#include "../../../frame/audio/adpcmImaWav.h"
 #include "../../../frame/audio/mp3.h"
 #include "../../../frame/audio/opus.h"
 #include "../../../frame/audio/speex.h"
@@ -126,6 +128,30 @@ static void SimpleBlock_getLace0Frame(
 			}
 		}
 		break;
+	case frameType_jpeg:
+		{
+			ttLibC_Jpeg *jpeg = ttLibC_Jpeg_getFrame(
+					(ttLibC_Jpeg *)track->frame,
+					data,
+					data_size,
+					true,
+					pts,
+					timebase);
+			if(jpeg == NULL) {
+				ERR_PRINT("failed to make jpeg data.");
+				reader->error_number = 5;
+			}
+			else {
+				track->frame = (ttLibC_Frame *)jpeg;
+				track->frame->id = track->track_number;
+				if(callback != NULL) {
+					if(!callback(ptr, track->frame)) {
+						reader->error_number = 5;
+					}
+				}
+			}
+		}
+		break;
 	case frameType_theora:
 		{
 			ttLibC_Theora *theora = ttLibC_Theora_getFrame(
@@ -218,6 +244,48 @@ static void SimpleBlock_getLace0Frame(
 			}
 			else {
 				track->frame = (ttLibC_Frame *)aac;
+				track->frame->id = track->track_number;
+				if(callback != NULL) {
+					if(!callback(ptr, track->frame)) {
+						reader->error_number = 5;
+					}
+				}
+			}
+		}
+		break;
+	case frameType_adpcm_ima_wav:
+		{
+			// adpcmの細かいところの指定はbinaryから復元できないので、ここに書こう
+			// sample_numはpcmの値から復元しなければならないわけか・・・
+			// たしか、4bitが１データだっけ？
+			uint32_t sample_num = 0;
+			switch(track->channel_num) {
+			case 1:
+				sample_num = (data_size - 4) * 2 + 1;
+				break;
+			case 2:
+				sample_num = (data_size - 8) + 1;
+				break;
+			default:
+				ERR_PRINT("only support stereo / monoral.");
+				return;
+			}
+			ttLibC_AdpcmImaWav *adpcm = ttLibC_AdpcmImaWav_make(
+					(ttLibC_AdpcmImaWav *)track->frame,
+					track->sample_rate,
+					sample_num,
+					track->channel_num,
+					data,
+					data_size,
+					true,
+					pts,
+					timebase);
+			if(adpcm == NULL) {
+				ERR_PRINT("failed to make adpcm data.");
+				reader->error_number = 5;
+			}
+			else {
+				track->frame = (ttLibC_Frame *)adpcm;
 				track->frame->id = track->track_number;
 				if(callback != NULL) {
 					if(!callback(ptr, track->frame)) {
