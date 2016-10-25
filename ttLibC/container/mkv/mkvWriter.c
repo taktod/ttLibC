@@ -16,11 +16,13 @@
 #include "../container.h"
 #include "../containerCommon.h"
 #include "../../frame/audio/aac.h"
+#include "../../frame/audio/adpcmImaWav.h"
 #include "../../frame/audio/mp3.h"
 #include "../../frame/audio/opus.h"
 #include "../../frame/audio/speex.h"
 #include "../../frame/video/h264.h"
 #include "../../frame/video/h265.h"
+#include "../../frame/video/jpeg.h"
 #include "../../frame/video/theora.h"
 #include "../../frame/video/vp8.h"
 #include "../../util/byteUtil.h"
@@ -110,9 +112,11 @@ static bool MkvWriter_makeTrackEntry(void *ptr, void *key, void *item) {
 		switch(track->frame_type) {
 		case frameType_h264:
 		case frameType_h265:
+		case frameType_jpeg:
 		case frameType_theora:
 		case frameType_vp8:
 		case frameType_aac:
+		case frameType_adpcm_ima_wav:
 		case frameType_mp3:
 		case frameType_opus:
 		case frameType_speex:
@@ -196,6 +200,31 @@ static bool MkvWriter_makeTrackEntry(void *ptr, void *key, void *item) {
 				ttLibC_ByteConnector_ebml2(connector, in_size, false);
 				ttLibC_DynamicBuffer_append(trackEntryBuffer, buf, connector->write_size);
 				ttLibC_DynamicBuffer_append(trackEntryBuffer, inner, in_size);
+			}
+			break;
+		case frameType_jpeg:
+			{
+				// codecID
+				ttLibC_ByteConnector_ebml2(connector, MkvType_CodecID, true);
+				ttLibC_ByteConnector_ebml2(connector, 7, false);
+				ttLibC_ByteConnector_string(connector, "V_MJPEG", 7);
+				// trackType
+				ttLibC_ByteConnector_ebml2(connector, MkvType_TrackType, true);
+				ttLibC_ByteConnector_ebml2(connector, 1, false);
+				ttLibC_ByteConnector_bit(connector, 1, 8);
+				// video要素の中身をつくっていく。
+				ttLibC_Jpeg *jpeg = (ttLibC_Jpeg *)ttLibC_FrameQueue_ref_first(track->frame_queue);
+				ttLibC_ByteConnector_ebml2(innerConnector, MkvType_PixelWidth, true);
+				ttLibC_ByteConnector_ebml2(innerConnector, 2, false);
+				ttLibC_ByteConnector_bit(innerConnector, jpeg->inherit_super.width, 16);
+				ttLibC_ByteConnector_ebml2(innerConnector, MkvType_PixelHeight, true);
+				ttLibC_ByteConnector_ebml2(innerConnector, 2, false);
+				ttLibC_ByteConnector_bit(innerConnector, jpeg->inherit_super.height, 16);
+
+				ttLibC_ByteConnector_ebml2(connector, MkvType_Video, true);
+				ttLibC_ByteConnector_ebml2(connector, innerConnector->write_size, false);
+				ttLibC_ByteConnector_string(connector, (const char *)inner, innerConnector->write_size);
+				ttLibC_DynamicBuffer_append(trackEntryBuffer, buf, connector->write_size);
 			}
 			break;
 		case frameType_theora:
@@ -295,6 +324,58 @@ static bool MkvWriter_makeTrackEntry(void *ptr, void *key, void *item) {
 				ttLibC_ByteConnector_ebml2(connector, in_size, false);
 				ttLibC_DynamicBuffer_append(trackEntryBuffer, buf, connector->write_size);
 				ttLibC_DynamicBuffer_append(trackEntryBuffer, inner, in_size);
+			}
+			break;
+		case frameType_adpcm_ima_wav:
+			{
+				// codecID
+				ttLibC_ByteConnector_ebml2(connector, MkvType_CodecID, true);
+				ttLibC_ByteConnector_ebml2(connector, 8, false);
+				ttLibC_ByteConnector_string(connector, "A_MS/ACM", 8);
+				// trackType
+				ttLibC_ByteConnector_ebml2(connector, MkvType_TrackType, true);
+				ttLibC_ByteConnector_ebml2(connector, 1, false);
+				ttLibC_ByteConnector_bit(connector, 2, 8);
+				// audioの子要素をつくっていく。
+				ttLibC_AdpcmImaWav *adpcm = (ttLibC_AdpcmImaWav *)ttLibC_FrameQueue_ref_first(track->frame_queue);
+				ttLibC_ByteConnector_ebml2(innerConnector, MkvType_SamplingFrequency, true);
+				ttLibC_ByteConnector_ebml2(innerConnector, 4, false);
+				float sr = adpcm->inherit_super.sample_rate;
+				ttLibC_ByteConnector_bit(innerConnector, *(uint32_t *)&sr, 32);
+				ttLibC_ByteConnector_ebml2(innerConnector, MkvType_Channels, true);
+				ttLibC_ByteConnector_ebml2(innerConnector, 1, false);
+				ttLibC_ByteConnector_bit(innerConnector, adpcm->inherit_super.channel_num, 8);
+
+				ttLibC_ByteConnector_ebml2(connector, MkvType_Audio, true);
+				ttLibC_ByteConnector_ebml2(connector, innerConnector->write_size, false);
+				ttLibC_ByteConnector_string(connector, (const char *)inner, innerConnector->write_size);
+				// codecPrivate (we must have OpusHead information or no sound.)
+				ttLibC_ByteConnector_ebml2(connector, MkvType_CodecPrivate, true);
+				ttLibC_ByteConnector_ebml2(connector, 0x14, false); // サイズは固定だと思う。
+				// wave format ex
+				//  codecType 0x0011
+				ttLibC_ByteConnector_bit(connector, 0x1100, 16);
+				//  channel byteConnectorの動作がベースbigEndianなのでbeかけてlittle endianかけるようにする。(なんか妙な気分だけど)
+				uint16_t be_channel = be_uint16_t(adpcm->inherit_super.channel_num);
+				ttLibC_ByteConnector_bit(connector, be_channel, 16);
+				//  sample_rate
+				uint32_t be_sample_rate = be_uint32_t(adpcm->inherit_super.sample_rate);
+				ttLibC_ByteConnector_bit(connector, be_sample_rate, 32);
+				//  avg bytes per sec
+				uint32_t avgBytesPerSec = adpcm->inherit_super.sample_rate;
+				if(adpcm->inherit_super.channel_num == 1) {
+					avgBytesPerSec /= 2;
+				}
+				uint32_t be_avgBytesPerSec = be_uint32_t(avgBytesPerSec);
+				ttLibC_ByteConnector_bit(connector, be_avgBytesPerSec, 32);
+				uint16_t nBlockAlign = adpcm->inherit_super.inherit_super.buffer_size;
+				uint16_t be_nBlockAlign = be_uint16_t(nBlockAlign);
+				ttLibC_ByteConnector_bit(connector, be_nBlockAlign, 16);
+				ttLibC_ByteConnector_bit(connector, 0x0400, 16);
+				ttLibC_ByteConnector_bit(connector, 0x0200, 16);
+				uint16_t be_sample_num = be_uint16_t(adpcm->inherit_super.sample_num);
+				ttLibC_ByteConnector_bit(connector, be_sample_num, 16);
+				ttLibC_DynamicBuffer_append(trackEntryBuffer, buf, connector->write_size);
 			}
 			break;
 		case frameType_mp3:
@@ -866,6 +947,7 @@ static bool MkvWriter_makeData(
 			break;
 		case frameType_vp8:
 		case frameType_theora:
+		case frameType_jpeg:
 			{
 				ttLibC_Video *video = (ttLibC_Video *)frame;
 				uint8_t *data = frame->data;
@@ -889,6 +971,7 @@ static bool MkvWriter_makeData(
 				ttLibC_DynamicBuffer_append(buffer, data, data_size);
 			}
 			break;
+		case frameType_adpcm_ima_wav:
 		case frameType_mp3:
 		case frameType_opus:
 		case frameType_speex:
@@ -963,10 +1046,12 @@ static bool MkvWriter_writeFromQueue(
 			case frameType_vp8:
 				ttLibC_FrameQueue_ref(track->frame_queue, MkvWirter_PrimaryVideoTrackCheck, writer);
 				break;
+			case frameType_jpeg: // jpegの場合はすべてがkeyFrameなので、keyFrameわけすると、すごく小さなunitになってしまう。よってmax_unit_duration分とりにいく。
 			case frameType_mp3:
 			case frameType_aac:
 			case frameType_opus:
 			case frameType_speex:
+			case frameType_adpcm_ima_wav:
 				writer->target_pos = writer->current_pts_pos + writer->max_unit_duration;
 				break;
 			default:

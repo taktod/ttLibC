@@ -141,7 +141,10 @@ ttLibC_Audio *ttLibC_Audio_clone(
 		return (ttLibC_Audio *)ttLibC_Aac_clone(
 				(ttLibC_Aac *)prev_frame,
 				(ttLibC_Aac *)src_frame);
-//	case frameType_adpcm_ima_wav:
+	case frameType_adpcm_ima_wav:
+		return (ttLibC_Audio *)ttLibC_AdpcmImaWav_clone(
+				(ttLibC_AdpcmImaWav *)prev_frame,
+				(ttLibC_AdpcmImaWav *)src_frame);
 	case frameType_mp3:
 		return (ttLibC_Audio *)ttLibC_Mp3_clone(
 				(ttLibC_Mp3 *)prev_frame,

@@ -21,8 +21,6 @@
 #include <ttLibC/container/mp4.h>
 #include <ttLibC/container/mkv.h>
 
-#include <ttLibC/frame/audio/audio.h>
-
 typedef struct {
 	ttLibC_ContainerReader *reader;
 	ttLibC_ContainerWriter *writer;
@@ -133,10 +131,7 @@ bool mkvTest_getFrameCallback(void *ptr, ttLibC_Frame *frame) {
 		LOG_PRINT("aac:%f", 1.0 * frame->pts / frame->timebase);
 		break;
 	case frameType_adpcm_ima_wav:
-		{
-			ttLibC_Audio *audio = (ttLibC_Audio *)frame;
-			LOG_PRINT("adpcmImaWav:%f %d", 1.0 * frame->pts / frame->timebase, audio->sample_num);
-		}
+		LOG_PRINT("adpcmImaWav:%f", 1.0 * frame->pts / frame->timebase);
 		break;
 	case frameType_opus:
 		LOG_PRINT("opus:%f", 1.0 * frame->pts / frame->timebase);
@@ -169,6 +164,7 @@ static void mkvCodecTest() {
 	containerTest_t testData;
 	char file[256];
 	ttLibC_Frame_Type types[2];
+	/*
 	LOG_PRINT("h264 / aac");
 	testData.reader = (ttLibC_ContainerReader *)ttLibC_MkvReader_make();
 	types[0] = frameType_h264;
@@ -220,7 +216,7 @@ static void mkvCodecTest() {
 	if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
 	if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
 	ASSERT(ttLibC_Allocator_dump() == 0);
-
+*/
 	LOG_PRINT("theora / speex");
 	testData.reader = (ttLibC_ContainerReader *)ttLibC_MkvReader_make();
 	types[0] = frameType_theora;
@@ -251,13 +247,11 @@ static void mkvCodecTest() {
 	testData.reader = (ttLibC_ContainerReader *)ttLibC_MkvReader_make();
 	types[0] = frameType_jpeg;
 	types[1] = frameType_adpcm_ima_wav;
-//	testData.writer = (ttLibC_ContainerWriter *)ttLibC_MkvWriter_make(types, 2);
-	testData.writer = NULL;
+	testData.writer = (ttLibC_ContainerWriter *)ttLibC_MkvWriter_make(types, 2);
 	sprintf(file, "%s/tools/data/source/test.mjpeg.adpcmimawav.mkv", getenv("HOME"));
 	testData.fp_in = fopen(file, "rb");
-//	sprintf(file, "%s/tools/data/c_out/test.theora.speex.mkv", getenv("HOME"));
-//	testData.fp_out = fopen(file, "wb");
-	testData.fp_out = NULL;
+	sprintf(file, "%s/tools/data/c_out/test.theora.speex.mkv", getenv("HOME"));
+	testData.fp_out = fopen(file, "wb");
 	do {
 		uint8_t buffer[65536];
 		if(!testData.fp_in) {
