@@ -28,6 +28,7 @@ typedef struct ttLibC_MkvWriteTrack {
 	// まぁ、h264やh265のconfigDataが中途でかわってしまう場合はだめで判定しなければいけない。(エラー扱いにしないとだめ)という意味では、別になっててもいいか・・・
 	ttLibC_Frame_Type frame_type;
 	bool is_appending; // 追加中であるかフラグ
+	uint32_t counter; // 追加フレーム数をカウントするカウンター theoraやvorbisで使う。
 } ttLibC_MkvWriteTrack;
 
 

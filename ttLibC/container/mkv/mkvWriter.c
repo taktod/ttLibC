@@ -18,8 +18,10 @@
 #include "../../frame/audio/aac.h"
 #include "../../frame/audio/mp3.h"
 #include "../../frame/audio/opus.h"
+#include "../../frame/audio/speex.h"
 #include "../../frame/video/h264.h"
 #include "../../frame/video/h265.h"
+#include "../../frame/video/theora.h"
 #include "../../frame/video/vp8.h"
 #include "../../util/byteUtil.h"
 #include "../../util/ioUtil.h"
@@ -54,6 +56,7 @@ ttLibC_MkvWriter *ttLibC_MkvWriter_make_ex(
 		track->h26x_configData = NULL;
 		track->frame_type = target_frame_types[i];
 		track->is_appending = false;
+		track->counter = 0;
 		ttLibC_StlMap_put(writer->track_list, (void *)(long)(i + 1), (void *)track);
 	}
 	writer->inherit_super.is_webm = false; // work as matroska for default
@@ -107,10 +110,12 @@ static bool MkvWriter_makeTrackEntry(void *ptr, void *key, void *item) {
 		switch(track->frame_type) {
 		case frameType_h264:
 		case frameType_h265:
+		case frameType_theora:
 		case frameType_vp8:
 		case frameType_aac:
 		case frameType_mp3:
 		case frameType_opus:
+		case frameType_speex:
 			break;
 		default:
 			ERR_PRINT("unexpected frame type.");
@@ -191,6 +196,49 @@ static bool MkvWriter_makeTrackEntry(void *ptr, void *key, void *item) {
 				ttLibC_ByteConnector_ebml2(connector, in_size, false);
 				ttLibC_DynamicBuffer_append(trackEntryBuffer, buf, connector->write_size);
 				ttLibC_DynamicBuffer_append(trackEntryBuffer, inner, in_size);
+			}
+			break;
+		case frameType_theora:
+			{
+				// codecID
+				ttLibC_ByteConnector_ebml2(connector, MkvType_CodecID, true);
+				ttLibC_ByteConnector_ebml2(connector, 8, false);
+				ttLibC_ByteConnector_string(connector, "V_THEORA", 8);
+				// trackType
+				ttLibC_ByteConnector_ebml2(connector, MkvType_TrackType, true);
+				ttLibC_ByteConnector_ebml2(connector, 1, false);
+				ttLibC_ByteConnector_bit(connector, 1, 8);
+				// video要素の中身をつくっていく。
+				ttLibC_Vp8 *vp8 = (ttLibC_Vp8 *)ttLibC_FrameQueue_ref_first(track->frame_queue);
+				ttLibC_ByteConnector_ebml2(innerConnector, MkvType_PixelWidth, true);
+				ttLibC_ByteConnector_ebml2(innerConnector, 2, false);
+				ttLibC_ByteConnector_bit(innerConnector, vp8->inherit_super.width, 16);
+				ttLibC_ByteConnector_ebml2(innerConnector, MkvType_PixelHeight, true);
+				ttLibC_ByteConnector_ebml2(innerConnector, 2, false);
+				ttLibC_ByteConnector_bit(innerConnector, vp8->inherit_super.height, 16);
+
+				ttLibC_ByteConnector_ebml2(connector, MkvType_Video, true);
+				ttLibC_ByteConnector_ebml2(connector, innerConnector->write_size, false);
+				ttLibC_ByteConnector_string(connector, (const char *)inner, innerConnector->write_size);
+				// codecPrivateを書き出す frame３つが揃わないとわからないので、まずそれを取り出す。(サイズが決定しない。)
+				ttLibC_Theora *identificationFrame = (ttLibC_Theora *)ttLibC_FrameQueue_dequeue_first(track->frame_queue);
+				ttLibC_Theora *commentFrame        = (ttLibC_Theora *)ttLibC_FrameQueue_dequeue_first(track->frame_queue);
+				ttLibC_Theora *setupFrame          = (ttLibC_Theora *)ttLibC_FrameQueue_dequeue_first(track->frame_queue);
+				ttLibC_ByteConnector_ebml2(connector, MkvType_CodecPrivate, true);
+				ttLibC_ByteConnector_ebml2(
+						connector,
+						identificationFrame->inherit_super.inherit_super.buffer_size +
+							commentFrame->inherit_super.inherit_super.buffer_size +
+							setupFrame->inherit_super.inherit_super.buffer_size +
+							3,
+						false);
+				ttLibC_ByteConnector_bit(connector, 2, 8);
+				ttLibC_ByteConnector_bit(connector, identificationFrame->inherit_super.inherit_super.buffer_size, 8);
+				ttLibC_ByteConnector_bit(connector, commentFrame->inherit_super.inherit_super.buffer_size, 8);
+				ttLibC_DynamicBuffer_append(trackEntryBuffer, buf, connector->write_size);
+				ttLibC_DynamicBuffer_append(trackEntryBuffer, identificationFrame->inherit_super.inherit_super.data, identificationFrame->inherit_super.inherit_super.buffer_size);
+				ttLibC_DynamicBuffer_append(trackEntryBuffer, commentFrame->inherit_super.inherit_super.data, commentFrame->inherit_super.inherit_super.buffer_size);
+				ttLibC_DynamicBuffer_append(trackEntryBuffer, setupFrame->inherit_super.inherit_super.data, setupFrame->inherit_super.inherit_super.buffer_size);
 			}
 			break;
 		case frameType_vp8:
@@ -309,6 +357,63 @@ static bool MkvWriter_makeTrackEntry(void *ptr, void *key, void *item) {
 				ttLibC_ByteConnector_bit(connector, 0, 24);
 				ttLibC_ByteConnector_bit(connector, 0, 16);
 				ttLibC_DynamicBuffer_append(trackEntryBuffer, buf, connector->write_size);
+			}
+			break;
+		case frameType_speex:
+			{
+				// speexをつくっていく。(これがないから、メモリーリークしたのか・・・)
+				// codecID
+				ttLibC_ByteConnector_ebml2(connector, MkvType_CodecID, true);
+				ttLibC_ByteConnector_ebml2(connector, 8, false);
+				ttLibC_ByteConnector_string(connector, "A_MS/ACM", 8);
+				// trackType
+				ttLibC_ByteConnector_ebml2(connector, MkvType_TrackType, true);
+				ttLibC_ByteConnector_ebml2(connector, 1, false);
+				ttLibC_ByteConnector_bit(connector, 2, 8);
+				// audioの子要素をつくっていく。
+				ttLibC_Speex *speex = (ttLibC_Speex *)ttLibC_FrameQueue_ref_first(track->frame_queue);
+				ttLibC_ByteConnector_ebml2(innerConnector, MkvType_SamplingFrequency, true);
+				ttLibC_ByteConnector_ebml2(innerConnector, 4, false);
+				float sr = speex->inherit_super.sample_rate;
+				ttLibC_ByteConnector_bit(innerConnector, *(uint32_t *)&sr, 32);
+				ttLibC_ByteConnector_ebml2(innerConnector, MkvType_Channels, true);
+				ttLibC_ByteConnector_ebml2(innerConnector, 1, false);
+				ttLibC_ByteConnector_bit(innerConnector, speex->inherit_super.channel_num, 8);
+
+				ttLibC_ByteConnector_ebml2(connector, MkvType_Audio, true);
+				ttLibC_ByteConnector_ebml2(connector, innerConnector->write_size, false);
+				ttLibC_ByteConnector_string(connector, (const char *)inner, innerConnector->write_size);
+				// codecPrivate (we must have OpusHead information or no sound.)
+				ttLibC_ByteConnector_ebml2(connector, MkvType_CodecPrivate, true);
+				ttLibC_ByteConnector_ebml2(connector, 0x62, false); // サイズは固定だと思う。
+				// wave format ex
+				//  codecType 0xA109
+				ttLibC_ByteConnector_bit(connector, 0x09A1, 16);
+				//  channel byteConnectorの動作がベースbigEndianなのでbeかけてlittle endianかけるようにする。(なんか妙な気分だけど)
+				uint16_t be_channel = be_uint16_t(speex->inherit_super.channel_num);
+				ttLibC_ByteConnector_bit(connector, be_channel, 16);
+				//  sample_rate
+				uint32_t be_sample_rate = be_uint32_t(speex->inherit_super.sample_rate);
+				ttLibC_ByteConnector_bit(connector, be_sample_rate, 32);
+				//  avg bytes per sec
+				uint8_t *speex_data = (uint8_t *)speex->inherit_super.inherit_super.data;
+				uint32_t *speex_data32 = (uint32_t *)(speex_data + 0x34);
+				uint32_t avgBytesPerSec = *speex_data32 / 8;
+				if(speex->inherit_super.channel_num == 2) {
+					avgBytesPerSec += 100; // stereoの場合は100byte足しておく。 inSignalのデータ17bit(端数のせいで2byteだけ絶対に増える。) x 50１秒あたり50フレームなので100byteふやす。
+				}
+				uint32_t be_avgBytesPerSec = be_uint32_t(avgBytesPerSec);
+				ttLibC_ByteConnector_bit(connector, be_avgBytesPerSec, 32);
+				if(speex->inherit_super.channel_num == 2) {
+					ttLibC_ByteConnector_bit(connector, 0x0400, 16);
+				}
+				else {
+					ttLibC_ByteConnector_bit(connector, 0x0200, 16);
+				}
+				ttLibC_ByteConnector_bit(connector, 0x1000, 16);
+				ttLibC_ByteConnector_bit(connector, 0x5000, 16);
+				ttLibC_DynamicBuffer_append(trackEntryBuffer, buf, connector->write_size);
+				ttLibC_DynamicBuffer_append(trackEntryBuffer, speex->inherit_super.inherit_super.data, speex->inherit_super.inherit_super.buffer_size);
 			}
 			break;
 		default:
@@ -579,6 +684,31 @@ static bool MkvWriter_makeData(
 				}
 			}
 			break;
+		case frameType_speex:
+			{
+				ttLibC_Speex *speex = (ttLibC_Speex *)frame;
+				switch(speex->type) {
+				case SpeexType_comment:
+				case SpeexType_header:
+					continue;
+				default:
+					break;
+				}
+			}
+			break;
+		case frameType_theora:
+			{
+				ttLibC_Theora *theora = (ttLibC_Theora *)frame;
+				switch(theora->type) {
+				case TheoraType_identificationHeaderDecodeFrame:
+				case TheoraType_commentHeaderFrame:
+				case TheoraType_setupHeaderFrame:
+					continue;
+				default:
+					break;
+				}
+			}
+			break;
 		default:
 			break;
 		}
@@ -735,15 +865,16 @@ static bool MkvWriter_makeData(
 			}
 			break;
 		case frameType_vp8:
+		case frameType_theora:
 			{
-				ttLibC_Vp8 *vp8 = (ttLibC_Vp8 *)frame;
-				uint8_t *vp8_data = frame->data;
-				size_t vp8_data_size = frame->buffer_size;
+				ttLibC_Video *video = (ttLibC_Video *)frame;
+				uint8_t *data = frame->data;
+				size_t data_size = frame->buffer_size;
 				ttLibC_ByteConnector_ebml2(connector, MkvType_SimpleBlock, true);
-				ttLibC_ByteConnector_ebml2(connector, vp8_data_size + 4, false);
+				ttLibC_ByteConnector_ebml2(connector, data_size + 4, false);
 				ttLibC_ByteConnector_ebml2(connector, frame->id, false);
 				ttLibC_ByteConnector_bit(connector, pts - writer->current_pts_pos, 16);
-				switch(vp8->inherit_super.type) {
+				switch(video->type) {
 				case videoType_inner:
 					ttLibC_ByteConnector_bit(connector, 0x00, 8);
 					break;
@@ -755,35 +886,22 @@ static bool MkvWriter_makeData(
 					break;
 				}
 				ttLibC_DynamicBuffer_append(buffer, buf, connector->write_size);
-				ttLibC_DynamicBuffer_append(buffer, vp8_data, vp8_data_size);
+				ttLibC_DynamicBuffer_append(buffer, data, data_size);
 			}
 			break;
 		case frameType_mp3:
-			{
-				ttLibC_Mp3 *mp3 = (ttLibC_Mp3 *)frame;
-				uint8_t *mp3_data = frame->data;
-				size_t mp3_data_size = frame->buffer_size;
-				ttLibC_ByteConnector_ebml2(connector, MkvType_SimpleBlock, true);
-				ttLibC_ByteConnector_ebml2(connector, mp3_data_size + 4, false);
-				ttLibC_ByteConnector_ebml2(connector, frame->id, false);
-				ttLibC_ByteConnector_bit(connector, pts - writer->current_pts_pos, 16);
-				ttLibC_ByteConnector_bit(connector, 0x80, 8);
-				ttLibC_DynamicBuffer_append(buffer, buf, connector->write_size);
-				ttLibC_DynamicBuffer_append(buffer, mp3_data, mp3_data_size);
-			}
-			break;
 		case frameType_opus:
+		case frameType_speex:
 			{
-				ttLibC_Opus *opus = (ttLibC_Opus *)frame;
-				uint8_t *opus_data = frame->data;
-				size_t opus_data_size = frame->buffer_size;
+				uint8_t *data = frame->data;
+				size_t data_size = frame->buffer_size;
 				ttLibC_ByteConnector_ebml2(connector, MkvType_SimpleBlock, true);
-				ttLibC_ByteConnector_ebml2(connector, opus_data_size + 4, false);
+				ttLibC_ByteConnector_ebml2(connector, data_size + 4, false);
 				ttLibC_ByteConnector_ebml2(connector, frame->id, false);
 				ttLibC_ByteConnector_bit(connector, pts - writer->current_pts_pos, 16);
 				ttLibC_ByteConnector_bit(connector, 0x80, 8);
 				ttLibC_DynamicBuffer_append(buffer, buf, connector->write_size);
-				ttLibC_DynamicBuffer_append(buffer, opus_data, opus_data_size);
+				ttLibC_DynamicBuffer_append(buffer, data, data_size);
 			}
 			break;
 		default:
@@ -841,12 +959,14 @@ static bool MkvWriter_writeFromQueue(
 			switch(track->frame_type) {
 			case frameType_h264:
 			case frameType_h265:
+			case frameType_theora:
 			case frameType_vp8:
 				ttLibC_FrameQueue_ref(track->frame_queue, MkvWirter_PrimaryVideoTrackCheck, writer);
 				break;
 			case frameType_mp3:
 			case frameType_aac:
 			case frameType_opus:
+			case frameType_speex:
 				writer->target_pos = writer->current_pts_pos + writer->max_unit_duration;
 				break;
 			default:
@@ -985,7 +1105,57 @@ bool ttLibC_MkvWriter_write(
 		}
 		break;
 	case frameType_theora:
-		return false;
+		{
+			ttLibC_Theora *theora = (ttLibC_Theora *)frame;
+			// theoraのframeは1つめはidentification
+			// ２つめはcomment
+			// ３つめはsetupとframeを追加するようにしなければいけない。それ以外のがきたらアウト
+			// 3つめがはいるのが可能だったら、下に処理をのばしていけばよし。
+			// それまではframeデータを捨てるべしだけど・・・
+			if(!track->is_appending) {
+				switch(track->counter) {
+				case 0:
+					if(theora->type != TheoraType_identificationHeaderDecodeFrame) {
+						return true;
+					}
+					++ track->counter;
+					break;
+				case 1:
+					if(theora->type != TheoraType_commentHeaderFrame) {
+						return true;
+					}
+					++ track->counter;
+					break;
+				case 2:
+					if(theora->type != TheoraType_setupHeaderFrame) {
+						return true;
+					}
+					++ track->counter;
+				default:
+					break;
+				}
+				if(track->counter < 3) {
+					// 現在のをqueueにいれて、ほっとく。
+					return MkvWriter_appendQueue(track, frame, 0);
+				}
+			}
+		}
+		break;
+	case frameType_speex:
+		{
+			// speexはheaderはほしい。
+			// headerがきたら、下に進んでOKなのだが・・・
+			ttLibC_Speex *speex = (ttLibC_Speex *)frame;
+			if(!track->is_appending && speex->type != SpeexType_header) {
+				// 初めはheaderじゃないとだめ。
+				return true;
+			}
+			if(speex->type == SpeexType_comment) {
+				// commentはいらない。
+				return true;
+			}
+		}
+		break;
 	default:
 		break;
 	}
