@@ -216,7 +216,7 @@ static void mkvCodecTest() {
 	if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
 	if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
 	ASSERT(ttLibC_Allocator_dump() == 0);
-*/
+
 	LOG_PRINT("theora / speex");
 	testData.reader = (ttLibC_ContainerReader *)ttLibC_MkvReader_make();
 	types[0] = frameType_theora;
@@ -267,14 +267,18 @@ static void mkvCodecTest() {
 	ttLibC_ContainerWriter_close(&testData.writer);
 	if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
 	if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
-	ASSERT(ttLibC_Allocator_dump() == 1);
-
+	ASSERT(ttLibC_Allocator_dump() == 0);
+*/
 	LOG_PRINT("vp8 / vorbis");
 	testData.reader = (ttLibC_ContainerReader *)ttLibC_MkvReader_make();
-	testData.writer = NULL;
+	types[0] = frameType_vp8;
+	types[1] = frameType_vorbis;
+	testData.writer = (ttLibC_ContainerWriter *)ttLibC_MkvWriter_make(types, 2);
+	((ttLibC_MkvWriter *)testData.writer)->is_webm = true;
 	sprintf(file, "%s/tools/data/source/test.vp8.vorbis.webm", getenv("HOME"));
 	testData.fp_in = fopen(file, "rb");
-	testData.fp_out = NULL;
+	sprintf(file, "%s/tools/data/c_out/test.vp8.vorbis.webm", getenv("HOME"));
+	testData.fp_out = fopen(file, "wb");
 	do {
 		uint8_t buffer[65536];
 		if(!testData.fp_in) {
@@ -290,7 +294,7 @@ static void mkvCodecTest() {
 	ttLibC_ContainerWriter_close(&testData.writer);
 	if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
 	if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
-	ASSERT(ttLibC_Allocator_dump() == 0);
+	ASSERT(ttLibC_Allocator_dump() == 1);
 
 	LOG_PRINT("vp9 / opus");
 	testData.reader = (ttLibC_ContainerReader *)ttLibC_MkvReader_make();

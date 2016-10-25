@@ -20,11 +20,13 @@
 #include "../../frame/audio/mp3.h"
 #include "../../frame/audio/opus.h"
 #include "../../frame/audio/speex.h"
+#include "../../frame/audio/vorbis.h"
 #include "../../frame/video/h264.h"
 #include "../../frame/video/h265.h"
 #include "../../frame/video/jpeg.h"
 #include "../../frame/video/theora.h"
 #include "../../frame/video/vp8.h"
+#include "../../frame/video/vp9.h"
 #include "../../util/byteUtil.h"
 #include "../../util/ioUtil.h"
 
@@ -120,6 +122,7 @@ static bool MkvWriter_makeTrackEntry(void *ptr, void *key, void *item) {
 		case frameType_mp3:
 		case frameType_opus:
 		case frameType_speex:
+		case frameType_vorbis:
 			break;
 		default:
 			ERR_PRINT("unexpected frame type.");
@@ -497,6 +500,50 @@ static bool MkvWriter_makeTrackEntry(void *ptr, void *key, void *item) {
 				ttLibC_DynamicBuffer_append(trackEntryBuffer, speex->inherit_super.inherit_super.data, speex->inherit_super.inherit_super.buffer_size);
 			}
 			break;
+		case frameType_vorbis:
+			{
+				// codecID
+				ttLibC_ByteConnector_ebml2(connector, MkvType_CodecID, true);
+				ttLibC_ByteConnector_ebml2(connector, 8, false);
+				ttLibC_ByteConnector_string(connector, "A_VORBIS", 8);
+				// trackType
+				ttLibC_ByteConnector_ebml2(connector, MkvType_TrackType, true);
+				ttLibC_ByteConnector_ebml2(connector, 1, false);
+				ttLibC_ByteConnector_bit(connector, 2, 8);
+				// audioの子要素をつくっていく。
+				ttLibC_Aac *aac = (ttLibC_Aac *)ttLibC_FrameQueue_ref_first(track->frame_queue);
+				ttLibC_ByteConnector_ebml2(innerConnector, MkvType_SamplingFrequency, true);
+				ttLibC_ByteConnector_ebml2(innerConnector, 4, false);
+				float sr = aac->inherit_super.sample_rate;
+				ttLibC_ByteConnector_bit(innerConnector, *(uint32_t *)&sr, 32);
+				ttLibC_ByteConnector_ebml2(innerConnector, MkvType_Channels, true);
+				ttLibC_ByteConnector_ebml2(innerConnector, 1, false);
+				ttLibC_ByteConnector_bit(innerConnector, aac->inherit_super.channel_num, 8);
+
+				ttLibC_ByteConnector_ebml2(connector, MkvType_Audio, true);
+				ttLibC_ByteConnector_ebml2(connector, innerConnector->write_size, false);
+				ttLibC_ByteConnector_string(connector, (const char *)inner, innerConnector->write_size);
+				// あとはprivateData
+				ttLibC_Vorbis *identificationFrame = (ttLibC_Vorbis *)ttLibC_FrameQueue_dequeue_first(track->frame_queue);
+				ttLibC_Vorbis *commentFrame        = (ttLibC_Vorbis *)ttLibC_FrameQueue_dequeue_first(track->frame_queue);
+				ttLibC_Vorbis *setupFrame          = (ttLibC_Vorbis *)ttLibC_FrameQueue_dequeue_first(track->frame_queue);
+				ttLibC_ByteConnector_ebml2(connector, MkvType_CodecPrivate, true);
+				ttLibC_ByteConnector_ebml2(
+						connector,
+						identificationFrame->inherit_super.inherit_super.buffer_size +
+							commentFrame->inherit_super.inherit_super.buffer_size +
+							setupFrame->inherit_super.inherit_super.buffer_size +
+							3,
+						false);
+				ttLibC_ByteConnector_bit(connector, 2, 8);
+				ttLibC_ByteConnector_bit(connector, identificationFrame->inherit_super.inherit_super.buffer_size, 8);
+				ttLibC_ByteConnector_bit(connector, commentFrame->inherit_super.inherit_super.buffer_size, 8);
+				ttLibC_DynamicBuffer_append(trackEntryBuffer, buf, connector->write_size);
+				ttLibC_DynamicBuffer_append(trackEntryBuffer, identificationFrame->inherit_super.inherit_super.data, identificationFrame->inherit_super.inherit_super.buffer_size);
+				ttLibC_DynamicBuffer_append(trackEntryBuffer, commentFrame->inherit_super.inherit_super.data, commentFrame->inherit_super.inherit_super.buffer_size);
+				ttLibC_DynamicBuffer_append(trackEntryBuffer, setupFrame->inherit_super.inherit_super.data, setupFrame->inherit_super.inherit_super.buffer_size);
+			}
+			break;
 		default:
 			ERR_PRINT("unreachable.");
 			return true;
@@ -790,6 +837,19 @@ static bool MkvWriter_makeData(
 				}
 			}
 			break;
+		case frameType_vorbis:
+			{
+				ttLibC_Vorbis *vorbis = (ttLibC_Vorbis *)frame;
+				switch(vorbis->type) {
+				case VorbisType_identification:
+				case VorbisType_comment:
+				case VorbisType_setup:
+					continue;
+				default:
+					break;
+				}
+			}
+			break;
 		default:
 			break;
 		}
@@ -975,6 +1035,7 @@ static bool MkvWriter_makeData(
 		case frameType_mp3:
 		case frameType_opus:
 		case frameType_speex:
+		case frameType_vorbis:
 			{
 				uint8_t *data = frame->data;
 				size_t data_size = frame->buffer_size;
@@ -1052,6 +1113,7 @@ static bool MkvWriter_writeFromQueue(
 			case frameType_opus:
 			case frameType_speex:
 			case frameType_adpcm_ima_wav:
+			case frameType_vorbis:
 				writer->target_pos = writer->current_pts_pos + writer->max_unit_duration;
 				break;
 			default:
@@ -1216,11 +1278,44 @@ bool ttLibC_MkvWriter_write(
 						return true;
 					}
 					++ track->counter;
+					break;
 				default:
 					break;
 				}
 				if(track->counter < 3) {
 					// 現在のをqueueにいれて、ほっとく。
+					return MkvWriter_appendQueue(track, frame, 0);
+				}
+			}
+		}
+		break;
+	case frameType_vorbis:
+		{
+			ttLibC_Vorbis *vorbis = (ttLibC_Vorbis *)frame;
+			if(!track->is_appending) {
+				switch(track->counter) {
+				case 0:
+					if(vorbis->type != VorbisType_identification) {
+						return true;
+					}
+					++ track->counter;
+					break;
+				case 1:
+					if(vorbis->type != VorbisType_comment) {
+						return true;
+					}
+					++ track->counter;
+					break;
+				case 2:
+					if(vorbis->type != VorbisType_setup) {
+						return true;
+					}
+					++ track->counter;
+					break;
+				default:
+					break;
+				}
+				if(track->counter < 3) {
 					return MkvWriter_appendQueue(track, frame, 0);
 				}
 			}
