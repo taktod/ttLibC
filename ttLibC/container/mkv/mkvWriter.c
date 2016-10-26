@@ -793,7 +793,7 @@ static bool MkvWriter_makeData(
 				}
 			}
 		}
-		if(pts > writer->target_pos) {
+		if(pts >= writer->target_pos) {
 			// すでに必要データ以上になった場合は、処理やめる。
 			break;
 		}
