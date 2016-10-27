@@ -253,6 +253,7 @@ static bool AvcodecDecoder_decodeVideo(
 	decoder->inherit_super.height = decoder->avframe->height;
 	switch(decoder->dec->pix_fmt) {
 	case AV_PIX_FMT_YUV420P:
+	case AV_PIX_FMT_YUVJ420P:
 		{
 			if(decoder->frame != NULL && decoder->frame->type != frameType_yuv420) {
 				ttLibC_Frame_close(&decoder->frame);
@@ -289,7 +290,7 @@ static bool AvcodecDecoder_decodeVideo(
 		ERR_PRINT("not make yet.");
 		return false;
 	default:
-		ERR_PRINT("unknown pixfmt output.");
+		ERR_PRINT("unknown pixfmt output.%d", decoder->dec->pix_fmt);
 		return false;
 	}
 	return false;
@@ -319,6 +320,9 @@ void *ttLibC_AvcodecDecoder_getAVCodecContext(ttLibC_Frame_Type frame_type) {
 		codec = avcodec_find_decoder(AV_CODEC_ID_HEVC);
 		break;
 #endif
+	case frameType_jpeg:
+		codec = avcodec_find_decoder(AV_CODEC_ID_MJPEG);
+		break;
 	case frameType_mp3:
 		codec = avcodec_find_decoder(AV_CODEC_ID_MP3);
 		break;
@@ -407,6 +411,9 @@ ttLibC_AvcodecDecoder *ttLibC_AvcodecDecoder_makeWithAVCodecContext(void *dec_co
 		frame_type = frameType_h265;
 		break;
 #endif
+	case AV_CODEC_ID_MJPEG:
+		frame_type = frameType_jpeg;
+		break;
 	case AV_CODEC_ID_MP3:
 		frame_type = frameType_mp3;
 		break;
