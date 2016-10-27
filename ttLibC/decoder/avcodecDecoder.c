@@ -231,6 +231,23 @@ static bool AvcodecDecoder_decodeVideo(
 	if(got_picture != 1) {
 		return true;
 	}
+/*	int result = avcodec_send_packet(decoder->dec, &decoder->packet);
+	if(result < 0) {
+		ERR_PRINT("failed to decode:%d", result);
+		return false;
+	}
+	if(result != 0) {
+		return true;
+	}
+	do {
+	result = avcodec_receive_frame(decoder->dec, decoder->avframe);
+	if(result == AVERROR(EAGAIN)) {
+		return true;
+	}
+	if(result < 0) {
+		ERR_PRINT("failed to receive:%d", result);
+		return false;
+	}*/
 	// decode complete now make frame and call callback.
 	decoder->inherit_super.width  = decoder->avframe->width;
 	decoder->inherit_super.height = decoder->avframe->height;
@@ -255,10 +272,12 @@ static bool AvcodecDecoder_decodeVideo(
 					frame->inherit_super.timebase);
 			if(y != NULL) {
 				decoder->frame = (ttLibC_Frame *)y;
-				if(callback == NULL) {
+				if(callback != NULL) {
+					return callback(ptr, decoder->frame);
+				}
+				else {
 					return true;
 				}
-				return callback(ptr, decoder->frame);
 			}
 		}
 		break;
@@ -295,7 +314,7 @@ void *ttLibC_AvcodecDecoder_getAVCodecContext(ttLibC_Frame_Type frame_type) {
 	case frameType_h264:
 		codec = avcodec_find_decoder(AV_CODEC_ID_H264);
 		break;
-#ifdef AV_CODEC_ID_HEVC
+#if defined(AV_CODEC_ID_HEVC) || defined(AV_CODEC_ID_H265)
 	case frameType_h265:
 		codec = avcodec_find_decoder(AV_CODEC_ID_HEVC);
 		break;
@@ -331,7 +350,8 @@ void *ttLibC_AvcodecDecoder_getAVCodecContext(ttLibC_Frame_Type frame_type) {
 		codec = avcodec_find_decoder(AV_CODEC_ID_VP8);
 		break;
 	case frameType_vp9:
-		codec = avcodec_find_decoder(AV_CODEC_ID_VP9);
+//		codec = avcodec_find_decoder(AV_CODEC_ID_VP9);
+		codec = avcodec_find_decoder_by_name("libvpx-vp9");
 		break;
 	case frameType_wmv1:
 		codec = avcodec_find_decoder(AV_CODEC_ID_WMV1);
@@ -382,7 +402,7 @@ ttLibC_AvcodecDecoder *ttLibC_AvcodecDecoder_makeWithAVCodecContext(void *dec_co
 	case AV_CODEC_ID_H264:
 		frame_type = frameType_h264;
 		break;
-#ifdef AV_CODEC_ID_HEVC
+#if defined(AV_CODEC_ID_HEVC) || defined(AV_CODEC_ID_H265)
 	case AV_CODEC_ID_HEVC:
 		frame_type = frameType_h265;
 		break;
@@ -479,7 +499,7 @@ ttLibC_AvcodecDecoder *ttLibC_AvcodecDecoder_makeWithAVCodecContext(void *dec_co
 		decoder->inherit_super.channel_num = 0;
 		break;
 	case AVMEDIA_TYPE_VIDEO:
-		switch(dec->pix_fmt) {
+/*		switch(dec->pix_fmt) {
 		case AV_PIX_FMT_YUV420P:
 			break;
 		case AV_PIX_FMT_NV12:
@@ -496,7 +516,7 @@ ttLibC_AvcodecDecoder *ttLibC_AvcodecDecoder_makeWithAVCodecContext(void *dec_co
 			av_free(decoder->dec);
 			ttLibC_free(decoder);
 			return NULL;
-		}
+		}*/
 		decoder->inherit_super.width  = 0;
 		decoder->inherit_super.height = 0;
 		break;
