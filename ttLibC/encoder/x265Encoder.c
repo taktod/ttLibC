@@ -273,6 +273,7 @@ void ttLibC_X265Encoder_close(ttLibC_X265Encoder **encoder) {
 		target->api->cleanup();
 		target->param = NULL;
 	}
+	ttLibC_H265_close(&target->h265);
 	ttLibC_free(target);
 	*encoder = NULL;
 }
