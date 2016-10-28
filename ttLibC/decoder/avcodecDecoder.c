@@ -16,8 +16,10 @@
 #include "../log.h"
 #include "../allocator.h"
 #include "../util/hexUtil.h"
+#include "../util/dynamicBufferUtil.h"
 
 #include "../frame/video/bgr.h"
+#include "../frame/video/theora.h"
 #include "../frame/video/yuv420.h"
 
 #include "../frame/audio/aac.h"
@@ -31,9 +33,11 @@ typedef struct {
 	ttLibC_AvcodecDecoder inherit_super;
 	AVCodecContext *dec;
 	AVFrame *avframe;
+	bool is_opened;
 
 	AVPacket packet;
 	ttLibC_Frame *frame;
+	ttLibC_DynamicBuffer *extraDataBuffer;
 } ttLibC_Decoder_AvcodecDecoder_;
 
 typedef ttLibC_Decoder_AvcodecDecoder_ ttLibC_AvcodecDecoder_;
@@ -222,6 +226,55 @@ static bool AvcodecDecoder_decodeVideo(
 	decoder->packet.data = frame->inherit_super.data;
 	decoder->packet.size = frame->inherit_super.buffer_size;
 	decoder->packet.pts  = frame->inherit_super.pts;
+	switch(frame->inherit_super.type) {
+	case frameType_theora:
+		{
+			ttLibC_Theora *theora = (ttLibC_Theora *)frame;
+			switch(theora->type) {
+			case TheoraType_identificationHeaderDecodeFrame:
+				if(decoder->extraDataBuffer == NULL) {
+					decoder->extraDataBuffer = ttLibC_DynamicBuffer_make();
+				}
+				else {
+					ttLibC_DynamicBuffer_reset(decoder->extraDataBuffer);
+				}
+				uint8_t buf[3] = {0x02, frame->inherit_super.buffer_size, 0};
+				ttLibC_DynamicBuffer_append(decoder->extraDataBuffer, buf, 3);
+				ttLibC_DynamicBuffer_append(decoder->extraDataBuffer, frame->inherit_super.data, frame->inherit_super.buffer_size);
+				return true;
+			case TheoraType_commentHeaderFrame:
+				{
+					uint8_t *buf = ttLibC_DynamicBuffer_refData(decoder->extraDataBuffer);
+					buf[2] = frame->inherit_super.buffer_size;
+					ttLibC_DynamicBuffer_append(decoder->extraDataBuffer, frame->inherit_super.data, frame->inherit_super.buffer_size);
+				}
+				return true;
+			case TheoraType_setupHeaderFrame:
+				ttLibC_DynamicBuffer_append(decoder->extraDataBuffer, frame->inherit_super.data, frame->inherit_super.buffer_size);
+				decoder->dec->extradata = ttLibC_DynamicBuffer_refData(decoder->extraDataBuffer);
+				decoder->dec->extradata_size = ttLibC_DynamicBuffer_refSize(decoder->extraDataBuffer);
+				if(!decoder->is_opened) {
+					int result = 0;
+					if((result = avcodec_open2(decoder->dec, decoder->dec->codec, NULL)) < 0) {
+						ERR_PRINT("failed to open codec.:%d", AVERROR(result));
+						av_free(decoder->dec);
+						ttLibC_free(decoder);
+						return NULL;
+					}
+					decoder->is_opened = true;
+				}
+				else {
+					ERR_PRINT("avcodec is already opened, therefore failed to set private data.");
+				}
+				return true;
+			default:
+				break;
+			}
+		}
+		break;
+	default:
+		break;
+	}
 	int got_picture;
 	int result = avcodec_decode_video2(decoder->dec, decoder->avframe, &got_picture, &decoder->packet);
 	if(result < 0) {
@@ -467,12 +520,16 @@ ttLibC_AvcodecDecoder *ttLibC_AvcodecDecoder_makeWithAVCodecContext(void *dec_co
 		return NULL;
 	}
 	decoder->dec = dec;
-	int result = 0;
-	if((result = avcodec_open2(decoder->dec, decoder->dec->codec, NULL)) < 0) {
-		ERR_PRINT("failed to open codec.:%d", AVERROR(result));
-		av_free(decoder->dec);
-		ttLibC_free(decoder);
-		return NULL;
+	decoder->is_opened = false;
+	if(frame_type != frameType_theora) {
+		int result = 0;
+		if((result = avcodec_open2(decoder->dec, decoder->dec->codec, NULL)) < 0) {
+			ERR_PRINT("failed to open codec.:%d", AVERROR(result));
+			av_free(decoder->dec);
+			ttLibC_free(decoder);
+			return NULL;
+		}
+		decoder->is_opened = true;
 	}
 	decoder->avframe = av_frame_alloc();
 	if(decoder->avframe == NULL) {
@@ -537,6 +594,7 @@ ttLibC_AvcodecDecoder *ttLibC_AvcodecDecoder_makeWithAVCodecContext(void *dec_co
 	}
 	av_init_packet(&decoder->packet);
 	decoder->frame = NULL;
+	decoder->extraDataBuffer = NULL;
 	return (ttLibC_AvcodecDecoder *)decoder;
 }
 
@@ -699,6 +757,7 @@ void ttLibC_AvcodecDecoder_close(ttLibC_AvcodecDecoder **decoder) {
 		avcodec_close(target->dec);
 		av_free(target->dec);
 	}
+	ttLibC_DynamicBuffer_close(&target->extraDataBuffer);
 	ttLibC_Frame_close(&target->frame);
 	ttLibC_free(target);
 	*decoder = NULL;
