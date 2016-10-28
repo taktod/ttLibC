@@ -21,6 +21,10 @@
 #	include <ttLibC/util/openalUtil.h>
 #endif
 
+#ifdef __ENABLE_AVCODEC__
+#	include <ttLibC/decoder/avcodecDecoder.h>
+#endif
+
 #ifdef __ENABLE_MP3LAME_ENCODE__
 #	include <ttLibC/encoder/mp3lameEncoder.h>
 #endif
@@ -542,24 +546,43 @@ static void acAacTest() {
 	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
-#if defined(__ENABLE_X265__) && defined(__ENABLE_OPENCV__)
+#if defined(__ENABLE_X265__) && defined(__ENABLE_OPENCV__) && defined(__ENABLE_AVCODEC__)
 typedef struct x265TestData {
-
+	ttLibC_AvcodecDecoder *decoder;
+	ttLibC_CvWindow *dec_win;
+	ttLibC_Bgr *dbgr;
 } x265TestData;
 
-static bool x265Test_encodeCallback(void *ptr, ttLibC_H265 *h265) {
+static bool x265Test_decodeCallback(void *ptr, ttLibC_Frame *yuv420) {
+	x265TestData *testData = (x265TestData *)ptr;
+	ttLibC_Bgr *b = ttLibC_ImageResampler_makeBgrFromYuv420(testData->dbgr, BgrType_bgr, (ttLibC_Yuv420 *)yuv420);
+	if(b == NULL) {
+		return false;
+	}
+	testData->dbgr = b;
+	ttLibC_CvWindow_showBgr(testData->dec_win, testData->dbgr);
 	return true;
+}
+
+static bool x265Test_encodeCallback(void *ptr, ttLibC_H265 *h265) {
+	x265TestData *testData = (x265TestData *)ptr;
+	if(h265->type == H265Type_unknown) {
+		return true;
+	}
+	return ttLibC_AvcodecDecoder_decode(testData->decoder, (ttLibC_Frame *)h265, x265Test_decodeCallback, ptr);;
 }
 #endif
 
 static void x265Test() {
 	LOG_PRINT("x265Test");
-#if defined(__ENABLE_X265__) && defined(__ENABLE_OPENCV__)
+#if defined(__ENABLE_X265__) && defined(__ENABLE_OPENCV__) && defined(__ENABLE_AVCODEC__)
 	uint32_t width = 320, height = 240;
 	ttLibC_CvCapture *capture = ttLibC_CvCapture_make(0, width, height);
-	ttLibC_CvWindow *original = ttLibC_CvWindow_make("original");
+	ttLibC_CvWindow *window = ttLibC_CvWindow_make("original");
+	ttLibC_CvWindow *dec_win = ttLibC_CvWindow_make("target");
 	ttLibC_X265Encoder *encoder = ttLibC_X265Encoder_make(width, height);
-	ttLibC_Bgr *bgr = NULL, *b;
+	ttLibC_AvcodecDecoder *decoder = ttLibC_AvcodecVideoDecoder_make(frameType_h265, width, height);
+	ttLibC_Bgr *bgr = NULL, *dbgr = NULL, *b;
 	ttLibC_Yuv420 *yuv = NULL, *y;
 
 	while(true) {
@@ -568,23 +591,31 @@ static void x265Test() {
 			break;
 		}
 		bgr = b;
-		ttLibC_CvWindow_showBgr(original, bgr);
+		ttLibC_CvWindow_showBgr(window, bgr);
 		y = ttLibC_ImageResampler_makeYuv420FromBgr(yuv, Yuv420Type_planar, bgr);
 		if(y == NULL) {
 			break;
 		}
 		yuv = y;
-		ttLibC_X265Encoder_encode(encoder, yuv, x265Test_encodeCallback, NULL);
+		x265TestData testData;
+		testData.dbgr = dbgr;
+		testData.dec_win = dec_win;
+		testData.decoder = decoder;
+		ttLibC_X265Encoder_encode(encoder, yuv, x265Test_encodeCallback, &testData);
+		dbgr = testData.dbgr;
 		uint8_t key_char = ttLibC_CvWindow_waitForKeyInput(10);
 		if(key_char == Keychar_Esc) {
 			break;
 		}
 	}
 	ttLibC_Bgr_close(&bgr);
+	ttLibC_Bgr_close(&dbgr);
 	ttLibC_Yuv420_close(&yuv);
-	ttLibC_CvCapture_close(&capture);
-	ttLibC_CvWindow_close(&original);
+	ttLibC_AvcodecDecoder_close(&decoder);
 	ttLibC_X265Encoder_close(&encoder);
+	ttLibC_CvWindow_close(&dec_win);
+	ttLibC_CvWindow_close(&window);
+	ttLibC_CvCapture_close(&capture);
 #endif
 	ASSERT(ttLibC_Allocator_dump() == 0);
 }

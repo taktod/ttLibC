@@ -23,6 +23,10 @@ typedef struct ttLibC_Encoder_X265Encoder_ {
 	x265_param *param;
 	x265_encoder *encoder;
 	bool is_pic_alloc;
+	bool is_first_frame;
+	ttLibC_H265 *h265;
+	uint64_t pts;
+	uint32_t timebase;
 } ttLibC_Encoder_X265Encoder_;
 
 typedef ttLibC_Encoder_X265Encoder_ ttLibC_X265Encoder_;
@@ -59,8 +63,142 @@ ttLibC_X265Encoder *ttLibC_X265Encoder_make(
 		ttLibC_X265Encoder_close((ttLibC_X265Encoder **)&encoder);
 		return NULL;
 	}
+	encoder->is_first_frame = true;
+	encoder->h265 = NULL;
+	encoder->pts = 0;
+	encoder->timebase = 1000;
 	// encoder is ready.
 	return (ttLibC_X265Encoder *)encoder;
+}
+
+static bool X265Encoder_makeH265Frame(
+		ttLibC_H265_Type target_type,
+		ttLibC_X265Encoder_ *encoder,
+		ttLibC_DynamicBuffer *buffer,
+		ttLibC_X265EncodeFunc callback,
+		void *ptr) {
+	ttLibC_H265 *h265 = NULL;
+	h265 = ttLibC_H265_make(
+			encoder->h265,
+			target_type,
+			encoder->param->sourceWidth,
+			encoder->param->sourceHeight,
+			ttLibC_DynamicBuffer_refData(buffer),
+			ttLibC_DynamicBuffer_refSize(buffer),
+			true,
+			encoder->pts,
+			encoder->timebase);
+	if(h265 == NULL) {
+		ERR_PRINT("failed to make h265 frame.");
+		return false;
+	}
+	encoder->h265 = h265;
+	if(callback != NULL) {
+		return callback(ptr, h265);
+	}
+	return true;
+}
+
+static bool X265Encoder_checkEncodedData(
+		ttLibC_X265Encoder_ *encoder,
+		x265_nal *nal,
+		int32_t nal_count,
+		int32_t output_flag,
+		ttLibC_X265EncodeFunc callback,
+		void *ptr) {
+	if(output_flag == 0) {
+		return true;
+	}
+	ttLibC_DynamicBuffer *target_buffer = ttLibC_DynamicBuffer_make();
+	ttLibC_H265_Type target_type =H265Type_unknown;
+	ttLibC_H265_NalInfo nal_info;
+	for(int32_t i = 0;i < nal_count;++ i, ++ nal) {
+		uint8_t *buf = nal->payload;
+		size_t buf_size = nal->sizeBytes;
+		if(!ttLibC_H265_getNalInfo(&nal_info, buf, (size_t)nal->sizeBytes)) {
+			ERR_PRINT("h265 data is corrupted.");
+			ttLibC_DynamicBuffer_close(&target_buffer);
+			return false;
+		}
+		switch(nal_info.nal_unit_type) {
+		case H265NalType_error:
+			ERR_PRINT("unknown nal type is found.");
+			ttLibC_DynamicBuffer_close(&target_buffer);
+			return false;
+		default:
+			LOG_PRINT("nal type is not implemented now.:%x", nal_info.nal_unit_type);
+			break;
+		case H265NalType_vpsNut:
+		case H265NalType_spsNut:
+		case H265NalType_ppsNut:
+			if(target_type != H265Type_configData) {
+				if(target_type != H265Type_unknown) {
+					bool result = X265Encoder_makeH265Frame(
+							target_type,
+							encoder,
+							target_buffer,
+							callback,
+							ptr);
+					if(!result) {
+						ttLibC_DynamicBuffer_close(&target_buffer);
+						return false;
+					}
+				}
+			}
+			target_type = H265Type_configData;
+			ttLibC_DynamicBuffer_append(target_buffer, buf, buf_size);
+			break;
+		case H265NalType_prefixSeiNut:
+			break;
+		case H265NalType_idrWRadl:
+			if(target_type != H265Type_sliceIDR) {
+				if(target_type != H265Type_unknown) {
+					// save prev information.
+					bool result = X265Encoder_makeH265Frame(
+							target_type,
+							encoder,
+							target_buffer,
+							callback,
+							ptr);
+					if(!result) {
+						ttLibC_DynamicBuffer_close(&target_buffer);
+						return false;
+					}
+				}
+			}
+			target_type = H265Type_sliceIDR;
+			ttLibC_DynamicBuffer_append(target_buffer, buf, buf_size);
+			break;
+		case H265NalType_trailN:
+		case H265NalType_trailR:
+			if(target_type != H265Type_slice) {
+				if(target_type != H265Type_unknown) {
+					// save prev information.
+					bool result = X265Encoder_makeH265Frame(
+							target_type,
+							encoder,
+							target_buffer,
+							callback,
+							ptr);
+					if(!result) {
+						ttLibC_DynamicBuffer_close(&target_buffer);
+						return false;
+					}
+				}
+			}
+			target_type = H265Type_slice;
+			ttLibC_DynamicBuffer_append(target_buffer, buf, buf_size);
+			break;
+		}
+	}
+	bool result = X265Encoder_makeH265Frame(
+			target_type,
+			encoder,
+			target_buffer,
+			callback,
+			ptr);
+	ttLibC_DynamicBuffer_close(&target_buffer);
+	return result;
 }
 
 bool ttLibC_X265Encoder_encode(
@@ -85,6 +223,16 @@ bool ttLibC_X265Encoder_encode(
 		ERR_PRINT("only support planar.");
 		return false;
 	}
+	encoder_->timebase = yuv420->inherit_super.inherit_super.timebase;
+	if(encoder_->is_first_frame) {
+		x265_nal *nal;
+		uint32_t i_nal;
+		int output_flag = encoder_->api->encoder_headers(encoder_->encoder, &nal, &i_nal);
+		if(!X265Encoder_checkEncodedData(encoder_, nal, i_nal, output_flag, callback, ptr)) {
+			return false;
+		}
+		encoder_->is_first_frame = false;
+	}
 	// setup picture.
 	x265_picture pic;
 	encoder_->api->picture_init(encoder_->param, &pic);
@@ -100,10 +248,15 @@ bool ttLibC_X265Encoder_encode(
 	x265_nal *nal;
 	uint32_t i_nal;
 	x265_picture pic_out;
-	int32_t frame_size = encoder_->api->encoder_encode(encoder_->encoder, &nal, &i_nal, &pic, &pic_out);
-	// TODO make h265 data from nal.
-	LOG_PRINT("output frame_size:%d", frame_size);
-	return true;
+	int32_t output_flag = encoder_->api->encoder_encode(encoder_->encoder, &nal, &i_nal, &pic, &pic_out);
+	if(output_flag < 0) {
+		ERR_PRINT("failed to encode data.");
+		return false;
+	}
+	if(output_flag != 0) {
+		encoder_->pts = pic_out.pts;
+	}
+	return X265Encoder_checkEncodedData(encoder_, nal, i_nal, output_flag, callback, ptr);
 }
 
 void ttLibC_X265Encoder_close(ttLibC_X265Encoder **encoder) {
