@@ -157,12 +157,18 @@ ttLibC_Audio *ttLibC_Audio_clone(
 		return (ttLibC_Audio *)ttLibC_Opus_clone(
 				(ttLibC_Opus *)prev_frame,
 				(ttLibC_Opus *)src_frame);
-//	case frameType_pcm_alaw:
+	case frameType_pcm_alaw:
+		return (ttLibC_Audio *)ttLibC_PcmAlaw_clone(
+				(ttLibC_PcmAlaw *)prev_frame,
+				(ttLibC_PcmAlaw *)src_frame);
 	case frameType_pcmF32:
 		return (ttLibC_Audio *)ttLibC_PcmF32_clone(
 				(ttLibC_PcmF32 *)prev_frame,
 				(ttLibC_PcmF32 *)src_frame);
-//	case frameType_pcm_mulaw:
+	case frameType_pcm_mulaw:
+		return (ttLibC_Audio *)ttLibC_PcmMulaw_clone(
+				(ttLibC_PcmMulaw *)prev_frame,
+				(ttLibC_PcmMulaw *)src_frame);
 	case frameType_pcmS16:
 		return (ttLibC_Audio *)ttLibC_PcmS16_clone(
 				(ttLibC_PcmS16 *)prev_frame,

@@ -49,6 +49,42 @@ ttLibC_Wmv2 *ttLibC_Wmv2_make(
 			timebase);
 }
 
+/**
+ * make clone frame
+ * always make copy buffer on it.
+ * @param prev_frame reuse frame object.
+ * @param src_frame  source of clone.
+ */
+ttLibC_Wmv2 *ttLibC_Wmv2_clone(
+		ttLibC_Wmv2 *prev_frame,
+		ttLibC_Wmv2 *src_frame) {
+	if(src_frame == NULL) {
+		return NULL;
+	}
+	if(src_frame->inherit_super.inherit_super.type != frameType_wmv2) {
+		ERR_PRINT("try to clone non wmv2 frame.");
+		return NULL;
+	}
+	if(prev_frame != NULL && prev_frame->inherit_super.inherit_super.type != frameType_wmv2) {
+		ERR_PRINT("try to use non wmv2 frame for reuse.");
+		return NULL;
+	}
+	ttLibC_Wmv2 *wmv2 = ttLibC_Wmv2_make(
+			prev_frame,
+			src_frame->inherit_super.type,
+			src_frame->inherit_super.width,
+			src_frame->inherit_super.height,
+			src_frame->inherit_super.inherit_super.data,
+			src_frame->inherit_super.inherit_super.buffer_size,
+			false,
+			src_frame->inherit_super.inherit_super.pts,
+			src_frame->inherit_super.inherit_super.timebase);
+	if(wmv2 != NULL) {
+		wmv2->inherit_super.inherit_super.id = src_frame->inherit_super.inherit_super.id;
+	}
+	return wmv2;
+}
+
 /*
  * close frame
  * @param frame

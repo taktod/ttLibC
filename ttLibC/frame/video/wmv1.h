@@ -51,6 +51,16 @@ ttLibC_Wmv1 *ttLibC_Wmv1_make(
 		uint32_t timebase);
 
 /**
+ * make clone frame
+ * always make copy buffer on it.
+ * @param prev_frame reuse frame object.
+ * @param src_frame  source of clone.
+ */
+ttLibC_Wmv1 *ttLibC_Wmv1_clone(
+		ttLibC_Wmv1 *prev_frame,
+		ttLibC_Wmv1 *src_frame);
+
+/**
  * close frame
  * @param frame
  */

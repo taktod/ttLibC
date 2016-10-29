@@ -185,8 +185,14 @@ ttLibC_Video *ttLibC_Video_clone(
 		return (ttLibC_Video *)ttLibC_Vp9_clone(
 				(ttLibC_Vp9 *)prev_frame,
 				(ttLibC_Vp9 *)src_frame);
-//	case frameType_wmv1:
-//	case frameType_wmv2:
+	case frameType_wmv1:
+		return (ttLibC_Video *)ttLibC_Vp9_clone(
+				(ttLibC_Wmv1 *)prev_frame,
+				(ttLibC_Wmv1 *)src_frame);
+	case frameType_wmv2:
+		return (ttLibC_Video *)ttLibC_Vp9_clone(
+				(ttLibC_Wmv2 *)prev_frame,
+				(ttLibC_Wmv2 *)src_frame);
 	case frameType_yuv420:
 		return (ttLibC_Video *)ttLibC_Yuv420_clone(
 				(ttLibC_Yuv420 *)prev_frame,

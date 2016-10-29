@@ -52,6 +52,16 @@ ttLibC_PcmAlaw *ttLibC_PcmAlaw_make(
 		uint32_t timebase);
 
 /**
+ * make clone frame
+ * always make copy buffer on it.
+ * @param prev_frame reuse frame object.
+ * @param src_frame  source of clone.
+ */
+ttLibC_PcmAlaw *ttLibC_PcmAlaw_clone(
+		ttLibC_PcmAlaw *prev_frame,
+		ttLibC_PcmAlaw *src_frame);
+
+/**
  * close frame
  * @param frame
  */

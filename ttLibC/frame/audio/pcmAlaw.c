@@ -53,6 +53,42 @@ ttLibC_PcmAlaw *ttLibC_PcmAlaw_make(
 			timebase);
 }
 
+/**
+ * make clone frame
+ * always make copy buffer on it.
+ * @param prev_frame reuse frame object.
+ * @param src_frame  source of clone.
+ */
+ttLibC_PcmAlaw *ttLibC_PcmAlaw_clone(
+		ttLibC_PcmAlaw *prev_frame,
+		ttLibC_PcmAlaw *src_frame) {
+	if(src_frame == NULL) {
+		return NULL;
+	}
+	if(src_frame->inherit_super.inherit_super.type != frameType_pcm_alaw) {
+		ERR_PRINT("try to clone non pcmAlaw frame.");
+		return NULL;
+	}
+	if(prev_frame != NULL && prev_frame->inherit_super.inherit_super.type != frameType_pcm_alaw) {
+		ERR_PRINT("try to use non pcmAlaw frame for reuse.");
+		return NULL;
+	}
+	ttLibC_PcmAlaw *pcmAlaw = ttLibC_PcmAlaw_make(
+			prev_frame,
+			src_frame->inherit_super.sample_rate,
+			src_frame->inherit_super.sample_num,
+			src_frame->inherit_super.channel_num,
+			src_frame->inherit_super.inherit_super.data,
+			src_frame->inherit_super.inherit_super.buffer_size,
+			false,
+			src_frame->inherit_super.inherit_super.pts,
+			src_frame->inherit_super.inherit_super.timebase);
+	if(pcmAlaw != NULL) {
+		pcmAlaw->inherit_super.inherit_super.id = src_frame->inherit_super.inherit_super.id;
+	}
+	return pcmAlaw;
+}
+
 /*
  * close frame
  * @param frame
