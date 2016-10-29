@@ -45,7 +45,7 @@ ttLibC_Mp4Writer *ttLibC_Mp4Writer_make_ex(
 	writer->track_list = ttLibC_StlMap_make();
 	for(int i = 0;i < types_num;++ i) {
 		// trackをつくってから、track_listに登録しておく。
-		ttLibC_Mp4Track *track = ttLibC_malloc(sizeof(ttLibC_Mp4Track));
+		ttLibC_Mp4WriteTrack *track = ttLibC_malloc(sizeof(ttLibC_Mp4WriteTrack));
 		track->frame_queue     = ttLibC_FrameQueue_make(i + 1, 255);
 		track->h264_configData = NULL;
 		track->frame_type      = target_frame_types[i];
@@ -86,7 +86,7 @@ static void Mp4Writer_updateSize(
 static bool Mp4Writer_makeTrex(void *ptr, void *key, void *item) {
 	if(item != NULL && ptr != NULL) {
 		ttLibC_DynamicBuffer *buffer = (ttLibC_DynamicBuffer *)ptr;
-		ttLibC_Mp4Track *track = (ttLibC_Mp4Track *)item;
+		ttLibC_Mp4WriteTrack *track = (ttLibC_Mp4WriteTrack *)item;
 		uint8_t buf[256];
 		size_t in_size;
 		switch(track->frame_type) {
@@ -129,7 +129,7 @@ static bool Mp4Writer_makeTrex(void *ptr, void *key, void *item) {
 static bool Mp4Writer_makeTrak(void *ptr, void *key, void *item) {
 	if(ptr != NULL && item != NULL) {
 		ttLibC_DynamicBuffer *buffer = (ttLibC_DynamicBuffer *)ptr;
-		ttLibC_Mp4Track *track = (ttLibC_Mp4Track *)item;
+		ttLibC_Mp4WriteTrack *track = (ttLibC_Mp4WriteTrack *)item;
 		// setup trak
 		size_t in_size;
 		uint8_t buf[256];
@@ -369,7 +369,7 @@ static bool Mp4Writer_makeTraf(void *ptr, void *key, void *item) {
 	}
 	ttLibC_Mp4Writer_ *writer = (ttLibC_Mp4Writer_ *)ptr;
 	ttLibC_DynamicBuffer *buffer = writer->currentWritingBuffer;
-	ttLibC_Mp4Track *track = (ttLibC_Mp4Track *)item;
+	ttLibC_Mp4WriteTrack *track = (ttLibC_Mp4WriteTrack *)item;
 	uint8_t *b = NULL;
 	uint8_t buf[256];
 	uint32_t in_size;
@@ -531,7 +531,7 @@ static bool Mp4Writer_makeMdat(void *ptr, void *key, void *item) {
 	}
 	ttLibC_Mp4Writer_ *writer = (ttLibC_Mp4Writer_ *)ptr;
 	ttLibC_DynamicBuffer *buffer = writer->currentWritingBuffer;
-	ttLibC_Mp4Track *track = (ttLibC_Mp4Track *)item;
+	ttLibC_Mp4WriteTrack *track = (ttLibC_Mp4WriteTrack *)item;
 	uint8_t *b = ttLibC_DynamicBuffer_refData(buffer);
 	b += track->dataOffsetPosForTrun;
 	*((uint32_t *)b) = be_uint32_t((ttLibC_DynamicBuffer_refSize(buffer) - writer->currentMoofSizePos));
@@ -614,7 +614,7 @@ static bool Mp4Writer_initCheckTrack(void *ptr, void *key, void *item) {
 	if(item == NULL) {
 		return false;
 	}
-	ttLibC_Mp4Track *track = (ttLibC_Mp4Track *)item;
+	ttLibC_Mp4WriteTrack *track = (ttLibC_Mp4WriteTrack *)item;
 	switch(track->frame_type) {
 	case frameType_h264:
 		{
@@ -670,7 +670,7 @@ static bool Mp4Writer_PrimaryH264TrackCheck(void *ptr, ttLibC_Frame *frame) {
 static bool Mp4Writer_dataCheckTrack(void *ptr, void *key, void *item) {
 	if(ptr != NULL && item != NULL) {
 		ttLibC_Mp4Writer_ *writer = (ttLibC_Mp4Writer_ *)ptr;
-		ttLibC_Mp4Track *track = (ttLibC_Mp4Track *)item;
+		ttLibC_Mp4WriteTrack *track = (ttLibC_Mp4WriteTrack *)item;
 		 // for audio we need to change timebase into 1000.
 		uint64_t pts = (uint64_t)(1.0 * track->frame_queue->pts * 1000 / track->frame_queue->timebase);
 		if(writer->target_pos > pts) {
@@ -713,7 +713,7 @@ static bool Mp4Writer_writeFromQueue(
 	case status_target_check:
 		{
 			// check 1st track to decide target_pos.
-			ttLibC_Mp4Track *track = (ttLibC_Mp4Track *)ttLibC_StlMap_get(writer->track_list, (void *)1);
+			ttLibC_Mp4WriteTrack *track = (ttLibC_Mp4WriteTrack *)ttLibC_StlMap_get(writer->track_list, (void *)1);
 			switch(track->frame_type) {
 			case frameType_h264:
 				ttLibC_FrameQueue_ref(track->frame_queue, Mp4Writer_PrimaryH264TrackCheck, writer);
@@ -798,7 +798,7 @@ bool ttLibC_Mp4Writer_write(
 		return true;
 	}
 	// put the frame on queue.
-	ttLibC_Mp4Track *track = (ttLibC_Mp4Track *)ttLibC_StlMap_get(writer_->track_list, (void *)frame->id);
+	ttLibC_Mp4WriteTrack *track = (ttLibC_Mp4WriteTrack *)ttLibC_StlMap_get(writer_->track_list, (void *)frame->id);
 	if(track == NULL) {
 		ERR_PRINT("failed to get correspond track. %d", frame->id);
 		return false;
@@ -860,7 +860,7 @@ bool ttLibC_Mp4Writer_write(
  */
 static bool Mp4Writer_closeTracks(void *ptr, void *key, void *item) {
 	if(item != NULL) {
-		ttLibC_Mp4Track *track = (ttLibC_Mp4Track *)item;
+		ttLibC_Mp4WriteTrack *track = (ttLibC_Mp4WriteTrack *)item;
 		ttLibC_FrameQueue_close(&track->frame_queue);
 		ttLibC_Frame_close(&track->h264_configData);
 		ttLibC_DynamicBuffer_close(&track->mdat_buffer);

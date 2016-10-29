@@ -22,7 +22,7 @@ extern"C" {
 /**
  * definition of mp4 tracks
  */
-typedef struct ttLibC_Mp4Track {
+typedef struct ttLibC_Mp4WriteTrack {
 	ttLibC_FrameQueue *frame_queue;
 	ttLibC_Frame *h264_configData;
 	ttLibC_Frame_Type frame_type;
@@ -30,7 +30,7 @@ typedef struct ttLibC_Mp4Track {
 	// use chunk writing.
 	ttLibC_DynamicBuffer *mdat_buffer; // buffer for mdat.
 	uint32_t dataOffsetPosForTrun; // data off set using for trun atom.
-} ttLibC_Mp4Track;
+} ttLibC_Mp4WriteTrack;
 
 /**
  * detail definition of mp4 writer.
