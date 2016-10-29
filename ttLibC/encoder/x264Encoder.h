@@ -84,6 +84,22 @@ bool ttLibC_X264Encoder_getDefaultX264ParamT(
 		uint32_t height);
 
 /**
+ * setup x264_param_t data with ttLibC default.
+ * @param param_t structure pointer for x264_param_t on x264.h
+ * @param width
+ * @param height
+ * @param preset
+ * @param tune
+ * @return true:success false:on error.
+ */
+bool ttLibC_X264Encoder_getDefaultX264ParamTWithPresetTune(
+		void *param_t,
+		uint32_t width,
+		uint32_t height,
+		const char *preset,
+		const char *tune);
+
+/**
  * make x264 encoder with x264_param_t
  * @param param_t structure pointer for x264_param_t on x264.h
  * @return ttLibC_X264Encoder object.

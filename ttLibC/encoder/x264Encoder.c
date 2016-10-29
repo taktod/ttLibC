@@ -67,15 +67,37 @@ bool ttLibC_X264Encoder_getDefaultX264ParamT(
 		void *param_t,
 		uint32_t width,
 		uint32_t height) {
+	return ttLibC_X264Encoder_getDefaultX264ParamTWithPresetTune(
+			param_t,
+			width,
+			height,
+			NULL,
+			NULL);
+}
+
+bool ttLibC_X264Encoder_getDefaultX264ParamTWithPresetTune(
+		void *param_t,
+		uint32_t width,
+		uint32_t height,
+		const char *preset,
+		const char *tune) {
 	x264_param_t *param = (x264_param_t *)param_t;
-	if(x264_param_default_preset(param, "medium", NULL) < 0) {
+	char *_preset = (char *)preset;
+	char *_tune = (char *)tune;
+	if(preset == NULL || strlen(preset) == 0) {
+		_preset = "ultrafast";
+	}
+	if(tune == NULL || strlen(tune) == 0) {
+		_tune = "zerolatency";
+	}
+	if(x264_param_default_preset(param, _preset, _tune) < 0) {
 		ERR_PRINT("failed to get default preset.");
 		return false;
 	}
 	param->i_csp = X264_CSP_I420;
 	param->i_width = width;
 	param->i_height = height;
-	param->b_vfr_input = 0;
+	param->b_vfr_input = 1;
 	param->b_repeat_headers = 1;
 	param->b_annexb = 1;
 
@@ -207,6 +229,8 @@ static bool X264Encoder_checkEncodedData(
 			return false;
 		default:
 			LOG_PRINT("nal type is not implemented now.:%x", nal_info.nal_unit_type);
+			break;
+		case H264NalType_supplementalEnhancementInformation:
 			break;
 		case H264NalType_slice:
 			if(target_type != H264Type_slice) {
