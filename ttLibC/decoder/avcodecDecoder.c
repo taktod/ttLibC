@@ -25,6 +25,8 @@
 #include "../frame/audio/aac.h"
 #include "../frame/audio/pcms16.h"
 #include "../frame/audio/pcmf32.h"
+#include "../frame/audio/speex.h"
+#include "../frame/audio/vorbis.h"
 
 /*
  * avcodecDecoder detail definition
@@ -60,6 +62,83 @@ static bool AvcodecDecoder_decodeAudio(
 			ttLibC_Aac *aac = (ttLibC_Aac *)frame;
 			if(aac->type == AacType_dsi) {
 				return true;
+			}
+		}
+		break;
+	case frameType_vorbis:
+		{
+			ttLibC_Vorbis *vorbis = (ttLibC_Vorbis *)frame;
+			switch(vorbis->type) {
+			case VorbisType_identification:
+				if(decoder->extraDataBuffer == NULL) {
+					decoder->extraDataBuffer = ttLibC_DynamicBuffer_make();
+				}
+				else {
+					ttLibC_DynamicBuffer_reset(decoder->extraDataBuffer);
+				}
+				uint8_t buf[3] = {0x02, frame->inherit_super.buffer_size, 0};
+				ttLibC_DynamicBuffer_append(decoder->extraDataBuffer, buf, 3);
+				ttLibC_DynamicBuffer_append(decoder->extraDataBuffer, frame->inherit_super.data, frame->inherit_super.buffer_size);
+				return true;
+			case VorbisType_comment:
+				{
+					uint8_t *buf = ttLibC_DynamicBuffer_refData(decoder->extraDataBuffer);
+					buf[2] = frame->inherit_super.buffer_size;
+					ttLibC_DynamicBuffer_append(decoder->extraDataBuffer, frame->inherit_super.data, frame->inherit_super.buffer_size);
+				}
+				return true;
+			case VorbisType_setup:
+				ttLibC_DynamicBuffer_append(decoder->extraDataBuffer, frame->inherit_super.data, frame->inherit_super.buffer_size);
+				decoder->dec->extradata = ttLibC_DynamicBuffer_refData(decoder->extraDataBuffer);
+				decoder->dec->extradata_size = ttLibC_DynamicBuffer_refSize(decoder->extraDataBuffer);
+				if(!decoder->is_opened) {
+					int result = 0;
+					if((result = avcodec_open2(decoder->dec, decoder->dec->codec, NULL)) < 0) {
+						ERR_PRINT("failed to open codec.:%d", AVERROR(result));
+						av_free(decoder->dec);
+						ttLibC_free(decoder);
+						return NULL;
+					}
+					decoder->is_opened = true;
+				}
+				else {
+					ERR_PRINT("avcodec is already opened, therefore failed to set private data.");
+				}
+				return true;
+			default:
+				break;
+			}
+		}
+		break;
+	case frameType_speex:
+		{
+			ttLibC_Speex *speex = (ttLibC_Speex *)frame;
+			switch(speex->type) {
+			case SpeexType_header:
+				if(decoder->extraDataBuffer == NULL) {
+					decoder->extraDataBuffer = ttLibC_DynamicBuffer_make();
+				}
+				else {
+					ttLibC_DynamicBuffer_reset(decoder->extraDataBuffer);
+				}
+				ttLibC_DynamicBuffer_append(decoder->extraDataBuffer, frame->inherit_super.data, frame->inherit_super.buffer_size);
+				decoder->dec->extradata = ttLibC_DynamicBuffer_refData(decoder->extraDataBuffer);
+				decoder->dec->extradata_size = ttLibC_DynamicBuffer_refSize(decoder->extraDataBuffer);
+				return true;
+			case SpeexType_comment:
+				return true;
+			default:
+				if(!decoder->is_opened) {
+					int result = 0;
+					if((result = avcodec_open2(decoder->dec, decoder->dec->codec, NULL)) < 0) {
+						ERR_PRINT("failed to open codec.:%d", AVERROR(result));
+						av_free(decoder->dec);
+						ttLibC_free(decoder);
+						return NULL;
+					}
+					decoder->is_opened = true;
+				}
+				break;
 			}
 		}
 		break;
@@ -223,9 +302,6 @@ static bool AvcodecDecoder_decodeVideo(
 		ttLibC_Video *frame,
 		ttLibC_AvcodecDecodeFunc callback,
 		void *ptr) {
-	decoder->packet.data = frame->inherit_super.data;
-	decoder->packet.size = frame->inherit_super.buffer_size;
-	decoder->packet.pts  = frame->inherit_super.pts;
 	switch(frame->inherit_super.type) {
 	case frameType_theora:
 		{
@@ -275,6 +351,9 @@ static bool AvcodecDecoder_decodeVideo(
 	default:
 		break;
 	}
+	decoder->packet.data = frame->inherit_super.data;
+	decoder->packet.size = frame->inherit_super.buffer_size;
+	decoder->packet.pts  = frame->inherit_super.pts;
 	int got_picture;
 	int result = avcodec_decode_video2(decoder->dec, decoder->avframe, &got_picture, &decoder->packet);
 	if(result < 0) {
@@ -521,7 +600,9 @@ ttLibC_AvcodecDecoder *ttLibC_AvcodecDecoder_makeWithAVCodecContext(void *dec_co
 	}
 	decoder->dec = dec;
 	decoder->is_opened = false;
-	if(frame_type != frameType_theora) {
+	if(frame_type != frameType_theora
+	&& frame_type != frameType_vorbis
+	&& frame_type != frameType_speex) {
 		int result = 0;
 		if((result = avcodec_open2(decoder->dec, decoder->dec->codec, NULL)) < 0) {
 			ERR_PRINT("failed to open codec.:%d", AVERROR(result));
@@ -549,7 +630,11 @@ ttLibC_AvcodecDecoder *ttLibC_AvcodecDecoder_makeWithAVCodecContext(void *dec_co
 		case AV_SAMPLE_FMT_FLT:
 			break;
 		case AV_SAMPLE_FMT_NONE:
-			LOG_PRINT("sampleFormat is unknown now. maybe decide later?");
+			// happen in vorbis decode.
+			if(frame_type != frameType_vorbis
+			&& frame_type != frameType_speex) {
+				LOG_PRINT("sampleFormat is unknown now. maybe decide later?");
+			}
 			break;
 		default:
 			ERR_PRINT("unsupport sample_fmt type:%d", dec->sample_fmt);
