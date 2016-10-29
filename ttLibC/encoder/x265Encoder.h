@@ -41,6 +41,21 @@ ttLibC_X265Encoder *ttLibC_X265Encoder_make(
 		uint32_t width,
 		uint32_t height);
 
+ttLibC_X265Encoder *ttLibC_X265Encoder_make_ex(
+		uint32_t width,
+		uint32_t height,
+		uint32_t bitrate);
+
+bool ttLibC_X265Encoder_getDefaultX265ApiAndParam(
+		void **api,
+		void **param,
+		const char *preset,
+		const char *tune,
+		uint32_t width,
+		uint32_t height);
+
+ttLibC_X265Encoder *ttLibC_X265Encoder_makeWithX265ApiAndParam(void *api, void *param);
+
 bool ttLibC_X265Encoder_encode(
 		ttLibC_X265Encoder *encoder,
 		ttLibC_Yuv420 *yuv420,

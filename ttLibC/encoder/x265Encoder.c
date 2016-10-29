@@ -34,29 +34,72 @@ typedef ttLibC_Encoder_X265Encoder_ ttLibC_X265Encoder_;
 ttLibC_X265Encoder *ttLibC_X265Encoder_make(
 		uint32_t width,
 		uint32_t height) {
+	x265_api *api;
+	x265_param *param;
+	if(!ttLibC_X265Encoder_getDefaultX265ApiAndParam((void **)&api, (void **)&param, NULL, NULL, width, height)) {
+		return NULL;
+	}
+	return ttLibC_X265Encoder_makeWithX265ApiAndParam(api, param);
+}
+
+ttLibC_X265Encoder *ttLibC_X265Encoder_make_ex(
+		uint32_t width,
+		uint32_t height,
+		uint32_t bitrate) {
+	x265_api *api;
+	x265_param *param;
+	if(!ttLibC_X265Encoder_getDefaultX265ApiAndParam((void **)&api, (void **)&param, NULL, NULL, width, height)) {
+		return NULL;
+	}
+	param->rc.bitrate = bitrate;
+	return ttLibC_X265Encoder_makeWithX265ApiAndParam(api, param);
+}
+
+bool ttLibC_X265Encoder_getDefaultX265ApiAndParam(
+		void **api,
+		void **param,
+		const char *preset,
+		const char *tune,
+		uint32_t width,
+		uint32_t height) {
+	*api = (void *)x265_api_get(0); // bit depth is 8 only.
+	const x265_api *_api = *api;
+	*param = _api->param_alloc();
+	x265_param *_param = *param;
+	char *_preset = (char *)preset;
+	char *_tune = (char *)tune;
+	if(preset == NULL || strlen(preset) == 0) {
+		_preset = "ultrafast";
+	}
+	if(tune == NULL || strlen(tune) == 0) {
+		_tune = "zerolatency";
+	}
+	if(_api->param_default_preset(_param, _preset, _tune) < 0) {
+		ERR_PRINT("failed to understand preset or tune.");
+		return false;
+	}
+	_param->logLevel = X265_LOG_NONE;
+	_param->bAnnexB = 1; // use annexB
+	_param->internalCsp = X265_CSP_I420; // yuv420 only.
+	_param->sourceWidth = width;
+	_param->sourceHeight = height;
+	_param->fpsNum = 15;
+	_param->fpsDenom = 1;
+	return true;
+}
+
+ttLibC_X265Encoder *ttLibC_X265Encoder_makeWithX265ApiAndParam(
+		void *api,
+		void *param) {
+	if(api == NULL || param == NULL) {
+		return NULL;
+	}
 	ttLibC_X265Encoder_ *encoder = ttLibC_malloc(sizeof(ttLibC_X265Encoder_));
 	if(encoder == NULL) {
 		return NULL;
 	}
-	// use default
-	encoder->api = x265_api_get(0);
-
-	encoder->param = encoder->api->param_alloc();
-	encoder->encoder = NULL;
-	char *preset = "ultrafast";
-	char *tune = "grain";
-	// get preset.
-	if(encoder->api->param_default_preset(encoder->param, preset, tune) < 0) {
-		ERR_PRINT("failed to understand preset or tune.");
-		ttLibC_X265Encoder_close((ttLibC_X265Encoder **)&encoder);
-		return NULL;
-	}
-	encoder->param->bAnnexB = 1;
-	encoder->param->internalCsp = X265_CSP_I420;
-	encoder->param->sourceWidth = width;
-	encoder->param->sourceHeight = height;
-	encoder->param->fpsNum = 15;
-	encoder->param->fpsDenom = 1;
+	encoder->api = (x265_api *)api;
+	encoder->param = (x265_param *)param;
 	encoder->encoder = encoder->api->encoder_open(encoder->param);
 	if(!encoder->encoder) {
 		LOG_PRINT("failed to open encoder.");
@@ -70,6 +113,7 @@ ttLibC_X265Encoder *ttLibC_X265Encoder_make(
 	// encoder is ready.
 	return (ttLibC_X265Encoder *)encoder;
 }
+
 
 static bool X265Encoder_makeH265Frame(
 		ttLibC_H265_Type target_type,
@@ -150,6 +194,7 @@ static bool X265Encoder_checkEncodedData(
 			break;
 		case H265NalType_prefixSeiNut:
 			break;
+		case H265NalType_craNut:
 		case H265NalType_idrWRadl:
 			if(target_type != H265Type_sliceIDR) {
 				if(target_type != H265Type_unknown) {
