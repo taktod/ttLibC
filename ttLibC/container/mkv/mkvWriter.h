@@ -24,7 +24,7 @@ extern "C" {
 
 typedef struct ttLibC_MkvWriteTrack {
 	ttLibC_FrameQueue *frame_queue;
-	ttLibC_Frame *h26x_configData; // これいるかなぁ・・・初めのデータがどうしてもconfigDataにならないとだめという感じでせめれば十分かな・・・
+	ttLibC_Frame *h26x_configData;
 	// まぁ、h264やh265のconfigDataが中途でかわってしまう場合はだめで判定しなければいけない。(エラー扱いにしないとだめ)という意味では、別になっててもいいか・・・
 	ttLibC_Frame_Type frame_type;
 	bool is_appending; // 追加中であるかフラグ

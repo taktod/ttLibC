@@ -310,7 +310,7 @@ static bool MkvWriter_makeTrackEntry(void *ptr, void *key, void *item) {
 				ttLibC_ByteConnector_ebml2(connector, 1, false);
 				ttLibC_ByteConnector_bit(connector, 1, 8);
 				// video要素の中身をつくっていく。
-				ttLibC_Vp8 *vp9 = (ttLibC_Vp9 *)ttLibC_FrameQueue_ref_first(track->frame_queue);
+				ttLibC_Vp9 *vp9 = (ttLibC_Vp9 *)ttLibC_FrameQueue_ref_first(track->frame_queue);
 				ttLibC_ByteConnector_ebml2(innerConnector, MkvType_PixelWidth, true);
 				ttLibC_ByteConnector_ebml2(innerConnector, 2, false);
 				ttLibC_ByteConnector_bit(innerConnector, vp9->inherit_super.width, 16);
@@ -1186,7 +1186,10 @@ static bool MkvWriter_writeFromQueue(
 	return true;
 }
 
-static bool MkvWriter_appendQueue(ttLibC_MkvWriteTrack *track, ttLibC_Frame *frame, uint64_t pts) {
+static bool MkvWriter_appendQueue(
+		ttLibC_MkvWriteTrack *track,
+		ttLibC_Frame *frame,
+		uint64_t pts) {
 	uint64_t original_pts = frame->pts;
 	uint32_t original_timebase = frame->timebase;
 	frame->pts = pts;
