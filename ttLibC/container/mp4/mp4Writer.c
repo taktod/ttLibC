@@ -44,12 +44,13 @@ ttLibC_Mp4Writer *ttLibC_Mp4Writer_make_ex(
 	// setup tracks
 	writer->track_list = ttLibC_StlMap_make();
 	for(int i = 0;i < types_num;++ i) {
-		// trackをつくってから、track_listに登録しておく。
 		ttLibC_Mp4WriteTrack *track = ttLibC_malloc(sizeof(ttLibC_Mp4WriteTrack));
 		track->frame_queue     = ttLibC_FrameQueue_make(i + 1, 255);
-		track->h264_configData = NULL;
+		track->h26x_configData = NULL;
 		track->frame_type      = target_frame_types[i];
 		track->mdat_buffer     = NULL;
+		track->is_appending    = false;
+		track->counter         = 0;
 		ttLibC_StlMap_put(writer->track_list, (void *)(i + 1), (void *)track); // trackId -> track
 	}
 	writer->inherit_super.inherit_super.timebase = 1000;
@@ -148,7 +149,7 @@ static bool Mp4Writer_makeTrak(void *ptr, void *key, void *item) {
 			case frameType_h264:
 				in_size = ttLibC_HexUtil_makeBuffer("00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 00 00 00", buf, 256);
 				ttLibC_DynamicBuffer_append(buffer, buf, in_size);
-				ttLibC_H264 *h264 = (ttLibC_H264 *)track->h264_configData;
+				ttLibC_H264 *h264 = (ttLibC_H264 *)track->h26x_configData;
 				be_width = be_uint16_t(h264->inherit_super.width);
 				ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_width, 2);
 				uint16_t zero = 0;
@@ -244,7 +245,7 @@ static bool Mp4Writer_makeTrak(void *ptr, void *key, void *item) {
 									uint32_t avcCSizePos = ttLibC_DynamicBuffer_refSize(buffer);
 									in_size = ttLibC_HexUtil_makeBuffer("00 00 00 00 61 76 63 43", buf, 256);
 									ttLibC_DynamicBuffer_append(buffer, buf, in_size);
-									in_size = ttLibC_H264_readAvccTag((ttLibC_H264 *)track->h264_configData, buf, 256);
+									in_size = ttLibC_H264_readAvccTag((ttLibC_H264 *)track->h26x_configData, buf, 256);
 									ttLibC_DynamicBuffer_append(buffer, buf, in_size);
 									Mp4Writer_updateSize(buffer, avcCSizePos);
 								Mp4Writer_updateSize(buffer, avc1SizePos);
@@ -619,7 +620,7 @@ static bool Mp4Writer_initCheckTrack(void *ptr, void *key, void *item) {
 	case frameType_h264:
 		{
 			// for h264 need configData.
-			return track->h264_configData != NULL;
+			return track->h26x_configData != NULL;
 		}
 	default:
 		{
@@ -764,6 +765,20 @@ static bool Mp4Writer_writeFromQueue(
 	return true;
 }
 
+static bool Mp4Writer_appendQueue(
+		ttLibC_Mp4WriteTrack *track,
+		ttLibC_Frame *frame,
+		uint64_t pts) {
+	uint64_t original_pts = frame->pts;
+	uint32_t original_timebase = frame->timebase;
+	frame->pts = pts;
+	frame->timebase = 1000;
+	bool result = ttLibC_FrameQueue_queue(track->frame_queue, frame);
+	frame->pts = original_pts;
+	frame->timebase = original_timebase;
+	return result;
+}
+
 bool ttLibC_Mp4Writer_write(
 		ttLibC_Mp4Writer *writer,
 		ttLibC_Frame *frame,
@@ -777,32 +792,12 @@ bool ttLibC_Mp4Writer_write(
 	if(frame == NULL) {
 		return true;
 	}
-	uint64_t pts = 0;
-	switch(frame->type) {
-	case frameType_h264:
-		{
-			pts = (uint64_t)(1.0 * frame->pts * 1000 / frame->timebase);
-			frame->pts = pts;
-			frame->timebase = 1000;
-		}
-		break;
-	case frameType_aac:
-		{
-			ttLibC_Audio *audio = (ttLibC_Audio *)frame;
-			pts = (uint64_t)(1.0 * frame->pts * audio->sample_rate / frame->timebase);
-			frame->pts = pts;
-			frame->timebase = audio->sample_rate;
-		}
-		break;
-	default:
-		return true;
-	}
-	// put the frame on queue.
-	ttLibC_Mp4WriteTrack *track = (ttLibC_Mp4WriteTrack *)ttLibC_StlMap_get(writer_->track_list, (void *)frame->id);
+	ttLibC_Mp4WriteTrack *track = (ttLibC_Mp4WriteTrack *)ttLibC_StlMap_get(writer_->track_list, (void *)(long)frame->id);
 	if(track == NULL) {
 		ERR_PRINT("failed to get correspond track. %d", frame->id);
 		return false;
 	}
+	uint64_t pts = (uint64_t)(1.0 * frame->pts * 1000 / frame->timebase);
 	// for first access.
 	switch(frame->type) {
 	case frameType_h264:
@@ -813,7 +808,7 @@ bool ttLibC_Mp4Writer_write(
 			}
 			if(h264->type == H264Type_configData) {
 				ttLibC_H264 *h = ttLibC_H264_clone(
-						(ttLibC_H264 *)track->h264_configData,
+						(ttLibC_H264 *)track->h26x_configData,
 						h264);
 				if(h == NULL) {
 					ERR_PRINT("failed to make clone data.");
@@ -821,30 +816,27 @@ bool ttLibC_Mp4Writer_write(
 				}
 				h->inherit_super.inherit_super.pts = 0;
 				h->inherit_super.inherit_super.timebase = 1000;
-				track->h264_configData = (ttLibC_Frame *)h;
+				track->h26x_configData = (ttLibC_Frame *)h;
+				return true;
+			}
+			if(!track->is_appending && h264->type != H264Type_sliceIDR) {
+				// no data in queue, and not sliceIDR -> not yet to append.
 				return true;
 			}
 		}
-		/* no break */
+		break;
 	default:
-		{
-			// queue入れるの失敗したらやめる。
-			if(!ttLibC_FrameQueue_queue(track->frame_queue, frame)) {
-				return false;
-			}
-		}
 		break;
 	}
-	// こういう書き方にすると音声onlyでもちゃんと動作するようになるけど、各トラックの先頭にkeyFrameのないデータがきてしまって、
+	track->is_appending = true;
 	if(writer_->is_first) {
-		// ptsを計算しなおして、1000に変更しなければいけない。
-		if(frame->timebase != 1000) {
-			pts = (uint64_t)(1.0 * frame->pts * 1000 / frame->timebase);
-		}
 		writer_->current_pts_pos = pts;
 		writer_->target_pos = pts;
 		writer_->inherit_super.inherit_super.pts = pts;
 		writer_->is_first = false;
+	}
+	if(!Mp4Writer_appendQueue(track, frame, pts)) {
+		return false;
 	}
 	writer_->callback = callback;
 	writer_->ptr = ptr;
@@ -862,7 +854,7 @@ static bool Mp4Writer_closeTracks(void *ptr, void *key, void *item) {
 	if(item != NULL) {
 		ttLibC_Mp4WriteTrack *track = (ttLibC_Mp4WriteTrack *)item;
 		ttLibC_FrameQueue_close(&track->frame_queue);
-		ttLibC_Frame_close(&track->h264_configData);
+		ttLibC_Frame_close(&track->h26x_configData);
 		ttLibC_DynamicBuffer_close(&track->mdat_buffer);
 		ttLibC_free(track);
 	}

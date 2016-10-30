@@ -24,12 +24,14 @@ extern"C" {
  */
 typedef struct ttLibC_Mp4WriteTrack {
 	ttLibC_FrameQueue *frame_queue;
-	ttLibC_Frame *h264_configData;
+	ttLibC_Frame *h26x_configData;
 	ttLibC_Frame_Type frame_type;
 
 	// use chunk writing.
 	ttLibC_DynamicBuffer *mdat_buffer; // buffer for mdat.
 	uint32_t dataOffsetPosForTrun; // data off set using for trun atom.
+	bool is_appending;
+	uint32_t counter; // for vorbis
 } ttLibC_Mp4WriteTrack;
 
 /**
