@@ -17,6 +17,7 @@ libttLibC_a_SOURCES= \
 	container/mp3/mp3Frame.c \
 	container/mp3/mp3Reader.c \
 	container/mp3/mp3Writer.c \
+	container/mp4/type/ctts.c \
 	container/mp4/type/stco.c \
 	container/mp4/type/stsc.c \
 	container/mp4/type/stsz.c \
