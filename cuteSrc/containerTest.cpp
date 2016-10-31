@@ -84,7 +84,7 @@ static void mp4CodecTest() {
 	types[0] = frameType_h264;
 	types[1] = frameType_aac;
 //	testData.writer = (ttLibC_ContainerWriter *)ttLibC_Mp4Writer_make(types, 2);
-	sprintf(file, "%s/tools/data/source/test.h264.aac.mp4", getenv("HOME"));
+	sprintf(file, "%s/tools/data/source/test.h264.aac.mp4box.mp4", getenv("HOME"));
 	testData.fp_in = fopen(file, "rb");
 //	sprintf(file, "%s/tools/data/c_out/test.h264.aac.mp4", getenv("HOME"));
 //	testData.fp_out = fopen(file, "wb");
@@ -111,7 +111,7 @@ static void mp4CodecTest() {
 	types[0] = frameType_h265;
 	types[1] = frameType_mp3;
 //	testData.writer = (ttLibC_ContainerWriter *)ttLibC_Mp4Writer_make(types, 2);
-	sprintf(file, "%s/tools/data/source/test.h265.mp3.mp4", getenv("HOME"));
+	sprintf(file, "%s/tools/data/source/test.h265.mp3.mp4box.mp4", getenv("HOME"));
 	testData.fp_in = fopen(file, "rb");
 //	sprintf(file, "%s/tools/data/c_out/test.h265.mp3.mp4", getenv("HOME"));
 //	testData.fp_out = fopen(file, "wb");
