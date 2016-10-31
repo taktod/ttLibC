@@ -41,27 +41,97 @@ static bool mp4Test_writeDataCallback(void *ptr, void *data, size_t data_size) {
 static bool mp4Test_getFrameCallback(void *ptr, ttLibC_Frame *frame) {
 	containerTest_t *testData = (containerTest_t *)ptr;
 	switch(frame->type) {
-	case frameType_h264:
-		{
-			ttLibC_Mp4Writer_write((ttLibC_Mp4Writer *)testData->writer, frame, mp4Test_writeDataCallback, ptr);
-/*			// make clone frame for 2nd video track.
-			ttLibC_Frame *cloned_frame = ttLibC_Frame_clone(NULL, frame);
-			cloned_frame->id = 3;
-			ttLibC_Mp4Writer_write((ttLibC_Mp4Writer *)testData->writer, cloned_frame, mp4Test_writeDataCallback, ptr);
-			ttLibC_Frame_close(&cloned_frame);*/
-		}
-		return true;
-	case frameType_aac:
-//		frame->id = 1;
-		return ttLibC_Mp4Writer_write((ttLibC_Mp4Writer *)testData->writer, frame, mp4Test_writeDataCallback, ptr);
-	default:
+	case frameType_h265:
+		LOG_PRINT("h265:%f", 1.0 * frame->pts / frame->timebase);
 		break;
+	case frameType_h264:
+		LOG_PRINT("h264:%f", 1.0 * frame->pts / frame->timebase);
+		break;
+	case frameType_jpeg:
+		LOG_PRINT("jpeg:%f", 1.0 * frame->pts / frame->timebase);
+		break;
+	case frameType_aac:
+		LOG_PRINT("aac:%f", 1.0 * frame->pts / frame->timebase);
+		break;
+	case frameType_vorbis:
+		LOG_PRINT("vorbis:%f", 1.0 * frame->pts / frame->timebase);
+		break;
+	case frameType_mp3:
+		LOG_PRINT("mp3:%f", 1.0 *frame->pts / frame->timebase);
+		break;
+	default:
+		LOG_PRINT("frame:%f", 1.0 * frame->pts / frame->timebase);
+		return true;
+	}
+	if(testData->writer != NULL) {
+		return ttLibC_Mp4Writer_write((ttLibC_Mp4Writer *)testData->writer, frame, mp4Test_writeDataCallback, ptr);
 	}
 	return true;
 }
 
 static bool mp4Test_getMp4Callback(void *ptr, ttLibC_Mp4 *mp4) {
 	return ttLibC_Mp4_getFrame(mp4, mp4Test_getFrameCallback, ptr);
+}
+
+static void mp4CodecTest() {
+	LOG_PRINT("mp4CodecTest");
+	containerTest_t testData;
+	char file[256];
+	ttLibC_Frame_Type types[2];
+
+	LOG_PRINT("h264 / aac");
+	testData.reader = (ttLibC_ContainerReader *)ttLibC_Mp4Reader_make();
+	types[0] = frameType_h264;
+	types[1] = frameType_aac;
+//	testData.writer = (ttLibC_ContainerWriter *)ttLibC_Mp4Writer_make(types, 2);
+	sprintf(file, "%s/tools/data/source/test.h264.aac.mp4", getenv("HOME"));
+	testData.fp_in = fopen(file, "rb");
+//	sprintf(file, "%s/tools/data/c_out/test.h264.aac.mp4", getenv("HOME"));
+//	testData.fp_out = fopen(file, "wb");
+	testData.fp_out = NULL;
+	do {
+		uint8_t buffer[65536];
+		if(!testData.fp_in) {
+			break;
+		}
+		size_t read_size = fread(buffer, 1, 65536, testData.fp_in);
+		if(!ttLibC_Mp4Reader_read((ttLibC_Mp4Reader *)testData.reader, buffer, read_size, mp4Test_getMp4Callback, &testData)) {
+			ERR_PRINT("error occured!");
+			break;
+		}
+	} while(!feof(testData.fp_in));
+	ttLibC_ContainerReader_close(&testData.reader);
+	ttLibC_ContainerWriter_close(&testData.writer);
+	if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
+	if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
+	ASSERT(ttLibC_Allocator_dump() == 0);
+
+	LOG_PRINT("h265 / mp3");
+	testData.reader = (ttLibC_ContainerReader *)ttLibC_Mp4Reader_make();
+	types[0] = frameType_h265;
+	types[1] = frameType_mp3;
+//	testData.writer = (ttLibC_ContainerWriter *)ttLibC_Mp4Writer_make(types, 2);
+	sprintf(file, "%s/tools/data/source/test.h265.mp3.mp4", getenv("HOME"));
+	testData.fp_in = fopen(file, "rb");
+//	sprintf(file, "%s/tools/data/c_out/test.h265.mp3.mp4", getenv("HOME"));
+//	testData.fp_out = fopen(file, "wb");
+	testData.fp_out = NULL;
+	do {
+		uint8_t buffer[65536];
+		if(!testData.fp_in) {
+			break;
+		}
+		size_t read_size = fread(buffer, 1, 65536, testData.fp_in);
+		if(!ttLibC_Mp4Reader_read((ttLibC_Mp4Reader *)testData.reader, buffer, read_size, mp4Test_getMp4Callback, &testData)) {
+			ERR_PRINT("error occured!");
+			break;
+		}
+	} while(!feof(testData.fp_in));
+	ttLibC_ContainerReader_close(&testData.reader);
+	ttLibC_ContainerWriter_close(&testData.writer);
+	if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
+	if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
+	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
 static void mp4Test() {
@@ -72,12 +142,9 @@ static void mp4Test() {
 	ttLibC_Frame_Type frameTypes[] = {
 			frameType_h264,
 			frameType_aac,
-//			frameType_h264
 	};
 	testData.writer = (ttLibC_ContainerWriter *)ttLibC_Mp4Writer_make(frameTypes, 2);
 	testData.fp_in = fopen("test.mp4", "rb");
-//	testData.fp_in = fopen("test_mod.mp4", "rb");
-//	testData.fp_in = fopen("test.fmp4", "rb");
 	testData.fp_out = fopen("test_out.mp4", "wb");
 	do {
 		if(!testData.fp_in || !testData.fp_out) {
@@ -701,6 +768,7 @@ cute::suite containerTests(cute::suite s) {
 	s.push_back(CUTE(mpegtsTest)); // h264/aac
 	s.push_back(CUTE(flvTest)); // h264/aac
 
+	s.push_back(CUTE(mp4CodecTest));
 	s.push_back(CUTE(mkvCodecTest));
 	return s;
 }

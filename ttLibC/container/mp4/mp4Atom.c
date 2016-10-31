@@ -12,6 +12,7 @@
 #include "mp4Reader.h"
 #include "../../log.h"
 #include "../../allocator.h"
+#include "type/ctts.h"
 #include "type/stts.h"
 #include "type/stco.h"
 #include "type/stsc.h"
@@ -20,7 +21,9 @@
 #include "../../util/hexUtil.h"
 #include "../../util/byteUtil.h"
 #include "../../frame/video/h264.h"
+#include "../../frame/video/h265.h"
 #include "../../frame/audio/aac.h"
+#include "../../frame/audio/mp3.h"
 
 ttLibC_Mp4Atom *ttLibC_Mp4Atom_make(
 		ttLibC_Mp4Atom *prev_atom,
@@ -103,8 +106,49 @@ static bool Mp4Atom_getFrame(
 			}
 		}
 		break;
+	case frameType_h265:
+		{
+			uint8_t *buf = data;
+			size_t buf_size = data_size;
+			do {
+				uint32_t size = 0;
+				for(int i = 1;i <= track->size_length;++ i) {
+					size = (size << 8) | *buf;
+					if(i != track->size_length) {
+						*buf = 0x00;
+					}
+					else {
+						*buf = 0x01;
+					}
+					++ buf;
+					-- buf_size;
+				}
+				buf += size;
+				buf_size -= size;
+			} while(buf_size > 0);
+			ttLibC_H265 *h265 = ttLibC_H265_getFrame(
+					(ttLibC_H265 *)track->frame,
+					data,
+					data_size,
+					true,
+					pts,
+					timebase);
+			if(h265 == NULL) {
+				ERR_PRINT("failed to make h265 data.");
+				return false;
+			}
+			h265->inherit_super.inherit_super.id = track->track_number;
+			track->frame = (ttLibC_Frame *)h265;
+			if(callback != NULL) {
+				if(!callback(ptr, track->frame)) {
+					return false;
+				}
+			}
+		}
+		break;
 	case frameType_aac:
 		{
+			// make this into getFrame?
 			ttLibC_Aac *aac = ttLibC_Aac_make(
 					(ttLibC_Aac *)track->frame,
 					AacType_raw,
@@ -123,6 +167,28 @@ static bool Mp4Atom_getFrame(
 			}
 			aac->inherit_super.inherit_super.id = track->track_number;
 			track->frame = (ttLibC_Frame *)aac;
+			if(callback != NULL) {
+				if(!callback(ptr, track->frame)) {
+					return false;
+				}
+			}
+		}
+		break;
+	case frameType_mp3:
+		{
+			ttLibC_Mp3 *mp3 = ttLibC_Mp3_getFrame(
+					(ttLibC_Mp3 *)track->frame,
+					data,
+					data_size,
+					true,
+					pts,
+					timebase);
+			if(mp3 == NULL) {
+				ERR_PRINT("failed to make mp3 data.");
+				return false;
+			}
+			mp3->inherit_super.inherit_super.id = track->track_number;
+			track->frame = (ttLibC_Frame *)mp3;
 			if(callback != NULL) {
 				if(!callback(ptr, track->frame)) {
 					return false;
@@ -162,9 +228,11 @@ static bool Mp4Atom_getTrackFrame(
 			}
 		}
 		uint32_t sample_count = ttLibC_Stsc_refChunkSampleNum(track->stsc);
-		for(int i = 0;i < sample_count;++ i) {
+		for(uint32_t i = 0;i < sample_count;++ i) {
 			uint32_t sample_size = ttLibC_Stsz_refCurrentSampleSize(track->stsz);
 			uint64_t pts = ttLibC_Stts_refCurrentPts(track->stts);
+			uint32_t pts_offset = ttLibC_Ctts_refCurrentOffset(track->ctts);
+			pts = pts + pts_offset - track->elst_mediatime;
 			uint32_t duration = ttLibC_Stts_refCurrentDelta(track->stts);
 
 			if(!Mp4Atom_getFrame(track, mdat_data + currentPos - reader->mdat_start_pos, sample_size, pts, track->timebase, duration, callback, ptr)) {
@@ -173,6 +241,7 @@ static bool Mp4Atom_getTrackFrame(
 				return false;
 			}
 			ttLibC_Stts_moveNext(track->stts); // prepare next sample time information
+			ttLibC_Ctts_moveNext(track->ctts);
 			ttLibC_Stsz_moveNext(track->stsz); // prepare next sample size
 			currentPos += sample_size;
 		}
@@ -255,6 +324,57 @@ static bool Mp4Atom_analyzeStsd(
 		return false;
 	}
 	switch(track->frame_type) {
+	case frameType_h265:
+		{
+			ttLibC_ByteReader *byte_reader = ttLibC_ByteReader_make(mp4Atom->inherit_super.inherit_super.data, mp4Atom->inherit_super.inherit_super.buffer_size, ByteUtilType_default);
+			ttLibC_ByteReader_skipByte(byte_reader, 12);
+			if(ttLibC_ByteReader_bit(byte_reader, 32) != 1) {
+				ERR_PRINT("only 1 entry count is expected.");
+				ttLibC_ByteReader_close(&byte_reader);
+				return false;
+			}
+			ttLibC_ByteReader_skipByte(byte_reader, 4);
+			uint32_t in_tag = ttLibC_ByteReader_bit(byte_reader, 32);
+			if(in_tag != 'hev1') {
+				ERR_PRINT("expected to have hev1 atom for h264.");
+				ttLibC_ByteReader_close(&byte_reader);
+				return false;
+			}
+			ttLibC_ByteReader_skipByte(byte_reader, 78);
+			uint32_t in_size = ttLibC_ByteReader_bit(byte_reader, 32);
+			in_tag = ttLibC_ByteReader_bit(byte_reader, 32);
+			if(in_tag != 'hvcC') {
+				ERR_PRINT("hvcC is expected.");
+				ttLibC_ByteReader_close(&byte_reader);
+				return false;
+			}
+			uint8_t *data = mp4Atom->inherit_super.inherit_super.data;
+			data += byte_reader->read_size;
+
+			// try to make h264->configData.
+			uint32_t size_length;
+			ttLibC_H265 *h265 = ttLibC_H265_analyzeHvccTag(
+					(ttLibC_H265 *)track->frame,
+					data,
+					in_size - 8,
+					&size_length);
+			if(h265 != NULL) {
+				track->size_length = size_length;
+				h265->inherit_super.inherit_super.pts = 0;
+				h265->inherit_super.inherit_super.timebase = track->timebase;
+				h265->inherit_super.inherit_super.id = track->track_number;
+				track->frame = (ttLibC_Frame *)h265;
+				if(callback != NULL) {
+					if(!callback(ptr, track->frame)) {
+						ttLibC_ByteReader_close(&byte_reader);
+						reader->error_number = 7;
+						return false;
+					}
+				}
+			}
+			ttLibC_ByteReader_close(&byte_reader);
+		}
+		break;
 	case frameType_h264:
 		{
 			ttLibC_ByteReader *byte_reader = ttLibC_ByteReader_make(mp4Atom->inherit_super.inherit_super.data, mp4Atom->inherit_super.inherit_super.buffer_size, ByteUtilType_default);
@@ -326,6 +446,9 @@ static bool Mp4Atom_analyzeStsd(
 				}
 			}
 		}
+		return true;
+	case frameType_mp3:
+		// nothing to do for mp3.
 		return true;
 	default:
 		ERR_PRINT("unknown frame:%d", track->frame_type);

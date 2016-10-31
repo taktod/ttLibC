@@ -16,6 +16,7 @@
 #include "../../util/hexUtil.h"
 #include "../../util/ioUtil.h"
 #include "../../util/byteUtil.h"
+#include "type/ctts.h"
 #include "type/stco.h"
 #include "type/stsc.h"
 #include "type/stsz.h"
@@ -72,7 +73,7 @@ static bool Mp4Reader_analyzeMvex(ttLibC_Mp4Reader_ *reader) {
 				uint32_t default_sample_duration = ttLibC_ByteReader_bit(byte_reader, 32);
 				uint32_t default_sample_size = ttLibC_ByteReader_bit(byte_reader, 32);
 				uint32_t default_sample_flags = ttLibC_ByteReader_bit(byte_reader, 32);
-				ttLibC_Mp4Track *track = ttLibC_StlMap_get(reader->tracks, (void *)track_id);
+				ttLibC_Mp4Track *track = ttLibC_StlMap_get(reader->tracks, (void *)(long)track_id);
 				if(track == NULL) {
 					ERR_PRINT("failed to ref track object.");
 					return false;
@@ -162,7 +163,7 @@ static bool Mp4Reader_readAtom(
 					// analyze traf at once. for the case of tfhd is not 1st.
 					ttLibC_Mp4Track *track = NULL; // target track
 					uint64_t decode_time_duration; // from tfdt
-					ttLibC_Mp4Atom *trun = NULL;
+					ttLibC_Mp4 *trun = NULL;
 					do {
 						uint32_t in_size = ttLibC_ByteReader_bit(byte_reader, 32);
 						uint32_t in_tag  = ttLibC_ByteReader_bit(byte_reader, 32);
@@ -173,7 +174,7 @@ static bool Mp4Reader_readAtom(
 							{
 								// get track object by track_id
 								uint32_t track_id = ttLibC_ByteReader_bit(byte_reader, 32);
-								track = ttLibC_StlMap_get(reader->tracks, (void *)track_id);
+								track = ttLibC_StlMap_get(reader->tracks, (void *)(long)track_id);
 								// default information
 								track->tfhd_base_data_offset = 0;
 								track->tfhd_sample_desription_index = 0;
@@ -229,12 +230,12 @@ static bool Mp4Reader_readAtom(
 					} while(byte_reader->read_size < size);
 					// byte reading is done.
 					if(track == NULL || trun == NULL) {
-						ttLibC_Mp4Atom_close(&trun);
+						ttLibC_Mp4Atom_close((ttLibC_Mp4Atom **)&trun);
 						reader->error_number = 6;
 					}
 					else {
 						ttLibC_Mp4Atom_close((ttLibC_Mp4Atom **)&track->trun);
-						track->trun = (ttLibC_Mp4 *)trun;
+						track->trun = trun;
 						track->decode_time_duration = decode_time_duration;
 						ttLibC_Trun_setTrack(track->trun, track);
 					}
@@ -246,6 +247,7 @@ static bool Mp4Reader_readAtom(
 			move_size = size;
 		}
 		break;
+	case Mp4Type_Edts:
 	case Mp4Type_Moof:
 	case Mp4Type_Moov:
 	case Mp4Type_Trak:
@@ -283,7 +285,7 @@ static bool Mp4Reader_readAtom(
 		}
 		move_size = 8;
 		break;
-	case Mp4Type_Edts:
+	case Mp4Type_Elst:
 	case Mp4Type_Udta:
 	case Mp4Type_Mvhd:
 	case Mp4Type_Iods:
@@ -301,10 +303,38 @@ static bool Mp4Reader_readAtom(
 	case Mp4Type_Stco:
 	case Mp4Type_Mvex:
 	case Mp4Type_Mfhd: // for html5 mediaSource, sequence number = 0 is works.
+	case Mp4Type_Ctts:
 		{
 			uint8_t version = ttLibC_ByteReader_bit(byte_reader, 8);
 			uint32_t flags = ttLibC_ByteReader_bit(byte_reader, 24);
 			switch(tag) {
+			case Mp4Type_Elst:
+				{
+					uint32_t count;
+					uint64_t segmentDuration;
+					uint64_t mediaTime;
+					uint16_t mediaRateInt;
+					uint16_t mediaRateFraction;
+					count = ttLibC_ByteReader_bit(byte_reader, 32);
+					if(version == 0) {
+						segmentDuration = ttLibC_ByteReader_bit(byte_reader, 32);
+						mediaTime = ttLibC_ByteReader_bit(byte_reader, 32);
+					}
+					else {
+						ERR_PRINT("warn:64bit for elst.");
+						segmentDuration = ttLibC_ByteReader_bit(byte_reader, 64);
+						mediaTime = ttLibC_ByteReader_bit(byte_reader, 64);
+					}
+					mediaRateInt = ttLibC_ByteReader_bit(byte_reader, 16);
+					mediaRateFraction = ttLibC_ByteReader_bit(byte_reader, 16);
+					if(mediaRateInt != 1 && mediaRateFraction != 0) {
+						ERR_PRINT("warn:rate is out of my thought. need to check.");
+					}
+					if(reader->track != NULL) {
+						reader->track->elst_mediatime = (uint32_t)mediaTime;
+					}
+				}
+				break;
 			case Mp4Type_Mvhd:
 				{
 					uint32_t timebase;
@@ -426,6 +456,9 @@ static bool Mp4Reader_readAtom(
 					case 'avc1':
 						reader->track->frame_type = frameType_h264;
 						break;
+					case 'hev1':
+						reader->track->frame_type = frameType_h265;
+						break;
 					case 'mp4v':
 					case 'mp4a':
 						// need to check esTag to understand frame type.
@@ -524,6 +557,7 @@ static bool Mp4Reader_readAtom(
 						}
 						break;
 					default:
+						ERR_PRINT("unknown tag for stsd:%x", in_tag);
 						break;
 					}
 				}
@@ -532,6 +566,14 @@ static bool Mp4Reader_readAtom(
 				{
 					reader->track->stts = ttLibC_Stts_make(data, size, reader->track->timebase);
 					if(reader->track->stts == NULL) {
+						reader->error_number = 1;
+					}
+				}
+				break;
+			case Mp4Type_Ctts:
+				{
+					reader->track->ctts = ttLibC_Ctts_make(data, size, reader->track->timebase);
+					if(reader->track->ctts == NULL) {
 						reader->error_number = 1;
 					}
 				}
@@ -661,6 +703,8 @@ bool ttLibC_Mp4Reader_read(
 }
 
 static bool Mp4Reader_closeTrack(void *ptr, void *key, void *item) {
+	(void)ptr;
+	(void)key;
 	ttLibC_Mp4Track *track = (ttLibC_Mp4Track *)item;
 	if(track != NULL) {
 		ttLibC_Frame_close(&track->frame);
@@ -668,6 +712,7 @@ static bool Mp4Reader_closeTrack(void *ptr, void *key, void *item) {
 		ttLibC_Mp4Atom_close((ttLibC_Mp4Atom **)&track->stts);
 		ttLibC_Mp4Atom_close((ttLibC_Mp4Atom **)&track->stsz);
 		ttLibC_Mp4Atom_close((ttLibC_Mp4Atom **)&track->stco);
+		ttLibC_Mp4Atom_close((ttLibC_Mp4Atom **)&track->ctts);
 		ttLibC_Mp4Atom_close((ttLibC_Mp4Atom **)&track->trun);
 		ttLibC_free(track);
 	}

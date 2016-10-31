@@ -42,10 +42,15 @@ typedef struct ttLibC_Mp4Track {
 	uint64_t dsi_info; // dsi info for aac.
 	uint32_t size_length; // size for h264 size nal
 
+	// for now, just deal with 1 entry only and rate = 1 only elst information.
+	uint32_t elst_mediatime;
+//	float elst_mediarate;
+
 	ttLibC_Mp4 *stts;
 	ttLibC_Mp4 *stsc;
 	ttLibC_Mp4 *stsz;
 	ttLibC_Mp4 *stco;
+	ttLibC_Mp4 *ctts;
 	// co64...
 
 	uint32_t trex_sample_desription_index;
