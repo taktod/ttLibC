@@ -461,16 +461,30 @@ static bool Mp4Reader_readAtom(
 						break;
 					case 'mp4v':
 					case 'mp4a':
-						// need to check esTag to understand frame type.
-						// for audio need to get sampleRate and channelNum
-						ttLibC_ByteReader_skipByte(byte_reader, 16);
-						uint32_t channel_num = ttLibC_ByteReader_bit(byte_reader, 16);
-						ttLibC_ByteReader_skipByte(byte_reader, 6);
-						uint32_t sample_rate = ttLibC_ByteReader_bit(byte_reader, 16);
-						ttLibC_ByteReader_skipByte(byte_reader, 2);
-						if(reader->track != NULL) {
-							reader->track->channel_num = channel_num;
-							reader->track->sample_rate = sample_rate;
+						if(reader->track->is_video) {
+							ttLibC_ByteReader_skipByte(byte_reader, 24);
+							uint16_t width  = ttLibC_ByteReader_bit(byte_reader, 16);
+							uint16_t height = ttLibC_ByteReader_bit(byte_reader, 16);
+							ttLibC_ByteReader_skipByte(byte_reader, 4);
+							ttLibC_ByteReader_skipByte(byte_reader, 4);
+							ttLibC_ByteReader_skipByte(byte_reader, 4);
+							ttLibC_ByteReader_skipByte(byte_reader, 2);
+							ttLibC_ByteReader_skipByte(byte_reader, 32);
+							ttLibC_ByteReader_skipByte(byte_reader, 2);
+							ttLibC_ByteReader_skipByte(byte_reader, 2);
+						}
+						else if(reader->track->is_audio) {
+							// need to check esTag to understand frame type.
+							// for audio need to get sampleRate and channelNum
+							ttLibC_ByteReader_skipByte(byte_reader, 16);
+							uint32_t channel_num = ttLibC_ByteReader_bit(byte_reader, 16);
+							ttLibC_ByteReader_skipByte(byte_reader, 6);
+							uint32_t sample_rate = ttLibC_ByteReader_bit(byte_reader, 16);
+							ttLibC_ByteReader_skipByte(byte_reader, 2);
+							if(reader->track != NULL) {
+								reader->track->channel_num = channel_num;
+								reader->track->sample_rate = sample_rate;
+							}
 						}
 						in_size = ttLibC_ByteReader_bit(byte_reader, 32);
 						in_tag = ttLibC_ByteReader_bit(byte_reader, 32);
@@ -533,9 +547,18 @@ static bool Mp4Reader_readAtom(
 									case 0x6B:
 										reader->track->frame_type = frameType_mp3;
 										break;
+									case 0x6C:
+										reader->track->frame_type = frameType_jpeg;
+										break;
+									case 0xDD:
+										reader->track->frame_type = frameType_vorbis;
+										break;
+									default:
+										break;
 									}
-									// for now, aac is the only one to analyze more.
-									if(reader->track->frame_type != frameType_aac) {
+									// for now, aac or vorbis is the only one to analyze more.
+									if(reader->track->frame_type != frameType_aac
+									&& reader->track->frame_type != frameType_vorbis) {
 										// other codec, stop to analyze.
 										break;
 									}
@@ -543,7 +566,19 @@ static bool Mp4Reader_readAtom(
 								}
 								else if(esTagType == 5) { // decoderSpecific
 									uint8_t *buf = data + byte_reader->read_size;
-									memcpy(&reader->track->dsi_info, buf, esTagSize);
+									switch(reader->track->frame_type) {
+									case frameType_aac:
+										memcpy(&reader->track->dsi_info, buf, esTagSize);
+										break;
+									case frameType_vorbis:
+										{
+											reader->track->private_data = ttLibC_DynamicBuffer_make();
+											ttLibC_DynamicBuffer_append(reader->track->private_data, buf, esTagSize); // コピっとく。
+										}
+										break;
+									default:
+										break;
+									}
 									break; // something I need is done.
 								}
 								else if(esTagType == 6) { // slConfig
@@ -708,6 +743,7 @@ static bool Mp4Reader_closeTrack(void *ptr, void *key, void *item) {
 	ttLibC_Mp4Track *track = (ttLibC_Mp4Track *)item;
 	if(track != NULL) {
 		ttLibC_Frame_close(&track->frame);
+		ttLibC_DynamicBuffer_close(&track->private_data);
 		ttLibC_Mp4Atom_close((ttLibC_Mp4Atom **)&track->stsc);
 		ttLibC_Mp4Atom_close((ttLibC_Mp4Atom **)&track->stts);
 		ttLibC_Mp4Atom_close((ttLibC_Mp4Atom **)&track->stsz);

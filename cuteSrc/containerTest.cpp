@@ -84,7 +84,7 @@ static void mp4CodecTest() {
 	types[0] = frameType_h264;
 	types[1] = frameType_aac;
 //	testData.writer = (ttLibC_ContainerWriter *)ttLibC_Mp4Writer_make(types, 2);
-	sprintf(file, "%s/tools/data/source/test.h264.aac.mp4box.mp4", getenv("HOME"));
+	sprintf(file, "%s/tools/data/source/test.h264.aac.mp4", getenv("HOME"));
 	testData.fp_in = fopen(file, "rb");
 //	sprintf(file, "%s/tools/data/c_out/test.h264.aac.mp4", getenv("HOME"));
 //	testData.fp_out = fopen(file, "wb");
@@ -111,7 +111,34 @@ static void mp4CodecTest() {
 	types[0] = frameType_h265;
 	types[1] = frameType_mp3;
 //	testData.writer = (ttLibC_ContainerWriter *)ttLibC_Mp4Writer_make(types, 2);
-	sprintf(file, "%s/tools/data/source/test.h265.mp3.mp4box.mp4", getenv("HOME"));
+	sprintf(file, "%s/tools/data/source/test.h265.mp3.mp4", getenv("HOME"));
+	testData.fp_in = fopen(file, "rb");
+//	sprintf(file, "%s/tools/data/c_out/test.h265.mp3.mp4", getenv("HOME"));
+//	testData.fp_out = fopen(file, "wb");
+	testData.fp_out = NULL;
+	do {
+		uint8_t buffer[65536];
+		if(!testData.fp_in) {
+			break;
+		}
+		size_t read_size = fread(buffer, 1, 65536, testData.fp_in);
+		if(!ttLibC_Mp4Reader_read((ttLibC_Mp4Reader *)testData.reader, buffer, read_size, mp4Test_getMp4Callback, &testData)) {
+			ERR_PRINT("error occured!");
+			break;
+		}
+	} while(!feof(testData.fp_in));
+	ttLibC_ContainerReader_close(&testData.reader);
+	ttLibC_ContainerWriter_close(&testData.writer);
+	if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
+	if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
+	ASSERT(ttLibC_Allocator_dump() == 0);
+
+	LOG_PRINT("mjpeg / vorbis");
+	testData.reader = (ttLibC_ContainerReader *)ttLibC_Mp4Reader_make();
+	types[0] = frameType_jpeg;
+	types[1] = frameType_vorbis;
+//	testData.writer = (ttLibC_ContainerWriter *)ttLibC_Mp4Writer_make(types, 2);
+	sprintf(file, "%s/tools/data/source/test.mjpeg.vorbis.mp4", getenv("HOME"));
 	testData.fp_in = fopen(file, "rb");
 //	sprintf(file, "%s/tools/data/c_out/test.h265.mp3.mp4", getenv("HOME"));
 //	testData.fp_out = fopen(file, "wb");

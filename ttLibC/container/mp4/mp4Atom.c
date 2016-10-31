@@ -22,8 +22,10 @@
 #include "../../util/byteUtil.h"
 #include "../../frame/video/h264.h"
 #include "../../frame/video/h265.h"
+#include "../../frame/video/jpeg.h"
 #include "../../frame/audio/aac.h"
 #include "../../frame/audio/mp3.h"
+#include "../../frame/audio/vorbis.h"
 
 ttLibC_Mp4Atom *ttLibC_Mp4Atom_make(
 		ttLibC_Mp4Atom *prev_atom,
@@ -148,7 +150,7 @@ static bool Mp4Atom_getFrame(
 		break;
 	case frameType_aac:
 		{
-			// make this into getFrame?
+			// TODO ? make this into getFrame?
 			ttLibC_Aac *aac = ttLibC_Aac_make(
 					(ttLibC_Aac *)track->frame,
 					AacType_raw,
@@ -189,6 +191,50 @@ static bool Mp4Atom_getFrame(
 			}
 			mp3->inherit_super.inherit_super.id = track->track_number;
 			track->frame = (ttLibC_Frame *)mp3;
+			if(callback != NULL) {
+				if(!callback(ptr, track->frame)) {
+					return false;
+				}
+			}
+		}
+		break;
+	case frameType_jpeg:
+		{
+			ttLibC_Jpeg *jpeg = ttLibC_Jpeg_getFrame(
+					(ttLibC_Jpeg *)track->frame,
+					data,
+					data_size,
+					true,
+					pts,
+					timebase);
+			if(jpeg == NULL) {
+				ERR_PRINT("failed to make jpeg data.");
+				return false;
+			}
+			jpeg->inherit_super.inherit_super.id = track->track_number;
+			track->frame = (ttLibC_Frame *)jpeg;
+			if(callback != NULL) {
+				if(!callback(ptr, track->frame)) {
+					return false;
+				}
+			}
+		}
+		break;
+	case frameType_vorbis:
+		{
+			ttLibC_Vorbis *vorbis = ttLibC_Vorbis_getFrame(
+					(ttLibC_Jpeg *)track->frame,
+					data,
+					data_size,
+					true,
+					pts,
+					timebase);
+			if(vorbis == NULL) {
+				ERR_PRINT("failed to make vorbis data.");
+				return false;
+			}
+			vorbis->inherit_super.inherit_super.id = track->track_number;
+			track->frame = (ttLibC_Frame *)vorbis;
 			if(callback != NULL) {
 				if(!callback(ptr, track->frame)) {
 					return false;
@@ -448,7 +494,84 @@ static bool Mp4Atom_analyzeStsd(
 		}
 		return true;
 	case frameType_mp3:
-		// nothing to do for mp3.
+	case frameType_jpeg:
+	// nothing to do for mp3, jpeg.
+		return true;
+	case frameType_vorbis:
+		{
+			// make vorbis identification comment setup frames.
+			uint8_t *private_data = ttLibC_DynamicBuffer_refData(track->private_data);
+			size_t private_data_size = ttLibC_DynamicBuffer_refSize(track->private_data);
+			uint32_t diff[4];
+			diff[0] = private_data[0];
+			diff[1] = private_data[1];
+			diff[2] = private_data[2];
+			diff[3] = private_data_size - 3 - diff[1] - diff[2];
+
+			private_data += 3;
+			ttLibC_Vorbis *v = ttLibC_Vorbis_getFrame(
+					(ttLibC_Vorbis *)track->frame,
+					private_data,
+					diff[1],
+					true,
+					track->pts,
+					track->timebase);
+			if(v == NULL) {
+				ERR_PRINT("failed to get vorbis identification frame.");
+				reader->error_number = 5;
+				return false;
+			}
+			track->frame = (ttLibC_Frame *)v;
+			track->frame->id = track->track_number;
+			if(callback != NULL) {
+				if(!callback(ptr, track->frame)) {
+					reader->error_number = 5;
+					return false;
+				}
+			}
+			private_data += diff[1];
+			v = ttLibC_Vorbis_getFrame(
+					(ttLibC_Vorbis *)track->frame,
+					private_data,
+					diff[2],
+					true,
+					track->pts,
+					track->timebase);
+			if(v == NULL) {
+				ERR_PRINT("failed to get vorbis comment frame.");
+				reader->error_number = 5;
+				return false;
+			}
+			track->frame = (ttLibC_Frame *)v;
+			track->frame->id = track->track_number;
+			if(callback != NULL) {
+				if(!callback(ptr, track->frame)) {
+					reader->error_number = 5;
+					return false;
+				}
+			}
+			private_data += diff[2];
+			v = ttLibC_Vorbis_getFrame(
+					(ttLibC_Vorbis *)track->frame,
+					private_data,
+					diff[3],
+					true,
+					track->pts,
+					track->timebase);
+			if(v == NULL) {
+				ERR_PRINT("failed to get vorbis setup frame.");
+				reader->error_number = 5;
+				return false;
+			}
+			track->frame = (ttLibC_Frame *)v;
+			track->frame->id = track->track_number;
+			if(callback != NULL) {
+				if(!callback(ptr, track->frame)) {
+					reader->error_number = 5;
+					return false;
+				}
+			}
+		}
 		return true;
 	default:
 		ERR_PRINT("unknown frame:%d", track->frame_type);
