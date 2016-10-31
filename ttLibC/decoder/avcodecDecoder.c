@@ -182,7 +182,7 @@ static bool AvcodecDecoder_decodeAudio(
 					NULL,
 					0,
 					true,
-					frame->inherit_super.pts,
+					decoder->avframe->pkt_pts,
 					frame->inherit_super.timebase);
 			if(pcmf32 != NULL) {
 				decoder->frame = (ttLibC_Frame *)pcmf32;
@@ -211,7 +211,7 @@ static bool AvcodecDecoder_decodeAudio(
 					decoder->avframe->data[1],
 					decoder->avframe->nb_samples * 4,
 					true,
-					frame->inherit_super.pts,
+					decoder->avframe->pkt_pts,
 					frame->inherit_super.timebase);
 			if(pcmf32 != NULL) {
 				decoder->frame = (ttLibC_Frame *)pcmf32;
@@ -243,7 +243,7 @@ static bool AvcodecDecoder_decodeAudio(
 					NULL,
 					0,
 					true,
-					frame->inherit_super.pts,
+					decoder->avframe->pkt_pts,
 					frame->inherit_super.timebase);
 			if(pcms16 != NULL) {
 				decoder->frame = (ttLibC_Frame *)pcms16;
@@ -272,7 +272,7 @@ static bool AvcodecDecoder_decodeAudio(
 					decoder->avframe->data[1],
 					decoder->avframe->nb_samples * 2,
 					true,
-					frame->inherit_super.pts,
+					decoder->avframe->pkt_pts,
 					frame->inherit_super.timebase);
 			if(pcms16 != NULL) {
 				decoder->frame = (ttLibC_Frame *)pcms16;
@@ -401,7 +401,7 @@ static bool AvcodecDecoder_decodeVideo(
 					decoder->avframe->data[1], decoder->avframe->linesize[1],
 					decoder->avframe->data[2], decoder->avframe->linesize[2],
 					true,
-					frame->inherit_super.pts,
+					decoder->avframe->pkt_pts,
 					frame->inherit_super.timebase);
 			if(y != NULL) {
 				decoder->frame = (ttLibC_Frame *)y;
