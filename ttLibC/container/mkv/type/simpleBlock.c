@@ -63,23 +63,27 @@ static void SimpleBlock_getLace0Frame(
 				buf += size;
 				buf_size -= size;
 			} while(buf_size > 0);
-			ttLibC_H265 *h265 = ttLibC_H265_getFrame(
-					(ttLibC_H265 *)track->frame,
-					data,
-					data_size,
-					true,
-					pts,
-					timebase);
-			if(h265 == NULL) {
-				ERR_PRINT("failed to make h265 data.");
-				reader->error_number = 5;
-			}
-			else {
+			while(data_size > 0) {
+				ttLibC_H265 *h265 = ttLibC_H265_getFrame(
+						(ttLibC_H265 *)track->frame,
+						data,
+						data_size,
+						true,
+						pts,
+						timebase);
+				if(h265 == NULL) {
+					ERR_PRINT("failed to make h265 data.");
+					reader->error_number = 5;
+					break;
+				}
+				data += h265->inherit_super.inherit_super.buffer_size;
+				data_size -= h265->inherit_super.inherit_super.buffer_size;
 				track->frame = (ttLibC_Frame *)h265;
 				track->frame->id = track->track_number;
 				if(callback != NULL) {
 					if(!callback(ptr, track->frame)) {
 						reader->error_number = 5;
+						break;
 					}
 				}
 			}
@@ -106,23 +110,27 @@ static void SimpleBlock_getLace0Frame(
 				buf += size;
 				buf_size -= size;
 			} while(buf_size > 0);
-			ttLibC_H264 *h264 = ttLibC_H264_getFrame(
-					(ttLibC_H264 *)track->frame,
-					data,
-					data_size,
-					true,
-					pts,
-					timebase);
-			if(h264 == NULL) {
-				ERR_PRINT("failed to make h264 data.");
-				reader->error_number = 5;
-			}
-			else {
+			while(data_size > 0) {
+				ttLibC_H264 *h264 = ttLibC_H264_getFrame(
+						(ttLibC_H264 *)track->frame,
+						data,
+						data_size,
+						true,
+						pts,
+						timebase);
+				if(h264 == NULL) {
+					ERR_PRINT("failed to make h264 data.");
+					reader->error_number = 5;
+					break;
+				}
+				data += h264->inherit_super.inherit_super.buffer_size;
+				data_size -= h264->inherit_super.inherit_super.buffer_size;
 				track->frame = (ttLibC_Frame *)h264;
 				track->frame->id = track->track_number;
 				if(callback != NULL) {
 					if(!callback(ptr, track->frame)) {
 						reader->error_number = 5;
+						break;
 					}
 				}
 			}

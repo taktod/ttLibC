@@ -133,22 +133,26 @@ static bool Mp4Atom_getFrame(
 				buf += size;
 				buf_size -= size;
 			} while(buf_size > 0);
-			ttLibC_H265 *h265 = ttLibC_H265_getFrame(
-					(ttLibC_H265 *)track->frame,
-					data,
-					data_size,
-					true,
-					pts,
-					timebase);
-			if(h265 == NULL) {
-				ERR_PRINT("failed to make h265 data.");
-				return false;
-			}
-			h265->inherit_super.inherit_super.id = track->track_number;
-			track->frame = (ttLibC_Frame *)h265;
-			if(callback != NULL) {
-				if(!callback(ptr, track->frame)) {
+			while(data_size > 0) {
+				ttLibC_H265 *h265 = ttLibC_H265_getFrame(
+						(ttLibC_H265 *)track->frame,
+						data,
+						data_size,
+						true,
+						pts,
+						timebase);
+				if(h265 == NULL) {
+					ERR_PRINT("failed to make h265 data.");
 					return false;
+				}
+				data += h265->inherit_super.inherit_super.buffer_size;
+				data_size -= h265->inherit_super.inherit_super.buffer_size;
+				h265->inherit_super.inherit_super.id = track->track_number;
+				track->frame = (ttLibC_Frame *)h265;
+				if(callback != NULL) {
+					if(!callback(ptr, track->frame)) {
+						return false;
+					}
 				}
 			}
 		}
