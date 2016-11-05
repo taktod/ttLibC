@@ -53,6 +53,7 @@ ttLibC_Mp4Atom *ttLibC_Mp4Atom_make(
 			timebase);
 	if(atom != NULL) {
 		atom->inherit_super.type = type;
+		atom->position = 0;
 	}
 	return atom;
 }
@@ -88,22 +89,26 @@ static bool Mp4Atom_getFrame(
 				buf += size;
 				buf_size -= size;
 			} while(buf_size > 0);
-			ttLibC_H264 *h264 = ttLibC_H264_getFrame(
-					(ttLibC_H264 *)track->frame,
-					data,
-					data_size,
-					true,
-					pts,
-					timebase);
-			if(h264 == NULL) {
-				ERR_PRINT("failed to make h264 data.");
-				return false;
-			}
-			h264->inherit_super.inherit_super.id = track->track_number;
-			track->frame = (ttLibC_Frame *)h264;
-			if(callback != NULL) {
-				if(!callback(ptr, track->frame)) {
+			while(data_size > 0) {
+				ttLibC_H264 *h264 = ttLibC_H264_getFrame(
+						(ttLibC_H264 *)track->frame,
+						data,
+						data_size,
+						true,
+						pts,
+						timebase);
+				if(h264 == NULL) {
+					ERR_PRINT("failed to make h264 data.");
 					return false;
+				}
+				data += h264->inherit_super.inherit_super.buffer_size;
+				data_size -= h264->inherit_super.inherit_super.buffer_size;
+				h264->inherit_super.inherit_super.id = track->track_number;
+				track->frame = (ttLibC_Frame *)h264;
+				if(callback != NULL) {
+					if(!callback(ptr, track->frame)) {
+						return false;
+					}
 				}
 			}
 		}
@@ -223,7 +228,7 @@ static bool Mp4Atom_getFrame(
 	case frameType_vorbis:
 		{
 			ttLibC_Vorbis *vorbis = ttLibC_Vorbis_getFrame(
-					(ttLibC_Jpeg *)track->frame,
+					(ttLibC_Vorbis *)track->frame,
 					data,
 					data_size,
 					true,
@@ -251,6 +256,7 @@ static bool Mp4Atom_getFrame(
 static bool Mp4Atom_getTrackFrame(
 		uint8_t *mdat_data,
 		size_t mdat_data_size,
+		bool is_complete,
 		ttLibC_Mp4Reader_ *reader,
 		ttLibC_Mp4Track *track,
 		ttLibC_getFrameFunc callback,
@@ -265,6 +271,9 @@ static bool Mp4Atom_getTrackFrame(
 		// ... should I change the way?
 		if(nextPos == 0) {
 			// current chunk is the last one.
+			if(!is_complete) {
+				return true;
+			}
 		}
 		else {
 			// have enough data for start of next chunk = have enough data for this chunk.
@@ -303,15 +312,17 @@ static bool Mp4Atom_getMdatFrameCallback(
 		void *ptr,
 		void *key,
 		void *item) {
+	(void)key;
 	ttLibC_Mp4Track *track = (ttLibC_Mp4Track *)item;
-	ttLibC_Mp4Atom *mp4Atom = (ttLibC_Mp4Atom *)ptr;
-	if(track == NULL || mp4Atom == NULL || mp4Atom->inherit_super.type != Mp4Type_Mdat) {
+	ttLibC_Mp4Atom *mdatAtom = (ttLibC_Mp4Atom *)ptr;
+	if(track == NULL || mdatAtom == NULL || mdatAtom->inherit_super.type != Mp4Type_Mdat) {
 		return false;
 	}
-	ttLibC_Mp4Reader_ *reader = (ttLibC_Mp4Reader_ *)mp4Atom->reader;
+	ttLibC_Mp4Reader_ *reader = (ttLibC_Mp4Reader_ *)mdatAtom->reader;
 	if(!Mp4Atom_getTrackFrame(
-			mp4Atom->inherit_super.inherit_super.data,
-			mp4Atom->inherit_super.inherit_super.buffer_size,
+			mdatAtom->inherit_super.inherit_super.data,
+			mdatAtom->inherit_super.inherit_super.buffer_size,
+			mdatAtom->inherit_super.is_complete,
 			reader,
 			track,
 			reader->callback,
@@ -326,26 +337,40 @@ static bool Mp4Atom_getFmp4FrameCallback(
 		void *ptr,
 		void *key,
 		void *item) {
+	(void)key;
 	ttLibC_Mp4Track *track = (ttLibC_Mp4Track *)item;
-	ttLibC_Mp4Atom *mp4Atom = (ttLibC_Mp4Atom *)ptr;
-	if(track == NULL || mp4Atom == NULL || mp4Atom->inherit_super.type != Mp4Type_Mdat) {
+	ttLibC_Mp4Atom *mdatAtom = (ttLibC_Mp4Atom *)ptr;
+	if(track == NULL || mdatAtom == NULL || mdatAtom->inherit_super.type != Mp4Type_Mdat) {
 		return false;
 	}
-	ttLibC_Mp4Reader_ *reader = (ttLibC_Mp4Reader_ *)mp4Atom->reader;
+	ttLibC_Mp4Reader_ *reader = (ttLibC_Mp4Reader_ *)mdatAtom->reader;
 	if(reader->error_number != 0) {
 		return false;
 	}
-	uint8_t *mdat_buffer = mp4Atom->inherit_super.inherit_super.data;
+	if(!ttLibC_Trun_isValid(track->trun)) {
+		// no more for trun.
+		return true;
+	}
+	uint8_t *mdat_buffer = mdatAtom->inherit_super.inherit_super.data;
 	uint64_t pos, pts;
-	uint32_t size, duration;
+	uint32_t size, duration, pts_offset;
 	do {
 		pts = ttLibC_Trun_refCurrentPts(track->trun);
+		pts_offset = ttLibC_Trun_refCurrentTimeOffset(track->trun);
+		pts = pts + pts_offset - track->elst_mediatime;
 		duration = ttLibC_Trun_refCurrentDelta(track->trun);
 		pos = ttLibC_Trun_refCurrentPos(track->trun);
 		size = ttLibC_Trun_refCurrentSize(track->trun);
+		uint8_t *target_buffer = NULL;
+		if(track->tfhd_base_data_offset != 0) {
+			target_buffer = mdat_buffer + (pos + track->tfhd_base_data_offset - mdatAtom->position);
+		}
+		else {
+			target_buffer = mdat_buffer + (pos + reader->moof_position - mdatAtom->position);
+		}
 		if(!Mp4Atom_getFrame(
 				track,
-				mdat_buffer + pos - reader->mdat_start_pos,
+				target_buffer,
 				size,
 				pts,
 				track->timebase,
@@ -626,6 +651,7 @@ bool ttLibC_Mp4_getFrame(
 		return Mp4Atom_getTrackFrame(
 				ttLibC_DynamicBuffer_refData(reader->mdat_buffer),
 				ttLibC_DynamicBuffer_refSize(reader->mdat_buffer),
+				true,
 				reader,
 				reader->track,
 				callback,

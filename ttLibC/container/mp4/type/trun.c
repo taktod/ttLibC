@@ -45,42 +45,15 @@ void ttLibC_Trun_setTrack(
 		ttLibC_Mp4 *mp4,
 		ttLibC_Mp4Track *track) {
 	ttLibC_Trun *trun = (ttLibC_Trun *)mp4;
-	mp4->inherit_super.pts = track->decode_time_duration;
-	mp4->inherit_super.timebase = track->timebase;
 	trun->track = track;
-	uint32_t *buf = (uint32_t *)trun->inherit_super.inherit_super.inherit_super.data;
-	buf += 2;
-	trun->flags = be_uint32_t(*buf);
-	++ buf;
-	trun->sample_count = be_uint32_t(*buf);
-	++ buf;
-	if((trun->flags & 0x000001) != 0) {
-		trun->data_offset = be_uint32_t(*buf);
-		++ buf;
-	}
-	else {
-		// ?
-		trun->data_offset = track->tfhd_base_data_offset;
-	}
-	if((trun->flags & 0x000004) != 0) {
-		trun->first_sample_flags = be_uint32_t(*buf);
-		++ buf;
-	}
-	else {
-		if(track->tfhd_sample_flags != 0) {
-			trun->first_sample_flags = track->tfhd_sample_flags;
-		}
-		else {
-			trun->first_sample_flags = track->trex_sample_flags;
-		}
-	}
 	trun->current_composition_time_offset = 0;
 	trun->current_duration = 0;
 	trun->current_flags = 0;
-	trun->current_pts = trun->inherit_super.inherit_super.inherit_super.pts;
+	trun->current_pts = track->decode_time_duration;
 	trun->current_size = 0;
-	trun->current_pos = trun->data_offset;
-	trun->data = buf;
+	trun->current_pos = 0;
+	trun->data = (uint8_t *)trun->inherit_super.inherit_super.inherit_super.data;
+	trun->data_size = trun->inherit_super.inherit_super.inherit_super.buffer_size;
 	ttLibC_Trun_moveNext((ttLibC_Mp4 *)trun);
 }
 
@@ -100,19 +73,78 @@ uint32_t ttLibC_Trun_refCurrentSize(ttLibC_Mp4 *mp4) {
 	ttLibC_Trun *trun = (ttLibC_Trun *)mp4;
 	return trun->current_size;
 }
+uint32_t ttLibC_Trun_refCurrentTimeOffset(ttLibC_Mp4 *mp4) {
+	ttLibC_Trun *trun = (ttLibC_Trun *)mp4;
+	return trun->current_composition_time_offset;
+}
+bool ttLibC_Trun_isValid(ttLibC_Mp4 *mp4) {
+	ttLibC_Trun *trun = (ttLibC_Trun *)mp4;
+	return trun->sample_count != 0 || trun->data_size != 0;
+}
 bool ttLibC_Trun_moveNext(ttLibC_Mp4 *mp4) {
 	ttLibC_Trun *trun = (ttLibC_Trun *)mp4;
 	ttLibC_Mp4Track *track = trun->track;
-	uint32_t *buf = trun->data;
+	uint8_t *buf = trun->data;
+	size_t buf_size = trun->data_size;
 	if(trun->sample_count == 0) {
-		return false; // no more.
+		if(buf_size == 0) {
+			// no more data.
+			return false;
+		}
+		// in the case of more data. need to check traf binary.
+		while(buf_size > 0) {
+			uint32_t sz = be_uint32_t(*(uint32_t *)buf);
+			buf += 4;
+			buf_size -= 4;
+			if(be_uint32_t(*(uint32_t *)buf) == Mp4Type_Trun) {
+				buf += 4;
+				buf_size -= 4;
+				trun->flags = be_uint32_t(*(uint32_t *)buf);
+				buf += 4;
+				buf_size -= 4;
+				trun->sample_count = be_uint32_t(*(uint32_t *)buf);
+				buf += 4;
+				buf_size -= 4;
+				if((trun->flags & 0x000001) != 0) {
+					trun->data_offset = be_uint32_t(*(uint32_t *)buf);
+					buf += 4;
+					buf_size -= 4;
+				}
+				else {
+					trun->data_offset = 0;
+				}
+				if((trun->flags & 0x000004) != 0) {
+					trun->first_sample_flags = be_uint32_t(*(uint32_t *)buf);
+					buf += 4;
+					buf_size -= 4;
+				}
+				else {
+					if(track->tfhd_sample_flags != 0) {
+						trun->first_sample_flags = track->tfhd_sample_flags;
+					}
+					else {
+						trun->first_sample_flags = track->trex_sample_flags;
+					}
+				}
+				trun->current_pos = trun->data_offset;
+				trun->current_composition_time_offset = 0;
+				trun->current_pts = track->decode_time_duration;
+				trun->current_duration = 0;
+				trun->current_flags = 0;
+				trun->current_size = 0;
+				break;
+			}
+			buf += (sz - 4);
+			buf_size -= (sz - 4);
+		}
 	}
 	-- trun->sample_count;
-	// now update information.
 	trun->current_pts += trun->current_duration;
+	trun->current_pos += trun->current_size;
 	if((trun->flags & 0x000100) != 0) {
-		trun->current_duration = be_uint32_t(*buf);
-		++ buf;
+		trun->current_duration = be_uint32_t(*(uint32_t *)buf);
+		buf += 4;
+		buf_size -= 4;
 	}
 	else {
 		if(track->tfhd_sample_duration != 0) {
@@ -122,10 +154,11 @@ bool ttLibC_Trun_moveNext(ttLibC_Mp4 *mp4) {
 			trun->current_duration = track->trex_sample_duration;
 		}
 	}
-	trun->current_pos += trun->current_size;
+	track->decode_time_duration = trun->current_pts + trun->current_duration;
 	if((trun->flags & 0x000200) != 0) {
-		trun->current_size = be_uint32_t(*buf);
-		++ buf;
+		trun->current_size = be_uint32_t(*(uint32_t *)buf);
+		buf += 4;
+		buf_size -= 4;
 	}
 	else {
 		if(track->tfhd_sample_size != 0) {
@@ -136,8 +169,9 @@ bool ttLibC_Trun_moveNext(ttLibC_Mp4 *mp4) {
 		}
 	}
 	if((trun->flags & 0x000400) != 0) {
-		trun->current_flags = be_uint32_t(*buf);
-		++ buf;
+		trun->current_flags = be_uint32_t(*(uint32_t *)buf);
+		buf += 4;
+		buf_size -= 4;
 	}
 	else {
 		if(track->tfhd_sample_flags != 0) {
@@ -148,13 +182,14 @@ bool ttLibC_Trun_moveNext(ttLibC_Mp4 *mp4) {
 		}
 	}
 	if((trun->flags & 0x000800) != 0) {
-		// sample_composition time presented
-		trun->current_composition_time_offset = be_uint32_t(*buf);
-		++ buf;
+		trun->current_composition_time_offset = be_uint32_t(*(uint32_t *)buf);
+		buf += 4;
+		buf_size -= 4;
 	}
 	else {
-
+		trun->current_composition_time_offset = 0;
 	}
 	trun->data = buf;
+	trun->data_size = buf_size;
 	return true;
 }

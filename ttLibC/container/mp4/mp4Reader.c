@@ -46,6 +46,7 @@ ttLibC_Mp4Reader *ttLibC_Mp4Reader_make() {
 	reader->mvex = NULL;
 	reader->ptr = NULL;
 	reader->is_fmp4 = false;
+	reader->position = 0;
 	return (ttLibC_Mp4Reader *)reader;
 }
 
@@ -128,6 +129,7 @@ static bool Mp4Reader_readAtom(
 				// mdat could be too big. so do callback with incomplete data.
 				// only for mdat.
 				{
+					reader->mdat_start_pos = reader->position;
 					if(data_size < size) {
 						ttLibC_ByteReader_close(&byte_reader);
 						ttLibC_Mp4Atom *mp4Atom = ttLibC_Mp4Atom_make(
@@ -139,6 +141,7 @@ static bool Mp4Reader_readAtom(
 								reader->timebase,
 								tag);
 						if(mp4Atom != NULL) {
+							mp4Atom->position = reader->position;
 							mp4Atom->inherit_super.is_complete = false;
 							mp4Atom->reader = (ttLibC_Mp4Reader *)reader;
 							reader->atom = mp4Atom;
@@ -162,8 +165,9 @@ static bool Mp4Reader_readAtom(
 				{
 					// analyze traf at once. for the case of tfhd is not 1st.
 					ttLibC_Mp4Track *track = NULL; // target track
-					uint64_t decode_time_duration; // from tfdt
-					ttLibC_Mp4 *trun = NULL;
+					uint64_t decode_time_duration = 0; // from tfdt
+					// trun will contain the data of traf, for analyzing trun, we need to check the data in trafAtom.(because, traf can hold multiple trunAtoms.)
+					ttLibC_Mp4 *trun = ttLibC_Trun_make(data + 8, size - 8);
 					do {
 						uint32_t in_size = ttLibC_ByteReader_bit(byte_reader, 32);
 						uint32_t in_tag  = ttLibC_ByteReader_bit(byte_reader, 32);
@@ -175,6 +179,9 @@ static bool Mp4Reader_readAtom(
 								// get track object by track_id
 								uint32_t track_id = ttLibC_ByteReader_bit(byte_reader, 32);
 								track = ttLibC_StlMap_get(reader->tracks, (void *)(long)track_id);
+								if(decode_time_duration == 0) {
+									decode_time_duration = track->decode_time_duration;
+								}
 								// default information
 								track->tfhd_base_data_offset = 0;
 								track->tfhd_sample_desription_index = 0;
@@ -215,16 +222,13 @@ static bool Mp4Reader_readAtom(
 							break;
 						case Mp4Type_Trun:
 							{
-								trun = ttLibC_Trun_make(
-										data + byte_reader->read_size - 12,
-										in_size);
-								ttLibC_ByteReader_skipByte(byte_reader, in_size - 8);
+								ttLibC_ByteReader_skipByte(byte_reader, in_size - 12);
 							}
 							break;
 						default:
 							LOG_PRINT("sz:%x tag:%x", in_size, in_tag);
 							reader->error_number = 6;
-							ttLibC_ByteReader_skipByte(byte_reader, in_size - 8);
+							ttLibC_ByteReader_skipByte(byte_reader, in_size - 12); // CHECK is this corrent?
 							break;
 						}
 					} while(byte_reader->read_size < size);
@@ -244,6 +248,7 @@ static bool Mp4Reader_readAtom(
 			default:
 				break;
 			}
+			reader->position += size;
 			move_size = size;
 		}
 		break;
@@ -272,17 +277,18 @@ static bool Mp4Reader_readAtom(
 				break;
 			case Mp4Type_Moof:
 				{
+					reader->moof_position = reader->position;
 					if(!Mp4Reader_analyzeMvex(reader)) {
 						reader->error_number = 5;
 						return false;
 					}
-					reader->mdat_start_pos = 0; // moof is the base of offset for mdat. therefore reset the mdat_start_pos.
 				}
 				break;
 			default:
 				break;
 			}
 		}
+		reader->position += 8;
 		move_size = 8;
 		break;
 	case Mp4Type_Elst:
@@ -582,7 +588,6 @@ static bool Mp4Reader_readAtom(
 									break; // something I need is done.
 								}
 								else if(esTagType == 6) { // slConfig
-									LOG_PRINT("slConfig");
 									break;
 								}
 								else {
@@ -659,6 +664,7 @@ static bool Mp4Reader_readAtom(
 				break;
 			}
 		}
+		reader->position += size;
 		move_size = size;
 		break;
 	default:
@@ -685,6 +691,7 @@ static bool Mp4Reader_readAtom(
 			reader->timebase,
 			tag);
 	if(mp4Atom != NULL) {
+		mp4Atom->position = reader->position - size;
 		mp4Atom->inherit_super.is_complete = true;
 		mp4Atom->reader = (ttLibC_Mp4Reader *)reader;
 		reader->atom = mp4Atom;
@@ -694,9 +701,6 @@ static bool Mp4Reader_readAtom(
 			}
 		}
 	}
-	if(reader->mdat_buffer == NULL) {
-		reader->mdat_start_pos += move_size;
-	}
 	if(reader->track != NULL) {
 		// trak is done. put track into stlmap.
 		if(reader->track->size == 0) {
@@ -705,7 +709,7 @@ static bool Mp4Reader_readAtom(
 				Mp4Reader_closeTrack(NULL, NULL, reader->track);
 			}
 			else {
-				ttLibC_StlMap_put(reader->tracks, (void *)reader->track->track_number, reader->track);
+				ttLibC_StlMap_put(reader->tracks, (void *)(long)reader->track->track_number, reader->track);
 			}
 			reader->track = NULL;
 		}

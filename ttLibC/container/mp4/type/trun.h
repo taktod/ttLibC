@@ -30,7 +30,8 @@ typedef struct ttLibC_Container_Mp4_Trun {
 	uint32_t current_size;
 	uint32_t current_flags;
 	uint32_t current_composition_time_offset;
-	uint32_t *data;
+	uint8_t *data;
+	size_t   data_size;
 	ttLibC_Mp4Track *track;
 } ttLibC_Container_Mp4_Trun;
 
@@ -48,6 +49,8 @@ uint64_t ttLibC_Trun_refCurrentPts(ttLibC_Mp4 *mp4);
 uint32_t ttLibC_Trun_refCurrentDelta(ttLibC_Mp4 *mp4);
 uint32_t ttLibC_Trun_refCurrentPos(ttLibC_Mp4 *mp4);
 uint32_t ttLibC_Trun_refCurrentSize(ttLibC_Mp4 *mp4);
+uint32_t ttLibC_Trun_refCurrentTimeOffset(ttLibC_Mp4 *mp4);
+bool ttLibC_Trun_isValid(ttLibC_Mp4 *mp4);
 bool ttLibC_Trun_moveNext(ttLibC_Mp4 *mp4);
 
 #ifdef __cplusplus

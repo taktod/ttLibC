@@ -74,6 +74,7 @@ typedef struct ttLibC_Mp4Track {
 typedef struct ttLibC_Container_Mp4Atom {
 	ttLibC_Mp4 inherit_super;
 	ttLibC_Mp4Reader *reader;
+	uint64_t position;
 } ttLibC_Container_Mp4Atom;
 
 typedef ttLibC_Container_Mp4Atom ttLibC_Mp4Atom;

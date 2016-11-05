@@ -44,6 +44,9 @@ typedef struct ttLibC_ContainerReader_Mp4Reader_ {
 	ttLibC_DynamicBuffer *mdat_buffer; // buffer for mdat. use for mp4 type ffmpeg.
 	size_t mdat_start_pos; // start position for mdat data, need for stco co64, and trun.
 
+	size_t moof_position; // position for moofAtom.
+	uint64_t position; // position for next mp4Atom.
+
 	// callback and ptr data for getFrame func.
 	ttLibC_getFrameFunc callback;
 	void *ptr;
