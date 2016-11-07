@@ -403,6 +403,7 @@ static bool Openh264Encoder_encode(
 	encoder_->picture.iColorFormat = videoFormatI420;
 	encoder_->picture.iStride[0]   = yuv->y_stride;
 	encoder_->picture.iStride[1]   = yuv->u_stride;
+	encoder_->picture.iStride[2]   = yuv->v_stride;
 	encoder_->picture.pData[0]     = yuv->y_data;
 	encoder_->picture.pData[1]     = yuv->u_data;
 	encoder_->picture.pData[2]     = yuv->v_data;
