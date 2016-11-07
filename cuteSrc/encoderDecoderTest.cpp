@@ -569,6 +569,21 @@ static bool x265Test_encodeCallback(void *ptr, ttLibC_H265 *h265) {
 	if(h265->type == H265Type_unknown) {
 		return true;
 	}
+	switch(h265->frame_type) {
+	case H265FrameType_B:
+		LOG_PRINT("h265:disposable:%d b frame", h265->is_disposable);
+		break;
+	case H265FrameType_P:
+		LOG_PRINT("h265:disposable:%d p frame", h265->is_disposable);
+		break;
+	case H265FrameType_I:
+		LOG_PRINT("h265:disposable:%d i frame", h265->is_disposable);
+		break;
+	case H265FrameType_unknown:
+	default:
+		LOG_PRINT("h265:disposable:%d", h265->is_disposable);
+		break;
+	}
 	return ttLibC_AvcodecDecoder_decode(testData->decoder, (ttLibC_Frame *)h265, x265Test_decodeCallback, ptr);;
 }
 #endif
@@ -620,16 +635,16 @@ static void x265Test() {
 	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
-#if defined(__ENABLE_X264__) && defined(__ENABLE_OPENCV__) && defined(__ENABLE_OPENH264__)
+#if defined(__ENABLE_X264__) && defined(__ENABLE_OPENCV__) && defined(__ENABLE_AVCODEC__)
 typedef struct x264TestData{
-	ttLibC_Openh264Decoder *decoder;
+	ttLibC_AvcodecDecoder *decoder;
 	ttLibC_CvWindow *dec_win;
 	ttLibC_Bgr *dbgr;
 } x264TestData;
 
-bool x264Test_decodeCallback(void *ptr, ttLibC_Yuv420 *yuv420) {
+bool x264Test_decodeCallback(void *ptr, ttLibC_Frame *yuv420) {
 	x264TestData *testData = (x264TestData *)ptr;
-	ttLibC_Bgr *b = ttLibC_ImageResampler_makeBgrFromYuv420(testData->dbgr, BgrType_bgr, yuv420);
+	ttLibC_Bgr *b = ttLibC_ImageResampler_makeBgrFromYuv420(testData->dbgr, BgrType_bgr, (ttLibC_Yuv420 *)yuv420);
 	if(b == NULL) {
 		return false;
 	}
@@ -643,14 +658,35 @@ bool x264Test_encodeCallback(void *ptr, ttLibC_H264 *h264) {
 	if(h264->type == H264Type_unknown) {
 		return true;
 	}
-	ttLibC_Openh264Decoder_decode(testData->decoder, h264, x264Test_decodeCallback, ptr);
+	switch(h264->frame_type) {
+	case H264FrameType_I:
+		LOG_PRINT("h264:disposable:%d i frame", h264->is_disposable);
+		break;
+	case H264FrameType_P:
+		LOG_PRINT("h264:disposable:%d p frame", h264->is_disposable);
+		break;
+	case H264FrameType_B:
+		LOG_PRINT("h264:disposable:%d b frame", h264->is_disposable);
+		break;
+	case H264FrameType_SI:
+		LOG_PRINT("h264:disposable:%d si frame", h264->is_disposable);
+		break;
+	case H264FrameType_SP:
+		LOG_PRINT("h264:disposable:%d sp frame", h264->is_disposable);
+		break;
+	default:
+	case H264FrameType_unknown:
+		LOG_PRINT("h264:disposable:%d", h264->is_disposable);
+		break;
+	}
+	ttLibC_AvcodecDecoder_decode(testData->decoder, (ttLibC_Frame *)h264, x264Test_decodeCallback, ptr);
 	return true;
 }
 #endif
 
 static void x264Test() {
 	LOG_PRINT("x264Test");
-#if defined(__ENABLE_X264__) && defined(__ENABLE_OPENCV__) && defined(__ENABLE_OPENH264__)
+#if defined(__ENABLE_X264__) && defined(__ENABLE_OPENCV__) && defined(__ENABLE_AVCODEC__)
 	// x264 does not have decoder.
 	// encode with x264 and decode with openh264.
 	uint32_t width = 320, height = 240;
@@ -658,7 +694,7 @@ static void x264Test() {
 	ttLibC_CvWindow *window = ttLibC_CvWindow_make("original");
 	ttLibC_CvWindow *dec_win = ttLibC_CvWindow_make("target");
 	ttLibC_X264Encoder *encoder = ttLibC_X264Encoder_make(width, height);
-	ttLibC_Openh264Decoder *decoder = ttLibC_Openh264Decoder_make();
+	ttLibC_AvcodecDecoder *decoder = ttLibC_AvcodecVideoDecoder_make(frameType_h264, width, height);
 	ttLibC_Bgr *bgr = NULL, *dbgr = NULL, *b;
 	ttLibC_Yuv420 *yuv = NULL, *y;
 	while(true) {
@@ -687,7 +723,7 @@ static void x264Test() {
 	ttLibC_Bgr_close(&bgr);
 	ttLibC_Bgr_close(&dbgr);
 	ttLibC_Yuv420_close(&yuv);
-	ttLibC_Openh264Decoder_close(&decoder);
+	ttLibC_AvcodecDecoder_close(&decoder);
 	ttLibC_X264Encoder_close(&encoder);
 	ttLibC_CvWindow_close(&dec_win);
 	ttLibC_CvWindow_close(&window);

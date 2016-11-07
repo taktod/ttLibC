@@ -104,6 +104,15 @@ typedef enum ttLibC_H265_Type {
 	H265Type_unknown = 0xFF,
 } ttLibC_H265_Type;
 
+// obey the def of h265.
+typedef enum ttLibC_H265Frame_Type {
+	H265FrameType_B = 0,
+	H265FrameType_P = 1,
+	H265FrameType_I = 2,
+	H265FrameType_unknown
+} ttLibC_H265Frame_Type;
+
+
 /**
  * h265 nalinfo definition.
  * for analyze result.
@@ -111,7 +120,11 @@ typedef enum ttLibC_H265_Type {
 typedef struct ttLibC_H265_NalInfo {
 	/** data_pos from buffer start pos */
 	size_t data_pos;
+	/** nal unit type */
 	ttLibC_H265_NalType nal_unit_type;
+	/** frame type */
+	ttLibC_H265Frame_Type frame_type;
+	bool is_disposable;
 	size_t nal_size; // size of nal(include 00 00 01 or avcc size data.)
 } ttLibC_H265_NalInfo;
 
@@ -121,8 +134,11 @@ typedef struct ttLibC_H265_NalInfo {
 typedef struct ttLibC_Frame_Video_H265 {
 	/** inherit data from ttLibC_Video */
 	ttLibC_Video inherit_super;
-	/** frame type */
+	/** group type */
 	ttLibC_H265_Type type;
+	/** frame type */
+	ttLibC_H265Frame_Type frame_type;
+	bool is_disposable;
 } ttLibC_Frame_Video_H265;
 
 typedef ttLibC_Frame_Video_H265 ttLibC_H265;
@@ -147,6 +163,7 @@ bool ttLibC_H265_getNalInfo(ttLibC_H265_NalInfo* info, uint8_t *data, size_t dat
 
 // analyze info of one nal for avcc data.
 bool ttLibC_H265_getHvccInfo(ttLibC_H265_NalInfo* info, uint8_t *data, size_t data_size);
+bool ttLibC_H265_getHvccInfo_ex(ttLibC_H265_NalInfo* info, uint8_t *data, size_t data_size, uint32_t length_size);
 
 // chec data type is hvcc
 bool ttLibC_H265_isNal(uint8_t *data, size_t data_size);

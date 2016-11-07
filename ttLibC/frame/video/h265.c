@@ -64,6 +64,68 @@ ttLibC_H265 *ttLibC_H265_make(
 		return NULL;
 	}
 	h265->type = type;
+	// check if disposable and frame type.
+	switch(h265->type) {
+	case H265Type_slice:
+		{
+			uint8_t *buf = h265->inherit_super.inherit_super.data;
+			size_t buf_size = h265->inherit_super.inherit_super.buffer_size;
+			ttLibC_ByteReader *reader = NULL;
+			ttLibC_H265_NalType nal_unit_type = H265NalType_error;
+			if(buf[2] == 1) {
+				reader = ttLibC_ByteReader_make(buf + 5, buf_size - 5, ByteUtilType_h26x);
+				nal_unit_type = ((*(buf + 3)) >> 1) & 0x3F;
+			}
+			else {
+				reader = ttLibC_ByteReader_make(buf + 6, buf_size - 6, ByteUtilType_h26x);
+				nal_unit_type = ((*(buf + 4)) >> 1) & 0x3F;
+			}
+			h265->is_disposable = false;
+			switch(nal_unit_type) {
+			case H265NalType_trailN:
+			case H265NalType_tsaN:
+			case H265NalType_stsaN:
+			case H265NalType_radlN:
+			case H265NalType_raslN:
+			case H265NalType_rsvVclN10:
+			case H265NalType_rsvVclN12:
+			case H265NalType_rsvVclN14:
+				h265->is_disposable = true;
+				/* no break */
+			case H265NalType_trailR:
+			case H265NalType_tsaR:
+			case H265NalType_stsaR:
+			case H265NalType_radlR:
+			case H265NalType_raslR:
+			case H265NalType_rsvVclR11:
+			case H265NalType_rsvVclR13:
+			case H265NalType_rsvVclR15:
+				{
+					uint32_t first_slice_segment_in_pic_flag = ttLibC_ByteReader_bit(reader, 1);
+					uint32_t slice_pic_parameter_set_id = ttLibC_ByteReader_expGolomb(reader, false);
+					h265->frame_type = ttLibC_ByteReader_expGolomb(reader, false);
+				}
+				break;
+			default:
+				ERR_PRINT("unexpected nal type.:%d", nal_unit_type);
+				break;
+			}
+			ttLibC_ByteReader_close(&reader);
+		}
+		break;
+	case H265Type_sliceIDR:
+		h265->is_disposable = false;
+		h265->frame_type = H265FrameType_I;
+		break;
+	case H265Type_configData:
+		h265->is_disposable = false;
+		h265->frame_type = H265FrameType_unknown;
+		break;
+	default:
+		h265->is_disposable = true;
+		h265->frame_type = H265FrameType_unknown;
+		break;
+	}
 	return h265;
 }
 
@@ -133,6 +195,47 @@ bool ttLibC_H265_getNalInfo(
 				else {
 					info->nal_unit_type = ((*data) >> 1) & 0x3F;
 				}
+				info->is_disposable = false;
+				switch(info->nal_unit_type) {
+				case H265NalType_trailN:
+				case H265NalType_tsaN:
+				case H265NalType_stsaN:
+				case H265NalType_radlN:
+				case H265NalType_raslN:
+				case H265NalType_rsvVclN10:
+				case H265NalType_rsvVclN12:
+				case H265NalType_rsvVclN14:
+					info->is_disposable = true;
+					/* no break */
+				case H265NalType_trailR:
+				case H265NalType_tsaR:
+				case H265NalType_stsaR:
+				case H265NalType_radlR:
+				case H265NalType_raslR:
+				case H265NalType_rsvVclR11:
+				case H265NalType_rsvVclR13:
+				case H265NalType_rsvVclR15:
+					{
+						ttLibC_ByteReader *reader = ttLibC_ByteReader_make(data + 2, data_size - 2, ByteUtilType_h26x);
+						uint32_t first_slice_segment_in_pic_flag = ttLibC_ByteReader_bit(reader, 1);
+						uint32_t slice_pic_parameter_set_id = ttLibC_ByteReader_expGolomb(reader, false);
+						info->frame_type = ttLibC_ByteReader_expGolomb(reader, false);
+						ttLibC_ByteReader_close(&reader);
+					}
+					break;
+					// idr?
+				case H265NalType_blaWLp:
+				case H265NalType_blaWRadl:
+				case H265NalType_blaNLp:
+				case H265NalType_idrWRadl:
+				case H265NalType_idrNLp:
+				case H265NalType_craNut:
+					info->frame_type = H265FrameType_I;
+					break;
+				default:
+					info->frame_type = H265FrameType_unknown;
+					break;
+				}
 			}
 			pos = i + 1;
 		}
@@ -164,6 +267,74 @@ bool ttLibC_H265_getHvccInfo(ttLibC_H265_NalInfo* info, uint8_t *data, size_t da
 		return false;
 	}
 	info->nal_unit_type = ((*data) >> 1) & 0x3F;
+	return true;
+}
+bool ttLibC_H265_getHvccInfo_ex(
+		ttLibC_H265_NalInfo* info,
+		uint8_t *data,
+		size_t data_size,
+		uint32_t length_size) {
+	if(info == NULL) {
+		return false;
+	}
+	if(data_size < length_size +1) {
+		return false;
+	}
+	info->data_pos = length_size;
+	info->nal_unit_type = H265NalType_error;
+	info->nal_size = 0;
+	for(uint32_t i = 0;i < length_size;++ i) {
+		info->nal_size = (info->nal_size << 8) | *data;
+		++ data;
+	}
+	if(data_size < info->nal_size) {
+		return false;
+	}
+	if(((*data) & 0x80) != 0) {
+		ERR_PRINT("forbidden zero bit is not zero.");
+		return false;
+	}
+	info->nal_unit_type = ((*data) >> 1) & 0x3F;
+	info->is_disposable = false;
+	switch(info->nal_unit_type) {
+	case H265NalType_trailN:
+	case H265NalType_tsaN:
+	case H265NalType_stsaN:
+	case H265NalType_radlN:
+	case H265NalType_raslN:
+	case H265NalType_rsvVclN10:
+	case H265NalType_rsvVclN12:
+	case H265NalType_rsvVclN14:
+		info->is_disposable = true;
+		/* no break */
+	case H265NalType_trailR:
+	case H265NalType_tsaR:
+	case H265NalType_stsaR:
+	case H265NalType_radlR:
+	case H265NalType_raslR:
+	case H265NalType_rsvVclR11:
+	case H265NalType_rsvVclR13:
+	case H265NalType_rsvVclR15:
+		{
+			ttLibC_ByteReader *reader = ttLibC_ByteReader_make(data + 2, data_size - 2, ByteUtilType_h26x);
+			uint32_t first_slice_segment_in_pic_flag = ttLibC_ByteReader_bit(reader, 1);
+			uint32_t slice_pic_parameter_set_id = ttLibC_ByteReader_expGolomb(reader, false);
+			info->frame_type = ttLibC_ByteReader_expGolomb(reader, false);
+			ttLibC_ByteReader_close(&reader);
+		}
+		break;
+	case H265NalType_blaWLp:
+	case H265NalType_blaWRadl:
+	case H265NalType_blaNLp:
+	case H265NalType_idrWRadl:
+	case H265NalType_idrNLp:
+	case H265NalType_craNut:
+		info->frame_type = H265FrameType_I;
+		break;
+	default:
+		info->frame_type = H265FrameType_unknown;
+		break;
+	}
 	return true;
 }
 

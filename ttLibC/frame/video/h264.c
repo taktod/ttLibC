@@ -135,6 +135,37 @@ ttLibC_H264 *ttLibC_H264_make(
 		}
 		memcpy(h264->inherit_super.inherit_super.data, data, data_size);
 	}
+	switch(h264->type) {
+	case H264Type_slice:
+	case H264Type_sliceIDR:
+		{
+			uint8_t *buf = h264->inherit_super.inherit_super.data;
+			size_t buf_size = h264->inherit_super.inherit_super.buffer_size;
+			ttLibC_ByteReader *reader = NULL;
+			if(buf[2] == 1) {
+				reader = ttLibC_ByteReader_make(buf + 4, buf_size - 4, ByteUtilType_h26x);
+				h264->is_disposable = (*(buf + 3) & 0x60) == 0;
+			}
+			else {
+				reader = ttLibC_ByteReader_make(buf + 5, buf_size - 5, ByteUtilType_h26x);
+				h264->is_disposable = (*(buf + 4) & 0x60) == 0;
+			}
+			uint32_t first_mb_in_slice = ttLibC_ByteReader_expGolomb(reader, false);
+			uint32_t slice_type = ttLibC_ByteReader_expGolomb(reader, false);
+			h264->frame_type = slice_type % 5;
+			ttLibC_ByteReader_close(&reader);
+		}
+		break;
+	case H264Type_configData:
+		h264->is_disposable = false;
+		h264->frame_type = H264FrameType_unknown;
+		break;
+	case H264Type_unknown:
+	default:
+		h264->is_disposable = true;
+		h264->frame_type = H264FrameType_unknown;
+		break;
+	}
 	return h264;
 }
 
@@ -216,7 +247,26 @@ bool ttLibC_H264_getNalInfo(ttLibC_H264_NalInfo* info, uint8_t *data, size_t dat
 					return false;
 				}
 				else {
+					info->is_disposable = ((*data) & 0x60) == 0;
 					info->nal_unit_type = (*data) & 0x1F;
+					// sliceType check
+					switch(info->nal_unit_type) {
+					case H264NalType_slice:
+//					case H264NalType_sliceDataPartitionA:
+//					case H264NalType_sliceDataPartitionB:
+//					case H264NalType_sliceDataPartitionC:
+					case H264NalType_sliceIDR:
+						{
+							ttLibC_ByteReader *reader = ttLibC_ByteReader_make(data + 1, data_size - info->data_pos - 1, ByteUtilType_h26x);
+							uint32_t first_mb_in_slice = ttLibC_ByteReader_expGolomb(reader, false);
+							uint32_t slice_type = ttLibC_ByteReader_expGolomb(reader, false);
+							info->frame_type = slice_type % 5;
+							ttLibC_ByteReader_close(&reader);
+						}
+						break;
+					default:
+						info->frame_type = H264FrameType_unknown;
+					}
 				}
 			}
 			pos = i + 1;
@@ -257,7 +307,56 @@ bool ttLibC_H264_getAvccInfo(ttLibC_H264_NalInfo* info, uint8_t *data, size_t da
 		ERR_PRINT("forbidden zero bit is not zero.");
 		return false;
 	}
+	// type check
 	info->nal_unit_type = (*data) & 0x1F;
+	return true;
+}
+
+bool ttLibC_H264_getAvccInfo_ex(
+		ttLibC_H264_NalInfo *info,
+		uint8_t *data,
+		size_t data_size,
+		uint32_t length_size) {
+	if(info == NULL) {
+		return false;
+	}
+	if(data_size < length_size + 1) {
+		// not enough data size.
+		return false;
+	}
+	info->data_pos = length_size;
+	info->nal_unit_type = H264NalType_error;
+	info->nal_size = 0;
+	for(uint32_t i = 0;i < length_size;++ i) {
+		info->nal_size = (info->nal_size << 8) | *data;
+		++ data;
+	}
+	if(data_size < info->nal_size) {
+		// not enough data size.
+		return false;
+	}
+	if(((*data) & 0x80) != 0) {
+		ERR_PRINT("forbidden zero bit is not zero.");
+	}
+	info->nal_unit_type = (*data) & 0x1F;
+	// sliceType check
+	switch(info->nal_unit_type) {
+	case H264NalType_slice:
+//	case H264NalType_sliceDataPartitionA:
+//	case H264NalType_sliceDataPartitionB:
+//	case H264NalType_sliceDataPartitionC:
+	case H264NalType_sliceIDR:
+		{
+			ttLibC_ByteReader *reader = ttLibC_ByteReader_make(data + 1, data_size - length_size - 1, ByteUtilType_h26x);
+			uint32_t first_mb_in_slice = ttLibC_ByteReader_expGolomb(reader, false);
+			uint32_t slice_type = ttLibC_ByteReader_expGolomb(reader, false);
+			info->frame_type = slice_type % 5;
+			ttLibC_ByteReader_close(&reader);
+		}
+		break;
+	default:
+		info->frame_type = H264FrameType_unknown;
+	}
 	return true;
 }
 

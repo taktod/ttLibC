@@ -72,17 +72,28 @@ typedef enum ttLibC_H264_Type {
 	H264Type_unknown = 0xFF,
 } ttLibC_H264_Type;
 
+// obey def of h264.
+typedef enum ttLibC_H264Frame_Type {
+	H264FrameType_P  = 0,
+	H264FrameType_B  = 1,
+	H264FrameType_I  = 2,
+	H264FrameType_SP = 3,
+	H264FrameType_SI = 4,
+	H264FrameType_unknown = -1
+} ttLibC_H264Frame_Type;
+
 /**
  * h264 nalinfo definition.
  * for analyze result.
  */
 typedef struct ttLibC_H264_NalInfo {
-	/* nal start position of buffer. now it's always 0, so removed. */
-//	size_t pos;
 	/** data_pos from buffer start pos. point the xx(00 00 01 xx) */
 	size_t data_pos;
 	/** nal unit type */
 	ttLibC_H264_NalType nal_unit_type;
+	/** frame type */
+	ttLibC_H264Frame_Type frame_type;
+	bool is_disposable;
 	/** size of nal */
 	size_t nal_size;
 } ttLibC_H264_NalInfo;
@@ -93,8 +104,11 @@ typedef struct ttLibC_H264_NalInfo {
 typedef struct ttLibC_Frame_Video_H264 {
 	/** inherit data from ttLibC_Video */
 	ttLibC_Video inherit_super;
-	/** frame type */
+	/** group type */
 	ttLibC_H264_Type type;
+	/** frame type */
+	ttLibC_H264Frame_Type frame_type;
+	bool is_disposable;
 } ttLibC_Frame_Video_H264;
 
 typedef ttLibC_Frame_Video_H264 ttLibC_H264;
@@ -149,6 +163,7 @@ bool ttLibC_H264_getNalInfo(ttLibC_H264_NalInfo* info, uint8_t *data, size_t dat
  * @return true:analyze success
  */
 bool ttLibC_H264_getAvccInfo(ttLibC_H264_NalInfo* info, uint8_t *data, size_t data_size);
+bool ttLibC_H264_getAvccInfo_ex(ttLibC_H264_NalInfo *info, uint8_t *data, size_t data_size, uint32_t length_size);
 
 /**
  * check data type is nal or not.

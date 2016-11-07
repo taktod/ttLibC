@@ -89,6 +89,7 @@ bool ttLibC_X264Encoder_getDefaultX264ParamTWithPresetTune(
 	}
 	if(tune == NULL || strlen(tune) == 0) {
 		_tune = "zerolatency";
+//		_tune = "ssim";
 	}
 	if(x264_param_default_preset(param, _preset, _tune) < 0) {
 		ERR_PRINT("failed to get default preset.");
@@ -347,6 +348,32 @@ bool ttLibC_X264Encoder_encode(
 		// TODO shoud I support dts?
 		encoder_->pts = pic.i_pts;
 	}
+	/*
+	switch(pic.i_type) {
+	case X264_TYPE_IDR:
+		LOG_PRINT("idr frame");
+		break;
+	case X264_TYPE_I:
+		LOG_PRINT("i frame");
+		break;
+	case X264_TYPE_P:
+		LOG_PRINT("p frame");
+		break;
+	case X264_TYPE_BREF:
+		LOG_PRINT("bref frame");
+		break;
+	case X264_TYPE_B:
+		LOG_PRINT("b frame");
+		break;
+	case X264_TYPE_KEYFRAME:
+		LOG_PRINT("key frame");
+		break;
+	case X264_TYPE_AUTO:
+	default:
+		LOG_PRINT("unknown");
+		break;
+	}
+	*/
 	return X264Encoder_checkEncodedData(encoder_, nal, i_nal, frame_size, callback, ptr);
 }
 

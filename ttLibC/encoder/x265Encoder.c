@@ -73,6 +73,7 @@ bool ttLibC_X265Encoder_getDefaultX265ApiAndParam(
 	}
 	if(tune == NULL || strlen(tune) == 0) {
 		_tune = "zerolatency";
+//		_tune = "ssim";
 	}
 	if(_api->param_default_preset(_param, _preset, _tune) < 0) {
 		ERR_PRINT("failed to understand preset or tune.");
@@ -301,6 +302,27 @@ bool ttLibC_X265Encoder_encode(
 	if(output_flag != 0) {
 		encoder_->pts = pic_out.pts;
 	}
+/*
+	switch(pic_out.sliceType) {
+	case X265_TYPE_IDR:
+		LOG_PRINT("idr frame");
+		break;
+	case X265_TYPE_I:
+		LOG_PRINT("i frame");
+		break;
+	case X265_TYPE_P:
+		LOG_PRINT("p frame");
+		break;
+	case X265_TYPE_BREF:
+		LOG_PRINT("bref frame");
+		break;
+	case X265_TYPE_B:
+		LOG_PRINT("b frame");
+		break;
+	default:
+		LOG_PRINT("unknown");
+		break;
+	} // */
 	return X265Encoder_checkEncodedData(encoder_, nal, i_nal, output_flag, callback, ptr);
 }
 
