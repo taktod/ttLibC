@@ -18,6 +18,16 @@ extern "C" {
 #include "../frame/video/h264.h"
 #include "../frame/video/yuv420.h"
 
+typedef enum ttLibC_X264Encoder_FrameType {
+	X264FrameType_Auto     = 0x0000,
+	X264FrameType_IDR      = 0x0001,
+	X264FrameType_I        = 0x0002,
+	X264FrameType_P        = 0x0003,
+	X264FrameType_Bref     = 0x0004,
+	X264FrameType_B        = 0x0005,
+	X264FrameType_KeyFrame = 0x0006
+} ttLibC_X264Encoder_FrameType;
+
 /**
  * x264 encoder definition
  */
@@ -105,6 +115,13 @@ bool ttLibC_X264Encoder_getDefaultX264ParamTWithPresetTune(
  * @return ttLibC_X264Encoder object.
  */
 ttLibC_X264Encoder *ttLibC_X264Encoder_makeWithX264ParamT(void *param_t);
+
+/**
+ * force next encode picture will be target frame type.
+ */
+bool ttLibC_X264Encoder_forceNextFrameType(
+		ttLibC_X264Encoder *encoder,
+		ttLibC_X264Encoder_FrameType frame_type);
 
 /**
  * encode frame.

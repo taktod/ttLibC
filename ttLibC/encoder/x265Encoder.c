@@ -20,9 +20,10 @@
 typedef struct ttLibC_Encoder_X265Encoder_ {
 	ttLibC_X265Encoder inherit_super;
 	const x265_api *api;
+	bool is_pic_alloc;
+	x265_picture pic;
 	x265_param *param;
 	x265_encoder *encoder;
-	bool is_pic_alloc;
 	bool is_first_frame;
 	ttLibC_H265 *h265;
 	uint64_t pts;
@@ -99,6 +100,7 @@ ttLibC_X265Encoder *ttLibC_X265Encoder_makeWithX265ApiAndParam(
 	if(encoder == NULL) {
 		return NULL;
 	}
+	encoder->is_pic_alloc = false;
 	encoder->api = (x265_api *)api;
 	encoder->param = (x265_param *)param;
 	encoder->encoder = encoder->api->encoder_open(encoder->param);
@@ -107,6 +109,8 @@ ttLibC_X265Encoder *ttLibC_X265Encoder_makeWithX265ApiAndParam(
 		ttLibC_X265Encoder_close((ttLibC_X265Encoder **)&encoder);
 		return NULL;
 	}
+	encoder->api->picture_init(encoder->param, &encoder->pic);
+	encoder->is_pic_alloc = true;
 	encoder->is_first_frame = true;
 	encoder->h265 = NULL;
 	encoder->pts = 0;
@@ -115,6 +119,36 @@ ttLibC_X265Encoder *ttLibC_X265Encoder_makeWithX265ApiAndParam(
 	return (ttLibC_X265Encoder *)encoder;
 }
 
+bool ttLibC_X265Encoder_forceNextFrameType(
+		ttLibC_X265Encoder *encoder,
+		ttLibC_X265Encoder_FrameType frame_type) {
+	ttLibC_X265Encoder_ *encoder_ = (ttLibC_X265Encoder_ *)encoder;
+	if(encoder_ == NULL) {
+		return false;
+	}
+	switch(frame_type) {
+	default:
+	case X265FrameType_Auto:
+		encoder_->pic.sliceType = X265_TYPE_AUTO;
+		break;
+	case X265FrameType_IDR:
+		encoder_->pic.sliceType = X265_TYPE_IDR;
+		break;
+	case X265FrameType_I:
+		encoder_->pic.sliceType = X265_TYPE_I;
+		break;
+	case X265FrameType_P:
+		encoder_->pic.sliceType = X265_TYPE_P;
+		break;
+	case X265FrameType_Bref:
+		encoder_->pic.sliceType = X265_TYPE_BREF;
+		break;
+	case X265FrameType_B:
+		encoder_->pic.sliceType = X265_TYPE_B;
+		break;
+	}
+	return true;
+}
 
 static bool X265Encoder_makeH265Frame(
 		ttLibC_H265_Type target_type,
@@ -280,25 +314,26 @@ bool ttLibC_X265Encoder_encode(
 		encoder_->is_first_frame = false;
 	}
 	// setup picture.
-	x265_picture pic;
-	encoder_->api->picture_init(encoder_->param, &pic);
-	pic.stride[0] = yuv420->inherit_super.width;
-	pic.stride[1] = yuv420->inherit_super.width / 2;
-	pic.stride[2] = yuv420->inherit_super.width / 2;
-	pic.planes[0] = yuv420->y_data;
-	pic.planes[1] = yuv420->u_data;
-	pic.planes[2] = yuv420->v_data;
-	pic.pts = (int64_t)(yuv420->inherit_super.inherit_super.pts);
+//	x265_picture pic;
+//	encoder_->api->picture_init(encoder_->param, &pic);
+	encoder_->pic.stride[0] = yuv420->y_stride;
+	encoder_->pic.stride[1] = yuv420->u_stride;
+	encoder_->pic.stride[2] = yuv420->v_stride;
+	encoder_->pic.planes[0] = yuv420->y_data;
+	encoder_->pic.planes[1] = yuv420->u_data;
+	encoder_->pic.planes[2] = yuv420->v_data;
+	encoder_->pic.pts = (int64_t)(yuv420->inherit_super.inherit_super.pts);
 
 	// do encode.
 	x265_nal *nal;
 	uint32_t i_nal;
 	x265_picture pic_out;
-	int32_t output_flag = encoder_->api->encoder_encode(encoder_->encoder, &nal, &i_nal, &pic, &pic_out);
+	int32_t output_flag = encoder_->api->encoder_encode(encoder_->encoder, &nal, &i_nal, &encoder_->pic, &pic_out);
 	if(output_flag < 0) {
 		ERR_PRINT("failed to encode data.");
 		return false;
 	}
+	encoder_->pic.sliceType = X265_TYPE_AUTO;
 	if(output_flag != 0) {
 		encoder_->pts = pic_out.pts;
 	}

@@ -131,12 +131,13 @@ ttLibC_X264Encoder *ttLibC_X264Encoder_makeWithX264ParamT(void *param_t) {
 	encoder->pts = 0;
 	encoder->timebase = (uint32_t)(param->i_timebase_den / param->i_timebase_num);
 	// make picture.
-	if(x264_picture_alloc(&encoder->pic, param->i_csp, param->i_width, param->i_height) < 0) {
+/*	if(x264_picture_alloc(&encoder->pic, param->i_csp, param->i_width, param->i_height) < 0) {
 		ERR_PRINT("failed to make picture.");
 		ttLibC_free(encoder);
 		return NULL;
 	}
-	encoder->is_pic_alloc = true;
+	encoder->is_pic_alloc = true;*/
+	x264_picture_init(&encoder->pic);
 	// open encoder.
 	encoder->enc = x264_encoder_open(param);
 	if(!encoder->enc) {
@@ -146,7 +147,46 @@ ttLibC_X264Encoder *ttLibC_X264Encoder_makeWithX264ParamT(void *param_t) {
 		ttLibC_free(encoder);
 		return NULL;
 	}
+	encoder->pic.img.i_csp = param->i_csp;
+	encoder->pic.img.i_plane = 3;
 	return (ttLibC_X264Encoder *)encoder;
+}
+
+/*
+ * force next encode picture will be target frame type.
+ */
+bool ttLibC_X264Encoder_forceNextFrameType(
+		ttLibC_X264Encoder *encoder,
+		ttLibC_X264Encoder_FrameType frame_type) {
+	ttLibC_X264Encoder_ *encoder_ = (ttLibC_X264Encoder_ *)encoder;
+	if(encoder_ == NULL) {
+		return false;
+	}
+	switch(frame_type) {
+	default:
+	case X264FrameType_Auto:
+		encoder_->pic.i_type = X264_TYPE_AUTO;
+		break;
+	case X264FrameType_IDR:
+		encoder_->pic.i_type = X264_TYPE_IDR;
+		break;
+	case X264FrameType_I:
+		encoder_->pic.i_type = X264_TYPE_I;
+		break;
+	case X264FrameType_P:
+		encoder_->pic.i_type = X264_TYPE_P;
+		break;
+	case X264FrameType_Bref:
+		encoder_->pic.i_type = X264_TYPE_BREF;
+		break;
+	case X264FrameType_B:
+		encoder_->pic.i_type = X264_TYPE_B;
+		break;
+	case X264FrameType_KeyFrame:
+		encoder_->pic.i_type = X264_TYPE_KEYFRAME;
+		break;
+	}
+	return true;
 }
 
 static bool X264Encoder_makeH264Frame(
@@ -330,9 +370,15 @@ bool ttLibC_X264Encoder_encode(
 	}
 	// copy yuv data to pic.
 	// check: can I use ref copy?
-	memcpy(encoder_->pic.img.plane[0], yuv420->y_data, encoder_->luma_size);
-	memcpy(encoder_->pic.img.plane[1], yuv420->u_data, encoder_->chroma_size);
-	memcpy(encoder_->pic.img.plane[2], yuv420->v_data, encoder_->chroma_size);
+//	memcpy(encoder_->pic.img.plane[0], yuv420->y_data, encoder_->luma_size);
+//	memcpy(encoder_->pic.img.plane[1], yuv420->u_data, encoder_->chroma_size);
+//	memcpy(encoder_->pic.img.plane[2], yuv420->v_data, encoder_->chroma_size);
+	encoder_->pic.img.plane[0] = yuv420->y_data;
+	encoder_->pic.img.plane[1] = yuv420->u_data;
+	encoder_->pic.img.plane[2] = yuv420->v_data;
+	encoder_->pic.img.i_stride[0] = yuv420->y_stride;
+	encoder_->pic.img.i_stride[1] = yuv420->u_stride;
+	encoder_->pic.img.i_stride[2] = yuv420->v_stride;
 	// update pic pts.
 	encoder_->pic.i_pts = (int64_t)(yuv420->inherit_super.inherit_super.pts * encoder_->timebase / yuv420->inherit_super.inherit_super.timebase);
 
@@ -344,6 +390,7 @@ bool ttLibC_X264Encoder_encode(
 		ERR_PRINT("failed to encode data.");
 		return false;
 	}
+	encoder_->pic.i_type = X264_TYPE_AUTO;
 	if(frame_size != 0) {
 		// TODO shoud I support dts?
 		encoder_->pts = pic.i_pts;
@@ -386,10 +433,10 @@ void ttLibC_X264Encoder_close(ttLibC_X264Encoder **encoder) {
 		x264_encoder_close(target->enc);
 		target->enc = NULL;
 	}
-	if(target->is_pic_alloc) {
+/*	if(target->is_pic_alloc) {
 		x264_picture_clean(&target->pic);
 		target->is_pic_alloc = false;
-	}
+	}*/
 	ttLibC_H264_close(&target->h264);
 	ttLibC_H264_close(&target->configData);
 	ttLibC_free(target);

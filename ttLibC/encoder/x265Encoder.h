@@ -18,6 +18,15 @@ extern "C" {
 #include "../frame/video/h265.h"
 #include "../frame/video/yuv420.h"
 
+typedef enum ttLibC_X265Encoder_FrameType {
+	X265FrameType_Auto     = 0x0000,
+	X265FrameType_IDR      = 0x0001,
+	X265FrameType_I        = 0x0002,
+	X265FrameType_P        = 0x0003,
+	X265FrameType_Bref     = 0x0004,
+	X265FrameType_B        = 0x0005,
+} ttLibC_X265Encoder_FrameType;
+
 /**
  * x265 encoder definition
  */
@@ -55,6 +64,10 @@ bool ttLibC_X265Encoder_getDefaultX265ApiAndParam(
 		uint32_t height);
 
 ttLibC_X265Encoder *ttLibC_X265Encoder_makeWithX265ApiAndParam(void *api, void *param);
+
+bool ttLibC_X265Encoder_forceNextFrameType(
+		ttLibC_X265Encoder *encoder,
+		ttLibC_X265Encoder_FrameType frame_type);
 
 bool ttLibC_X265Encoder_encode(
 		ttLibC_X265Encoder *encoder,
