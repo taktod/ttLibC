@@ -90,6 +90,11 @@ typedef struct ttLibC_Frame {
 	 */
 	uint64_t pts;
 	/**
+	 * dts information
+	 * use for container work only.
+	 */
+	uint64_t dts;
+	/**
 	 * timebase information
 	 * 1/timebase is the unit of pts.
 	 * for example, 1000 means 1pts = 1mili sec.

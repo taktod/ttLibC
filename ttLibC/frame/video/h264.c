@@ -117,6 +117,7 @@ ttLibC_H264 *ttLibC_H264_make(
 	h264->inherit_super.inherit_super.data_size   = data_size_;
 	h264->inherit_super.inherit_super.is_non_copy = non_copy_mode;
 	h264->inherit_super.inherit_super.pts         = pts;
+	h264->inherit_super.inherit_super.dts         = 0;
 	h264->inherit_super.inherit_super.timebase    = timebase;
 	h264->inherit_super.inherit_super.type        = frameType_h264;
 	if(non_copy_mode) {

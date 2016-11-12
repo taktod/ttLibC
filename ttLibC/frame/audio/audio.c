@@ -103,6 +103,7 @@ ttLibC_Audio *ttLibC_Audio_make(
 	audio->inherit_super.data_size   = data_size_;
 	audio->inherit_super.is_non_copy = non_copy_mode;
 	audio->inherit_super.pts         = pts;
+	audio->inherit_super.dts         = 0;
 	audio->inherit_super.timebase    = timebase;
 	audio->inherit_super.type        = frame_type;
 	if(non_copy_mode) {

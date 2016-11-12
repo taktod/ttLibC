@@ -81,6 +81,7 @@ ttLibC_Opus *ttLibC_Opus_make(
 	opus->inherit_super.inherit_super.data_size   = data_size_;
 	opus->inherit_super.inherit_super.is_non_copy = non_copy_mode;
 	opus->inherit_super.inherit_super.pts         = pts;
+	opus->inherit_super.inherit_super.dts         = 0;
 	opus->inherit_super.inherit_super.timebase    = timebase;
 	opus->inherit_super.inherit_super.type        = frameType_opus;
 	if(non_copy_mode) {

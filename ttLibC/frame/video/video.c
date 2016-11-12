@@ -115,6 +115,7 @@ ttLibC_Video *ttLibC_Video_make(
 	video->inherit_super.data_size   = data_size_;
 	video->inherit_super.is_non_copy = non_copy_mode;
 	video->inherit_super.pts         = pts;
+	video->inherit_super.dts         = 0;
 	video->inherit_super.timebase    = timebase;
 	video->inherit_super.type        = frame_type;
 	if(non_copy_mode) {

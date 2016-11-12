@@ -124,6 +124,7 @@ ttLibC_Aac *ttLibC_Aac_make(
 	aac->inherit_super.inherit_super.inherit_super.data_size   = data_size_;
 	aac->inherit_super.inherit_super.inherit_super.is_non_copy = non_copy_mode;
 	aac->inherit_super.inherit_super.inherit_super.pts         = pts;
+	aac->inherit_super.inherit_super.inherit_super.dts         = 0;
 	aac->inherit_super.inherit_super.inherit_super.timebase    = timebase;
 	aac->inherit_super.inherit_super.inherit_super.type        = frameType_aac;
 	if(non_copy_mode) {

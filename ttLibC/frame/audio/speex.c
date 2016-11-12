@@ -83,6 +83,7 @@ ttLibC_Speex *ttLibC_Speex_make(
 	speex->inherit_super.inherit_super.data_size   = data_size_;
 	speex->inherit_super.inherit_super.is_non_copy = non_copy_mode;
 	speex->inherit_super.inherit_super.pts         = pts;
+	speex->inherit_super.inherit_super.dts         = 0;
 	speex->inherit_super.inherit_super.timebase    = timebase;
 	speex->inherit_super.inherit_super.type        = frameType_speex;
 	if(non_copy_mode) {

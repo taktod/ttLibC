@@ -104,6 +104,7 @@ ttLibC_PcmS16 *ttLibC_PcmS16_make(
 	pcms16->inherit_super.inherit_super.data_size   = data_size_;
 	pcms16->inherit_super.inherit_super.is_non_copy = non_copy_mode;
 	pcms16->inherit_super.inherit_super.pts         = pts;
+	pcms16->inherit_super.inherit_super.dts         = 0;
 	pcms16->inherit_super.inherit_super.timebase    = timebase;
 	pcms16->inherit_super.inherit_super.type        = frameType_pcmS16;
 	if(non_copy_mode) {

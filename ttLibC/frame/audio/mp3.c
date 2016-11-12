@@ -102,6 +102,7 @@ ttLibC_Mp3 *ttLibC_Mp3_make(
 	mp3->inherit_super.inherit_super.inherit_super.data_size   = data_size_;
 	mp3->inherit_super.inherit_super.inherit_super.is_non_copy = non_copy_mode;
 	mp3->inherit_super.inherit_super.inherit_super.pts         = pts;
+	mp3->inherit_super.inherit_super.inherit_super.dts         = 0;
 	mp3->inherit_super.inherit_super.inherit_super.timebase    = timebase;
 	mp3->inherit_super.inherit_super.inherit_super.type        = frameType_mp3;
 	if(non_copy_mode) {
