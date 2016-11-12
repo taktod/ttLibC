@@ -11,6 +11,7 @@
 #include "misc.h"
 #include "../log.h"
 #include "../allocator.h"
+#include "../frame/video/video.h"
 #include <stdlib.h>
 #include "../util/stlListUtil.h"
 
@@ -28,6 +29,8 @@ typedef struct ttLibC_Container_Misc_FrameQueue2_{
 	ttLibC_FrameQueueFunc callback;
 	/** ptr */
 	void *ptr;
+	// pts cache for h26x frame.
+	uint64_t pts_cache[2];
 } ttLibC_Container_Misc_FrameQueue2_;
 
 typedef ttLibC_Container_Misc_FrameQueue2_ ttLibC_FrameQueue2_;
@@ -41,6 +44,7 @@ typedef ttLibC_Container_Misc_FrameQueue2_ ttLibC_FrameQueue2_;
 ttLibC_FrameQueue *ttLibC_FrameQueue_make(
 		uint32_t track_id,
 		uint32_t max_size) {
+	(void)max_size;
 	ttLibC_FrameQueue2_ *queue = ttLibC_malloc(sizeof(ttLibC_FrameQueue2_));
 	if(queue == NULL) {
 		ERR_PRINT("failed to allocate queue object.");
@@ -63,6 +67,8 @@ ttLibC_FrameQueue *ttLibC_FrameQueue_make(
 	queue->inherit_super.track_id = track_id;
 	queue->inherit_super.timebase = 1000;
 	queue->inherit_super.pts = 0;
+	queue->pts_cache[0] = 0;
+	queue->pts_cache[1] = 0;
 	return (ttLibC_FrameQueue *)queue;
 }
 
@@ -160,6 +166,17 @@ ttLibC_Frame *ttLibC_FrameQueue_dequeue_first(ttLibC_FrameQueue *queue) {
 	return frame;
 }
 
+static bool FrameQueue_updateDtsCallback(void *ptr, void *item) {
+	uint64_t *buf = (uint64_t *)ptr;
+	ttLibC_Frame *frame = (ttLibC_Frame *)item;
+	++ buf[1];
+	if(buf[1] == 2) {
+		frame->dts = buf[0];
+		return false;
+	}
+	return true;
+}
+
 /*
  * add frame on queue.
  * @param queue target queue object.
@@ -185,12 +202,57 @@ bool ttLibC_FrameQueue_queue(
 		return false;
 	}
 	ttLibC_StlList_remove(queue_->used_frame_list, prev_frame);
-	queue_->inherit_super.pts = f->pts;
+	switch(f->type) {
+	case frameType_h264:
+	case frameType_h265:
+		{
+			ttLibC_Video *v = (ttLibC_Video *)f;
+			if(v->type != videoType_info) {
+				if(f->pts == 0) {
+					// nothing to do for pts = 0
+					break;
+				}
+				if(queue_->pts_cache[0] == 0) {
+					queue_->pts_cache[0] = f->pts;
+					break;
+				}
+				if(queue_->pts_cache[1] == 0) {
+					queue_->pts_cache[1] = f->pts;
+					break;
+				}
+				// pick up lowest pts
+				uint64_t pts = queue_->pts_cache[0];
+				if(pts > queue_->pts_cache[1]) {
+					pts = queue_->pts_cache[1];
+				}
+				if(pts > f->pts) {
+					pts = f->pts;
+				}
+				// update frame dts.
+				uint64_t buf[2] = {pts, 0};
+				ttLibC_StlList_forEachReverse(queue_->frame_list, FrameQueue_updateDtsCallback, buf);
+				// update pts for queue information.
+				queue_->inherit_super.pts = pts;
+				// update pts cache
+				if(pts == queue_->pts_cache[0]) {
+					queue_->pts_cache[0] = f->pts;
+				}
+				if(pts == queue_->pts_cache[1]) {
+					queue_->pts_cache[1] = f->pts;
+				}
+			}
+		}
+		break;
+	default:
+		queue_->inherit_super.pts = f->pts;
+		break;
+	}
 	queue_->inherit_super.timebase = f->timebase;
 	return ttLibC_StlList_addLast(queue_->frame_list, f);
 }
 
 static bool FrameQueue_frameClose(void *ptr, void *item) {
+	(void)ptr;
 	ttLibC_Frame_close((ttLibC_Frame **)&item);
 	return true;
 }
