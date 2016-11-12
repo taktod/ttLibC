@@ -221,6 +221,7 @@ bool ttLibC_H264_getNalInfo(ttLibC_H264_NalInfo* info, uint8_t *data, size_t dat
 	if(data_size == 0) {
 		return false; // no more data.
 	}
+	uint8_t *dat = data;
 //	info->pos           = 0;
 	info->data_pos      = 0;
 	info->nal_unit_type = H264NalType_error;
@@ -243,31 +244,31 @@ bool ttLibC_H264_getNalInfo(ttLibC_H264_NalInfo* info, uint8_t *data, size_t dat
 				}
 			}
 			else if(info->nal_unit_type == H264NalType_error && info->data_pos != 0) {
+				dat += info->data_pos;
 				if(((*data) & 0x80) != 0) {
 					ERR_PRINT("forbidden zero bit is not zero.");
 					return false;
 				}
-				else {
-					info->is_disposable = ((*data) & 0x60) == 0;
-					info->nal_unit_type = (*data) & 0x1F;
-					// sliceType check
-					switch(info->nal_unit_type) {
-					case H264NalType_slice:
-//					case H264NalType_sliceDataPartitionA:
-//					case H264NalType_sliceDataPartitionB:
-//					case H264NalType_sliceDataPartitionC:
-					case H264NalType_sliceIDR:
-						{
-							ttLibC_ByteReader *reader = ttLibC_ByteReader_make(data + 1, data_size - info->data_pos - 1, ByteUtilType_h26x);
-							uint32_t first_mb_in_slice = ttLibC_ByteReader_expGolomb(reader, false);
-							uint32_t slice_type = ttLibC_ByteReader_expGolomb(reader, false);
-							info->frame_type = slice_type % 5;
-							ttLibC_ByteReader_close(&reader);
-						}
-						break;
-					default:
-						info->frame_type = H264FrameType_unknown;
+				info->is_disposable = ((*dat) & 0x60) == 0;
+				info->nal_unit_type = (*dat) & 0x1F;
+				// sliceType check
+				switch(info->nal_unit_type) {
+				case H264NalType_slice:
+//				case H264NalType_sliceDataPartitionA:
+//				case H264NalType_sliceDataPartitionB:
+//				case H264NalType_sliceDataPartitionC:
+				case H264NalType_sliceIDR:
+					{
+						ttLibC_ByteReader *reader = ttLibC_ByteReader_make(dat + 1, data_size - info->data_pos - 1, ByteUtilType_h26x);
+						uint32_t first_mb_in_slice = ttLibC_ByteReader_expGolomb(reader, false);
+						uint32_t slice_type = ttLibC_ByteReader_expGolomb(reader, false);
+						info->frame_type = slice_type % 5;
+						ttLibC_ByteReader_close(&reader);
 					}
+					break;
+				default:
+					info->frame_type = H264FrameType_unknown;
+					break;
 				}
 			}
 			pos = i + 1;

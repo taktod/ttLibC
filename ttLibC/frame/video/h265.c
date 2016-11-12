@@ -169,6 +169,7 @@ bool ttLibC_H265_getNalInfo(
 	if(data_size == 0) {
 		return false;
 	}
+	uint8_t *dat = data;
 	info->data_pos = 0;
 	info->nal_unit_type = H265NalType_error;
 	info->nal_size = 0;
@@ -188,13 +189,12 @@ bool ttLibC_H265_getNalInfo(
 				}
 			}
 			else if(info->nal_unit_type == H265NalType_error && info->data_pos != 0) {
-				if(((*data) & 0x80) != 0) {
+				dat += info->data_pos;
+				if(((*dat) & 0x80) != 0) {
 					ERR_PRINT("forbidden zero bit is not zero.");
 					return false;
 				}
-				else {
-					info->nal_unit_type = ((*data) >> 1) & 0x3F;
-				}
+				info->nal_unit_type = ((*dat) >> 1) & 0x3F;
 				info->is_disposable = false;
 				switch(info->nal_unit_type) {
 				case H265NalType_trailN:
@@ -216,7 +216,7 @@ bool ttLibC_H265_getNalInfo(
 				case H265NalType_rsvVclR13:
 				case H265NalType_rsvVclR15:
 					{
-						ttLibC_ByteReader *reader = ttLibC_ByteReader_make(data + 2, data_size - 2, ByteUtilType_h26x);
+						ttLibC_ByteReader *reader = ttLibC_ByteReader_make(dat + 2, data_size - info->data_pos, ByteUtilType_h26x);
 						uint32_t first_slice_segment_in_pic_flag = ttLibC_ByteReader_bit(reader, 1);
 						uint32_t slice_pic_parameter_set_id = ttLibC_ByteReader_expGolomb(reader, false);
 						info->frame_type = ttLibC_ByteReader_expGolomb(reader, false);
