@@ -291,13 +291,16 @@ static bool Mp4Atom_getTrackFrame(
 			uint32_t sample_size = ttLibC_Stsz_refCurrentSampleSize(track->stsz);
 			uint64_t pts = ttLibC_Stts_refCurrentPts(track->stts);
 			uint32_t pts_offset = ttLibC_Ctts_refCurrentOffset(track->ctts);
-			pts = pts + pts_offset - track->elst_mediatime;
-			uint32_t duration = ttLibC_Stts_refCurrentDelta(track->stts);
+			// ignore the data which pts < 0.
+			if(pts + pts_offset >= track->elst_mediatime) {
+				pts = pts + pts_offset - track->elst_mediatime;
+				uint32_t duration = ttLibC_Stts_refCurrentDelta(track->stts);
 
-			if(!Mp4Atom_getFrame(track, mdat_data + currentPos - reader->mdat_start_pos, sample_size, pts, track->timebase, duration, callback, ptr)) {
-				reader->error_number = 5;
-				// quit the loop.
-				return false;
+				if(!Mp4Atom_getFrame(track, mdat_data + currentPos - reader->mdat_start_pos, sample_size, pts, track->timebase, duration, callback, ptr)) {
+					reader->error_number = 5;
+					// quit the loop.
+					return false;
+				}
 			}
 			ttLibC_Stts_moveNext(track->stts); // prepare next sample time information
 			ttLibC_Ctts_moveNext(track->ctts);
