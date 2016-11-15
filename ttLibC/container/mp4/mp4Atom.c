@@ -364,7 +364,6 @@ static bool Mp4Atom_getFmp4FrameCallback(
 	do {
 		pts = ttLibC_Trun_refCurrentPts(track->trun);
 		pts_offset = ttLibC_Trun_refCurrentTimeOffset(track->trun);
-		pts = pts + pts_offset - track->elst_mediatime;
 		duration = ttLibC_Trun_refCurrentDelta(track->trun);
 		pos = ttLibC_Trun_refCurrentPos(track->trun);
 		size = ttLibC_Trun_refCurrentSize(track->trun);
@@ -375,17 +374,20 @@ static bool Mp4Atom_getFmp4FrameCallback(
 		else {
 			target_buffer = mdat_buffer + (pos + reader->moof_position - mdatAtom->position);
 		}
-		if(!Mp4Atom_getFrame(
-				track,
-				target_buffer,
-				size,
-				pts,
-				track->timebase,
-				duration,
-				reader->callback,
-				reader->ptr)) {
-			reader->error_number = 5;
-			return false;
+		if(pts + pts_offset >= track->elst_mediatime) {
+			pts = pts + pts_offset - track->elst_mediatime;
+			if(!Mp4Atom_getFrame(
+					track,
+					target_buffer,
+					size,
+					pts,
+					track->timebase,
+					duration,
+					reader->callback,
+					reader->ptr)) {
+				reader->error_number = 5;
+				return false;
+			}
 		}
 	} while(ttLibC_Trun_moveNext(track->trun));
 	return true;

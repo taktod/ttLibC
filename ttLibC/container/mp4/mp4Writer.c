@@ -181,7 +181,7 @@ static bool Mp4Writer_makeTrak(void *ptr, void *key, void *item) {
 					// edtsとelst([duration 0] [mediatime = timebase] [rate 1.0]にする。)
 					in_size = ttLibC_HexUtil_makeBuffer("00 00 00 24 65 64 74 73 00 00 00 1C 65 6C 73 74 00 00 00 00 00 00 00 01 00 00 00 00", buf, 256);
 					ttLibC_DynamicBuffer_append(buffer, buf, in_size);
-					uint32_t be_mediatime = be_uint32_t(ttLibC_FrameQueue_ref_first(track->frame_queue)->timebase);
+					uint32_t be_mediatime = be_uint32_t(track->h26x_configData->timebase);
 					ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_mediatime, 4);
 					in_size = ttLibC_HexUtil_makeBuffer("00 01 00 00", buf, 256);
 					ttLibC_DynamicBuffer_append(buffer, buf, in_size);
@@ -836,6 +836,7 @@ bool ttLibC_Mp4Writer_write(
 		return false;
 	}
 	uint64_t pts = (uint64_t)(1.0 * frame->pts * 1000 / frame->timebase);
+	track->enable_dts = writer->enable_dts;
 	// for first access.
 	switch(frame->type) {
 	case frameType_h264:
@@ -866,7 +867,6 @@ bool ttLibC_Mp4Writer_write(
 	default:
 		break;
 	}
-	track->enable_dts = writer->enable_dts;
 	track->is_appending = true;
 	if(writer_->is_first) {
 		writer_->current_pts_pos = pts;
