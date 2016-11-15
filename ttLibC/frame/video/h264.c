@@ -281,7 +281,7 @@ bool ttLibC_H264_getNalInfo(ttLibC_H264_NalInfo* info, uint8_t *data, size_t dat
 }
 
 /*
- * analyez info of one nal(for avcc data).
+ * analyze info of one nal(for avcc data).
  * @param info      pointer for info data.(update with data.)
  * @param data      data for analyze
  * @param data_size data size
@@ -476,7 +476,6 @@ static Error_e H264_analyzeSequenceParameterSet(
 	case 139:
 	case 134:
 		{
-			ERR_PRINT("non check code.");
 			uint32_t chroma_format_idc = ttLibC_ByteReader_expGolomb(reader, false);
 			if(chroma_format_idc == 3) {
 				ttLibC_ByteReader_bit(reader, 1);
@@ -875,11 +874,19 @@ ttLibC_H264 *ttLibC_H264_analyzeAvccTag(
 	 * 1byte pps num
 	 * 2byte pps size
 	 * nbyte pps
+	 * profile_idc = 100 110 122 144 only
+	 * 1byte 0xFC | chroma_format
+	 * 1byte 0xF8 | (bit_depth_luma - 8)
+	 * 1byte 0xF8 | (bit_depth_chroma - 8)
+	 * 1byte spsext num
+	 * 2byte length spsext size
+	 * nbyte spsext
 	 * done...
 	 */
 	if(data[0] != 1) {
 		ERR_PRINT("avcc version is not 1.");
 	}
+	uint8_t profile_idc = data[1];
 	*length_size = (data[4] & 0x03) + 1;
 	uint32_t sps_count = data[5] & 0x1F;
 	if(sps_count != 1) {
@@ -922,11 +929,22 @@ ttLibC_H264 *ttLibC_H264_analyzeAvccTag(
 	buf += pps_size;
 	buf_pos += pps_size;
 	if(data_size != 0) {
-		ERR_PRINT("data loading is not complete, there is some more.");
-		if(alloc_flag) {
-			ttLibC_free(buffer);
+		if(profile_idc != 100 && profile_idc != 110 && profile_idc != 122 && profile_idc != 144) {
+			ERR_PRINT("invalid profile_idc for extended data.");
+			if(alloc_flag) {
+				ttLibC_free(buffer);
+			}
+			return NULL;
 		}
-		return NULL;
+		// in the case of support spsext need to append buf with annexB style nal.
+		// just now not support spsext, so check spsext num == 0 or not.
+		if(data[3] != 0) {
+			ERR_PRINT("spsext num is not 0, not support now.");
+			if(alloc_flag) {
+				ttLibC_free(buffer);
+			}
+			return NULL;
+		}
 	}
 	// now make frame.
 	ttLibC_H264 *h264 = ttLibC_H264_getFrame(
@@ -1033,9 +1051,20 @@ size_t ttLibC_H264_readAvccTag(
 	 * 01 1byte for the number of pps.
 	 * xx xx 2byte for pps size
 	 * pps body data
+	 * in the case profile == 100 110 122 144
+	 * 1byte 0xFC | chroma_format (chroma_format_idc?)
+	 * 1byte 0xF8 | (bit_depth_luma - 8)
+	 * 1byte 0xF8 | (bit_depth_chroma - 8)
+	 * 1byte spsext num
+	 * 2byte length spsext size
+	 * nbyte spsext
 	 * that's all.
 	 */
+	uint8_t profile_idc = sps_buf[1 + sps_info.data_pos];
 	size_t target_size = 11 + sps_info.nal_size - sps_info.data_pos + pps_info.nal_size - pps_info.data_pos;
+	if(profile_idc == 100 || profile_idc == 110 || profile_idc == 122 || profile_idc == 144) {
+		target_size += 4; // only spsext is not exist is support, so only 4byte.
+	}
 	if(data_size < target_size) {
 		ERR_PRINT("input buffer is too small:%zx required size:%zx", data_size, target_size);
 		return 0;
@@ -1062,6 +1091,30 @@ size_t ttLibC_H264_readAvccTag(
 	dat += 3;
 	data_size -= 3;
 	memcpy(dat, pps_buf + pps_info.data_pos, pps_size);
+	dat += pps_size;
+	data_size -= pps_size;
+	if(profile_idc == 100 || profile_idc == 110 || profile_idc == 122 || profile_idc == 144) {
+//		LOG_PRINT("need to make spse info for avcC.");
+		ttLibC_ByteReader *reader = ttLibC_ByteReader_make(sps_buf + sps_info.data_pos, sps_info.nal_size, ByteUtilType_h26x);
+		ttLibC_ByteReader_bit(reader, 1);
+		ttLibC_ByteReader_bit(reader, 2);
+		ttLibC_ByteReader_bit(reader, 5); // type
+		ttLibC_ByteReader_bit(reader, 8); // profile idc
+		ttLibC_ByteReader_bit(reader, 8); // constraint_set flags
+		ttLibC_ByteReader_bit(reader, 8); // level_idc
+		ttLibC_ByteReader_expGolomb(reader, true);
+		uint8_t chroma_format_idc = ttLibC_ByteReader_expGolomb(reader, true);
+		if(chroma_format_idc == 3) {
+			ttLibC_ByteReader_bit(reader, 1); // separate color plane flag
+		}
+		uint8_t bit_depth_luma_minus8 = ttLibC_ByteReader_expGolomb(reader, true);
+		uint8_t bit_depth_chroma_minus8 = ttLibC_ByteReader_expGolomb(reader, true);
+		ttLibC_ByteReader_close(&reader);
+		dat[0] = 0xFC | chroma_format_idc;
+		dat[1] = 0xF8 | bit_depth_luma_minus8;
+		dat[2] = 0xF8 | bit_depth_chroma_minus8;
+		dat[3] = 0;
+	}
 	return target_size;
 }
 
