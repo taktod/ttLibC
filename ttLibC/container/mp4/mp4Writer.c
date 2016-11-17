@@ -14,8 +14,14 @@
 #include "../../util/ioUtil.h"
 #include "../container.h"
 #include "../containerCommon.h"
+#include "../../frame/audio/audio.h"
 #include "../../frame/audio/aac.h"
+#include "../../frame/audio/mp3.h"
+#include "../../frame/audio/vorbis.h"
+#include "../../frame/video/video.h"
 #include "../../frame/video/h264.h"
+#include "../../frame/video/h265.h"
+#include "../../frame/video/jpeg.h"
 
 #include <stdlib.h>
 
@@ -96,12 +102,23 @@ static bool Mp4Writer_makeTrex(void *ptr, void *key, void *item) {
 		size_t in_size;
 		switch(track->frame_type) {
 		case frameType_h264:
+		case frameType_h265:
 			{
 				in_size = ttLibC_HexUtil_makeBuffer("00 00 00 20 74 72 65 78 00 00 00 00", buf, 256);
 				ttLibC_DynamicBuffer_append(buffer, buf, in_size);
 				uint32_t be_track_id = be_uint32_t(track->frame_queue->track_id);
 				ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_track_id, 4);
-				in_size = ttLibC_HexUtil_makeBuffer("00 00 00 01 00 00 22 1A 00 00 00 00 00 01 00 00", buf, 256);
+				in_size = ttLibC_HexUtil_makeBuffer("00 00 00 01 00 00 00 00 00 00 00 00 00 01 00 00", buf, 256);
+				ttLibC_DynamicBuffer_append(buffer, buf, in_size);
+			}
+			break;
+		case frameType_jpeg:
+			{
+				in_size = ttLibC_HexUtil_makeBuffer("00 00 00 20 74 72 65 78 00 00 00 00", buf, 256);
+				ttLibC_DynamicBuffer_append(buffer, buf, in_size);
+				uint32_t be_track_id = be_uint32_t(track->frame_queue->track_id);
+				ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_track_id, 4);
+				in_size = ttLibC_HexUtil_makeBuffer("00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00", buf, 256);
 				ttLibC_DynamicBuffer_append(buffer, buf, in_size);
 			}
 			break;
@@ -116,7 +133,28 @@ static bool Mp4Writer_makeTrex(void *ptr, void *key, void *item) {
 				ttLibC_DynamicBuffer_append(buffer, buf, in_size);
 			}
 			break;
-//		case frameType_mp3:
+		case frameType_mp3:
+			{
+				// use 1152 for default duration.本当はframeの内容で変化させるべき
+				in_size = ttLibC_HexUtil_makeBuffer("00 00 00 20 74 72 65 78 00 00 00 00", buf, 256);
+				ttLibC_DynamicBuffer_append(buffer, buf, in_size);
+				uint32_t be_track_id = be_uint32_t(track->frame_queue->track_id);
+				ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_track_id, 4);
+				in_size = ttLibC_HexUtil_makeBuffer("00 00 00 01 00 00 04 80 00 00 00 00 02 00 00 00", buf, 256);
+				ttLibC_DynamicBuffer_append(buffer, buf, in_size);
+			}
+			break;
+		case frameType_vorbis:
+			{
+				// use 1024 for default duration.本当はidentification frameで変化させるべき
+				in_size = ttLibC_HexUtil_makeBuffer("00 00 00 20 74 72 65 78 00 00 00 00", buf, 256);
+				ttLibC_DynamicBuffer_append(buffer, buf, in_size);
+				uint32_t be_track_id = be_uint32_t(track->frame_queue->track_id);
+				ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_track_id, 4);
+				in_size = ttLibC_HexUtil_makeBuffer("00 00 00 01 00 00 04 00 00 00 00 00 02 00 00 00", buf, 256);
+				ttLibC_DynamicBuffer_append(buffer, buf, in_size);
+			}
+			break;
 		default:
 			return false;
 		}
@@ -140,7 +178,8 @@ static bool Mp4Writer_makeTrak(void *ptr, void *key, void *item) {
 		size_t in_size;
 		uint8_t buf[256];
 		uint16_t be_width, be_height;
-		ttLibC_Aac *aac = NULL;
+		ttLibC_Audio *audio = NULL;
+		ttLibC_Video *video = NULL;
 		// trak
 		uint32_t trakSizePos = ttLibC_DynamicBuffer_refSize(buffer);
 		in_size = ttLibC_HexUtil_makeBuffer("00 00 00 00 74 72 61 6B", buf, 256);
@@ -152,18 +191,37 @@ static bool Mp4Writer_makeTrak(void *ptr, void *key, void *item) {
 			ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_track_id, 4);
 			switch(track->frame_type) {
 			case frameType_h264:
-				in_size = ttLibC_HexUtil_makeBuffer("00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 00 00 00", buf, 256);
-				ttLibC_DynamicBuffer_append(buffer, buf, in_size);
-				ttLibC_H264 *h264 = (ttLibC_H264 *)track->h26x_configData;
-				be_width = be_uint16_t(h264->inherit_super.width);
-				ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_width, 2);
-				uint16_t zero = 0;
-				ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&zero, 2);
-				be_height = be_uint16_t(h264->inherit_super.height);
-				ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_height, 2);
-				ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&zero, 2);
+			case frameType_h265:
+				{
+					in_size = ttLibC_HexUtil_makeBuffer("00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 00 00 00", buf, 256);
+					ttLibC_DynamicBuffer_append(buffer, buf, in_size);
+					video = (ttLibC_Video *)track->h26x_configData;
+					be_width = be_uint16_t(video->width);
+					ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_width, 2);
+					uint16_t zero = 0;
+					ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&zero, 2);
+					be_height = be_uint16_t(video->height);
+					ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_height, 2);
+					ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&zero, 2);
+				}
+				break;
+			case frameType_jpeg:
+				{
+					in_size = ttLibC_HexUtil_makeBuffer("00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 00 00 00", buf, 256);
+					ttLibC_DynamicBuffer_append(buffer, buf, in_size);
+					video = (ttLibC_Video *)ttLibC_FrameQueue_ref_first(track->frame_queue);
+					be_width = be_uint16_t(video->width);
+					ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_width, 2);
+					uint16_t zero = 0;
+					ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&zero, 2);
+					be_height = be_uint16_t(video->height);
+					ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_height, 2);
+					ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&zero, 2);
+				}
 				break;
 			case frameType_aac:
+			case frameType_mp3:
+			case frameType_vorbis:
 				in_size = ttLibC_HexUtil_makeBuffer("00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 01 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 00 00 00 00 00 00 00 00 00 00 00", buf, 256);
 				//                                                                                         [   ] what's alternateGroup?...
 				//                                                                                               [   ] this is for volume.
@@ -172,16 +230,16 @@ static bool Mp4Writer_makeTrak(void *ptr, void *key, void *item) {
 			default:
 				return false;
 			}
+			// add edts and elst for dts.
 			switch(track->frame_type) {
 			case frameType_h264:
 			case frameType_h265:
-				// add edts and elst for dts.
 				if(track->enable_dts) {
 					track->use_dts = true;
 					// edtsとelst([duration 0] [mediatime = timebase] [rate 1.0]にする。)
 					in_size = ttLibC_HexUtil_makeBuffer("00 00 00 24 65 64 74 73 00 00 00 1C 65 6C 73 74 00 00 00 00 00 00 00 01 00 00 00 00", buf, 256);
 					ttLibC_DynamicBuffer_append(buffer, buf, in_size);
-					uint32_t be_mediatime = be_uint32_t(track->h26x_configData->timebase);
+					uint32_t be_mediatime = be_uint32_t(track->h26x_configData->timebase / 5);
 					ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_mediatime, 4);
 					in_size = ttLibC_HexUtil_makeBuffer("00 01 00 00", buf, 256);
 					ttLibC_DynamicBuffer_append(buffer, buf, in_size);
@@ -197,17 +255,23 @@ static bool Mp4Writer_makeTrak(void *ptr, void *key, void *item) {
 				// mdhd
 				switch(track->frame_type) {
 				case frameType_h264:
+				case frameType_h265:
+				case frameType_jpeg:
 					in_size = ttLibC_HexUtil_makeBuffer("00 00 00 20 6D 64 68 64 00 00 00 00 00 00 00 00 00 00 00 00 00 00 03 E8 00 00 00 00 55 C4 00 00", buf, 256);
 					ttLibC_DynamicBuffer_append(buffer, buf, in_size);
 					break;
 				case frameType_aac:
-					in_size = ttLibC_HexUtil_makeBuffer("00 00 00 20 6D 64 68 64 00 00 00 00 00 00 00 00 00 00 00 00", buf, 256);
-					ttLibC_DynamicBuffer_append(buffer, buf, in_size);
-					aac = (ttLibC_Aac *)ttLibC_FrameQueue_ref_first(track->frame_queue);
-					uint32_t be_timescale = be_uint32_t(aac->inherit_super.sample_rate);
-					ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_timescale, 4);
-					in_size = ttLibC_HexUtil_makeBuffer("00 00 00 00 55 C4 00 00", buf, 256);
-					ttLibC_DynamicBuffer_append(buffer, buf, in_size);
+				case frameType_mp3:
+				case frameType_vorbis:
+					{
+						in_size = ttLibC_HexUtil_makeBuffer("00 00 00 20 6D 64 68 64 00 00 00 00 00 00 00 00 00 00 00 00", buf, 256);
+						ttLibC_DynamicBuffer_append(buffer, buf, in_size);
+						audio = (ttLibC_Audio *)ttLibC_FrameQueue_ref_first(track->frame_queue);
+						uint32_t be_timescale = be_uint32_t(audio->sample_rate);
+						ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_timescale, 4);
+						in_size = ttLibC_HexUtil_makeBuffer("00 00 00 00 55 C4 00 00", buf, 256);
+						ttLibC_DynamicBuffer_append(buffer, buf, in_size);
+					}
 					break;
 				default:
 					return false;
@@ -215,9 +279,13 @@ static bool Mp4Writer_makeTrak(void *ptr, void *key, void *item) {
 				// hdlr
 				switch(track->frame_type) {
 				case frameType_h264:
+				case frameType_h265:
+				case frameType_jpeg:
 					in_size = ttLibC_HexUtil_makeBuffer("00 00 00 21 68 64 6C 72 00 00 00 00 00 00 00 00 76 69 64 65 00 00 00 00 00 00 00 00 00 00 00 00 00", buf, 256);
 					break;
 				case frameType_aac:
+				case frameType_mp3:
+				case frameType_vorbis:
 					in_size = ttLibC_HexUtil_makeBuffer("00 00 00 21 68 64 6C 72 00 00 00 00 00 00 00 00 73 6F 75 6E 00 00 00 00 00 00 00 00 00 00 00 00 00", buf, 256);
 					break;
 				default:
@@ -230,11 +298,15 @@ static bool Mp4Writer_makeTrak(void *ptr, void *key, void *item) {
 				ttLibC_DynamicBuffer_append(buffer, buf, in_size);
 					switch(track->frame_type) {
 					case frameType_h264:
+					case frameType_h265:
+					case frameType_jpeg:
 						// vmhd
 						in_size = ttLibC_HexUtil_makeBuffer("00 00 00 14 76 6D 68 64 00 00 00 01 00 00 00 00 00 00 00 00", buf, 256);
 						ttLibC_DynamicBuffer_append(buffer, buf, in_size);
 						break;
 					case frameType_aac:
+					case frameType_mp3:
+					case frameType_vorbis:
 						// smhd
 						in_size = ttLibC_HexUtil_makeBuffer("00 00 00 10 73 6D 68 64 00 00 00 00 00 00 00 00", buf, 256);
 						ttLibC_DynamicBuffer_append(buffer, buf, in_size);
@@ -268,10 +340,44 @@ static bool Mp4Writer_makeTrak(void *ptr, void *key, void *item) {
 									uint32_t avcCSizePos = ttLibC_DynamicBuffer_refSize(buffer);
 									in_size = ttLibC_HexUtil_makeBuffer("00 00 00 00 61 76 63 43", buf, 256);
 									ttLibC_DynamicBuffer_append(buffer, buf, in_size);
-									in_size = ttLibC_H264_readAvccTag((ttLibC_H264 *)track->h26x_configData, buf, 256);
+									in_size = ttLibC_H264_readAvccTag((ttLibC_H264 *)video, buf, 256);
 									ttLibC_DynamicBuffer_append(buffer, buf, in_size);
 									Mp4Writer_updateSize(buffer, avcCSizePos);
 								Mp4Writer_updateSize(buffer, avc1SizePos);
+							}
+							break;
+						case frameType_h265:
+							{
+								// hev1
+								uint32_t hev1SizePos = ttLibC_DynamicBuffer_refSize(buffer);
+								in_size = ttLibC_HexUtil_makeBuffer("00 00 04 B4 68 65 76 31 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00", buf, 256);
+								ttLibC_DynamicBuffer_append(buffer, buf, in_size);
+								ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_width, 2);
+								ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_height, 2);
+								in_size = ttLibC_HexUtil_makeBuffer("00 48 00 00 00 48 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 18 FF FF", buf, 256);
+								ttLibC_DynamicBuffer_append(buffer, buf, in_size);
+									// hvcC
+									uint32_t hvcCSizePos = ttLibC_DynamicBuffer_refSize(buffer);
+									in_size = ttLibC_HexUtil_makeBuffer("00 00 00 00 68 76 63 43", buf, 256);
+									ttLibC_DynamicBuffer_append(buffer, buf, in_size);
+									in_size = ttLibC_H265_readHvccTag((ttLibC_H265 *)video, buf, 256);
+									ttLibC_DynamicBuffer_append(buffer, buf, in_size);
+									Mp4Writer_updateSize(buffer, hvcCSizePos);
+								Mp4Writer_updateSize(buffer, hev1SizePos);
+							}
+							break;
+						case frameType_jpeg:
+							{
+								// mp4v
+								uint32_t mp4vSizePos = ttLibC_DynamicBuffer_refSize(buffer);
+								in_size = ttLibC_HexUtil_makeBuffer("00 00 00 79 6D 70 34 76 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00", buf, 256);
+								ttLibC_DynamicBuffer_append(buffer, buf, in_size);
+								ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_width, 2);
+								ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_height, 2);
+								// esds is fixed.(本当はbitrateを調整すべきではある、1mbpsでほっとく。)
+								in_size = ttLibC_HexUtil_makeBuffer("00 48 00 00 00 48 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 18 FF FF 00 00 00 23 65 73 64 73 00 00 00 00 03 15 00 01 00 04 0D 6C 11 00 00 00 00 1E 84 80 00 1E 84 80 06 01 02", buf, 256);
+								ttLibC_DynamicBuffer_append(buffer, buf, in_size);
+								Mp4Writer_updateSize(buffer, mp4vSizePos);
 							}
 							break;
 						case frameType_aac:
@@ -281,26 +387,32 @@ static bool Mp4Writer_makeTrak(void *ptr, void *key, void *item) {
 								in_size = ttLibC_HexUtil_makeBuffer("00 00 00 00 6D 70 34 61 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00", buf, 256);
 								ttLibC_DynamicBuffer_append(buffer, buf, in_size);
 								// channel 2byte
-								uint16_t be_channel_num = be_uint16_t(aac->inherit_super.channel_num);
+								uint16_t be_channel_num = be_uint16_t(audio->channel_num);
 								ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_channel_num, 2);
 								// size 0x10 16bit fixed
 								// 00 4byte
 								in_size = ttLibC_HexUtil_makeBuffer("00 10 00 00 00 00", buf, 256);
 								ttLibC_DynamicBuffer_append(buffer, buf, in_size);
 								// sampleRate(16.16)
-								uint16_t be_sample_rate = be_uint16_t(aac->inherit_super.sample_rate);
+								uint16_t be_sample_rate = be_uint16_t(audio->sample_rate);
 								ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_sample_rate, 2);
 								in_size = ttLibC_HexUtil_makeBuffer("00 00", buf, 256);
 								ttLibC_DynamicBuffer_append(buffer, buf, in_size);
 									// esds
 									uint32_t esdsSizePos = ttLibC_DynamicBuffer_refSize(buffer);
+									// ugly code.
+									// 00 00 00 00 65 73 64 73 00 00 00 00
+									// 03 sz 00 02 00
+									// 04 sz 40(aac) 15(flag) 00 00 00  00 01 77 00  00 01 77 00(00 01 77 00 = 96000bps)
+									// 05 sz 12 10(dsi)
+									// 06 01 02
 									in_size = ttLibC_HexUtil_makeBuffer("00 00 00 00 65 73 64 73 00 00 00 00 03", buf, 256);
 									ttLibC_DynamicBuffer_append(buffer, buf, in_size);
 									uint32_t esTagSizePos = ttLibC_DynamicBuffer_refSize(buffer);
-									in_size = ttLibC_HexUtil_makeBuffer("19 00 02 00 04 11 40 15 00 00 00 00 01 77 00 00 01 77 00 05", buf, 256);
+									in_size = ttLibC_HexUtil_makeBuffer("19 00 00 00 04 11 40 15 00 00 00 00 01 77 00 00 01 77 00 05", buf, 256);
 									ttLibC_DynamicBuffer_append(buffer, buf, in_size);
 									uint8_t aac_buf[4];
-									in_size = ttLibC_Aac_readDsiInfo(aac, aac_buf, 4);
+									in_size = ttLibC_Aac_readDsiInfo((ttLibC_Aac *)audio, aac_buf, 4);
 									uint8_t sz = (uint8_t)in_size;
 									ttLibC_DynamicBuffer_append(buffer, &sz, 1);
 									ttLibC_DynamicBuffer_append(buffer, aac_buf, sz);
@@ -310,6 +422,143 @@ static bool Mp4Writer_makeTrak(void *ptr, void *key, void *item) {
 									uint8_t *b = ttLibC_DynamicBuffer_refData(buffer);
 									b += esTagSizePos;
 									*b = (ttLibC_DynamicBuffer_refSize(buffer) - esTagSizePos - 1);
+									Mp4Writer_updateSize(buffer, esdsSizePos);
+								Mp4Writer_updateSize(buffer, mp4aSizePos);
+							}
+							break;
+						case frameType_mp3:
+							{
+								// mp4a
+								uint32_t mp4aSizePos = ttLibC_DynamicBuffer_refSize(buffer);
+								in_size = ttLibC_HexUtil_makeBuffer("00 00 00 00 6D 70 34 61 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00", buf, 256);
+								ttLibC_DynamicBuffer_append(buffer, buf, in_size);
+								// channel 2byte
+								uint16_t be_channel_num = be_uint16_t(audio->channel_num);
+								ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_channel_num, 2);
+								// size 0x10 16bit fixed
+								// 00 4byte
+								in_size = ttLibC_HexUtil_makeBuffer("00 10 00 00 00 00", buf, 256);
+								ttLibC_DynamicBuffer_append(buffer, buf, in_size);
+								// sampleRate(16.16)
+								uint16_t be_sample_rate = be_uint16_t(audio->sample_rate);
+								ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_sample_rate, 2);
+								in_size = ttLibC_HexUtil_makeBuffer("00 00", buf, 256);
+								ttLibC_DynamicBuffer_append(buffer, buf, in_size);
+									// esds
+									uint32_t esdsSizePos = ttLibC_DynamicBuffer_refSize(buffer);
+									// esds is constant(in some case, we need to update bitrate ave.bitrate.)
+									in_size = ttLibC_HexUtil_makeBuffer("00 00 00 00 65 73 64 73 00 00 00 00 03", buf, 256);
+									ttLibC_DynamicBuffer_append(buffer, buf, in_size);
+									in_size = ttLibC_HexUtil_makeBuffer("15 00 00 00 04 0D 6B 15 00 00 00 00 01 77 00 00 01 77 00 06 01 02", buf, 256);
+									ttLibC_DynamicBuffer_append(buffer, buf, in_size);
+									Mp4Writer_updateSize(buffer, esdsSizePos);
+								Mp4Writer_updateSize(buffer, mp4aSizePos);
+							}
+							break;
+						case frameType_vorbis:
+							{
+								// mp4a
+								uint32_t mp4aSizePos = ttLibC_DynamicBuffer_refSize(buffer);
+								in_size = ttLibC_HexUtil_makeBuffer("00 00 00 00 6D 70 34 61 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00", buf, 256);
+								ttLibC_DynamicBuffer_append(buffer, buf, in_size);
+								// channel 2byte
+								uint16_t be_channel_num = be_uint16_t(audio->channel_num);
+								ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_channel_num, 2);
+								// size 0x10 16bit fixed
+								// 00 4byte
+								in_size = ttLibC_HexUtil_makeBuffer("00 10 00 00 00 00", buf, 256);
+								ttLibC_DynamicBuffer_append(buffer, buf, in_size);
+								// sampleRate(16.16)
+								uint16_t be_sample_rate = be_uint16_t(audio->sample_rate);
+								ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_sample_rate, 2);
+								in_size = ttLibC_HexUtil_makeBuffer("00 00", buf, 256);
+								ttLibC_DynamicBuffer_append(buffer, buf, in_size);
+									// esds
+									uint32_t esdsSizePos = ttLibC_DynamicBuffer_refSize(buffer);
+									in_size = ttLibC_HexUtil_makeBuffer("00 00 0F 96 65 73 64 73 00 00 00 00", buf, 256);
+									ttLibC_DynamicBuffer_append(buffer, buf, in_size);
+									// prepare codecPrivate buffer.
+									ttLibC_Vorbis *identificationFrame = (ttLibC_Vorbis *)ttLibC_FrameQueue_dequeue_first(track->frame_queue);
+									ttLibC_Vorbis *commentFrame        = (ttLibC_Vorbis *)ttLibC_FrameQueue_dequeue_first(track->frame_queue);
+									ttLibC_Vorbis *setupFrame          = (ttLibC_Vorbis *)ttLibC_FrameQueue_dequeue_first(track->frame_queue);
+									ttLibC_DynamicBuffer *vorbisSpecificBuffer = ttLibC_DynamicBuffer_make();
+									uint8_t vsb_buf[3];
+									vsb_buf[0] = 2;
+									vsb_buf[1] = identificationFrame->inherit_super.inherit_super.buffer_size;
+									vsb_buf[2] = commentFrame->inherit_super.inherit_super.buffer_size;
+									ttLibC_DynamicBuffer_append(vorbisSpecificBuffer, vsb_buf, 3);
+									ttLibC_DynamicBuffer_append(vorbisSpecificBuffer, identificationFrame->inherit_super.inherit_super.data, identificationFrame->inherit_super.inherit_super.buffer_size);
+									ttLibC_DynamicBuffer_append(vorbisSpecificBuffer, commentFrame->inherit_super.inherit_super.data, commentFrame->inherit_super.inherit_super.buffer_size);
+									ttLibC_DynamicBuffer_append(vorbisSpecificBuffer, setupFrame->inherit_super.inherit_super.data, setupFrame->inherit_super.inherit_super.buffer_size);
+
+									// 03 size 00 00 00
+									// 04 size DD(vorbis) 15(flag?) 00 00 00  00 01 77 00  00 01 77 00
+									// 05 size vorbiscodecprivate
+									// 06 01 02
+									struct sz{
+										uint8_t buf[3];
+										uint32_t length;
+									};
+									struct sz size03;
+									struct sz size04;
+									struct sz size05;
+									uint32_t vsb_size = ttLibC_DynamicBuffer_refSize(vorbisSpecificBuffer);
+									if(vsb_size <= 127) {
+										size05.length = 2;
+										size05.buf[0] = 0x05;
+										size05.buf[1] = vsb_size;
+									}
+									else {
+										size05.length = 3;
+										size05.buf[0] = 0x05;
+										size05.buf[1] = ((vsb_size >> 7) & 0x7F) | 0x80;
+										size05.buf[2] = vsb_size & 0x7F;
+									}
+									vsb_size += 0x0D + size05.length;
+									if(vsb_size <= 127) {
+										size04.length = 2;
+										size04.buf[0] = 0x04;
+										size04.buf[1] = vsb_size;
+									}
+									else {
+										size04.length = 3;
+										size04.buf[0] = 0x04;
+										size04.buf[1] = ((vsb_size >> 7) & 0x7F) | 0x80;
+										size04.buf[2] = vsb_size & 0x7F;
+									}
+									vsb_size += 0x06 + size04.length;
+									if(vsb_size <= 127) {
+										size03.length = 2;
+										size03.buf[0] = 0x03;
+										size03.buf[1] = vsb_size;
+									}
+									else {
+										size03.length = 3;
+										size03.buf[0] = 0x03;
+										size03.buf[1] = ((vsb_size >> 7) & 0x7F) | 0x80;
+										size03.buf[2] = vsb_size & 0x7F;
+									}
+									// 03
+									ttLibC_DynamicBuffer_append(buffer, size03.buf, size03.length);
+									in_size = ttLibC_HexUtil_makeBuffer("00 00 00", buf, 256);
+									ttLibC_DynamicBuffer_append(buffer, buf, in_size);
+
+									// 04
+									ttLibC_DynamicBuffer_append(buffer, size04.buf, size04.length);
+									in_size = ttLibC_HexUtil_makeBuffer("DD 15 00 00 00 00 01 77 00 00 01 77 00", buf, 256);
+									ttLibC_DynamicBuffer_append(buffer, buf, in_size);
+
+									// 05
+									ttLibC_DynamicBuffer_append(buffer, size05.buf, size05.length);
+									ttLibC_DynamicBuffer_append(buffer,
+											ttLibC_DynamicBuffer_refData(vorbisSpecificBuffer),
+											ttLibC_DynamicBuffer_refSize(vorbisSpecificBuffer));
+
+									// 06
+									in_size = ttLibC_HexUtil_makeBuffer("06 01 02", buf, 256);
+									ttLibC_DynamicBuffer_append(buffer, buf, in_size);
+
+									ttLibC_DynamicBuffer_close(&vorbisSpecificBuffer);
 									Mp4Writer_updateSize(buffer, esdsSizePos);
 								Mp4Writer_updateSize(buffer, mp4aSizePos);
 							}
@@ -420,16 +669,34 @@ static bool Mp4Writer_makeTraf(void *ptr, void *key, void *item) {
 		// just put first frame pts information.
 		ttLibC_Frame *first_frame = ttLibC_FrameQueue_ref_first(track->frame_queue);
 		uint32_t be_timediff = be_uint32_t((uint32_t)first_frame->pts);
+		// for audio, timediff is crazy, cause round for timebase = 1000. for write function.
+		switch(track->frame_type) {
+		case frameType_h264:
+		case frameType_h265:
+			{
+				if(track->use_dts) {
+					uint32_t timediff = first_frame->dts;
+					be_timediff = be_uint32_t((uint32_t)timediff);
+				}
+			}
+			break;
+		case frameType_jpeg:
+			break;
+		case frameType_aac:
+		case frameType_mp3:
+		case frameType_vorbis:
+			{
+				ttLibC_Audio *audio = (ttLibC_Audio *)first_frame;
+				uint32_t timediff = (uint32_t)(1.0 * first_frame->pts * audio->sample_rate / 1000);
+				be_timediff = be_uint32_t((uint32_t)timediff);
+			}
+			break;
+		default:
+			break;
+		}
 		ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_timediff, 4);
 
 		// trun
-		// video305 sz duration fsfp dop
-		// audio201 sz dop
-		// 32bit count
-		// has dop, dop(pos from moof atom.) 32bit
-		// has fsfp, flags 32bit
-		// has duration, duration 32bit
-		// has size, data size 32bit
 		switch(track->frame_type) {
 		case frameType_h264:
 			{
@@ -482,11 +749,125 @@ static bool Mp4Writer_makeTraf(void *ptr, void *key, void *item) {
 						ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_h264_size, 4);
 						if(track->use_dts) {
 							// get offset to store.
-							uint32_t offset = h264->inherit_super.inherit_super.pts - h264->inherit_super.inherit_super.dts + h264->inherit_super.inherit_super.timebase;
+							uint32_t offset = h264->inherit_super.inherit_super.pts - h264->inherit_super.inherit_super.dts + h264->inherit_super.inherit_super.timebase / 5;
 							uint32_t be_offset = be_uint32_t(offset);
 							ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_offset, 4);
 						}
-//						ttLibC_H264_close(&h264); // frameQueue will handle to release, DON'T close.
+						++ frameCount;
+					}
+					else {
+						break;
+					}
+				}
+				// update frame count.
+				b = ttLibC_DynamicBuffer_refData(buffer);
+				b += frameCountPos;
+				*((uint32_t *)b) = be_uint32_t(frameCount);
+				Mp4Writer_updateSize(buffer, trunSizePos);
+			}
+			break;
+		case frameType_h265:
+			{
+				uint32_t trunSizePos = ttLibC_DynamicBuffer_refSize(buffer);
+				if(track->use_dts) {
+					in_size = ttLibC_HexUtil_makeBuffer("00 00 00 00 74 72 75 6E 00 00 0B 05 00 00 00 00 00 00 00 00 00 00 00 00", buf, 256);
+				}
+				else {
+					in_size = ttLibC_HexUtil_makeBuffer("00 00 00 00 74 72 75 6E 00 00 03 05 00 00 00 00 00 00 00 00 00 00 00 00", buf, 256);
+				}
+				ttLibC_DynamicBuffer_append(buffer, buf, in_size);
+				// count, update later.
+				uint32_t frameCountPos = ttLibC_DynamicBuffer_refSize(buffer) - 12;
+				// dop, update later.
+				track->dataOffsetPosForTrun = frameCountPos + 4;
+				uint32_t frameCount = 0;
+				while(true) {
+					ttLibC_H265 *h265 = (ttLibC_H265 *)ttLibC_FrameQueue_ref_first(track->frame_queue);
+					if(h265 == NULL) {
+						break;
+					}
+					if(h265->inherit_super.inherit_super.dts < writer->target_pos) {
+						ttLibC_H265 *h = (ttLibC_H265 *)ttLibC_FrameQueue_dequeue_first(track->frame_queue);
+						if(h265 != h) {
+							ERR_PRINT("ref frame is invalid.");
+							return false;
+						}
+						// get next frame to get duration of frame.
+						ttLibC_Frame *next_frame = ttLibC_FrameQueue_ref_first(track->frame_queue);
+						uint32_t duration = next_frame->dts - h265->inherit_super.inherit_super.dts;
+						uint32_t be_duration = be_uint32_t(duration);
+						ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_duration, 4);
+
+						// put data on mdat_buffer.
+						uint8_t *h265_data = h265->inherit_super.inherit_super.data;
+						size_t h265_data_size = h265->inherit_super.inherit_super.buffer_size;
+						ttLibC_H265_NalInfo nal_info;
+						uint32_t h265_size = 0;
+						while(ttLibC_H265_getNalInfo(&nal_info, h265_data, h265_data_size)) {
+							uint32_t nal_size = nal_info.nal_size - nal_info.data_pos;
+							h265_size += 4 + nal_size;
+							uint32_t be_nal_size = be_uint32_t(nal_size);
+							ttLibC_DynamicBuffer_append(track->mdat_buffer, (uint8_t *)&be_nal_size, 4);
+							ttLibC_DynamicBuffer_append(track->mdat_buffer, h265_data + nal_info.data_pos, nal_size);
+							h265_data += nal_info.nal_size;
+							h265_data_size -= nal_info.nal_size;
+						}
+						// set size on trun.
+						uint32_t be_h265_size = be_uint32_t(h265_size);
+						ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_h265_size, 4);
+						if(track->use_dts) {
+							// get offset to store.
+							uint32_t offset = h265->inherit_super.inherit_super.pts - h265->inherit_super.inherit_super.dts + h265->inherit_super.inherit_super.timebase / 5;
+							uint32_t be_offset = be_uint32_t(offset);
+							ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_offset, 4);
+						}
+						++ frameCount;
+					}
+					else {
+						break;
+					}
+				}
+				// update frame count.
+				b = ttLibC_DynamicBuffer_refData(buffer);
+				b += frameCountPos;
+				*((uint32_t *)b) = be_uint32_t(frameCount);
+				Mp4Writer_updateSize(buffer, trunSizePos);
+			}
+			break;
+		case frameType_jpeg:
+			{
+				// trun use 0301
+				uint32_t trunSizePos = ttLibC_DynamicBuffer_refSize(buffer);
+				in_size = ttLibC_HexUtil_makeBuffer("00 00 00 00 74 72 75 6E 00 00 03 01 00 00 00 00 00 00 00 00", buf, 256);
+				ttLibC_DynamicBuffer_append(buffer, buf, in_size);
+				uint32_t frameCountPos = ttLibC_DynamicBuffer_refSize(buffer) - 8;
+				track->dataOffsetPosForTrun = frameCountPos + 4;
+				uint32_t frameCount = 0;
+				uint64_t target_pts = 0;
+				while(true) {
+					ttLibC_Jpeg *jpeg =(ttLibC_Jpeg *)ttLibC_FrameQueue_ref_first(track->frame_queue);
+					if(jpeg == NULL) {
+						break;
+					}
+					if(jpeg->inherit_super.inherit_super.pts < writer->target_pos) {
+						ttLibC_Jpeg *j = (ttLibC_Jpeg *)ttLibC_FrameQueue_dequeue_first(track->frame_queue);
+						if(jpeg != j) {
+							ERR_PRINT("ref frame is invalid.");
+							return false;
+						}
+						// get next frame to get duration of frame.
+						ttLibC_Frame *next_frame = ttLibC_FrameQueue_ref_first(track->frame_queue);
+						uint32_t duration = next_frame->pts - jpeg->inherit_super.inherit_super.pts;
+						uint32_t be_duration = be_uint32_t(duration);
+						ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_duration, 4);
+
+						// put data on mdat_buffer.
+						uint8_t *jpeg_data = jpeg->inherit_super.inherit_super.data;
+						size_t jpeg_data_size = jpeg->inherit_super.inherit_super.buffer_size;
+						ttLibC_DynamicBuffer_append(track->mdat_buffer, jpeg_data, jpeg_data_size);
+						// set size on trun.
+						uint32_t be_jpeg_size = be_uint32_t(jpeg_data_size);
+						ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_jpeg_size, 4);
 						++ frameCount;
 					}
 					else {
@@ -535,7 +916,94 @@ static bool Mp4Writer_makeTraf(void *ptr, void *key, void *item) {
 							ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_aac_size, 4);
 							++ frameCount;
 						}
-//						ttLibC_Aac_close(&aac); // frameQueue will handle to release, DON'T close.
+					}
+					else {
+						break;
+					}
+				}
+				b = ttLibC_DynamicBuffer_refData(buffer);
+				b += frameCountPos;
+				*((uint32_t *)b) = be_uint32_t(frameCount);
+				Mp4Writer_updateSize(buffer, trunSizePos);
+			}
+			break;
+		case frameType_mp3:
+			{
+				uint32_t trunSizePos = ttLibC_DynamicBuffer_refSize(buffer);
+				in_size = ttLibC_HexUtil_makeBuffer("00 00 00 00 74 72 75 6E 00 00 03 01 00 00 00 00 00 00 00 00", buf, 256);
+				ttLibC_DynamicBuffer_append(buffer, buf, in_size);
+				uint32_t frameCountPos = ttLibC_DynamicBuffer_refSize(buffer) - 8;
+				track->dataOffsetPosForTrun = frameCountPos + 4;
+				uint32_t frameCount = 0;
+				uint64_t target_pts = 0;
+				while(true) {
+					ttLibC_Mp3 *mp3 = (ttLibC_Mp3 *)ttLibC_FrameQueue_ref_first(track->frame_queue);
+					if(mp3 == NULL) {
+						break;
+					}
+					if(target_pts == 0) {
+						target_pts = (uint64_t)(1.0 * writer->target_pos * mp3->inherit_super.inherit_super.timebase / 1000);
+					}
+					if(mp3->inherit_super.inherit_super.pts < target_pts) {
+						ttLibC_Mp3 *m = (ttLibC_Mp3 *)ttLibC_FrameQueue_dequeue_first(track->frame_queue);
+						if(mp3 != m) {
+							ERR_PRINT("ref frame is invalid.");
+							return false;
+						}
+						if(mp3->type == Mp3Type_frame) {
+							uint8_t *mp3_data = mp3->inherit_super.inherit_super.data;
+							uint32_t mp3_size = mp3->inherit_super.inherit_super.buffer_size;
+							ttLibC_DynamicBuffer_append(track->mdat_buffer, mp3_data, mp3_size);
+							uint32_t be_mp3_duration = be_uint32_t(mp3->inherit_super.sample_num);
+							ttLibC_DynamicBuffer_append(buffer,(uint8_t *)&be_mp3_duration, 4);
+							uint32_t be_mp3_size = be_uint32_t(mp3_size);
+							ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_mp3_size, 4);
+							++ frameCount;
+						}
+					}
+					else {
+						break;
+					}
+				}
+				b = ttLibC_DynamicBuffer_refData(buffer);
+				b += frameCountPos;
+				*((uint32_t *)b) = be_uint32_t(frameCount);
+				Mp4Writer_updateSize(buffer, trunSizePos);
+			}
+			break;
+		case frameType_vorbis:
+			{
+				uint32_t trunSizePos = ttLibC_DynamicBuffer_refSize(buffer);
+				in_size = ttLibC_HexUtil_makeBuffer("00 00 00 00 74 72 75 6E 00 00 03 01 00 00 00 00 00 00 00 00", buf, 256);
+				ttLibC_DynamicBuffer_append(buffer, buf, in_size);
+				uint32_t frameCountPos = ttLibC_DynamicBuffer_refSize(buffer) - 8;
+				track->dataOffsetPosForTrun = frameCountPos + 4;
+				uint32_t frameCount = 0;
+				uint64_t target_pts = 0;
+				while(true) {
+					ttLibC_Vorbis *vorbis = (ttLibC_Vorbis *)ttLibC_FrameQueue_ref_first(track->frame_queue);
+					if(vorbis == NULL) {
+						break;
+					}
+					if(target_pts == 0) {
+						target_pts = (uint64_t)(1.0 * writer->target_pos * vorbis->inherit_super.inherit_super.timebase / 1000);
+					}
+					if(vorbis->inherit_super.inherit_super.pts < target_pts) {
+						ttLibC_Vorbis *v = (ttLibC_Vorbis *)ttLibC_FrameQueue_dequeue_first(track->frame_queue);
+						if(vorbis != v) {
+							ERR_PRINT("ref frame is invalid.");
+							return false;
+						}
+						if(vorbis->type == VorbisType_frame) {
+							uint8_t *vorbis_data = vorbis->inherit_super.inherit_super.data;
+							uint32_t vorbis_size = vorbis->inherit_super.inherit_super.buffer_size;
+							ttLibC_DynamicBuffer_append(track->mdat_buffer, vorbis_data, vorbis_size);
+							uint32_t be_vorbis_duration = be_uint32_t(vorbis->inherit_super.sample_num);
+							ttLibC_DynamicBuffer_append(buffer,(uint8_t *)&be_vorbis_duration, 4);
+							uint32_t be_vorbis_size = be_uint32_t(vorbis_size);
+							ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_vorbis_size, 4);
+							++ frameCount;
+						}
 					}
 					else {
 						break;
@@ -655,14 +1123,15 @@ static bool Mp4Writer_initCheckTrack(void *ptr, void *key, void *item) {
 	ttLibC_Mp4WriteTrack *track = (ttLibC_Mp4WriteTrack *)item;
 	switch(track->frame_type) {
 	case frameType_h264:
+	case frameType_h265:
 		{
 			// for h264 need configData.
 			return track->h26x_configData != NULL;
 		}
 	default:
 		{
-			// for others need at least 1 frame.
-			return ttLibC_FrameQueue_ref_first(track->frame_queue) != NULL;
+			// for others need to check in appending mode.
+			return track->is_appending;
 		}
 	}
 	return true;
@@ -673,30 +1142,32 @@ static bool Mp4Writer_initCheckTrack(void *ptr, void *key, void *item) {
  */
 static bool Mp4Writer_PrimaryH264TrackCheck(void *ptr, ttLibC_Frame *frame) {
 	ttLibC_Mp4Writer_ *writer = (ttLibC_Mp4Writer_ *)ptr;
-	ttLibC_H264 *h264 = (ttLibC_H264 *)frame;
-	switch(h264->type) {
-	case H264Type_slice:
-		// exceed max_unit_duration.
-		if(h264->inherit_super.inherit_super.pts - writer->current_pts_pos > writer->max_unit_duration) {
-			writer->target_pos = writer->current_pts_pos + writer->max_unit_duration;
-			return false;
+	ttLibC_Video *video = (ttLibC_Video *)frame;
+	switch(video->type) {
+	case videoType_inner:
+		{
+			if(video->inherit_super.pts - writer->current_pts_pos > writer->max_unit_duration) {
+				writer->target_pos = writer->current_pts_pos + writer->max_unit_duration;
+				return false;
+			}
 		}
-		return true;
-	case H264Type_sliceIDR:
-		// if sliceIDR is too far away, use max_unit_duration.
-		if(writer->current_pts_pos + writer->max_unit_duration < h264->inherit_super.inherit_super.pts) {
-			writer->target_pos = writer->current_pts_pos + writer->max_unit_duration;
-			return false;
+		break;
+	case videoType_key:
+		{
+			if(writer->current_pts_pos + writer->max_unit_duration < video->inherit_super.pts) {
+				writer->target_pos = writer->current_pts_pos + writer->max_unit_duration;
+				return false;
+			}
+			if(writer->current_pts_pos != video->inherit_super.pts) {
+				writer->target_pos = video->inherit_super.pts;
+				return false;
+			}
 		}
-		// find next sliceIDR.
-		if(writer->current_pts_pos != h264->inherit_super.inherit_super.pts) {
-			writer->target_pos = h264->inherit_super.inherit_super.pts;
-			return false;
-		}
-		return true;
+		break;
 	default:
 		return true;
 	}
+	return true;
 }
 
 /**
@@ -755,9 +1226,13 @@ static bool Mp4Writer_writeFromQueue(
 			ttLibC_Mp4WriteTrack *track = (ttLibC_Mp4WriteTrack *)ttLibC_StlMap_get(writer->track_list, (void *)1);
 			switch(track->frame_type) {
 			case frameType_h264:
+			case frameType_h265:
 				ttLibC_FrameQueue_ref(track->frame_queue, Mp4Writer_PrimaryH264TrackCheck, writer);
 				break;
+			case frameType_jpeg:
 			case frameType_aac:
+			case frameType_mp3:
+			case frameType_vorbis:
 				writer->target_pos = writer->current_pts_pos + writer->max_unit_duration;
 				break;
 			default:
@@ -839,6 +1314,30 @@ bool ttLibC_Mp4Writer_write(
 	track->enable_dts = writer->enable_dts;
 	// for first access.
 	switch(frame->type) {
+	case frameType_h265:
+		{
+			ttLibC_H265 *h265 = (ttLibC_H265 *)frame;
+			if(h265->type == H265Type_unknown) {
+				return true;
+			}
+			if(h265->type == H265Type_configData) {
+				ttLibC_H265 *h = ttLibC_H265_clone(
+						(ttLibC_H265 *)track->h26x_configData,
+						h265);
+				if(h == NULL) {
+					ERR_PRINT("failed to make clone data.");
+					return false;
+				}
+				h->inherit_super.inherit_super.pts = 0;
+				h->inherit_super.inherit_super.timebase = 1000;
+				track->h26x_configData = (ttLibC_Frame *)h;
+				return true;
+			}
+			if(!track->is_appending && h265->type != H265Type_sliceIDR) {
+				return true;
+			}
+		}
+		break;
 	case frameType_h264:
 		{
 			ttLibC_H264 *h264 = (ttLibC_H264 *)frame;
@@ -861,6 +1360,38 @@ bool ttLibC_Mp4Writer_write(
 			if(!track->is_appending && h264->type != H264Type_sliceIDR) {
 				// no data in queue, and not sliceIDR -> not yet to append.
 				return true;
+			}
+		}
+		break;
+	case frameType_vorbis:
+		{
+			ttLibC_Vorbis *vorbis = (ttLibC_Vorbis *)frame;
+			if(!track->is_appending) {
+				switch(track->counter) {
+				case 0:
+					if(vorbis->type != VorbisType_identification) {
+						return true;
+					}
+					++ track->counter;
+					break;
+				case 1:
+					if(vorbis->type != VorbisType_comment) {
+						return true;
+					}
+					++ track->counter;
+					break;
+				case 2:
+					if(vorbis->type != VorbisType_setup) {
+						return true;
+					}
+					++ track->counter;
+					break;
+				default:
+					break;
+				}
+				if(track->counter < 3) {
+					return Mp4Writer_appendQueue(track, frame, 0);
+				}
 			}
 		}
 		break;
