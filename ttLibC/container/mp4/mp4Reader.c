@@ -530,7 +530,7 @@ static bool Mp4Reader_readAtom(
 									 * 0x68:Mpeg4AdtsScalableSamplingRate
 									 * 0x69:Mpeg2Adts
 									 * 0x6A:Mpeg1Video
-									 * 0x6B:Mpeg1Adts
+									 * 0x6B:Mpeg1Adts *
 									 * 0x6C:JpegVideo *
 									 * 0xC0:PrivateAudio
 									 * 0xD0:PrivateVideo
