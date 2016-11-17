@@ -56,6 +56,9 @@ ttLibC_Vorbis *ttLibC_Vorbis_make(
 			timebase);
 	if(vorbis != NULL) {
 		vorbis->type = type;
+		vorbis->block0 = 0;
+		vorbis->block1 = 0;
+		vorbis->block_type = 0;
 	}
 	return (ttLibC_Vorbis *)vorbis;
 }
@@ -93,6 +96,7 @@ ttLibC_Vorbis *ttLibC_Vorbis_clone(
 			src_frame->inherit_super.inherit_super.timebase);
 	if(vorbis != NULL) {
 		vorbis->inherit_super.inherit_super.id = src_frame->inherit_super.inherit_super.id;
+		vorbis->block_type = src_frame->block_type;
 		vorbis->block0 = src_frame->block0;
 		vorbis->block1 = src_frame->block1;
 	}
@@ -109,8 +113,8 @@ ttLibC_Vorbis *ttLibC_Vorbis_getFrame(
 		bool non_copy_mode,
 		uint64_t pts,
 		uint32_t timebase) {
+	uint8_t *buf = (uint8_t *)data;
 	if(data_size > 7){
-		uint8_t *buf = (uint8_t *)data;
 		// check is header or not.
 		if(buf[1] == 'v'
 		&& buf[2] == 'o'
@@ -127,7 +131,7 @@ ttLibC_Vorbis *ttLibC_Vorbis_getFrame(
 						return NULL;
 					}
 					uint32_t channel_num = buf[11];
-					uint32_t *buf32 = (uint32_t *)buf + 12;
+					uint32_t *buf32 = (uint32_t *)(buf + 12);
 					uint32_t sample_rate = le_uint32_t(*buf32);
 					uint32_t block0 = buf[28] & 0x0F;
 					uint32_t block1 = (buf[28] >> 4) & 0x0F;
@@ -150,11 +154,14 @@ ttLibC_Vorbis *ttLibC_Vorbis_getFrame(
 					}
 					vorbis->block0 = block0_value;
 					vorbis->block1 = block1_value;
+					vorbis->block_type = 0;
 					return vorbis;
 				}
 				break;
 			case 0x03: // comment
 				{
+					uint32_t block0 = prev_frame->block0;
+					uint32_t block1 = prev_frame->block1;
 					ttLibC_Vorbis *vorbis = ttLibC_Vorbis_make(
 							prev_frame,
 							VorbisType_comment,
@@ -170,13 +177,16 @@ ttLibC_Vorbis *ttLibC_Vorbis_getFrame(
 						ERR_PRINT("failed to make vorbisFrame.");
 						return NULL;
 					}
-					vorbis->block0 = prev_frame->block0;
-					vorbis->block1 = prev_frame->block1;
+					vorbis->block0 = block0;
+					vorbis->block1 = block1;
+					vorbis->block_type = 0;
 					return vorbis;
 				}
 				break;
 			case 0x05: // setup
 				{
+					uint32_t block0 = prev_frame->block0;
+					uint32_t block1 = prev_frame->block1;
 					ttLibC_Vorbis *vorbis = ttLibC_Vorbis_make(
 							prev_frame,
 							VorbisType_setup,
@@ -192,8 +202,9 @@ ttLibC_Vorbis *ttLibC_Vorbis_getFrame(
 						ERR_PRINT("failed to make vorbisFrame.");
 						return NULL;
 					}
-					vorbis->block0 = prev_frame->block0;
-					vorbis->block1 = prev_frame->block1;
+					vorbis->block0 = block0;
+					vorbis->block1 = block1;
+					vorbis->block_type = 0;
 					return vorbis;
 				}
 				break;
@@ -205,12 +216,29 @@ ttLibC_Vorbis *ttLibC_Vorbis_getFrame(
 	if(prev_frame == NULL) {
 		return NULL;
 	}
+	uint32_t block0 = prev_frame->block0;
+	uint32_t block1 = prev_frame->block1;
+	uint32_t sample_num = 0;
+	if(prev_frame->block_type == 0) {
+		sample_num += block0;
+	}
+	else {
+		sample_num += block1;
+	}
+	uint8_t block_type = (buf[0] & 0x02) != 0;
+	if(block_type == 0) {
+		sample_num += block0;
+	}
+	else {
+		sample_num += block1;
+	}
+	sample_num = sample_num >> 2;
 	// normal frame.
 	ttLibC_Vorbis *vorbis = ttLibC_Vorbis_make(
 			prev_frame,
 			VorbisType_frame,
 			prev_frame->inherit_super.sample_rate,
-			(prev_frame->inherit_super.sample_num == 0) ? (prev_frame->block0 + prev_frame->block1) / 4 : prev_frame->block1 / 2,
+			sample_num,
 			prev_frame->inherit_super.channel_num,
 			data,
 			data_size,
@@ -221,8 +249,9 @@ ttLibC_Vorbis *ttLibC_Vorbis_getFrame(
 		ERR_PRINT("failed to make vorbisFrame.");
 		return NULL;
 	}
-	vorbis->block0 = prev_frame->block0;
-	vorbis->block1 = prev_frame->block1;
+	vorbis->block0 = block0;
+	vorbis->block1 = block1;
+	vorbis->block_type = block_type;
 	return vorbis;
 }
 

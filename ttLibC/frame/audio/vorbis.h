@@ -38,6 +38,7 @@ typedef struct ttLibC_Frame_Audio_Vorbis {
 	/** block data from identification frame. */
 	uint32_t block0;
 	uint32_t block1;
+	uint8_t block_type;
 } ttLibC_Frame_Audio_Vorbis;
 
 typedef ttLibC_Frame_Audio_Vorbis ttLibC_Vorbis;
