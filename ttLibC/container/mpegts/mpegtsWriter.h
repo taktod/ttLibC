@@ -21,13 +21,15 @@ extern "C" {
 #include "../misc.h"
 
 /**
- * definition of mpegts tracks/
+ * definition of mpegts tracks
  */
 typedef struct ttLibC_MpegtsTrack {
 	ttLibC_FrameQueue *frame_queue;
 	ttLibC_Frame *h264_configData;
 	uint8_t cc; // continuity counter.
 	ttLibC_Frame_Type frame_type;
+	bool enable_dts;
+	bool use_dts;
 } ttLibC_MpegtsTrack;
 
 /**

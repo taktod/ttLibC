@@ -120,6 +120,7 @@ typedef ttLibC_ContainerWriter_MpegtsTrackInfo ttLibC_MpegtsTrackInfo;
 typedef struct ttLibC_ContainerWriter_MpegtsWriter {
 	ttLibC_ContainerWriter inherit_super;
 	/** ref the track info to get pid and frame type. */
+	bool enable_dts;
 } ttLibC_ContainerWriter_MpegtsWriter;
 
 typedef ttLibC_ContainerWriter_MpegtsWriter ttLibC_MpegtsWriter;
@@ -158,13 +159,31 @@ ttLibC_MpegtsWriter *ttLibC_MpegtsWriter_make_ex(
  * @param ptr         user def pointer.
  * @return true:success false:error
  */
-bool ttLibC_MpegtsWriter_write(
+bool ttLibC_MpegtsWriter_write__(
 		ttLibC_MpegtsWriter *writer,
 		bool update_info,
 		uint16_t pid,
 		ttLibC_Frame *frame,
 		ttLibC_ContainerWriteFunc callback,
 		void *ptr);
+
+/**
+ * write binaries for sdt pat pmt.
+ */
+bool ttLibC_MpegtsWriter_writeInfo(
+		ttLibC_MpegtsWriter *writer,
+		ttLibC_ContainerWriteFunc callback,
+		void *ptr);
+
+/**
+ * write frame on mpegts writer.
+ */
+bool ttLibC_MpegtsWriter_write(
+		ttLibC_MpegtsWriter *writer,
+		ttLibC_Frame *frame,
+		ttLibC_ContainerWriteFunc callback,
+		void *ptr);
+
 
 /**
  * try to reduce the mpegts data size.

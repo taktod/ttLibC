@@ -305,7 +305,7 @@ static bool MpegtsWriter_writeFromQueue(
  * @param callback    callback for write process.
  * @param ptr         user def data pointer for callback.
  */
-bool ttLibC_MpegtsWriter_write(
+bool ttLibC_MpegtsWriter_write__(
 		ttLibC_MpegtsWriter *writer,
 		bool update_info,
 		uint16_t pid,
@@ -400,6 +400,27 @@ bool ttLibC_MpegtsWriter_write(
 	writer_->callback = callback;
 	writer_->ptr = ptr;
 	return MpegtsWriter_writeFromQueue(writer_);
+}
+
+/**
+ * write binaries for sdt pat pmt.
+ */
+bool ttLibC_MpegtsWriter_writeInfo(
+		ttLibC_MpegtsWriter *writer,
+		ttLibC_ContainerWriteFunc callback,
+		void *ptr) {
+	return ttLibC_MpegtsWriter_write__(writer, true, 0x100, NULL, callback, ptr);
+}
+
+/**
+ * write frame on mpegts writer.
+ */
+bool ttLibC_MpegtsWriter_write(
+		ttLibC_MpegtsWriter *writer,
+		ttLibC_Frame *frame,
+		ttLibC_ContainerWriteFunc callback,
+		void *ptr) {
+	return ttLibC_MpegtsWriter_write__(writer, false, frame->id, frame, callback, ptr);
 }
 
 bool ttLibC_MpegtsWriter_setReduceMode(
