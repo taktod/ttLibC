@@ -1140,7 +1140,7 @@ static bool Mp4Writer_initCheckTrack(void *ptr, void *key, void *item) {
 /**
  * check primary h264 track for target pos for chunk.
  */
-static bool Mp4Writer_PrimaryH264TrackCheck(void *ptr, ttLibC_Frame *frame) {
+static bool Mp4Writer_primaryH26xTrackCheck(void *ptr, ttLibC_Frame *frame) {
 	ttLibC_Mp4Writer_ *writer = (ttLibC_Mp4Writer_ *)ptr;
 	ttLibC_Video *video = (ttLibC_Video *)frame;
 	switch(video->type) {
@@ -1181,7 +1181,7 @@ static bool Mp4Writer_dataCheckTrack(void *ptr, void *key, void *item) {
 	if(ptr != NULL && item != NULL) {
 		ttLibC_Mp4Writer_ *writer = (ttLibC_Mp4Writer_ *)ptr;
 		ttLibC_Mp4WriteTrack *track = (ttLibC_Mp4WriteTrack *)item;
-		 // for audio we need to change timebase into 1000.
+		// for audio we need to change timebase into 1000.
 		uint64_t pts = (uint64_t)(1.0 * track->frame_queue->pts * 1000 / track->frame_queue->timebase);
 		if(writer->target_pos > pts) {
 			return false;
@@ -1227,7 +1227,7 @@ static bool Mp4Writer_writeFromQueue(
 			switch(track->frame_type) {
 			case frameType_h264:
 			case frameType_h265:
-				ttLibC_FrameQueue_ref(track->frame_queue, Mp4Writer_PrimaryH264TrackCheck, writer);
+				ttLibC_FrameQueue_ref(track->frame_queue, Mp4Writer_primaryH26xTrackCheck, writer);
 				break;
 			case frameType_jpeg:
 			case frameType_aac:
