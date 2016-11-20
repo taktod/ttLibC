@@ -403,7 +403,6 @@ static Error_e H265_analyzeSPSNut(
 		ttLibC_H265_Ref_t *ref,
 		uint8_t *data,
 		size_t data_size) {
-//	LOG_PRINT("spsの解析を実施します。");
 //	LOG_DUMP(data, data_size, true);
 	// 解析を実施してみる。
 	// とりあえず先頭の2byteはどのnalであるかといった情報なので、パス。
