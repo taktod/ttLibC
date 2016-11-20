@@ -83,7 +83,7 @@ bool ttLibC_Sdt_makePacket(
 	data[4]  = 0x00;
 	data[5]  = 0x42; // fixed id
 	data[6]  = 0xF0;
-	data[7]  = 0x16 + provider_length + name_length; // section length. changacble.* // これはcrc込みっぽい。s
+	data[7]  = 0x16 + provider_length + name_length; // section length. changacble.* // include crc.
 	data[8]  = 0x00; ///
 	data[9]  = 0x01; /// program number.
 	data[10] = 0xC1;
