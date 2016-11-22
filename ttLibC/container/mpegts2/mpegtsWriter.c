@@ -18,6 +18,7 @@
 #include "type/sdt.h"
 
 #include "../../frame/video/h264.h"
+#include "../../frame/video/h265.h"
 #include "../../frame/audio/mp3.h"
 #include "../../frame/audio/aac.h"
 
@@ -33,7 +34,7 @@ ttLibC_MpegtsWriter *ttLibC_MpegtsWriter_make(
 	return ttLibC_MpegtsWriter_make_ex(
 			target_frame_types,
 			types_num,
-			900000);
+			180000);
 }
 
 ttLibC_MpegtsWriter *ttLibC_MpegtsWriter_make_ex(
@@ -57,8 +58,7 @@ ttLibC_MpegtsWriter *ttLibC_MpegtsWriter_make_ex(
 		track->frame_type       = target_frame_types[i];
 		track->is_appending     = false;
 		track->cc               = 0;
-		track->enable_dts       = false;
-		track->use_dts          = false;
+		track->use_mode         = containerWriter_normal;
 		track->tmp_buffer       = NULL;
 		track->tmp_frame_buffer = NULL;
 		ttLibC_StlMap_put(writer->track_list, (void *)(long)(0x0100 + i), (void *)track);
@@ -325,32 +325,169 @@ static bool MpegtsWriter_makeData(ttLibC_MpegtsWriter_ *writer) {
 	return result;
 }
 
-static bool MpegtsWriter_primaryH26xTrackCheck(void *ptr, ttLibC_Frame *frame) {
+static bool MpegtsWriter_primaryVideoTrackCheck(void *ptr, ttLibC_Frame *frame) {
 	ttLibC_MpegtsWriter_ *writer = (ttLibC_MpegtsWriter_ *)ptr;
 	ttLibC_Video *video = (ttLibC_Video *)frame;
-	switch(video->type) {
-	case videoType_inner:
-		{
-			if(video->inherit_super.pts - writer->current_pts_pos > writer->max_unit_duration) {
-				writer->target_pos = writer->current_pts_pos + writer->max_unit_duration;
-				return false;
-			}
-		}
-		break;
-	case videoType_key:
-		{
-			if(writer->current_pts_pos + writer->max_unit_duration < video->inherit_super.pts) {
-				writer->target_pos = writer->current_pts_pos + writer->max_unit_duration;
-				return false;
-			}
-			if(writer->current_pts_pos != video->inherit_super.pts) {
-				writer->target_pos = video->inherit_super.pts;
-				return false;
-			}
-		}
-		break;
+	ttLibC_MpegtsWriteTrack *track = (ttLibC_MpegtsWriteTrack *)ttLibC_StlMap_get(writer->track_list, (void *)(long)0x0100);
+	ttLibC_ContainerWriter_Mode divisionMode = track->use_mode & 0x0F;
+	switch(divisionMode) {
 	default:
-		return true;
+	case containerWriter_keyFrame_division:
+		if(video->type == videoType_key) {
+			if(writer->current_pts_pos != frame->pts) {
+				writer->target_pos = frame->pts;
+				return false;
+			}
+		}
+		break;
+	case containerWriter_innerFrame_division:
+		switch(frame->type) {
+		case frameType_h264:
+			{
+				ttLibC_H264 *h264 = (ttLibC_H264 *)frame;
+				switch(h264->frame_type) {
+				case H264FrameType_I:
+					if(writer->current_pts_pos != frame->pts) {
+						writer->target_pos = frame->pts;
+						return false;
+					}
+					break;
+				case H264FrameType_P:
+					if(frame->pts - writer->current_pts_pos > writer->max_unit_duration) {
+						writer->target_pos = frame->pts;
+						return false;
+					}
+					break;
+				case H264FrameType_B:
+				default:
+					break;
+				}
+			}
+			break;
+		case frameType_h265:
+			{
+				ttLibC_H265 *h265 = (ttLibC_H265 *)frame;
+				switch(h265->frame_type) {
+				case H265FrameType_I:
+					if(writer->current_pts_pos != frame->pts) {
+						writer->target_pos = frame->pts;
+						return false;
+					}
+					break;
+				case H265FrameType_P:
+					if(frame->pts - writer->current_pts_pos > writer->max_unit_duration) {
+						writer->target_pos = frame->pts;
+						return false;
+					}
+					break;
+				case H265FrameType_B:
+				default:
+					break;
+				}
+			}
+			break;
+		default:
+			switch(video->type) {
+			case videoType_inner:
+				{
+					if(frame->pts - writer->current_pts_pos > writer->max_unit_duration) {
+						writer->target_pos = writer->current_pts_pos + writer->max_unit_duration;
+						return false;
+					}
+				}
+				break;
+			case videoType_key:
+				{
+					if(writer->current_pts_pos != frame->pts) {
+						writer->target_pos = frame->pts;
+						return false;
+					}
+				}
+				break;
+			default:
+				return true;
+			}
+			break;
+		}
+		break;
+	case containerWriter_allFrame_division:
+		switch(frame->type) {
+		case frameType_h264:
+			{
+				ttLibC_H264 *h264 = (ttLibC_H264 *)frame;
+				switch(h264->frame_type) {
+				case H264FrameType_I:
+					if(writer->current_pts_pos != frame->pts) {
+						writer->target_pos = frame->pts;
+						return false;
+					}
+					break;
+				case H264FrameType_B:
+					if(!h264->is_disposable) {
+						return true;
+					}
+					/* no break */
+				case H264FrameType_P:
+					if(frame->pts - writer->current_pts_pos > writer->max_unit_duration) {
+						writer->target_pos = frame->pts;
+						return false;
+					}
+					break;
+				default:
+					break;
+				}
+			}
+			break;
+		case frameType_h265:
+			{
+				ttLibC_H265 *h265 = (ttLibC_H265 *)frame;
+				switch(h265->frame_type) {
+				case H265FrameType_I:
+					if(writer->current_pts_pos != frame->pts) {
+						writer->target_pos = frame->pts;
+						return false;
+					}
+					break;
+				case H265FrameType_B:
+					if(!h265->is_disposable) {
+						return true;
+					}
+					/* no break */
+				case H265FrameType_P:
+					if(frame->pts - writer->current_pts_pos > writer->max_unit_duration) {
+						writer->target_pos = frame->pts;
+						return false;
+					}
+					break;
+				default:
+					break;
+				}
+			}
+			break;
+		default:
+			switch(video->type) {
+			case videoType_inner:
+				{
+					if(frame->pts - writer->current_pts_pos > writer->max_unit_duration) {
+						writer->target_pos = writer->current_pts_pos + writer->max_unit_duration;
+						return false;
+					}
+				}
+				break;
+			case videoType_key:
+				{
+					if(writer->current_pts_pos != frame->pts) {
+						writer->target_pos = frame->pts;
+						return false;
+					}
+				}
+				break;
+			default:
+				return true;
+			}
+			break;
+		}
+		break;
 	}
 	return true;
 }
@@ -376,7 +513,7 @@ static bool MpegtsWriter_writeFromQueue(
 			ttLibC_MpegtsWriteTrack *track = (ttLibC_MpegtsWriteTrack *)ttLibC_StlMap_get(writer->track_list, (void *)(long)0x100);
 			switch(track->frame_type) {
 			case frameType_h264:
-				ttLibC_FrameQueue_ref(track->frame_queue, MpegtsWriter_primaryH26xTrackCheck, writer);
+				ttLibC_FrameQueue_ref(track->frame_queue, MpegtsWriter_primaryVideoTrackCheck, writer);
 				break;
 			case frameType_aac:
 			case frameType_mp3:
@@ -459,7 +596,7 @@ bool ttLibC_MpegtsWriter_write(
 		return false;
 	}
 	uint64_t pts = (uint64_t)(1.0 * frame->pts * 90000 / frame->timebase);
-	track->enable_dts = writer->enable_dts;
+	track->use_mode = writer->inherit_super.mode;
 	// trackにframeを追加する。
 	switch(frame->type) {
 	case frameType_h264:
@@ -479,9 +616,6 @@ bool ttLibC_MpegtsWriter_write(
 				h->inherit_super.inherit_super.pts = 0;
 				h->inherit_super.inherit_super.timebase = 90000;
 				track->h26x_configData = (ttLibC_Frame *)h;
-			}
-			if(writer_->is_first) {
-				track->use_dts = track->enable_dts;
 			}
 			if(!track->is_appending && h264->type != H264Type_sliceIDR) {
 				// queueにデータがなく、sliceIDRでない場合はまだ始める時期ではない。

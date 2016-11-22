@@ -32,8 +32,8 @@ typedef struct ttLibC_Mp4WriteTrack {
 	uint32_t dataOffsetPosForTrun; // data off set using for trun atom.
 	bool is_appending;
 	uint32_t counter; // for vorbis
-	bool enable_dts;
-	bool use_dts;
+	ttLibC_ContainerWriter_Mode enable_mode;
+	ttLibC_ContainerWriter_Mode use_mode;
 } ttLibC_Mp4WriteTrack;
 
 /**

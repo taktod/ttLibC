@@ -93,6 +93,14 @@ void ttLibC_ContainerReader_close(ttLibC_ContainerReader **reader);
 
 // -------------------------------------------------------------- //
 
+#define containerWriter_normal              0x00
+#define containerWriter_enable_dts          0x10
+#define containerWriter_keyFrame_division   0x00
+#define containerWriter_innerFrame_division 0x01
+#define containerWriter_allFrame_division   0x02
+
+#define ttLibC_ContainerWriter_Mode uint32_t
+
 /**
  * definition of container writer.
  */
@@ -100,6 +108,7 @@ typedef struct ttLibC_ContainerWriter {
 	ttLibC_Container_Type type;
 	uint64_t pts;
 	uint32_t timebase;
+	ttLibC_ContainerWriter_Mode mode;
 } ttLibC_ContainerWriter;
 
 /**

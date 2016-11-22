@@ -132,7 +132,6 @@ typedef struct ttLibC_ContainerWriter_Mp4TrackInfo {
  */
 typedef struct ttLibC_ContainerWriter_Mp4Writer {
 	ttLibC_ContainerWriter inherit_super;
-	bool enable_dts;
 } ttLibC_ContainerWriter_Mp4Writer;
 
 typedef ttLibC_ContainerWriter_Mp4Writer ttLibC_Mp4Writer;

@@ -119,8 +119,6 @@ typedef ttLibC_ContainerWriter_MpegtsTrackInfo ttLibC_MpegtsTrackInfo;
  */
 typedef struct ttLibC_ContainerWriter_MpegtsWriter {
 	ttLibC_ContainerWriter inherit_super;
-	/** ref the track info to get pid and frame type. */
-	bool enable_dts;
 } ttLibC_ContainerWriter_MpegtsWriter;
 
 typedef ttLibC_ContainerWriter_MpegtsWriter ttLibC_MpegtsWriter;

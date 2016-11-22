@@ -27,8 +27,7 @@ typedef struct ttLibC_MpegtsWriteTrack {
 	uint8_t cc; // continuity counter.
 	ttLibC_Frame_Type frame_type;
 	bool is_appending;
-	bool enable_dts;
-	bool use_dts;
+	ttLibC_ContainerWriter_Mode use_mode;
 	ttLibC_DynamicBuffer *tmp_buffer; // mpegtsのデータを構築するときに利用する一時buffer
 	ttLibC_DynamicBuffer *tmp_frame_buffer; // mpegtsデータを構築するときに一時的に利用するbuffer.
 } ttLibC_MpegtsWriteTrack;

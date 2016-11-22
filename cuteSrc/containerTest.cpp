@@ -87,22 +87,11 @@ static void mp4CodecTest() {
 	types[0] = frameType_h264;
 	types[1] = frameType_aac;
 	testData.writer = (ttLibC_ContainerWriter *)ttLibC_Mp4Writer_make(types, 2);
-//	testData.writer = NULL;
-//	sprintf(file, "%s/tools/data/source/test.h264.aac.mp4", getenv("HOME"));
-//	sprintf(file, "%s/tools/data/source/test.h264.aac.mp4box.mp4", getenv("HOME"));
-//	sprintf(file, "%s/tools/data/source/test.h264.aac.fmp4", getenv("HOME"));
-//	sprintf(file, "%s/tools/data/source/test.h264.aac.frag.mp4", getenv("HOME"));
-	((ttLibC_Mp4Writer *)testData.writer)->enable_dts = true;
-//	sprintf(file, "%s/tools/data/source/MP4Box/test.h264b.aac.mp4", getenv("HOME"));
-	sprintf(file, "%s/tools/data/source/MP4Box/test.h264b.aac_dashinit.mp4", getenv("HOME"));
-//	sprintf(file, "%s/tools/data/source/MP4Box/test.fix.mp4", getenv("HOME"));
-//	sprintf(file, "%s/tools/data/c_out/test.h264.aac.mp4", getenv("HOME"));
+	testData.writer->mode = containerWriter_enable_dts;
+	sprintf(file, "%s/tools/data/source/test.h264.aac.mp4", getenv("HOME"));
 	testData.fp_in = fopen(file, "rb");
 	sprintf(file, "%s/tools/data/c_out/test.h264.aac.mp4", getenv("HOME"));
-//	sprintf(file, "%s/tools/data/c_out/test.h264b.aac.mp4", getenv("HOME"));
-//	sprintf(file, "%s/tools/data/c_out/test.dts.h264.aac.mp4", getenv("HOME"));
 	testData.fp_out = fopen(file, "wb");
-//	testData.fp_out = NULL;
 	do {
 		uint8_t buffer[65536];
 		if(!testData.fp_in) {
@@ -120,21 +109,17 @@ static void mp4CodecTest() {
 	if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
 	ASSERT(ttLibC_Allocator_dump() == 0);
 	// */
-/*
+
 	LOG_PRINT("h265 / mp3");
 	testData.reader = (ttLibC_ContainerReader *)ttLibC_Mp4Reader_make();
 	types[0] = frameType_h265;
 	types[1] = frameType_mp3;
 	testData.writer = (ttLibC_ContainerWriter *)ttLibC_Mp4Writer_make(types, 2);
-	((ttLibC_Mp4Writer *)testData.writer)->enable_dts = true;
+	testData.writer->mode = containerWriter_enable_dts;
 	sprintf(file, "%s/tools/data/source/test.h265.mp3.mp4", getenv("HOME"));
-//	sprintf(file, "%s/tools/data/source/test.h265.mp3.mp4box.mp4", getenv("HOME"));
-//	sprintf(file, "%s/tools/data/source/test.h265.mp3.frag.mp4", getenv("HOME"));
-//	sprintf(file, "%s/tools/data/c_out/test.h265.mp3.mp4", getenv("HOME"));
 	testData.fp_in = fopen(file, "rb");
-	sprintf(file, "%s/tools/data/c_out/test.h265.mp3.mp4", getenv("HOME"));
+	sprintf(file, "%s/tools/data/c_out/test.h265b.mp3.mp4", getenv("HOME"));
 	testData.fp_out = fopen(file, "wb");
-//	testData.fp_out = NULL;
 	do {
 		uint8_t buffer[65536];
 		if(!testData.fp_in) {
@@ -158,15 +143,10 @@ static void mp4CodecTest() {
 	types[0] = frameType_jpeg;
 	types[1] = frameType_vorbis;
 	testData.writer = (ttLibC_ContainerWriter *)ttLibC_Mp4Writer_make(types, 2);
-//	testData.writer = NULL;
 	sprintf(file, "%s/tools/data/source/test.mjpeg.vorbis.mp4", getenv("HOME"));
-//	sprintf(file, "%s/tools/data/source/test.mjpeg.vorbis.mp4box.mp4", getenv("HOME"));
-//	sprintf(file, "%s/tools/data/source/test.mjpeg.vorbis.frag.mp4", getenv("HOME"));
-//	sprintf(file, "%s/tools/data/c_out/test.mjpeg.vorbis.mp4", getenv("HOME"));
 	testData.fp_in = fopen(file, "rb");
 	sprintf(file, "%s/tools/data/c_out/test.mjpeg.vorbis.mp4", getenv("HOME"));
 	testData.fp_out = fopen(file, "wb");
-//	testData.fp_out = NULL;
 	do {
 		uint8_t buffer[65536];
 		if(!testData.fp_in) {
@@ -289,11 +269,9 @@ static void mkvCodecTest() {
 	types[0] = frameType_h264;
 	types[1] = frameType_aac;
 	testData.writer = (ttLibC_ContainerWriter *)ttLibC_MkvWriter_make(types, 2);
-//	sprintf(file, "%s/tools/data/source/test.h264.aac.mkv", getenv("HOME"));
-	sprintf(file, "%s/tools/data/source/test.h264b.aac.mkv", getenv("HOME"));
+	sprintf(file, "%s/tools/data/source/test.h264.aac.mkv", getenv("HOME"));
 	testData.fp_in = fopen(file, "rb");
-//	sprintf(file, "%s/tools/data/c_out/test.h264.aac.mkv", getenv("HOME"));
-	sprintf(file, "%s/tools/data/c_out/test.h264b.aac.mkv", getenv("HOME"));
+	sprintf(file, "%s/tools/data/c_out/test.h264.aac.mkv", getenv("HOME"));
 	testData.fp_out = fopen(file, "wb");
 	do {
 		uint8_t buffer[65536];
@@ -311,7 +289,7 @@ static void mkvCodecTest() {
 	if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
 	if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
 	ASSERT(ttLibC_Allocator_dump() == 0);
-	/*
+
 	LOG_PRINT("h265 / mp3");
 	testData.reader = (ttLibC_ContainerReader *)ttLibC_MkvReader_make();
 	types[0] = frameType_h265;
@@ -337,7 +315,7 @@ static void mkvCodecTest() {
 	if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
 	if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
 	ASSERT(ttLibC_Allocator_dump() == 0);
-/*
+
 	LOG_PRINT("theora / speex");
 	testData.reader = (ttLibC_ContainerReader *)ttLibC_MkvReader_make();
 	types[0] = frameType_theora;
@@ -443,7 +421,6 @@ static void mkvCodecTest() {
 	if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
 	if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
 	ASSERT(ttLibC_Allocator_dump() == 0);
-	*/
 }
 
 static void webmTest() {
@@ -607,7 +584,7 @@ static void mp3Test() {
 	ttLibC_ContainerWriter_close(&testData.writer);
 	if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
 	if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
-	LOG_PRINT("write size is %d", testData.write_size);
+	LOG_PRINT("write size is %llu", testData.write_size);
 	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
@@ -629,14 +606,14 @@ bool mpegtsTest_getFrameCallback(void *ptr, ttLibC_Frame *frame) {
 			if(h264->type == H264Type_unknown) {
 				return true;
 			}
-			LOG_PRINT("h264:%x %f", frame->id, 1.0 * frame->pts / frame->timebase);
+//			LOG_PRINT("h264:%x %f %llu type:%d disposable:%d", frame->id, 1.0 * frame->pts / frame->timebase, frame->pts, h264->frame_type, h264->is_disposable);
 		}
 		break;
 	case frameType_aac:
-		LOG_PRINT("aac:%x %f", frame->id, 1.0 * frame->pts / frame->timebase);
+//		LOG_PRINT("aac:%x %f", frame->id, 1.0 * frame->pts / frame->timebase);
 		break;
 	case frameType_mp3:
-		LOG_PRINT("mp3:%x %f", frame->id, 1.0 * frame->pts / frame->timebase);
+//		LOG_PRINT("mp3:%x %f", frame->id, 1.0 * frame->pts / frame->timebase);
 		break;
 	default:
 		LOG_PRINT("unexpect frame type is found.");		return false;
@@ -664,9 +641,8 @@ static void mpegtsCodecTest() {
 	testData.writer = (ttLibC_ContainerWriter *)ttLibC_MpegtsWriter_make(types, 2);
 	sprintf(file, "%s/tools/data/source/test.h264.aac.ts", getenv("HOME"));
 	testData.fp_in = fopen(file, "rb");
-//	sprintf(file, "%s/tools/data/c_out/test.h264.aac.ts", getenv("HOME"));
-//	testData.fp_out = fopen(file, "wb");
-	testData.fp_out = NULL;
+	sprintf(file, "%s/tools/data/c_out/test.h264.aac.ts", getenv("HOME"));
+	testData.fp_out = fopen(file, "wb");
 	do {
 		uint8_t buffer[65536];
 		if(!testData.fp_in) {
@@ -683,17 +659,46 @@ static void mpegtsCodecTest() {
 	if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
 	if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
 	ASSERT(ttLibC_Allocator_dump() == 0);
+	// */
+
+	LOG_PRINT("h264 / mp3");
+	testData.reader = (ttLibC_ContainerReader *)ttLibC_MpegtsReader_make();
+	types[0] = frameType_h264;
+	types[1] = frameType_mp3;
+	testData.writer = (ttLibC_ContainerWriter *)ttLibC_MpegtsWriter_make(types, 2);
+	testData.writer->mode = containerWriter_enable_dts;
+	sprintf(file, "%s/tools/data/source/test.h264.mp3.ts", getenv("HOME"));
+	testData.fp_in = fopen(file, "rb");
+	sprintf(file, "%s/tools/data/c_out/test.h264.mp3.ts", getenv("HOME"));
+	testData.fp_out = fopen(file, "wb");
+	do {
+		uint8_t buffer[65536];
+		if(!testData.fp_in) {
+			break;
+		}
+		size_t read_size = fread(buffer, 1, 65536, testData.fp_in);
+		if(!ttLibC_MpegtsReader_read((ttLibC_MpegtsReader *)testData.reader, buffer, read_size, mpegtsTest_getMpegtsCallback, &testData)) {
+			ERR_PRINT("error occured!");
+			break;
+		}
+	} while(!feof(testData.fp_in));
+	ttLibC_ContainerReader_close(&testData.reader);
+	ttLibC_ContainerWriter_close(&testData.writer);
+	if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
+	if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
+	ASSERT(ttLibC_Allocator_dump() == 0);
+	// */
 
 	LOG_PRINT("h264b / mp3");
 	testData.reader = (ttLibC_ContainerReader *)ttLibC_MpegtsReader_make();
 	types[0] = frameType_h264;
 	types[1] = frameType_mp3;
 	testData.writer = (ttLibC_ContainerWriter *)ttLibC_MpegtsWriter_make(types, 2);
+	testData.writer->mode = containerWriter_enable_dts | containerWriter_innerFrame_division;
 	sprintf(file, "%s/tools/data/source/test.h264b.mp3.ts", getenv("HOME"));
 	testData.fp_in = fopen(file, "rb");
-//	sprintf(file, "%s/tools/data/c_out/test.h264b.mp3.ts", getenv("HOME"));
-//	testData.fp_out = fopen(file, "wb");
-	testData.fp_out = NULL;
+	sprintf(file, "%s/tools/data/c_out/test.h264b.mp3.ts", getenv("HOME"));
+	testData.fp_out = fopen(file, "wb");
 	do {
 		uint8_t buffer[65536];
 		if(!testData.fp_in) {
@@ -710,6 +715,35 @@ static void mpegtsCodecTest() {
 	if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
 	if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
 	ASSERT(ttLibC_Allocator_dump() == 0);
+	// */
+
+	LOG_PRINT("h264b / aac");
+	testData.reader = (ttLibC_ContainerReader *)ttLibC_MpegtsReader_make();
+	types[0] = frameType_h264;
+	types[1] = frameType_aac;
+	testData.writer = (ttLibC_ContainerWriter *)ttLibC_MpegtsWriter_make(types, 2);
+	testData.writer->mode = containerWriter_enable_dts | containerWriter_allFrame_division;
+	sprintf(file, "%s/tools/data/source/test.h264b.aac.ts", getenv("HOME"));
+	testData.fp_in = fopen(file, "rb");
+	sprintf(file, "%s/tools/data/c_out/test.h264b.aac.ts", getenv("HOME"));
+	testData.fp_out = fopen(file, "wb");
+	do {
+		uint8_t buffer[65536];
+		if(!testData.fp_in) {
+			break;
+		}
+		size_t read_size = fread(buffer, 1, 65536, testData.fp_in);
+		if(!ttLibC_MpegtsReader_read((ttLibC_MpegtsReader *)testData.reader, buffer, read_size, mpegtsTest_getMpegtsCallback, &testData)) {
+			ERR_PRINT("error occured!");
+			break;
+		}
+	} while(!feof(testData.fp_in));
+	ttLibC_ContainerReader_close(&testData.reader);
+	ttLibC_ContainerWriter_close(&testData.writer);
+	if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
+	if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
+	ASSERT(ttLibC_Allocator_dump() == 0);
+	// */
 }
 
 static void mpegtsTest() {

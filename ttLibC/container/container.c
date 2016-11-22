@@ -255,6 +255,7 @@ ttLibC_ContainerWriter *ttLibC_ContainerWriter_make(
 	writer->type     = container_type;
 	writer->timebase = timebase;
 	writer->pts      = 0;
+	writer->mode     = containerWriter_normal;
 	return writer;
 }
 
