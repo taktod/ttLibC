@@ -116,9 +116,9 @@ static bool MpegtsWriter_makeH264Data(
 				result = false;
 				break;
 			}
-			if(h264->inherit_super.inherit_super.pts < writer->current_pts_pos) {
+/*			if(h264->inherit_super.inherit_super.pts < writer->current_pts_pos) {
 				continue;
-			}
+			}*/
 			// とりあえずデータchunkを作らなければならない。
 			// dynamicBufferにつくるのはいいけど・・・メモリーのreallocがもったいないか・・・
 			// メモリーのallocもできた。
@@ -132,12 +132,19 @@ static bool MpegtsWriter_makeH264Data(
 				aud[4] = 0xF0;
 				aud_size = 5;
 			}*/
+			uint64_t dts = h264->inherit_super.inherit_super.dts;
+			if(dts < 20000) {
+				dts = 0;
+			}
+			else {
+				dts -= 20000;
+			}
 			ttLibC_DynamicBuffer_append(dataBuffer, aud, aud_size);
 			switch(h264->type) {
 			case H264Type_slice:
 				// sliceの場合はaud + slice
 				ttLibC_DynamicBuffer_append(dataBuffer, h264->inherit_super.inherit_super.data, h264->inherit_super.inherit_super.buffer_size);
-				ttLibC_Pes_writePacket(track, false, false, 0xE0, h264->inherit_super.inherit_super.id, h264->inherit_super.inherit_super.pts, h264->inherit_super.inherit_super.dts, dataBuffer, buffer);
+				ttLibC_Pes_writePacket(track, false, false, 0xE0, h264->inherit_super.inherit_super.id, h264->inherit_super.inherit_super.pts, dts, dataBuffer, buffer);
 				break;
 			case H264Type_sliceIDR:
 				// sliceIDRの場合はaud + sps + pps + sliceIDRという形にしておく。
@@ -150,7 +157,7 @@ static bool MpegtsWriter_makeH264Data(
 						ttLibC_DynamicBuffer_append(dataBuffer, configData->inherit_super.inherit_super.data, configData->inherit_super.inherit_super.buffer_size);
 					}
 					ttLibC_DynamicBuffer_append(dataBuffer, h264->inherit_super.inherit_super.data, h264->inherit_super.inherit_super.buffer_size);
-					ttLibC_Pes_writePacket(track, true, false, 0xE0, h264->inherit_super.inherit_super.id, h264->inherit_super.inherit_super.pts, h264->inherit_super.inherit_super.dts, dataBuffer, buffer);
+					ttLibC_Pes_writePacket(track, true, false, 0xE0, h264->inherit_super.inherit_super.id, h264->inherit_super.inherit_super.pts, dts, dataBuffer, buffer);
 				}
 				break;
 			default:
@@ -187,9 +194,9 @@ static bool MpegtsWriter_makeAacData(
 				result = false;
 				break;
 			}
-			if(aac->inherit_super.inherit_super.pts < writer->current_pts_pos) {
+/*			if(aac->inherit_super.inherit_super.pts < writer->current_pts_pos) {
 				continue;
-			}
+			}*/
 			if(!is_info_update) {
 				pid = aac->inherit_super.inherit_super.id;
 				pts = aac->inherit_super.inherit_super.pts;
@@ -245,9 +252,9 @@ static bool MpegtsWriter_makeMp3Data(
 				result = false;
 				break;
 			}
-			if(mp3->inherit_super.inherit_super.pts < writer->current_pts_pos) {
+/*			if(mp3->inherit_super.inherit_super.pts < writer->current_pts_pos) {
 				continue;
-			}
+			}*/
 			if(!is_info_update) {
 				pid = mp3->inherit_super.inherit_super.id;
 				pts = mp3->inherit_super.inherit_super.pts;
