@@ -453,8 +453,9 @@ bool ttLibC_Pes_writePacket(
 			switch(track->frame_type) {
 			case frameType_h264:
 //			case frameType_h265:
-				if((track->use_mode & containerWriter_enable_dts) != 0) {
+				if((track->use_mode & containerWriter_enable_dts) != 0 && pts != dts) {
 					header_buf.buf[7] |= 0x40; // こっちもdtsあるフラグ追加
+					header_buf.buf[8] = 0x0A;
 					header_buf.buf[9] |= 0x10; // dtsありにする。
 					Buf_t_timestamp(header_buf, 0x11, dts); // dts追加
 				}
