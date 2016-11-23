@@ -1404,6 +1404,7 @@ static bool Mp4Writer_writeFromQueue(
 		{
 			writer->current_pts_pos = writer->target_pos;
 			writer->status = status_target_check;
+			writer->inherit_super.inherit_super.pts = writer->target_pos;
 			++ writer->chunk_counter;
 //			return Mp4Writer_writeFromQueue(writer);
 		}

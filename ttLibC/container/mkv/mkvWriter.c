@@ -1315,6 +1315,7 @@ static bool MkvWriter_writeFromQueue(
 	case status_update: // 次の処理へ移動する。(status_target_checkにいく。)
 		{
 			writer->current_pts_pos = writer->target_pos;
+			writer->inherit_super.inherit_super.pts = writer->target_pos;
 			writer->status = status_target_check;
 			// 無限ループが怖いのでここで止めとく。
 			// 呼び出しループが大きすぎるとstackエラーになる環境がありえるので、こうしとく。

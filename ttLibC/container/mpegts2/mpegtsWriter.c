@@ -561,6 +561,7 @@ static bool MpegtsWriter_writeFromQueue(
 	case status_update:       // 次のフェーズに移動する。
 		{
 			writer->current_pts_pos = writer->target_pos;
+			writer->inherit_super.inherit_super.pts = writer->target_pos;
 			writer->status = status_target_check;
 		}
 		break;
