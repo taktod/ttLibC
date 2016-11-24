@@ -237,7 +237,7 @@ bool ttLibC_FrameQueue_queue(
 				if(pts == queue_->pts_cache[0]) {
 					queue_->pts_cache[0] = f->pts;
 				}
-				if(pts == queue_->pts_cache[1]) {
+				else if(pts == queue_->pts_cache[1]) {
 					queue_->pts_cache[1] = f->pts;
 				}
 			}
