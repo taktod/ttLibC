@@ -244,6 +244,7 @@ bool ttLibC_FrameQueue_queue(
 		}
 		break;
 	default:
+		f->dts = f->pts;
 		queue_->inherit_super.pts = f->pts;
 		break;
 	}
