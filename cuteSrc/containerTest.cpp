@@ -610,7 +610,7 @@ bool mpegtsTest_getFrameCallback(void *ptr, ttLibC_Frame *frame) {
 		}
 		break;
 	case frameType_aac:
-//		LOG_PRINT("aac:%x %f", frame->id, 1.0 * frame->pts / frame->timebase);
+//		LOG_PRINT("aac:%x %f %llu", frame->id, 1.0 * frame->pts / frame->timebase, frame->pts);
 		break;
 	case frameType_mp3:
 //		LOG_PRINT("mp3:%x %f", frame->id, 1.0 * frame->pts / frame->timebase);
@@ -639,6 +639,7 @@ static void mpegtsCodecTest() {
 	types[0] = frameType_h264;
 	types[1] = frameType_aac;
 	testData.writer = (ttLibC_ContainerWriter *)ttLibC_MpegtsWriter_make(types, 2);
+	testData.writer->mode = containerWriter_innerFrame_split | containerWriter_allKeyFrame_split;
 	sprintf(file, "%s/tools/data/source/test.h264.aac.ts", getenv("HOME"));
 	testData.fp_in = fopen(file, "rb");
 	sprintf(file, "%s/tools/data/c_out/test.h264.aac.ts", getenv("HOME"));
@@ -666,7 +667,7 @@ static void mpegtsCodecTest() {
 	types[0] = frameType_h264;
 	types[1] = frameType_mp3;
 	testData.writer = (ttLibC_ContainerWriter *)ttLibC_MpegtsWriter_make(types, 2);
-	testData.writer->mode = containerWriter_enable_dts;
+	testData.writer->mode = containerWriter_enable_dts | containerWriter_allKeyFrame_split;
 	sprintf(file, "%s/tools/data/source/test.h264.mp3.ts", getenv("HOME"));
 	testData.fp_in = fopen(file, "rb");
 	sprintf(file, "%s/tools/data/c_out/test.h264.mp3.ts", getenv("HOME"));
@@ -694,7 +695,7 @@ static void mpegtsCodecTest() {
 	types[0] = frameType_h264;
 	types[1] = frameType_mp3;
 	testData.writer = (ttLibC_ContainerWriter *)ttLibC_MpegtsWriter_make(types, 2);
-	testData.writer->mode = containerWriter_enable_dts | containerWriter_innerFrame_division;
+	testData.writer->mode = containerWriter_enable_dts | containerWriter_allKeyFrame_split;
 	sprintf(file, "%s/tools/data/source/test.h264b.mp3.ts", getenv("HOME"));
 	testData.fp_in = fopen(file, "rb");
 	sprintf(file, "%s/tools/data/c_out/test.h264b.mp3.ts", getenv("HOME"));
@@ -721,12 +722,15 @@ static void mpegtsCodecTest() {
 	testData.reader = (ttLibC_ContainerReader *)ttLibC_MpegtsReader_make();
 	types[0] = frameType_h264;
 	types[1] = frameType_aac;
-	testData.writer = (ttLibC_ContainerWriter *)ttLibC_MpegtsWriter_make(types, 2);
-	testData.writer->mode = containerWriter_enable_dts | containerWriter_allFrame_division;
+	testData.writer = (ttLibC_ContainerWriter *)ttLibC_MpegtsWriter_make_ex(types, 2, 15000);
+	testData.writer->mode = containerWriter_innerFrame_split | containerWriter_allKeyFrame_split;
 	sprintf(file, "%s/tools/data/source/test.h264b.aac.ts", getenv("HOME"));
+//	sprintf(file, "%s/tools/data/c_out/test.h264b.aac.ts", getenv("HOME"));
+//	sprintf(file, "%s/tools/data/test.h264b.aac.phpOutput.ts", getenv("HOME"));
 	testData.fp_in = fopen(file, "rb");
 	sprintf(file, "%s/tools/data/c_out/test.h264b.aac.ts", getenv("HOME"));
 	testData.fp_out = fopen(file, "wb");
+//	testData.fp_out = NULL;
 	do {
 		uint8_t buffer[65536];
 		if(!testData.fp_in) {
