@@ -371,6 +371,7 @@ bool ttLibC_Pes_getFrame(
 bool ttLibC_Pes_writePacket(
 		ttLibC_MpegtsWriteTrack *track, // for continuity counter
 		bool has_randomAccess, // for random access flag
+		bool has_pcr,
 		bool has_size, // for size data flag
 		uint8_t trackBaseId, // trackBaseId
 		uint32_t pid, // pid
@@ -470,7 +471,7 @@ bool ttLibC_Pes_writePacket(
 					header_buf.buf[5] = size & 0xFF;
 				}
 			}
-			if(pid == 0x0100 && has_randomAccess) {
+			if(has_pcr) {
 				// pcrPIDの場合adaptation fieldは8byte固定 1byte(size) + 1byte(flag) + 6byte(pts)
 				Buf_t_byte(adapt_buf, 0x07);
 				if(has_randomAccess) {
@@ -482,12 +483,10 @@ bool ttLibC_Pes_writePacket(
 				// これ・・・h264の場合はdtsいれた方が建設的かも
 				Buf_t_pcr(adapt_buf, pts);
 			}
-			else {
-				if(has_randomAccess) {
-					// ランダムアクセスがonの場合はfragがある
-					Buf_t_byte(adapt_buf, 0x01);
-					Buf_t_byte(adapt_buf, 0x10);
-				}
+			else if(has_randomAccess) {
+				// ランダムアクセスがonの場合はfragがある
+				Buf_t_byte(adapt_buf, 0x01);
+				Buf_t_byte(adapt_buf, 0x10);
 			}
 		}
 		// このlengthが184以下の場合はadapatation fieldで埋めが必要

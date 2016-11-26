@@ -705,165 +705,134 @@ static bool MkvWriter_makeInitMkv(ttLibC_MkvWriter_ *writer) {
 // check video track to decide chunk size.
 static bool MkvWirter_PrimaryVideoTrackCheck(void *ptr, ttLibC_Frame *frame) {
 	ttLibC_MkvWriter_ *writer = (ttLibC_MkvWriter_ *)ptr;
-	ttLibC_Video *video = (ttLibC_Video *)frame;
 	ttLibC_MkvWriteTrack *track = (ttLibC_MkvWriteTrack *)ttLibC_StlMap_get(writer->track_list, (void *)(long)1);
 	ttLibC_ContainerWriter_Mode divisionMode = track->use_mode & 0x0F;
-	switch(divisionMode) {
-	default:
-	case containerWriter_keyFrame_division:
-		if(video->type == videoType_key) {
-			if(writer->current_pts_pos != frame->pts) {
-				writer->target_pos = frame->pts;
+	ttLibC_Video *video = (ttLibC_Video *)frame;
+	// frame is not ready.
+	if(frame->pts != 0 && frame->dts == 0) {
+		return true;
+	}
+	if(video->type == videoType_key) {
+		// キーフレームでかつ、すべてのkeyFrameで分割するモードの場合
+		if((track->use_mode & containerWriter_allKeyFrame_split) != 0) {
+			if(writer->current_pts_pos < frame->dts) {
+				writer->target_pos = frame->dts;
 				return false;
 			}
 		}
-		break;
-	case containerWriter_innerFrame_division:
-		switch(frame->type) {
-		case frameType_h264:
-			{
-				ttLibC_H264 *h264 = (ttLibC_H264 *)frame;
-				switch(h264->frame_type) {
-				case H264FrameType_I:
-					if(writer->current_pts_pos != frame->pts) {
-						writer->target_pos = frame->pts;
-						return false;
-					}
-					break;
-				case H264FrameType_P:
-					if(frame->pts - writer->current_pts_pos > writer->max_unit_duration) {
-						writer->target_pos = frame->pts;
-						return false;
-					}
-					break;
-				case H264FrameType_B:
-				default:
-					break;
-				}
+	}
+	switch(frame->type) {
+	case frameType_h264:
+		{
+			ttLibC_H264 *h264 = (ttLibC_H264 *)frame;
+			if(frame->dts < writer->max_unit_duration + writer->current_pts_pos) {
+				return true;
 			}
-			break;
-		case frameType_h265:
-			{
-				ttLibC_H265 *h265 = (ttLibC_H265 *)frame;
-				switch(h265->frame_type) {
-				case H265FrameType_I:
-					if(writer->current_pts_pos != frame->pts) {
-						writer->target_pos = frame->pts;
-						return false;
-					}
-					break;
-				case H265FrameType_P:
-					if(frame->pts - writer->current_pts_pos > writer->max_unit_duration) {
-						writer->target_pos = frame->pts;
-						return false;
-					}
-					break;
-				case H265FrameType_B:
-				default:
-					break;
+			switch(h264->frame_type) {
+			case H264FrameType_B:
+				// コンパイラがうまい具合に調整してくれるかな・・・なんか考えることがうまくできない。
+				if((divisionMode & containerWriter_bFrame_split) != 0) {
+					// bframe splitの場合は問答無用でok
 				}
-			}
-			break;
-		default:
-			switch(video->type) {
-			case videoType_inner:
-				{
-					if(frame->pts - writer->current_pts_pos > writer->max_unit_duration) {
-						writer->target_pos = writer->current_pts_pos + writer->max_unit_duration;
-						return false;
-					}
+				else if((divisionMode & containerWriter_disposableBFrame_split) != 0 && h264->is_disposable) {
+					// disposable b frameで分割する場合は、こっち。
+				}
+				else {
+					return true;
 				}
 				break;
-			case videoType_key:
-				{
-					if(writer->current_pts_pos != frame->pts) {
-						writer->target_pos = frame->pts;
-						return false;
-					}
+			case H264FrameType_SP:
+				ERR_PRINT("sp frame is not checked.");
+				/* no break */
+			case H264FrameType_P:
+				if((divisionMode & containerWriter_pFrame_split) != 0) {
+					// p frameで分割する場合
 				}
+				else if((divisionMode & containerWriter_innerFrame_split) != 0 && frame->dts == frame->pts) {
+					// 中間フレーム分割でかつdts ptsが一致する場合(bフレームに依存しない、pframeである場合)
+				}
+				else {
+					return true;
+				}
+				break;
+			case H264FrameType_SI:
+				ERR_PRINT("si frame is not checked.");
+				/* no break */
+			case H264FrameType_I:
+				// keyFrameはとにかく分割候補にする。
 				break;
 			default:
 				return true;
 			}
-			break;
+			writer->target_pos = frame->dts;
+			return false;
 		}
 		break;
-	case containerWriter_allFrame_division:
-		switch(frame->type) {
-		case frameType_h264:
-			{
-				ttLibC_H264 *h264 = (ttLibC_H264 *)frame;
-				switch(h264->frame_type) {
-				case H264FrameType_I:
-					if(writer->current_pts_pos != frame->pts) {
-						writer->target_pos = frame->pts;
-						return false;
-					}
-					break;
-				case H264FrameType_B:
-					if(!h264->is_disposable) {
-						return true;
-					}
-					/* no break */
-				case H264FrameType_P:
-					if(frame->pts - writer->current_pts_pos > writer->max_unit_duration) {
-						writer->target_pos = frame->pts;
-						return false;
-					}
-					break;
-				default:
-					break;
-				}
+	case frameType_h265:
+		{
+			ttLibC_H265 *h265 = (ttLibC_H265 *)frame;
+			if(frame->dts < writer->max_unit_duration + writer->current_pts_pos) {
+				return true;
 			}
-			break;
-		case frameType_h265:
-			{
-				ttLibC_H265 *h265 = (ttLibC_H265 *)frame;
-				switch(h265->frame_type) {
-				case H265FrameType_I:
-					if(writer->current_pts_pos != frame->pts) {
-						writer->target_pos = frame->pts;
-						return false;
-					}
-					break;
-				case H265FrameType_B:
-					if(!h265->is_disposable) {
-						return true;
-					}
-					/* no break */
-				case H265FrameType_P:
-					if(frame->pts - writer->current_pts_pos > writer->max_unit_duration) {
-						writer->target_pos = frame->pts;
-						return false;
-					}
-					break;
-				default:
-					break;
+			switch(h265->frame_type) {
+			case H265FrameType_B:
+				if((divisionMode & containerWriter_bFrame_split) != 0) {
+					// bframe splitの場合は問答無用でok
 				}
-			}
-			break;
-		default:
-			switch(video->type) {
-			case videoType_inner:
-				{
-					if(frame->pts - writer->current_pts_pos > writer->max_unit_duration) {
-						writer->target_pos = writer->current_pts_pos + writer->max_unit_duration;
-						return false;
-					}
+				else if((divisionMode & containerWriter_disposableBFrame_split) != 0 && h265->is_disposable) {
+					// disposable b frameで分割する場合は、こっち。
+				}
+				else {
+					return true;
 				}
 				break;
-			case videoType_key:
-				{
-					if(writer->current_pts_pos != frame->pts) {
-						writer->target_pos = frame->pts;
-						return false;
-					}
+			case H265FrameType_P:
+				if((divisionMode & containerWriter_pFrame_split) != 0) {
+					// p frameで分割する場合
 				}
+				else if((divisionMode & containerWriter_innerFrame_split) != 0 && frame->dts == frame->pts) {
+					// 中間フレーム分割でかつdts ptsが一致する場合(bフレームに依存しない、pframeである場合)
+				}
+				else {
+					return true;
+				}
+				break;
+			case H265FrameType_I:
 				break;
 			default:
 				return true;
 			}
-			break;
+			writer->target_pos = frame->dts;
+			return false;
+		}
+		break;
+	default:
+		{
+			if(frame->pts < writer->max_unit_duration + writer->current_pts_pos) {
+				return true;
+			}
+			switch(video->type) {
+			default:
+			case videoType_info:
+				return true;
+			case videoType_key:
+				break;
+			case videoType_inner:
+				if((divisionMode & containerWriter_innerFrame_split) == 0) {
+				}
+				else if((divisionMode & containerWriter_pFrame_split) == 0) {
+				}
+				else if((divisionMode & containerWriter_disposableBFrame_split) == 0) {
+				}
+				else if((divisionMode & containerWriter_bFrame_split) == 0) {
+				}
+				else {
+					return true;
+				}
+				break;
+			}
+			writer->target_pos = frame->pts;
+			return false;
 		}
 		break;
 	}
@@ -1288,7 +1257,6 @@ static bool MkvWriter_writeFromQueue(
 				ERR_PRINT("unexpected frame is found.%d", track->frame_type);
 				return false;
 			}
-			// 位置情報が更新されたら次い進む。
 			if(writer->target_pos != writer->current_pts_pos) {
 				writer->status = status_data_check;
 				return MkvWriter_writeFromQueue(writer);
@@ -1354,7 +1322,6 @@ bool ttLibC_MkvWriter_write(
 	if(frame == NULL) {
 		return true;
 	}
-	// 該当trackを取得
 	ttLibC_MkvWriteTrack *track = (ttLibC_MkvWriteTrack *)ttLibC_StlMap_get(writer_->track_list, (void *)(long)frame->id);
 	if(track == NULL) {
 		ERR_PRINT("failed to get correspond track. %d", frame->id);
@@ -1362,7 +1329,6 @@ bool ttLibC_MkvWriter_write(
 	}
 	uint64_t pts = (uint64_t)(1.0 * frame->pts * 1000 / frame->timebase);
 	track->enable_mode = writer->inherit_super.mode;
-	// trackにframeを追加する。
 	switch(frame->type) {
 	case frameType_h265:
 		{
@@ -1384,7 +1350,6 @@ bool ttLibC_MkvWriter_write(
 				return true;
 			}
 			if(!track->is_appending && h265->type != H265Type_sliceIDR) {
-				// queueにデータがなく、sliceIDRでない場合は、まだはじめる時ではない。
 				return true;
 			}
 		}
@@ -1409,7 +1374,7 @@ bool ttLibC_MkvWriter_write(
 				return true;
 			}
 			if(!track->is_appending && h264->type != H264Type_sliceIDR) {
-				// queueにデータがなく、sliceIDRでない場合は、まだはじめる時ではない。
+				// no data in queue, and not sliceIDR -> not yet to append.
 				return true;
 			}
 		}
@@ -1418,7 +1383,6 @@ bool ttLibC_MkvWriter_write(
 	case frameType_vp9:
 		{
 			ttLibC_Video *video = (ttLibC_Video *)frame;
-			// フレームが１つもなければ・・・というのがあるか・・・
 			if(!track->is_appending && video->type != videoType_key) {
 				return true;
 			}
@@ -1427,11 +1391,6 @@ bool ttLibC_MkvWriter_write(
 	case frameType_theora:
 		{
 			ttLibC_Theora *theora = (ttLibC_Theora *)frame;
-			// theoraのframeは1つめはidentification
-			// ２つめはcomment
-			// ３つめはsetupとframeを追加するようにしなければいけない。それ以外のがきたらアウト
-			// 3つめがはいるのが可能だったら、下に処理をのばしていけばよし。
-			// それまではframeデータを捨てるべしだけど・・・
 			if(!track->is_appending) {
 				switch(track->counter) {
 				case 0:
@@ -1456,7 +1415,6 @@ bool ttLibC_MkvWriter_write(
 					break;
 				}
 				if(track->counter < 3) {
-					// 現在のをqueueにいれて、ほっとく。
 					return MkvWriter_appendQueue(track, frame, 0);
 				}
 			}
@@ -1509,6 +1467,21 @@ bool ttLibC_MkvWriter_write(
 			}
 		}
 		break;
+	case frameType_mp3:
+		{
+			ttLibC_Mp3 *mp3 = (ttLibC_Mp3 *)frame;
+			switch(mp3->type) {
+			case Mp3Type_frame:
+				break;
+			case Mp3Type_id3:
+			case Mp3Type_tag:
+				return true;
+			default:
+				ERR_PRINT("unexpected mp3 frame:%d", mp3->type);
+				return true;
+			}
+		}
+		break;
 	default:
 		break;
 	}
@@ -1524,7 +1497,6 @@ bool ttLibC_MkvWriter_write(
 	}
 	writer_->callback = callback;
 	writer_->ptr = ptr;
-	// Queue処理に進む。
 	return MkvWriter_writeFromQueue(writer_);
 }
 
@@ -1532,7 +1504,6 @@ static bool MkvWriter_closeTracks(void *ptr, void *key, void *item) {
 	(void)ptr;
 	(void)key;
 	if(item != NULL) {
-		// trackの内容データを解放する処理を書いておく。
 		ttLibC_MkvWriteTrack *track = (ttLibC_MkvWriteTrack *)item;
 		ttLibC_FrameQueue_close(&track->frame_queue);
 		ttLibC_Frame_close(&track->h26x_configData);

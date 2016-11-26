@@ -55,6 +55,7 @@ bool ttLibC_Pes_getFrame(
 bool ttLibC_Pes_writePacket(
 		ttLibC_MpegtsWriteTrack *track,
 		bool has_randomAccess,
+		bool has_pcr,
 		bool has_size,
 		uint8_t trackBaseId,
 		uint32_t pid,

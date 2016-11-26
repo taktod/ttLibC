@@ -93,11 +93,27 @@ void ttLibC_ContainerReader_close(ttLibC_ContainerReader **reader);
 
 // -------------------------------------------------------------- //
 
-#define containerWriter_normal              0x00
-#define containerWriter_enable_dts          0x10
+#define containerWriter_normal                 0x00
+#define containerWriter_enable_dts             0x20
+
+/*
 #define containerWriter_keyFrame_division   0x00
 #define containerWriter_innerFrame_division 0x01
 #define containerWriter_allFrame_division   0x02
+*/
+
+// split with all keyFrame
+#define containerWriter_allKeyFrame_split      0x10
+// split with keyFrame
+#define containerWriter_keyFrame_split         0x00
+// split with inner Frame, for h264 & h265, split with p frame which is not refed by b frame.
+#define containerWriter_innerFrame_split       0x01
+// split with p frame.
+#define containerWriter_pFrame_split           0x02
+// split with disposable b frame.
+#define containerWriter_disposableBFrame_split 0x04
+// split with b frame.
+#define containerWriter_bFrame_split           0x08
 
 #define ttLibC_ContainerWriter_Mode uint32_t
 

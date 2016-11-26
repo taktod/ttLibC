@@ -145,12 +145,13 @@ static bool Mp4Writer_makeTrex(void *ptr, void *key, void *item) {
 			break;
 		case frameType_vorbis:
 			{
-				// use 1024 for default duration.本当はidentification frameで変化させるべき
+				// vorvis frame is not has constant duration.
 				in_size = ttLibC_HexUtil_makeBuffer("00 00 00 20 74 72 65 78 00 00 00 00", buf, 256);
 				ttLibC_DynamicBuffer_append(buffer, buf, in_size);
 				uint32_t be_track_id = be_uint32_t(track->frame_queue->track_id);
 				ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_track_id, 4);
-				in_size = ttLibC_HexUtil_makeBuffer("00 00 00 01 00 00 04 00 00 00 00 00 02 00 00 00", buf, 256);
+//				in_size = ttLibC_HexUtil_makeBuffer("00 00 00 01 00 00 04 00 00 00 00 00 02 00 00 00", buf, 256);
+				in_size = ttLibC_HexUtil_makeBuffer("00 00 00 01 00 00 00 00 00 00 00 00 02 00 00 00", buf, 256);
 				ttLibC_DynamicBuffer_append(buffer, buf, in_size);
 			}
 			break;
@@ -192,24 +193,16 @@ static bool Mp4Writer_makeTrak(void *ptr, void *key, void *item) {
 			switch(track->frame_type) {
 			case frameType_h264:
 			case frameType_h265:
-				{
-					in_size = ttLibC_HexUtil_makeBuffer("00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 00 00 00", buf, 256);
-					ttLibC_DynamicBuffer_append(buffer, buf, in_size);
-					video = (ttLibC_Video *)track->h26x_configData;
-					be_width = be_uint16_t(video->width);
-					ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_width, 2);
-					uint16_t zero = 0;
-					ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&zero, 2);
-					be_height = be_uint16_t(video->height);
-					ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_height, 2);
-					ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&zero, 2);
-				}
-				break;
 			case frameType_jpeg:
 				{
 					in_size = ttLibC_HexUtil_makeBuffer("00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 00 00 00", buf, 256);
 					ttLibC_DynamicBuffer_append(buffer, buf, in_size);
-					video = (ttLibC_Video *)ttLibC_FrameQueue_ref_first(track->frame_queue);
+					if(track->h26x_configData != NULL) {
+						video = (ttLibC_Video *)track->h26x_configData;
+					}
+					else {
+						video = (ttLibC_Video *)ttLibC_FrameQueue_ref_first(track->frame_queue);
+					}
 					be_width = be_uint16_t(video->width);
 					ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_width, 2);
 					uint16_t zero = 0;
@@ -223,8 +216,6 @@ static bool Mp4Writer_makeTrak(void *ptr, void *key, void *item) {
 			case frameType_mp3:
 			case frameType_vorbis:
 				in_size = ttLibC_HexUtil_makeBuffer("00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 01 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 00 00 00 00 00 00 00 00 00 00 00", buf, 256);
-				//                                                                                         [   ] what's alternateGroup?...
-				//                                                                                               [   ] this is for volume.
 				ttLibC_DynamicBuffer_append(buffer, buf, in_size);
 				break;
 			default:
@@ -373,7 +364,7 @@ static bool Mp4Writer_makeTrak(void *ptr, void *key, void *item) {
 								ttLibC_DynamicBuffer_append(buffer, buf, in_size);
 								ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_width, 2);
 								ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_height, 2);
-								// esds is fixed.(本当はbitrateを調整すべきではある、1mbpsでほっとく。)
+								// esds is leave as constant.(actually we have to update ave bps, max bps, leave as 1mbps)
 								in_size = ttLibC_HexUtil_makeBuffer("00 48 00 00 00 48 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 18 FF FF 00 00 00 23 65 73 64 73 00 00 00 00 03 15 00 01 00 04 0D 6C 11 00 00 00 00 1E 84 80 00 1E 84 80 06 01 02", buf, 256);
 								ttLibC_DynamicBuffer_append(buffer, buf, in_size);
 								Mp4Writer_updateSize(buffer, mp4vSizePos);
@@ -591,7 +582,6 @@ static bool Mp4Writer_makeTrak(void *ptr, void *key, void *item) {
  * make init.mp4 data.(ftyp moov)
  */
 static bool Mp4Writer_makeInitMp4(ttLibC_Mp4Writer_ *writer) {
-	// 初期のinit.mp4を作成する。
 	ttLibC_DynamicBuffer *buffer = ttLibC_DynamicBuffer_make();
 	if(buffer == NULL) {
 		ERR_PRINT("failed to make buffer.");
@@ -748,7 +738,7 @@ static bool Mp4Writer_makeTraf(void *ptr, void *key, void *item) {
 						ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_h264_size, 4);
 						if((track->use_mode & containerWriter_enable_dts) != 0) {
 							// get offset to store.
-							uint32_t offset = h264->inherit_super.inherit_super.pts - h264->inherit_super.inherit_super.dts + h264->inherit_super.inherit_super.timebase / 5;
+							uint32_t offset = h264->inherit_super.inherit_super.pts + (h264->inherit_super.inherit_super.timebase / 5) - h264->inherit_super.inherit_super.dts;
 							uint32_t be_offset = be_uint32_t(offset);
 							ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_offset, 4);
 						}
@@ -816,7 +806,7 @@ static bool Mp4Writer_makeTraf(void *ptr, void *key, void *item) {
 						ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_h265_size, 4);
 						if((track->use_mode & containerWriter_enable_dts) != 0) {
 							// get offset to store.
-							uint32_t offset = h265->inherit_super.inherit_super.pts - h265->inherit_super.inherit_super.dts + h265->inherit_super.inherit_super.timebase / 5;
+							uint32_t offset = h265->inherit_super.inherit_super.pts + (h265->inherit_super.inherit_super.timebase / 5) - h265->inherit_super.inherit_super.dts;
 							uint32_t be_offset = be_uint32_t(offset);
 							ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_offset, 4);
 						}
@@ -1141,165 +1131,134 @@ static bool Mp4Writer_initCheckTrack(void *ptr, void *key, void *item) {
  */
 static bool Mp4Writer_primaryVideoTrackCheck(void *ptr, ttLibC_Frame *frame) {
 	ttLibC_Mp4Writer_ *writer = (ttLibC_Mp4Writer_ *)ptr;
-	ttLibC_Video *video = (ttLibC_Video *)frame;
 	ttLibC_Mp4WriteTrack *track = (ttLibC_Mp4WriteTrack *)ttLibC_StlMap_get(writer->track_list, (void *)(long)1);
 	ttLibC_ContainerWriter_Mode divisionMode = track->use_mode & 0x0F;
-	switch(divisionMode) {
-	default:
-	case containerWriter_keyFrame_division:
-		if(video->type == videoType_key) {
-			if(writer->current_pts_pos != frame->pts) {
-				writer->target_pos = frame->pts;
+	ttLibC_Video *video = (ttLibC_Video *)frame;
+	// frame is not ready.
+	if(frame->pts != 0 && frame->dts == 0) {
+		return true;
+	}
+	if(video->type == videoType_key) {
+		// キーフレームでかつ、すべてのkeyFrameで分割するモードの場合
+		if((track->use_mode & containerWriter_allKeyFrame_split) != 0) {
+			if(writer->current_pts_pos < frame->dts) {
+				writer->target_pos = frame->dts;
 				return false;
 			}
 		}
-		break;
-	case containerWriter_innerFrame_division:
-		switch(frame->type) {
-		case frameType_h264:
-			{
-				ttLibC_H264 *h264 = (ttLibC_H264 *)frame;
-				switch(h264->frame_type) {
-				case H264FrameType_I:
-					if(writer->current_pts_pos != frame->pts) {
-						writer->target_pos = frame->pts;
-						return false;
-					}
-					break;
-				case H264FrameType_P:
-					if(frame->pts - writer->current_pts_pos > writer->max_unit_duration) {
-						writer->target_pos = frame->pts;
-						return false;
-					}
-					break;
-				case H264FrameType_B:
-				default:
-					break;
-				}
+	}
+	switch(frame->type) {
+	case frameType_h264:
+		{
+			ttLibC_H264 *h264 = (ttLibC_H264 *)frame;
+			if(frame->dts < writer->max_unit_duration + writer->current_pts_pos) {
+				return true;
 			}
-			break;
-		case frameType_h265:
-			{
-				ttLibC_H265 *h265 = (ttLibC_H265 *)frame;
-				switch(h265->frame_type) {
-				case H265FrameType_I:
-					if(writer->current_pts_pos != frame->pts) {
-						writer->target_pos = frame->pts;
-						return false;
-					}
-					break;
-				case H265FrameType_P:
-					if(frame->pts - writer->current_pts_pos > writer->max_unit_duration) {
-						writer->target_pos = frame->pts;
-						return false;
-					}
-					break;
-				case H265FrameType_B:
-				default:
-					break;
+			switch(h264->frame_type) {
+			case H264FrameType_B:
+				// コンパイラがうまい具合に調整してくれるかな・・・なんか考えることがうまくできない。
+				if((divisionMode & containerWriter_bFrame_split) != 0) {
+					// bframe splitの場合は問答無用でok
 				}
-			}
-			break;
-		default:
-			switch(video->type) {
-			case videoType_inner:
-				{
-					if(frame->pts - writer->current_pts_pos > writer->max_unit_duration) {
-						writer->target_pos = writer->current_pts_pos + writer->max_unit_duration;
-						return false;
-					}
+				else if((divisionMode & containerWriter_disposableBFrame_split) != 0 && h264->is_disposable) {
+					// disposable b frameで分割する場合は、こっち。
+				}
+				else {
+					return true;
 				}
 				break;
-			case videoType_key:
-				{
-					if(writer->current_pts_pos != frame->pts) {
-						writer->target_pos = frame->pts;
-						return false;
-					}
+			case H264FrameType_SP:
+				ERR_PRINT("sp frame is not checked.");
+				/* no break */
+			case H264FrameType_P:
+				if((divisionMode & containerWriter_pFrame_split) != 0) {
+					// p frameで分割する場合
 				}
+				else if((divisionMode & containerWriter_innerFrame_split) != 0 && frame->dts == frame->pts) {
+					// 中間フレーム分割でかつdts ptsが一致する場合(bフレームに依存しない、pframeである場合)
+				}
+				else {
+					return true;
+				}
+				break;
+			case H264FrameType_SI:
+				ERR_PRINT("si frame is not checked.");
+				/* no break */
+			case H264FrameType_I:
+				// keyFrameはとにかく分割候補にする。
 				break;
 			default:
 				return true;
 			}
-			break;
+			writer->target_pos = frame->dts;
+			return false;
 		}
 		break;
-	case containerWriter_allFrame_division:
-		switch(frame->type) {
-		case frameType_h264:
-			{
-				ttLibC_H264 *h264 = (ttLibC_H264 *)frame;
-				switch(h264->frame_type) {
-				case H264FrameType_I:
-					if(writer->current_pts_pos != frame->pts) {
-						writer->target_pos = frame->pts;
-						return false;
-					}
-					break;
-				case H264FrameType_B:
-					if(!h264->is_disposable) {
-						return true;
-					}
-					/* no break */
-				case H264FrameType_P:
-					if(frame->pts - writer->current_pts_pos > writer->max_unit_duration) {
-						writer->target_pos = frame->pts;
-						return false;
-					}
-					break;
-				default:
-					break;
-				}
+	case frameType_h265:
+		{
+			ttLibC_H265 *h265 = (ttLibC_H265 *)frame;
+			if(frame->dts < writer->max_unit_duration + writer->current_pts_pos) {
+				return true;
 			}
-			break;
-		case frameType_h265:
-			{
-				ttLibC_H265 *h265 = (ttLibC_H265 *)frame;
-				switch(h265->frame_type) {
-				case H265FrameType_I:
-					if(writer->current_pts_pos != frame->pts) {
-						writer->target_pos = frame->pts;
-						return false;
-					}
-					break;
-				case H265FrameType_B:
-					if(!h265->is_disposable) {
-						return true;
-					}
-					/* no break */
-				case H265FrameType_P:
-					if(frame->pts - writer->current_pts_pos > writer->max_unit_duration) {
-						writer->target_pos = frame->pts;
-						return false;
-					}
-					break;
-				default:
-					break;
+			switch(h265->frame_type) {
+			case H265FrameType_B:
+				if((divisionMode & containerWriter_bFrame_split) != 0) {
+					// bframe splitの場合は問答無用でok
 				}
-			}
-			break;
-		default:
-			switch(video->type) {
-			case videoType_inner:
-				{
-					if(frame->pts - writer->current_pts_pos > writer->max_unit_duration) {
-						writer->target_pos = writer->current_pts_pos + writer->max_unit_duration;
-						return false;
-					}
+				else if((divisionMode & containerWriter_disposableBFrame_split) != 0 && h265->is_disposable) {
+					// disposable b frameで分割する場合は、こっち。
+				}
+				else {
+					return true;
 				}
 				break;
-			case videoType_key:
-				{
-					if(writer->current_pts_pos != frame->pts) {
-						writer->target_pos = frame->pts;
-						return false;
-					}
+			case H265FrameType_P:
+				if((divisionMode & containerWriter_pFrame_split) != 0) {
+					// p frameで分割する場合
 				}
+				else if((divisionMode & containerWriter_innerFrame_split) != 0 && frame->dts == frame->pts) {
+					// 中間フレーム分割でかつdts ptsが一致する場合(bフレームに依存しない、pframeである場合)
+				}
+				else {
+					return true;
+				}
+				break;
+			case H265FrameType_I:
 				break;
 			default:
 				return true;
 			}
-			break;
+			writer->target_pos = frame->dts;
+			return false;
+		}
+		break;
+	default:
+		{
+			if(frame->pts < writer->max_unit_duration + writer->current_pts_pos) {
+				return true;
+			}
+			switch(video->type) {
+			default:
+			case videoType_info:
+				return true;
+			case videoType_key:
+				break;
+			case videoType_inner:
+				if((divisionMode & containerWriter_innerFrame_split) == 0) {
+				}
+				else if((divisionMode & containerWriter_pFrame_split) == 0) {
+				}
+				else if((divisionMode & containerWriter_disposableBFrame_split) == 0) {
+				}
+				else if((divisionMode & containerWriter_bFrame_split) == 0) {
+				}
+				else {
+					return true;
+				}
+				break;
+			}
+			writer->target_pos = frame->pts;
+			return false;
 		}
 		break;
 	}
@@ -1449,7 +1408,6 @@ bool ttLibC_Mp4Writer_write(
 	}
 	uint64_t pts = (uint64_t)(1.0 * frame->pts * 1000 / frame->timebase);
 	track->enable_mode = writer->inherit_super.mode;
-	// for first access.
 	switch(frame->type) {
 	case frameType_h265:
 		{
@@ -1529,6 +1487,21 @@ bool ttLibC_Mp4Writer_write(
 				if(track->counter < 3) {
 					return Mp4Writer_appendQueue(track, frame, 0);
 				}
+			}
+		}
+		break;
+	case frameType_mp3:
+		{
+			ttLibC_Mp3 *mp3 = (ttLibC_Mp3 *)frame;
+			switch(mp3->type) {
+			case Mp3Type_frame:
+				break;
+			case Mp3Type_id3:
+			case Mp3Type_tag:
+				return true;
+			default:
+				ERR_PRINT("unexpected mp3 frame:%d", mp3->type);
+				return true;
 			}
 		}
 		break;
