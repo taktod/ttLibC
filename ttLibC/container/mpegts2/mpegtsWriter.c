@@ -350,13 +350,13 @@ static bool MpegtsWriter_primaryVideoTrackCheck(void *ptr, ttLibC_Frame *frame) 
 		return true;
 	}
 	if(video->type == videoType_key) {
-		// キーフレームでかつ、すべてのkeyFrameで分割するモードの場合
-		if((track->use_mode & containerWriter_allKeyFrame_split) != 0) {
+		// キーフレームでかつ、すべてのkeyFrameで分割するモードの場合 モードに関係なく分割しておこう。
+//		if((track->use_mode & containerWriter_allKeyFrame_split) != 0) {
 			if(writer->current_pts_pos < frame->dts) {
 				writer->target_pos = frame->dts;
 				return false;
 			}
-		}
+//		}
 	}
 	switch(frame->type) {
 	case frameType_h264:
