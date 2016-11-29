@@ -190,15 +190,7 @@ void ttLibC_MkvReader_close(ttLibC_MkvReader **reader);
 // -------------------------------------------------------------- //
 // writer
 
-/**
- * definition of mkk writer
- */
-typedef struct ttLibC_ContainerWriter_MkvWriter {
-	ttLibC_ContainerWriter inherit_super;
-	bool is_webm; // if webm true, mkv false.
-} ttLibC_ContainerWriter_MkvWriter;
-
-typedef ttLibC_ContainerWriter_MkvWriter ttLibC_MkvWriter;
+typedef ttLibC_ContainerWriter ttLibC_MkvWriter;
 
 ttLibC_MkvWriter *ttLibC_MkvWriter_make(
 		ttLibC_Frame_Type* target_frame_types,
@@ -207,7 +199,7 @@ ttLibC_MkvWriter *ttLibC_MkvWriter_make(
 ttLibC_MkvWriter *ttLibC_MkvWriter_make_ex(
 		ttLibC_Frame_Type* target_frame_types,
 		uint32_t types_num,
-		uint32_t max_unit_duration);
+		uint32_t unit_duration);
 
 bool ttLibC_MkvWriter_write(
 		ttLibC_MkvWriter *writer,

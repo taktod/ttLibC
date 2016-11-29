@@ -17,6 +17,7 @@ extern "C" {
 
 #include "container.h"
 #include "misc.h"
+#include "../util/stlMapUtil.h"
 
 /**
  * definition of bit type. (just for information.)
@@ -127,6 +128,20 @@ typedef struct ttLibC_ContainerWriter_WriteTrack {
 	ttLibC_ContainerWriter_Mode use_mode;
 } ttLibC_ContainerWriter_WriteTrack;
 
+// ContainerWriterの詳細
+typedef struct ttLibC_ContainerWriter_ {
+	ttLibC_ContainerWriter     inherit_super;
+	ttLibC_StlMap             *track_list;
+	ttLibC_ContainerWriteFunc  callback;
+	void                      *ptr;
+
+	bool                          is_first;
+	ttLibC_ContainerWriter_Status status;
+	uint64_t                      current_pts_pos;
+	uint64_t                      target_pos;
+	uint32_t                      unit_duration;
+} ttLibC_ContainerWriter_;
+
 /*
  * trackのclose
  * writeの動作の補助部
@@ -156,6 +171,19 @@ bool ttLibC_ContainerWriteTrack_appendQueue(
 //ttLibC_ContainerWriteTrack_primaryVideoTrackCheck();
 
 void ttLibC_ContainerWriteTrack_close(ttLibC_ContainerWriter_WriteTrack **track);
+
+// 内部で利用するcontainerWriterのmake動作
+ttLibC_ContainerWriter *ttLibC_ContainerWriter_make_(
+		ttLibC_Container_Type container_type,
+		size_t                writer_size,
+		uint32_t              timebase,
+		size_t                track_size,
+		uint32_t              track_base_id,
+		ttLibC_Frame_Type    *target_frame_types,
+		uint32_t              types_num,
+		uint32_t              unit_duration);
+
+void ttLibC_ContainerWriter_close_(ttLibC_ContainerWriter_ **writer);
 
 #ifdef __cplusplus
 } /* extern "C" */

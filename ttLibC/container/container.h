@@ -32,6 +32,7 @@ typedef enum ttLibC_Container_Type {
 	containerType_mpegts,
 	containerType_riff,
 	containerType_wav,
+	containerType_webm
 } ttLibC_Container_Type;
 
 /**

@@ -62,6 +62,7 @@ ttLibC_Container *ttLibC_Container_make(
 	case containerType_mpegts:
 	case containerType_riff:
 	case containerType_wav:
+	case containerType_webm:
 		break;
 	default:
 		ERR_PRINT("unknown container type.%d", container_type);
@@ -130,6 +131,7 @@ bool ttLibC_Container_getFrame(
 	case containerType_flv:
 		return ttLibC_Flv_getFrame((ttLibC_Flv *)container, callback, ptr);
 	case containerType_mkv:
+	case containerType_webm:
 		return ttLibC_Mkv_getFrame((ttLibC_Mkv *)container, callback, ptr);
 	case containerType_mp3:
 		return ttLibC_Container_Mp3_getFrame((ttLibC_Container_Mp3 *)container, callback, ptr);
@@ -194,6 +196,7 @@ ttLibC_ContainerReader *ttLibC_ContainerReader_make(
 		ERR_PRINT("failed to allocate memory for reader.");
 		return NULL;
 	}
+	memset(reader, 0, reader_size);
 	reader->type = container_type;
 	return reader;
 }
@@ -221,6 +224,7 @@ void ttLibC_ContainerReader_close(ttLibC_ContainerReader **reader) {
 		ttLibC_FlvReader_close((ttLibC_FlvReader **)reader);
 		return;
 	case containerType_mkv:
+	case containerType_webm:
 		ttLibC_MkvReader_close((ttLibC_MkvReader **)reader);
 		return;
 	case containerType_mp3:
@@ -261,11 +265,85 @@ ttLibC_ContainerWriter *ttLibC_ContainerWriter_make(
 		ERR_PRINT("failed to allocate memory for writer.");
 		return NULL;
 	}
+	memset(writer, 0, writer_size);
 	writer->type     = container_type;
 	writer->timebase = timebase;
 	writer->pts      = 0;
 	writer->mode     = containerWriter_normal;
 	return writer;
+}
+
+ttLibC_ContainerWriter *ttLibC_ContainerWriter_make_(
+		ttLibC_Container_Type container_type,
+		size_t                writer_size,
+		uint32_t              timebase,
+		size_t                track_size,
+		uint32_t              track_base_id,
+		ttLibC_Frame_Type    *target_frame_types,
+		uint32_t              types_num,
+		uint32_t              unit_duration) {
+	if(writer_size == 0) {
+		ERR_PRINT("0 is invalid size for malloc.");
+		return NULL;
+	}
+	ttLibC_ContainerWriter_ *writer = ttLibC_malloc(writer_size);
+	if(writer == NULL) {
+		ERR_PRINT("failed to allocate memory for writer.");
+	}
+	memset(writer, 0, writer_size);
+	writer->inherit_super.type     = container_type;
+	writer->inherit_super.timebase = timebase;
+	writer->inherit_super.pts      = 0;
+	writer->inherit_super.mode     = containerWriter_normal;
+	// trackのidのつけ方はコンテナ次第なので、あとでなんとかしなければだめか・・・
+	if(track_size == 0) {
+		writer->track_list = NULL;
+	}
+	else {
+		writer->track_list = ttLibC_StlMap_make();
+		for(uint32_t i = 0;i < types_num;++ i) {
+			ttLibC_ContainerWriter_WriteTrack *track = ttLibC_ContainerWriteTrack_make(
+					track_size,
+					i + track_base_id,
+					target_frame_types[i]);
+			if(track == NULL) {
+				ERR_PRINT("failed to make track object.");
+			}
+			else {
+				ttLibC_StlMap_put(writer->track_list, (void *)(long)(i + track_base_id), (void *)track);
+			}
+		}
+	}
+	writer->callback          = NULL;
+	writer->ptr               = NULL;
+	writer->is_first          = true;
+	writer->status            = status_init_check;
+	writer->current_pts_pos   = 0;
+	writer->target_pos        = 0;
+	writer->unit_duration = unit_duration;
+	return (ttLibC_ContainerWriter *)writer;
+}
+
+static bool ContainerWriter_closeTracks(void *ptr, void *key, void *item) {
+	(void)ptr;
+	(void)key;
+	if(item != NULL) {
+		ttLibC_ContainerWriter_WriteTrack *track = (ttLibC_ContainerWriter_WriteTrack *)item;
+		ttLibC_ContainerWriteTrack_close((ttLibC_ContainerWriter_WriteTrack **)&track);
+	}
+	return true;
+}
+
+void ttLibC_ContainerWriter_close_(ttLibC_ContainerWriter_ **writer) {
+	ttLibC_ContainerWriter_ *target = (ttLibC_ContainerWriter_ *)*writer;
+	if(target == NULL) {
+		return;
+	}
+	// 特殊なclose(trackの中にメモリーを保持するものがある場合とかの場合は、先にtrackをcloseして、track_listか該当オブジェクトをNULLにしておけばよい。)
+	ttLibC_StlMap_forEach(target->track_list, ContainerWriter_closeTracks, NULL);
+	ttLibC_StlMap_close(&target->track_list);
+	ttLibC_free(target);
+	*writer = NULL;
 }
 
 bool ttLibC_ContainerWriter_write(
@@ -289,6 +367,7 @@ void ttLibC_ContainerWriter_close(ttLibC_ContainerWriter **writer) {
 		ttLibC_FlvWriter_close((ttLibC_FlvWriter **)writer);
 		return;
 	case containerType_mkv:
+	case containerType_webm:
 		ttLibC_MkvWriter_close((ttLibC_MkvWriter **)writer);
 		return;
 	case containerType_mp3:
@@ -313,6 +392,10 @@ ttLibC_ContainerWriter_WriteTrack *ttLibC_ContainerWriteTrack_make(
 		uint32_t          track_id,
 		ttLibC_Frame_Type frame_type) {
 	ttLibC_ContainerWriter_WriteTrack *track = ttLibC_malloc(track_size);
+	if(track == NULL) {
+		return NULL;
+	}
+	memset(track, 0, track_size);
 	track->frame_queue     = ttLibC_FrameQueue_make(track_id, 255);
 	track->h26x_configData = NULL;
 	track->frame_type      = frame_type;

@@ -156,13 +156,13 @@ bool ttLibC_Pmt_makePacket(
 		size_t data_size) {
 	uint32_t size = ttLibC_HexUtil_makeBuffer("47 50 00 10 00 02 B0 00 00 01 C1 00 00 E1 00 F0 00", data, data_size);
 	uint8_t *buf_crc = data + 5;
-	data[7] = 13 + 5 * writer->track_list->size;
+	data[7] = 13 + 5 * writer->inherit_super.track_list->size;
 	data += size;
 	data_size -= size;
 	uint32_t i = 0;
 	while(true) {
 		uint32_t pid = 0x0100 + i;
-		ttLibC_ContainerWriter_WriteTrack *track = (ttLibC_ContainerWriter_WriteTrack *)ttLibC_StlMap_get(writer->track_list, (void *)(long)pid);
+		ttLibC_ContainerWriter_WriteTrack *track = (ttLibC_ContainerWriter_WriteTrack *)ttLibC_StlMap_get(writer->inherit_super.track_list, (void *)(long)pid);
 		if(track == NULL) {
 			break;
 		}

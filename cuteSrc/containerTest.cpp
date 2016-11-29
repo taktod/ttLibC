@@ -373,7 +373,7 @@ static void mkvCodecTest() {
 	types[0] = frameType_vp8;
 	types[1] = frameType_vorbis;
 	testData.writer = (ttLibC_ContainerWriter *)ttLibC_MkvWriter_make(types, 2);
-	((ttLibC_MkvWriter *)testData.writer)->is_webm = true;
+	testData.writer->type = containerType_webm;
 	sprintf(file, "%s/tools/data/source/test.vp8.vorbis.webm", getenv("HOME"));
 	testData.fp_in = fopen(file, "rb");
 	sprintf(file, "%s/tools/data/c_out/test.vp8.vorbis.webm", getenv("HOME"));
@@ -400,7 +400,7 @@ static void mkvCodecTest() {
 	types[0] = frameType_vp9;
 	types[1] = frameType_opus;
 	testData.writer = (ttLibC_ContainerWriter *)ttLibC_MkvWriter_make(types, 2);
-	((ttLibC_MkvWriter *)testData.writer)->is_webm = true;
+	testData.writer->type = containerType_webm;
 	sprintf(file, "%s/tools/data/source/test.vp9.opus.webm", getenv("HOME"));
 	testData.fp_in = fopen(file, "rb");
 	sprintf(file, "%s/tools/data/c_out/test.vp9.opus.webm", getenv("HOME"));
@@ -435,7 +435,7 @@ static void webmTest() {
 	};
 	testData.writer = (ttLibC_ContainerWriter *)ttLibC_MkvWriter_make(
 			frameTypes, 2);
-	((ttLibC_MkvWriter *)testData.writer)->is_webm = true;
+	testData.writer->type = containerType_webm;
 	testData.fp_in = fopen("test.webm", "rb");
 	testData.fp_out = fopen("test_out.webm", "wb");
 	do {

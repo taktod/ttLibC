@@ -117,11 +117,7 @@ typedef ttLibC_ContainerWriter_MpegtsTrackInfo ttLibC_MpegtsTrackInfo;
 /**
  * definition of mpegts writer object.
  */
-typedef struct ttLibC_ContainerWriter_MpegtsWriter {
-	ttLibC_ContainerWriter inherit_super;
-} ttLibC_ContainerWriter_MpegtsWriter;
-
-typedef ttLibC_ContainerWriter_MpegtsWriter ttLibC_MpegtsWriter;
+typedef ttLibC_ContainerWriter ttLibC_MpegtsWriter;
 
 /**
  * make mpegts writer object
@@ -138,14 +134,14 @@ ttLibC_MpegtsWriter *ttLibC_MpegtsWriter_make(
  * make mpegts writer object (detail)
  * @param target_frame_types array of ttLibC_Frame_Type
  * @param types_num          size of target_frame_types array.
- * @param max_unit_duration  unit duration for audio data.
+ * @param unit_duration  unit duration for audio data.
  * @return mpegts writer object.
  * TODO remove types_num instead of using types_num, add frameType_none for end marker of array.
  */
 ttLibC_MpegtsWriter *ttLibC_MpegtsWriter_make_ex(
 		ttLibC_Frame_Type *target_frame_types,
 		uint32_t types_num,
-		uint32_t max_unit_duration);
+		uint32_t unit_duration);
 
 /**
  * write frame on mpegts writer.

@@ -38,34 +38,22 @@ ttLibC_Mp4Writer *ttLibC_Mp4Writer_make(
 ttLibC_Mp4Writer *ttLibC_Mp4Writer_make_ex(
 		ttLibC_Frame_Type* target_frame_types,
 		uint32_t types_num,
-		uint32_t max_unit_duration) {
-	ttLibC_Mp4Writer_ *writer = (ttLibC_Mp4Writer_ *)ttLibC_ContainerWriter_make(
+		uint32_t unit_duration) {
+	ttLibC_Mp4Writer_ *writer = (ttLibC_Mp4Writer_ *)ttLibC_ContainerWriter_make_(
 			containerType_mp4,
 			sizeof(ttLibC_Mp4Writer_),
-			1000); // work with 1000 only for now.
+			1000,
+			sizeof(ttLibC_Mp4WriteTrack),
+			1,
+			target_frame_types,
+			types_num,
+			unit_duration);
 	if(writer == NULL) {
-		ERR_PRINT("failed to allocate writer.");
 		return NULL;
 	}
-	// setup tracks
-	writer->track_list = ttLibC_StlMap_make();
-	for(uint32_t i = 0;i < types_num;++ i) {
-		ttLibC_Mp4WriteTrack *track = (ttLibC_Mp4WriteTrack *)ttLibC_ContainerWriteTrack_make(
-				sizeof(ttLibC_Mp4WriteTrack),
-				i + 1,
-				target_frame_types[i]);
-		track->mdat_buffer = NULL;
-		track->dataOffsetPosForTrun = 0;
-		ttLibC_StlMap_put(writer->track_list, (void *)(long)(i + 1), (void *)track); // trackId -> track
-	}
-	writer->inherit_super.inherit_super.timebase = 1000;
-	writer->inherit_super.inherit_super.pts = 0;
-	writer->max_unit_duration = max_unit_duration;
-	writer->is_first = true;
-	writer->current_pts_pos = 0;
-	writer->target_pos = 0;
-	writer->status = status_init_check;
 	writer->chunk_counter = 1;
+	writer->currentMoofSizePos = 0;
+	writer->currentWritingBuffer = NULL;
 	return (ttLibC_Mp4Writer *)writer;
 }
 
@@ -602,15 +590,15 @@ static bool Mp4Writer_makeInitMp4(ttLibC_Mp4Writer_ *writer) {
 		in_size = ttLibC_HexUtil_makeBuffer("00 00 00 00 6D 76 65 78", buf, 256);
 		ttLibC_DynamicBuffer_append(buffer, buf, in_size);
 			// trex
-			ttLibC_StlMap_forEach(writer->track_list, Mp4Writer_makeTrex, buffer);
+			ttLibC_StlMap_forEach(writer->inherit_super.track_list, Mp4Writer_makeTrex, buffer);
 		Mp4Writer_updateSize(buffer, mvexSizePos);
 		// trak
-		ttLibC_StlMap_forEach(writer->track_list, Mp4Writer_makeTrak, buffer);
+		ttLibC_StlMap_forEach(writer->inherit_super.track_list, Mp4Writer_makeTrak, buffer);
 	Mp4Writer_updateSize(buffer, moovSizePos);
 	// ready, write now.
 	bool result = true;
-	if(writer->callback != NULL) {
-		result = writer->callback(writer->ptr, ttLibC_DynamicBuffer_refData(buffer), ttLibC_DynamicBuffer_refSize(buffer));
+	if(writer->inherit_super.callback != NULL) {
+		result = writer->inherit_super.callback(writer->inherit_super.ptr, ttLibC_DynamicBuffer_refData(buffer), ttLibC_DynamicBuffer_refSize(buffer));
 	}
 	ttLibC_DynamicBuffer_close(&buffer);
 	return result;
@@ -704,7 +692,7 @@ static bool Mp4Writer_makeTraf(void *ptr, void *key, void *item) {
 					if(h264 == NULL) {
 						break;
 					}
-					if(h264->inherit_super.inherit_super.dts < writer->target_pos) {
+					if(h264->inherit_super.inherit_super.dts < writer->inherit_super.target_pos) {
 						ttLibC_H264 *h = (ttLibC_H264 *)ttLibC_FrameQueue_dequeue_first(track->inherit_super.frame_queue);
 						if(h264 != h) {
 							ERR_PRINT("ref frame is invalid.");
@@ -772,7 +760,7 @@ static bool Mp4Writer_makeTraf(void *ptr, void *key, void *item) {
 					if(h265 == NULL) {
 						break;
 					}
-					if(h265->inherit_super.inherit_super.dts < writer->target_pos) {
+					if(h265->inherit_super.inherit_super.dts < writer->inherit_super.target_pos) {
 						ttLibC_H265 *h = (ttLibC_H265 *)ttLibC_FrameQueue_dequeue_first(track->inherit_super.frame_queue);
 						if(h265 != h) {
 							ERR_PRINT("ref frame is invalid.");
@@ -835,7 +823,7 @@ static bool Mp4Writer_makeTraf(void *ptr, void *key, void *item) {
 					if(jpeg == NULL) {
 						break;
 					}
-					if(jpeg->inherit_super.inherit_super.pts < writer->target_pos) {
+					if(jpeg->inherit_super.inherit_super.pts < writer->inherit_super.target_pos) {
 						ttLibC_Jpeg *j = (ttLibC_Jpeg *)ttLibC_FrameQueue_dequeue_first(track->inherit_super.frame_queue);
 						if(jpeg != j) {
 							ERR_PRINT("ref frame is invalid.");
@@ -882,7 +870,7 @@ static bool Mp4Writer_makeTraf(void *ptr, void *key, void *item) {
 						break;
 					}
 					if(target_pts == 0) {
-						target_pts = (uint64_t)(1.0 * writer->target_pos * aac->inherit_super.inherit_super.timebase / 1000);
+						target_pts = (uint64_t)(1.0 * writer->inherit_super.target_pos * aac->inherit_super.inherit_super.timebase / 1000);
 					}
 					if(aac->inherit_super.inherit_super.pts < target_pts) {
 						ttLibC_Aac *a = (ttLibC_Aac *)ttLibC_FrameQueue_dequeue_first(track->inherit_super.frame_queue);
@@ -928,7 +916,7 @@ static bool Mp4Writer_makeTraf(void *ptr, void *key, void *item) {
 						break;
 					}
 					if(target_pts == 0) {
-						target_pts = (uint64_t)(1.0 * writer->target_pos * mp3->inherit_super.inherit_super.timebase / 1000);
+						target_pts = (uint64_t)(1.0 * writer->inherit_super.target_pos * mp3->inherit_super.inherit_super.timebase / 1000);
 					}
 					if(mp3->inherit_super.inherit_super.pts < target_pts) {
 						ttLibC_Mp3 *m = (ttLibC_Mp3 *)ttLibC_FrameQueue_dequeue_first(track->inherit_super.frame_queue);
@@ -972,7 +960,7 @@ static bool Mp4Writer_makeTraf(void *ptr, void *key, void *item) {
 						break;
 					}
 					if(target_pts == 0) {
-						target_pts = (uint64_t)(1.0 * writer->target_pos * vorbis->inherit_super.inherit_super.timebase / 1000);
+						target_pts = (uint64_t)(1.0 * writer->inherit_super.target_pos * vorbis->inherit_super.inherit_super.timebase / 1000);
 					}
 					if(vorbis->inherit_super.inherit_super.pts < target_pts) {
 						ttLibC_Vorbis *v = (ttLibC_Vorbis *)ttLibC_FrameQueue_dequeue_first(track->inherit_super.frame_queue);
@@ -1046,7 +1034,7 @@ static bool Mp4Writer_makeData(ttLibC_Mp4Writer_ *writer) {
 	// sidx
 	in_size = ttLibC_HexUtil_makeBuffer("00 00 00 2C 73 69 64 78 00 00 00 00 00 00 00 01 00 00 03 E8", buf, 256);
 	ttLibC_DynamicBuffer_append(buffer, buf, in_size);
-	uint32_t earlistPts = be_uint32_t(writer->current_pts_pos);
+	uint32_t earlistPts = be_uint32_t(writer->inherit_super.current_pts_pos);
 	ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&earlistPts, 4);
 	in_size = ttLibC_HexUtil_makeBuffer("00 00 00 00 00 00 00 01", buf, 256);
 	ttLibC_DynamicBuffer_append(buffer, buf, in_size);
@@ -1054,7 +1042,7 @@ static bool Mp4Writer_makeData(ttLibC_Mp4Writer_ *writer) {
 	uint32_t sidx_inner_sizePos = ttLibC_DynamicBuffer_refSize(buffer);
 	in_size = ttLibC_HexUtil_makeBuffer("00 00 00 00", buf, 256);
 	ttLibC_DynamicBuffer_append(buffer, buf, in_size);
-	uint32_t duration_diff = writer->target_pos - writer->current_pts_pos;
+	uint32_t duration_diff = writer->inherit_super.target_pos - writer->inherit_super.current_pts_pos;
 	uint32_t be_duration = be_uint32_t(duration_diff);
 	ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_duration, 4);
 	in_size = ttLibC_HexUtil_makeBuffer("90 00 00 00", buf, 256);
@@ -1070,14 +1058,14 @@ static bool Mp4Writer_makeData(ttLibC_Mp4Writer_ *writer) {
 		uint32_t be_counter = be_uint32_t(writer->chunk_counter);
 		ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_counter, 4);
 		// traf
-		ttLibC_StlMap_forEach(writer->track_list, Mp4Writer_makeTraf, writer);
+		ttLibC_StlMap_forEach(writer->inherit_super.track_list, Mp4Writer_makeTraf, writer);
 	Mp4Writer_updateSize(buffer, moofSizePos);
 	// mdat
 	uint32_t mdatSizePos = ttLibC_DynamicBuffer_refSize(buffer);
 	in_size = ttLibC_HexUtil_makeBuffer("00 00 00 00 6D 64 61 74", buf, 256);
 	ttLibC_DynamicBuffer_append(buffer, buf, in_size);
 	// now, we put mdat_buffer and update trun dop information.
-	ttLibC_StlMap_forEach(writer->track_list, Mp4Writer_makeMdat, writer);
+	ttLibC_StlMap_forEach(writer->inherit_super.track_list, Mp4Writer_makeMdat, writer);
 	Mp4Writer_updateSize(buffer, mdatSizePos);
 	// now ready to update sidx size data.
 	b = ttLibC_DynamicBuffer_refData(buffer);
@@ -1086,8 +1074,8 @@ static bool Mp4Writer_makeData(ttLibC_Mp4Writer_ *writer) {
 	// done.
 
 	bool result = true;
-	if(writer->callback != NULL) {
-		result = writer->callback(writer->ptr, ttLibC_DynamicBuffer_refData(buffer), ttLibC_DynamicBuffer_refSize(buffer));
+	if(writer->inherit_super.callback != NULL) {
+		result = writer->inherit_super.callback(writer->inherit_super.ptr, ttLibC_DynamicBuffer_refData(buffer), ttLibC_DynamicBuffer_refSize(buffer));
 	}
 	ttLibC_DynamicBuffer_close(&buffer);
 	writer->currentWritingBuffer = NULL;
@@ -1128,7 +1116,7 @@ static bool Mp4Writer_initCheckTrack(void *ptr, void *key, void *item) {
  */
 static bool Mp4Writer_primaryVideoTrackCheck(void *ptr, ttLibC_Frame *frame) {
 	ttLibC_Mp4Writer_ *writer = (ttLibC_Mp4Writer_ *)ptr;
-	ttLibC_ContainerWriter_WriteTrack *track = (ttLibC_ContainerWriter_WriteTrack *)ttLibC_StlMap_get(writer->track_list, (void *)(long)1);
+	ttLibC_ContainerWriter_WriteTrack *track = (ttLibC_ContainerWriter_WriteTrack *)ttLibC_StlMap_get(writer->inherit_super.track_list, (void *)(long)1);
 	ttLibC_ContainerWriter_Mode divisionMode = track->use_mode & 0x0F;
 	ttLibC_Video *video = (ttLibC_Video *)frame;
 	// frame is not ready.
@@ -1138,8 +1126,8 @@ static bool Mp4Writer_primaryVideoTrackCheck(void *ptr, ttLibC_Frame *frame) {
 	if(video->type == videoType_key) {
 		// キーフレームでかつ、すべてのkeyFrameで分割するモードの場合
 		if((track->use_mode & containerWriter_allKeyFrame_split) != 0) {
-			if(writer->current_pts_pos < frame->dts) {
-				writer->target_pos = frame->dts;
+			if(writer->inherit_super.current_pts_pos < frame->dts) {
+				writer->inherit_super.target_pos = frame->dts;
 				return false;
 			}
 		}
@@ -1148,7 +1136,7 @@ static bool Mp4Writer_primaryVideoTrackCheck(void *ptr, ttLibC_Frame *frame) {
 	case frameType_h264:
 		{
 			ttLibC_H264 *h264 = (ttLibC_H264 *)frame;
-			if(frame->dts < writer->max_unit_duration + writer->current_pts_pos) {
+			if(frame->dts < writer->inherit_super.unit_duration + writer->inherit_super.current_pts_pos) {
 				return true;
 			}
 			switch(h264->frame_type) {
@@ -1187,14 +1175,14 @@ static bool Mp4Writer_primaryVideoTrackCheck(void *ptr, ttLibC_Frame *frame) {
 			default:
 				return true;
 			}
-			writer->target_pos = frame->dts;
+			writer->inherit_super.target_pos = frame->dts;
 			return false;
 		}
 		break;
 	case frameType_h265:
 		{
 			ttLibC_H265 *h265 = (ttLibC_H265 *)frame;
-			if(frame->dts < writer->max_unit_duration + writer->current_pts_pos) {
+			if(frame->dts < writer->inherit_super.unit_duration + writer->inherit_super.current_pts_pos) {
 				return true;
 			}
 			switch(h265->frame_type) {
@@ -1225,13 +1213,13 @@ static bool Mp4Writer_primaryVideoTrackCheck(void *ptr, ttLibC_Frame *frame) {
 			default:
 				return true;
 			}
-			writer->target_pos = frame->dts;
+			writer->inherit_super.target_pos = frame->dts;
 			return false;
 		}
 		break;
 	default:
 		{
-			if(frame->pts < writer->max_unit_duration + writer->current_pts_pos) {
+			if(frame->pts < writer->inherit_super.unit_duration + writer->inherit_super.current_pts_pos) {
 				return true;
 			}
 			switch(video->type) {
@@ -1254,7 +1242,7 @@ static bool Mp4Writer_primaryVideoTrackCheck(void *ptr, ttLibC_Frame *frame) {
 				}
 				break;
 			}
-			writer->target_pos = frame->pts;
+			writer->inherit_super.target_pos = frame->pts;
 			return false;
 		}
 		break;
@@ -1275,7 +1263,7 @@ static bool Mp4Writer_dataCheckTrack(void *ptr, void *key, void *item) {
 		ttLibC_ContainerWriter_WriteTrack *track = (ttLibC_ContainerWriter_WriteTrack *)item;
 		// for audio we need to change timebase into 1000.
 		uint64_t pts = (uint64_t)(1.0 * track->frame_queue->pts * 1000 / track->frame_queue->timebase);
-		if(writer->target_pos > pts) {
+		if(writer->inherit_super.target_pos > pts) {
 			return false;
 		}
 		return true;
@@ -1288,12 +1276,12 @@ static bool Mp4Writer_dataCheckTrack(void *ptr, void *key, void *item) {
  */
 static bool Mp4Writer_writeFromQueue(
 		ttLibC_Mp4Writer_ *writer) {
-	switch(writer->status) {
+	switch(writer->inherit_super.status) {
 	case status_init_check:
 		{
-			if(ttLibC_StlMap_forEach(writer->track_list, Mp4Writer_initCheckTrack, NULL)) {
+			if(ttLibC_StlMap_forEach(writer->inherit_super.track_list, Mp4Writer_initCheckTrack, NULL)) {
 				// now ready to make init.mp4
-				writer->status = status_make_init;
+				writer->inherit_super.status = status_make_init;
 				return Mp4Writer_writeFromQueue(writer);
 			}
 		}
@@ -1302,7 +1290,7 @@ static bool Mp4Writer_writeFromQueue(
 		{
 			if(Mp4Writer_makeInitMp4(writer)) {
 				// now ready to make chunk.
-				writer->status = status_target_check;
+				writer->inherit_super.status = status_target_check;
 				return Mp4Writer_writeFromQueue(writer);
 			}
 			else {
@@ -1315,7 +1303,7 @@ static bool Mp4Writer_writeFromQueue(
 	case status_target_check:
 		{
 			// check 1st track to decide target_pos.
-			ttLibC_ContainerWriter_WriteTrack *track = (ttLibC_ContainerWriter_WriteTrack *)ttLibC_StlMap_get(writer->track_list, (void *)1);
+			ttLibC_ContainerWriter_WriteTrack *track = (ttLibC_ContainerWriter_WriteTrack *)ttLibC_StlMap_get(writer->inherit_super.track_list, (void *)1);
 			switch(track->frame_type) {
 			case frameType_h264:
 			case frameType_h265:
@@ -1325,24 +1313,24 @@ static bool Mp4Writer_writeFromQueue(
 			case frameType_aac:
 			case frameType_mp3:
 			case frameType_vorbis:
-				writer->target_pos = writer->current_pts_pos + writer->max_unit_duration;
+				writer->inherit_super.target_pos = writer->inherit_super.current_pts_pos + writer->inherit_super.unit_duration;
 				break;
 			default:
 				ERR_PRINT("unexpected frame is found.");
 				return false;
 			}
-			if(writer->target_pos != writer->current_pts_pos) {
+			if(writer->inherit_super.target_pos != writer->inherit_super.current_pts_pos) {
 				// check each track.
-				writer->status = status_data_check;
+				writer->inherit_super.status = status_data_check;
 				return Mp4Writer_writeFromQueue(writer);
 			}
 		}
 		break;
 	case status_data_check:
 		{
-			if(ttLibC_StlMap_forEach(writer->track_list, Mp4Writer_dataCheckTrack, writer)) {
+			if(ttLibC_StlMap_forEach(writer->inherit_super.track_list, Mp4Writer_dataCheckTrack, writer)) {
 				// all track is ok.
-				writer->status = status_make_data; // make chunk data.
+				writer->inherit_super.status = status_make_data; // make chunk data.
 				return Mp4Writer_writeFromQueue(writer);
 			}
 		}
@@ -1351,16 +1339,16 @@ static bool Mp4Writer_writeFromQueue(
 		{
 			if(Mp4Writer_makeData(writer)) {
 				// write done.
-				writer->status = status_update; // update information for next chunk.
+				writer->inherit_super.status = status_update; // update information for next chunk.
 				return Mp4Writer_writeFromQueue(writer);
 			}
 		}
 		break;
 	case status_update:
 		{
-			writer->current_pts_pos = writer->target_pos;
-			writer->status = status_target_check;
-			writer->inherit_super.inherit_super.pts = writer->target_pos;
+			writer->inherit_super.current_pts_pos = writer->inherit_super.target_pos;
+			writer->inherit_super.status = status_target_check;
+			writer->inherit_super.inherit_super.pts = writer->inherit_super.target_pos;
 			++ writer->chunk_counter;
 //			return Mp4Writer_writeFromQueue(writer);
 		}
@@ -1384,19 +1372,19 @@ bool ttLibC_Mp4Writer_write(
 	if(frame == NULL) {
 		return true;
 	}
-	ttLibC_ContainerWriter_WriteTrack *track = (ttLibC_ContainerWriter_WriteTrack *)ttLibC_StlMap_get(writer_->track_list, (void *)(long)frame->id);
+	ttLibC_ContainerWriter_WriteTrack *track = (ttLibC_ContainerWriter_WriteTrack *)ttLibC_StlMap_get(writer_->inherit_super.track_list, (void *)(long)frame->id);
 	uint64_t pts = (uint64_t)(1.0 * frame->pts * 1000 / frame->timebase);
-	if(!ttLibC_ContainerWriteTrack_appendQueue(track, frame, 1000, writer->inherit_super.mode)) {
+	if(!ttLibC_ContainerWriteTrack_appendQueue(track, frame, 1000, writer->mode)) {
 		return false;
 	}
-	if(writer_->is_first) {
-		writer_->current_pts_pos = pts;
-		writer_->target_pos = pts;
+	if(writer_->inherit_super.is_first) {
+		writer_->inherit_super.current_pts_pos = pts;
+		writer_->inherit_super.target_pos = pts;
 		writer_->inherit_super.inherit_super.pts = pts;
-		writer_->is_first = false;
+		writer_->inherit_super.is_first = false;
 	}
-	writer_->callback = callback;
-	writer_->ptr = ptr;
+	writer_->inherit_super.callback = callback;
+	writer_->inherit_super.ptr = ptr;
 	return Mp4Writer_writeFromQueue(writer_);
 }
 
@@ -1431,9 +1419,8 @@ void ttLibC_Mp4Writer_close(ttLibC_Mp4Writer **writer) {
 		ERR_PRINT("try to close non Mp4Wrtier.");
 		return;
 	}
-	ttLibC_StlMap_forEach(target->track_list, Mp4Writer_closeTracks, NULL);
-	ttLibC_StlMap_close(&target->track_list);
-	ttLibC_free(target);
-	*writer = NULL;
+	ttLibC_StlMap_forEach(target->inherit_super.track_list, Mp4Writer_closeTracks, NULL);
+	ttLibC_StlMap_close(&target->inherit_super.track_list);
+	ttLibC_ContainerWriter_close_(writer);
 }
 

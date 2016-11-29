@@ -127,14 +127,7 @@ typedef struct ttLibC_ContainerWriter_Mp4TrackInfo {
 	ttLibC_Frame_Type frame_type;
 } ttLibC_ContainerWriter_Mp4TrackInfo;
 
-/**
- * target writer.
- */
-typedef struct ttLibC_ContainerWriter_Mp4Writer {
-	ttLibC_ContainerWriter inherit_super;
-} ttLibC_ContainerWriter_Mp4Writer;
-
-typedef ttLibC_ContainerWriter_Mp4Writer ttLibC_Mp4Writer;
+typedef ttLibC_ContainerWriter ttLibC_Mp4Writer;
 
 /**
  * make mp4Writer
@@ -149,12 +142,12 @@ ttLibC_Mp4Writer *ttLibC_Mp4Writer_make(
  * make mp4Writer with detail information.
  * @param target_frame_types array of use frame type list.
  * @param types_num          number of array.
- * @param max_unit_duration  divide mp4 chunk unit with this duration at least(in milisec.)
+ * @param unit_duration  divide mp4 chunk unit with this duration at least(in milisec.)
  */
 ttLibC_Mp4Writer *ttLibC_Mp4Writer_make_ex(
 		ttLibC_Frame_Type* target_frame_types,
 		uint32_t types_num,
-		uint32_t max_unit_duration);
+		uint32_t unit_duration);
 
 /**
  * write frame data to writer.

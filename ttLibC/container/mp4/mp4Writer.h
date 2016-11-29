@@ -16,7 +16,6 @@ extern"C" {
 #include "../misc.h"
 #include "../containerCommon.h"
 
-#include "../../util/stlMapUtil.h"
 #include "../../util/dynamicBufferUtil.h"
 
 /**
@@ -29,27 +28,11 @@ typedef struct ttLibC_Mp4WriteTrack {
 	uint32_t dataOffsetPosForTrun; // data off set using for trun atom.
 } ttLibC_Mp4WriteTrack;
 
-/**
- * detail definition of mp4 writer.
- */
 typedef struct ttLibC_ContainerWriter_Mp4Writer_ {
-	ttLibC_Mp4Writer inherit_super;
-
-	ttLibC_StlMap *track_list;
-
-	ttLibC_ContainerWriter_Status status;
-	ttLibC_ContainerWriteFunc callback;
-	void *ptr;
-	uint32_t max_unit_duration;
-
-	bool is_first;
-	uint64_t current_pts_pos; // written data pts.
-	uint64_t target_pos; // chunk target pts.
-	uint32_t chunk_counter; // chunk counter for mfhd atom.
-
-	// using for data writing.
-	ttLibC_DynamicBuffer *currentWritingBuffer;
-	uint32_t currentMoofSizePos;
+	ttLibC_ContainerWriter_ inherit_super;
+	ttLibC_DynamicBuffer   *currentWritingBuffer;
+	uint32_t                currentMoofSizePos;
+	uint32_t                chunk_counter;
 } ttLibC_ContainerWriter_Mp4Writer_;
 
 typedef ttLibC_ContainerWriter_Mp4Writer_ ttLibC_Mp4Writer_;

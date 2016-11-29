@@ -18,7 +18,6 @@ extern "C" {
 #include "../mpegts.h"
 #include "../misc.h"
 #include "../containerCommon.h"
-#include "../../util/stlMapUtil.h"
 #include "../../util/dynamicBufferUtil.h"
 
 typedef struct ttLibC_MpegtsWriteTrack {
@@ -29,27 +28,15 @@ typedef struct ttLibC_MpegtsWriteTrack {
 } ttLibC_MpegtsWriteTrack;
 
 typedef struct ttLibC_ContainerWriter_MpegtsWriter_ {
-	ttLibC_MpegtsWriter inherit_super;
+	ttLibC_ContainerWriter_ inherit_super;
 	uint8_t cc_sdt;
 	uint8_t cc_pat;
 	uint8_t cc_pmt;
 	uint8_t sdt_buf[188];
 	uint8_t pat_buf[188];
 	uint8_t pmt_buf[188];
-
-	ttLibC_StlMap *track_list;
-//	uint32_t pes_track_num; // トラック数の保持ポインタかな？いらないなたぶん。
-	bool is_first;
-	uint64_t current_pts_pos;
-	uint64_t target_pos;
-	uint32_t max_unit_duration;
-
-	ttLibC_ContainerWriter_Status status;
-	ttLibC_ContainerWriteFunc callback;
-	void *ptr;
-
 	bool is_reduce_mode;
-	ttLibC_DynamicBuffer *data_buffer; // mpegtsのデータを構築するときに出来上がったデータを保持するための
+	ttLibC_DynamicBuffer *data_buffer;
 } ttLibC_ContainerWriter_MpegtsWriter_;
 
 typedef ttLibC_ContainerWriter_MpegtsWriter_ ttLibC_MpegtsWriter_;

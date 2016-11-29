@@ -29,6 +29,7 @@
 #include "../../frame/video/vp9.h"
 #include "../../util/byteUtil.h"
 #include "../../util/ioUtil.h"
+#include "../../util/dynamicBufferUtil.h"
 
 #include <stdlib.h>
 
@@ -44,31 +45,16 @@ ttLibC_MkvWriter *ttLibC_MkvWriter_make(
 ttLibC_MkvWriter *ttLibC_MkvWriter_make_ex(
 		ttLibC_Frame_Type* target_frame_types,
 		uint32_t types_num,
-		uint32_t max_unit_duration) {
-	ttLibC_MkvWriter_ *writer = (ttLibC_MkvWriter_ *)ttLibC_ContainerWriter_make(
+		uint32_t unit_duration) {
+	return ttLibC_ContainerWriter_make_(
 			containerType_mkv,
 			sizeof(ttLibC_MkvWriter_),
-			1000); // work with 1000 only for now.
-	if(writer == NULL) {
-		ERR_PRINT("failed to allocate writer.");
-		return NULL;
-	}
-	writer->track_list = ttLibC_StlMap_make();
-	for(uint32_t i = 0;i < types_num;++ i) {
-		ttLibC_MkvWriteTrack *track = ttLibC_ContainerWriteTrack_make(
-				sizeof(ttLibC_MkvWriteTrack),
-				i + 1,
-				target_frame_types[i]);
-		ttLibC_StlMap_put(writer->track_list, (void *)(long)(i + 1), (void *)track);
-	}
-	writer->inherit_super.is_webm = false; // work as matroska for default
-	writer->inherit_super.inherit_super.timebase = 1000;
-	writer->inherit_super.inherit_super.pts = 0;
-	writer->max_unit_duration = max_unit_duration;
-	writer->is_first = true;
-	writer->target_pos = 0;
-	writer->status = status_init_check;
-	return (ttLibC_MkvWriter *)writer;
+			1000,
+			sizeof(ttLibC_MkvWriteTrack),
+			1,
+			target_frame_types,
+			types_num,
+			unit_duration);
 }
 
 /**
@@ -659,7 +645,7 @@ static bool MkvWriter_makeInitMkv(ttLibC_MkvWriter_ *writer) {
 	uint8_t buf[256];
 	size_t in_size;
 	// EBML
-	if(writer->inherit_super.is_webm) {
+	if(writer->inherit_super.type == containerType_webm) {
 		in_size = ttLibC_HexUtil_makeBuffer("1A 45 DF A3 9F 42 86 81 01 42 F7 81 01 42 F2 81 04 42 F3 81 08 42 82 84 77 65 62 6D 42 87 81 04 42 85 81 02", buf, 256);
 	}
 	else {
@@ -721,7 +707,7 @@ static bool MkvWirter_PrimaryVideoTrackCheck(void *ptr, ttLibC_Frame *frame) {
 	case frameType_h264:
 		{
 			ttLibC_H264 *h264 = (ttLibC_H264 *)frame;
-			if(frame->dts < writer->max_unit_duration + writer->current_pts_pos) {
+			if(frame->dts < writer->unit_duration + writer->current_pts_pos) {
 				return true;
 			}
 			switch(h264->frame_type) {
@@ -767,7 +753,7 @@ static bool MkvWirter_PrimaryVideoTrackCheck(void *ptr, ttLibC_Frame *frame) {
 	case frameType_h265:
 		{
 			ttLibC_H265 *h265 = (ttLibC_H265 *)frame;
-			if(frame->dts < writer->max_unit_duration + writer->current_pts_pos) {
+			if(frame->dts < writer->unit_duration + writer->current_pts_pos) {
 				return true;
 			}
 			switch(h265->frame_type) {
@@ -804,7 +790,7 @@ static bool MkvWirter_PrimaryVideoTrackCheck(void *ptr, ttLibC_Frame *frame) {
 		break;
 	default:
 		{
-			if(frame->pts < writer->max_unit_duration + writer->current_pts_pos) {
+			if(frame->pts < writer->unit_duration + writer->current_pts_pos) {
 				return true;
 			}
 			switch(video->type) {
@@ -1247,7 +1233,7 @@ static bool MkvWriter_writeFromQueue(
 			case frameType_speex:
 			case frameType_adpcm_ima_wav:
 			case frameType_vorbis:
-				writer->target_pos = writer->current_pts_pos + writer->max_unit_duration;
+				writer->target_pos = writer->current_pts_pos + writer->unit_duration;
 				break;
 			default:
 				ERR_PRINT("unexpected frame is found.%d", track->frame_type);
@@ -1279,7 +1265,7 @@ static bool MkvWriter_writeFromQueue(
 	case status_update: // 次の処理へ移動する。(status_target_checkにいく。)
 		{
 			writer->current_pts_pos = writer->target_pos;
-			writer->inherit_super.inherit_super.pts = writer->target_pos;
+			writer->inherit_super.pts = writer->target_pos;
 			writer->status = status_target_check;
 			// 無限ループが怖いのでここで止めとく。
 			// 呼び出しループが大きすぎるとstackエラーになる環境がありえるので、こうしとく。
@@ -1307,13 +1293,13 @@ bool ttLibC_MkvWriter_write(
 	ttLibC_MkvWriteTrack *track = (ttLibC_MkvWriteTrack *)ttLibC_StlMap_get(writer_->track_list, (void *)(long)frame->id);
 	// これ・・・ptsを2度計算するのが気持ち悪い。writerも共通化したら、そっちにもっていこう。
 	uint64_t pts = (uint64_t)(1.0 * frame->pts * 1000 / frame->timebase);
-	if(!ttLibC_ContainerWriteTrack_appendQueue(track, frame, 1000, writer->inherit_super.mode)) {
+	if(!ttLibC_ContainerWriteTrack_appendQueue(track, frame, 1000, writer_->inherit_super.mode)) {
 		return false;
 	}
 	if(writer_->is_first) {
 		writer_->current_pts_pos = pts;
 		writer_->target_pos = pts;
-		writer_->inherit_super.inherit_super.pts = pts;
+		writer_->inherit_super.pts = pts;
 		writer_->is_first = false;
 	}
 	writer_->callback = callback;
@@ -1321,28 +1307,16 @@ bool ttLibC_MkvWriter_write(
 	return MkvWriter_writeFromQueue(writer_);
 }
 
-static bool MkvWriter_closeTracks(void *ptr, void *key, void *item) {
-	(void)ptr;
-	(void)key;
-	if(item != NULL) {
-		ttLibC_MkvWriteTrack *track = (ttLibC_MkvWriteTrack *)item;
-		ttLibC_ContainerWriteTrack_close((ttLibC_ContainerWriter_WriteTrack **)&track);
-	}
-	return true;
-}
-
 void ttLibC_MkvWriter_close(ttLibC_MkvWriter **writer) {
 	ttLibC_MkvWriter_ *target = (ttLibC_MkvWriter_ *)*writer;
 	if(target == NULL) {
 		return;
 	}
-	if(target->inherit_super.inherit_super.type != containerType_mkv) {
+	if(target->inherit_super.type != containerType_mkv
+	&& target->inherit_super.type != containerType_webm) {
 		ERR_PRINT("try to close non mkvWriter.");
 		return;
 	}
-	ttLibC_StlMap_forEach(target->track_list, MkvWriter_closeTracks, NULL);
-	ttLibC_StlMap_close(&target->track_list);
-	ttLibC_free(target);
-	*writer = NULL;
+	ttLibC_ContainerWriter_close_(writer);
 }
 

@@ -40,37 +40,22 @@ ttLibC_MpegtsWriter *ttLibC_MpegtsWriter_make(
 ttLibC_MpegtsWriter *ttLibC_MpegtsWriter_make_ex(
 		ttLibC_Frame_Type *target_frame_types,
 		uint32_t types_num,
-		uint32_t max_unit_duration) {
-	ttLibC_MpegtsWriter_ *writer = (ttLibC_MpegtsWriter_ *)ttLibC_ContainerWriter_make(
+		uint32_t unit_duration) {
+	ttLibC_MpegtsWriter_ *writer = (ttLibC_MpegtsWriter_ *)ttLibC_ContainerWriter_make_(
 			containerType_mpegts,
 			sizeof(ttLibC_MpegtsWriter_),
-			90000);
-	if(writer == NULL) {
-		ERR_PRINT("failed to allocate writer.");
-		return NULL;
-	}
-	// prepare for track.
-	writer->track_list = ttLibC_StlMap_make();
-	for(uint32_t i = 0;i < types_num;++ i) {
-		ttLibC_MpegtsWriteTrack *track = (ttLibC_MpegtsWriteTrack *)ttLibC_ContainerWriteTrack_make(
-				sizeof(ttLibC_MpegtsWriteTrack),
-				(0x0100 + i),
-				target_frame_types[i]);
-		track->cc = 0;
-		track->tmp_buffer       = NULL;
-		track->tmp_frame_buffer = NULL;
-		ttLibC_StlMap_put(writer->track_list, (void *)(long)(0x0100 + i), (void *)track);
-	}
-	writer->inherit_super.inherit_super.timebase = 90000;
-	writer->inherit_super.inherit_super.pts = 0;
-	writer->is_first          = true;
-	writer->is_reduce_mode    = false;
-	writer->cc_sdt            = 0;
-	writer->cc_pat            = 0;
-	writer->cc_pmt            = 0;
-	writer->max_unit_duration = max_unit_duration;
-	writer->status            = status_target_check;
-	writer->data_buffer       = NULL;
+			90000,
+			sizeof(ttLibC_MpegtsWriteTrack),
+			0x0100,
+			target_frame_types,
+			types_num,
+			unit_duration);
+	writer->is_reduce_mode = false;
+	writer->cc_sdt = 0;
+	writer->cc_pat = 0;
+	writer->cc_pmt = 0;
+	writer->data_buffer = NULL;
+	writer->inherit_super.status = status_target_check;
 
 	ttLibC_Sdt_makePacket((const char *)"ttLibC", (const char *)"mpegtsMuxer", writer->sdt_buf, 188);
 	ttLibC_Pat_makePacket(writer->pat_buf, 188);
@@ -109,7 +94,7 @@ static bool MpegtsWriter_makeH264Data(
 	// とりあえず使うべきframeをpop upして減らしておこうか・・・
 	while(true) {
 		ttLibC_H264 *h264 = (ttLibC_H264 *)ttLibC_FrameQueue_ref_first(track->inherit_super.frame_queue);
-		if(h264 != NULL && h264->inherit_super.inherit_super.pts < writer->target_pos) {
+		if(h264 != NULL && h264->inherit_super.inherit_super.pts < writer->inherit_super.target_pos) {
 			ttLibC_H264 *h = (ttLibC_H264 *)ttLibC_FrameQueue_dequeue_first(track->inherit_super.frame_queue);
 			if(h264 != h) {
 				ERR_PRINT("data is corrupted. broken?");
@@ -193,7 +178,7 @@ static bool MpegtsWriter_makeAacData(
 	bool is_info_update = false;
 	while(true) {
 		ttLibC_Aac *aac = (ttLibC_Aac *)ttLibC_FrameQueue_ref_first(track->inherit_super.frame_queue);
-		if(aac != NULL && aac->inherit_super.inherit_super.pts < writer->target_pos) {
+		if(aac != NULL && aac->inherit_super.inherit_super.pts < writer->inherit_super.target_pos) {
 			ttLibC_Aac *a = (ttLibC_Aac *)ttLibC_FrameQueue_dequeue_first(track->inherit_super.frame_queue);
 			if(aac != a) {
 				ERR_PRINT("data is corrupted. broken?");
@@ -251,7 +236,7 @@ static bool MpegtsWriter_makeMp3Data(
 	bool is_info_update = false;
 	while(true) {
 		ttLibC_Mp3 *mp3 = (ttLibC_Mp3 *)ttLibC_FrameQueue_ref_first(track->inherit_super.frame_queue);
-		if(mp3 != NULL && mp3->inherit_super.inherit_super.pts < writer->target_pos) {
+		if(mp3 != NULL && mp3->inherit_super.inherit_super.pts < writer->inherit_super.target_pos) {
 			ttLibC_Mp3 *m = (ttLibC_Mp3 *)ttLibC_FrameQueue_dequeue_first(track->inherit_super.frame_queue);
 			if(mp3 != m) {
 				ERR_PRINT("data is corrupted. broken?");
@@ -291,7 +276,7 @@ static bool MpegtsWriter_makeData(ttLibC_MpegtsWriter_ *writer) {
 	uint32_t pid = 0x0100;
 	bool result = true;
 	while(true) {
-		ttLibC_ContainerWriter_WriteTrack *track = (ttLibC_ContainerWriter_WriteTrack *)ttLibC_StlMap_get(writer->track_list, (void *)(long)pid);
+		ttLibC_ContainerWriter_WriteTrack *track = (ttLibC_ContainerWriter_WriteTrack *)ttLibC_StlMap_get(writer->inherit_super.track_list, (void *)(long)pid);
 		if(track == NULL) {
 			break;
 		}
@@ -329,9 +314,9 @@ static bool MpegtsWriter_makeData(ttLibC_MpegtsWriter_ *writer) {
 		++ pid;
 	}
 	// output is complete, call callback.
-	if(writer->callback != NULL) {
+	if(writer->inherit_super.callback != NULL) {
 		if(ttLibC_DynamicBuffer_refSize(buffer) != 0) {
-			result = writer->callback(writer->ptr, ttLibC_DynamicBuffer_refData(buffer), ttLibC_DynamicBuffer_refSize(buffer));
+			result = writer->inherit_super.callback(writer->inherit_super.ptr, ttLibC_DynamicBuffer_refData(buffer), ttLibC_DynamicBuffer_refSize(buffer));
 		}
 	}
 	ttLibC_DynamicBuffer_empty(buffer);
@@ -341,7 +326,7 @@ static bool MpegtsWriter_makeData(ttLibC_MpegtsWriter_ *writer) {
 static bool MpegtsWriter_primaryVideoTrackCheck(void *ptr, ttLibC_Frame *frame) {
 	ttLibC_MpegtsWriter_ *writer = (ttLibC_MpegtsWriter_ *)ptr;
 	ttLibC_Video *video = (ttLibC_Video *)frame;
-	ttLibC_ContainerWriter_WriteTrack *track = (ttLibC_ContainerWriter_WriteTrack *)ttLibC_StlMap_get(writer->track_list, (void *)(long)0x0100);
+	ttLibC_ContainerWriter_WriteTrack *track = (ttLibC_ContainerWriter_WriteTrack *)ttLibC_StlMap_get(writer->inherit_super.track_list, (void *)(long)0x0100);
 	ttLibC_ContainerWriter_Mode divisionMode = track->use_mode & 0x0F;
 	// frame is not ready.
 	if(frame->pts != 0 && frame->dts == 0) {
@@ -350,8 +335,8 @@ static bool MpegtsWriter_primaryVideoTrackCheck(void *ptr, ttLibC_Frame *frame) 
 	if(video->type == videoType_key) {
 		// キーフレームでかつ、すべてのkeyFrameで分割するモードの場合 モードに関係なく分割しておこう。
 //		if((track->use_mode & containerWriter_allKeyFrame_split) != 0) {
-			if(writer->current_pts_pos < frame->dts) {
-				writer->target_pos = frame->dts;
+			if(writer->inherit_super.current_pts_pos < frame->dts) {
+				writer->inherit_super.target_pos = frame->dts;
 				return false;
 			}
 //		}
@@ -363,7 +348,7 @@ static bool MpegtsWriter_primaryVideoTrackCheck(void *ptr, ttLibC_Frame *frame) 
 				return true;
 			}
 			ttLibC_H264 *h264 = (ttLibC_H264 *)frame;
-			if(frame->dts < writer->max_unit_duration + writer->current_pts_pos) {
+			if(frame->dts < writer->inherit_super.unit_duration + writer->inherit_super.current_pts_pos) {
 				return true;
 			}
 			switch(h264->frame_type) {
@@ -402,14 +387,14 @@ static bool MpegtsWriter_primaryVideoTrackCheck(void *ptr, ttLibC_Frame *frame) 
 			default:
 				return true;
 			}
-			writer->target_pos = frame->dts;
+			writer->inherit_super.target_pos = frame->dts;
 			return false;
 		}
 		break;
 	case frameType_h265:
 		{
 			ttLibC_H265 *h265 = (ttLibC_H265 *)frame;
-			if(frame->dts < writer->max_unit_duration + writer->current_pts_pos) {
+			if(frame->dts < writer->inherit_super.unit_duration + writer->inherit_super.current_pts_pos) {
 				return true;
 			}
 			switch(h265->frame_type) {
@@ -440,13 +425,13 @@ static bool MpegtsWriter_primaryVideoTrackCheck(void *ptr, ttLibC_Frame *frame) 
 			default:
 				return true;
 			}
-			writer->target_pos = frame->dts;
+			writer->inherit_super.target_pos = frame->dts;
 			return false;
 		}
 		break;
 	default:
 		{
-			if(frame->pts < writer->max_unit_duration + writer->current_pts_pos) {
+			if(frame->pts < writer->inherit_super.unit_duration + writer->inherit_super.current_pts_pos) {
 				return true;
 			}
 			switch(video->type) {
@@ -469,7 +454,7 @@ static bool MpegtsWriter_primaryVideoTrackCheck(void *ptr, ttLibC_Frame *frame) 
 				}
 				break;
 			}
-			writer->target_pos = frame->pts;
+			writer->inherit_super.target_pos = frame->pts;
 			return false;
 		}
 		break;
@@ -482,7 +467,7 @@ static bool MpegtsWriter_dataCheckTrack(void *ptr, void *key, void *item) {
 	if(ptr != NULL && item != NULL) {
 		ttLibC_MpegtsWriter_ *writer = (ttLibC_MpegtsWriter_ *)ptr;
 		ttLibC_ContainerWriter_WriteTrack *track = (ttLibC_ContainerWriter_WriteTrack *)item;
-		if(writer->target_pos > track->frame_queue->pts) {
+		if(writer->inherit_super.target_pos > track->frame_queue->pts) {
 			return false;
 		}
 		return true;
@@ -492,33 +477,33 @@ static bool MpegtsWriter_dataCheckTrack(void *ptr, void *key, void *item) {
 
 static bool MpegtsWriter_writeFromQueue(
 		ttLibC_MpegtsWriter_ *writer) {
-	switch(writer->status) {
+	switch(writer->inherit_super.status) {
 	case status_target_check: // pcrのデータから書き込む範囲を決定する
 		{
-			ttLibC_ContainerWriter_WriteTrack *track = (ttLibC_ContainerWriter_WriteTrack *)ttLibC_StlMap_get(writer->track_list, (void *)(long)0x100);
+			ttLibC_ContainerWriter_WriteTrack *track = (ttLibC_ContainerWriter_WriteTrack *)ttLibC_StlMap_get(writer->inherit_super.track_list, (void *)(long)0x100);
 			switch(track->frame_type) {
 			case frameType_h264:
 				ttLibC_FrameQueue_ref(track->frame_queue, MpegtsWriter_primaryVideoTrackCheck, writer);
 				break;
 			case frameType_aac:
 			case frameType_mp3:
-				writer->target_pos = writer->current_pts_pos + writer->max_unit_duration;
+				writer->inherit_super.target_pos = writer->inherit_super.current_pts_pos + writer->inherit_super.unit_duration;
 				break;
 			default:
 				ERR_PRINT("unexpected frame is found.");
 				return false;
 			}
-			if(writer->target_pos != writer->current_pts_pos) {
-				writer->status = status_data_check;
+			if(writer->inherit_super.target_pos != writer->inherit_super.current_pts_pos) {
+				writer->inherit_super.status = status_data_check;
 				return MpegtsWriter_writeFromQueue(writer);
 			}
 		}
 		break;
 	case status_data_check:   // 書き込む範囲にきちんとしたデータがあることを確認する。
 		{
-			if(ttLibC_StlMap_forEach(writer->track_list, MpegtsWriter_dataCheckTrack, writer)) {
+			if(ttLibC_StlMap_forEach(writer->inherit_super.track_list, MpegtsWriter_dataCheckTrack, writer)) {
 				// all track is ok.
-				writer->status = status_make_data;
+				writer->inherit_super.status = status_make_data;
 				return MpegtsWriter_writeFromQueue(writer);
 			}
 		}
@@ -528,7 +513,7 @@ static bool MpegtsWriter_writeFromQueue(
 			// データを作る。
 			if(MpegtsWriter_makeData(writer)) {
 				// trueが応答された書き出し完了とする。
-				writer->status = status_update;
+				writer->inherit_super.status = status_update;
 				return MpegtsWriter_writeFromQueue(writer);
 			}
 			else {
@@ -538,9 +523,9 @@ static bool MpegtsWriter_writeFromQueue(
 		break;
 	case status_update:       // 次のフェーズに移動する。
 		{
-			writer->current_pts_pos = writer->target_pos;
-			writer->inherit_super.inherit_super.pts = writer->target_pos;
-			writer->status = status_target_check;
+			writer->inherit_super.current_pts_pos = writer->inherit_super.target_pos;
+			writer->inherit_super.inherit_super.pts = writer->inherit_super.target_pos;
+			writer->inherit_super.status = status_target_check;
 		}
 		break;
 	default:
@@ -562,17 +547,17 @@ bool ttLibC_MpegtsWriter_write(
 	if(frame == NULL) {
 		return true;
 	}
-	ttLibC_ContainerWriter_WriteTrack *track = (ttLibC_ContainerWriter_WriteTrack *)ttLibC_StlMap_get(writer_->track_list, (void *)(long)frame->id);
+	ttLibC_ContainerWriter_WriteTrack *track = (ttLibC_ContainerWriter_WriteTrack *)ttLibC_StlMap_get(writer_->inherit_super.track_list, (void *)(long)frame->id);
 	uint64_t pts = (uint64_t)(1.0 * frame->pts * 90000 / frame->timebase);
-	if(!ttLibC_ContainerWriteTrack_appendQueue(track, frame, 90000, writer->inherit_super.mode)) {
+	if(!ttLibC_ContainerWriteTrack_appendQueue(track, frame, 90000, writer->mode)) {
 		return false;
 	}
 	track->use_mode = track->enable_mode;
-	if(writer_->is_first) {
-		writer_->current_pts_pos = pts;
-		writer_->target_pos = pts;
+	if(writer_->inherit_super.is_first) {
+		writer_->inherit_super.current_pts_pos = pts;
+		writer_->inherit_super.target_pos = pts;
 		writer_->inherit_super.inherit_super.pts = pts;
-		writer_->is_first = false;
+		writer_->inherit_super.is_first = false;
 		if(!ttLibC_MpegtsWriter_writeInfo(
 				writer,
 				callback,
@@ -580,8 +565,8 @@ bool ttLibC_MpegtsWriter_write(
 			return false;
 		}
 	}
-	writer_->callback = callback;
-	writer_->ptr = ptr;
+	writer_->inherit_super.callback = callback;
+	writer_->inherit_super.ptr = ptr;
 	return MpegtsWriter_writeFromQueue(writer_);
 }
 
@@ -593,7 +578,7 @@ bool ttLibC_MpegtsWriter_writeInfo(
 	if(writer_ == NULL) {
 		return false;
 	}
-	if(writer_->is_first) {
+	if(writer_->inherit_super.is_first) {
 		return true;
 	}
 	// sdt
@@ -651,8 +636,7 @@ void ttLibC_MpegtsWriter_close(ttLibC_MpegtsWriter **writer) {
 		return;
 	}
 	ttLibC_DynamicBuffer_close(&target->data_buffer);
-	ttLibC_StlMap_forEach(target->track_list, MpegtsWriter_closeTracks, NULL);
-	ttLibC_StlMap_close(&target->track_list);
-	ttLibC_free(target);
-	*writer = NULL;
+	ttLibC_StlMap_forEach(target->inherit_super.track_list, MpegtsWriter_closeTracks, NULL);
+	ttLibC_StlMap_close(&target->inherit_super.track_list);
+	ttLibC_ContainerWriter_close_(writer);
 }
