@@ -22,12 +22,8 @@ extern "C" {
 #include "../../util/dynamicBufferUtil.h"
 
 typedef struct ttLibC_MpegtsWriteTrack {
-	ttLibC_FrameQueue *frame_queue;
-	ttLibC_Frame *h26x_configData;
+	ttLibC_ContainerWriter_WriteTrack inherit_super;
 	uint8_t cc; // continuity counter.
-	ttLibC_Frame_Type frame_type;
-	bool is_appending;
-	ttLibC_ContainerWriter_Mode use_mode;
 	ttLibC_DynamicBuffer *tmp_buffer; // mpegtsのデータを構築するときに利用する一時buffer
 	ttLibC_DynamicBuffer *tmp_frame_buffer; // mpegtsデータを構築するときに一時的に利用するbuffer.
 } ttLibC_MpegtsWriteTrack;

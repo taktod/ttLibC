@@ -55,14 +55,10 @@ ttLibC_MkvWriter *ttLibC_MkvWriter_make_ex(
 	}
 	writer->track_list = ttLibC_StlMap_make();
 	for(uint32_t i = 0;i < types_num;++ i) {
-		ttLibC_MkvWriteTrack *track = ttLibC_malloc(sizeof(ttLibC_MkvWriteTrack));
-		track->frame_queue = ttLibC_FrameQueue_make(i + 1, 255);
-		track->h26x_configData = NULL;
-		track->frame_type = target_frame_types[i];
-		track->is_appending = false;
-		track->counter = 0;
-		track->enable_mode = containerWriter_normal;
-		track->use_mode = containerWriter_normal;
+		ttLibC_MkvWriteTrack *track = ttLibC_ContainerWriteTrack_make(
+				sizeof(ttLibC_MkvWriteTrack),
+				i + 1,
+				target_frame_types[i]);
 		ttLibC_StlMap_put(writer->track_list, (void *)(long)(i + 1), (void *)track);
 	}
 	writer->inherit_super.is_webm = false; // work as matroska for default
@@ -1295,20 +1291,6 @@ static bool MkvWriter_writeFromQueue(
 	return true;
 }
 
-static bool MkvWriter_appendQueue(
-		ttLibC_MkvWriteTrack *track,
-		ttLibC_Frame *frame,
-		uint64_t pts) {
-	uint64_t original_pts = frame->pts;
-	uint32_t original_timebase = frame->timebase;
-	frame->pts = pts;
-	frame->timebase = 1000;
-	bool result = ttLibC_FrameQueue_queue(track->frame_queue, frame);
-	frame->pts = original_pts;
-	frame->timebase = original_timebase;
-	return result;
-}
-
 bool ttLibC_MkvWriter_write(
 		ttLibC_MkvWriter *writer,
 		ttLibC_Frame *frame,
@@ -1323,177 +1305,16 @@ bool ttLibC_MkvWriter_write(
 		return true;
 	}
 	ttLibC_MkvWriteTrack *track = (ttLibC_MkvWriteTrack *)ttLibC_StlMap_get(writer_->track_list, (void *)(long)frame->id);
-	if(track == NULL) {
-		ERR_PRINT("failed to get correspond track. %d", frame->id);
+	// これ・・・ptsを2度計算するのが気持ち悪い。writerも共通化したら、そっちにもっていこう。
+	uint64_t pts = (uint64_t)(1.0 * frame->pts * 1000 / frame->timebase);
+	if(!ttLibC_ContainerWriteTrack_appendQueue(track, frame, 1000, writer->inherit_super.mode)) {
 		return false;
 	}
-	uint64_t pts = (uint64_t)(1.0 * frame->pts * 1000 / frame->timebase);
-	track->enable_mode = writer->inherit_super.mode;
-	switch(frame->type) {
-	case frameType_h265:
-		{
-			ttLibC_H265 *h265 = (ttLibC_H265 *)frame;
-			if(h265->type == H265Type_unknown) {
-				return true;
-			}
-			if(h265->type == H265Type_configData) {
-				ttLibC_H265 *h = ttLibC_H265_clone(
-						(ttLibC_H265 *)track->h26x_configData,
-						h265);
-				if(h == NULL) {
-					ERR_PRINT("failed to make clone data.");
-					return false;
-				}
-				h->inherit_super.inherit_super.pts = 0;
-				h->inherit_super.inherit_super.timebase = 1000;
-				track->h26x_configData = (ttLibC_Frame *)h;
-				return true;
-			}
-			if(!track->is_appending && h265->type != H265Type_sliceIDR) {
-				return true;
-			}
-		}
-		break;
-	case frameType_h264:
-		{
-			ttLibC_H264 *h264 = (ttLibC_H264 *)frame;
-			if(h264->type == H264Type_unknown) {
-				return true;
-			}
-			if(h264->type == H264Type_configData) {
-				ttLibC_H264 *h = ttLibC_H264_clone(
-						(ttLibC_H264 *)track->h26x_configData,
-						h264);
-				if(h == NULL) {
-					ERR_PRINT("failed to make clone data.");
-					return false;
-				}
-				h->inherit_super.inherit_super.pts = 0;
-				h->inherit_super.inherit_super.timebase = 1000;
-				track->h26x_configData = (ttLibC_Frame *)h;
-				return true;
-			}
-			if(!track->is_appending && h264->type != H264Type_sliceIDR) {
-				// no data in queue, and not sliceIDR -> not yet to append.
-				return true;
-			}
-		}
-		break;
-	case frameType_vp8:
-	case frameType_vp9:
-		{
-			ttLibC_Video *video = (ttLibC_Video *)frame;
-			if(!track->is_appending && video->type != videoType_key) {
-				return true;
-			}
-		}
-		break;
-	case frameType_theora:
-		{
-			ttLibC_Theora *theora = (ttLibC_Theora *)frame;
-			if(!track->is_appending) {
-				switch(track->counter) {
-				case 0:
-					if(theora->type != TheoraType_identificationHeaderDecodeFrame) {
-						return true;
-					}
-					++ track->counter;
-					break;
-				case 1:
-					if(theora->type != TheoraType_commentHeaderFrame) {
-						return true;
-					}
-					++ track->counter;
-					break;
-				case 2:
-					if(theora->type != TheoraType_setupHeaderFrame) {
-						return true;
-					}
-					++ track->counter;
-					break;
-				default:
-					break;
-				}
-				if(track->counter < 3) {
-					return MkvWriter_appendQueue(track, frame, 0);
-				}
-			}
-		}
-		break;
-	case frameType_vorbis:
-		{
-			ttLibC_Vorbis *vorbis = (ttLibC_Vorbis *)frame;
-			if(!track->is_appending) {
-				switch(track->counter) {
-				case 0:
-					if(vorbis->type != VorbisType_identification) {
-						return true;
-					}
-					++ track->counter;
-					break;
-				case 1:
-					if(vorbis->type != VorbisType_comment) {
-						return true;
-					}
-					++ track->counter;
-					break;
-				case 2:
-					if(vorbis->type != VorbisType_setup) {
-						return true;
-					}
-					++ track->counter;
-					break;
-				default:
-					break;
-				}
-				if(track->counter < 3) {
-					return MkvWriter_appendQueue(track, frame, 0);
-				}
-			}
-		}
-		break;
-	case frameType_speex:
-		{
-			// speexはheaderはほしい。
-			// headerがきたら、下に進んでOKなのだが・・・
-			ttLibC_Speex *speex = (ttLibC_Speex *)frame;
-			if(!track->is_appending && speex->type != SpeexType_header) {
-				// 初めはheaderじゃないとだめ。
-				return true;
-			}
-			if(speex->type == SpeexType_comment) {
-				// commentはいらない。
-				return true;
-			}
-		}
-		break;
-	case frameType_mp3:
-		{
-			ttLibC_Mp3 *mp3 = (ttLibC_Mp3 *)frame;
-			switch(mp3->type) {
-			case Mp3Type_frame:
-				break;
-			case Mp3Type_id3:
-			case Mp3Type_tag:
-				return true;
-			default:
-				ERR_PRINT("unexpected mp3 frame:%d", mp3->type);
-				return true;
-			}
-		}
-		break;
-	default:
-		break;
-	}
-	track->is_appending = true;
 	if(writer_->is_first) {
 		writer_->current_pts_pos = pts;
 		writer_->target_pos = pts;
 		writer_->inherit_super.inherit_super.pts = pts;
 		writer_->is_first = false;
-	}
-	if(!MkvWriter_appendQueue(track, frame, pts)) {
-		return false;
 	}
 	writer_->callback = callback;
 	writer_->ptr = ptr;
@@ -1505,9 +1326,7 @@ static bool MkvWriter_closeTracks(void *ptr, void *key, void *item) {
 	(void)key;
 	if(item != NULL) {
 		ttLibC_MkvWriteTrack *track = (ttLibC_MkvWriteTrack *)item;
-		ttLibC_FrameQueue_close(&track->frame_queue);
-		ttLibC_Frame_close(&track->h26x_configData);
-		ttLibC_free(track);
+		ttLibC_ContainerWriteTrack_close((ttLibC_ContainerWriter_WriteTrack **)&track);
 	}
 	return true;
 }

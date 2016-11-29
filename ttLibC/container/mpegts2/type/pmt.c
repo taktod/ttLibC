@@ -162,7 +162,7 @@ bool ttLibC_Pmt_makePacket(
 	uint32_t i = 0;
 	while(true) {
 		uint32_t pid = 0x0100 + i;
-		ttLibC_MpegtsWriteTrack *track = (ttLibC_MpegtsWriteTrack *)ttLibC_StlMap_get(writer->track_list, (void *)(long)pid);
+		ttLibC_ContainerWriter_WriteTrack *track = (ttLibC_ContainerWriter_WriteTrack *)ttLibC_StlMap_get(writer->track_list, (void *)(long)pid);
 		if(track == NULL) {
 			break;
 		}

@@ -50,15 +50,12 @@ ttLibC_Mp4Writer *ttLibC_Mp4Writer_make_ex(
 	// setup tracks
 	writer->track_list = ttLibC_StlMap_make();
 	for(uint32_t i = 0;i < types_num;++ i) {
-		ttLibC_Mp4WriteTrack *track = ttLibC_malloc(sizeof(ttLibC_Mp4WriteTrack));
-		track->frame_queue     = ttLibC_FrameQueue_make(i + 1, 255);
-		track->h26x_configData = NULL;
-		track->frame_type      = target_frame_types[i];
-		track->mdat_buffer     = NULL;
-		track->is_appending    = false;
-		track->counter         = 0;
-		track->enable_mode     = containerWriter_normal;
-		track->use_mode        = containerWriter_normal;
+		ttLibC_Mp4WriteTrack *track = (ttLibC_Mp4WriteTrack *)ttLibC_ContainerWriteTrack_make(
+				sizeof(ttLibC_Mp4WriteTrack),
+				i + 1,
+				target_frame_types[i]);
+		track->mdat_buffer = NULL;
+		track->dataOffsetPosForTrun = 0;
 		ttLibC_StlMap_put(writer->track_list, (void *)(long)(i + 1), (void *)track); // trackId -> track
 	}
 	writer->inherit_super.inherit_super.timebase = 1000;
@@ -96,7 +93,7 @@ static bool Mp4Writer_makeTrex(void *ptr, void *key, void *item) {
 	(void)key;
 	if(item != NULL && ptr != NULL) {
 		ttLibC_DynamicBuffer *buffer = (ttLibC_DynamicBuffer *)ptr;
-		ttLibC_Mp4WriteTrack *track = (ttLibC_Mp4WriteTrack *)item;
+		ttLibC_ContainerWriter_WriteTrack *track = (ttLibC_ContainerWriter_WriteTrack *)item;
 		uint8_t buf[256];
 		size_t in_size;
 		switch(track->frame_type) {
@@ -173,7 +170,7 @@ static bool Mp4Writer_makeTrak(void *ptr, void *key, void *item) {
 	(void)key;
 	if(ptr != NULL && item != NULL) {
 		ttLibC_DynamicBuffer *buffer = (ttLibC_DynamicBuffer *)ptr;
-		ttLibC_Mp4WriteTrack *track = (ttLibC_Mp4WriteTrack *)item;
+		ttLibC_ContainerWriter_WriteTrack *track = (ttLibC_ContainerWriter_WriteTrack *)item;
 		track->use_mode = track->enable_mode;
 		// setup trak
 		size_t in_size;
@@ -650,20 +647,20 @@ static bool Mp4Writer_makeTraf(void *ptr, void *key, void *item) {
 		// tfhd
 		in_size = ttLibC_HexUtil_makeBuffer("00 00 00 10 74 66 68 64 00 02 00 00", buf, 256);
 		ttLibC_DynamicBuffer_append(buffer, buf, in_size);
-		uint32_t be_track_id = be_uint32_t(track->frame_queue->track_id);
+		uint32_t be_track_id = be_uint32_t(track->inherit_super.frame_queue->track_id);
 		ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_track_id, 4);
 		// tfdt timestamp
 		in_size = ttLibC_HexUtil_makeBuffer("00 00 00 10 74 66 64 74 00 00 00 00", buf, 256);
 		ttLibC_DynamicBuffer_append(buffer, buf, in_size);
 		// just put first frame pts information.
-		ttLibC_Frame *first_frame = ttLibC_FrameQueue_ref_first(track->frame_queue);
+		ttLibC_Frame *first_frame = ttLibC_FrameQueue_ref_first(track->inherit_super.frame_queue);
 		uint32_t be_timediff = be_uint32_t((uint32_t)first_frame->pts);
 		// for audio, timediff is crazy, cause round for timebase = 1000. for write function.
-		switch(track->frame_type) {
+		switch(track->inherit_super.frame_type) {
 		case frameType_h264:
 		case frameType_h265:
 			{
-				if((track->use_mode & containerWriter_enable_dts) != 0) {
+				if((track->inherit_super.use_mode & containerWriter_enable_dts) != 0) {
 					uint32_t timediff = first_frame->dts;
 					be_timediff = be_uint32_t((uint32_t)timediff);
 				}
@@ -686,11 +683,11 @@ static bool Mp4Writer_makeTraf(void *ptr, void *key, void *item) {
 		ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_timediff, 4);
 
 		// trun
-		switch(track->frame_type) {
+		switch(track->inherit_super.frame_type) {
 		case frameType_h264:
 			{
 				uint32_t trunSizePos = ttLibC_DynamicBuffer_refSize(buffer);
-				if((track->use_mode & containerWriter_enable_dts) != 0) {
+				if((track->inherit_super.use_mode & containerWriter_enable_dts) != 0) {
 					in_size = ttLibC_HexUtil_makeBuffer("00 00 00 00 74 72 75 6E 00 00 0B 05 00 00 00 00 00 00 00 00 00 00 00 00", buf, 256);
 				}
 				else {
@@ -703,18 +700,18 @@ static bool Mp4Writer_makeTraf(void *ptr, void *key, void *item) {
 				track->dataOffsetPosForTrun = frameCountPos + 4;
 				uint32_t frameCount = 0;
 				while(true) {
-					ttLibC_H264 *h264 = (ttLibC_H264 *)ttLibC_FrameQueue_ref_first(track->frame_queue);
+					ttLibC_H264 *h264 = (ttLibC_H264 *)ttLibC_FrameQueue_ref_first(track->inherit_super.frame_queue);
 					if(h264 == NULL) {
 						break;
 					}
 					if(h264->inherit_super.inherit_super.dts < writer->target_pos) {
-						ttLibC_H264 *h = (ttLibC_H264 *)ttLibC_FrameQueue_dequeue_first(track->frame_queue);
+						ttLibC_H264 *h = (ttLibC_H264 *)ttLibC_FrameQueue_dequeue_first(track->inherit_super.frame_queue);
 						if(h264 != h) {
 							ERR_PRINT("ref frame is invalid.");
 							return false;
 						}
 						// get next frame to get duration of frame.
-						ttLibC_Frame *next_frame = ttLibC_FrameQueue_ref_first(track->frame_queue);
+						ttLibC_Frame *next_frame = ttLibC_FrameQueue_ref_first(track->inherit_super.frame_queue);
 						uint32_t duration = next_frame->dts - h264->inherit_super.inherit_super.dts;
 						uint32_t be_duration = be_uint32_t(duration);
 						ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_duration, 4);
@@ -736,7 +733,7 @@ static bool Mp4Writer_makeTraf(void *ptr, void *key, void *item) {
 						// set size on trun.
 						uint32_t be_h264_size = be_uint32_t(h264_size);
 						ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_h264_size, 4);
-						if((track->use_mode & containerWriter_enable_dts) != 0) {
+						if((track->inherit_super.use_mode & containerWriter_enable_dts) != 0) {
 							// get offset to store.
 							uint32_t offset = h264->inherit_super.inherit_super.pts + (h264->inherit_super.inherit_super.timebase / 5) - h264->inherit_super.inherit_super.dts;
 							uint32_t be_offset = be_uint32_t(offset);
@@ -758,7 +755,7 @@ static bool Mp4Writer_makeTraf(void *ptr, void *key, void *item) {
 		case frameType_h265:
 			{
 				uint32_t trunSizePos = ttLibC_DynamicBuffer_refSize(buffer);
-				if((track->use_mode & containerWriter_enable_dts) != 0) {
+				if((track->inherit_super.use_mode & containerWriter_enable_dts) != 0) {
 					in_size = ttLibC_HexUtil_makeBuffer("00 00 00 00 74 72 75 6E 00 00 0B 05 00 00 00 00 00 00 00 00 00 00 00 00", buf, 256);
 				}
 				else {
@@ -771,18 +768,18 @@ static bool Mp4Writer_makeTraf(void *ptr, void *key, void *item) {
 				track->dataOffsetPosForTrun = frameCountPos + 4;
 				uint32_t frameCount = 0;
 				while(true) {
-					ttLibC_H265 *h265 = (ttLibC_H265 *)ttLibC_FrameQueue_ref_first(track->frame_queue);
+					ttLibC_H265 *h265 = (ttLibC_H265 *)ttLibC_FrameQueue_ref_first(track->inherit_super.frame_queue);
 					if(h265 == NULL) {
 						break;
 					}
 					if(h265->inherit_super.inherit_super.dts < writer->target_pos) {
-						ttLibC_H265 *h = (ttLibC_H265 *)ttLibC_FrameQueue_dequeue_first(track->frame_queue);
+						ttLibC_H265 *h = (ttLibC_H265 *)ttLibC_FrameQueue_dequeue_first(track->inherit_super.frame_queue);
 						if(h265 != h) {
 							ERR_PRINT("ref frame is invalid.");
 							return false;
 						}
 						// get next frame to get duration of frame.
-						ttLibC_Frame *next_frame = ttLibC_FrameQueue_ref_first(track->frame_queue);
+						ttLibC_Frame *next_frame = ttLibC_FrameQueue_ref_first(track->inherit_super.frame_queue);
 						uint32_t duration = next_frame->dts - h265->inherit_super.inherit_super.dts;
 						uint32_t be_duration = be_uint32_t(duration);
 						ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_duration, 4);
@@ -804,7 +801,7 @@ static bool Mp4Writer_makeTraf(void *ptr, void *key, void *item) {
 						// set size on trun.
 						uint32_t be_h265_size = be_uint32_t(h265_size);
 						ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_h265_size, 4);
-						if((track->use_mode & containerWriter_enable_dts) != 0) {
+						if((track->inherit_super.use_mode & containerWriter_enable_dts) != 0) {
 							// get offset to store.
 							uint32_t offset = h265->inherit_super.inherit_super.pts + (h265->inherit_super.inherit_super.timebase / 5) - h265->inherit_super.inherit_super.dts;
 							uint32_t be_offset = be_uint32_t(offset);
@@ -834,18 +831,18 @@ static bool Mp4Writer_makeTraf(void *ptr, void *key, void *item) {
 				uint32_t frameCount = 0;
 				uint64_t target_pts = 0;
 				while(true) {
-					ttLibC_Jpeg *jpeg =(ttLibC_Jpeg *)ttLibC_FrameQueue_ref_first(track->frame_queue);
+					ttLibC_Jpeg *jpeg =(ttLibC_Jpeg *)ttLibC_FrameQueue_ref_first(track->inherit_super.frame_queue);
 					if(jpeg == NULL) {
 						break;
 					}
 					if(jpeg->inherit_super.inherit_super.pts < writer->target_pos) {
-						ttLibC_Jpeg *j = (ttLibC_Jpeg *)ttLibC_FrameQueue_dequeue_first(track->frame_queue);
+						ttLibC_Jpeg *j = (ttLibC_Jpeg *)ttLibC_FrameQueue_dequeue_first(track->inherit_super.frame_queue);
 						if(jpeg != j) {
 							ERR_PRINT("ref frame is invalid.");
 							return false;
 						}
 						// get next frame to get duration of frame.
-						ttLibC_Frame *next_frame = ttLibC_FrameQueue_ref_first(track->frame_queue);
+						ttLibC_Frame *next_frame = ttLibC_FrameQueue_ref_first(track->inherit_super.frame_queue);
 						uint32_t duration = next_frame->pts - jpeg->inherit_super.inherit_super.pts;
 						uint32_t be_duration = be_uint32_t(duration);
 						ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_duration, 4);
@@ -880,7 +877,7 @@ static bool Mp4Writer_makeTraf(void *ptr, void *key, void *item) {
 				uint32_t frameCount = 0;
 				uint64_t target_pts = 0;
 				while(true) {
-					ttLibC_Aac *aac = (ttLibC_Aac *)ttLibC_FrameQueue_ref_first(track->frame_queue);
+					ttLibC_Aac *aac = (ttLibC_Aac *)ttLibC_FrameQueue_ref_first(track->inherit_super.frame_queue);
 					if(aac == NULL) {
 						break;
 					}
@@ -888,7 +885,7 @@ static bool Mp4Writer_makeTraf(void *ptr, void *key, void *item) {
 						target_pts = (uint64_t)(1.0 * writer->target_pos * aac->inherit_super.inherit_super.timebase / 1000);
 					}
 					if(aac->inherit_super.inherit_super.pts < target_pts) {
-						ttLibC_Aac *a = (ttLibC_Aac *)ttLibC_FrameQueue_dequeue_first(track->frame_queue);
+						ttLibC_Aac *a = (ttLibC_Aac *)ttLibC_FrameQueue_dequeue_first(track->inherit_super.frame_queue);
 						if(aac != a) {
 							ERR_PRINT("ref frame is invalid.");
 							return false;
@@ -926,7 +923,7 @@ static bool Mp4Writer_makeTraf(void *ptr, void *key, void *item) {
 				uint32_t frameCount = 0;
 				uint64_t target_pts = 0;
 				while(true) {
-					ttLibC_Mp3 *mp3 = (ttLibC_Mp3 *)ttLibC_FrameQueue_ref_first(track->frame_queue);
+					ttLibC_Mp3 *mp3 = (ttLibC_Mp3 *)ttLibC_FrameQueue_ref_first(track->inherit_super.frame_queue);
 					if(mp3 == NULL) {
 						break;
 					}
@@ -934,7 +931,7 @@ static bool Mp4Writer_makeTraf(void *ptr, void *key, void *item) {
 						target_pts = (uint64_t)(1.0 * writer->target_pos * mp3->inherit_super.inherit_super.timebase / 1000);
 					}
 					if(mp3->inherit_super.inherit_super.pts < target_pts) {
-						ttLibC_Mp3 *m = (ttLibC_Mp3 *)ttLibC_FrameQueue_dequeue_first(track->frame_queue);
+						ttLibC_Mp3 *m = (ttLibC_Mp3 *)ttLibC_FrameQueue_dequeue_first(track->inherit_super.frame_queue);
 						if(mp3 != m) {
 							ERR_PRINT("ref frame is invalid.");
 							return false;
@@ -970,7 +967,7 @@ static bool Mp4Writer_makeTraf(void *ptr, void *key, void *item) {
 				uint32_t frameCount = 0;
 				uint64_t target_pts = 0;
 				while(true) {
-					ttLibC_Vorbis *vorbis = (ttLibC_Vorbis *)ttLibC_FrameQueue_ref_first(track->frame_queue);
+					ttLibC_Vorbis *vorbis = (ttLibC_Vorbis *)ttLibC_FrameQueue_ref_first(track->inherit_super.frame_queue);
 					if(vorbis == NULL) {
 						break;
 					}
@@ -978,7 +975,7 @@ static bool Mp4Writer_makeTraf(void *ptr, void *key, void *item) {
 						target_pts = (uint64_t)(1.0 * writer->target_pos * vorbis->inherit_super.inherit_super.timebase / 1000);
 					}
 					if(vorbis->inherit_super.inherit_super.pts < target_pts) {
-						ttLibC_Vorbis *v = (ttLibC_Vorbis *)ttLibC_FrameQueue_dequeue_first(track->frame_queue);
+						ttLibC_Vorbis *v = (ttLibC_Vorbis *)ttLibC_FrameQueue_dequeue_first(track->inherit_super.frame_queue);
 						if(vorbis != v) {
 							ERR_PRINT("ref frame is invalid.");
 							return false;
@@ -1109,7 +1106,7 @@ static bool Mp4Writer_initCheckTrack(void *ptr, void *key, void *item) {
 	if(item == NULL) {
 		return false;
 	}
-	ttLibC_Mp4WriteTrack *track = (ttLibC_Mp4WriteTrack *)item;
+	ttLibC_ContainerWriter_WriteTrack *track = (ttLibC_ContainerWriter_WriteTrack *)item;
 	switch(track->frame_type) {
 	case frameType_h264:
 	case frameType_h265:
@@ -1131,7 +1128,7 @@ static bool Mp4Writer_initCheckTrack(void *ptr, void *key, void *item) {
  */
 static bool Mp4Writer_primaryVideoTrackCheck(void *ptr, ttLibC_Frame *frame) {
 	ttLibC_Mp4Writer_ *writer = (ttLibC_Mp4Writer_ *)ptr;
-	ttLibC_Mp4WriteTrack *track = (ttLibC_Mp4WriteTrack *)ttLibC_StlMap_get(writer->track_list, (void *)(long)1);
+	ttLibC_ContainerWriter_WriteTrack *track = (ttLibC_ContainerWriter_WriteTrack *)ttLibC_StlMap_get(writer->track_list, (void *)(long)1);
 	ttLibC_ContainerWriter_Mode divisionMode = track->use_mode & 0x0F;
 	ttLibC_Video *video = (ttLibC_Video *)frame;
 	// frame is not ready.
@@ -1275,7 +1272,7 @@ static bool Mp4Writer_dataCheckTrack(void *ptr, void *key, void *item) {
 	(void)key;
 	if(ptr != NULL && item != NULL) {
 		ttLibC_Mp4Writer_ *writer = (ttLibC_Mp4Writer_ *)ptr;
-		ttLibC_Mp4WriteTrack *track = (ttLibC_Mp4WriteTrack *)item;
+		ttLibC_ContainerWriter_WriteTrack *track = (ttLibC_ContainerWriter_WriteTrack *)item;
 		// for audio we need to change timebase into 1000.
 		uint64_t pts = (uint64_t)(1.0 * track->frame_queue->pts * 1000 / track->frame_queue->timebase);
 		if(writer->target_pos > pts) {
@@ -1318,7 +1315,7 @@ static bool Mp4Writer_writeFromQueue(
 	case status_target_check:
 		{
 			// check 1st track to decide target_pos.
-			ttLibC_Mp4WriteTrack *track = (ttLibC_Mp4WriteTrack *)ttLibC_StlMap_get(writer->track_list, (void *)1);
+			ttLibC_ContainerWriter_WriteTrack *track = (ttLibC_ContainerWriter_WriteTrack *)ttLibC_StlMap_get(writer->track_list, (void *)1);
 			switch(track->frame_type) {
 			case frameType_h264:
 			case frameType_h265:
@@ -1374,20 +1371,6 @@ static bool Mp4Writer_writeFromQueue(
 	return true;
 }
 
-static bool Mp4Writer_appendQueue(
-		ttLibC_Mp4WriteTrack *track,
-		ttLibC_Frame *frame,
-		uint64_t pts) {
-	uint64_t original_pts = frame->pts;
-	uint32_t original_timebase = frame->timebase;
-	frame->pts = pts;
-	frame->timebase = 1000;
-	bool result = ttLibC_FrameQueue_queue(track->frame_queue, frame);
-	frame->pts = original_pts;
-	frame->timebase = original_timebase;
-	return result;
-}
-
 bool ttLibC_Mp4Writer_write(
 		ttLibC_Mp4Writer *writer,
 		ttLibC_Frame *frame,
@@ -1401,122 +1384,16 @@ bool ttLibC_Mp4Writer_write(
 	if(frame == NULL) {
 		return true;
 	}
-	ttLibC_Mp4WriteTrack *track = (ttLibC_Mp4WriteTrack *)ttLibC_StlMap_get(writer_->track_list, (void *)(long)frame->id);
-	if(track == NULL) {
-		ERR_PRINT("failed to get correspond track. %d", frame->id);
+	ttLibC_ContainerWriter_WriteTrack *track = (ttLibC_ContainerWriter_WriteTrack *)ttLibC_StlMap_get(writer_->track_list, (void *)(long)frame->id);
+	uint64_t pts = (uint64_t)(1.0 * frame->pts * 1000 / frame->timebase);
+	if(!ttLibC_ContainerWriteTrack_appendQueue(track, frame, 1000, writer->inherit_super.mode)) {
 		return false;
 	}
-	uint64_t pts = (uint64_t)(1.0 * frame->pts * 1000 / frame->timebase);
-	track->enable_mode = writer->inherit_super.mode;
-	switch(frame->type) {
-	case frameType_h265:
-		{
-			ttLibC_H265 *h265 = (ttLibC_H265 *)frame;
-			if(h265->type == H265Type_unknown) {
-				return true;
-			}
-			if(h265->type == H265Type_configData) {
-				ttLibC_H265 *h = ttLibC_H265_clone(
-						(ttLibC_H265 *)track->h26x_configData,
-						h265);
-				if(h == NULL) {
-					ERR_PRINT("failed to make clone data.");
-					return false;
-				}
-				h->inherit_super.inherit_super.pts = 0;
-				h->inherit_super.inherit_super.timebase = 1000;
-				track->h26x_configData = (ttLibC_Frame *)h;
-				return true;
-			}
-			if(!track->is_appending && h265->type != H265Type_sliceIDR) {
-				return true;
-			}
-		}
-		break;
-	case frameType_h264:
-		{
-			ttLibC_H264 *h264 = (ttLibC_H264 *)frame;
-			if(h264->type == H264Type_unknown) {
-				return true;
-			}
-			if(h264->type == H264Type_configData) {
-				ttLibC_H264 *h = ttLibC_H264_clone(
-						(ttLibC_H264 *)track->h26x_configData,
-						h264);
-				if(h == NULL) {
-					ERR_PRINT("failed to make clone data.");
-					return false;
-				}
-				h->inherit_super.inherit_super.pts = 0;
-				h->inherit_super.inherit_super.timebase = 1000;
-				track->h26x_configData = (ttLibC_Frame *)h;
-				return true;
-			}
-			if(!track->is_appending && h264->type != H264Type_sliceIDR) {
-				// no data in queue, and not sliceIDR -> not yet to append.
-				return true;
-			}
-		}
-		break;
-	case frameType_vorbis:
-		{
-			ttLibC_Vorbis *vorbis = (ttLibC_Vorbis *)frame;
-			if(!track->is_appending) {
-				switch(track->counter) {
-				case 0:
-					if(vorbis->type != VorbisType_identification) {
-						return true;
-					}
-					++ track->counter;
-					break;
-				case 1:
-					if(vorbis->type != VorbisType_comment) {
-						return true;
-					}
-					++ track->counter;
-					break;
-				case 2:
-					if(vorbis->type != VorbisType_setup) {
-						return true;
-					}
-					++ track->counter;
-					break;
-				default:
-					break;
-				}
-				if(track->counter < 3) {
-					return Mp4Writer_appendQueue(track, frame, 0);
-				}
-			}
-		}
-		break;
-	case frameType_mp3:
-		{
-			ttLibC_Mp3 *mp3 = (ttLibC_Mp3 *)frame;
-			switch(mp3->type) {
-			case Mp3Type_frame:
-				break;
-			case Mp3Type_id3:
-			case Mp3Type_tag:
-				return true;
-			default:
-				ERR_PRINT("unexpected mp3 frame:%d", mp3->type);
-				return true;
-			}
-		}
-		break;
-	default:
-		break;
-	}
-	track->is_appending = true;
 	if(writer_->is_first) {
 		writer_->current_pts_pos = pts;
 		writer_->target_pos = pts;
 		writer_->inherit_super.inherit_super.pts = pts;
 		writer_->is_first = false;
-	}
-	if(!Mp4Writer_appendQueue(track, frame, pts)) {
-		return false;
 	}
 	writer_->callback = callback;
 	writer_->ptr = ptr;
@@ -1535,10 +1412,8 @@ static bool Mp4Writer_closeTracks(void *ptr, void *key, void *item) {
 	(void)key;
 	if(item != NULL) {
 		ttLibC_Mp4WriteTrack *track = (ttLibC_Mp4WriteTrack *)item;
-		ttLibC_FrameQueue_close(&track->frame_queue);
-		ttLibC_Frame_close(&track->h26x_configData);
 		ttLibC_DynamicBuffer_close(&track->mdat_buffer);
-		ttLibC_free(track);
+		ttLibC_ContainerWriteTrack_close((ttLibC_ContainerWriter_WriteTrack **)&track);
 	}
 	return true;
 }

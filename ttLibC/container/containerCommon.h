@@ -16,6 +16,7 @@ extern "C" {
 #endif
 
 #include "container.h"
+#include "misc.h"
 
 /**
  * definition of bit type. (just for information.)
@@ -115,6 +116,46 @@ ttLibC_ContainerWriter *ttLibC_ContainerWriter_make(
 		ttLibC_Container_Type container_type,
 		size_t writer_size,
 		uint32_t timebase);
+
+typedef struct ttLibC_ContainerWriter_WriteTrack {
+	ttLibC_FrameQueue          *frame_queue;
+	ttLibC_Frame               *h26x_configData;
+	ttLibC_Frame_Type           frame_type;
+	uint32_t                    counter;
+	bool                        is_appending;
+	ttLibC_ContainerWriter_Mode enable_mode;
+	ttLibC_ContainerWriter_Mode use_mode;
+} ttLibC_ContainerWriter_WriteTrack;
+
+/*
+ * trackのclose
+ * writeの動作の補助部
+ * appendQueueの動作(内部) // ここの動作がinit系の動作に影響するのか・・・うーん。
+ * 必要なデータを参照する動作をつくっておきたい・・・けど・・・
+ * theoraのデータみたいに、合算してとらない方がいいものもあるわけだけど・・・
+ * まぁ一気にとってもいいんだが・・・
+ * 一度しかしないので、bufferで応答してもいいかな・・・
+ * まぁ、よく考えよう。
+ * primaryVideoTrackCheck
+ * このあたりは抜き出しておきたいね。
+ */
+
+ttLibC_ContainerWriter_WriteTrack *ttLibC_ContainerWriteTrack_make(
+		size_t            track_size,
+		uint32_t          track_id,
+		ttLibC_Frame_Type frame_type);
+
+bool ttLibC_ContainerWriteTrack_appendQueue(
+		ttLibC_ContainerWriter_WriteTrack *track,
+		ttLibC_Frame                      *frame,
+		uint32_t                           timebase,
+		ttLibC_ContainerWriter_Mode        enable_mode);
+
+// これは共通した方がいいけど、writerの動作調整しなければならないわけだが・・・
+// これはあとでする。
+//ttLibC_ContainerWriteTrack_primaryVideoTrackCheck();
+
+void ttLibC_ContainerWriteTrack_close(ttLibC_ContainerWriter_WriteTrack **track);
 
 #ifdef __cplusplus
 } /* extern "C" */
