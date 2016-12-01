@@ -142,33 +142,27 @@ typedef struct ttLibC_ContainerWriter_ {
 	uint32_t                      unit_duration;
 } ttLibC_ContainerWriter_;
 
-/*
- * trackのclose
- * writeの動作の補助部
- * appendQueueの動作(内部) // ここの動作がinit系の動作に影響するのか・・・うーん。
- * 必要なデータを参照する動作をつくっておきたい・・・けど・・・
- * theoraのデータみたいに、合算してとらない方がいいものもあるわけだけど・・・
- * まぁ一気にとってもいいんだが・・・
- * 一度しかしないので、bufferで応答してもいいかな・・・
- * まぁ、よく考えよう。
- * primaryVideoTrackCheck
- * このあたりは抜き出しておきたいね。
- */
-
 ttLibC_ContainerWriter_WriteTrack *ttLibC_ContainerWriteTrack_make(
 		size_t            track_size,
 		uint32_t          track_id,
 		ttLibC_Frame_Type frame_type);
 
+// will delete?
 bool ttLibC_ContainerWriteTrack_appendQueue(
 		ttLibC_ContainerWriter_WriteTrack *track,
 		ttLibC_Frame                      *frame,
 		uint32_t                           timebase,
 		ttLibC_ContainerWriter_Mode        enable_mode);
 
-// これは共通した方がいいけど、writerの動作調整しなければならないわけだが・・・
-// これはあとでする。
-//ttLibC_ContainerWriteTrack_primaryVideoTrackCheck();
+bool ttLibC_ContainerWriter_write_(
+		ttLibC_ContainerWriter_ *writer,
+		ttLibC_Frame *frame,
+		ttLibC_ContainerWriteFunc callback,
+		void *ptr);
+
+bool ttLibC_ContainerWriter_isReadyToStart(ttLibC_ContainerWriter_ *writer);
+bool ttLibC_ContainerWriter_primaryTrackCheck(void *ptr, ttLibC_Frame *frame);
+bool ttLibC_ContainerWriter_isReadyToWrite(ttLibC_ContainerWriter_ *writer);
 
 void ttLibC_ContainerWriteTrack_close(ttLibC_ContainerWriter_WriteTrack **track);
 

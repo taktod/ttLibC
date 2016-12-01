@@ -566,7 +566,7 @@ static bool Mp4Writer_makeTrak(void *ptr, void *key, void *item) {
 /**
  * make init.mp4 data.(ftyp moov)
  */
-static bool Mp4Writer_makeInitMp4(ttLibC_Mp4Writer_ *writer) {
+static bool Mp4Writer_makeInitMp4(ttLibC_ContainerWriter_ *writer) {
 	ttLibC_DynamicBuffer *buffer = ttLibC_DynamicBuffer_make();
 	if(buffer == NULL) {
 		ERR_PRINT("failed to make buffer.");
@@ -590,15 +590,15 @@ static bool Mp4Writer_makeInitMp4(ttLibC_Mp4Writer_ *writer) {
 		in_size = ttLibC_HexUtil_makeBuffer("00 00 00 00 6D 76 65 78", buf, 256);
 		ttLibC_DynamicBuffer_append(buffer, buf, in_size);
 			// trex
-			ttLibC_StlMap_forEach(writer->inherit_super.track_list, Mp4Writer_makeTrex, buffer);
+			ttLibC_StlMap_forEach(writer->track_list, Mp4Writer_makeTrex, buffer);
 		Mp4Writer_updateSize(buffer, mvexSizePos);
 		// trak
-		ttLibC_StlMap_forEach(writer->inherit_super.track_list, Mp4Writer_makeTrak, buffer);
+		ttLibC_StlMap_forEach(writer->track_list, Mp4Writer_makeTrak, buffer);
 	Mp4Writer_updateSize(buffer, moovSizePos);
 	// ready, write now.
 	bool result = true;
-	if(writer->inherit_super.callback != NULL) {
-		result = writer->inherit_super.callback(writer->inherit_super.ptr, ttLibC_DynamicBuffer_refData(buffer), ttLibC_DynamicBuffer_refSize(buffer));
+	if(writer->callback != NULL) {
+		result = writer->callback(writer->ptr, ttLibC_DynamicBuffer_refData(buffer), ttLibC_DynamicBuffer_refSize(buffer));
 	}
 	ttLibC_DynamicBuffer_close(&buffer);
 	return result;
@@ -1083,195 +1083,6 @@ static bool Mp4Writer_makeData(ttLibC_Mp4Writer_ *writer) {
 }
 
 /**
- * check if track has enough information to make init.mp4.
- * @param ptr
- * @param key
- * @param item
- */
-static bool Mp4Writer_initCheckTrack(void *ptr, void *key, void *item) {
-	(void)key;
-	(void)ptr;
-	if(item == NULL) {
-		return false;
-	}
-	ttLibC_ContainerWriter_WriteTrack *track = (ttLibC_ContainerWriter_WriteTrack *)item;
-	switch(track->frame_type) {
-	case frameType_h264:
-	case frameType_h265:
-		{
-			// for h264 need configData.
-			return track->h26x_configData != NULL;
-		}
-	default:
-		{
-			// for others need to check in appending mode.
-			return track->is_appending;
-		}
-	}
-	return true;
-}
-
-/**
- * check primary h264 track for target pos for chunk.
- */
-static bool Mp4Writer_primaryVideoTrackCheck(void *ptr, ttLibC_Frame *frame) {
-	ttLibC_Mp4Writer_ *writer = (ttLibC_Mp4Writer_ *)ptr;
-	ttLibC_ContainerWriter_WriteTrack *track = (ttLibC_ContainerWriter_WriteTrack *)ttLibC_StlMap_get(writer->inherit_super.track_list, (void *)(long)1);
-	ttLibC_ContainerWriter_Mode divisionMode = track->use_mode & 0x0F;
-	ttLibC_Video *video = (ttLibC_Video *)frame;
-	// frame is not ready.
-	if(frame->pts != 0 && frame->dts == 0) {
-		return true;
-	}
-	if(video->type == videoType_key) {
-		// キーフレームでかつ、すべてのkeyFrameで分割するモードの場合
-		if((track->use_mode & containerWriter_allKeyFrame_split) != 0) {
-			if(writer->inherit_super.current_pts_pos < frame->dts) {
-				writer->inherit_super.target_pos = frame->dts;
-				return false;
-			}
-		}
-	}
-	switch(frame->type) {
-	case frameType_h264:
-		{
-			ttLibC_H264 *h264 = (ttLibC_H264 *)frame;
-			if(frame->dts < writer->inherit_super.unit_duration + writer->inherit_super.current_pts_pos) {
-				return true;
-			}
-			switch(h264->frame_type) {
-			case H264FrameType_B:
-				// コンパイラがうまい具合に調整してくれるかな・・・なんか考えることがうまくできない。
-				if((divisionMode & containerWriter_bFrame_split) != 0) {
-					// bframe splitの場合は問答無用でok
-				}
-				else if((divisionMode & containerWriter_disposableBFrame_split) != 0 && h264->is_disposable) {
-					// disposable b frameで分割する場合は、こっち。
-				}
-				else {
-					return true;
-				}
-				break;
-			case H264FrameType_SP:
-				ERR_PRINT("sp frame is not checked.");
-				/* no break */
-			case H264FrameType_P:
-				if((divisionMode & containerWriter_pFrame_split) != 0) {
-					// p frameで分割する場合
-				}
-				else if((divisionMode & containerWriter_innerFrame_split) != 0 && frame->dts == frame->pts) {
-					// 中間フレーム分割でかつdts ptsが一致する場合(bフレームに依存しない、pframeである場合)
-				}
-				else {
-					return true;
-				}
-				break;
-			case H264FrameType_SI:
-				ERR_PRINT("si frame is not checked.");
-				/* no break */
-			case H264FrameType_I:
-				// keyFrameはとにかく分割候補にする。
-				break;
-			default:
-				return true;
-			}
-			writer->inherit_super.target_pos = frame->dts;
-			return false;
-		}
-		break;
-	case frameType_h265:
-		{
-			ttLibC_H265 *h265 = (ttLibC_H265 *)frame;
-			if(frame->dts < writer->inherit_super.unit_duration + writer->inherit_super.current_pts_pos) {
-				return true;
-			}
-			switch(h265->frame_type) {
-			case H265FrameType_B:
-				if((divisionMode & containerWriter_bFrame_split) != 0) {
-					// bframe splitの場合は問答無用でok
-				}
-				else if((divisionMode & containerWriter_disposableBFrame_split) != 0 && h265->is_disposable) {
-					// disposable b frameで分割する場合は、こっち。
-				}
-				else {
-					return true;
-				}
-				break;
-			case H265FrameType_P:
-				if((divisionMode & containerWriter_pFrame_split) != 0) {
-					// p frameで分割する場合
-				}
-				else if((divisionMode & containerWriter_innerFrame_split) != 0 && frame->dts == frame->pts) {
-					// 中間フレーム分割でかつdts ptsが一致する場合(bフレームに依存しない、pframeである場合)
-				}
-				else {
-					return true;
-				}
-				break;
-			case H265FrameType_I:
-				break;
-			default:
-				return true;
-			}
-			writer->inherit_super.target_pos = frame->dts;
-			return false;
-		}
-		break;
-	default:
-		{
-			if(frame->pts < writer->inherit_super.unit_duration + writer->inherit_super.current_pts_pos) {
-				return true;
-			}
-			switch(video->type) {
-			default:
-			case videoType_info:
-				return true;
-			case videoType_key:
-				break;
-			case videoType_inner:
-				if((divisionMode & containerWriter_innerFrame_split) == 0) {
-				}
-				else if((divisionMode & containerWriter_pFrame_split) == 0) {
-				}
-				else if((divisionMode & containerWriter_disposableBFrame_split) == 0) {
-				}
-				else if((divisionMode & containerWriter_bFrame_split) == 0) {
-				}
-				else {
-					return true;
-				}
-				break;
-			}
-			writer->inherit_super.target_pos = frame->pts;
-			return false;
-		}
-		break;
-	}
-	return true;
-}
-
-/**
- * check data chunk writing for each track.
- * @param ptr
- * @param key
- * @param item
- */
-static bool Mp4Writer_dataCheckTrack(void *ptr, void *key, void *item) {
-	(void)key;
-	if(ptr != NULL && item != NULL) {
-		ttLibC_Mp4Writer_ *writer = (ttLibC_Mp4Writer_ *)ptr;
-		ttLibC_ContainerWriter_WriteTrack *track = (ttLibC_ContainerWriter_WriteTrack *)item;
-		// for audio we need to change timebase into 1000.
-		uint64_t pts = (uint64_t)(1.0 * track->frame_queue->pts * 1000 / track->frame_queue->timebase);
-		if(writer->inherit_super.target_pos > pts) {
-			return false;
-		}
-		return true;
-	}
-	return false;
-}
-
-/**
  * write from queued data.
  */
 static bool Mp4Writer_writeFromQueue(
@@ -1279,8 +1090,7 @@ static bool Mp4Writer_writeFromQueue(
 	switch(writer->inherit_super.status) {
 	case status_init_check:
 		{
-			if(ttLibC_StlMap_forEach(writer->inherit_super.track_list, Mp4Writer_initCheckTrack, NULL)) {
-				// now ready to make init.mp4
+			if(ttLibC_ContainerWriter_isReadyToStart(writer)) {
 				writer->inherit_super.status = status_make_init;
 				return Mp4Writer_writeFromQueue(writer);
 			}
@@ -1304,21 +1114,7 @@ static bool Mp4Writer_writeFromQueue(
 		{
 			// check 1st track to decide target_pos.
 			ttLibC_ContainerWriter_WriteTrack *track = (ttLibC_ContainerWriter_WriteTrack *)ttLibC_StlMap_get(writer->inherit_super.track_list, (void *)1);
-			switch(track->frame_type) {
-			case frameType_h264:
-			case frameType_h265:
-				ttLibC_FrameQueue_ref(track->frame_queue, Mp4Writer_primaryVideoTrackCheck, writer);
-				break;
-			case frameType_jpeg:
-			case frameType_aac:
-			case frameType_mp3:
-			case frameType_vorbis:
-				writer->inherit_super.target_pos = writer->inherit_super.current_pts_pos + writer->inherit_super.unit_duration;
-				break;
-			default:
-				ERR_PRINT("unexpected frame is found.");
-				return false;
-			}
+			ttLibC_FrameQueue_ref(track->frame_queue, ttLibC_ContainerWriter_primaryTrackCheck, writer);
 			if(writer->inherit_super.target_pos != writer->inherit_super.current_pts_pos) {
 				// check each track.
 				writer->inherit_super.status = status_data_check;
@@ -1328,9 +1124,8 @@ static bool Mp4Writer_writeFromQueue(
 		break;
 	case status_data_check:
 		{
-			if(ttLibC_StlMap_forEach(writer->inherit_super.track_list, Mp4Writer_dataCheckTrack, writer)) {
-				// all track is ok.
-				writer->inherit_super.status = status_make_data; // make chunk data.
+			if(ttLibC_ContainerWriter_isReadyToWrite(writer)) {
+				writer->inherit_super.status = status_make_data;
 				return Mp4Writer_writeFromQueue(writer);
 			}
 		}
@@ -1364,28 +1159,14 @@ bool ttLibC_Mp4Writer_write(
 		ttLibC_Frame *frame,
 		ttLibC_ContainerWriteFunc callback,
 		void *ptr) {
-	ttLibC_Mp4Writer_ *writer_ = (ttLibC_Mp4Writer_ *)writer;
-	if(writer_ == NULL) {
-		ERR_PRINT("writer is null.");
+	if(!ttLibC_ContainerWriter_write_(
+			(ttLibC_ContainerWriter_ *)writer,
+			frame,
+			callback,
+			ptr)) {
 		return false;
 	}
-	if(frame == NULL) {
-		return true;
-	}
-	ttLibC_ContainerWriter_WriteTrack *track = (ttLibC_ContainerWriter_WriteTrack *)ttLibC_StlMap_get(writer_->inherit_super.track_list, (void *)(long)frame->id);
-	uint64_t pts = (uint64_t)(1.0 * frame->pts * 1000 / frame->timebase);
-	if(!ttLibC_ContainerWriteTrack_appendQueue(track, frame, 1000, writer->mode)) {
-		return false;
-	}
-	if(writer_->inherit_super.is_first) {
-		writer_->inherit_super.current_pts_pos = pts;
-		writer_->inherit_super.target_pos = pts;
-		writer_->inherit_super.inherit_super.pts = pts;
-		writer_->inherit_super.is_first = false;
-	}
-	writer_->inherit_super.callback = callback;
-	writer_->inherit_super.ptr = ptr;
-	return Mp4Writer_writeFromQueue(writer_);
+	return Mp4Writer_writeFromQueue(writer);
 }
 
 /**

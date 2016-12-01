@@ -24,6 +24,8 @@
 #include "../frame/video/h265.h"
 #include "../frame/video/h264.h"
 #include "../frame/video/theora.h"
+#include "../frame/audio/audio.h"
+#include "../frame/audio/aac.h"
 #include "../frame/audio/mp3.h"
 #include "../frame/audio/speex.h"
 #include "../frame/audio/vorbis.h"
@@ -421,6 +423,385 @@ static bool ContainerWriteTrack_appendQueue(
 	return result;
 }
 
+static bool ContainerWriter_isReadyToStartCallback(void *ptr, void *key, void *item) {
+	(void)ptr;
+	(void)key;
+	if(item == NULL) {
+		return false;
+	}
+	ttLibC_ContainerWriter_WriteTrack *track = (ttLibC_ContainerWriter_WriteTrack *)item;
+	switch(track->frame_type) {
+	case frameType_h264:
+	case frameType_h265:
+		{
+			return track->h26x_configData != NULL;
+		}
+	default:
+		{
+			return track->is_appending;
+		}
+	}
+}
+
+bool ttLibC_ContainerWriter_isReadyToStart(ttLibC_ContainerWriter_ *writer) {
+	if(ttLibC_StlMap_forEach(writer->track_list, ContainerWriter_isReadyToStartCallback, writer)) {
+		return true;
+	}
+	return false;
+}
+
+bool ttLibC_ContainerWriter_primaryTrackCheck(void *ptr, ttLibC_Frame *frame) {
+	ttLibC_ContainerWriter_ *writer = (ttLibC_ContainerWriter_ *)ptr;
+	ttLibC_ContainerWriter_WriteTrack *track = (ttLibC_ContainerWriter_WriteTrack *)ttLibC_StlMap_get(writer->track_list, (void *)(long)frame->id);
+	if(ttLibC_Frame_isAudio(frame)) {
+		if(frame->dts < writer->unit_duration + writer->current_pts_pos) {
+			return true;
+		}
+		writer->target_pos = frame->pts;
+		return false;
+	}
+	else if(ttLibC_Frame_isVideo(frame)) {
+		if(frame->pts != 0 && frame->dts == 0) {
+			// dts is 0, frame is not ready.
+			return true;
+		}
+		ttLibC_Video *video = (ttLibC_Video *)frame;
+		if(frame->type == videoType_key) {
+			if((track->use_mode & containerWriter_allKeyFrame_split) != 0) {
+				if(writer->current_pts_pos < frame->dts) {
+					writer->target_pos = frame->dts;
+					return false;
+				}
+			}
+		}
+		if(frame->dts < writer->unit_duration + writer->current_pts_pos) {
+			return true;
+		}
+		switch(frame->type) {
+		case frameType_h264:
+			{
+				ttLibC_H264 *h264 = (ttLibC_H264 *)frame;
+				switch(h264->frame_type) {
+				case H264FrameType_B:
+					if((track->use_mode & containerWriter_bFrame_split) != 0) {
+					}
+					else if((track->use_mode & containerWriter_disposableBFrame_split) != 0 && h264->is_disposable) {
+					}
+					else {
+						return true;
+					}
+					break;
+				case H264FrameType_SP:
+					ERR_PRINT("sp frame is not checked.");
+					/* no break */
+				case H264FrameType_P:
+					if((track->use_mode & containerWriter_pFrame_split) != 0) {
+					}
+					else if((track->use_mode & containerWriter_innerFrame_split) != 0 && frame->dts == frame->pts) {
+					}
+					else {
+						return true;
+					}
+					break;
+				case H264FrameType_SI:
+					ERR_PRINT("si frame is not checked.");
+					/* no break */
+				case H264FrameType_I:
+					break;
+				default:
+					return true;
+				}
+				writer->target_pos = frame->dts;
+				return false;
+			}
+			break;
+		case frameType_h265:
+			{
+				ttLibC_H265 *h265 = (ttLibC_H265 *)frame;
+				switch(h265->frame_type) {
+				case H265FrameType_B:
+					if((track->use_mode & containerWriter_bFrame_split) != 0) {
+					}
+					else if((track->use_mode & containerWriter_disposableBFrame_split) != 0 && h265->is_disposable) {
+					}
+					else {
+						return true;
+					}
+					break;
+				case H265FrameType_P:
+					if((track->use_mode & containerWriter_pFrame_split) != 0) {
+					}
+					else if((track->use_mode & containerWriter_innerFrame_split) != 0 && frame->dts == frame->pts) {
+					}
+					else {
+						return true;
+					}
+					break;
+				case H265FrameType_I:
+					break;
+				default:
+					return true;
+				}
+				writer->target_pos = frame->dts;
+				return false;
+			}
+			break;
+		default:
+			{
+				switch(video->type) {
+				default:
+				case videoType_info:
+					return true;
+				case videoType_key:
+					break;
+				case videoType_inner:
+					if((track->use_mode & containerWriter_innerFrame_split) == 0) {
+					}
+					else if((track->use_mode & containerWriter_pFrame_split) == 0) {
+					}
+					else if((track->use_mode & containerWriter_disposableBFrame_split) == 0) {
+					}
+					else if((track->use_mode & containerWriter_bFrame_split) == 0) {
+					}
+					else {
+						return true;
+					}
+					break;
+				}
+				writer->target_pos = frame->pts;
+				return false;
+			}
+			break;
+		}
+	}
+	return true;
+}
+
+static bool ContainerWriter_isReadyToWriteCallback(void *ptr, void *key, void *item) {
+	(void)key;
+	if(ptr != NULL && item != NULL) {
+		ttLibC_ContainerWriter_ *writer = (ttLibC_ContainerWriter_ *)ptr;
+		ttLibC_ContainerWriter_WriteTrack *track = (ttLibC_ContainerWriter_WriteTrack *)item;
+		uint64_t pts = track->frame_queue->pts;
+		if(writer->inherit_super.timebase != track->frame_queue->timebase) {
+			pts = (uint64_t)(1.0 * track->frame_queue->pts * writer->inherit_super.timebase / track->frame_queue->timebase);
+		}
+		if(writer->target_pos > pts) {
+			return false;
+		}
+		return true;
+	}
+	return false;
+}
+bool ttLibC_ContainerWriter_isReadyToWrite(ttLibC_ContainerWriter_ *writer) {
+	if(ttLibC_StlMap_forEach(writer->track_list, ContainerWriter_isReadyToWriteCallback, writer)) {
+		return true;
+	}
+	return false;
+}
+
+bool ttLibC_ContainerWriter_write_(
+		ttLibC_ContainerWriter_ *writer,
+		ttLibC_Frame *frame,
+		ttLibC_ContainerWriteFunc callback,
+		void *ptr) {
+	if(writer == NULL) {
+		ERR_PRINT("writer is null.");
+		return false;
+	}
+	if(frame == NULL) {
+		return true;
+	}
+	ttLibC_ContainerWriter_WriteTrack *track = (ttLibC_ContainerWriter_WriteTrack *)ttLibC_StlMap_get(writer->track_list, (void *)(long)frame->id);
+	if(track == NULL) {
+		ERR_PRINT("failed to get correspond track. %d", frame->id);
+		return false;
+	}
+	uint64_t pts = (uint64_t)(1.0 * frame->pts * writer->inherit_super.timebase / frame->timebase);
+	if(frame->timebase == writer->inherit_super.timebase) {
+		pts = frame->pts;
+	}
+	track->enable_mode = writer->inherit_super.mode;
+	switch(frame->type) {
+	case frameType_h264:
+		{
+			ttLibC_H264 *h264 = (ttLibC_H264 *)frame;
+			if(h264->type == H264Type_unknown) {
+				return true;
+			}
+			if(h264->type == H264Type_configData) {
+				ttLibC_H264 *h = ttLibC_H264_clone(
+						(ttLibC_H264 *)track->h26x_configData,
+						h264);
+				if(h == NULL) {
+					ERR_PRINT("failed to make clone data.");
+					return false;
+				}
+				h->inherit_super.inherit_super.pts = 0;
+				h->inherit_super.inherit_super.timebase = writer->inherit_super.timebase;
+				track->h26x_configData = (ttLibC_Frame *)h;
+				return true;
+			}
+			if(!track->is_appending && h264->type != H264Type_sliceIDR) {
+				return true;
+			}
+		}
+		break;
+	case frameType_h265:
+		{
+			ttLibC_H265 *h265 = (ttLibC_H265 *)frame;
+			if(h265->type == H265Type_unknown) {
+				return true;
+			}
+			if(h265->type == H265Type_configData) {
+				ttLibC_H265 *h = ttLibC_H265_clone(
+						(ttLibC_H265 *)track->h26x_configData,
+						h265);
+				if(h == NULL) {
+					ERR_PRINT("failed to make clone data.");
+					return false;
+				}
+				h->inherit_super.inherit_super.pts = 0;
+				h->inherit_super.inherit_super.timebase = writer->inherit_super.timebase;
+				track->h26x_configData = (ttLibC_Frame *)h;
+				return true;
+			}
+			if(!track->is_appending && h265->type != H265Type_sliceIDR) {
+				return true;
+			}
+		}
+		break;
+	case frameType_theora:
+		{
+			ttLibC_Theora *theora = (ttLibC_Theora *)frame;
+			if(!track->is_appending) {
+				switch(track->counter) {
+				case 0:
+					{
+						if(theora->type != TheoraType_identificationHeaderDecodeFrame) {
+							return true;
+						}
+						++ track->counter;
+					}
+					break;
+				case 1:
+					{
+						if(theora->type != TheoraType_commentHeaderFrame) {
+							return true;
+						}
+						++ track->counter;
+					}
+					break;
+				case 2:
+					{
+						if(theora->type != TheoraType_setupHeaderFrame) {
+							return true;
+						}
+						++ track->counter;
+					}
+					break;
+				default:
+					break;
+				}
+				if(track->counter < 3) {
+					return ContainerWriteTrack_appendQueue(track, frame, 0, writer->inherit_super.timebase);
+				}
+			}
+		}
+		break;
+	case frameType_vp8:
+	case frameType_vp9:
+		{
+			ttLibC_Video *video = (ttLibC_Video *)frame;
+			if(!track->is_appending && video->type != videoType_key) {
+				return true;
+			}
+		}
+		break;
+	case frameType_mp3:
+		{
+			ttLibC_Mp3 *mp3 = (ttLibC_Mp3 *)frame;
+			switch(mp3->type) {
+			case Mp3Type_frame:
+				break;
+			case Mp3Type_id3:
+			case Mp3Type_tag:
+				return true;
+			default:
+				ERR_PRINT("unexpected mp3 frame.:%d", mp3->type);
+				return true;
+			}
+		}
+		break;
+	case frameType_speex:
+		{
+			ttLibC_Speex *speex = (ttLibC_Speex *)frame;
+			switch(speex->type) {
+			case SpeexType_header:
+				{
+					if(track->is_appending) {
+						ERR_PRINT("find speex header frame after track generating.");
+						return true;
+					}
+				}
+				break;
+			case SpeexType_comment:
+				return true;
+			default:
+				break;
+			}
+		}
+		break;
+	case frameType_vorbis:
+		{
+			ttLibC_Vorbis *vorbis = (ttLibC_Vorbis *)frame;
+			if(!track->is_appending) {
+				switch(track->counter) {
+				case 0:
+					if(vorbis->type != VorbisType_identification) {
+						return true;
+					}
+					++ track->counter;
+					break;
+				case 1:
+					if(vorbis->type != VorbisType_comment) {
+						return true;
+					}
+					++ track->counter;
+					break;
+				case 2:
+					if(vorbis->type != VorbisType_setup) {
+						return true;
+					}
+					++ track->counter;
+					break;
+				default:
+					break;
+				}
+				if(track->counter < 3) {
+					return ContainerWriteTrack_appendQueue(track, frame, 0, writer->inherit_super.timebase);
+				}
+			}
+		}
+		break;
+	default:
+		break;
+	}
+	track->is_appending = true;
+	if(!ContainerWriteTrack_appendQueue(track, frame, pts, writer->inherit_super.timebase)) {
+		return false;
+	}
+	if(writer->is_first) {
+		writer->current_pts_pos = pts;
+		writer->target_pos = pts;
+		writer->inherit_super.pts = pts;
+		writer->is_first = false;
+	}
+	writer->callback = callback;
+	writer->ptr = ptr;
+	return true;
+}
+
 bool ttLibC_ContainerWriteTrack_appendQueue(
 		ttLibC_ContainerWriter_WriteTrack *track,
 		ttLibC_Frame                      *frame,
@@ -604,7 +985,6 @@ bool ttLibC_ContainerWriteTrack_appendQueue(
 	if(!ContainerWriteTrack_appendQueue(track, frame, pts, timebase)) {
 		return false;
 	}
-	return true;
 	return true;
 }
 
