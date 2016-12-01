@@ -819,25 +819,25 @@ static bool Mp4Writer_makeTraf(void *ptr, void *key, void *item) {
 				uint32_t frameCount = 0;
 				uint64_t target_pts = 0;
 				while(true) {
-					ttLibC_Jpeg *jpeg =(ttLibC_Jpeg *)ttLibC_FrameQueue_ref_first(track->inherit_super.frame_queue);
+					ttLibC_Video *jpeg =(ttLibC_Video *)ttLibC_FrameQueue_ref_first(track->inherit_super.frame_queue);
 					if(jpeg == NULL) {
 						break;
 					}
-					if(jpeg->inherit_super.inherit_super.pts < writer->inherit_super.target_pos) {
-						ttLibC_Jpeg *j = (ttLibC_Jpeg *)ttLibC_FrameQueue_dequeue_first(track->inherit_super.frame_queue);
+					if(jpeg->inherit_super.pts < writer->inherit_super.target_pos) {
+						ttLibC_Video *j = (ttLibC_Video *)ttLibC_FrameQueue_dequeue_first(track->inherit_super.frame_queue);
 						if(jpeg != j) {
 							ERR_PRINT("ref frame is invalid.");
 							return false;
 						}
 						// get next frame to get duration of frame.
 						ttLibC_Frame *next_frame = ttLibC_FrameQueue_ref_first(track->inherit_super.frame_queue);
-						uint32_t duration = next_frame->pts - jpeg->inherit_super.inherit_super.pts;
+						uint32_t duration = next_frame->pts - jpeg->inherit_super.pts;
 						uint32_t be_duration = be_uint32_t(duration);
 						ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_duration, 4);
 
 						// put data on mdat_buffer.
-						uint8_t *jpeg_data = jpeg->inherit_super.inherit_super.data;
-						size_t jpeg_data_size = jpeg->inherit_super.inherit_super.buffer_size;
+						uint8_t *jpeg_data = jpeg->inherit_super.data;
+						size_t jpeg_data_size = jpeg->inherit_super.buffer_size;
 						ttLibC_DynamicBuffer_append(track->mdat_buffer, jpeg_data, jpeg_data_size);
 						// set size on trun.
 						uint32_t be_jpeg_size = be_uint32_t(jpeg_data_size);

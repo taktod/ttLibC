@@ -19,18 +19,13 @@
 #include "../../frame/frame.h"
 #include "../../frame/audio/audio.h"
 #include "../../frame/audio/aac.h"
-#include "../../frame/audio/adpcmImaWav.h"
-#include "../../frame/audio/mp3.h"
-#include "../../frame/audio/opus.h"
 #include "../../frame/audio/speex.h"
 #include "../../frame/audio/vorbis.h"
+
 #include "../../frame/video/video.h"
 #include "../../frame/video/h264.h"
 #include "../../frame/video/h265.h"
-#include "../../frame/video/jpeg.h"
 #include "../../frame/video/theora.h"
-#include "../../frame/video/vp8.h"
-#include "../../frame/video/vp9.h"
 #include "../../util/byteUtil.h"
 #include "../../util/ioUtil.h"
 #include "../../util/dynamicBufferUtil.h"
@@ -179,13 +174,13 @@ static bool MkvWriter_makeTrackEntry(void *ptr, void *key, void *item) {
 				ttLibC_ByteConnector_ebml2(connector, 1, false);
 				ttLibC_ByteConnector_bit(connector, 1, 8);
 				// video要素の中身をつくっていく。
-				ttLibC_Jpeg *jpeg = (ttLibC_Jpeg *)ttLibC_FrameQueue_ref_first(track->frame_queue);
+				ttLibC_Video *video = (ttLibC_Video *)ttLibC_FrameQueue_ref_first(track->frame_queue);
 				ttLibC_ByteConnector_ebml2(innerConnector, MkvType_PixelWidth, true);
 				ttLibC_ByteConnector_ebml2(innerConnector, 2, false);
-				ttLibC_ByteConnector_bit(innerConnector, jpeg->inherit_super.width, 16);
+				ttLibC_ByteConnector_bit(innerConnector, video->width, 16);
 				ttLibC_ByteConnector_ebml2(innerConnector, MkvType_PixelHeight, true);
 				ttLibC_ByteConnector_ebml2(innerConnector, 2, false);
-				ttLibC_ByteConnector_bit(innerConnector, jpeg->inherit_super.height, 16);
+				ttLibC_ByteConnector_bit(innerConnector, video->height, 16);
 
 				ttLibC_ByteConnector_ebml2(connector, MkvType_Video, true);
 				ttLibC_ByteConnector_ebml2(connector, innerConnector->write_size, false);
@@ -204,13 +199,13 @@ static bool MkvWriter_makeTrackEntry(void *ptr, void *key, void *item) {
 				ttLibC_ByteConnector_ebml2(connector, 1, false);
 				ttLibC_ByteConnector_bit(connector, 1, 8);
 				// video要素の中身をつくっていく。
-				ttLibC_Vp8 *vp8 = (ttLibC_Vp8 *)ttLibC_FrameQueue_ref_first(track->frame_queue);
+				ttLibC_Video *video = (ttLibC_Video *)ttLibC_FrameQueue_ref_first(track->frame_queue);
 				ttLibC_ByteConnector_ebml2(innerConnector, MkvType_PixelWidth, true);
 				ttLibC_ByteConnector_ebml2(innerConnector, 2, false);
-				ttLibC_ByteConnector_bit(innerConnector, vp8->inherit_super.width, 16);
+				ttLibC_ByteConnector_bit(innerConnector, video->width, 16);
 				ttLibC_ByteConnector_ebml2(innerConnector, MkvType_PixelHeight, true);
 				ttLibC_ByteConnector_ebml2(innerConnector, 2, false);
-				ttLibC_ByteConnector_bit(innerConnector, vp8->inherit_super.height, 16);
+				ttLibC_ByteConnector_bit(innerConnector, video->height, 16);
 
 				ttLibC_ByteConnector_ebml2(connector, MkvType_Video, true);
 				ttLibC_ByteConnector_ebml2(connector, innerConnector->write_size, false);
@@ -232,8 +227,8 @@ static bool MkvWriter_makeTrackEntry(void *ptr, void *key, void *item) {
 				ttLibC_ByteConnector_bit(connector, commentFrame->inherit_super.inherit_super.buffer_size, 8);
 				ttLibC_DynamicBuffer_append(trackEntryBuffer, buf, connector->write_size);
 				ttLibC_DynamicBuffer_append(trackEntryBuffer, identificationFrame->inherit_super.inherit_super.data, identificationFrame->inherit_super.inherit_super.buffer_size);
-				ttLibC_DynamicBuffer_append(trackEntryBuffer, commentFrame->inherit_super.inherit_super.data, commentFrame->inherit_super.inherit_super.buffer_size);
-				ttLibC_DynamicBuffer_append(trackEntryBuffer, setupFrame->inherit_super.inherit_super.data, setupFrame->inherit_super.inherit_super.buffer_size);
+				ttLibC_DynamicBuffer_append(trackEntryBuffer, commentFrame->inherit_super.inherit_super.data,        commentFrame->inherit_super.inherit_super.buffer_size);
+				ttLibC_DynamicBuffer_append(trackEntryBuffer, setupFrame->inherit_super.inherit_super.data,          setupFrame->inherit_super.inherit_super.buffer_size);
 			}
 			break;
 		case frameType_vp8:
@@ -247,13 +242,13 @@ static bool MkvWriter_makeTrackEntry(void *ptr, void *key, void *item) {
 				ttLibC_ByteConnector_ebml2(connector, 1, false);
 				ttLibC_ByteConnector_bit(connector, 1, 8);
 				// video要素の中身をつくっていく。
-				ttLibC_Vp8 *vp8 = (ttLibC_Vp8 *)ttLibC_FrameQueue_ref_first(track->frame_queue);
+				ttLibC_Video *video = (ttLibC_Video *)ttLibC_FrameQueue_ref_first(track->frame_queue);
 				ttLibC_ByteConnector_ebml2(innerConnector, MkvType_PixelWidth, true);
 				ttLibC_ByteConnector_ebml2(innerConnector, 2, false);
-				ttLibC_ByteConnector_bit(innerConnector, vp8->inherit_super.width, 16);
+				ttLibC_ByteConnector_bit(innerConnector, video->width, 16);
 				ttLibC_ByteConnector_ebml2(innerConnector, MkvType_PixelHeight, true);
 				ttLibC_ByteConnector_ebml2(innerConnector, 2, false);
-				ttLibC_ByteConnector_bit(innerConnector, vp8->inherit_super.height, 16);
+				ttLibC_ByteConnector_bit(innerConnector, video->height, 16);
 
 				ttLibC_ByteConnector_ebml2(connector, MkvType_Video, true);
 				ttLibC_ByteConnector_ebml2(connector, innerConnector->write_size, false);
@@ -272,13 +267,13 @@ static bool MkvWriter_makeTrackEntry(void *ptr, void *key, void *item) {
 				ttLibC_ByteConnector_ebml2(connector, 1, false);
 				ttLibC_ByteConnector_bit(connector, 1, 8);
 				// video要素の中身をつくっていく。
-				ttLibC_Vp9 *vp9 = (ttLibC_Vp9 *)ttLibC_FrameQueue_ref_first(track->frame_queue);
+				ttLibC_Video *video = (ttLibC_Video *)ttLibC_FrameQueue_ref_first(track->frame_queue);
 				ttLibC_ByteConnector_ebml2(innerConnector, MkvType_PixelWidth, true);
 				ttLibC_ByteConnector_ebml2(innerConnector, 2, false);
-				ttLibC_ByteConnector_bit(innerConnector, vp9->inherit_super.width, 16);
+				ttLibC_ByteConnector_bit(innerConnector, video->width, 16);
 				ttLibC_ByteConnector_ebml2(innerConnector, MkvType_PixelHeight, true);
 				ttLibC_ByteConnector_ebml2(innerConnector, 2, false);
-				ttLibC_ByteConnector_bit(innerConnector, vp9->inherit_super.height, 16);
+				ttLibC_ByteConnector_bit(innerConnector, video->height, 16);
 
 				ttLibC_ByteConnector_ebml2(connector, MkvType_Video, true);
 				ttLibC_ByteConnector_ebml2(connector, innerConnector->write_size, false);
@@ -327,15 +322,15 @@ static bool MkvWriter_makeTrackEntry(void *ptr, void *key, void *item) {
 				ttLibC_ByteConnector_ebml2(connector, MkvType_TrackType, true);
 				ttLibC_ByteConnector_ebml2(connector, 1, false);
 				ttLibC_ByteConnector_bit(connector, 2, 8);
-				// audioの子要素をつくっていく。
-				ttLibC_AdpcmImaWav *adpcm = (ttLibC_AdpcmImaWav *)ttLibC_FrameQueue_ref_first(track->frame_queue);
+				// audioの子要素をつくっていく
+				ttLibC_Audio *audio = (ttLibC_Audio *)ttLibC_FrameQueue_ref_first(track->frame_queue);
 				ttLibC_ByteConnector_ebml2(innerConnector, MkvType_SamplingFrequency, true);
 				ttLibC_ByteConnector_ebml2(innerConnector, 4, false);
-				float sr = adpcm->inherit_super.sample_rate;
+				float sr = audio->sample_rate;
 				ttLibC_ByteConnector_bit(innerConnector, *(uint32_t *)&sr, 32);
 				ttLibC_ByteConnector_ebml2(innerConnector, MkvType_Channels, true);
 				ttLibC_ByteConnector_ebml2(innerConnector, 1, false);
-				ttLibC_ByteConnector_bit(innerConnector, adpcm->inherit_super.channel_num, 8);
+				ttLibC_ByteConnector_bit(innerConnector, audio->channel_num, 8);
 
 				ttLibC_ByteConnector_ebml2(connector, MkvType_Audio, true);
 				ttLibC_ByteConnector_ebml2(connector, innerConnector->write_size, false);
@@ -347,24 +342,24 @@ static bool MkvWriter_makeTrackEntry(void *ptr, void *key, void *item) {
 				//  codecType 0x0011
 				ttLibC_ByteConnector_bit(connector, 0x1100, 16);
 				//  channel byteConnectorの動作がベースbigEndianなのでbeかけてlittle endianかけるようにする。(なんか妙な気分だけど)
-				uint16_t be_channel = be_uint16_t(adpcm->inherit_super.channel_num);
+				uint16_t be_channel = be_uint16_t(audio->channel_num);
 				ttLibC_ByteConnector_bit(connector, be_channel, 16);
 				//  sample_rate
-				uint32_t be_sample_rate = be_uint32_t(adpcm->inherit_super.sample_rate);
+				uint32_t be_sample_rate = be_uint32_t(audio->sample_rate);
 				ttLibC_ByteConnector_bit(connector, be_sample_rate, 32);
 				//  avg bytes per sec
-				uint32_t avgBytesPerSec = adpcm->inherit_super.sample_rate;
-				if(adpcm->inherit_super.channel_num == 1) {
+				uint32_t avgBytesPerSec = audio->sample_rate;
+				if(audio->channel_num == 1) {
 					avgBytesPerSec /= 2;
 				}
 				uint32_t be_avgBytesPerSec = be_uint32_t(avgBytesPerSec);
 				ttLibC_ByteConnector_bit(connector, be_avgBytesPerSec, 32);
-				uint16_t nBlockAlign = adpcm->inherit_super.inherit_super.buffer_size;
+				uint16_t nBlockAlign = audio->inherit_super.buffer_size;
 				uint16_t be_nBlockAlign = be_uint16_t(nBlockAlign);
 				ttLibC_ByteConnector_bit(connector, be_nBlockAlign, 16);
 				ttLibC_ByteConnector_bit(connector, 0x0400, 16);
 				ttLibC_ByteConnector_bit(connector, 0x0200, 16);
-				uint16_t be_sample_num = be_uint16_t(adpcm->inherit_super.sample_num);
+				uint16_t be_sample_num = be_uint16_t(audio->sample_num);
 				ttLibC_ByteConnector_bit(connector, be_sample_num, 16);
 				ttLibC_DynamicBuffer_append(trackEntryBuffer, buf, connector->write_size);
 			}
@@ -380,14 +375,14 @@ static bool MkvWriter_makeTrackEntry(void *ptr, void *key, void *item) {
 				ttLibC_ByteConnector_ebml2(connector, 1, false);
 				ttLibC_ByteConnector_bit(connector, 2, 8);
 				// audioの子要素をつくっていく。
-				ttLibC_Opus *opus = (ttLibC_Opus *)ttLibC_FrameQueue_ref_first(track->frame_queue);
+				ttLibC_Audio *audio = (ttLibC_Audio *)ttLibC_FrameQueue_ref_first(track->frame_queue);
 				ttLibC_ByteConnector_ebml2(innerConnector, MkvType_SamplingFrequency, true);
 				ttLibC_ByteConnector_ebml2(innerConnector, 4, false);
-				float sr = opus->inherit_super.sample_rate;
+				float sr = audio->sample_rate;
 				ttLibC_ByteConnector_bit(innerConnector, *(uint32_t *)&sr, 32);
 				ttLibC_ByteConnector_ebml2(innerConnector, MkvType_Channels, true);
 				ttLibC_ByteConnector_ebml2(innerConnector, 1, false);
-				ttLibC_ByteConnector_bit(innerConnector, opus->inherit_super.channel_num, 8);
+				ttLibC_ByteConnector_bit(innerConnector, audio->channel_num, 8);
 
 				ttLibC_ByteConnector_ebml2(connector, MkvType_Audio, true);
 				ttLibC_ByteConnector_ebml2(connector, innerConnector->write_size, false);
@@ -406,14 +401,14 @@ static bool MkvWriter_makeTrackEntry(void *ptr, void *key, void *item) {
 				ttLibC_ByteConnector_ebml2(connector, 1, false);
 				ttLibC_ByteConnector_bit(connector, 2, 8);
 				// audioの子要素をつくっていく。
-				ttLibC_Opus *opus = (ttLibC_Opus *)ttLibC_FrameQueue_ref_first(track->frame_queue);
+				ttLibC_Audio *audio = (ttLibC_Audio *)ttLibC_FrameQueue_ref_first(track->frame_queue);
 				ttLibC_ByteConnector_ebml2(innerConnector, MkvType_SamplingFrequency, true);
 				ttLibC_ByteConnector_ebml2(innerConnector, 4, false);
-				float sr = opus->inherit_super.sample_rate;
+				float sr = audio->sample_rate;
 				ttLibC_ByteConnector_bit(innerConnector, *(uint32_t *)&sr, 32);
 				ttLibC_ByteConnector_ebml2(innerConnector, MkvType_Channels, true);
 				ttLibC_ByteConnector_ebml2(innerConnector, 1, false);
-				ttLibC_ByteConnector_bit(innerConnector, opus->inherit_super.channel_num, 8);
+				ttLibC_ByteConnector_bit(innerConnector, audio->channel_num, 8);
 
 				ttLibC_ByteConnector_ebml2(connector, MkvType_Audio, true);
 				ttLibC_ByteConnector_ebml2(connector, innerConnector->write_size, false);
@@ -423,9 +418,9 @@ static bool MkvWriter_makeTrackEntry(void *ptr, void *key, void *item) {
 				ttLibC_ByteConnector_ebml2(connector, 19, false);
 				ttLibC_ByteConnector_string(connector, "OpusHead", 8);
 				ttLibC_ByteConnector_bit(connector, 1, 8);
-				ttLibC_ByteConnector_bit(connector, opus->inherit_super.channel_num, 8);
+				ttLibC_ByteConnector_bit(connector, audio->channel_num, 8);
 				ttLibC_ByteConnector_bit(connector, 0, 16);
-				ttLibC_ByteConnector_bit(connector, opus->inherit_super.sample_rate, 16);
+				ttLibC_ByteConnector_bit(connector, audio->sample_rate, 16);
 				ttLibC_ByteConnector_bit(connector, 0, 24);
 				ttLibC_ByteConnector_bit(connector, 0, 16);
 				ttLibC_DynamicBuffer_append(trackEntryBuffer, buf, connector->write_size);
@@ -443,14 +438,14 @@ static bool MkvWriter_makeTrackEntry(void *ptr, void *key, void *item) {
 				ttLibC_ByteConnector_ebml2(connector, 1, false);
 				ttLibC_ByteConnector_bit(connector, 2, 8);
 				// audioの子要素をつくっていく。
-				ttLibC_Speex *speex = (ttLibC_Speex *)ttLibC_FrameQueue_ref_first(track->frame_queue);
+				ttLibC_Audio *audio = (ttLibC_Audio *)ttLibC_FrameQueue_ref_first(track->frame_queue);
 				ttLibC_ByteConnector_ebml2(innerConnector, MkvType_SamplingFrequency, true);
 				ttLibC_ByteConnector_ebml2(innerConnector, 4, false);
-				float sr = speex->inherit_super.sample_rate;
+				float sr = audio->sample_rate;
 				ttLibC_ByteConnector_bit(innerConnector, *(uint32_t *)&sr, 32);
 				ttLibC_ByteConnector_ebml2(innerConnector, MkvType_Channels, true);
 				ttLibC_ByteConnector_ebml2(innerConnector, 1, false);
-				ttLibC_ByteConnector_bit(innerConnector, speex->inherit_super.channel_num, 8);
+				ttLibC_ByteConnector_bit(innerConnector, audio->channel_num, 8);
 
 				ttLibC_ByteConnector_ebml2(connector, MkvType_Audio, true);
 				ttLibC_ByteConnector_ebml2(connector, innerConnector->write_size, false);
@@ -462,21 +457,21 @@ static bool MkvWriter_makeTrackEntry(void *ptr, void *key, void *item) {
 				//  codecType 0xA109
 				ttLibC_ByteConnector_bit(connector, 0x09A1, 16);
 				//  channel byteConnectorの動作がベースbigEndianなのでbeかけてlittle endianかけるようにする。(なんか妙な気分だけど)
-				uint16_t be_channel = be_uint16_t(speex->inherit_super.channel_num);
+				uint16_t be_channel = be_uint16_t(audio->channel_num);
 				ttLibC_ByteConnector_bit(connector, be_channel, 16);
 				//  sample_rate
-				uint32_t be_sample_rate = be_uint32_t(speex->inherit_super.sample_rate);
+				uint32_t be_sample_rate = be_uint32_t(audio->sample_rate);
 				ttLibC_ByteConnector_bit(connector, be_sample_rate, 32);
 				//  avg bytes per sec
-				uint8_t *speex_data = (uint8_t *)speex->inherit_super.inherit_super.data;
+				uint8_t *speex_data = (uint8_t *)audio->inherit_super.data;
 				uint32_t *speex_data32 = (uint32_t *)(speex_data + 0x34);
 				uint32_t avgBytesPerSec = *speex_data32 / 8;
-				if(speex->inherit_super.channel_num == 2) {
+				if(audio->channel_num == 2) {
 					avgBytesPerSec += 100; // stereoの場合は100byte足しておく。 inSignalのデータ17bit(端数のせいで2byteだけ絶対に増える。) x 50１秒あたり50フレームなので100byteふやす。
 				}
 				uint32_t be_avgBytesPerSec = be_uint32_t(avgBytesPerSec);
 				ttLibC_ByteConnector_bit(connector, be_avgBytesPerSec, 32);
-				if(speex->inherit_super.channel_num == 2) {
+				if(audio->channel_num == 2) {
 					ttLibC_ByteConnector_bit(connector, 0x0400, 16);
 				}
 				else {
@@ -485,7 +480,7 @@ static bool MkvWriter_makeTrackEntry(void *ptr, void *key, void *item) {
 				ttLibC_ByteConnector_bit(connector, 0x1000, 16);
 				ttLibC_ByteConnector_bit(connector, 0x5000, 16);
 				ttLibC_DynamicBuffer_append(trackEntryBuffer, buf, connector->write_size);
-				ttLibC_DynamicBuffer_append(trackEntryBuffer, speex->inherit_super.inherit_super.data, speex->inherit_super.inherit_super.buffer_size);
+				ttLibC_DynamicBuffer_append(trackEntryBuffer, audio->inherit_super.data, audio->inherit_super.buffer_size);
 			}
 			break;
 		case frameType_vorbis:
@@ -499,14 +494,14 @@ static bool MkvWriter_makeTrackEntry(void *ptr, void *key, void *item) {
 				ttLibC_ByteConnector_ebml2(connector, 1, false);
 				ttLibC_ByteConnector_bit(connector, 2, 8);
 				// audioの子要素をつくっていく。
-				ttLibC_Aac *aac = (ttLibC_Aac *)ttLibC_FrameQueue_ref_first(track->frame_queue);
+				ttLibC_Audio *audio = (ttLibC_Audio *)ttLibC_FrameQueue_ref_first(track->frame_queue);
 				ttLibC_ByteConnector_ebml2(innerConnector, MkvType_SamplingFrequency, true);
 				ttLibC_ByteConnector_ebml2(innerConnector, 4, false);
-				float sr = aac->inherit_super.sample_rate;
+				float sr = audio->sample_rate;
 				ttLibC_ByteConnector_bit(innerConnector, *(uint32_t *)&sr, 32);
 				ttLibC_ByteConnector_ebml2(innerConnector, MkvType_Channels, true);
 				ttLibC_ByteConnector_ebml2(innerConnector, 1, false);
-				ttLibC_ByteConnector_bit(innerConnector, aac->inherit_super.channel_num, 8);
+				ttLibC_ByteConnector_bit(innerConnector, audio->channel_num, 8);
 
 				ttLibC_ByteConnector_ebml2(connector, MkvType_Audio, true);
 				ttLibC_ByteConnector_ebml2(connector, innerConnector->write_size, false);
@@ -528,8 +523,8 @@ static bool MkvWriter_makeTrackEntry(void *ptr, void *key, void *item) {
 				ttLibC_ByteConnector_bit(connector, commentFrame->inherit_super.inherit_super.buffer_size, 8);
 				ttLibC_DynamicBuffer_append(trackEntryBuffer, buf, connector->write_size);
 				ttLibC_DynamicBuffer_append(trackEntryBuffer, identificationFrame->inherit_super.inherit_super.data, identificationFrame->inherit_super.inherit_super.buffer_size);
-				ttLibC_DynamicBuffer_append(trackEntryBuffer, commentFrame->inherit_super.inherit_super.data, commentFrame->inherit_super.inherit_super.buffer_size);
-				ttLibC_DynamicBuffer_append(trackEntryBuffer, setupFrame->inherit_super.inherit_super.data, setupFrame->inherit_super.inherit_super.buffer_size);
+				ttLibC_DynamicBuffer_append(trackEntryBuffer, commentFrame->inherit_super.inherit_super.data,        commentFrame->inherit_super.inherit_super.buffer_size);
+				ttLibC_DynamicBuffer_append(trackEntryBuffer, setupFrame->inherit_super.inherit_super.data,          setupFrame->inherit_super.inherit_super.buffer_size);
 			}
 			break;
 		default:
