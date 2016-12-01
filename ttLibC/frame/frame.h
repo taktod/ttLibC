@@ -128,6 +128,20 @@ ttLibC_Frame *ttLibC_Frame_clone(
 		ttLibC_Frame *src_frame);
 
 /**
+ * check frame is audio frame.
+ * @param frame
+ * @return true:audio false:not audio
+ */
+bool ttLibC_Frame_isAudio(ttLibC_Frame *frame);
+
+/**
+ * check frame is video frame.
+ * @param frame
+ * @return true:video false:not video
+ */
+bool ttLibC_Frame_isVideo(ttLibC_Frame *frame);
+
+/**
  * close frame
  * @param frame
  */

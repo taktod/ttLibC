@@ -64,6 +64,90 @@ ttLibC_Frame *ttLibC_Frame_clone(
 	return NULL;
 }
 
+/**
+ * check frame is audio frame.
+ * @param frame
+ * @return true:audio false:not audio
+ */
+bool ttLibC_Frame_isAudio(ttLibC_Frame *frame) {
+	if(frame == NULL) {
+		return false;
+	}
+	switch(frame->type) {
+	case frameType_bgr:
+	case frameType_flv1:
+	case frameType_h264:
+	case frameType_h265:
+	case frameType_jpeg:
+	case frameType_theora:
+	case frameType_vp6:
+	case frameType_vp8:
+	case frameType_vp9:
+	case frameType_wmv1:
+	case frameType_wmv2:
+	case frameType_yuv420:
+		return false;
+	case frameType_aac:
+	case frameType_adpcm_ima_wav:
+	case frameType_mp3:
+	case frameType_nellymoser:
+	case frameType_opus:
+	case frameType_pcm_alaw:
+	case frameType_pcmF32:
+	case frameType_pcm_mulaw:
+	case frameType_pcmS16:
+	case frameType_speex:
+	case frameType_vorbis:
+		return true;
+	default:
+		ERR_PRINT("unknown frame type:%d", frame->type);
+		break;
+	}
+	return false;
+}
+
+/**
+ * check frame is video frame.
+ * @param frame
+ * @return true:video false:not video
+ */
+bool ttLibC_Frame_isVideo(ttLibC_Frame *frame) {
+	if(frame == NULL) {
+		return false;
+	}
+	switch(frame->type) {
+	case frameType_bgr:
+	case frameType_flv1:
+	case frameType_h264:
+	case frameType_h265:
+	case frameType_jpeg:
+	case frameType_theora:
+	case frameType_vp6:
+	case frameType_vp8:
+	case frameType_vp9:
+	case frameType_wmv1:
+	case frameType_wmv2:
+	case frameType_yuv420:
+		return true;
+	case frameType_aac:
+	case frameType_adpcm_ima_wav:
+	case frameType_mp3:
+	case frameType_nellymoser:
+	case frameType_opus:
+	case frameType_pcm_alaw:
+	case frameType_pcmF32:
+	case frameType_pcm_mulaw:
+	case frameType_pcmS16:
+	case frameType_speex:
+	case frameType_vorbis:
+		return false;
+	default:
+		ERR_PRINT("unknown frame type:%d", frame->type);
+		break;
+	}
+	return false;
+}
+
 /*
  * release frame
  * @param frame
