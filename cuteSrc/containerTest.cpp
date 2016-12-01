@@ -45,22 +45,22 @@ static bool mp4Test_getFrameCallback(void *ptr, ttLibC_Frame *frame) {
 	containerTest_t *testData = (containerTest_t *)ptr;
 	switch(frame->type) {
 	case frameType_h265:
-		LOG_PRINT("h265:%f", 1.0 * frame->pts / frame->timebase);
+//		LOG_PRINT("h265:%f", 1.0 * frame->pts / frame->timebase);
 		break;
 	case frameType_h264:
-		LOG_PRINT("h264:%f", 1.0 * frame->pts / frame->timebase);
+//		LOG_PRINT("h264:%f", 1.0 * frame->pts / frame->timebase);
 		break;
 	case frameType_jpeg:
-		LOG_PRINT("jpeg:%f", 1.0 * frame->pts / frame->timebase);
+//		LOG_PRINT("jpeg:%f", 1.0 * frame->pts / frame->timebase);
 		break;
 	case frameType_aac:
-		LOG_PRINT("aac:%f", 1.0 * frame->pts / frame->timebase);
+//		LOG_PRINT("aac:%f", 1.0 * frame->pts / frame->timebase);
 		break;
 	case frameType_vorbis:
-		LOG_PRINT("vorbis:%f", 1.0 * frame->pts / frame->timebase);
+//		LOG_PRINT("vorbis:%f", 1.0 * frame->pts / frame->timebase);
 		break;
 	case frameType_mp3:
-		LOG_PRINT("mp3:%f", 1.0 * frame->pts / frame->timebase);
+//		LOG_PRINT("mp3:%f", 1.0 * frame->pts / frame->timebase);
 		break;
 	default:
 		LOG_PRINT("frame:%f", 1.0 * frame->pts / frame->timebase);
@@ -209,40 +209,40 @@ bool mkvTest_getFrameCallback(void *ptr, ttLibC_Frame *frame) {
 	containerTest_t *testData = (containerTest_t *)ptr;
 	switch(frame->type) {
 	case frameType_h265:
-		LOG_PRINT("h265:%f", 1.0 * frame->pts / frame->timebase);
+//		LOG_PRINT("h265:%f", 1.0 * frame->pts / frame->timebase);
 		break;
 	case frameType_h264:
-		LOG_PRINT("h264:%f", 1.0 * frame->pts / frame->timebase);
+//		LOG_PRINT("h264:%f", 1.0 * frame->pts / frame->timebase);
 		break;
 	case frameType_jpeg:
-		LOG_PRINT("jpeg:%f", 1.0 * frame->pts / frame->timebase);
+//		LOG_PRINT("jpeg:%f", 1.0 * frame->pts / frame->timebase);
 		break;
 	case frameType_vp8:
-		LOG_PRINT("vp8:%f", 1.0 * frame->pts / frame->timebase);
+//		LOG_PRINT("vp8:%f", 1.0 * frame->pts / frame->timebase);
 		break;
 	case frameType_vp9:
-		LOG_PRINT("vp9:%f", 1.0 * frame->pts / frame->timebase);
+//		LOG_PRINT("vp9:%f", 1.0 * frame->pts / frame->timebase);
 		break;
 	case frameType_theora:
-		LOG_PRINT("theora:%f", 1.0 * frame->pts / frame->timebase);
+//		LOG_PRINT("theora:%f", 1.0 * frame->pts / frame->timebase);
 		break;
 	case frameType_aac:
-		LOG_PRINT("aac:%f", 1.0 * frame->pts / frame->timebase);
+//		LOG_PRINT("aac:%f", 1.0 * frame->pts / frame->timebase);
 		break;
 	case frameType_adpcm_ima_wav:
-		LOG_PRINT("adpcmImaWav:%f", 1.0 * frame->pts / frame->timebase);
+//		LOG_PRINT("adpcmImaWav:%f", 1.0 * frame->pts / frame->timebase);
 		break;
 	case frameType_opus:
-		LOG_PRINT("opus:%f", 1.0 * frame->pts / frame->timebase);
+//		LOG_PRINT("opus:%f", 1.0 * frame->pts / frame->timebase);
 		break;
 	case frameType_vorbis:
-		LOG_PRINT("vorbis:%f", 1.0 * frame->pts / frame->timebase);
+//		LOG_PRINT("vorbis:%f", 1.0 * frame->pts / frame->timebase);
 		break;
 	case frameType_mp3:
-		LOG_PRINT("mp3:%f", 1.0 * frame->pts / frame->timebase);
+//		LOG_PRINT("mp3:%f", 1.0 * frame->pts / frame->timebase);
 		break;
 	case frameType_speex:
-		LOG_PRINT("speex:%f", 1.0 *frame->pts / frame->timebase);
+//		LOG_PRINT("speex:%f", 1.0 *frame->pts / frame->timebase);
 		break;
 	default:
 		LOG_PRINT("frame:%f", 1.0 * frame->pts / frame->timebase);
