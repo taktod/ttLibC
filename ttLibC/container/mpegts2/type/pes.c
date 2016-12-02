@@ -506,7 +506,7 @@ bool ttLibC_Pes_writePacket(
 					Buf_t_byte(adapt_buf, 0xFF);
 				}
 				adapt_buf.buf[0] = count - 1;
-				if(adapt_buf_length == 0 && adapt_buf.length > 2) {
+				if(adapt_buf_length == 0 && adapt_buf.length > 1) {
 					adapt_buf.buf[1] = 0x00;
 				}
 			}
