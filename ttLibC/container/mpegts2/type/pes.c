@@ -478,7 +478,7 @@ bool ttLibC_Pes_writePacket(
 					Buf_t_byte(adapt_buf, 0x50);
 				}
 				else {
-					Buf_t_byte(adapt_buf, 0x40);
+					Buf_t_byte(adapt_buf, 0x10);
 				}
 				// これ・・・h264の場合はdtsいれた方が建設的かも
 				Buf_t_pcr(adapt_buf, pts);
@@ -486,7 +486,7 @@ bool ttLibC_Pes_writePacket(
 			else if(has_randomAccess) {
 				// ランダムアクセスがonの場合はfragがある
 				Buf_t_byte(adapt_buf, 0x01);
-				Buf_t_byte(adapt_buf, 0x10);
+				Buf_t_byte(adapt_buf, 0x40);
 			}
 		}
 		// このlengthが184以下の場合はadapatation fieldで埋めが必要
