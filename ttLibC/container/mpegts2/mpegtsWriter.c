@@ -131,7 +131,7 @@ static bool MpegtsWriter_makeH264Data(
 			case H264Type_slice:
 				// sliceの場合はaud + slice
 				ttLibC_DynamicBuffer_append(dataBuffer, h264->inherit_super.inherit_super.data, h264->inherit_super.inherit_super.buffer_size);
-				ttLibC_Pes_writePacket(track, false, need_pcr, false, 0xE0, h264->inherit_super.inherit_super.id, h264->inherit_super.inherit_super.pts, dts, dataBuffer, buffer);
+				ttLibC_Pes_writePacket(track, false, need_pcr, true, 0xE0, h264->inherit_super.inherit_super.id, h264->inherit_super.inherit_super.pts, dts, dataBuffer, buffer);
 				is_first = false;
 				break;
 			case H264Type_sliceIDR:
@@ -145,7 +145,7 @@ static bool MpegtsWriter_makeH264Data(
 						ttLibC_DynamicBuffer_append(dataBuffer, configData->inherit_super.inherit_super.data, configData->inherit_super.inherit_super.buffer_size);
 					}
 					ttLibC_DynamicBuffer_append(dataBuffer, h264->inherit_super.inherit_super.data, h264->inherit_super.inherit_super.buffer_size);
-					ttLibC_Pes_writePacket(track, true, need_pcr, false, 0xE0, h264->inherit_super.inherit_super.id, h264->inherit_super.inherit_super.pts, dts, dataBuffer, buffer);
+					ttLibC_Pes_writePacket(track, true, need_pcr, true, 0xE0, h264->inherit_super.inherit_super.id, h264->inherit_super.inherit_super.pts, dts, dataBuffer, buffer);
 					is_first = false;
 				}
 				break;
