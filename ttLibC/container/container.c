@@ -466,7 +466,7 @@ bool ttLibC_ContainerWriter_primaryTrackCheck(void *ptr, ttLibC_Frame *frame) {
 			return true;
 		}
 		ttLibC_Video *video = (ttLibC_Video *)frame;
-		if(frame->type == videoType_key) {
+		if(video->type == videoType_key) {
 			if((track->use_mode & containerWriter_allKeyFrame_split) != 0) {
 				if(writer->current_pts_pos < frame->dts) {
 					writer->target_pos = frame->dts;

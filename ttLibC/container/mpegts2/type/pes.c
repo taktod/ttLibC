@@ -191,6 +191,17 @@ ttLibC_Pes *ttLibC_Pes_getPacket(
 			uint64_t dts = ((ttLibC_ByteReader_bit(reader, 4) << 29) & 0xC0000000)
 					| ((ttLibC_ByteReader_bit(reader, 16) << 14)     & 0x3FFF8000)
 					| ((ttLibC_ByteReader_bit(reader, 16) >> 1)      & 0x00007FFF);
+			if(header_info.pid == 0x0100) {
+//				LOG_PRINT("id:%x pts:%llu dts:%llu", header_info.pid, pts, dts);
+			}
+		}
+		else {
+			if(header_info.pid == 0x0100) {
+//				LOG_PRINT("id:%x pts:%llu dts:%llu *", header_info.pid, pts, pts);
+			}
+			else {
+//				LOG_PRINT("    id:%x pts:%llu dts:%llu", header_info.pid, pts, pts);
+			}
 		}
 		data += reader->read_size;
 		data_size -= reader->read_size;
@@ -481,7 +492,9 @@ bool ttLibC_Pes_writePacket(
 					Buf_t_byte(adapt_buf, 0x10);
 				}
 				// これ・・・h264の場合はdtsいれた方が建設的かも
-				Buf_t_pcr(adapt_buf, pts);
+				Buf_t_pcr(adapt_buf, pts); // これでもOKなのか・・・
+//				Buf_t_pcr(adapt_buf, pts - 6006); // これでもOKなのか・・・
+//				Buf_t_pcr(adapt_buf, pts - 63000 - 6006);
 			}
 			else if(has_randomAccess) {
 				// ランダムアクセスがonの場合はfragがある

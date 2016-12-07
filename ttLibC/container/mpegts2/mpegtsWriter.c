@@ -92,7 +92,7 @@ static bool MpegtsWriter_makeH264Data(
 	// とりあえず使うべきframeをpop upして減らしておこうか・・・
 	while(true) {
 		ttLibC_H264 *h264 = (ttLibC_H264 *)ttLibC_FrameQueue_ref_first(track->inherit_super.frame_queue);
-		if(h264 != NULL && h264->inherit_super.inherit_super.pts < writer->target_pos) {
+		if(h264 != NULL && h264->inherit_super.inherit_super.pts <= writer->target_pos) {
 			ttLibC_H264 *h = (ttLibC_H264 *)ttLibC_FrameQueue_dequeue_first(track->inherit_super.frame_queue);
 			if(h264 != h) {
 				ERR_PRINT("data is corrupted. broken?");
@@ -126,12 +126,13 @@ static bool MpegtsWriter_makeH264Data(
 			else {
 				dts -= 20000;
 			}
+//			LOG_PRINT("pid:100 pts:%llu dts:%llu", h264->inherit_super.inherit_super.pts, dts);
 			ttLibC_DynamicBuffer_append(dataBuffer, aud, aud_size);
 			switch(h264->type) {
 			case H264Type_slice:
 				// sliceの場合はaud + slice
 				ttLibC_DynamicBuffer_append(dataBuffer, h264->inherit_super.inherit_super.data, h264->inherit_super.inherit_super.buffer_size);
-				ttLibC_Pes_writePacket(track, false, need_pcr, true, 0xE0, h264->inherit_super.inherit_super.id, h264->inherit_super.inherit_super.pts, dts, dataBuffer, buffer);
+				ttLibC_Pes_writePacket(track, false, false, false, 0xE0, h264->inherit_super.inherit_super.id, h264->inherit_super.inherit_super.pts, dts, dataBuffer, buffer);
 				is_first = false;
 				break;
 			case H264Type_sliceIDR:
@@ -145,7 +146,7 @@ static bool MpegtsWriter_makeH264Data(
 						ttLibC_DynamicBuffer_append(dataBuffer, configData->inherit_super.inherit_super.data, configData->inherit_super.inherit_super.buffer_size);
 					}
 					ttLibC_DynamicBuffer_append(dataBuffer, h264->inherit_super.inherit_super.data, h264->inherit_super.inherit_super.buffer_size);
-					ttLibC_Pes_writePacket(track, true, need_pcr, true, 0xE0, h264->inherit_super.inherit_super.id, h264->inherit_super.inherit_super.pts, dts, dataBuffer, buffer);
+					ttLibC_Pes_writePacket(track, true, need_pcr, false, 0xE0, h264->inherit_super.inherit_super.id, h264->inherit_super.inherit_super.pts, dts, dataBuffer, buffer);
 					is_first = false;
 				}
 				break;
@@ -174,6 +175,7 @@ static bool MpegtsWriter_makeAacData(
 	uint32_t pid = 0;
 	uint64_t pts = 0;
 	bool is_info_update = false;
+	uint64_t current_pts_pos = writer->current_pts_pos;
 	while(true) {
 		ttLibC_Aac *aac = (ttLibC_Aac *)ttLibC_FrameQueue_ref_first(track->inherit_super.frame_queue);
 		if(aac != NULL && aac->inherit_super.inherit_super.pts < writer->target_pos) {
@@ -186,6 +188,15 @@ static bool MpegtsWriter_makeAacData(
 /*			if(aac->inherit_super.inherit_super.pts < writer->current_pts_pos) {
 				continue;
 			}*/
+			// divide data into small unit.
+			if(current_pts_pos + writer->unit_duration <= aac->inherit_super.inherit_super.pts) {
+//				current_pts_pos = aac->inherit_super.inherit_super.pts;
+				current_pts_pos += writer->unit_duration;
+				ttLibC_Pes_writePacket(track, true, pid == 0x0100, true, 0xC0, pid, pts, 0, dataBuffer, buffer);
+				pid = 0;
+				pts = 0;
+				is_info_update = false;
+			}
 			if(!is_info_update) {
 				pid = aac->inherit_super.inherit_super.id;
 				pts = aac->inherit_super.inherit_super.pts;
@@ -232,6 +243,7 @@ static bool MpegtsWriter_makeMp3Data(
 	uint32_t pid = 0;
 	uint64_t pts = 0;
 	bool is_info_update = false;
+	uint64_t current_pts_pos = writer->current_pts_pos;
 	while(true) {
 		ttLibC_Mp3 *mp3 = (ttLibC_Mp3 *)ttLibC_FrameQueue_ref_first(track->inherit_super.frame_queue);
 		if(mp3 != NULL && mp3->inherit_super.inherit_super.pts < writer->target_pos) {
@@ -244,6 +256,13 @@ static bool MpegtsWriter_makeMp3Data(
 /*			if(mp3->inherit_super.inherit_super.pts < writer->current_pts_pos) {
 				continue;
 			}*/
+			if(current_pts_pos + writer->unit_duration <= mp3->inherit_super.inherit_super.pts) {
+				current_pts_pos = mp3->inherit_super.inherit_super.pts;
+				ttLibC_Pes_writePacket(track, true, pid == 0x0100, true, 0xC0, pid, pts, 0, dataBuffer, buffer);
+				pid = 0;
+				pts = 0;
+				is_info_update = false;
+			}
 			if(!is_info_update) {
 				pid = mp3->inherit_super.inherit_super.id;
 				pts = mp3->inherit_super.inherit_super.pts;

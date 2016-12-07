@@ -129,6 +129,7 @@ bool ttLibC_MpegtsPacket_loadMpegtsPacketHeader(
 			ttLibC_ByteReader_bit(reader, 6);
 			header_info->adaptationField.pcrExtension = ttLibC_ByteReader_bit(reader, 9);
 			left_size -= 6;
+//			LOG_PRINT("pcr:%llu %llu", header_info->adaptationField.pcrBase, header_info->adaptationField.pcrExtension);
 		}
 		if(left_size > 0) {
 			ttLibC_ByteReader_skipByte(reader, left_size);
