@@ -92,7 +92,7 @@ static bool MpegtsWriter_makeH264Data(
 	// とりあえず使うべきframeをpop upして減らしておこうか・・・
 	while(true) {
 		ttLibC_H264 *h264 = (ttLibC_H264 *)ttLibC_FrameQueue_ref_first(track->inherit_super.frame_queue);
-		if(h264 != NULL && h264->inherit_super.inherit_super.pts <= writer->target_pos) {
+		if(h264 != NULL && h264->inherit_super.inherit_super.pts < writer->target_pos) {
 			ttLibC_H264 *h = (ttLibC_H264 *)ttLibC_FrameQueue_dequeue_first(track->inherit_super.frame_queue);
 			if(h264 != h) {
 				ERR_PRINT("data is corrupted. broken?");
@@ -132,7 +132,7 @@ static bool MpegtsWriter_makeH264Data(
 			case H264Type_slice:
 				// sliceの場合はaud + slice
 				ttLibC_DynamicBuffer_append(dataBuffer, h264->inherit_super.inherit_super.data, h264->inherit_super.inherit_super.buffer_size);
-				ttLibC_Pes_writePacket(track, false, false, false, 0xE0, h264->inherit_super.inherit_super.id, h264->inherit_super.inherit_super.pts, dts, dataBuffer, buffer);
+				ttLibC_Pes_writePacket(track, false, need_pcr, false, 0xE0, h264->inherit_super.inherit_super.id, h264->inherit_super.inherit_super.pts, dts, dataBuffer, buffer);
 				is_first = false;
 				break;
 			case H264Type_sliceIDR:
@@ -190,8 +190,7 @@ static bool MpegtsWriter_makeAacData(
 			}*/
 			// divide data into small unit.
 			if(current_pts_pos + writer->unit_duration <= aac->inherit_super.inherit_super.pts) {
-//				current_pts_pos = aac->inherit_super.inherit_super.pts;
-				current_pts_pos += writer->unit_duration;
+				current_pts_pos = aac->inherit_super.inherit_super.pts;
 				ttLibC_Pes_writePacket(track, true, pid == 0x0100, true, 0xC0, pid, pts, 0, dataBuffer, buffer);
 				pid = 0;
 				pts = 0;
@@ -422,7 +421,7 @@ bool ttLibC_MpegtsWriter_write(
 	}
 	ttLibC_ContainerWriter_WriteTrack *track = (ttLibC_ContainerWriter_WriteTrack *)ttLibC_StlMap_get(writer_->track_list, (void *)(long)frame->id);
 	if(track != NULL) {
-		track->use_mode = track->enable_mode | containerWriter_allKeyFrame_split;
+		track->use_mode = track->enable_mode;
 	}
 	return MpegtsWriter_writeFromQueue(writer_);
 }
