@@ -144,6 +144,16 @@ ttLibC_MpegtsWriter *ttLibC_MpegtsWriter_make_ex(
 		uint32_t unit_duration);
 
 /**
+ * update margin of dts calcuration.
+ * @param writer
+ * @param margin
+ * @node default is 20000
+ */
+bool ttLibC_MpegtsWriter_updateDtsMargin(
+		ttLibC_MpegtsWriter *writer,
+		uint64_t margin);
+
+/**
  * write frame on mpegts writer.
  * @param writer      mpegts writer object
  * @param update_info if true try to write sdt pat pmt infromation.

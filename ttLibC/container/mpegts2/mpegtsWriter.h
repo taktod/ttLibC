@@ -37,6 +37,7 @@ typedef struct ttLibC_ContainerWriter_MpegtsWriter_ {
 	uint8_t pmt_buf[188];
 	bool is_reduce_mode;
 	ttLibC_DynamicBuffer *data_buffer;
+	uint64_t dts_margin;
 } ttLibC_ContainerWriter_MpegtsWriter_;
 
 typedef ttLibC_ContainerWriter_MpegtsWriter_ ttLibC_MpegtsWriter_;

@@ -54,6 +54,7 @@ ttLibC_MpegtsWriter *ttLibC_MpegtsWriter_make_ex(
 	writer->cc_pat = 0;
 	writer->cc_pmt = 0;
 	writer->data_buffer = NULL;
+	writer->dts_margin = 20000;
 
 	ttLibC_Sdt_makePacket((const char *)"ttLibC", (const char *)"mpegtsMuxer", writer->sdt_buf, 188);
 	ttLibC_Pat_makePacket(writer->pat_buf, 188);
@@ -61,8 +62,25 @@ ttLibC_MpegtsWriter *ttLibC_MpegtsWriter_make_ex(
 	return (ttLibC_MpegtsWriter *)writer;
 }
 
+/**
+ * update margin of dts calcuration.
+ * @param writer
+ * @param margin
+ * @node default is 20000
+ */
+bool ttLibC_MpegtsWriter_updateDtsMargin(
+		ttLibC_MpegtsWriter *writer,
+		uint64_t margin) {
+	ttLibC_MpegtsWriter_ *writer_ = (ttLibC_MpegtsWriter_ *)writer;
+	if(writer->type != containerType_mpegts) {
+		return false;
+	}
+	writer_->dts_margin = margin;
+	return true;
+}
+
 static bool MpegtsWriter_makeH264Data(
-		ttLibC_ContainerWriter_ *writer,
+		ttLibC_MpegtsWriter_ *writer,
 		ttLibC_MpegtsWriteTrack *track,
 		ttLibC_DynamicBuffer *buffer) {
 	// とりあえずこれが一番面倒か・・・
@@ -92,7 +110,7 @@ static bool MpegtsWriter_makeH264Data(
 	// とりあえず使うべきframeをpop upして減らしておこうか・・・
 	while(true) {
 		ttLibC_H264 *h264 = (ttLibC_H264 *)ttLibC_FrameQueue_ref_first(track->inherit_super.frame_queue);
-		if(h264 != NULL && h264->inherit_super.inherit_super.pts < writer->target_pos) {
+		if(h264 != NULL && h264->inherit_super.inherit_super.pts < writer->inherit_super.target_pos) {
 			ttLibC_H264 *h = (ttLibC_H264 *)ttLibC_FrameQueue_dequeue_first(track->inherit_super.frame_queue);
 			if(h264 != h) {
 				ERR_PRINT("data is corrupted. broken?");
@@ -120,11 +138,11 @@ static bool MpegtsWriter_makeH264Data(
 				aud_size = 5;
 			}*/
 			uint64_t dts = h264->inherit_super.inherit_super.dts;
-			if(dts < 20000) {
+			if(dts < writer->dts_margin) {
 				dts = 0;
 			}
 			else {
-				dts -= 20000;
+				dts -= writer->dts_margin;
 			}
 //			LOG_PRINT("pid:100 pts:%llu dts:%llu", h264->inherit_super.inherit_super.pts, dts);
 			ttLibC_DynamicBuffer_append(dataBuffer, aud, aud_size);
