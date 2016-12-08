@@ -412,13 +412,17 @@ static bool ContainerWriteTrack_appendQueue(
 		ttLibC_ContainerWriter_WriteTrack *track,
 		ttLibC_Frame *frame,
 		uint64_t pts,
+		uint64_t dts,
 		uint32_t timebase) {
 	uint64_t original_pts      = frame->pts;
+	uint64_t original_dts      = frame->dts;
 	uint32_t original_timebase = frame->timebase;
 	frame->pts      = pts;
+	frame->dts      = dts;
 	frame->timebase = timebase;
 	bool result     = ttLibC_FrameQueue_queue(track->frame_queue, frame);
 	frame->pts      = original_pts;
+	frame->dts      = original_dts;
 	frame->timebase = original_timebase;
 	return result;
 }
@@ -618,8 +622,10 @@ bool ttLibC_ContainerWriter_write_(
 		return false;
 	}
 	uint64_t pts = (uint64_t)(1.0 * frame->pts * writer->inherit_super.timebase / frame->timebase);
+	uint64_t dts = (uint64_t)(1.0 * frame->dts * writer->inherit_super.timebase / frame->timebase);
 	if(frame->timebase == writer->inherit_super.timebase) {
 		pts = frame->pts;
+		dts = frame->dts;
 	}
 	track->enable_mode = writer->inherit_super.mode;
 	switch(frame->type) {
@@ -638,6 +644,7 @@ bool ttLibC_ContainerWriter_write_(
 					return false;
 				}
 				h->inherit_super.inherit_super.pts = 0;
+				h->inherit_super.inherit_super.dts = 0;
 				h->inherit_super.inherit_super.timebase = writer->inherit_super.timebase;
 				track->h26x_configData = (ttLibC_Frame *)h;
 				return true;
@@ -662,6 +669,7 @@ bool ttLibC_ContainerWriter_write_(
 					return false;
 				}
 				h->inherit_super.inherit_super.pts = 0;
+				h->inherit_super.inherit_super.dts = 0;
 				h->inherit_super.inherit_super.timebase = writer->inherit_super.timebase;
 				track->h26x_configData = (ttLibC_Frame *)h;
 				return true;
@@ -704,7 +712,7 @@ bool ttLibC_ContainerWriter_write_(
 					break;
 				}
 				if(track->counter < 3) {
-					return ContainerWriteTrack_appendQueue(track, frame, 0, writer->inherit_super.timebase);
+					return ContainerWriteTrack_appendQueue(track, frame, 0, 0, writer->inherit_super.timebase);
 				}
 			}
 		}
@@ -779,7 +787,7 @@ bool ttLibC_ContainerWriter_write_(
 					break;
 				}
 				if(track->counter < 3) {
-					return ContainerWriteTrack_appendQueue(track, frame, 0, writer->inherit_super.timebase);
+					return ContainerWriteTrack_appendQueue(track, frame, 0, 0, writer->inherit_super.timebase);
 				}
 			}
 		}
@@ -788,7 +796,7 @@ bool ttLibC_ContainerWriter_write_(
 		break;
 	}
 	track->is_appending = true;
-	if(!ContainerWriteTrack_appendQueue(track, frame, pts, writer->inherit_super.timebase)) {
+	if(!ContainerWriteTrack_appendQueue(track, frame, pts, dts, writer->inherit_super.timebase)) {
 		return false;
 	}
 	if(writer->is_first) {
@@ -812,8 +820,10 @@ bool ttLibC_ContainerWriteTrack_appendQueue(
 		return false;
 	}
 	uint64_t pts = (uint64_t)(1.0 * frame->pts * timebase / frame->timebase);
+	uint64_t dts = (uint64_t)(1.0 * frame->dts * timebase / frame->timebase);
 	if(frame->timebase == timebase) {
 		pts = frame->pts;
+		dts = frame->dts;
 	}
 	track->enable_mode = enable_mode;
 	switch(frame->type) {
@@ -898,7 +908,7 @@ bool ttLibC_ContainerWriteTrack_appendQueue(
 					break;
 				}
 				if(track->counter < 3) {
-					return ContainerWriteTrack_appendQueue(track, frame, 0, timebase);
+					return ContainerWriteTrack_appendQueue(track, frame, 0, 0, timebase);
 				}
 			}
 		}
@@ -973,7 +983,7 @@ bool ttLibC_ContainerWriteTrack_appendQueue(
 					break;
 				}
 				if(track->counter < 3) {
-					return ContainerWriteTrack_appendQueue(track, frame, 0, timebase);
+					return ContainerWriteTrack_appendQueue(track, frame, 0, 0, timebase);
 				}
 			}
 		}
@@ -982,7 +992,7 @@ bool ttLibC_ContainerWriteTrack_appendQueue(
 		break;
 	}
 	track->is_appending = true;
-	if(!ContainerWriteTrack_appendQueue(track, frame, pts, timebase)) {
+	if(!ContainerWriteTrack_appendQueue(track, frame, pts, dts, timebase)) {
 		return false;
 	}
 	return true;
@@ -998,5 +1008,3 @@ void ttLibC_ContainerWriteTrack_close(ttLibC_ContainerWriter_WriteTrack **track)
 	ttLibC_free(target);
 	*track = NULL;
 }
-
-

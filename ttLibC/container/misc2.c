@@ -201,52 +201,59 @@ bool ttLibC_FrameQueue_queue(
 		ERR_PRINT("failed to clone frame.");
 		return false;
 	}
+	// let save dts information from frame.
+	f->dts = frame->dts;
 	ttLibC_StlList_remove(queue_->used_frame_list, prev_frame);
-	switch(f->type) {
-	case frameType_h264:
-	case frameType_h265:
-		{
-			ttLibC_Video *v = (ttLibC_Video *)f;
-			if(v->type != videoType_info) {
-				if(f->pts == 0) {
-					// nothing to do for pts = 0
-					break;
-				}
-				if(queue_->pts_cache[0] == 0) {
-					queue_->pts_cache[0] = f->pts;
-					break;
-				}
-				if(queue_->pts_cache[1] == 0) {
-					queue_->pts_cache[1] = f->pts;
-					break;
-				}
-				// pick up lowest pts
-				uint64_t pts = queue_->pts_cache[0];
-				if(pts > queue_->pts_cache[1]) {
-					pts = queue_->pts_cache[1];
-				}
-				if(pts > f->pts) {
-					pts = f->pts;
-				}
-				// update frame dts.
-				uint64_t buf[2] = {pts, 0};
-				ttLibC_StlList_forEachReverse(queue_->frame_list, FrameQueue_updateDtsCallback, buf);
-				// update pts for queue information.
-				queue_->inherit_super.pts = pts;
-				// update pts cache
-				if(pts == queue_->pts_cache[0]) {
-					queue_->pts_cache[0] = f->pts;
-				}
-				else if(pts == queue_->pts_cache[1]) {
-					queue_->pts_cache[1] = f->pts;
+	if(f->dts == 0) {
+		switch(f->type) {
+		case frameType_h264:
+		case frameType_h265:
+			{
+				ttLibC_Video *v = (ttLibC_Video *)f;
+				if(v->type != videoType_info) {
+					if(f->pts == 0) {
+						// nothing to do for pts = 0
+						break;
+					}
+					if(queue_->pts_cache[0] == 0) {
+						queue_->pts_cache[0] = f->pts;
+						break;
+					}
+					if(queue_->pts_cache[1] == 0) {
+						queue_->pts_cache[1] = f->pts;
+						break;
+					}
+					// pick up lowest pts
+					uint64_t pts = queue_->pts_cache[0];
+					if(pts > queue_->pts_cache[1]) {
+						pts = queue_->pts_cache[1];
+					}
+					if(pts > f->pts) {
+						pts = f->pts;
+					}
+					// update frame dts.
+					uint64_t buf[2] = {pts, 0};
+					ttLibC_StlList_forEachReverse(queue_->frame_list, FrameQueue_updateDtsCallback, buf);
+					// update pts for queue information.
+					queue_->inherit_super.pts = pts;
+					// update pts cache
+					if(pts == queue_->pts_cache[0]) {
+						queue_->pts_cache[0] = f->pts;
+					}
+					else if(pts == queue_->pts_cache[1]) {
+						queue_->pts_cache[1] = f->pts;
+					}
 				}
 			}
+			break;
+		default:
+			f->dts = f->pts;
+			queue_->inherit_super.pts = f->pts;
+			break;
 		}
-		break;
-	default:
-		f->dts = f->pts;
+	}
+	else {
 		queue_->inherit_super.pts = f->pts;
-		break;
 	}
 	queue_->inherit_super.timebase = f->timebase;
 	return ttLibC_StlList_addLast(queue_->frame_list, f);
