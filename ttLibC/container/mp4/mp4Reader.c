@@ -22,6 +22,7 @@
 #include "type/stsz.h"
 #include "type/stts.h"
 #include "type/trun.h"
+#include "type/elst.h"
 
 static bool Mp4Reader_closeTrack(void *ptr, void *key, void *item);
 
@@ -316,7 +317,16 @@ static bool Mp4Reader_readAtom(
 			switch(tag) {
 			case Mp4Type_Elst:
 				{
-					uint32_t count;
+					if(reader->track == NULL) {
+						reader->error_number = 1;
+					}
+					else {
+						reader->track->elst = ttLibC_Elst_make(data, size, reader->track->timebase);
+						if(reader->track->elst == NULL) {
+							reader->error_number = 1;
+						}
+					}
+/*					uint32_t count;
 					uint64_t segmentDuration;
 					uint64_t mediaTime;
 					uint16_t mediaRateInt;
@@ -339,6 +349,7 @@ static bool Mp4Reader_readAtom(
 					if(reader->track != NULL) {
 						reader->track->elst_mediatime = (uint32_t)mediaTime;
 					}
+					*/
 				}
 				break;
 			case Mp4Type_Mvhd:
@@ -754,6 +765,7 @@ static bool Mp4Reader_closeTrack(void *ptr, void *key, void *item) {
 		ttLibC_Mp4Atom_close((ttLibC_Mp4Atom **)&track->stco);
 		ttLibC_Mp4Atom_close((ttLibC_Mp4Atom **)&track->ctts);
 		ttLibC_Mp4Atom_close((ttLibC_Mp4Atom **)&track->trun);
+		ttLibC_Mp4Atom_close((ttLibC_Mp4Atom **)&track->elst);
 		ttLibC_free(track);
 	}
 	return true;

@@ -53,6 +53,7 @@ typedef struct ttLibC_Mp4Track {
 	ttLibC_Mp4 *stsz;
 	ttLibC_Mp4 *stco;
 	ttLibC_Mp4 *ctts;
+	ttLibC_Mp4 *elst;
 	// co64...
 
 	uint32_t trex_sample_desription_index;
