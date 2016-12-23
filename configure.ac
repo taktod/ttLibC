@@ -41,6 +41,7 @@ vorbis_flag=no
 avcodec_flag=no
 apple_flag=no
 webrtc_flag=no
+soundtouch_flag=no
 
 # check result
 cute_check=no
@@ -65,6 +66,7 @@ vorbis_decode_check=no
 avcodec_check=no
 apple_check=no
 webrtc_check=no
+soundtouch_check=no
 
 AC_ARG_ENABLE(
 	[lgpl],
@@ -138,6 +140,7 @@ AC_ARG_ENABLE(
 		daala_flag=$enableval
 		vorbis_flag=$enableval
 		webrtc_flag=$enableval
+		soundtouch_flag=$enableval
 	]
 )
 
@@ -259,6 +262,12 @@ AC_ARG_ENABLE(
 	[webrtc],
 	AS_HELP_STRING([--enable-webrtc/--disable-webrtc], [enable/disable/webrtc code.]),
 	[webrtc_flag=$enableval]
+)
+
+AC_ARG_ENABLE(
+	[soundtouch],
+	AS_HELP_STRING([--enable-soundtouch/--disable-soundtouch], [enable/disable/soundtouch code.]),
+	[soundtouch_flag=$enableval]
 )
 
 if test x$opencv_flag = "xyes"; then
@@ -484,7 +493,6 @@ if test x$vorbis_flag = "xyes"; then
 		[vorbis_decode_check=no]
 	)
 fi
-
 if test x$webrtc_flag = "xyes"; then
 	AC_MSG_CHECKING(for WEBRTC)
 	AC_ARG_VAR([WEBRTC_INCLUDE_PATH], [path for webrtc compiled directory.])
@@ -569,6 +577,14 @@ if test x$webrtc_flag = "xyes"; then
 		AC_SUBST([WEBRTC_LIBS])
 		AC_MSG_RESULT([yes])
 	fi
+fi
+if test x$soundtouch_flag = "xyes"; then
+	PKG_CHECK_MODULES(
+		[SOUNDTOUCH],
+		[soundtouch],
+		[soundtouch_check=yes],
+		[soundtouch_check=no]
+	)
 fi
 
 AC_MSG_CHECKING(for license)
@@ -697,6 +713,7 @@ if test x$vorbis_flag$vorbis_encode_check = "xyesyes"; then
 	AC_DEFINE([__ENABLE_VORBIS_ENCODE__])
 fi
 AM_CONDITIONAL(ENABLE_VORBIS_ENCODE, test x$vorbis_flag$vorbis_encode_check = "xyesyes")
+
 if test x$vorbis_flag$vorbis_decode_check = "xyesyes"; then
 	AC_DEFINE([__ENABLE_VORBIS_DECODE__])
 fi
@@ -706,6 +723,12 @@ if test x$webrtc_flag$webrtc_check = "xyesyes"; then
 	AC_DEFINE([__ENABLE_WEBRTC__])
 fi
 AM_CONDITIONAL(ENABLE_WEBRTC, test x$webrtc_flag$webrtc_check = "xyesyes")
+
+if test x$soundtouch_flag$lgpl_flag$soundtouch_check = "xyesyesyes"; then
+echo "define soundtouch"
+	AC_DEFINE([__ENABLE_SOUNDTOUCH__])
+fi
+AM_CONDITIONAL(ENABLE_SOUNDTOUCH, test x$soundtouch_flag$lgpl_flag$soundtouch_check = "xyesyesyes")
 
 AC_ARG_WITH(pkgconfigdir,
 	AS_HELP_STRING([--with-pkgconfigdir], [Use the specified pkgconfig dir.(default is $libdir/pkgconfig)]),
@@ -990,4 +1013,17 @@ echo "webrtc:           off(no compile data detection.)"
 	fi
 else
 echo "webrtc:           off"
+fi
+if test x$soundtouch_flag = "xyes"; then
+	if test x$lgpl_flag = "xyes"; then
+		if test x$soundtouch_check = "xyes"; then
+echo "soundtouch:       on"
+		else
+echo "soundtouch:       off(soundtouch library is missing.)"
+		fi
+	else
+echo "soundtouch:       off(under lgpl only.)"
+	fi
+else
+echo "soundtouch:       off"
 fi

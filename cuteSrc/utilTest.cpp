@@ -19,8 +19,10 @@
 
 #include <ttLibC/frame/video/bgr.h>
 #include <ttLibC/frame/audio/pcms16.h>
+#include <ttLibC/frame/audio/pcmf32.h>
 #include <ttLibC/util/beepUtil.h>
 #include <ttLibC/util/ioUtil.h>
+#include <ttLibC/resampler/audioResampler.h>
 
 #ifdef __ENABLE_OPENCV__
 #	include <ttLibC/util/opencvUtil.h>
@@ -62,6 +64,111 @@
 #ifdef __ENABLE_MP3LAME_ENCODE__
 #include <ttLibC/encoder/mp3lameEncoder.h>
 #endif
+
+#ifdef __ENABLE_SOUNDTOUCH__
+#include <soundtouch/SoundTouch.h>
+#include <ttLibC/resampler/soundtouchResampler.h>
+#endif
+
+#if defined(__ENABLE_SOUNDTOUCH__) && defined(__ENABLE_APPLE__)
+
+static bool soundtouchPlayTestCallback(void *ptr, ttLibC_Audio *pcm) {
+	if(pcm->inherit_super.type != frameType_pcmS16) {
+		return true;
+	}
+	ttLibC_AuPlayer *auPlayer = (ttLibC_AuPlayer *)ptr;
+	while(!ttLibC_AuPlayer_queue(auPlayer, (ttLibC_PcmS16 *)pcm)) {
+		usleep(100); // ...
+	}// */
+	return true;
+}
+
+#endif
+
+static void soundtouchPlayTest() {
+	LOG_PRINT("soundtouchPlayTest");
+#if defined(__ENABLE_SOUNDTOUCH__) && defined(__ENABLE_APPLE__)
+	ttLibC_BeepGenerator *generator = ttLibC_BeepGenerator_make(PcmS16Type_littleEndian, 440, 44100, 2);
+	ttLibC_AuPlayer *auPlayer = ttLibC_AuPlayer_make(44100, 2, AuPlayerType_DefaultOutput);
+	ttLibC_Soundtouch *soundtouch = ttLibC_Soundtouch_make(44100, 2);
+	ttLibC_Soundtouch_setPitchSemiTones(soundtouch, 1.5);
+	ttLibC_PcmS16 *pcm = NULL;
+	for(int i = 0;i < 10;i ++) {
+		ttLibC_PcmS16 *p = ttLibC_BeepGenerator_makeBeepByMiliSec(generator, pcm, 1000);
+		if(p == NULL) {
+			break;
+		}
+		pcm = p;
+		ttLibC_Soundtouch_resample(soundtouch, (ttLibC_Audio *)pcm, soundtouchPlayTestCallback, auPlayer);
+	}
+	ttLibC_Soundtouch_resample(soundtouch, NULL, soundtouchPlayTestCallback, auPlayer);
+	ttLibC_PcmS16_close(&pcm);
+	ttLibC_Soundtouch_close(&soundtouch);
+	ttLibC_AuPlayer_close(&auPlayer);
+	ttLibC_BeepGenerator_close(&generator);
+#endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
+
+static void soundtouchPlayTest_test() {
+	LOG_PRINT("soundtouchPlayTest");
+#if defined(__ENABLE_APPLE__) && defined(__ENABLE_SOUNDTOUCH__)
+	ttLibC_BeepGenerator *generator = ttLibC_BeepGenerator_make(PcmS16Type_littleEndian, 440, 44100, 2);
+	ttLibC_AuPlayer *auPlayer = ttLibC_AuPlayer_make(44100, 2, AuPlayerType_DefaultOutput);
+	ttLibC_PcmS16 *pcm = NULL;
+	soundtouch::SoundTouch *st = new soundtouch::SoundTouch();
+	st->setSampleRate(44100);
+	st->setChannels(2);
+	st->setPitchSemiTones(1.5);
+	ttLibC_PcmF32 *fpcm = NULL;
+	ttLibC_PcmF32 *ffpcm = NULL;
+	ttLibC_PcmS16 *ppcm = NULL;
+	for(int i = 0;i < 10;i ++) {
+		ttLibC_PcmS16 *p = ttLibC_BeepGenerator_makeBeepByMiliSec(generator, pcm, 1000);
+		if(p == NULL) {
+			break;
+		}
+		pcm = p;
+		ttLibC_PcmF32 *f = ttLibC_AudioResampler_makePcmF32FromPcmS16(fpcm, PcmF32Type_interleave, pcm);
+		if(f == NULL) {
+			break;
+		}
+		fpcm = f;
+		st->putSamples((const float *)fpcm->l_data, fpcm->inherit_super.sample_num);
+
+		int nSamples = 0;
+		do {
+			float buf[1024];
+			nSamples = st->receiveSamples(buf, 1024 / 2);
+			if(nSamples == 0) {
+				break;
+			}
+			f = ttLibC_PcmF32_make(ffpcm, PcmF32Type_interleave, 44100, nSamples, 2, buf, nSamples * 4 * 2, buf, nSamples, NULL, 0, true, 0, 1000);
+			if(f == NULL) {
+				break;
+			}
+			ffpcm = f;
+			p = ttLibC_AudioResampler_makePcmS16FromPcmF32(ppcm, PcmS16Type_littleEndian, ffpcm);
+			if(p == NULL) {
+				break;
+			}
+			ppcm = p;
+			while(!ttLibC_AuPlayer_queue(auPlayer, ppcm)) {
+				usleep(100); // ...
+			}// */
+		} while(nSamples != 0);
+	}
+	delete st;
+	ttLibC_PcmS16_close(&pcm);
+	ttLibC_PcmF32_close(&fpcm);
+	ttLibC_PcmS16_close(&ppcm);
+	ttLibC_PcmF32_close(&ffpcm);
+	ttLibC_AuPlayer_close(&auPlayer);
+	ttLibC_BeepGenerator_close(&generator);
+#endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
+
 
 #if defined(__ENABLE_APPLE__) && defined(__ENABLE_MP3LAME_ENCODE__)
 typedef struct audioUnitRecordTest_t {
@@ -281,6 +388,19 @@ static void linkedListTest() {
 	ttLibC_LinkedList_forEach(linkedList, findItem, linkedList);
 	ttLibC_LinkedList_forEach(linkedList, findItem2, NULL);
 	ttLibC_LinkedList_close(&linkedList);
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
+
+static void byteUtilH26XTest() {
+	LOG_PRINT("byteUtilH26XTest");
+	uint8_t buffer[256];
+	uint32_t size = ttLibC_HexUtil_makeBuffer("0001E012345678", buffer, 256);
+	ttLibC_ByteReader *reader = ttLibC_ByteReader_make(buffer, size, ByteUtilType_h26x);
+	LOG_PRINT("%x", ttLibC_ByteReader_bit(reader, 16));
+	LOG_PRINT("%x", ttLibC_ByteReader_bit(reader, 1));
+	LOG_PRINT("%x", ttLibC_ByteReader_expGolomb(reader, false));
+	LOG_PRINT("%x", ttLibC_ByteReader_expGolomb(reader, false));
+	ttLibC_ByteReader_close(&reader);
 	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
@@ -520,12 +640,12 @@ static void crc32Test() {
 	ttLibC_Crc32 *crc32 = ttLibC_Crc32_make(0xFFFFFFFFL);
 	uint8_t buf[256] = "123456789";
 	// 2AB104B2
-	uint32_t size = ttLibC_HexUtil_makeBuffer("00B00D0001C100000001F000", buf, sizeof(buf));
+	uint32_t size = ttLibC_HexUtil_makeBuffer("02 B0 1D 00 01 C1 00 00 E1 00 F0 00 1B E1 00 F0 00 0F E1 01 F0 06 0A 04 75 6E 64 00", buf, sizeof(buf));
 	uint8_t *data = buf;
 	for(int i = 0;i < size;++ i, ++data) {
 		ttLibC_Crc32_update(crc32, *data);
 	}
-	LOG_PRINT("result:%llu", ttLibC_Crc32_getValue(crc32));
+	LOG_PRINT("result:%llx", ttLibC_Crc32_getValue(crc32));
 	ASSERTM("FAILED", ttLibC_Crc32_getValue(crc32) == 0x2AB104B2);
 	ttLibC_Crc32_close(&crc32);
 	ASSERT(ttLibC_Allocator_dump() == 0);
@@ -668,12 +788,14 @@ static void openalUtilTest() {
  */
 cute::suite utilTests(cute::suite s) {
 	s.clear();
+	s.push_back(CUTE(soundtouchPlayTest));
 	s.push_back(CUTE(audioUnitRecordTest));
 	s.push_back(CUTE(audioUnitPlayTest));
 	s.push_back(CUTE(stlMapTest));
 	s.push_back(CUTE(stlListTest));
 	s.push_back(CUTE(linkedListTest));
 	s.push_back(CUTE(byteUtilTest));
+	s.push_back(CUTE(byteUtilH26XTest));
 	s.push_back(CUTE(connectorTest));
 	s.push_back(CUTE(dynamicBufferTest));
 	s.push_back(CUTE(amfTest));

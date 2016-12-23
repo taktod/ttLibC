@@ -160,6 +160,11 @@ nobase_include_HEADERS += \
 	ttLibC/util/audioUnitUtil.h
 endif
 
+if ENABLE_SOUNDTOUCH
+nobase_include_HEADERS += \
+	ttLibC/resampler/soundtouchResampler.h
+endif
+
 pkgconfigdir=@pkgconfigdir@
 pkgconfig_DATA=ttLibC.pc
 CLEANFILES=ttLibC.pc
