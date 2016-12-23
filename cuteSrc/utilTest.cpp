@@ -113,7 +113,7 @@ static void soundtouchPlayTest() {
 static void soundtouchPlayTest_test() {
 	LOG_PRINT("soundtouchPlayTest");
 #if defined(__ENABLE_APPLE__) && defined(__ENABLE_SOUNDTOUCH__)
-	ttLibC_BeepGenerator *generator = ttLibC_BeepGenerator_make(PcmS16Type_littleEndian, 440, 44100, 2);
+/*	ttLibC_BeepGenerator *generator = ttLibC_BeepGenerator_make(PcmS16Type_littleEndian, 440, 44100, 2);
 	ttLibC_AuPlayer *auPlayer = ttLibC_AuPlayer_make(44100, 2, AuPlayerType_DefaultOutput);
 	ttLibC_PcmS16 *pcm = NULL;
 	soundtouch::SoundTouch *st = new soundtouch::SoundTouch();
@@ -155,7 +155,7 @@ static void soundtouchPlayTest_test() {
 			ppcm = p;
 			while(!ttLibC_AuPlayer_queue(auPlayer, ppcm)) {
 				usleep(100); // ...
-			}// */
+			}// * /
 		} while(nSamples != 0);
 	}
 	delete st;
@@ -164,7 +164,7 @@ static void soundtouchPlayTest_test() {
 	ttLibC_PcmS16_close(&ppcm);
 	ttLibC_PcmF32_close(&ffpcm);
 	ttLibC_AuPlayer_close(&auPlayer);
-	ttLibC_BeepGenerator_close(&generator);
+	ttLibC_BeepGenerator_close(&generator);*/
 #endif
 	ASSERT(ttLibC_Allocator_dump() == 0);
 }
