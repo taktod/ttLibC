@@ -495,87 +495,92 @@ if test x$vorbis_flag = "xyes"; then
 fi
 if test x$webrtc_flag = "xyes"; then
 	AC_MSG_CHECKING(for WEBRTC)
-	AC_ARG_VAR([WEBRTC_INCLUDE_PATH], [path for webrtc compiled directory.])
-	AC_ARG_VAR([WEBRTC_PATH], [path for webrtc compiled directory.])
-	if test x$WEBRTC_PATH = "x"; then
+	if test x$socket_flag = "xyes"; then
+		AC_ARG_VAR([WEBRTC_INCLUDE_PATH], [path for webrtc compiled directory.])
+		AC_ARG_VAR([WEBRTC_PATH], [path for webrtc compiled directory.])
+		if test x$WEBRTC_PATH = "x"; then
+			AC_MSG_RESULT([no])
+			webrtc_check=no
+		else
+			webrtc_check=yes
+			if test x$WEBRTC_INCLUDE_PATH = "x"; then
+				WEBRTC_INCLUDE_PATH=$WEBRTC_PATH/../../
+			fi
+			WEBRTC_CFLAGS="-I${WEBRTC_INCLUDE_PATH}"
+			WEBRTC_CFLAGS+=' -pthread'
+#			WEBRTC_CFLAGS+=' -fno-exceptions'
+			WEBRTC_CFLAGS+=' -fno-strict-aliasing'
+			WEBRTC_CFLAGS+=' -Wall'
+			WEBRTC_CFLAGS+=' -Wno-unused-parameter'
+			WEBRTC_CFLAGS+=' -Wno-missing-field-initializers'
+			WEBRTC_CFLAGS+=' -Wextra'
+			WEBRTC_CFLAGS+=' -Wno-unused-local-typedefs'
+			WEBRTC_CFLAGS+=' -Wno-uninitialized'
+			WEBRTC_CFLAGS+=' -Wno-unused-variable'
+#			WEBRTC_CFLAGS+=' -Wno-unused-but-set-variable'
+			WEBRTC_CFLAGS+=' -pipe'
+			WEBRTC_CFLAGS+=' -fno-ident'
+			WEBRTC_CFLAGS+=' -fdata-sections'
+			WEBRTC_CFLAGS+=' -ffunction-sections'
+			WEBRTC_CFLAGS+=' -fPIC'
+			WEBRTC_CFLAGS+=' -fpermissive'
+#			WEBRTC_CFLAGS+=' -std=c++11'
+			
+			WEBRTC_CFLAGS+=' -DWEBRTC_THREAD_RR'
+			WEBRTC_CFLAGS+=' -DEXPAT_RELATIVE_PATH'
+			WEBRTC_CFLAGS+=' -DGTEST_RELATIVE_PATH'
+			WEBRTC_CFLAGS+=' -DJSONCPP_RELATIVE_PATH'
+			WEBRTC_CFLAGS+=' -DWEBRTC_RELATIVE_PATH'
+	
+			WEBRTC_LIBS=`find ${WEBRTC_PATH} -name lib*.a -exec echo {} +`
+			case "${host_os}" in
+			linux*)
+				WEBRTC_CFLAGS+=' -DWEBRTC_LINUX'
+				WEBRTC_CFLAGS+=' -DWEBRTC_POSIX=1'
+				WEBRTC_CFLAGS+=' -DNOMINMAX'
+				;;
+			cygwin*|mingw*)
+				WEBRTC_CFLAGS+=' -DWEBRTC_WIN'
+				WEBRTC_CFLAGS+=' -DNOGUI'
+				WEBRTC_CFLAGS+=' -DNOMINMAX'
+				;;
+			darwin*)
+#				WEBRTC_CFLAGS+=' -std=gnu++0x'
+				WEBRTC_CFLAGS+=' -Wno-c++0x-extensions'
+				WEBRTC_CFLAGS+=' -Wno-c++11-extensions'
+				WEBRTC_CFLAGS+=' -stdlib=libc++'
+				WEBRTC_CFLAGS+=' -DNOGUI'
+				WEBRTC_CFLAGS+=' -DWEBRTC_MAC'
+				WEBRTC_CFLAGS+=' -DWEBRTC_IOS'
+				WEBRTC_CFLAGS+=' -DWEBRTC_POSIX=1'
+				WEBRTC_LIBS+=' -stdlib=libc++'
+				WEBRTC_LIBS+=' -framework Foundation'
+				WEBRTC_LIBS+=' -framework Cocoa'
+				WEBRTC_LIBS+=' -framework IOKit'
+				WEBRTC_LIBS+=' -framework Security'
+				WEBRTC_LIBS+=' -framework SystemConfiguration'
+				WEBRTC_LIBS+=' -framework AVFoundation'
+				WEBRTC_LIBS+=' -framework ApplicationServices'
+				WEBRTC_LIBS+=' -framework CoreGraphics'
+				WEBRTC_LIBS+=' -framework CoreServices'
+				WEBRTC_LIBS+=' -framework AppKit'
+				WEBRTC_LIBS+=' -framework OpenGL'
+				WEBRTC_LIBS+=' -framework AudioToolbox'
+				WEBRTC_LIBS+=' -framework CoreMedia'
+				WEBRTC_LIBS+=' -framework CoreVideo'
+				WEBRTC_LIBS+=' -framework CoreAudio'
+				;;
+			*)
+				AC_MSG_ERROR(["OS $host_os is not supported"])
+				;;
+			esac
+			AC_SUBST([WEBRTC_CFLAGS])
+			AC_SUBST([WEBRTC_LIBS])
+			AC_MSG_RESULT([yes])
+		fi
+	else
 		AC_MSG_RESULT([no])
 		webrtc_check=no
-	else
-		webrtc_check=yes
-		if test x$WEBRTC_INCLUDE_PATH = "x"; then
-			WEBRTC_INCLUDE_PATH=$WEBRTC_PATH/../../
-		fi
-		WEBRTC_CFLAGS="-I${WEBRTC_INCLUDE_PATH}"
-		WEBRTC_CFLAGS+=' -pthread'
-#		WEBRTC_CFLAGS+=' -fno-exceptions'
-		WEBRTC_CFLAGS+=' -fno-strict-aliasing'
-		WEBRTC_CFLAGS+=' -Wall'
-		WEBRTC_CFLAGS+=' -Wno-unused-parameter'
-		WEBRTC_CFLAGS+=' -Wno-missing-field-initializers'
-		WEBRTC_CFLAGS+=' -Wextra'
-		WEBRTC_CFLAGS+=' -Wno-unused-local-typedefs'
-		WEBRTC_CFLAGS+=' -Wno-uninitialized'
-		WEBRTC_CFLAGS+=' -Wno-unused-variable'
-#		WEBRTC_CFLAGS+=' -Wno-unused-but-set-variable'
-		WEBRTC_CFLAGS+=' -pipe'
-		WEBRTC_CFLAGS+=' -fno-ident'
-		WEBRTC_CFLAGS+=' -fdata-sections'
-		WEBRTC_CFLAGS+=' -ffunction-sections'
-		WEBRTC_CFLAGS+=' -fPIC'
-		WEBRTC_CFLAGS+=' -fpermissive'
-#		WEBRTC_CFLAGS+=' -std=c++11'
-		
-		WEBRTC_CFLAGS+=' -DWEBRTC_THREAD_RR'
-		WEBRTC_CFLAGS+=' -DEXPAT_RELATIVE_PATH'
-		WEBRTC_CFLAGS+=' -DGTEST_RELATIVE_PATH'
-		WEBRTC_CFLAGS+=' -DJSONCPP_RELATIVE_PATH'
-		WEBRTC_CFLAGS+=' -DWEBRTC_RELATIVE_PATH'
-
-		WEBRTC_LIBS=`find ${WEBRTC_PATH} -name lib*.a -exec echo {} +`
-		case "${host_os}" in
-		linux*)
-			WEBRTC_CFLAGS+=' -DWEBRTC_LINUX'
-			WEBRTC_CFLAGS+=' -DWEBRTC_POSIX=1'
-			WEBRTC_CFLAGS+=' -DNOMINMAX'
-			;;
-		cygwin*|mingw*)
-			WEBRTC_CFLAGS+=' -DWEBRTC_WIN'
-			WEBRTC_CFLAGS+=' -DNOGUI'
-			WEBRTC_CFLAGS+=' -DNOMINMAX'
-			;;
-		darwin*)
-#			WEBRTC_CFLAGS+=' -std=gnu++0x'
-			WEBRTC_CFLAGS+=' -Wno-c++0x-extensions'
-			WEBRTC_CFLAGS+=' -Wno-c++11-extensions'
-			WEBRTC_CFLAGS+=' -stdlib=libc++'
-			WEBRTC_CFLAGS+=' -DNOGUI'
-			WEBRTC_CFLAGS+=' -DWEBRTC_MAC'
-			WEBRTC_CFLAGS+=' -DWEBRTC_IOS'
-			WEBRTC_CFLAGS+=' -DWEBRTC_POSIX=1'
-			WEBRTC_LIBS+=' -stdlib=libc++'
-			WEBRTC_LIBS+=' -framework Foundation'
-			WEBRTC_LIBS+=' -framework Cocoa'
-			WEBRTC_LIBS+=' -framework IOKit'
-			WEBRTC_LIBS+=' -framework Security'
-			WEBRTC_LIBS+=' -framework SystemConfiguration'
-			WEBRTC_LIBS+=' -framework AVFoundation'
-			WEBRTC_LIBS+=' -framework ApplicationServices'
-			WEBRTC_LIBS+=' -framework CoreGraphics'
-			WEBRTC_LIBS+=' -framework CoreServices'
-			WEBRTC_LIBS+=' -framework AppKit'
-			WEBRTC_LIBS+=' -framework OpenGL'
-			WEBRTC_LIBS+=' -framework AudioToolbox'
-			WEBRTC_LIBS+=' -framework CoreMedia'
-			WEBRTC_LIBS+=' -framework CoreVideo'
-			WEBRTC_LIBS+=' -framework CoreAudio'
-			;;
-		*)
-			AC_MSG_ERROR(["OS $host_os is not supported"])
-			;;
-		esac
-		AC_SUBST([WEBRTC_CFLAGS])
-		AC_SUBST([WEBRTC_LIBS])
-		AC_MSG_RESULT([yes])
 	fi
 fi
 if test x$soundtouch_flag = "xyes"; then
@@ -1006,10 +1011,14 @@ else
 echo "apple:            off"
 fi
 if test x$webrtc_flag = "xyes"; then
-	if test x$webrtc_check = "xyes"; then
+	if test x$socket_check = "xyes"; then
+		if test x$webrtc_check = "xyes"; then
 echo "webrtc:           on"
-	else
+		else
 echo "webrtc:           off(no compile data detection.)"
+		fi
+	else
+echo "webrtc:           off(no socket code.)"
 	fi
 else
 echo "webrtc:           off"
