@@ -17,6 +17,7 @@
 #include "../../../util/ioUtil.h"
 #include "../../../util/crc32Util.h"
 #include "../../../util/dynamicBufferUtil.h"
+#include "../../../util/hexUtil.h"
 
 ttLibC_Pmt *ttLibC_Pmt_make(
 		ttLibC_Pmt *prev_pmt,
