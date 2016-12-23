@@ -113,6 +113,11 @@ static bool Mp4Reader_readAtom(
 	uint32_t move_size = 8;
 	uint32_t size = ttLibC_ByteReader_bit(byte_reader, 32);
 	uint32_t tag  = ttLibC_ByteReader_bit(byte_reader, 32);
+	if(size == 0) {
+		ERR_PRINT("invalid mp4 data. atom size is 0.");
+		ttLibC_ByteReader_close(&byte_reader);
+		return false;
+	}
 	if(tag != Mp4Type_Mdat && data_size < size) {
 		ttLibC_ByteReader_close(&byte_reader);
 		return false;
