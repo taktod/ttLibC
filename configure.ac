@@ -1011,7 +1011,7 @@ else
 echo "apple:            off"
 fi
 if test x$webrtc_flag = "xyes"; then
-	if test x$socket_check = "xyes"; then
+	if test x$socket_flag = "xyes"; then
 		if test x$webrtc_check = "xyes"; then
 echo "webrtc:           on"
 		else
