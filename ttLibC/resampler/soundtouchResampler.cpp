@@ -241,7 +241,7 @@ bool ttLibC_Soundtouch_resample(
 		}
 		soundtouch_->results16 = s;
 		// if origial is pcmf32
-		if(pcm->inherit_super.type == frameType_pcmF32) {
+		if(soundtouch_->target_type == frameType_pcmF32) {
 			// result should be pcmf32.
 			ttLibC_PcmF32 *f = ttLibC_AudioResampler_makePcmF32FromPcmS16(
 					soundtouch_->resultf32,
