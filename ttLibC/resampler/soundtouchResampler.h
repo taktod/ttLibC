@@ -17,6 +17,8 @@ extern "C" {
 
 typedef struct ttLibC_Resampler_Soundtouch {
 	uint32_t version;
+	uint32_t sample_rate;
+	uint32_t channel_num;
 } ttLibC_Resampler_Soundtouch;
 
 typedef ttLibC_Resampler_Soundtouch ttLibC_Soundtouch;

@@ -49,6 +49,8 @@ ttLibC_Soundtouch *ttLibC_Soundtouch_make(
 	soundtouch->soundtouch->setChannels(channel_num);
 	soundtouch->sample_rate = sample_rate;
 	soundtouch->channel_num = channel_num;
+	soundtouch->inherit_super.sample_rate = sample_rate;
+	soundtouch->inherit_super.channel_num = channel_num;
 	soundtouch->target_type = frameType_pcmS16;
 	return (ttLibC_Soundtouch *)soundtouch;
 }
