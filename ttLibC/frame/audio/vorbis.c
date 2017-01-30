@@ -160,6 +160,9 @@ ttLibC_Vorbis *ttLibC_Vorbis_getFrame(
 				break;
 			case 0x03: // comment
 				{
+					if(prev_frame == NULL) {
+						return NULL;
+					}
 					uint32_t block0 = prev_frame->block0;
 					uint32_t block1 = prev_frame->block1;
 					ttLibC_Vorbis *vorbis = ttLibC_Vorbis_make(
@@ -185,6 +188,9 @@ ttLibC_Vorbis *ttLibC_Vorbis_getFrame(
 				break;
 			case 0x05: // setup
 				{
+					if(prev_frame == NULL) {
+						return NULL;
+					}
 					uint32_t block0 = prev_frame->block0;
 					uint32_t block1 = prev_frame->block1;
 					ttLibC_Vorbis *vorbis = ttLibC_Vorbis_make(
