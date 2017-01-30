@@ -730,7 +730,6 @@ fi
 AM_CONDITIONAL(ENABLE_WEBRTC, test x$webrtc_flag$webrtc_check = "xyesyes")
 
 if test x$soundtouch_flag$lgpl_flag$soundtouch_check = "xyesyesyes"; then
-echo "define soundtouch"
 	AC_DEFINE([__ENABLE_SOUNDTOUCH__])
 fi
 AM_CONDITIONAL(ENABLE_SOUNDTOUCH, test x$soundtouch_flag$lgpl_flag$soundtouch_check = "xyesyesyes")
