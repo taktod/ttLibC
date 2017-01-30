@@ -158,7 +158,7 @@ bool ttLibC_Soundtouch_resample(
 		return false;
 	}
 	if(pcm == NULL) {
-		// TODO do flush all data.
+		// do flush all data.
 		soundtouch_->soundtouch->flush();
 	}
 	else {
@@ -173,7 +173,7 @@ bool ttLibC_Soundtouch_resample(
 		soundtouch_->target_type = pcm->inherit_super.type;
 #ifdef SOUNDTOUCH_INTEGER_SAMPLES
 		// soundtouch work with int16.
-		// TODO not checked yet.
+		// TODO checked this.
 		ttLibC_PcmS16 *source = NULL;
 		if(pcm->inherit_super.type == frameType_pcmS16) {
 			ttLibC_PcmS16 *f = (ttLibC_PcmS16 *)pcm;
