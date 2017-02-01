@@ -284,20 +284,13 @@ ttLibC_ContainerWriter *ttLibC_ContainerWriter_make_(
 		ttLibC_Frame_Type    *target_frame_types,
 		uint32_t              types_num,
 		uint32_t              unit_duration) {
-	if(writer_size == 0) {
-		ERR_PRINT("0 is invalid size for malloc.");
+	ttLibC_ContainerWriter_ *writer = (ttLibC_ContainerWriter_ *)ttLibC_ContainerWriter_make(
+			container_type,
+			writer_size,
+			timebase);
+	if(writer == NULL) {
 		return NULL;
 	}
-	ttLibC_ContainerWriter_ *writer = ttLibC_malloc(writer_size);
-	if(writer == NULL) {
-		ERR_PRINT("failed to allocate memory for writer.");
-	}
-	memset(writer, 0, writer_size);
-	writer->inherit_super.type     = container_type;
-	writer->inherit_super.timebase = timebase;
-	writer->inherit_super.pts      = 0;
-	writer->inherit_super.mode     = containerWriter_normal;
-	// trackのidのつけ方はコンテナ次第なので、あとでなんとかしなければだめか・・・
 	if(track_size == 0) {
 		writer->track_list = NULL;
 	}
