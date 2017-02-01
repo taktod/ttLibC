@@ -49,6 +49,9 @@ ttLibC_MpegtsWriter *ttLibC_MpegtsWriter_make_ex(
 			target_frame_types,
 			types_num,
 			unit_duration);
+	if(writer == NULL) {
+		return NULL;
+	}
 	writer->is_reduce_mode = false;
 	writer->cc_sdt = 0;
 	writer->cc_pat = 0;
