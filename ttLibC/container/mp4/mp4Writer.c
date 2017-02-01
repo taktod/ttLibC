@@ -1159,14 +1159,19 @@ bool ttLibC_Mp4Writer_write(
 		ttLibC_Frame *frame,
 		ttLibC_ContainerWriteFunc callback,
 		void *ptr) {
-	if(!ttLibC_ContainerWriter_write_(
+	switch(ttLibC_ContainerWriter_write_(
 			(ttLibC_ContainerWriter_ *)writer,
 			frame,
 			callback,
 			ptr)) {
+	case -1:
+	default:
 		return false;
+	case 0:
+		return true;
+	case 1:
+		return Mp4Writer_writeFromQueue(writer);
 	}
-	return Mp4Writer_writeFromQueue(writer);
 }
 
 /**

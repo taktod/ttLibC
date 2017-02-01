@@ -1036,14 +1036,19 @@ bool ttLibC_MkvWriter_write(
 		ttLibC_Frame *frame,
 		ttLibC_ContainerWriteFunc callback,
 		void *ptr) {
-	if(!ttLibC_ContainerWriter_write_(
+	switch(ttLibC_ContainerWriter_write_(
 			(ttLibC_ContainerWriter_ *)writer,
 			frame,
 			callback,
 			ptr)) {
+	case -1:
+	default:
 		return false;
+	case 0:
+		return true;
+	case 1:
+		return MkvWriter_writeFromQueue((ttLibC_ContainerWriter_ *)writer);
 	}
-	return MkvWriter_writeFromQueue((ttLibC_ContainerWriter_ *)writer);
 }
 
 void ttLibC_MkvWriter_close(ttLibC_MkvWriter **writer) {

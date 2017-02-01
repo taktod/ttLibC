@@ -604,22 +604,22 @@ bool ttLibC_ContainerWriter_isReadyToWrite(ttLibC_ContainerWriter_ *writer) {
 	return false;
 }
 
-bool ttLibC_ContainerWriter_write_(
+int ttLibC_ContainerWriter_write_(
 		ttLibC_ContainerWriter_ *writer,
 		ttLibC_Frame *frame,
 		ttLibC_ContainerWriteFunc callback,
 		void *ptr) {
 	if(writer == NULL) {
 		ERR_PRINT("writer is null.");
-		return false;
+		return -1;
 	}
 	if(frame == NULL) {
-		return true;
+		return 0;
 	}
 	ttLibC_ContainerWriter_WriteTrack *track = (ttLibC_ContainerWriter_WriteTrack *)ttLibC_StlMap_get(writer->track_list, (void *)(long)frame->id);
 	if(track == NULL) {
 		ERR_PRINT("failed to get correspond track. %d", frame->id);
-		return false;
+		return -1;
 	}
 	uint64_t pts = (uint64_t)(1.0 * frame->pts * writer->inherit_super.timebase / frame->timebase);
 	uint64_t dts = (uint64_t)(1.0 * frame->dts * writer->inherit_super.timebase / frame->timebase);
@@ -633,7 +633,7 @@ bool ttLibC_ContainerWriter_write_(
 		{
 			ttLibC_H264 *h264 = (ttLibC_H264 *)frame;
 			if(h264->type == H264Type_unknown) {
-				return true;
+				return 0;
 			}
 			if(h264->type == H264Type_configData) {
 				ttLibC_H264 *h = ttLibC_H264_clone(
@@ -641,16 +641,16 @@ bool ttLibC_ContainerWriter_write_(
 						h264);
 				if(h == NULL) {
 					ERR_PRINT("failed to make clone data.");
-					return false;
+					return -1;
 				}
 				h->inherit_super.inherit_super.pts = 0;
 				h->inherit_super.inherit_super.dts = 0;
 				h->inherit_super.inherit_super.timebase = writer->inherit_super.timebase;
 				track->h26x_configData = (ttLibC_Frame *)h;
-				return true;
+				return 0;
 			}
 			if(!track->is_appending && h264->type != H264Type_sliceIDR) {
-				return true;
+				return 0;
 			}
 		}
 		break;
@@ -658,7 +658,7 @@ bool ttLibC_ContainerWriter_write_(
 		{
 			ttLibC_H265 *h265 = (ttLibC_H265 *)frame;
 			if(h265->type == H265Type_unknown) {
-				return true;
+				return 0;
 			}
 			if(h265->type == H265Type_configData) {
 				ttLibC_H265 *h = ttLibC_H265_clone(
@@ -666,16 +666,16 @@ bool ttLibC_ContainerWriter_write_(
 						h265);
 				if(h == NULL) {
 					ERR_PRINT("failed to make clone data.");
-					return false;
+					return -1;
 				}
 				h->inherit_super.inherit_super.pts = 0;
 				h->inherit_super.inherit_super.dts = 0;
 				h->inherit_super.inherit_super.timebase = writer->inherit_super.timebase;
 				track->h26x_configData = (ttLibC_Frame *)h;
-				return true;
+				return 0;
 			}
 			if(!track->is_appending && h265->type != H265Type_sliceIDR) {
-				return true;
+				return 0;
 			}
 		}
 		break;
@@ -687,7 +687,7 @@ bool ttLibC_ContainerWriter_write_(
 				case 0:
 					{
 						if(theora->type != TheoraType_identificationHeaderDecodeFrame) {
-							return true;
+							return 0;
 						}
 						++ track->counter;
 					}
@@ -695,7 +695,7 @@ bool ttLibC_ContainerWriter_write_(
 				case 1:
 					{
 						if(theora->type != TheoraType_commentHeaderFrame) {
-							return true;
+							return 0;
 						}
 						++ track->counter;
 					}
@@ -703,7 +703,7 @@ bool ttLibC_ContainerWriter_write_(
 				case 2:
 					{
 						if(theora->type != TheoraType_setupHeaderFrame) {
-							return true;
+							return 0;
 						}
 						++ track->counter;
 					}
@@ -712,7 +712,12 @@ bool ttLibC_ContainerWriter_write_(
 					break;
 				}
 				if(track->counter < 3) {
-					return ContainerWriteTrack_appendQueue(track, frame, 0, 0, writer->inherit_super.timebase);
+					if(!ContainerWriteTrack_appendQueue(track, frame, 0, 0, writer->inherit_super.timebase)) {
+						return -1;
+					}
+					else {
+						return 0;
+					}
 				}
 			}
 		}
@@ -722,7 +727,7 @@ bool ttLibC_ContainerWriter_write_(
 		{
 			ttLibC_Video *video = (ttLibC_Video *)frame;
 			if(!track->is_appending && video->type != videoType_key) {
-				return true;
+				return 0;
 			}
 		}
 		break;
@@ -734,10 +739,10 @@ bool ttLibC_ContainerWriter_write_(
 				break;
 			case Mp3Type_id3:
 			case Mp3Type_tag:
-				return true;
+				return 0;
 			default:
 				ERR_PRINT("unexpected mp3 frame.:%d", mp3->type);
-				return true;
+				return 0;
 			}
 		}
 		break;
@@ -749,12 +754,12 @@ bool ttLibC_ContainerWriter_write_(
 				{
 					if(track->is_appending) {
 						ERR_PRINT("find speex header frame after track generating.");
-						return true;
+						return 0;
 					}
 				}
 				break;
 			case SpeexType_comment:
-				return true;
+				return 0;
 			default:
 				break;
 			}
@@ -767,19 +772,19 @@ bool ttLibC_ContainerWriter_write_(
 				switch(track->counter) {
 				case 0:
 					if(vorbis->type != VorbisType_identification) {
-						return true;
+						return 0;
 					}
 					++ track->counter;
 					break;
 				case 1:
 					if(vorbis->type != VorbisType_comment) {
-						return true;
+						return 0;
 					}
 					++ track->counter;
 					break;
 				case 2:
 					if(vorbis->type != VorbisType_setup) {
-						return true;
+						return 0;
 					}
 					++ track->counter;
 					break;
@@ -787,7 +792,12 @@ bool ttLibC_ContainerWriter_write_(
 					break;
 				}
 				if(track->counter < 3) {
-					return ContainerWriteTrack_appendQueue(track, frame, 0, 0, writer->inherit_super.timebase);
+					if(!ContainerWriteTrack_appendQueue(track, frame, 0, 0, writer->inherit_super.timebase)){
+						return -1;
+					}
+					else {
+						return 0;
+					}
 				}
 			}
 		}
@@ -797,7 +807,7 @@ bool ttLibC_ContainerWriter_write_(
 	}
 	track->is_appending = true;
 	if(!ContainerWriteTrack_appendQueue(track, frame, pts, dts, writer->inherit_super.timebase)) {
-		return false;
+		return -1;
 	}
 	if(writer->is_first) {
 		writer->current_pts_pos = pts;
@@ -807,7 +817,7 @@ bool ttLibC_ContainerWriter_write_(
 	}
 	writer->callback = callback;
 	writer->ptr = ptr;
-	return true;
+	return 1;
 }
 
 bool ttLibC_ContainerWriteTrack_appendQueue(

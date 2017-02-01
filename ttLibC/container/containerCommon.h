@@ -154,7 +154,14 @@ bool ttLibC_ContainerWriteTrack_appendQueue(
 		uint32_t                           timebase,
 		ttLibC_ContainerWriter_Mode        enable_mode);
 
-bool ttLibC_ContainerWriter_write_(
+/**
+ * @param writer
+ * @param frame
+ * @param callback
+ * @param ptr
+ * @return -1:error 0:done, but should not be continue, 1:all done.
+ */
+int ttLibC_ContainerWriter_write_(
 		ttLibC_ContainerWriter_ *writer,
 		ttLibC_Frame *frame,
 		ttLibC_ContainerWriteFunc callback,

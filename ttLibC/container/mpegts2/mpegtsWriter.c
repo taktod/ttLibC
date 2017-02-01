@@ -430,12 +430,18 @@ bool ttLibC_MpegtsWriter_write(
 		ttLibC_ContainerWriteFunc callback,
 		void *ptr) {
 	ttLibC_ContainerWriter_ *writer_ = (ttLibC_ContainerWriter_ *)writer;
-	if(!ttLibC_ContainerWriter_write_(
+	switch(ttLibC_ContainerWriter_write_(
 			writer_,
 			frame,
 			callback,
 			ptr)) {
+	case -1:
+	default:
 		return false;
+	case 0:
+		return true;
+	case 1:
+		break;
 	}
 	ttLibC_ContainerWriter_WriteTrack *track = (ttLibC_ContainerWriter_WriteTrack *)ttLibC_StlMap_get(writer_->track_list, (void *)(long)frame->id);
 	if(track != NULL) {
