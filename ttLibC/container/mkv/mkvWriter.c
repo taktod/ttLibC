@@ -19,6 +19,7 @@
 #include "../../frame/frame.h"
 #include "../../frame/audio/audio.h"
 #include "../../frame/audio/aac.h"
+#include "../../frame/audio/mp3.h"
 #include "../../frame/audio/speex.h"
 #include "../../frame/audio/vorbis.h"
 
@@ -688,6 +689,20 @@ static bool MkvWriter_makeData(
 				}
 			}
 			break;
+		case frameType_mp3:
+			{
+				ttLibC_Mp3 *mp3 = (ttLibC_Mp3 *)frame;
+				switch(mp3->type) {
+				case Mp3Type_frame:
+					break;
+				case Mp3Type_id3:
+				case Mp3Type_tag:
+					continue;
+				default:
+					break;
+				}
+			}
+			break;
 		case frameType_speex:
 			{
 				ttLibC_Speex *speex = (ttLibC_Speex *)frame;
@@ -908,8 +923,8 @@ static bool MkvWriter_makeData(
 				ttLibC_DynamicBuffer_append(buffer, data, data_size);
 			}
 			break;
-		case frameType_adpcm_ima_wav:
 		case frameType_mp3:
+		case frameType_adpcm_ima_wav:
 		case frameType_opus:
 		case frameType_speex:
 		case frameType_vorbis:
