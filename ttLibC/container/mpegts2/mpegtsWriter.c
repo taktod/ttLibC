@@ -501,7 +501,6 @@ static bool MpegtsWriter_closeTracks(void *ptr, void *key, void *item) {
 		ttLibC_DynamicBuffer_close(&track->tmp_buffer);
 		ttLibC_DynamicBuffer_close(&track->tmp_frame_buffer);
 		ttLibC_ContainerWriteTrack_close((ttLibC_ContainerWriter_WriteTrack **)&track);
-		ttLibC_free(track);
 	}
 	return true;
 }
