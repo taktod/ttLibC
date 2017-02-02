@@ -209,7 +209,7 @@ bool ttLibC_ContainerReader_read(
 		size_t data_size,
 		ttLibC_ContainerReadFunc callback,
 		void *ptr) {
-	// それぞれのコンテナの中身をみる。
+	// TODO make this.
 	return true;
 }
 
@@ -334,7 +334,7 @@ void ttLibC_ContainerWriter_close_(ttLibC_ContainerWriter_ **writer) {
 	if(target == NULL) {
 		return;
 	}
-	// 特殊なclose(trackの中にメモリーを保持するものがある場合とかの場合は、先にtrackをcloseして、track_listか該当オブジェクトをNULLにしておけばよい。)
+	// in the case of track have extra memory, not use this function.
 	ttLibC_StlMap_forEach(target->track_list, ContainerWriter_closeTracks, NULL);
 	ttLibC_StlMap_close(&target->track_list);
 	ttLibC_free(target);

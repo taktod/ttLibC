@@ -30,7 +30,6 @@ ttLibC_Mp4 *ttLibC_Ctts_make(
 		uint32_t timebase);
 
 uint32_t ttLibC_Ctts_refCurrentOffset(ttLibC_Mp4 *mp4);
-// pts復元はsttsとcttsの組み合わせをなんとかしないとだめ
 void ttLibC_Ctts_moveNext(ttLibC_Mp4 *mp4);
 
 #ifdef __cplusplus

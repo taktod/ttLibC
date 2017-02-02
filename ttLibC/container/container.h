@@ -97,12 +97,6 @@ void ttLibC_ContainerReader_close(ttLibC_ContainerReader **reader);
 #define containerWriter_normal                 0x00
 #define containerWriter_enable_dts             0x20
 
-/*
-#define containerWriter_keyFrame_division   0x00
-#define containerWriter_innerFrame_division 0x01
-#define containerWriter_allFrame_division   0x02
-*/
-
 // split with all keyFrame
 #define containerWriter_allKeyFrame_split      0x10
 // split with keyFrame

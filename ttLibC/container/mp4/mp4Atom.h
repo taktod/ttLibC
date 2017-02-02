@@ -44,10 +44,6 @@ typedef struct ttLibC_Mp4Track {
 	// for vorbis private data.
 	ttLibC_DynamicBuffer *private_data;
 
-	// for now, just deal with 1 entry only and rate = 1 only elst information.
-	uint32_t elst_mediatime;
-//	float elst_mediarate;
-
 	ttLibC_Mp4 *stts;
 	ttLibC_Mp4 *stsc;
 	ttLibC_Mp4 *stsz;

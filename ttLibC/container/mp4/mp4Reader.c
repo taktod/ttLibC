@@ -331,30 +331,6 @@ static bool Mp4Reader_readAtom(
 							reader->error_number = 1;
 						}
 					}
-/*					uint32_t count;
-					uint64_t segmentDuration;
-					uint64_t mediaTime;
-					uint16_t mediaRateInt;
-					uint16_t mediaRateFraction;
-					count = ttLibC_ByteReader_bit(byte_reader, 32);
-					if(version == 0) {
-						segmentDuration = ttLibC_ByteReader_bit(byte_reader, 32);
-						mediaTime = ttLibC_ByteReader_bit(byte_reader, 32);
-					}
-					else {
-						ERR_PRINT("warn:64bit for elst.");
-						segmentDuration = ttLibC_ByteReader_bit(byte_reader, 64);
-						mediaTime = ttLibC_ByteReader_bit(byte_reader, 64);
-					}
-					mediaRateInt = ttLibC_ByteReader_bit(byte_reader, 16);
-					mediaRateFraction = ttLibC_ByteReader_bit(byte_reader, 16);
-					if(mediaRateInt != 1 && mediaRateFraction != 0) {
-						ERR_PRINT("warn:rate is out of my thought. need to check.");
-					}
-					if(reader->track != NULL) {
-						reader->track->elst_mediatime = (uint32_t)mediaTime;
-					}
-					*/
 				}
 				break;
 			case Mp4Type_Mvhd:
@@ -595,7 +571,7 @@ static bool Mp4Reader_readAtom(
 									case frameType_vorbis:
 										{
 											reader->track->private_data = ttLibC_DynamicBuffer_make();
-											ttLibC_DynamicBuffer_append(reader->track->private_data, buf, esTagSize); // コピっとく。
+											ttLibC_DynamicBuffer_append(reader->track->private_data, buf, esTagSize);
 										}
 										break;
 									default:

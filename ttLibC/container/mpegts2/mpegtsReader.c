@@ -74,14 +74,12 @@ static bool MpegtsReader_read(
 			return false;
 		}
 		reader->pmt = pmt;
-		// ここはあれだな、初期アクセスだったら・・・にすべき。
 		if(reader->pes_list == NULL) {
 			reader->pes_list = ttLibC_StlMap_make();
 			if(reader->pes_list == NULL) {
 				ERR_PRINT("failed to allocate for pes_list.");
 				return false;
 			}
-			// あとはpes_listを初期化しておかないとだめなわけか・・・？
 		}
 		result = callback(ptr, (ttLibC_Mpegts *)reader->pmt);
 	}
@@ -128,7 +126,7 @@ static bool MpegtsReader_read(
 				break;
 			}
 		}
-		// TO ignore incomplete data.
+		// ignore incomplete data.
 		if(!find) {
 			return true;
 		}

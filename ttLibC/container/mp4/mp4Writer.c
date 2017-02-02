@@ -119,7 +119,7 @@ static bool Mp4Writer_makeTrex(void *ptr, void *key, void *item) {
 			break;
 		case frameType_mp3:
 			{
-				// use 1152 for default duration.本当はframeの内容で変化させるべき
+				// use 1152 for default duration. this should be change according to frame.
 				in_size = ttLibC_HexUtil_makeBuffer("00 00 00 20 74 72 65 78 00 00 00 00", buf, 256);
 				ttLibC_DynamicBuffer_append(buffer, buf, in_size);
 				uint32_t be_track_id = be_uint32_t(track->frame_queue->track_id);
@@ -1145,7 +1145,6 @@ static bool Mp4Writer_writeFromQueue(
 			writer->inherit_super.status = status_target_check;
 			writer->inherit_super.inherit_super.pts = writer->inherit_super.target_pos;
 			++ writer->chunk_counter;
-//			return Mp4Writer_writeFromQueue(writer);
 		}
 		break;
 	default:
@@ -1170,8 +1169,9 @@ bool ttLibC_Mp4Writer_write(
 	case 0:
 		return true;
 	case 1:
-		return Mp4Writer_writeFromQueue(writer);
+		break;
 	}
+	return Mp4Writer_writeFromQueue(writer);
 }
 
 /**

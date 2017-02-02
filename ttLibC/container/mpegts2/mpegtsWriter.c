@@ -86,31 +86,11 @@ static bool MpegtsWriter_makeH264Data(
 		ttLibC_MpegtsWriter_ *writer,
 		ttLibC_MpegtsWriteTrack *track,
 		ttLibC_DynamicBuffer *buffer) {
-	// とりあえずこれが一番面倒か・・・
-	// pesにbufferを渡してデータをいれてもらうことにする。
-	// sliceの場合はaud + slice
-	// sliceIDRの場合はaud + sps + pps + sliceIDR
-	// というbufferを作らなければならない。
-	// reducemodeの場合は、nalの分解を00 00 00 01ではなく00 00 01にしなければならないわけだが・・・
-	// データ実体はこんなところ。
-
-	// sliceはadaptationFieldはいらないっぽい。
-	// sliceIDRはadaptationFieldでpcrPIDの場合はptsの書き込みも必要・・・
-	// これは渡すframe情報でなんとかできるからいいか。frame->idが0x0100である場合に判定できる。
-	// あとはrandom accessが可能であるかのフラグも必要。これもadaptationFieldの情報
-
-	// pesデータの登録としては、まずtrackマスクになる値が必要。映像なら0xE0、音声なら0xC0が対象になる。
-
 	if(track->tmp_frame_buffer == NULL) {
 		track->tmp_frame_buffer = ttLibC_DynamicBuffer_make();
 	}
 	ttLibC_DynamicBuffer *dataBuffer = track->tmp_frame_buffer;
 	bool result = true;
-	bool is_first = true;
-	bool need_pcr = false;
-	// 必要になる情報はこんなものかねぇ・・・
-	// とりあえずframeを取り出して処理にまわさないとだめだな。
-	// とりあえず使うべきframeをpop upして減らしておこうか・・・
 	while(true) {
 		ttLibC_H264 *h264 = (ttLibC_H264 *)ttLibC_FrameQueue_ref_first(track->inherit_super.frame_queue);
 		if(h264 != NULL && h264->inherit_super.inherit_super.pts < writer->inherit_super.target_pos) {
@@ -123,17 +103,9 @@ static bool MpegtsWriter_makeH264Data(
 /*			if(h264->inherit_super.inherit_super.pts < writer->current_pts_pos) {
 				continue;
 			}*/
-			need_pcr = is_first;
-			if(h264->inherit_super.inherit_super.id != 0x0100) {
-				need_pcr = false;
-			}
-			// とりあえずデータchunkを作らなければならない。
-			// dynamicBufferにつくるのはいいけど・・・メモリーのreallocがもったいないか・・・
-			// メモリーのallocもできた。
-			// さて・・・
 			uint32_t aud_size = 6;
 			uint8_t aud[6] = {0x00, 0x00, 0x00, 0x01, 0x09, 0xF0};
-			// とりあえずこういうややこしいのはおいといてつくるだけつくってみよう。
+			// make reduce mode later.
 /*			if(writer->is_reduce_mode) {
 				aud[2] = 0x01;
 				aud[3] = 0x09;
@@ -147,17 +119,15 @@ static bool MpegtsWriter_makeH264Data(
 			else {
 				dts -= writer->dts_margin;
 			}
-//			LOG_PRINT("pid:100 pts:%llu dts:%llu", h264->inherit_super.inherit_super.pts, dts);
 			ttLibC_DynamicBuffer_append(dataBuffer, aud, aud_size);
 			switch(h264->type) {
 			case H264Type_slice:
-				// sliceの場合はaud + slice
+				// slice => aud + slice
 				ttLibC_DynamicBuffer_append(dataBuffer, h264->inherit_super.inherit_super.data, h264->inherit_super.inherit_super.buffer_size);
-				ttLibC_Pes_writePacket(track, false, need_pcr, false, 0xE0, h264->inherit_super.inherit_super.id, h264->inherit_super.inherit_super.pts, dts, dataBuffer, buffer);
-				is_first = false;
+				ttLibC_Pes_writePacket(track, false, false, false, 0xE0, h264->inherit_super.inherit_super.id, h264->inherit_super.inherit_super.pts, dts, dataBuffer, buffer);
 				break;
 			case H264Type_sliceIDR:
-				// sliceIDRの場合はaud + sps + pps + sliceIDRという形にしておく。
+				// sliceIDR => aud + sps + pps + sliceIDR
 				{
 					ttLibC_H264 *configData = (ttLibC_H264 *)track->inherit_super.h26x_configData;
 					if(configData == NULL) {
@@ -167,8 +137,7 @@ static bool MpegtsWriter_makeH264Data(
 						ttLibC_DynamicBuffer_append(dataBuffer, configData->inherit_super.inherit_super.data, configData->inherit_super.inherit_super.buffer_size);
 					}
 					ttLibC_DynamicBuffer_append(dataBuffer, h264->inherit_super.inherit_super.data, h264->inherit_super.inherit_super.buffer_size);
-					ttLibC_Pes_writePacket(track, true, need_pcr, false, 0xE0, h264->inherit_super.inherit_super.id, h264->inherit_super.inherit_super.pts, dts, dataBuffer, buffer);
-					is_first = false;
+					ttLibC_Pes_writePacket(track, true, (h264->inherit_super.inherit_super.id == 0x0100), false, 0xE0, h264->inherit_super.inherit_super.id, h264->inherit_super.inherit_super.pts, dts, dataBuffer, buffer);
 				}
 				break;
 			default:
@@ -382,7 +351,7 @@ static bool MpegtsWriter_writeFromQueue(
 			}
 		}
 		break;
-	case status_target_check: // pcrのデータから書き込む範囲を決定する
+	case status_target_check:
 		{
 			ttLibC_ContainerWriter_WriteTrack *track = (ttLibC_ContainerWriter_WriteTrack *)ttLibC_StlMap_get(writer->track_list, (void *)(long)0x0100);
 			ttLibC_FrameQueue_ref(track->frame_queue, ttLibC_ContainerWriter_primaryTrackCheck, writer);
@@ -392,7 +361,7 @@ static bool MpegtsWriter_writeFromQueue(
 			}
 		}
 		break;
-	case status_data_check:   // 書き込む範囲にきちんとしたデータがあることを確認する。
+	case status_data_check:
 		{
 			if(ttLibC_ContainerWriter_isReadyToWrite(writer)) {
 				// all track is ok.
@@ -401,11 +370,9 @@ static bool MpegtsWriter_writeFromQueue(
 			}
 		}
 		break;
-	case status_make_data:    // 実際の書き込むデータを作る。
+	case status_make_data:
 		{
-			// データを作る。
 			if(MpegtsWriter_makeData(writer)) {
-				// trueが応答された書き出し完了とする。
 				writer->status = status_update;
 				return MpegtsWriter_writeFromQueue(writer);
 			}
@@ -414,7 +381,7 @@ static bool MpegtsWriter_writeFromQueue(
 			}
 		}
 		break;
-	case status_update:       // 次のフェーズに移動する。
+	case status_update:
 		{
 			writer->current_pts_pos = writer->target_pos;
 			writer->inherit_super.pts = writer->target_pos;

@@ -115,7 +115,7 @@ static bool MkvWriter_makeTrackEntry(void *ptr, void *key, void *item) {
 				ttLibC_ByteConnector_ebml2(connector, 1, false);
 				ttLibC_ByteConnector_bit(connector, 1, 8);
 				ttLibC_H264 *configData = (ttLibC_H264 *)track->h26x_configData;
-				// video要素の中身をつくっていく。
+				// video information
 				ttLibC_ByteConnector_ebml2(innerConnector, MkvType_PixelWidth, true);
 				ttLibC_ByteConnector_ebml2(innerConnector, 2, false);
 				ttLibC_ByteConnector_bit(innerConnector, configData->inherit_super.width, 16);
@@ -145,7 +145,7 @@ static bool MkvWriter_makeTrackEntry(void *ptr, void *key, void *item) {
 				ttLibC_ByteConnector_ebml2(connector, 1, false);
 				ttLibC_ByteConnector_bit(connector, 1, 8);
 				ttLibC_H265 *configData = (ttLibC_H265 *)track->h26x_configData;
-				// video要素の中身をつくっていく。
+				// video informataion
 				ttLibC_ByteConnector_ebml2(innerConnector, MkvType_PixelWidth, true);
 				ttLibC_ByteConnector_ebml2(innerConnector, 2, false);
 				ttLibC_ByteConnector_bit(innerConnector, configData->inherit_super.width, 16);
@@ -174,7 +174,7 @@ static bool MkvWriter_makeTrackEntry(void *ptr, void *key, void *item) {
 				ttLibC_ByteConnector_ebml2(connector, MkvType_TrackType, true);
 				ttLibC_ByteConnector_ebml2(connector, 1, false);
 				ttLibC_ByteConnector_bit(connector, 1, 8);
-				// video要素の中身をつくっていく。
+				// video information
 				ttLibC_Video *video = (ttLibC_Video *)ttLibC_FrameQueue_ref_first(track->frame_queue);
 				ttLibC_ByteConnector_ebml2(innerConnector, MkvType_PixelWidth, true);
 				ttLibC_ByteConnector_ebml2(innerConnector, 2, false);
@@ -199,7 +199,7 @@ static bool MkvWriter_makeTrackEntry(void *ptr, void *key, void *item) {
 				ttLibC_ByteConnector_ebml2(connector, MkvType_TrackType, true);
 				ttLibC_ByteConnector_ebml2(connector, 1, false);
 				ttLibC_ByteConnector_bit(connector, 1, 8);
-				// video要素の中身をつくっていく。
+				// video information
 				ttLibC_Video *video = (ttLibC_Video *)ttLibC_FrameQueue_ref_first(track->frame_queue);
 				ttLibC_ByteConnector_ebml2(innerConnector, MkvType_PixelWidth, true);
 				ttLibC_ByteConnector_ebml2(innerConnector, 2, false);
@@ -211,7 +211,7 @@ static bool MkvWriter_makeTrackEntry(void *ptr, void *key, void *item) {
 				ttLibC_ByteConnector_ebml2(connector, MkvType_Video, true);
 				ttLibC_ByteConnector_ebml2(connector, innerConnector->write_size, false);
 				ttLibC_ByteConnector_string(connector, (const char *)inner, innerConnector->write_size);
-				// codecPrivateを書き出す frame３つが揃わないとわからないので、まずそれを取り出す。(サイズが決定しない。)
+				// make codecPrivate
 				ttLibC_Theora *identificationFrame = (ttLibC_Theora *)ttLibC_FrameQueue_dequeue_first(track->frame_queue);
 				ttLibC_Theora *commentFrame        = (ttLibC_Theora *)ttLibC_FrameQueue_dequeue_first(track->frame_queue);
 				ttLibC_Theora *setupFrame          = (ttLibC_Theora *)ttLibC_FrameQueue_dequeue_first(track->frame_queue);
@@ -242,7 +242,7 @@ static bool MkvWriter_makeTrackEntry(void *ptr, void *key, void *item) {
 				ttLibC_ByteConnector_ebml2(connector, MkvType_TrackType, true);
 				ttLibC_ByteConnector_ebml2(connector, 1, false);
 				ttLibC_ByteConnector_bit(connector, 1, 8);
-				// video要素の中身をつくっていく。
+				// video information
 				ttLibC_Video *video = (ttLibC_Video *)ttLibC_FrameQueue_ref_first(track->frame_queue);
 				ttLibC_ByteConnector_ebml2(innerConnector, MkvType_PixelWidth, true);
 				ttLibC_ByteConnector_ebml2(innerConnector, 2, false);
@@ -267,7 +267,7 @@ static bool MkvWriter_makeTrackEntry(void *ptr, void *key, void *item) {
 				ttLibC_ByteConnector_ebml2(connector, MkvType_TrackType, true);
 				ttLibC_ByteConnector_ebml2(connector, 1, false);
 				ttLibC_ByteConnector_bit(connector, 1, 8);
-				// video要素の中身をつくっていく。
+				// video information
 				ttLibC_Video *video = (ttLibC_Video *)ttLibC_FrameQueue_ref_first(track->frame_queue);
 				ttLibC_ByteConnector_ebml2(innerConnector, MkvType_PixelWidth, true);
 				ttLibC_ByteConnector_ebml2(innerConnector, 2, false);
@@ -292,7 +292,7 @@ static bool MkvWriter_makeTrackEntry(void *ptr, void *key, void *item) {
 				ttLibC_ByteConnector_ebml2(connector, MkvType_TrackType, true);
 				ttLibC_ByteConnector_ebml2(connector, 1, false);
 				ttLibC_ByteConnector_bit(connector, 2, 8);
-				// audioの子要素をつくっていく。
+				// audio information
 				ttLibC_Aac *aac = (ttLibC_Aac *)ttLibC_FrameQueue_ref_first(track->frame_queue);
 				ttLibC_ByteConnector_ebml2(innerConnector, MkvType_SamplingFrequency, true);
 				ttLibC_ByteConnector_ebml2(innerConnector, 4, false);
@@ -323,7 +323,7 @@ static bool MkvWriter_makeTrackEntry(void *ptr, void *key, void *item) {
 				ttLibC_ByteConnector_ebml2(connector, MkvType_TrackType, true);
 				ttLibC_ByteConnector_ebml2(connector, 1, false);
 				ttLibC_ByteConnector_bit(connector, 2, 8);
-				// audioの子要素をつくっていく
+				// audio information
 				ttLibC_Audio *audio = (ttLibC_Audio *)ttLibC_FrameQueue_ref_first(track->frame_queue);
 				ttLibC_ByteConnector_ebml2(innerConnector, MkvType_SamplingFrequency, true);
 				ttLibC_ByteConnector_ebml2(innerConnector, 4, false);
@@ -342,7 +342,7 @@ static bool MkvWriter_makeTrackEntry(void *ptr, void *key, void *item) {
 				// wave format ex
 				//  codecType 0x0011
 				ttLibC_ByteConnector_bit(connector, 0x1100, 16);
-				//  channel byteConnectorの動作がベースbigEndianなのでbeかけてlittle endianかけるようにする。(なんか妙な気分だけど)
+				// convert bigendian -> little endian.
 				uint16_t be_channel = be_uint16_t(audio->channel_num);
 				ttLibC_ByteConnector_bit(connector, be_channel, 16);
 				//  sample_rate
@@ -375,7 +375,7 @@ static bool MkvWriter_makeTrackEntry(void *ptr, void *key, void *item) {
 				ttLibC_ByteConnector_ebml2(connector, MkvType_TrackType, true);
 				ttLibC_ByteConnector_ebml2(connector, 1, false);
 				ttLibC_ByteConnector_bit(connector, 2, 8);
-				// audioの子要素をつくっていく。
+				// audio information
 				ttLibC_Audio *audio = (ttLibC_Audio *)ttLibC_FrameQueue_ref_first(track->frame_queue);
 				ttLibC_ByteConnector_ebml2(innerConnector, MkvType_SamplingFrequency, true);
 				ttLibC_ByteConnector_ebml2(innerConnector, 4, false);
@@ -401,7 +401,7 @@ static bool MkvWriter_makeTrackEntry(void *ptr, void *key, void *item) {
 				ttLibC_ByteConnector_ebml2(connector, MkvType_TrackType, true);
 				ttLibC_ByteConnector_ebml2(connector, 1, false);
 				ttLibC_ByteConnector_bit(connector, 2, 8);
-				// audioの子要素をつくっていく。
+				// audio information
 				ttLibC_Audio *audio = (ttLibC_Audio *)ttLibC_FrameQueue_ref_first(track->frame_queue);
 				ttLibC_ByteConnector_ebml2(innerConnector, MkvType_SamplingFrequency, true);
 				ttLibC_ByteConnector_ebml2(innerConnector, 4, false);
@@ -429,7 +429,6 @@ static bool MkvWriter_makeTrackEntry(void *ptr, void *key, void *item) {
 			break;
 		case frameType_speex:
 			{
-				// speexをつくっていく。(これがないから、メモリーリークしたのか・・・)
 				// codecID
 				ttLibC_ByteConnector_ebml2(connector, MkvType_CodecID, true);
 				ttLibC_ByteConnector_ebml2(connector, 8, false);
@@ -438,7 +437,7 @@ static bool MkvWriter_makeTrackEntry(void *ptr, void *key, void *item) {
 				ttLibC_ByteConnector_ebml2(connector, MkvType_TrackType, true);
 				ttLibC_ByteConnector_ebml2(connector, 1, false);
 				ttLibC_ByteConnector_bit(connector, 2, 8);
-				// audioの子要素をつくっていく。
+				// audio information
 				ttLibC_Audio *audio = (ttLibC_Audio *)ttLibC_FrameQueue_ref_first(track->frame_queue);
 				ttLibC_ByteConnector_ebml2(innerConnector, MkvType_SamplingFrequency, true);
 				ttLibC_ByteConnector_ebml2(innerConnector, 4, false);
@@ -453,11 +452,10 @@ static bool MkvWriter_makeTrackEntry(void *ptr, void *key, void *item) {
 				ttLibC_ByteConnector_string(connector, (const char *)inner, innerConnector->write_size);
 				// codecPrivate (we must have OpusHead information or no sound.)
 				ttLibC_ByteConnector_ebml2(connector, MkvType_CodecPrivate, true);
-				ttLibC_ByteConnector_ebml2(connector, 0x62, false); // サイズは固定だと思う。
+				ttLibC_ByteConnector_ebml2(connector, 0x62, false); // fixed size?
 				// wave format ex
 				//  codecType 0xA109
 				ttLibC_ByteConnector_bit(connector, 0x09A1, 16);
-				//  channel byteConnectorの動作がベースbigEndianなのでbeかけてlittle endianかけるようにする。(なんか妙な気分だけど)
 				uint16_t be_channel = be_uint16_t(audio->channel_num);
 				ttLibC_ByteConnector_bit(connector, be_channel, 16);
 				//  sample_rate
@@ -468,7 +466,7 @@ static bool MkvWriter_makeTrackEntry(void *ptr, void *key, void *item) {
 				uint32_t *speex_data32 = (uint32_t *)(speex_data + 0x34);
 				uint32_t avgBytesPerSec = *speex_data32 / 8;
 				if(audio->channel_num == 2) {
-					avgBytesPerSec += 100; // stereoの場合は100byte足しておく。 inSignalのデータ17bit(端数のせいで2byteだけ絶対に増える。) x 50１秒あたり50フレームなので100byteふやす。
+					avgBytesPerSec += 100; // for stereo data add 100byte, insignaldata = 17bit -> 2byte x 50 frame / sec = 100byte / sec
 				}
 				uint32_t be_avgBytesPerSec = be_uint32_t(avgBytesPerSec);
 				ttLibC_ByteConnector_bit(connector, be_avgBytesPerSec, 32);
@@ -494,7 +492,7 @@ static bool MkvWriter_makeTrackEntry(void *ptr, void *key, void *item) {
 				ttLibC_ByteConnector_ebml2(connector, MkvType_TrackType, true);
 				ttLibC_ByteConnector_ebml2(connector, 1, false);
 				ttLibC_ByteConnector_bit(connector, 2, 8);
-				// audioの子要素をつくっていく。
+				// audio information
 				ttLibC_Audio *audio = (ttLibC_Audio *)ttLibC_FrameQueue_ref_first(track->frame_queue);
 				ttLibC_ByteConnector_ebml2(innerConnector, MkvType_SamplingFrequency, true);
 				ttLibC_ByteConnector_ebml2(innerConnector, 4, false);
@@ -534,7 +532,7 @@ static bool MkvWriter_makeTrackEntry(void *ptr, void *key, void *item) {
 		}
 		ttLibC_ByteConnector_close(&innerConnector);
 		ttLibC_ByteConnector_close(&connector);
-		// trackEntryが作成完了したので、trackのbufferに追加しなければならない。
+		// trackEntry is done, next to add buffer on track.
 		connector = ttLibC_ByteConnector_make(buf, 256, ByteUtilType_default);
 		ttLibC_ByteConnector_ebml2(connector, MkvType_TrackEntry, true);
 		ttLibC_ByteConnector_ebml2(connector, ttLibC_DynamicBuffer_refSize(trackEntryBuffer), false);
@@ -554,7 +552,7 @@ static bool MkvWriter_makeTrackEntry(void *ptr, void *key, void *item) {
  * @param writer
  */
 static bool MkvWriter_makeInitMkv(ttLibC_ContainerWriter_ *writer) {
-	// 初期データのmkvを作成します。
+	// make initial data of mkv.
 	ttLibC_DynamicBuffer *buffer = ttLibC_DynamicBuffer_make();
 	uint8_t buf[256];
 	size_t in_size;
@@ -599,24 +597,19 @@ static bool MkvWriter_makeInitMkv(ttLibC_ContainerWriter_ *writer) {
 
 static bool MkvWriter_makeData(
 		ttLibC_ContainerWriter_ *writer) {
-	// 書き出しを実施する
-	// clusterを書き出す。(中身完了してからやらないとだめ)
-	// bufferをつくる。ここにデータを書き出す。
+	// write cluster
+	// tmp buffer for generate memory.
 	ttLibC_DynamicBuffer *buffer = ttLibC_DynamicBuffer_make();
-	uint8_t buf[256]; // 一時データ処理用buffer
+	uint8_t buf[256];
 	ttLibC_ByteConnector *connector = ttLibC_ByteConnector_make(buf, 256, ByteUtilType_default);
-	// timecodeを書き出します。
+	// timecode with 64bit int.
 	ttLibC_ByteConnector_ebml2(connector, MkvType_Timecode, true);
-	// とりあえず8byteにしておこうと思う。
 	ttLibC_ByteConnector_ebml2(connector, 8, false);
-	ttLibC_ByteConnector_bit(connector, (writer->current_pts_pos >> 32), 32); // 64bitで書き出ししておく。
-	ttLibC_ByteConnector_bit(connector, (writer->current_pts_pos), 32); // 64bitで書き出ししておく。
+	ttLibC_ByteConnector_bit(connector, (writer->current_pts_pos >> 32), 32);
+	ttLibC_ByteConnector_bit(connector, (writer->current_pts_pos), 32);
 	ttLibC_DynamicBuffer_append(buffer, buf, connector->write_size);
-	// このデータがtimecodeとして書き込むべきデータ
 	ttLibC_ByteConnector_close(&connector);
-	// simpleBlockを書き出していく。
-	// trackからデータを取り出して、一番若いフレームを書き出すという処理をかかないとだめ。
-	// トラックの最大数を知る必要がある。
+	// simpleblock
 	uint64_t target_track;
 	ttLibC_Frame *frame;
 	uint64_t pts;
@@ -626,19 +619,18 @@ static bool MkvWriter_makeData(
 		frame = NULL;
 		pts = 0;
 		is_found = false;
-		// 全トラックから、一番ptsの低いものを見つけなければならない。
+		// find lowest pts data from all tracks.
 		for(uint32_t i = 0;i < writer->track_list->size;++ i) {
 			ttLibC_ContainerWriter_WriteTrack *track = (ttLibC_ContainerWriter_WriteTrack *)ttLibC_StlMap_get(writer->track_list, (void *)(long)(1 + i));
 			frame = ttLibC_FrameQueue_ref_first(track->frame_queue);
 			if(frame != NULL) {
-				if(!is_found) {
-					// まだ見つかってなければなんであれ、登録する。
+				if(!is_found) { // add any in the case of not found.
 					target_track = i + 1;
 					pts = frame->pts;
 					is_found = true;
 				}
 				else {
-					if(pts > frame->pts) {
+					if(pts > frame->pts) { // if pts is lower, overwrite.
 						target_track = i + 1;
 						pts = frame->pts;
 					}
@@ -646,22 +638,22 @@ static bool MkvWriter_makeData(
 			}
 		}
 		if(pts >= writer->target_pos) {
-			// すでに必要データ以上になった場合は、処理やめる。
+			// already have enough data. done.
 			break;
 		}
 		if(target_track == 0) {
-			// 処理すべきトラックがみつからなかった。もうデータがない。処理終わり
+			// no track. done
 			break;
 		}
 		ttLibC_ContainerWriter_WriteTrack *track = (ttLibC_ContainerWriter_WriteTrack *)ttLibC_StlMap_get(writer->track_list, (void *)target_track);
 		frame = ttLibC_FrameQueue_dequeue_first(track->frame_queue);
+		// check if frame is not written in block.
 		switch(frame->type) {
 		case frameType_aac:
 			{
 				ttLibC_Aac *aac = (ttLibC_Aac *)frame;
 				if(aac->type == AacType_dsi) {
-					// dsi情報は処理にまわさない。
-					continue; // これできちんとwhileループのcontinueになってる模様。
+					continue;
 				}
 			}
 			break;
@@ -744,35 +736,28 @@ static bool MkvWriter_makeData(
 		default:
 			break;
 		}
-		// このframeの内容が書き出すべきもの。
-		// simpleBlockで書き出しておく。lacingはしない。
+		// now we should write this frame in simpleblock. not to use lacing.
 		connector = ttLibC_ByteConnector_make(buf, 255, ByteUtilType_default);
 		switch(frame->type) {
 		case frameType_h264:
 			{
 				ttLibC_H264 *h264 = (ttLibC_H264 *)frame;
-				// まずデータサイズがわからないとどうしようもない。
-				// sizeNalに改良する。
 				uint8_t *h264_data = frame->data;
 				size_t h264_data_size = frame->buffer_size;
 				ttLibC_H264_NalInfo nal_info;
 				uint32_t h264_size = 0;
-				// ちょっと無駄がおおいけど、２周してごまかすか・・・
 				while(ttLibC_H264_getNalInfo(&nal_info, h264_data, h264_data_size)) {
 					uint32_t nal_size = nal_info.nal_size - nal_info.data_pos;
 					h264_size += 4 + nal_size;
 					h264_data += nal_info.nal_size;
 					h264_data_size -= nal_info.nal_size;
 				}
-				// サイズはわかった。あとはこのサイズ + 4byteにするだけ。
 				h264_size += 4;
 				ttLibC_ByteConnector_ebml2(connector, MkvType_SimpleBlock, true);
 				ttLibC_ByteConnector_ebml2(connector, h264_size, false);
-				// トラックIDがあまり増えないことを期待しておくことにする。
+				// if track is over 0x80, not work. because we expected trackId for 1byte ebml.
 				ttLibC_ByteConnector_ebml2(connector, frame->id, false);
-				// 時間情報
 				ttLibC_ByteConnector_bit(connector, pts - writer->current_pts_pos, 16);
-				// とりあえずデータをつくるわけだが・・・
 				switch(h264->type) {
 				case H264Type_slice:
 					ttLibC_ByteConnector_bit(connector, 0x00, 8);
@@ -784,12 +769,9 @@ static bool MkvWriter_makeData(
 					LOG_PRINT("unexpected h264 type.");
 					break;
 				}
-				// ここまでであとはsizeNalを書き出していけばOKのはず。
 				ttLibC_DynamicBuffer_append(buffer, buf, connector->write_size);
-				// あとはh264のデータを書き出していく。
 				h264_data = frame->data;
 				h264_data_size = frame->buffer_size;
-				// ちょっと無駄がおおいけど、２周してごまかすか・・・
 				while(ttLibC_H264_getNalInfo(&nal_info, h264_data, h264_data_size)) {
 					uint32_t nal_size = nal_info.nal_size - nal_info.data_pos;
 					h264_size += 4 + nal_size;
@@ -799,23 +781,11 @@ static bool MkvWriter_makeData(
 					h264_data += nal_info.nal_size;
 					h264_data_size -= nal_info.nal_size;
 				}
-				// ここまで終わればきっと大丈夫なデータになってるはず。
-
-				// A3 4304 81 00 00 80 00 00 02 FC 65 ...
-				// simpleBlock
-				//    データサイズ
-				//         トラックID(ebml)
-				//            timestamp
-				//                  データフラグ
-				//                     以降データ実体
-				// よって実体をつくっていかなければならない。
 			}
 			break;
 		case frameType_h265:
 			{
-				// ここでh265のフレーム書き出しをつくらなければならない。
 				ttLibC_H265 *h265 = (ttLibC_H265 *)frame;
-				// まずsizeNalにする。
 				uint8_t *h265_data = frame->data;
 				size_t h265_data_size = frame->buffer_size;
 				ttLibC_H265_NalInfo nal_info;
@@ -826,15 +796,12 @@ static bool MkvWriter_makeData(
 					h265_data += nal_info.nal_size;
 					h265_data_size -= nal_info.nal_size;
 				}
-				// サイズはわかった。あとはこのサイズ + 4byteにするだけ。
 				h265_size += 4;
 				ttLibC_ByteConnector_ebml2(connector, MkvType_SimpleBlock, true);
 				ttLibC_ByteConnector_ebml2(connector, h265_size, false);
-				// トラックIDがあまり増えないことを期待しておくことにする。
+				// TODO must be 1byte ebml value for trackId.
 				ttLibC_ByteConnector_ebml2(connector, frame->id, false);
-				// 時間情報
 				ttLibC_ByteConnector_bit(connector, pts - writer->current_pts_pos, 16);
-				// とりあえずデータをつくるわけだが・・・
 				switch(h265->type) {
 				case H265Type_slice:
 					ttLibC_ByteConnector_bit(connector, 0x00, 8);
@@ -847,10 +814,8 @@ static bool MkvWriter_makeData(
 					break;
 				}
 				ttLibC_DynamicBuffer_append(buffer, buf, connector->write_size);
-				// あとはh265のデータを書き出していく。
 				h265_data = frame->data;
 				h265_data_size = frame->buffer_size;
-				// ちょっと無駄がおおいけど、２周してごまかすか・・・
 				while(ttLibC_H265_getNalInfo(&nal_info, h265_data, h265_data_size)) {
 					uint32_t nal_size = nal_info.nal_size - nal_info.data_pos;
 					h265_size += 4 + nal_size;
@@ -865,35 +830,23 @@ static bool MkvWriter_makeData(
 		case frameType_aac:
 			{
 				ttLibC_Aac *aac = (ttLibC_Aac *)frame;
-				// データサイズを知る必要がある。
 				uint8_t *aac_data = aac->inherit_super.inherit_super.data;
 				uint32_t aac_size = aac->inherit_super.inherit_super.buffer_size;
+				// use AacType_raw
 				if(aac->type == AacType_adts) {
-					// dsiが1くることはないと思うが・・・
 					aac_data += 7;
 					aac_size -= 7;
 				}
 				aac_size += 4;
-				// サイズはわかった。あとはこのサイズ + 4byteにするだけ。
 				ttLibC_ByteConnector_ebml2(connector, MkvType_SimpleBlock, true);
 				ttLibC_ByteConnector_ebml2(connector, aac_size, false);
-				// トラックIDがあまり増えないことを期待しておくことにする。
 				ttLibC_ByteConnector_ebml2(connector, frame->id, false);
-				// 時間情報
 				ttLibC_ByteConnector_bit(connector, pts - writer->current_pts_pos, 16);
 				ttLibC_ByteConnector_bit(connector, 0x80, 8);
-				// あとはデータをかけばOK
 				ttLibC_DynamicBuffer_append(buffer, buf, connector->write_size);
 
 				aac_size -= 4;
 				ttLibC_DynamicBuffer_append(buffer, aac_data, aac_size);
-				// A3 8D 82 00 00 80 21...
-				// simpleBlock
-				//    データサイズ
-				//       track
-				//          timestamp
-				//                データフラグ(keyFrameの映像と同じ扱いっぽい。)
-				//                   あとはデータ実体
 			}
 			break;
 		case frameType_vp8:
@@ -969,7 +922,7 @@ static bool MkvWriter_makeData(
 static bool MkvWriter_writeFromQueue(
 		ttLibC_ContainerWriter_ *writer) {
 	switch(writer->status) {
-	case status_init_check: // 初期データ作成可能か確認
+	case status_init_check:
 		{
 			if(ttLibC_ContainerWriter_isReadyToStart(writer)) {
 				writer->status = status_make_init;
@@ -977,8 +930,7 @@ static bool MkvWriter_writeFromQueue(
 			}
 		}
 		break;
-	case status_make_init: // 初期データ作成
-		// 初期データ作成動作を実際に発動させる。
+	case status_make_init:
 		if(MkvWriter_makeInitMkv(writer)) {
 			writer->status = status_target_check;
 			return MkvWriter_writeFromQueue(writer);
@@ -989,7 +941,7 @@ static bool MkvWriter_writeFromQueue(
 			return false;
 		}
 		break;
-	case status_target_check: // cluster書き込み先がどの程度になるか初めのトラックから判断
+	case status_target_check:
 		{
 			ttLibC_ContainerWriter_WriteTrack *track = (ttLibC_ContainerWriter_WriteTrack *)ttLibC_StlMap_get(writer->track_list, (void *)1);
 			ttLibC_FrameQueue_ref(track->frame_queue, ttLibC_ContainerWriter_primaryTrackCheck, writer);
@@ -999,7 +951,7 @@ static bool MkvWriter_writeFromQueue(
 			}
 		}
 		break;
-	case status_data_check: // cluster分書き込むのに必要なデータがあるか確認
+	case status_data_check:
 		{
 			if(ttLibC_ContainerWriter_isReadyToWrite(writer)) {
 				writer->status = status_make_data;
@@ -1007,7 +959,7 @@ static bool MkvWriter_writeFromQueue(
 			}
 		}
 		break;
-	case status_make_data: // clusterの書き込みを実施
+	case status_make_data:
 		{
 			if(MkvWriter_makeData(writer)) {
 				// write done.
@@ -1016,13 +968,11 @@ static bool MkvWriter_writeFromQueue(
 			}
 		}
 		break;
-	case status_update: // 次の処理へ移動する。(status_target_checkにいく。)
+	case status_update:
 		{
 			writer->current_pts_pos = writer->target_pos;
 			writer->inherit_super.pts = writer->target_pos;
 			writer->status = status_target_check;
-			// 無限ループが怖いのでここで止めとく。
-			// 呼び出しループが大きすぎるとstackエラーになる環境がありえるので、こうしとく。
 		}
 		break;
 	default:
@@ -1047,8 +997,9 @@ bool ttLibC_MkvWriter_write(
 	case 0:
 		return true;
 	case 1:
-		return MkvWriter_writeFromQueue((ttLibC_ContainerWriter_ *)writer);
+		break;
 	}
+	return MkvWriter_writeFromQueue((ttLibC_ContainerWriter_ *)writer);
 }
 
 void ttLibC_MkvWriter_close(ttLibC_MkvWriter **writer) {

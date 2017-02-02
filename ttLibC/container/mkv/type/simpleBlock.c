@@ -43,8 +43,6 @@ static void SimpleBlock_getLace0Frame(
 	switch(track->type) {
 	case frameType_h265:
 		{
-			// ここはframeの解析を実施するところ。
-			// あとはここで解析してれば大丈夫になるんだろうか・・・
 			uint8_t *buf = data;
 			size_t buf_size = data_size;
 			do {
@@ -263,9 +261,6 @@ static void SimpleBlock_getLace0Frame(
 		break;
 	case frameType_adpcm_ima_wav:
 		{
-			// adpcmの細かいところの指定はbinaryから復元できないので、ここに書こう
-			// sample_numはpcmの値から復元しなければならないわけか・・・
-			// たしか、4bitが１データだっけ？
 			uint32_t sample_num = 0;
 			switch(track->channel_num) {
 			case 1:
@@ -388,7 +383,6 @@ static void SimpleBlock_getLace0Frame(
 				reader->error_number = 5;
 			}
 			else {
-				// とりあえずこれで上書きしておく。
 				speex->inherit_super.channel_num = track->channel_num;
 				speex->inherit_super.sample_rate = track->sample_rate;
 				track->frame = (ttLibC_Frame *)speex;

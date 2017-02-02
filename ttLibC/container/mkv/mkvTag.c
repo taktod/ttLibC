@@ -209,19 +209,6 @@ void ttLibC_MkvTag_getPrivateDataFrame(
 	case frameType_aac:
 		{
 			memcpy(&track->dsi_info, private_data, private_data_size);
-			// try to callback data.
-/*			ttLibC_Aac *aac = ttLibC_Aac_make(
-					NULL,
-					AacType_dsi,
-					track->sample_rate,
-					0,
-					track->channel_num,
-					private_data,
-					private_data_size,
-					true,
-					0,
-					reader_->timebase,
-					track->dsi_info);*/
 			ttLibC_Aac *aac = ttLibC_Aac_getFrame(
 					NULL,
 					private_data,
@@ -314,13 +301,11 @@ void ttLibC_MkvTag_getPrivateDataFrame(
 		}
 		break;
 	case frameType_unknown:
-		// 音声の場合はspeexみたいなriffのデータの場合がありうる。
-		// とりあえずwave format exだったはず。
+		// in the case of riff, we will be here. such as speex, adpcmimawav
 		{
-			// wave format exであると仮定してbinaryをみてみることにする。
-			// check data as wave format ex.
+			// try to read binary as wave format ex.
 			if(!track->is_video) {
-				// 音声であることが条件(そりゃそうだ。)
+				// must be audio
 				ttLibC_ByteReader *reader = ttLibC_ByteReader_make(private_data, private_data_size, ByteUtilType_default);
 				uint16_t be_tag = ttLibC_ByteReader_bit(reader, 16);
 				uint16_t be_channels = ttLibC_ByteReader_bit(reader, 16);
@@ -329,9 +314,8 @@ void ttLibC_MkvTag_getPrivateDataFrame(
 				uint16_t channels = be_uint16_t(be_channels);
 				uint32_t sample_rate = be_uint32_t(be_sample_rate);
 				ttLibC_ByteReader_close(&reader);
-				if(channels == track->channel_num && sample_rate ==track->sample_rate) {
-					// トラックとsampleRateが一致するようなら、waveformatexであろう。
-					// 本当はcodecIDを保持しておいて、判定した方がいいと思う。
+				// take as ok, if sample rate and channel number are same.
+				if(channels == track->channel_num && sample_rate == track->sample_rate) {
 					switch(tag) {
 					default:
 					case 0x0000: // unknown
@@ -351,8 +335,7 @@ void ttLibC_MkvTag_getPrivateDataFrame(
 					case 0xA109: // speex
 						{
 							track->type = frameType_speex;
-							// とりあえず欲しい情報はすでに全部あるからこれでいいか。
-							// extraデータの部分でheaderを読み込まないとだめっぽい。
+							// we already have enough information, however  it is better to analyze speex header information to check.
 							ttLibC_Speex *speex = ttLibC_Speex_getFrame(
 									(ttLibC_Speex *)track->frame,
 									private_data + 18,
@@ -380,7 +363,6 @@ void ttLibC_MkvTag_getPrivateDataFrame(
 					}
 				}
 			}
-			// そこからcodecがなにであるかわかるはず。
 //			reader_->error_number = 3;
 		}
 		break;

@@ -191,17 +191,6 @@ ttLibC_Pes *ttLibC_Pes_getPacket(
 			uint64_t dts = ((ttLibC_ByteReader_bit(reader, 4) << 29) & 0xC0000000)
 					| ((ttLibC_ByteReader_bit(reader, 16) << 14)     & 0x3FFF8000)
 					| ((ttLibC_ByteReader_bit(reader, 16) >> 1)      & 0x00007FFF);
-			if(header_info.pid == 0x0100) {
-//				LOG_PRINT("id:%x pts:%llu dts:%llu", header_info.pid, pts, dts);
-			}
-		}
-		else {
-			if(header_info.pid == 0x0100) {
-//				LOG_PRINT("id:%x pts:%llu dts:%llu *", header_info.pid, pts, pts);
-			}
-			else {
-//				LOG_PRINT("    id:%x pts:%llu dts:%llu", header_info.pid, pts, pts);
-			}
 		}
 		data += reader->read_size;
 		data_size -= reader->read_size;
@@ -390,34 +379,22 @@ bool ttLibC_Pes_writePacket(
 		uint64_t dts, // dts
 		ttLibC_DynamicBuffer *frame_buffer, // frame buffer
 		ttLibC_DynamicBuffer *output_buffer) { // buffer for result.
-	// このbufferにデータをいれていこうと思う。
-	// そっか巡回カウンターの値もなんとかしないとだめなのね・・・うーん。
-	// 書き出しを実施する。
-	// データから書き出しを実施する。
-	// とりあえずbinaryをつくって、dump出しておくか・・・
-	// とりあえずpidが0x100の場合 or has_randomAccessがtrueの場合、データサイズがおもったより小さい場合(188byte以下になる場合)
-	// これらの条件に当てはまる場合はadaptation fieldが必要になる。
-	// サンプル
+	// sample
 	// 47 41 00 30 07 50 00 00 7B 0C 7E 00 00 00 01 E0 00 00 80 C0 0A 31 00 09 07 4D 11 00 07 D8 61 00 00 00 01 09
-	//          10 adaptation fieldがなければ10
 	//             07 adaptation size
-	//                40 10でランダムアクセス + pcr
-	//                   pcrのデータ
-	//                                  ここからフレームデータ
-	//                                             トラックIDとかだったと思う。
-	//                                                          C0:ptsとdts 80pts 0Aのあとで5byte 5byteとなってる。
-	//                                                 [    ]sizeだっけ
-	// 残りはh264のnal
+	//                40 10:random access + pcr flag
+	//                   pcr information
+	//                                             trackId
+	//                                                 [    ]size(in the case of less than 65536)
+	//                                                          C0:pts + dts 5byte + 5byte
 
-	// サンプル2
+	// sample2
 	// 47 41 01 30 01 40 00 00 01 C0 0B 75 80 80 05 21 00 07 F5 AF FF FB 90 64
-	//          30でadaptationfieldあり
-	//             1byte 40 ランダムアクセス only
-	//                               データサイズ 0xB75っぽい。
-	//                                        80でptsのみあり。      [ここから普通のmp3
-	// とりあえず普通のデータを一旦つくって、必要となるデータサイズがどうなるか確認後、adaptation fieldについて、調整すればよさそう。
+	//             1byte 40 randomAccess only
+	//                               data size 0xB75
+	//                                        80 pts only          [mp3
 
-	// とりあえずマクロでごまかしておく。
+	// use macro to make easy.
 #define Buf_t_init(a)			{a.ptr = a.buf;a.length = 0;a.ptr_length = 188;}
 #define Buf_t_byte(a, b)		{*a.ptr = b;++ a.ptr;--a.ptr_length;++ a.length;}
 #define Buf_t_hex(a, b)			{int c = ttLibC_HexUtil_makeBuffer(b, a.ptr, a.ptr_length); \
@@ -458,18 +435,18 @@ bool ttLibC_Pes_writePacket(
 		if(is_first) {
 			Buf_t_hex(header_buf, "00 00 01");
 			Buf_t_byte(header_buf, trackBaseId | (pid & 0x0F));
-			Buf_t_hex(header_buf, "00 00 80 80 05"); // フレームの全長、あとでいれる。
-			Buf_t_timestamp(header_buf, 0x21, pts); // pts追加
+			Buf_t_hex(header_buf, "00 00 80 80 05");
+			Buf_t_timestamp(header_buf, 0x21, pts);
 
 			// データをつくっておく。
 			switch(track->inherit_super.frame_type) {
 			case frameType_h264:
 //			case frameType_h265:
 				if((track->inherit_super.use_mode & containerWriter_enable_dts) != 0 && pts != dts) {
-					header_buf.buf[7] |= 0x40; // こっちもdtsあるフラグ追加
+					header_buf.buf[7] |= 0x40; // add flag for dts
 					header_buf.buf[8] = 0x0A;
-					header_buf.buf[9] |= 0x10; // dtsありにする。
-					Buf_t_timestamp(header_buf, 0x11, dts); // dts追加
+					header_buf.buf[9] |= 0x10; // update pts with dts flag
+					Buf_t_timestamp(header_buf, 0x11, dts); // dts info.
 				}
 				break;
 			default:
@@ -483,7 +460,7 @@ bool ttLibC_Pes_writePacket(
 				}
 			}
 			if(has_pcr) {
-				// pcrPIDの場合adaptation fieldは8byte固定 1byte(size) + 1byte(flag) + 6byte(pts)
+				// with pcr adaptationFIeld(8byte) = 1byte(size) + 1byte(flag) + 6byte(pts);
 				Buf_t_byte(adapt_buf, 0x07);
 				if(has_randomAccess) {
 					Buf_t_byte(adapt_buf, 0x50);
@@ -491,18 +468,14 @@ bool ttLibC_Pes_writePacket(
 				else {
 					Buf_t_byte(adapt_buf, 0x10);
 				}
-				// これ・・・h264の場合はdtsいれた方が建設的かも
-				Buf_t_pcr(adapt_buf, pts); // これでもOKなのか・・・
-//				Buf_t_pcr(adapt_buf, pts - 6006); // これでもOKなのか・・・
-//				Buf_t_pcr(adapt_buf, pts - 63000 - 6006);
+				Buf_t_pcr(adapt_buf, pts); // TODO check pcrPts should be behind from timestamp?
 			}
 			else if(has_randomAccess) {
-				// ランダムアクセスがonの場合はfragがある
 				Buf_t_byte(adapt_buf, 0x01);
 				Buf_t_byte(adapt_buf, 0x40);
 			}
 		}
-		// このlengthが184以下の場合はadapatation fieldで埋めが必要
+		// if less than 184 byte, adaptation padding is necessary.
 		Buf_t_byte(sync_buf, 0x47);
 		if(is_first) {
 			Buf_t_byte(sync_buf, 0x40 | ((pid >> 8) & 0xFF));
