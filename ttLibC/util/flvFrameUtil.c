@@ -119,7 +119,7 @@ static ttLibC_Video *FlvFrameManager_readH264Binary(
 					data,
 					data_size,
 					true,
-					pts,
+					pts + dts,
 					1000);
 			if(h264 == NULL) {
 				ERR_PRINT("failed to make h264 data.");
