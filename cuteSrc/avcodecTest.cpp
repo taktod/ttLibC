@@ -385,6 +385,104 @@ static void pcmMulawTest() {
 	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
+static void opusTest() {
+	LOG_PRINT("opusTest");
+#if defined(__ENABLE_AVCODEC__) && defined(__ENABLE_OPENAL__)
+	avcodecAudioTest_t testData;
+	uint32_t sample_rate = 48000, channel_num = 1;
+	ttLibC_BeepGenerator *generator = ttLibC_BeepGenerator_make(PcmS16Type_littleEndian, 440, sample_rate, channel_num);
+	generator->amplitude = 30000;
+
+	AVCodecContext *enc = (AVCodecContext *)ttLibC_AvcodecEncoder_getAVCodecContext(frameType_opus);
+	enc->bit_rate = 96000;
+	enc->sample_rate = sample_rate;
+	enc->time_base = (AVRational){1, (int)sample_rate};
+	enc->channels = channel_num;
+	enc->channel_layout = av_get_default_channel_layout(channel_num);
+	enc->sample_fmt = AV_SAMPLE_FMT_S16;
+	enc->strict_std_compliance = -2;
+	ttLibC_AvcodecEncoder *encoder = ttLibC_AvcodecEncoder_makeWithAVCodecContext(enc);
+
+	testData.device = ttLibC_AlDevice_make(256);
+	testData.pcms16 = NULL;
+	testData.decoder = ttLibC_AvcodecAudioDecoder_make_ex(
+			frameType_opus,
+			sample_rate,
+			channel_num,
+			ttLibC_AvcodecEncoder_getExtraData(encoder),
+			ttLibC_AvcodecEncoder_getExtraDataSize(encoder));
+	ttLibC_PcmS16 *pcms16 = NULL, *p;
+
+	for(int i = 0;i < 10;++ i) {
+		p = ttLibC_BeepGenerator_makeBeepByMiliSec(generator, pcms16, 100);
+		if(p == NULL) {
+			break;
+		}
+		pcms16 = p;
+		ttLibC_AvcodecEncoder_encode(encoder, (ttLibC_Frame *)pcms16, avcodecAudioEncodeCallback, &testData);
+	}
+	// start to play
+	ttLibC_AlDevice_proceed(testData.device, -1);
+
+	ttLibC_PcmS16_close(&pcms16);
+	ttLibC_AvcodecDecoder_close(&testData.decoder);
+	ttLibC_PcmS16_close(&testData.pcms16);
+	ttLibC_AlDevice_close(&testData.device);
+	ttLibC_AvcodecEncoder_close(&encoder);
+	ttLibC_BeepGenerator_close(&generator);
+#endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
+
+static void speexTest() {
+	LOG_PRINT("speexTest");
+#if defined(__ENABLE_AVCODEC__) && defined(__ENABLE_OPENAL__)
+	avcodecAudioTest_t testData;
+	uint32_t sample_rate = 32000, channel_num = 1;
+	ttLibC_BeepGenerator *generator = ttLibC_BeepGenerator_make(PcmS16Type_littleEndian, 440, sample_rate, channel_num);
+	generator->amplitude = 30000;
+
+	AVCodecContext *enc = (AVCodecContext *)ttLibC_AvcodecEncoder_getAVCodecContext(frameType_speex);
+	enc->bit_rate = 96000;
+	enc->sample_rate = sample_rate;
+	enc->time_base = (AVRational){1, (int)sample_rate};
+	enc->channels = channel_num;
+	enc->channel_layout = av_get_default_channel_layout(channel_num);
+	enc->sample_fmt = AV_SAMPLE_FMT_S16;
+	enc->strict_std_compliance = -2;
+	ttLibC_AvcodecEncoder *encoder = ttLibC_AvcodecEncoder_makeWithAVCodecContext(enc);
+
+	testData.device = ttLibC_AlDevice_make(256);
+	testData.pcms16 = NULL;
+	testData.decoder = ttLibC_AvcodecAudioDecoder_make_ex(
+			frameType_speex,
+			sample_rate,
+			channel_num,
+			ttLibC_AvcodecEncoder_getExtraData(encoder),
+			ttLibC_AvcodecEncoder_getExtraDataSize(encoder));
+	ttLibC_PcmS16 *pcms16 = NULL, *p;
+
+	for(int i = 0;i < 10;++ i) {
+		p = ttLibC_BeepGenerator_makeBeepByMiliSec(generator, pcms16, 100);
+		if(p == NULL) {
+			break;
+		}
+		pcms16 = p;
+		ttLibC_AvcodecEncoder_encode(encoder, (ttLibC_Frame *)pcms16, avcodecAudioEncodeCallback, &testData);
+	}
+	// start to play
+	ttLibC_AlDevice_proceed(testData.device, -1);
+
+	ttLibC_PcmS16_close(&pcms16);
+	ttLibC_AvcodecDecoder_close(&testData.decoder);
+	ttLibC_PcmS16_close(&testData.pcms16);
+	ttLibC_AlDevice_close(&testData.device);
+	ttLibC_AvcodecEncoder_close(&encoder);
+	ttLibC_BeepGenerator_close(&generator);
+#endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
+
 static void vorbisTest() {
 	LOG_PRINT("vorbisTest");
 #if defined(__ENABLE_AVCODEC__) && defined(__ENABLE_OPENAL__)
@@ -765,6 +863,8 @@ cute::suite avcodecTests(cute::suite s) {
 	s.push_back(CUTE(nellymoserTest));
 	s.push_back(CUTE(pcmAlawTest));
 	s.push_back(CUTE(pcmMulawTest));
+	s.push_back(CUTE(opusTest));
+	s.push_back(CUTE(speexTest));
 	s.push_back(CUTE(vorbisTest));
 	s.push_back(CUTE(flv1Test));
 	s.push_back(CUTE(vp8Test));

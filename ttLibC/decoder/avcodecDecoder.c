@@ -433,6 +433,7 @@ static bool AvcodecDecoder_decodeVideo(
  * @param frame_type target ttLibC_Frame_Type
  */
 void *ttLibC_AvcodecDecoder_getAVCodecContext(ttLibC_Frame_Type frame_type) {
+	avcodec_register_all();
 	AVCodec *codec = NULL;
 	switch(frame_type) {
 	case frameType_aac:
@@ -715,7 +716,6 @@ ttLibC_AvcodecDecoder *ttLibC_AvcodecAudioDecoder_make_ex(
 		uint32_t channel_num,
 		void *extradata,
 		size_t extradata_size) {
-	avcodec_register_all();
 	AVCodecContext *dec = (AVCodecContext *)ttLibC_AvcodecDecoder_getAVCodecContext(frame_type);
 	if(dec == NULL) {
 		return NULL;
@@ -760,7 +760,6 @@ ttLibC_AvcodecDecoder *ttLibC_AvcodecVideoDecoder_make_ex(
 		uint32_t height,
 		void *extradata,
 		size_t extradata_size) {
-	avcodec_register_all();
 	AVCodecContext *dec = (AVCodecContext *)ttLibC_AvcodecDecoder_getAVCodecContext(frame_type);
 	if(dec == NULL) {
 		return NULL;
@@ -778,7 +777,6 @@ ttLibC_AvcodecDecoder *ttLibC_AvcodecVideoDecoder_make_ex(
  */
 ttLibC_AvcodecDecoder *ttLibC_AvcodecDecoder_make(
 		ttLibC_Frame_Type frame_type) {
-	avcodec_register_all();
 	AVCodecContext *dec = (AVCodecContext *)ttLibC_AvcodecDecoder_getAVCodecContext(frame_type);
 	if(dec == NULL) {
 		return NULL;

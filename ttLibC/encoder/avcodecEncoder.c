@@ -199,8 +199,6 @@ static bool AvcodecEncoder_encode_AudioDetail(
 		break;
 	case frameType_opus:
 		{
-			// TODO not check yet.
-			LOG_PRINT("not check yet.");
 			ttLibC_Opus *opus = ttLibC_Opus_make(
 					(ttLibC_Opus *)encoder->frame,
 					OpusType_frame,
@@ -265,8 +263,6 @@ static bool AvcodecEncoder_encode_AudioDetail(
 		break;
 	case frameType_speex:
 		{
-			// TODO not check yet.
-			LOG_PRINT("not check yet.");
 			ttLibC_Speex *speex = ttLibC_Speex_make(
 					(ttLibC_Speex *)encoder->frame,
 					SpeexType_frame,
@@ -915,6 +911,7 @@ static bool AvcodecEncoder_encode_Yuv420(
  */
 void *ttLibC_AvcodecEncoder_getAVCodecContext(ttLibC_Frame_Type frame_type) {
 	AVCodec *codec = NULL;
+	avcodec_register_all();
 	switch(frame_type) {
 	case frameType_aac:
 		codec = avcodec_find_encoder(AV_CODEC_ID_AAC);
@@ -1250,7 +1247,6 @@ ttLibC_AvcodecEncoder *ttLibC_AvcodecAudioEncoder_make_ex(
 		uint32_t sample_rate,
 		uint32_t channel_num,
 		uint32_t bitrate) {
-	avcodec_register_all();
 	AVCodecContext *enc = ttLibC_AvcodecEncoder_getAVCodecContext(frame_type);
 	if(enc == NULL) {
 		return NULL;
@@ -1319,7 +1315,6 @@ ttLibC_AvcodecEncoder *ttLibC_AvcodecVideoEncoder_make_ex(
 		uint32_t quality,
 		uint32_t bitrate,
 		uint32_t timebase) {
-	avcodec_register_all();
 	AVCodecContext *enc = ttLibC_AvcodecEncoder_getAVCodecContext(frame_type);
 	if(enc == NULL) {
 		return NULL;
