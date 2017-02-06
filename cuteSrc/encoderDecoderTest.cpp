@@ -688,7 +688,7 @@ static void x264Test() {
 	LOG_PRINT("x264Test");
 #if defined(__ENABLE_X264__) && defined(__ENABLE_OPENCV__) && defined(__ENABLE_AVCODEC__)
 	// x264 does not have decoder.
-	// encode with x264 and decode with openh264.
+	// encode with x264 and decode with avcodec.
 	uint32_t width = 320, height = 240;
 	ttLibC_CvCapture *capture = ttLibC_CvCapture_make(0, width, height);
 	ttLibC_CvWindow *window = ttLibC_CvWindow_make("original");
