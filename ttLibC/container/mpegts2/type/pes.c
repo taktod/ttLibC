@@ -409,7 +409,7 @@ bool ttLibC_Pes_writePacket(
 									Buf_t_byte(a, 0x00); \
 								}
 #define Buf_t_timestamp(a, b, c){ \
-									Buf_t_byte(a, b | ((c >> 30) & 0x0E)); \
+									Buf_t_byte(a, b | ((c >> 29) & 0x0E)); \
 									Buf_t_byte(a, (c >> 22) & 0xFF); \
 									Buf_t_byte(a, ((c >> 14) & 0xFE) | 0x01); \
 									Buf_t_byte(a, (c >> 7) & 0xFF); \
