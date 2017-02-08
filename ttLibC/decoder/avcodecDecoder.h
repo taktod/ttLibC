@@ -24,20 +24,14 @@ extern "C" {
 typedef struct ttLibC_Decoder_AvcodecDecoder {
 	/** input frame type */
 	ttLibC_Frame_Type frame_type;
-	union {
-		struct {
-			/** width of decoded frame(for video). */
-			uint32_t width;
-			/** height of decoded frame(for video). */
-			uint32_t height;
-		};
-		struct {
-			/** sample_rate of decoded frame(for audio). */
-			uint32_t sample_rate;
-			/** channel_num of decoded frame(for audio). */
-			uint32_t channel_num;
-		};
-	};
+	/** width of decoded frame(for video). */
+	uint32_t width;
+	/** height of decoded frame(for video). */
+	uint32_t height;
+	/** sample_rate of decoded frame(for audio). */
+	uint32_t sample_rate;
+	/** channel_num of decoded frame(for audio). */
+	uint32_t channel_num;
 } ttLibC_Decoder_AvcodecDecoder;
 
 typedef ttLibC_Decoder_AvcodecDecoder ttLibC_AvcodecDecoder;

@@ -28,20 +28,14 @@ typedef struct ttLibC_Encoder_AvcodecEncoder {
 	ttLibC_Frame_Type input_frame_type;
 	/** input frame format type. ttLibC_PcmS16_Type, ttLibC_PcmF32_Type, ttLibC_Yuv420_Type ... */
 	uint32_t input_format_type;
-	union {
-		struct {
-			/** width for video */
-			uint32_t width;
-			/** height for video */
-			uint32_t height;
-		};
-		struct {
-			/** sample_rate for audio */
-			uint32_t sample_rate;
-			/** channel_num for audio */
-			uint32_t channel_num;
-		};
-	};
+	/** width for video */
+	uint32_t width;
+	/** height for video */
+	uint32_t height;
+	/** sample_rate for audio */
+	uint32_t sample_rate;
+	/** channel_num for audio */
+	uint32_t channel_num;
 } ttLibC_Encoder_AvcodecEncoder;
 
 typedef ttLibC_Encoder_AvcodecEncoder ttLibC_AvcodecEncoder;
