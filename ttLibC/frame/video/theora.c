@@ -172,10 +172,12 @@ uint32_t ttLibC_Theora_getWidth(ttLibC_Theora *prev_frame, uint8_t *data, size_t
 	}
 	dat += 6;
 	dat += 3;
-	uint32_t fmbW = *((uint16_t *)dat);
+//	uint32_t fmbW = *((uint16_t *)dat);
 	dat += 2;
 //	uint32_t fmbH = *((uint16_t *)dat);
-	return be_int16_t(fmbW) * 16;
+	dat += 2;
+	uint32_t picW = *((uint32_t *)dat);
+	return ((be_uint32_t(picW)) >> 8);
 }
 
 /*
@@ -213,8 +215,10 @@ uint32_t ttLibC_Theora_getHeight(ttLibC_Theora *prev_frame, uint8_t *data, size_
 	dat += 3;
 //	uint32_t fmbW = *((uint16_t *)dat);
 	dat += 2;
-	uint32_t fmbH = *((uint16_t *)dat);
-	return be_uint16_t(fmbH) * 16;
+//	uint32_t fmbH = *((uint16_t *)dat);
+	dat += 5;
+	uint32_t picH = *((uint32_t *)dat);
+	return ((be_uint32_t(picH)) >> 8);
 }
 
 /*
