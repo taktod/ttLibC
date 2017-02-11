@@ -379,6 +379,9 @@ bool ttLibC_Pes_writePacket(
 		uint64_t dts, // dts
 		ttLibC_DynamicBuffer *frame_buffer, // frame buffer
 		ttLibC_DynamicBuffer *output_buffer) { // buffer for result.
+	if(pid == 0 || frame_buffer == NULL || output_buffer == NULL || ttLibC_DynamicBuffer_refSize(frame_buffer) == 0) {
+		return true;
+	}
 	// sample
 	// 47 41 00 30 07 50 00 00 7B 0C 7E 00 00 00 01 E0 00 00 80 C0 0A 31 00 09 07 4D 11 00 07 D8 61 00 00 00 01 09
 	//             07 adaptation size
