@@ -250,7 +250,12 @@ ttLibC_Bgr *ttLibC_CvCapture_queryFrame(ttLibC_CvCapture *capture, ttLibC_Bgr *p
 	}
 	uint64_t pts = (time - capture_->startTime) * timebase / CLOCKS_PER_SEC;
 #endif
-	return ttLibC_Bgr_make(prev_frame, BgrType_bgr, frame->width, frame->height, frame->widthStep, frame->imageData, frame->imageSize, true, pts, timebase);
+	if(frame->width >= capture->width && frame->height >= capture->height) {
+		return ttLibC_Bgr_make(prev_frame, BgrType_bgr, capture->width, capture->height, frame->widthStep, frame->imageData, frame->imageSize, true, pts, timebase);
+	}
+	else {
+		return ttLibC_Bgr_make(prev_frame, BgrType_bgr, frame->width, frame->height, frame->widthStep, frame->imageData, frame->imageSize, true, pts, timebase);
+	}
 }
 
 /*
