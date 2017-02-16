@@ -25,6 +25,7 @@
 
 #ifdef __ENABLE_OPENH264__
 #	include <wels/codec_api.h>
+#	include <wels/codec_ver.h>
 #endif
 
 #ifdef __ENABLE_AVCODEC__
@@ -625,7 +626,7 @@ static void openh264Test() {
 	paramExt.sSpatialLayers[0].fFrameRate = paramExt.fMaxFrameRate;
 	paramExt.sSpatialLayers[0].iSpatialBitrate = paramExt.iTargetBitrate;
 	paramExt.sSpatialLayers[0].iMaxSpatialBitrate = paramExt.iMaxBitrate;
-#ifndef __OPENH264_OVER_16__
+#if (OPENH264_MAJOR <= 1) && (OPENH264_MINOR <= 5)
 	paramExt.sSpatialLayers[0].sSliceCfg.uiSliceMode = SM_AUTO_SLICE;
 	paramExt.sSpatialLayers[0].sSliceCfg.sSliceArgument.uiSliceNum = 0;
 #endif
@@ -679,7 +680,7 @@ static void openh264Test() {
 	SDecodingParam decParam = {0};
 	decParam.sVideoProperty.eVideoBsType = VIDEO_BITSTREAM_SVC;
 	decParam.bParseOnly = false;
-#ifndef __OPENH264_OVER_16__
+#if (OPENH264_MAJOR <= 1) && (OPENH264_MINOR <= 5)
 	decParam.eOutputColorFormat = videoFormatI420;
 #endif
 	decParam.uiTargetDqLayer = UCHAR_MAX;

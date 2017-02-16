@@ -15,10 +15,13 @@
 #include "../allocator.h"
 
 #include <wels/codec_api.h>
+#include <wels/codec_ver.h>
 #include <climits>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+
+#define Param_set(a, b) {if(a != b) {a = b;}}
 
 /*
  * h264 decoder detail definition.
@@ -50,16 +53,16 @@ static ttLibC_Openh264Decoder *Openh264Decoder_make(SDecodingParam *param) {
 	}
 	SDecodingParam decParam;
 	memset(&decParam, 0, sizeof(SDecodingParam));
-	decParam.bParseOnly          = param->bParseOnly;
-	decParam.eEcActiveIdc        = param->eEcActiveIdc;
-#ifndef __OPENH264_OVER_16__
-	decParam.eOutputColorFormat  = param->eOutputColorFormat;
+	Param_set(decParam.pFileNameRestructed, param->pFileNameRestructed);
+#if (OPENH264_MAJOR <= 1) && (OPENH264_MINOR <= 5)
+	Param_set(decParam.eOutputColorFormat,  param->eOutputColorFormat);
 #endif
-	decParam.pFileNameRestructed = param->pFileNameRestructed;
-	decParam.sVideoProperty.eVideoBsType = param->sVideoProperty.eVideoBsType;
-	decParam.sVideoProperty.size         = param->sVideoProperty.size;
-	decParam.uiCpuLoad           = param->uiCpuLoad;
-	decParam.uiTargetDqLayer     = param->uiTargetDqLayer;
+	Param_set(decParam.uiCpuLoad,           param->uiCpuLoad);
+	Param_set(decParam.uiTargetDqLayer,     param->uiTargetDqLayer);
+	Param_set(decParam.eEcActiveIdc,        param->eEcActiveIdc);
+	Param_set(decParam.bParseOnly,          param->bParseOnly);
+	Param_set(decParam.sVideoProperty.size,         param->sVideoProperty.size);
+	Param_set(decParam.sVideoProperty.eVideoBsType, param->sVideoProperty.eVideoBsType);
 	res = decoder->decoder->Initialize(&decParam);
 	if(res != 0) {
 		ERR_PRINT("failed to initialize decoder.");
@@ -173,13 +176,16 @@ ttLibC_Openh264Decoder *ttLibC_Openh264Decoder_make() {
 void ttLibC_Openh264Decoder_getDefaultSDecodingParam(void *param) {
 	SDecodingParam *pParam = (SDecodingParam *)param;
 	memset(pParam, 0, sizeof(SDecodingParam));
-	pParam->sVideoProperty.eVideoBsType = VIDEO_BITSTREAM_SVC;
-	pParam->bParseOnly = false;
-#ifndef __OPENH264_OVER_16__
+//	pParam->pFileNameRestructed;
+#if (OPENH264_MAJOR <= 1) && (OPENH264_MINOR <= 5)
 	pParam->eOutputColorFormat = videoFormatI420;
 #endif
+	pParam->uiCpuLoad       = 0;
 	pParam->uiTargetDqLayer = UCHAR_MAX;
-	pParam->eEcActiveIdc = ERROR_CON_SLICE_COPY;
+	pParam->eEcActiveIdc    = ERROR_CON_SLICE_COPY;
+	pParam->bParseOnly      = false;
+	pParam->sVideoProperty.size         = sizeof(SVideoProperty);
+	pParam->sVideoProperty.eVideoBsType = VIDEO_BITSTREAM_SVC;
 }
 
 /*
