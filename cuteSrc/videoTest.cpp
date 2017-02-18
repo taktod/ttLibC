@@ -81,6 +81,7 @@ static void daalaTest() {
 	di.timebase_denominator = 1;
 	di.pixel_aspect_numerator = 1;
 	di.pixel_aspect_denominator = 1;
+	di.keyframe_rate = 15;
 	di.full_precision_references = 0;
 	di.nplanes = 3;
 	di.plane_info[0].xdec = 0;
