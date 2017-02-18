@@ -66,8 +66,186 @@
 #ifdef __ENABLE_APPLE__
 #	include <ttLibC/util/audioUnitUtil.h>
 #endif
+
+#ifdef __ENABLE_FDKAAC__
+#	include <fdk-aac/aacenc_lib.h>
+#	include <fdk-aac/aacdecoder_lib.h>
+#endif
+
 #include <stdio.h>
 #include <unistd.h>
+
+static void fdkaacTest() {
+	LOG_PRINT("fdkaacTest");
+#if defined(__ENABLE_FDKAAC__) && defined(__ENABLE_OPENAL__)
+	uint32_t sample_rate = 44100, channel_num = 2, bitrate = 96000;
+	ttLibC_BeepGenerator *generator = ttLibC_BeepGenerator_make(PcmS16Type_littleEndian, 440, sample_rate, channel_num);
+	ttLibC_AlDevice *device = ttLibC_AlDevice_make(256);
+	ttLibC_PcmS16 *pcm = NULL, *p, *dpcm = NULL;
+	HANDLE_AACENCODER encHandle;
+	AACENC_InfoStruct info;
+	AACENC_ERROR err;
+	HANDLE_AACDECODER decHandle;
+	AAC_DECODER_ERROR derr = AAC_DEC_OK;
+	// encoder
+	if((err = aacEncOpen(&encHandle, 0, channel_num)) != AACENC_OK) {
+		ERR_PRINT("failed to open HANDLE_AACENCODER");
+	}
+	uint32_t value = AOT_AAC_LC;
+	if(err == AACENC_OK && (err = aacEncoder_SetParam(encHandle, AACENC_AOT, value)) != AACENC_OK) {
+		ERR_PRINT("failed to set profile.");
+	}
+	if(err == AACENC_OK && (err = aacEncoder_SetParam(encHandle, AACENC_SAMPLERATE, sample_rate)) != AACENC_OK) {
+		ERR_PRINT("failed to set sample_rate.");
+	}
+	if(err == AACENC_OK) {
+		switch(channel_num) {
+		case 1:
+			value = MODE_1;
+			break;
+		case 2:
+			value = MODE_2;
+			break;
+		default:
+			ERR_PRINT("unknown channel_num:%d", channel_num);
+			err = AACENC_INIT_ERROR;
+			break;
+		}
+	}
+	if(err == AACENC_OK && (err = aacEncoder_SetParam(encHandle, AACENC_CHANNELMODE, value)) != AACENC_OK) {
+		ERR_PRINT("failed to set channel_num.");
+	}
+	if(err == AACENC_OK && (err = aacEncoder_SetParam(encHandle, AACENC_CHANNELORDER, 1)) != AACENC_OK) {
+		ERR_PRINT("failed to set channelorder.");
+	}
+	if(err == AACENC_OK && (err = aacEncoder_SetParam(encHandle, AACENC_BITRATE, bitrate)) != AACENC_OK) {
+		ERR_PRINT("failed to set bitrate.");
+	}
+	if(err == AACENC_OK && (err = aacEncoder_SetParam(encHandle, AACENC_TRANSMUX, 2)) != AACENC_OK) {
+		ERR_PRINT("failed to set bitrate.");
+	}
+	if(err == AACENC_OK && (err = aacEncEncode(encHandle, NULL, NULL, NULL, NULL)) != AACENC_OK) {
+		ERR_PRINT("failed to initialize encoder.");
+	}
+	if(err == AACENC_OK && (err = aacEncInfo(encHandle, &info)) != AACENC_OK) {
+		ERR_PRINT("failed to get info.");
+	}
+	if(err != AACENC_OK) {
+		if(encHandle) {
+			aacEncClose(&encHandle);
+			encHandle = NULL;
+		}
+	}
+
+	// decoder
+	decHandle = aacDecoder_Open(TT_MP4_ADTS, 1);
+	if(decHandle == NULL) {
+		ERR_PRINT("failed to open decoder handle.");
+		derr = AAC_DEC_INVALID_HANDLE;
+	}
+	if(derr != AAC_DEC_OK) {
+		if(decHandle != NULL) {
+			aacDecoder_Close(decHandle);
+			decHandle = NULL;
+		}
+	}
+	for(int i = 0;i < 100;i ++) {
+		if(encHandle == NULL || decHandle == NULL) {
+			break;
+		}
+		p = ttLibC_BeepGenerator_makeBeepBySampleNum(generator, pcm, info.frameLength);
+		if(p == NULL) {
+			break;
+		}
+		pcm = p;
+		AACENC_BufDesc in_buf = {}, out_buf = {};
+		AACENC_InArgs  in_args = {};
+		AACENC_OutArgs out_args = {};
+		int in_identifier = IN_AUDIO_DATA;
+		int in_elem_size = sizeof(int16_t);
+		int out_identifier = OUT_BITSTREAM_DATA;
+		uint8_t out[20480];
+		void *out_ptr = out;
+		int out_size = 20480;
+		int out_elem_size = 1;
+
+		in_args.numInSamples = info.frameLength * channel_num;
+		in_buf.numBufs = 1;
+		in_buf.bufferIdentifiers = &in_identifier;
+		in_buf.bufs = &pcm->inherit_super.inherit_super.data;
+		in_buf.bufSizes = (int32_t *)&pcm->inherit_super.inherit_super.buffer_size;
+		in_buf.bufElSizes = &in_elem_size;
+
+		out_buf.numBufs = 1;
+		out_buf.bufferIdentifiers = &out_identifier;
+		out_buf.bufs = &out_ptr;
+		out_buf.bufSizes = &out_size;
+		out_buf.bufElSizes = &out_elem_size;
+
+		if((err = aacEncEncode(encHandle, &in_buf, &out_buf, &in_args, &out_args)) != AACENC_OK) {
+			ERR_PRINT("failed to encode.");
+			break;
+		}
+		// done.
+//		LOG_DUMP(out, out_args.numOutBytes, true);
+		uint32_t size = out_args.numOutBytes;
+		uint32_t valid = out_args.numOutBytes;
+		uint8_t *in_packet_ptr = (uint8_t *)out;
+		derr = aacDecoder_Fill(decHandle, &in_packet_ptr, &size, &valid);
+		if(derr != AAC_DEC_OK) {
+			ERR_PRINT("failed to fill aac data.");
+			break;
+		}
+		int16_t decodeBuffer[20480];
+		int16_t *decode_buf = decodeBuffer;
+		derr = aacDecoder_DecodeFrame(decHandle, decode_buf, sizeof(decodeBuffer), 0);
+		if(derr == AAC_DEC_NOT_ENOUGH_BITS) {
+			ERR_PRINT("need more bits");
+			continue;
+		}
+		if(derr != AAC_DEC_OK) {
+			ERR_PRINT("failed to decode frame.");
+			break;
+		}
+		p = ttLibC_PcmS16_make(
+				dpcm,
+				PcmS16Type_littleEndian,
+				sample_rate,
+				1024,
+				channel_num,
+				decode_buf,
+				1024 * channel_num * 2,
+				decode_buf,
+				1024 * channel_num * 2,
+				NULL,
+				0,
+				false,
+				pcm->inherit_super.inherit_super.pts,
+				pcm->inherit_super.inherit_super.timebase);
+		if(p == NULL) {
+			ERR_PRINT("failed to make decoded pcm object.");
+			break;
+		}
+		dpcm = p;
+		// try to decode.
+		ttLibC_AlDevice_queue(device, dpcm);
+	}
+	ttLibC_AlDevice_proceed(device, -1);
+	if(encHandle) {
+		aacEncClose(&encHandle);
+		encHandle = NULL;
+	}
+	if(decHandle) {
+		aacDecoder_Close(decHandle);
+		decHandle = NULL;
+	}
+	ttLibC_AlDevice_close(&device);
+	ttLibC_PcmS16_close(&dpcm);
+	ttLibC_PcmS16_close(&pcm);
+	ttLibC_BeepGenerator_close(&generator);
+#endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
 
 static void vorbisTest() {
 	LOG_PRINT("vorbisTest");
@@ -836,6 +1014,7 @@ static void pcmS16CloneTest() {
  */
 cute::suite audioTests(cute::suite s) {
 	s.clear();
+	s.push_back(CUTE(fdkaacTest));
 	s.push_back(CUTE(vorbisTest));
 	s.push_back(CUTE(faadTest));
 	s.push_back(CUTE(audioResamplerTest));

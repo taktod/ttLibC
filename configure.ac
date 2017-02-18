@@ -43,6 +43,7 @@ avcodec_flag=no
 apple_flag=no
 webrtc_flag=no
 soundtouch_flag=no
+fdkaac_flag=no
 
 # check result
 cute_check=no
@@ -68,6 +69,7 @@ avcodec_check=no
 apple_check=no
 webrtc_check=no
 soundtouch_check=no
+fdkaac_check=no
 
 AC_ARG_ENABLE(
 	[lgpl],
@@ -142,6 +144,7 @@ AC_ARG_ENABLE(
 		vorbis_flag=$enableval
 		webrtc_flag=$enableval
 		soundtouch_flag=$enableval
+		fdkaac_flag=$enableval
 	]
 )
 
@@ -261,14 +264,20 @@ AC_ARG_ENABLE(
 
 AC_ARG_ENABLE(
 	[webrtc],
-	AS_HELP_STRING([--enable-webrtc/--disable-webrtc], [enable/disable/webrtc code.]),
+	AS_HELP_STRING([--enable-webrtc/--disable-webrtc], [enable/disable webrtc code.]),
 	[webrtc_flag=$enableval]
 )
 
 AC_ARG_ENABLE(
 	[soundtouch],
-	AS_HELP_STRING([--enable-soundtouch/--disable-soundtouch], [enable/disable/soundtouch code.]),
+	AS_HELP_STRING([--enable-soundtouch/--disable-soundtouch], [enable/disable soundtouch code.]),
 	[soundtouch_flag=$enableval]
+)
+
+AC_ARG_ENABLE(
+	[fdkaac],
+	AS_HELP_STRING([--enable-fdkaac/--disable-fdkaac], [enable/disable fdkaac code.]),
+	[fdkaac_flag=$enableval]
 )
 
 if test x$opencv_flag = "xyes"; then
@@ -582,6 +591,14 @@ if test x$soundtouch_flag = "xyes"; then
 		[soundtouch_check=no]
 	)
 fi
+if test x$fdkaac_flag = "xyes"; then
+	PKG_CHECK_MODULES(
+		[FDKAAC],
+		[fdk-aac],
+		[fdkaac_check=yes],
+		[fdkaac_check=no]
+	)
+fi
 
 AC_MSG_CHECKING(for license)
 if test x$gpl_flag = "xyes"; then
@@ -724,6 +741,11 @@ if test x$soundtouch_flag$lgpl_flag$soundtouch_check = "xyesyesyes"; then
 	AC_DEFINE([__ENABLE_SOUNDTOUCH__])
 fi
 AM_CONDITIONAL(ENABLE_SOUNDTOUCH, test x$soundtouch_flag$lgpl_flag$soundtouch_check = "xyesyesyes")
+
+if test x$fdkaac_flag$lgpl_flag$fdkaac_check = "xyesyesyes"; then
+	AC_DEFINE([__ENABLE_FDKAAC__])
+fi
+AM_CONDITIONAL(ENABLE_FDKAAC, test x$fdkaac_flag$lgpl_flag$fdkaac_check = "xyesyesyes")
 
 AC_ARG_WITH(pkgconfigdir,
 	AS_HELP_STRING([--with-pkgconfigdir], [Use the specified pkgconfig dir.(default is $libdir/pkgconfig)]),
@@ -1025,4 +1047,17 @@ echo "soundtouch:       off(under lgpl only.)"
 	fi
 else
 echo "soundtouch:       off"
+fi
+if test x$fdkaac_flag = "xyes"; then
+	if test x$lgpl_flag = "xyes"; then
+		if test x$fdkaac_check = "xyes"; then
+echo "fdkaac:           on"
+		else
+echo "fdkaac:           off(fdkaac library is missing.)"
+		fi
+	else
+echo "fdkaac:           off(under lgpl only.)"
+	fi
+else
+echo "fdkaac:           off"
 fi
