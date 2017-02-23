@@ -566,7 +566,7 @@ void ttLibC_Openh264Encoder_getDefaultSEncParamExt(
 	pParamExt->bEnableDenoise             = false;
 	pParamExt->bEnableAdaptiveQuant       = true;
 	pParamExt->bEnableBackgroundDetection = true;
-	pParamExt->bEnableFrameCroppingFlag   = false;
+	pParamExt->bEnableFrameCroppingFlag   = true;
 	pParamExt->bEnableSceneChangeDetect   = false;
 	pParamExt->bIsLosslessLink            = false;
 }
