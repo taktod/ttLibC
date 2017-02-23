@@ -192,7 +192,7 @@ static ttLibC_Aac *Aac_getRawFrame(
 		bool non_copy_mode,
 		uint64_t pts,
 		uint32_t timebase) {
-	if(prev_frame == NULL || data_size <= 4) {
+	if(prev_frame == NULL && data_size <= 8) {
 		ttLibC_ByteReader *reader = ttLibC_ByteReader_make(data, data_size, ByteUtilType_default);
 		uint64_t dsi_info;
 		uint32_t bit_size = 0;
@@ -226,7 +226,7 @@ static ttLibC_Aac *Aac_getRawFrame(
 				channel_num,
 				data,
 				data_size,
-				true,
+				non_copy_mode,
 				pts,
 				timebase,
 				dsi_info);
@@ -235,8 +235,8 @@ static ttLibC_Aac *Aac_getRawFrame(
 		}
 		return aac;
 	}
-	else {
-		ttLibC_Aac_ *aac = prev_frame;
+	else if(prev_frame != NULL) {
+		ttLibC_Aac_ *aac = (ttLibC_Aac_ *)prev_frame;
 		return ttLibC_Aac_make(
 				prev_frame,
 				AacType_raw,
@@ -245,10 +245,13 @@ static ttLibC_Aac *Aac_getRawFrame(
 				aac->inherit_super.inherit_super.channel_num,
 				data,
 				data_size,
-				true,
+				non_copy_mode,
 				pts,
 				timebase,
 				aac->dsi_info);
+	}
+	else {
+		return NULL;
 	}
 }
 
@@ -358,12 +361,12 @@ size_t ttLibC_Aac_readAdtsHeader(
 	uint32_t channel_conf = ttLibC_ByteReader_bit(reader, 4);
 	if(reader == NULL) {
 		ERR_PRINT("failed to allocate byteReader.");
-		return NULL;
+		return 0;
 	}
 	if(reader->error != Error_noError) {
 		LOG_ERROR(reader->error);
 		ttLibC_ByteReader_close(&reader);
-		return NULL;
+		return 0;
 	}
 	ttLibC_ByteReader_close(&reader);
 	-- object_type; // to make adts, need to decrement.
