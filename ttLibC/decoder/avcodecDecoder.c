@@ -19,6 +19,7 @@
 #include "../util/dynamicBufferUtil.h"
 
 #include "../frame/video/bgr.h"
+#include "../frame/video/h264.h"
 #include "../frame/video/theora.h"
 #include "../frame/video/yuv420.h"
 
@@ -39,6 +40,7 @@ typedef struct {
 
 	AVPacket packet;
 	ttLibC_Frame *frame;
+	ttLibC_Frame *h26x_configData;
 	ttLibC_DynamicBuffer *extraDataBuffer;
 } ttLibC_Decoder_AvcodecDecoder_;
 
@@ -302,7 +304,42 @@ static bool AvcodecDecoder_decodeVideo(
 		ttLibC_Video *frame,
 		ttLibC_AvcodecDecodeFunc callback,
 		void *ptr) {
+	decoder->packet.data = frame->inherit_super.data;
+	decoder->packet.size = frame->inherit_super.buffer_size;
+	decoder->packet.pts  = frame->inherit_super.pts;
 	switch(frame->inherit_super.type) {
+	case frameType_h264:
+		{
+			ttLibC_H264 *h264 = (ttLibC_H264 *)frame;
+			switch(h264->type) {
+			case H264Type_configData:
+				{
+					ttLibC_Frame *f = ttLibC_Frame_clone(decoder->h26x_configData, (ttLibC_Frame *)frame);
+					if(f == NULL) {
+						ERR_PRINT("failed to make cloned frame.");
+						return false;
+					}
+					decoder->h26x_configData = f;
+					return true;
+				}
+				break;
+			case H264Type_sliceIDR:
+				{
+					if(decoder->extraDataBuffer == NULL) {
+						decoder->extraDataBuffer = ttLibC_DynamicBuffer_make();
+					}
+					ttLibC_DynamicBuffer_empty(decoder->extraDataBuffer);
+					ttLibC_DynamicBuffer_append(decoder->extraDataBuffer, decoder->h26x_configData->data, decoder->h26x_configData->buffer_size);
+					ttLibC_DynamicBuffer_append(decoder->extraDataBuffer, frame->inherit_super.data,      frame->inherit_super.buffer_size);
+					decoder->packet.data = ttLibC_DynamicBuffer_refData(decoder->extraDataBuffer);
+					decoder->packet.size = ttLibC_DynamicBuffer_refSize(decoder->extraDataBuffer);
+				}
+				break;
+			default:
+				break;
+			}
+		}
+		break;
 	case frameType_theora:
 		{
 			ttLibC_Theora *theora = (ttLibC_Theora *)frame;
@@ -351,9 +388,6 @@ static bool AvcodecDecoder_decodeVideo(
 	default:
 		break;
 	}
-	decoder->packet.data = frame->inherit_super.data;
-	decoder->packet.size = frame->inherit_super.buffer_size;
-	decoder->packet.pts  = frame->inherit_super.pts;
 	int got_picture;
 	int result = avcodec_decode_video2(decoder->dec, decoder->avframe, &got_picture, &decoder->packet);
 	if(result < 0) {
@@ -680,6 +714,7 @@ ttLibC_AvcodecDecoder *ttLibC_AvcodecDecoder_makeWithAVCodecContext(void *dec_co
 	}
 	av_init_packet(&decoder->packet);
 	decoder->frame = NULL;
+	decoder->h26x_configData = NULL;
 	decoder->extraDataBuffer = NULL;
 	return (ttLibC_AvcodecDecoder *)decoder;
 }
@@ -842,6 +877,7 @@ void ttLibC_AvcodecDecoder_close(ttLibC_AvcodecDecoder **decoder) {
 	}
 	ttLibC_DynamicBuffer_close(&target->extraDataBuffer);
 	ttLibC_Frame_close(&target->frame);
+	ttLibC_Frame_close(&target->h26x_configData);
 	ttLibC_free(target);
 	*decoder = NULL;
 }
