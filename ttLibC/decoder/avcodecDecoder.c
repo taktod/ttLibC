@@ -325,6 +325,10 @@ static bool AvcodecDecoder_decodeVideo(
 				break;
 			case H264Type_sliceIDR:
 				{
+					if(decoder->h26x_configData == NULL) {
+						ERR_PRINT("need h264_configData for decode sliceIDR.");
+						return false;
+					}
 					if(decoder->extraDataBuffer == NULL) {
 						decoder->extraDataBuffer = ttLibC_DynamicBuffer_make();
 					}
