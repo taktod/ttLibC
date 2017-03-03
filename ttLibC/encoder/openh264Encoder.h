@@ -104,6 +104,23 @@ void ttLibC_Openh264Encoder_getDefaultSEncParamExt(
 		uint32_t height);
 
 /**
+ * parse openh264 param with c string.
+ * @param paramExt SEncParamExt structure object.
+ * @param name     target element name, should be same as structure element.
+ * @param value    support int, double, enum name with  c string.
+ */
+bool ttLibC_Openh264Encoder_paramParse(void *paramExt, const char *name, const char *value);
+
+/**
+ * parse openh264 spatialLayer info with c string.
+ * @param paramExt SEncParamExt structure object.
+ * @param target   spatialLayer index should be less than 4
+ * @param name     target element name, should be same as layer element.
+ * @param value    support int, double, enum name with  c string.
+ */
+bool ttLibC_Openh264Encoder_spatialParamParse(void *paramExt, uint32_t target, const char *name, const char *value);
+
+/**
  * make openh264 encoder with SEncParamExt
  * @param paramExt structure pointer for SEncParamExt on wels/codec_api.h
  * @return ttLibC_Openh264Encoder object.

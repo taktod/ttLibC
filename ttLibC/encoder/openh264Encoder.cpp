@@ -686,6 +686,564 @@ void ttLibC_Openh264Encoder_close(ttLibC_Openh264Encoder **encoder) {
 	Openh264Encoder_close(encoder);
 }
 
+/**
+ * parse param with c string.
+ */
+bool ttLibC_Openh264Encoder_paramParse(void *paramExt, const char *name, const char *value) {
+	char *end = NULL;
+	SEncParamExt *pExt = (SEncParamExt *)paramExt;
+#define OPT(str)	else if(!strcmp(name, str))
+#define ENUM(str)	else if(!strcmp(value, str))
+#define SetI(target)	do {int val = strtol(value, &end, 0); \
+							if(end == value || *end != '\0') return false;\
+							pExt->target = val;\
+						} while(0);
+#define SetD(target)	do {double val = strtod(value, &end); \
+							if(end == value || *end != '\0') return false;\
+							pExt->target = val;\
+						} while(0);
+#define SetB(target)	do {bool val; \
+							if(!strcmp(value, "true")) val = true; \
+							else if(!strcmp(value, "false")) val = false; \
+							else { \
+								int v = strtol(value, &end, 0); \
+								if(end == value || *end != '\0') return false;\
+								val = (v != 0); \
+							} \
+							pExt->target = val;\
+						} while(0);
+	if(0) {}
+	OPT("iUsageType")
+	{
+		EUsageType type;
+		if(0) {}
+		ENUM("CAMERA_VIDEO_REAL_TIME")
+			type = CAMERA_VIDEO_REAL_TIME;
+		ENUM("SCREEN_CONTENT_REAL_TIME")
+			type = SCREEN_CONTENT_REAL_TIME;
+		ENUM("CAMERA_VIDEO_NON_REAL_TIME")
+			type = CAMERA_VIDEO_NON_REAL_TIME;
+		else return false;
+		pExt->iUsageType = type;
+	}
+	OPT("iTargetBitrate")
+	{
+		SetI(iTargetBitrate);
+	}
+	OPT("iRCMode")
+	{
+		RC_MODES mode;
+		if(0) {}
+		ENUM("RC_QUALITY_MODE")
+			mode = RC_QUALITY_MODE;
+		ENUM("RC_BITRATE_MODE")
+			mode = RC_BITRATE_MODE;
+		ENUM("RC_BUFFERBASED_MODE")
+			mode = RC_BUFFERBASED_MODE;
+		ENUM("RC_TIMESTAMP_MODE")
+			mode = RC_TIMESTAMP_MODE;
+#if OPENH264_MAJOR >= 1 && OPENH264_MINOR >= 5
+		ENUM("RC_BITRATE_MODE_POST_SKIP")
+			mode = RC_BITRATE_MODE_POST_SKIP;
+#endif
+		ENUM("RC_OFF_MODE")
+			mode = RC_OFF_MODE;
+		else return false;
+		pExt->iRCMode = mode;
+	}
+	OPT("fMaxFrameRate")
+	{
+		SetD(fMaxFrameRate);
+	}
+	OPT("iTemporalLayerNum")
+	{
+		SetI(iTemporalLayerNum);
+	}
+	OPT("iSpatialLayerNum")
+	{
+		SetI(iSpatialLayerNum);
+	}
+	OPT("iComplexityMode")
+	{
+		ECOMPLEXITY_MODE mode;
+		if(0) {}
+		ENUM("LOW_COMPLEXITY")
+			mode = LOW_COMPLEXITY;
+		ENUM("MEDIUM_COMPLEXITY")
+			mode = MEDIUM_COMPLEXITY;
+		ENUM("HIGH_COMPLEXITY")
+			mode = HIGH_COMPLEXITY;
+		else return false;
+		pExt->iComplexityMode = mode;
+	}
+	OPT("uiIntraPeriod")
+	{
+		SetI(uiIntraPeriod);
+	}
+	OPT("iNumRefFrame")
+	{
+		SetI(iNumRefFrame);
+	}
+	OPT("eSpsPpsIdStrategy")
+	{
+		EParameterSetStrategy strategy;
+		if(0) {}
+		ENUM("CONSTANT_ID")
+			strategy = CONSTANT_ID;
+		ENUM("INCREASING_ID")
+			strategy = INCREASING_ID;
+		ENUM("SPS_LISTING")
+			strategy = SPS_LISTING;
+		ENUM("SPS_LISTING_AND_PPS_INCREASING")
+			strategy = SPS_LISTING_AND_PPS_INCREASING;
+		ENUM("SPS_PPS_LISTING")
+			strategy = SPS_PPS_LISTING;
+		else return false;
+		pExt->eSpsPpsIdStrategy = strategy;
+	}
+	OPT("bPrefixNalAddingCtrl")
+	{
+		SetB(bPrefixNalAddingCtrl);
+	}
+	OPT("bEnableSSEI")
+	{
+		SetB(bEnableSSEI);
+	}
+	OPT("bSimulcastAVC")
+	{
+		SetB(bSimulcastAVC);
+	}
+	OPT("iPaddingFlag")
+	{
+		SetI(iPaddingFlag);
+	}
+	OPT("iEntropyCodingModeFlag")
+	{
+		SetI(iEntropyCodingModeFlag);
+	}
+	OPT("bEnableFrameSkip")
+	{
+		SetB(bEnableFrameSkip);
+	}
+	OPT("iMaxBitrate")
+	{
+		SetI(iMaxBitrate);
+	}
+	OPT("iMaxQp")
+	{
+		SetI(iMaxQp);
+	}
+	OPT("iMinQp")
+	{
+		SetI(iMinQp);
+	}
+	OPT("uiMaxNalSize")
+	{
+		SetI(uiMaxNalSize);
+	}
+	OPT("bEnableLongTermReference")
+	{
+		SetB(bEnableLongTermReference);
+	}
+	OPT("iLTRRefNum")
+	{
+		SetI(iLTRRefNum);
+	}
+	OPT("iLtrMarkPeriod")
+	{
+		SetI(iLtrMarkPeriod);
+	}
+	OPT("iMultipleThreadIdc")
+	{
+		SetI(iMultipleThreadIdc);
+	}
+#if OPENH264_MAJOR >= 1 && OPENH264_MINOR >= 6
+	OPT("bUseLoadBalancing")
+	{
+		SetB(bUseLoadBalancing);
+	}
+#endif
+	OPT("iLoopFilterDisableIdc")
+	{
+		SetI(iLoopFilterDisableIdc);
+	}
+	OPT("iLoopFilterAlphaC0Offset")
+	{
+		SetI(iLoopFilterAlphaC0Offset);
+	}
+	OPT("iLoopFilterBetaOffset")
+	{
+		SetI(iLoopFilterBetaOffset);
+	}
+	OPT("bEnableDenoise")
+	{
+		SetB(bEnableDenoise);
+	}
+	OPT("bEnableBackgroundDetection")
+	{
+		SetB(bEnableBackgroundDetection);
+	}
+	OPT("bEnableAdaptiveQuant")
+	{
+		SetB(bEnableAdaptiveQuant);
+	}
+	OPT("bEnableFrameCroppingFlag")
+	{
+		SetB(bEnableFrameCroppingFlag);
+	}
+	OPT("bEnableSceneChangeDetect")
+	{
+		SetB(bEnableSceneChangeDetect);
+	}
+	OPT("bIsLosslessLink")
+	{
+		SetB(bIsLosslessLink);
+	}
+	else {
+		return false;
+	}
+#undef OPT
+#undef ENUM
+#undef SetI
+#undef SetD
+#undef SetB
+	return true;
+}
+bool ttLibC_Openh264Encoder_spatialParamParse(void *paramExt, uint32_t target, const char *name, const char *value) {
+	if(target >= MAX_SPATIAL_LAYER_NUM) {
+		return false;
+	}
+	char *end = NULL;
+	SEncParamExt *pExt = (SEncParamExt *)paramExt;
+	SSpatialLayerConfig layer = pExt->sSpatialLayers[target];
+#define OPT(str)	else if(!strcmp(name, str))
+#define ENUM(str)	else if(!strcmp(value, str))
+#define SetI(target)	do {int val = strtol(value, &end, 0); \
+							if(end == value || *end != '\0') return false;\
+							layer.target = val;\
+						} while(0);
+#define SetD(target)	do {double val = strtod(value, &end); \
+							if(end == value || *end != '\0') return false;\
+							layer.target = val;\
+						} while(0);
+#define SetB(target)	do {bool val; \
+							if(!strcmp(value, "true")) val = true; \
+							else if(!strcmp(value, "false")) val = false; \
+							else { \
+								int v = strtol(value, &end, 0); \
+								if(end == value || *end != '\0') return false;\
+								val = (v != 0); \
+							} \
+							layer.target = val;\
+						} while(0);
+	if(0) {}
+	OPT("iVideoWidth")
+	{
+		SetI(iVideoWidth);
+	}
+	OPT("iVideoHeight")
+	{
+		SetI(iVideoHeight);
+	}
+	OPT("fFrameRate")
+	{
+		SetD(fFrameRate);
+	}
+	OPT("iSpatialBitrate")
+	{
+		SetI(iSpatialBitrate);
+	}
+	OPT("iMaxSpatialBitrate")
+	{
+		SetI(iMaxSpatialBitrate);
+	}
+	OPT("uiProfileIdc")
+	{
+		EProfileIdc idc;
+		if(0) {}
+		ENUM("PRO_UNKNOWN")
+			idc = PRO_UNKNOWN;
+		ENUM("PRO_BASELINE")
+			idc = PRO_BASELINE;
+		ENUM("PRO_MAIN")
+			idc = PRO_MAIN;
+		ENUM("PRO_EXTENDED")
+			idc = PRO_EXTENDED;
+		ENUM("PRO_HIGH")
+			idc = PRO_HIGH;
+		ENUM("PRO_HIGH10")
+			idc = PRO_HIGH10;
+		ENUM("PRO_HIGH422")
+			idc = PRO_HIGH422;
+		ENUM("PRO_HIGH444")
+			idc = PRO_HIGH444;
+		ENUM("PRO_CAVLC444")
+			idc = PRO_CAVLC444;
+		ENUM("PRO_SCALABLE_BASELINE")
+			idc = PRO_SCALABLE_BASELINE;
+		ENUM("PRO_SCALABLE_HIGH")
+			idc = PRO_SCALABLE_HIGH;
+		else return false;
+		layer.uiProfileIdc = idc;
+	}
+	OPT("uiLevelIdc")
+	{
+		ELevelIdc idc;
+		if(0) {}
+		ENUM("LEVEL_UNKNOWN")
+			idc = LEVEL_UNKNOWN;
+		ENUM("LEVEL_1_0")
+			idc = LEVEL_1_0;
+		ENUM("LEVEL_1_B")
+			idc = LEVEL_1_B;
+		ENUM("LEVEL_1_1")
+			idc = LEVEL_1_1;
+		ENUM("LEVEL_1_2")
+			idc = LEVEL_1_2;
+		ENUM("LEVEL_1_3")
+			idc = LEVEL_1_3;
+		ENUM("LEVEL_2_0")
+			idc = LEVEL_2_0;
+		ENUM("LEVEL_2_1")
+			idc = LEVEL_2_1;
+		ENUM("LEVEL_2_2")
+			idc = LEVEL_2_2;
+		ENUM("LEVEL_3_0")
+			idc = LEVEL_3_0;
+		ENUM("LEVEL_3_1")
+			idc = LEVEL_3_1;
+		ENUM("LEVEL_3_2")
+			idc = LEVEL_3_2;
+		ENUM("LEVEL_4_0")
+			idc = LEVEL_4_0;
+		ENUM("LEVEL_4_1")
+			idc = LEVEL_4_1;
+		ENUM("LEVEL_4_2")
+			idc = LEVEL_4_2;
+		ENUM("LEVEL_5_0")
+			idc = LEVEL_5_0;
+		ENUM("LEVEL_5_1")
+			idc = LEVEL_5_1;
+		ENUM("LEVEL_5_2")
+			idc = LEVEL_5_2;
+		else return false;
+		layer.uiLevelIdc = idc;
+	}
+	OPT("iDLayerQp")
+	{
+		SetI(iDLayerQp);
+	}
+#if OPENH264_MAJOR <= 1 && OPENH264_MINOR <= 5
+	OPT("sSliceCfg.uiSliceMode")
+	{
+		SliceModeEnum mode;
+		if(0) {}
+		ENUM("SM_SINGLE_SLICE")
+			mode = SM_SINGLE_SLICE;
+		ENUM("SM_FIXEDSLCNUM_SLICE")
+			mode = SM_FIXEDSLCNUM_SLICE;
+		ENUM("SM_RASTER_SLICE")
+			mode = SM_RASTER_SLICE;
+		ENUM("SM_ROWMB_SLICE")
+			mode = SM_ROWMB_SLICE;
+		ENUM("SM_DYN_SLICE")
+			mode = SM_DYN_SLICE;
+		ENUM("SM_AUTO_SLICE")
+			mode = SM_AUTO_SLICE;
+		ENUM("SM_RESERVED")
+			mode = SM_RESERVED;
+		else return false;
+		layer.sSliceCfg.uiSliceMode = mode;
+	}
+/*	OPT("sSliceCfg.sSliceArgument.uiSliceMbNum")
+	{
+		// no idea to make...
+	}*/
+	OPT("sSliceCfg.sSliceArgument.uiSliceNum")
+	{
+		SetI(sSliceCfg.sSliceArgument.uiSliceNum);
+	}
+	OPT("sSliceCfg.sSliceArgument.uiSliceSizeConstraint")
+	{
+		SetI(sSliceCfg.sSliceArgument.uiSliceSizeConstraint);
+	}
+#elif OPENH264_MAJOR >= 1 && OPENH264_MINOR >= 6
+	OPT("sSliceArgument.uiSliceMode")
+	{
+		SliceModeEnum mode;
+		if(0) {}
+		ENUM("SM_SINGLE_SLICE")
+			mode = SM_SINGLE_SLICE;
+		ENUM("SM_FIXEDSLCNUM_SLICE")
+			mode = SM_FIXEDSLCNUM_SLICE;
+		ENUM("SM_RASTER_SLICE")
+			mode = SM_RASTER_SLICE;
+		ENUM("SM_SIZELIMITED_SLICE")
+			mode = SM_SIZELIMITED_SLICE;
+		ENUM("SM_RESERVED")
+			mode = SM_RESERVED;
+		else return false;
+		layer.sSliceArgument.uiSliceMode = mode;
+	}
+	OPT("sSliceArgument.uiSliceNum")
+	{
+		SetI(sSliceArgument.uiSliceNum);
+	}
+	OPT("sSliceArgument.uiSliceSizeConstraint")
+	{
+		SetI(sSliceArgument.uiSliceSizeConstraint);
+	}
+/*	OPT("sSliceArgument.uiSliceMbNum")
+	{
+		// no idea to make...
+	}*/
+	OPT("bVideoSignalTypePresent")
+	{
+		SetB(bVideoSignalTypePresent);
+	}
+	OPT("uiVideoFormat")
+	{
+		EVideoFormatSPS format;
+		if(0) {}
+		ENUM("VF_COMPONENT")
+			format = VF_COMPONENT;
+		ENUM("VF_PAL")
+			format = VF_PAL;
+		ENUM("VF_NTSC")
+			format = VF_NTSC;
+		ENUM("VF_SECAM")
+			format = VF_SECAM;
+		ENUM("VF_MAC")
+			format = VF_MAC;
+		ENUM("VF_UNDEF")
+			format = VF_UNDEF;
+		ENUM("VF_NUM_ENUM")
+			format = VF_NUM_ENUM;
+		else return false;
+		layer.uiVideoFormat = format;
+	}
+	OPT("bFullRange")
+	{
+		SetB(bFullRange);
+	}
+	OPT("bColorDescriptionPresent")
+	{
+		SetB(bColorDescriptionPresent);
+	}
+	OPT("uiColorPrimaries")
+	{
+		EColorPrimaries primaries;
+		if(0) {}
+		ENUM("CP_RESERVED0")
+			primaries = CP_RESERVED0;
+		ENUM("CP_BT709")
+			primaries = CP_BT709;
+		ENUM("CP_UNDEF")
+			primaries = CP_UNDEF;
+		ENUM("CP_RESERVED3")
+			primaries = CP_RESERVED3;
+		ENUM("CP_BT470M")
+			primaries = CP_BT470M;
+		ENUM("CP_BT470BG")
+			primaries = CP_BT470BG;
+		ENUM("CP_SMPTE170M")
+			primaries = CP_SMPTE170M;
+		ENUM("CP_SMPTE240M")
+			primaries = CP_SMPTE240M;
+		ENUM("CP_FILM")
+			primaries = CP_FILM;
+		ENUM("CP_BT2020")
+			primaries = CP_BT2020;
+		ENUM("CP_NUM_ENUM")
+			primaries = CP_NUM_ENUM;
+		else return false;
+		layer.uiColorPrimaries = primaries;
+	}
+	OPT("uiTransferCharacteristics")
+	{
+		ETransferCharacteristics characteristics;
+		if(0) {}
+		ENUM("TRC_RESERVED0")
+			characteristics = TRC_RESERVED0;
+		ENUM("TRC_BT709")
+			characteristics = TRC_BT709;
+		ENUM("TRC_UNDEF")
+			characteristics = TRC_UNDEF;
+		ENUM("TRC_RESERVED3")
+			characteristics = TRC_RESERVED3;
+		ENUM("TRC_BT470M")
+			characteristics = TRC_BT470M;
+		ENUM("TRC_BT470BG")
+			characteristics = TRC_BT470BG;
+		ENUM("TRC_SMPTE170M")
+			characteristics = TRC_SMPTE170M;
+		ENUM("TRC_SMPTE240M")
+			characteristics = TRC_SMPTE240M;
+		ENUM("TRC_LINEAR")
+			characteristics = TRC_LINEAR;
+		ENUM("TRC_LOG100")
+			characteristics = TRC_LOG100;
+		ENUM("TRC_LOG316")
+			characteristics = TRC_LOG316;
+		ENUM("TRC_IEC61966_2_4")
+			characteristics = TRC_IEC61966_2_4;
+		ENUM("TRC_BT1361E")
+			characteristics = TRC_BT1361E;
+		ENUM("TRC_IEC61966_2_1")
+			characteristics = TRC_IEC61966_2_1;
+		ENUM("TRC_BT2020_10")
+			characteristics = TRC_BT2020_10;
+		ENUM("TRC_BT2020_12")
+			characteristics = TRC_BT2020_12;
+		ENUM("TRC_NUM_ENUM")
+			characteristics = TRC_NUM_ENUM;
+		else return false;
+		layer.uiTransferCharacteristics = characteristics;
+	}
+	OPT("uiColorMatrix")
+	{
+		EColorMatrix matrix;
+		if(0) {}
+		ENUM("CM_GBR")
+			matrix = CM_GBR;
+		ENUM("CM_BT709")
+			matrix = CM_BT709;
+		ENUM("CM_UNDEF")
+			matrix = CM_UNDEF;
+		ENUM("CM_RESERVED3")
+			matrix = CM_RESERVED3;
+		ENUM("CM_FCC")
+			matrix = CM_FCC;
+		ENUM("CM_BT470BG")
+			matrix = CM_BT470BG;
+		ENUM("CM_SMPTE170M")
+			matrix = CM_SMPTE170M;
+		ENUM("CM_SMPTE240M")
+			matrix = CM_SMPTE240M;
+		ENUM("CM_YCGCO")
+			matrix = CM_YCGCO;
+		ENUM("CM_BT2020NC")
+			matrix = CM_BT2020NC;
+		ENUM("CM_BT2020C")
+			matrix = CM_BT2020C;
+		ENUM("CM_NUM_ENUM")
+			matrix = CM_NUM_ENUM;
+		else return false;
+		layer.uiColorMatrix = matrix;
+	}
+#endif
+	else {
+		return false;
+	}
+#undef OPT
+#undef ENUM
+#undef SetI
+#undef SetD
+#undef SetB
+	return true;
+}
+
+
 } /* extern "C" */
 
 #endif
