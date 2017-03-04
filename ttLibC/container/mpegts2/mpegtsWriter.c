@@ -290,23 +290,23 @@ static bool MpegtsWriter_makeData(ttLibC_MpegtsWriter_ *writer) {
 		case frameType_h264:
 			if(!MpegtsWriter_makeH264Data(
 					writer,
-					track,
+					(ttLibC_MpegtsWriteTrack *)track,
 					buffer)) {
 				result = false;
 			}
 			break;
 		case frameType_aac:
 			if(!MpegtsWriter_makeAacData(
-					writer,
-					track,
+					(ttLibC_ContainerWriter_ *)writer,
+					(ttLibC_MpegtsWriteTrack *)track,
 					buffer)) {
 				result = false;
 			}
 			break;
 		case frameType_mp3:
 			if(!MpegtsWriter_makeMp3Data(
-					writer,
-					track,
+					(ttLibC_ContainerWriter_ *)writer,
+					(ttLibC_MpegtsWriteTrack *)track,
 					buffer)) {
 				result = false;
 			}
@@ -343,7 +343,7 @@ static bool MpegtsWriter_writeFromQueue(
 	case status_make_init:
 		{
 			if(ttLibC_MpegtsWriter_writeInfo(
-					writer,
+					(ttLibC_MpegtsWriter *)writer,
 					writer->callback,
 					writer->ptr)) {
 				writer->status = status_target_check;
@@ -372,7 +372,7 @@ static bool MpegtsWriter_writeFromQueue(
 		break;
 	case status_make_data:
 		{
-			if(MpegtsWriter_makeData(writer)) {
+			if(MpegtsWriter_makeData((ttLibC_MpegtsWriter_ *)writer)) {
 				writer->status = status_update;
 				return MpegtsWriter_writeFromQueue(writer);
 			}
@@ -487,5 +487,5 @@ void ttLibC_MpegtsWriter_close(ttLibC_MpegtsWriter **writer) {
 	ttLibC_DynamicBuffer_close(&target->data_buffer);
 	ttLibC_StlMap_forEach(target->inherit_super.track_list, MpegtsWriter_closeTracks, NULL);
 	ttLibC_StlMap_close(&target->inherit_super.track_list);
-	ttLibC_ContainerWriter_close_(writer);
+	ttLibC_ContainerWriter_close_((ttLibC_ContainerWriter_ **)writer);
 }

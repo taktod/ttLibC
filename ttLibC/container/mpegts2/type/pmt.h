@@ -40,8 +40,8 @@ ttLibC_Pmt *ttLibC_Pmt_make(
 		uint64_t pts,
 		uint32_t timebase,
 		uint16_t pid,
-		uint8_t continuity_counter,
-		int pes_track_num);
+		uint8_t  continuity_counter,
+		uint32_t pes_track_num);
 
 ttLibC_Pmt *ttLibC_Pmt_getPacket(
 		ttLibC_Pmt *prev_pmt,

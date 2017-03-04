@@ -47,7 +47,7 @@ static void SimpleBlock_getLace0Frame(
 			size_t buf_size = data_size;
 			do {
 				uint32_t size = 0;
-				for(int i = 1;i <= track->size_length;++ i) {
+				for(uint32_t i = 1;i <= track->size_length;++ i) {
 					size = (size << 8) | *buf;
 					if(i != track->size_length) {
 						*buf = 0x00;
@@ -94,7 +94,7 @@ static void SimpleBlock_getLace0Frame(
 			// sizenal -> nal
 			do {
 				uint32_t size = 0;
-				for(int i = 1;i <= track->size_length;++ i) {
+				for(uint32_t i = 1;i <= track->size_length;++ i) {
 					size = (size << 8) | *buf;
 					if(i != track->size_length) {
 						*buf = 0x00;
@@ -425,7 +425,7 @@ bool ttLibC_SimpleBlock_getFrame(
 	size_t data_size = tag->inherit_super.inherit_super.data_size - byte_reader->read_size;
 
 	// get track information from reader.
-	ttLibC_MkvTrack *track = ttLibC_StlMap_get(reader->tracks, (void *)track_id);
+	ttLibC_MkvTrack *track = ttLibC_StlMap_get(reader->tracks, (void *)(long)track_id);
 	if(track == NULL) {
 		ERR_PRINT("failed to get track information.");
 		reader->error_number = 1;

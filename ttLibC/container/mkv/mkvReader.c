@@ -348,7 +348,7 @@ static bool MkvReader_readTag(
 				}
 				else {
 					// put into track map
-					ttLibC_StlMap_put(reader->tracks, (void *)reader->track->track_number, reader->track);
+					ttLibC_StlMap_put(reader->tracks, (void *)(long)reader->track->track_number, reader->track);
 					reader->track = NULL;
 				}
 			}
@@ -380,6 +380,8 @@ bool ttLibC_MkvReader_read(
 }
 
 static bool MkvReader_closeTrack(void *ptr, void *key, void *item) {
+	(void)ptr;
+	(void)key;
 	ttLibC_MkvTrack *track = (ttLibC_MkvTrack *)item;
 	if(track != NULL) {
 		ttLibC_Frame_close(&track->frame);

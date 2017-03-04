@@ -28,7 +28,7 @@ ttLibC_Pmt *ttLibC_Pmt_make(
 		uint32_t timebase,
 		uint16_t pid,
 		uint8_t continuity_counter,
-		int pes_track_num) {
+		uint32_t pes_track_num) {
 	// copy prev field list.
 	ttLibC_PmtElementaryField *pmtElementaryField_list = NULL;
 	if(prev_pmt != NULL) {
@@ -60,7 +60,7 @@ ttLibC_Pmt *ttLibC_Pmt_make(
 			ttLibC_Pmt_close(&pmt);
 			return NULL;
 		}
-		for(int i = 0;i < pes_track_num;++ i) {
+		for(uint32_t i = 0;i < pes_track_num;++ i) {
 			pmt->pmtElementaryField_list[i].stream_type = 0;
 			pmt->pmtElementaryField_list[i].pid = 0;
 		}
@@ -102,7 +102,7 @@ ttLibC_Pmt *ttLibC_Pmt_getPacket(
 	section_length -= 4;
 	uint32_t pes_track_num = 0;
 	// check the number of pes.
-	for(int i = 0;i < section_length - 4;++ i) {
+	for(uint32_t i = 0;i < section_length - 4;++ i) {
 		++ pes_track_num;
 		uint8_t stream_type = ttLibC_ByteReader_bit(reader, 8);
 		ttLibC_ByteReader_bit(reader, 3);
@@ -131,7 +131,7 @@ ttLibC_Pmt *ttLibC_Pmt_getPacket(
 		return NULL;
 	}
 	ttLibC_ByteReader_rewindByte(reader, section_length - 4);
-	for(int i = 0, k = 0;i < section_length - 4;++ i) {
+	for(uint32_t i = 0, k = 0;i < section_length - 4;++ i) {
 		uint8_t stream_type = ttLibC_ByteReader_bit(reader, 8);
 		ttLibC_ByteReader_bit(reader, 3);
 		uint16_t pes_pid = ttLibC_ByteReader_bit(reader, 13);
@@ -199,7 +199,7 @@ bool ttLibC_Pmt_makePacket(
 	data += 4;
 	data_size -= 4;
 	ttLibC_Crc32_close(&crc32);
-	for(int i = 0;i < data_size;++ i) {
+	for(uint32_t i = 0;i < data_size;++ i) {
 		*data = 0xFF;
 		++ data;
 	}

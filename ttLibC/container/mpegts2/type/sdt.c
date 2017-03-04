@@ -47,6 +47,7 @@ ttLibC_Sdt *ttLibC_Sdt_getPacket(
 		ttLibC_Sdt *prev_sdt,
 		uint8_t *data,
 		size_t data_size) {
+	(void)data;
 	if(data_size != 188) {
 		ERR_PRINT("size is not 188 bytes");
 		return NULL;
@@ -122,7 +123,7 @@ bool ttLibC_Sdt_makePacket(
 	data_size -= name_length;
 	// crc32
 	ttLibC_Crc32 *crc32 = ttLibC_Crc32_make(0xFFFFFFFF);
-	for(int i = 0;i < buf_length;++ i) {
+	for(uint32_t i = 0;i < buf_length;++ i) {
 		ttLibC_Crc32_update(crc32, *buf_crc);
 		++ buf_crc;
 	}
@@ -131,7 +132,7 @@ bool ttLibC_Sdt_makePacket(
 	data_size -= 4;
 	ttLibC_Crc32_close(&crc32);
 	// fill with 0xFF
-	for(int i = 0;i < data_size;++ i) {
+	for(uint32_t i = 0;i < data_size;++ i) {
 		*data = 0xFF;
 		++ data;
 	}

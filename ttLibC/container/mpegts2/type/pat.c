@@ -82,7 +82,7 @@ bool ttLibC_Pat_makePacket(
 	uint32_t size = ttLibC_HexUtil_makeBuffer("474000100000B00D0001C100000001F0002AB104B2", data, data_size);
 	data += size;
 	data_size -= size;
-	for(int i = 0;i < data_size;++ i) {
+	for(uint32_t i = 0;i < data_size;++ i) {
 		*data = 0xFF;
 		++ data;
 	}

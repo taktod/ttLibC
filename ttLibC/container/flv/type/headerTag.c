@@ -44,6 +44,10 @@ ttLibC_FlvHeaderTag *ttLibC_FlvHeaderTag_getTag(
 		ttLibC_FlvTag *prev_tag,
 		uint8_t *data,
 		size_t data_size) {
+	if(data_size < 13) {
+		ERR_PRINT("size is too small.");
+		return NULL;
+	}
 	if(data[0] != 'F'
 	|| data[1] != 'L'
 	|| data[2] != 'V') {

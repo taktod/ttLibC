@@ -76,7 +76,7 @@ static bool Mp4Atom_getFrame(
 			size_t buf_size = data_size;
 			do {
 				uint32_t size = 0;
-				for(int i = 1;i <= track->size_length;++ i) {
+				for(uint32_t i = 1;i <= track->size_length;++ i) {
 					size = (size << 8) | *buf;
 					if(i != track->size_length) {
 						*buf = 0x00;
@@ -120,7 +120,7 @@ static bool Mp4Atom_getFrame(
 			size_t buf_size = data_size;
 			do {
 				uint32_t size = 0;
-				for(int i = 1;i <= track->size_length;++ i) {
+				for(uint32_t i = 1;i <= track->size_length;++ i) {
 					size = (size << 8) | *buf;
 					if(i != track->size_length) {
 						*buf = 0x00;

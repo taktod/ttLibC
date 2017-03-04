@@ -1090,7 +1090,7 @@ static bool Mp4Writer_writeFromQueue(
 	switch(writer->inherit_super.status) {
 	case status_init_check:
 		{
-			if(ttLibC_ContainerWriter_isReadyToStart(writer)) {
+			if(ttLibC_ContainerWriter_isReadyToStart((ttLibC_ContainerWriter_ *)writer)) {
 				writer->inherit_super.status = status_make_init;
 				return Mp4Writer_writeFromQueue(writer);
 			}
@@ -1098,7 +1098,7 @@ static bool Mp4Writer_writeFromQueue(
 		break;
 	case status_make_init:
 		{
-			if(Mp4Writer_makeInitMp4(writer)) {
+			if(Mp4Writer_makeInitMp4((ttLibC_ContainerWriter_ *)writer)) {
 				// now ready to make chunk.
 				writer->inherit_super.status = status_target_check;
 				return Mp4Writer_writeFromQueue(writer);
@@ -1124,7 +1124,7 @@ static bool Mp4Writer_writeFromQueue(
 		break;
 	case status_data_check:
 		{
-			if(ttLibC_ContainerWriter_isReadyToWrite(writer)) {
+			if(ttLibC_ContainerWriter_isReadyToWrite((ttLibC_ContainerWriter_ *)writer)) {
 				writer->inherit_super.status = status_make_data;
 				return Mp4Writer_writeFromQueue(writer);
 			}
@@ -1171,7 +1171,7 @@ bool ttLibC_Mp4Writer_write(
 	case 1:
 		break;
 	}
-	return Mp4Writer_writeFromQueue(writer);
+	return Mp4Writer_writeFromQueue((ttLibC_Mp4Writer_ *)writer);
 }
 
 /**
@@ -1207,6 +1207,6 @@ void ttLibC_Mp4Writer_close(ttLibC_Mp4Writer **writer) {
 	}
 	ttLibC_StlMap_forEach(target->inherit_super.track_list, Mp4Writer_closeTracks, NULL);
 	ttLibC_StlMap_close(&target->inherit_super.track_list);
-	ttLibC_ContainerWriter_close_(writer);
+	ttLibC_ContainerWriter_close_((ttLibC_ContainerWriter_ **)writer);
 }
 

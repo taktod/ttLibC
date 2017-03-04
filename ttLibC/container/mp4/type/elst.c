@@ -42,7 +42,7 @@ ttLibC_Mp4 *ttLibC_Elst_make(
 		}
 		else {
 			ERR_PRINT("not support 64bit elst now.");
-			ttLibC_Mp4Atom_close((ttLibC_Mp4 **)&elst);
+			ttLibC_Mp4Atom_close((ttLibC_Mp4Atom **)&elst);
 			return NULL;
 		}
 		++ buf;

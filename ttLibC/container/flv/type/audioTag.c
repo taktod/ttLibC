@@ -233,7 +233,7 @@ bool ttLibC_FlvAudioTag_writeTag(
 			data[3]  = size & 0xFF;
 			uint32_t endSize = ttLibC_DynamicBuffer_refSize(buffer);
 			uint32_t be_endSize = be_uint32_t(endSize);
-			ttLibC_DynamicBuffer_append(buffer, &be_endSize, 4);
+			ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_endSize, 4);
 			// done.
 			if(callback != NULL) {
 				if(!callback(
@@ -261,7 +261,7 @@ bool ttLibC_FlvAudioTag_writeTag(
 	data[3]  = size & 0xFF;
 	uint32_t endSize = ttLibC_DynamicBuffer_refSize(buffer);
 	uint32_t be_endSize = be_uint32_t(endSize);
-	ttLibC_DynamicBuffer_append(buffer, &be_endSize, 4);
+	ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_endSize, 4);
 
 	bool result = true;
 	if(callback != NULL) {
