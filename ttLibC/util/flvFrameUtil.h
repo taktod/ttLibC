@@ -18,6 +18,7 @@ extern "C" {
 #include "../frame/frame.h"
 #include "../frame/video/video.h"
 #include "../frame/audio/audio.h"
+#include "../container/container.h"
 #include "dynamicBufferUtil.h"
 
 typedef enum {
@@ -71,14 +72,18 @@ ttLibC_FlvFrameManager *ttLibC_FlvFrameManager_make();
  * @param data      target binary data
  * @param data_size target binary data size
  * @param pts       pts(timebase is 1000 fixed.)
- * @return video frame.
+ * @param callback  callback
+ * @param ptr       userdef data pointer.
+ * @return ture / false
  * TODO need error code?
  */
-ttLibC_Video *ttLibC_FlvFrameManager_readVideoBinary(
+bool ttLibC_FlvFrameManager_readVideoBinary(
 		ttLibC_FlvFrameManager *manager,
 		void *data,
 		size_t data_size,
-		uint64_t pts);
+		uint64_t pts,
+		ttLibC_getFrameFunc callback,
+		void *ptr);
 
 /**
  * read audio binary data.
@@ -86,13 +91,17 @@ ttLibC_Video *ttLibC_FlvFrameManager_readVideoBinary(
  * @param data      target binary data
  * @param data_size target binary data size
  * @param pts       pts(timebase is 1000 fixed.)
- * @return audio frame.
+ * @param callback  callback
+ * @param ptr       userdef data pointer.
+ * @return ture / false
  */
-ttLibC_Audio *ttLibC_FlvFrameManager_readAudioBinary(
+bool ttLibC_FlvFrameManager_readAudioBinary(
 		ttLibC_FlvFrameManager *manager,
 		void *data,
 		size_t data_size,
-		uint64_t pts);
+		uint64_t pts,
+		ttLibC_getFrameFunc callback,
+		void *ptr);
 
 /**
  * special get binary data for aac dsi information.

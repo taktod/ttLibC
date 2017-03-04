@@ -18,6 +18,7 @@ extern "C" {
 #include <stdint.h>
 #include "rtmpMessage.h"
 #include "../../../../frame/audio/audio.h"
+#include "../rtmpStream.h"
 
 /*
  * same as flv.
@@ -38,23 +39,29 @@ extern "C" {
 typedef struct ttLibC_Net_Client_Rtmp_Message_AudioMessage {
 	ttLibC_RtmpMessage inherit_super;
 	ttLibC_Audio *audio_frame;
-//	uint32_t dsi_info;
-//	size_t dsi_info_size;
+	uint8_t *data;
 	bool is_dsi_info;
 } ttLibC_Net_Client_Rtmp_Message_AudioMessage;
 
 typedef ttLibC_Net_Client_Rtmp_Message_AudioMessage ttLibC_AudioMessage;
 
 ttLibC_AudioMessage *ttLibC_AudioMessage_make();
+
+// for receive
+
+ttLibC_AudioMessage *ttLibC_AudioMessage_readBinary(
+		uint8_t *data,
+		size_t data_size);
+
+tetty_errornum ttLibC_AudioMessage_getFrame(
+		ttLibC_AudioMessage *message,
+		ttLibC_RtmpStream_ *stream);
+
+// for send
+
 ttLibC_AudioMessage *ttLibC_AudioMessage_addFrame(
 		ttLibC_RtmpStream *stream,
 		ttLibC_Audio *frame);
-
-ttLibC_AudioMessage *ttLibC_AudioMessage_readBinary(
-		ttLibC_RtmpHeader *header,
-		ttLibC_RtmpStream *stream,
-		uint8_t *data,
-		size_t data_size);
 
 bool ttLibC_AudioMessage_getData(
 		ttLibC_AudioMessage *message,

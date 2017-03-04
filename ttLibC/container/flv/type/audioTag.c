@@ -185,19 +185,13 @@ bool ttLibC_FlvAudioTag_getFrame(
 		ttLibC_FlvAudioTag *audio_tag,
 		ttLibC_getFrameFunc callback,
 		void *ptr) {
-	ttLibC_Audio *audio = ttLibC_FlvFrameManager_readAudioBinary(
+	return ttLibC_FlvFrameManager_readAudioBinary(
 			audio_tag->inherit_super.frameManager,
 			audio_tag->inherit_super.inherit_super.inherit_super.data,
 			audio_tag->inherit_super.inherit_super.inherit_super.buffer_size,
-			audio_tag->inherit_super.inherit_super.inherit_super.pts);
-	if(audio != NULL) {
-		if(callback != NULL) {
-			if(!callback(ptr, audio)) {
-				return false;
-			}
-		}
-	}
-	return true;
+			audio_tag->inherit_super.inherit_super.inherit_super.pts,
+			callback,
+			ptr);
 }
 
 bool ttLibC_FlvAudioTag_writeTag(

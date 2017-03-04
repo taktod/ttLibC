@@ -17,6 +17,9 @@ extern "C" {
 
 #include <stdint.h>
 #include "rtmpMessage.h"
+#include "../../../../container/container.h"
+#include "../rtmpStream.h"
+
 /*
  * header
  *
@@ -42,17 +45,11 @@ typedef struct ttLibC_Net_Client_Rtmp_Message_AggregateMessage {
 
 typedef ttLibC_Net_Client_Rtmp_Message_AggregateMessage ttLibC_AggregateMessage;
 
-typedef bool (* ttLibC_AggregateMessage_getFrameFunc)(void *ptr, ttLibC_Frame *frame);
-
 ttLibC_AggregateMessage *ttLibC_AggregateMessage_make();
-ttLibC_AggregateMessage *ttLibC_AggregateMessage_readBinary(
-		uint8_t *data,
-		size_t data_size);
+ttLibC_AggregateMessage *ttLibC_AggregateMessage_readBinary(uint8_t *data);
 tetty_errornum ttLibC_AggregateMessage_getFrame(
 		ttLibC_AggregateMessage *message,
-		ttLibC_RtmpStream *stream,
-		ttLibC_AggregateMessage_getFrameFunc callback,
-		void *ptr);
+		ttLibC_RtmpStream_ *stream);
 void ttLibC_AggregateMessage_close(ttLibC_AggregateMessage **message);
 
 #ifdef __cplusplus

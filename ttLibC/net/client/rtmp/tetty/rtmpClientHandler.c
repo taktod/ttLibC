@@ -24,16 +24,6 @@
 #include "../rtmpStream.h"
 #include <string.h>
 
-static bool RtmpClientHandler_getAggregateFrames(void *ptr, ttLibC_Frame *frame) {
-	ttLibC_RtmpStream_ *stream = (ttLibC_RtmpStream_ *)ptr;
-	if(stream != NULL && stream->frame_callback != NULL) {
-		if(!stream->frame_callback(stream->frame_ptr, frame)) {
-			return false;
-		}
-	}
-	return true;
-}
-
 static tetty_errornum RtmpClientHandler_channelRead(
 		ttLibC_TettyContext *ctx,
 		void *data,
@@ -43,50 +33,44 @@ static tetty_errornum RtmpClientHandler_channelRead(
 	switch(rtmp_message->header->message_type) {
 	case RtmpMessageType_videoMessage:
 		{
-			ttLibC_VideoMessage *video_message = (ttLibC_VideoMessage *)rtmp_message;
-			ttLibC_RtmpStream_ *stream_ = ttLibC_StlMap_get(client_object->streamId_rtmpStream_map, (void *)((long)video_message->inherit_super.header->stream_id));
-			if(video_message->video_frame == NULL) {
-				ERR_PRINT("frame is missing for videoMessage.");
-				ctx->bootstrap->error_number = 9;
-				return 0;
-			}
-			if(stream_ != NULL && stream_->frame_callback != NULL) {
-				if(!stream_->frame_callback(stream_->frame_ptr, (ttLibC_Frame *)video_message->video_frame)) {
-					LOG_PRINT("frame callback returns false.");
-					ctx->bootstrap->error_number = 10;
+			ttLibC_RtmpStream_ *stream_ = ttLibC_StlMap_get(client_object->streamId_rtmpStream_map, (void *)((long)rtmp_message->header->stream_id));
+			if(stream_ != NULL) {
+				tetty_errornum error_num = ttLibC_VideoMessage_getFrame(
+						(ttLibC_VideoMessage *)rtmp_message,
+						stream_);
+				if(error_num != 0) {
+					LOG_PRINT("something happen during videoMessage_getFrame.:%d", error_num);
+					ctx->bootstrap->error_number = error_num;
 				}
 			}
 		}
 		break;
 	case RtmpMessageType_audioMessage:
 		{
-			ttLibC_AudioMessage *audio_message = (ttLibC_AudioMessage *)rtmp_message;
-			ttLibC_RtmpStream_ *stream_ = ttLibC_StlMap_get(client_object->streamId_rtmpStream_map, (void *)((long)audio_message->inherit_super.header->stream_id));
-			if(audio_message->audio_frame == NULL) {
-				ERR_PRINT("frame is missing for audioMessage.");
-				ctx->bootstrap->error_number = 8;
-				return 0;
-			}
-			if(stream_ != NULL && stream_->frame_callback != NULL) {
-				if(!stream_->frame_callback(stream_->frame_ptr, (ttLibC_Frame *)audio_message->audio_frame)) {
-					LOG_PRINT("frame callback returns false.");
-					ctx->bootstrap->error_number = 10;
+			ttLibC_RtmpStream_ *stream_ = ttLibC_StlMap_get(client_object->streamId_rtmpStream_map, (void *)((long)rtmp_message->header->stream_id));
+			if(stream_ != NULL) {
+				tetty_errornum error_num = ttLibC_AudioMessage_getFrame(
+						(ttLibC_AudioMessage *)rtmp_message,
+						stream_);
+				if(error_num != 0) {
+					LOG_PRINT("something happen during audioMessage_getFrame.:%d", error_num);
+					ctx->bootstrap->error_number = error_num;
 				}
 			}
 		}
 		break;
 	case RtmpMessageType_aggregateMessage:
 		{
-			ttLibC_RtmpStream *stream = ttLibC_StlMap_get(client_object->streamId_rtmpStream_map, (void *)((long)rtmp_message->header->stream_id));
-			// get frame from aggregate message.
-			tetty_errornum error_num = ttLibC_AggregateMessage_getFrame(
-					(ttLibC_AggregateMessage *)rtmp_message,
-					stream,
-					RtmpClientHandler_getAggregateFrames,
-					stream);
-			if(error_num != 0) {
-				LOG_PRINT("something happen during aggregateMessage_getFrame.:%d", error_num);
-				ctx->bootstrap->error_number = error_num;
+			ttLibC_RtmpStream_ *stream_ = ttLibC_StlMap_get(client_object->streamId_rtmpStream_map, (void *)((long)rtmp_message->header->stream_id));
+			if(stream_ != NULL) {
+				// get frame from aggregate message.
+				tetty_errornum error_num = ttLibC_AggregateMessage_getFrame(
+						(ttLibC_AggregateMessage *)rtmp_message,
+						stream_);
+				if(error_num != 0) {
+					LOG_PRINT("something happen during aggregateMessage_getFrame.:%d", error_num);
+					ctx->bootstrap->error_number = error_num;
+				}
 			}
 		}
 		break;

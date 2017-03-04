@@ -35,6 +35,44 @@ ttLibC_AudioMessage *ttLibC_AudioMessage_make() {
 	message->is_dsi_info = false;
 	return message;
 }
+
+ttLibC_AudioMessage *ttLibC_AudioMessage_readBinary(
+		uint8_t *data,
+		size_t data_size) {
+	if(data_size <= 1) {
+		return NULL;
+	}
+	ttLibC_AudioMessage *message = ttLibC_AudioMessage_make();
+	if(message == NULL) {
+		return NULL;
+	}
+	message->data = data;
+	return message;
+}
+
+tetty_errornum ttLibC_AudioMessage_getFrame(
+		ttLibC_AudioMessage *message,
+		ttLibC_RtmpStream_ *stream) {
+	if(stream == NULL) {
+		return 0;
+	}
+	uint8_t *data = message->data;
+	if(data == NULL) {
+		return 0;
+	}
+	ttLibC_FlvFrameManager *manager = stream->frame_manager;
+	if(!ttLibC_FlvFrameManager_readAudioBinary(
+			manager,
+			data,
+			message->inherit_super.header->size,
+			message->inherit_super.header->timestamp,
+			stream->frame_callback,
+			stream->frame_ptr)) {
+		return 97;
+	}
+	return 0;
+}
+
 ttLibC_AudioMessage *ttLibC_AudioMessage_addFrame(
 		ttLibC_RtmpStream *stream,
 		ttLibC_Audio *frame) {
@@ -55,32 +93,6 @@ ttLibC_AudioMessage *ttLibC_AudioMessage_addFrame(
 	// update pts and stream_id
 	message->inherit_super.header->timestamp = message->audio_frame->inherit_super.pts * 1000 / message->audio_frame->inherit_super.timebase;
 	message->inherit_super.header->stream_id = stream_->stream_id;
-	return message;
-}
-
-ttLibC_AudioMessage *ttLibC_AudioMessage_readBinary(
-		ttLibC_RtmpHeader *header,
-		ttLibC_RtmpStream *stream,
-		uint8_t *data,
-		size_t data_size) {
-	ttLibC_RtmpStream_ *stream_ = (ttLibC_RtmpStream_ *)stream;
-	if(stream_ == NULL) {
-		return NULL;
-	}
-	ttLibC_FlvFrameManager *manager = stream_->frame_manager;
-	ttLibC_Audio *audio_frame = ttLibC_FlvFrameManager_readAudioBinary(
-			manager,
-			data,
-			data_size,
-			header->timestamp);
-	if(audio_frame == NULL) {
-		return NULL;
-	}
-	ttLibC_AudioMessage *message = ttLibC_AudioMessage_make();
-	if(message == NULL) {
-		return NULL;
-	}
-	message->audio_frame = audio_frame;
 	return message;
 }
 

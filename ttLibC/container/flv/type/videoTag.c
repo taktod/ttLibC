@@ -129,19 +129,13 @@ bool ttLibC_FlvVideoTag_getFrame(
 		ttLibC_FlvVideoTag *video_tag,
 		ttLibC_getFrameFunc callback,
 		void *ptr) {
-	ttLibC_Video *video = ttLibC_FlvFrameManager_readVideoBinary(
+	return ttLibC_FlvFrameManager_readVideoBinary(
 			video_tag->inherit_super.frameManager,
 			video_tag->inherit_super.inherit_super.inherit_super.data,
 			video_tag->inherit_super.inherit_super.inherit_super.buffer_size,
-			video_tag->inherit_super.inherit_super.inherit_super.pts);
-	if(video != NULL) {
-		if(callback != NULL) {
-			if(!callback(ptr, (ttLibC_Frame *)video)) {
-				return false;
-			}
-		}
-	}
-	return true;
+			video_tag->inherit_super.inherit_super.inherit_super.pts,
+			callback,
+			ptr);
 }
 
 bool ttLibC_FlvVideoTag_writeTag(

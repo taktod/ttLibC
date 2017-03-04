@@ -32,9 +32,7 @@ ttLibC_AggregateMessage *ttLibC_AggregateMessage_make() {
 	return message;
 }
 
-ttLibC_AggregateMessage *ttLibC_AggregateMessage_readBinary(
-		uint8_t *data,
-		size_t data_size) {
+ttLibC_AggregateMessage *ttLibC_AggregateMessage_readBinary(uint8_t *data) {
 	ttLibC_AggregateMessage *message = ttLibC_AggregateMessage_make();
 	if(message == NULL) {
 		return NULL;
@@ -44,11 +42,8 @@ ttLibC_AggregateMessage *ttLibC_AggregateMessage_readBinary(
 }
 tetty_errornum ttLibC_AggregateMessage_getFrame(
 		ttLibC_AggregateMessage *message,
-		ttLibC_RtmpStream *stream,
-		ttLibC_AggregateMessage_getFrameFunc callback,
-		void *ptr) {
-	ttLibC_RtmpStream_ *stream_ = (ttLibC_RtmpStream_ *)stream;
-	if(stream_ == NULL) {
+		ttLibC_RtmpStream_ *stream) {
+	if(stream == NULL) {
 		return 0;
 	}
 	uint8_t *data = message->data;
@@ -58,7 +53,7 @@ tetty_errornum ttLibC_AggregateMessage_getFrame(
 	int32_t timestamp_diff = message->inherit_super.header->timestamp;
 	bool is_first_media = true;
 	size_t data_size = message->inherit_super.header->size;
-	ttLibC_FlvFrameManager *manager = stream_->frame_manager;
+	ttLibC_FlvFrameManager *manager = stream->frame_manager;
 	while(data_size > 0) {
 		if(data_size < 11) {
 			ERR_PRINT("data size is too small for aggregate message.");
@@ -81,28 +76,26 @@ tetty_errornum ttLibC_AggregateMessage_getFrame(
 		switch(type) {
 		case RtmpMessageType_videoMessage:
 			{
-				ttLibC_Video *video_frame = ttLibC_FlvFrameManager_readVideoBinary(
+				bool result = ttLibC_FlvFrameManager_readVideoBinary(
 						manager,
 						data,
 						size,
-						timestamp);
-				if(video_frame != NULL) {
-					callback(ptr, (ttLibC_Frame *)video_frame);
-				}
+						timestamp,
+						stream->frame_callback,
+						stream->frame_ptr);
 				data += (size + 4);
 				data_size -= (size + 4);
 			}
 			break;
 		case RtmpMessageType_audioMessage:
 			{
-				ttLibC_Audio *audio_frame = ttLibC_FlvFrameManager_readAudioBinary(
+				bool result = ttLibC_FlvFrameManager_readAudioBinary(
 						manager,
 						data,
 						size,
-						timestamp);
-				if(audio_frame != NULL) {
-					callback(ptr, (ttLibC_Frame *)audio_frame);
-				}
+						timestamp,
+						stream->frame_callback,
+						stream->frame_ptr);
 				data += (size + 4);
 				data_size -= (size + 4);
 			}

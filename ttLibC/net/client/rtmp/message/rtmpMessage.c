@@ -31,6 +31,7 @@ bool ttLibC_RtmpMessage_getData(
 		ttLibC_ClientObject *client_object,
 		ttLibC_RtmpMessage *message,
 		ttLibC_DynamicBuffer *buffer) {
+	(void)client_object;
 	ttLibC_RtmpHeader *header = message->header;
 	// rtmpMessage obj -> binary
 	switch(header->message_type) {
@@ -139,8 +140,6 @@ ttLibC_RtmpMessage *ttLibC_RtmpMessage_readBinary(
 	case RtmpMessageType_audioMessage:
 		{
 			rtmp_message = (ttLibC_RtmpMessage *)ttLibC_AudioMessage_readBinary(
-					header,
-					stream,
 					ttLibC_DynamicBuffer_refData(data_buffer),
 					ttLibC_DynamicBuffer_refSize(data_buffer));
 		}
@@ -148,8 +147,6 @@ ttLibC_RtmpMessage *ttLibC_RtmpMessage_readBinary(
 	case RtmpMessageType_videoMessage:
 		{
 			rtmp_message = (ttLibC_RtmpMessage *)ttLibC_VideoMessage_readBinary(
-					header,
-					stream,
 					ttLibC_DynamicBuffer_refData(data_buffer),
 					ttLibC_DynamicBuffer_refSize(data_buffer));
 		}
@@ -174,9 +171,7 @@ ttLibC_RtmpMessage *ttLibC_RtmpMessage_readBinary(
 		break;
 	case RtmpMessageType_aggregateMessage:
 		{
-			rtmp_message = (ttLibC_RtmpMessage *)ttLibC_AggregateMessage_readBinary(
-					ttLibC_DynamicBuffer_refData(data_buffer),
-					ttLibC_DynamicBuffer_refSize(data_buffer));
+			rtmp_message = (ttLibC_RtmpMessage *)ttLibC_AggregateMessage_readBinary(ttLibC_DynamicBuffer_refData(data_buffer));
 		}
 		break;
 	default:

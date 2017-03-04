@@ -33,9 +33,9 @@
 typedef struct ttLibC_Util_FlvFrameManager_ {
 	ttLibC_FlvFrameManager inherit_super;
 	/** reuse video frame */
-	ttLibC_Video *video_frame;
+	ttLibC_Frame *video_frame;
 	/** reuse audio frame */
-	ttLibC_Audio *audio_frame;
+	ttLibC_Frame *audio_frame;
 	/** size length for h264 nal */
 	uint32_t size_length;
 	/** current aac dsi information. */
@@ -62,13 +62,15 @@ ttLibC_FlvFrameManager *ttLibC_FlvFrameManager_make() {
 	return (ttLibC_FlvFrameManager *)manager;
 }
 
-static ttLibC_Video *FlvFrameManager_readH264Binary(
+static bool FlvFrameManager_readH264Binary(
 		ttLibC_FlvFrameManager_ *manager,
 		uint8_t *data,
 		size_t data_size,
-		uint64_t pts) {
-	if(data_size <= 4) {
-		return NULL;
+		uint64_t pts,
+		ttLibC_getFrameFunc callback,
+		void *ptr) {
+	if(data_size < 4) {
+		return true;
 	}
 	uint32_t dts = (data[1] << 16) | (data[2] << 8) | data[3];
 	switch(data[0]) {
@@ -89,7 +91,14 @@ static ttLibC_Video *FlvFrameManager_readH264Binary(
 			manager->size_length = size_length;
 			h264->inherit_super.inherit_super.pts = pts;
 			h264->inherit_super.inherit_super.timebase = 1000;
-			return (ttLibC_Video *)h264;
+			h264->inherit_super.inherit_super.id = 9;
+			manager->video_frame = (ttLibC_Frame *)h264;
+			manager->inherit_super.video_type = frameType_h264;
+			if(callback != NULL) {
+				if(!callback(ptr, (ttLibC_Frame *)h264)) {
+					return false;
+				}
+			}
 		}
 		break;
 	case 0x01: // slice frame.
@@ -100,7 +109,7 @@ static ttLibC_Video *FlvFrameManager_readH264Binary(
 			size_t buf_size = data_size;
 			do {
 				uint32_t size = 0;
-				for(int i = 1;i <= manager->size_length;++ i) {
+				for(uint32_t i = 1;i <= manager->size_length;++ i) {
 					size = (size << 8) | *buf;
 					if(i != manager->size_length) {
 						*buf = 0x00;
@@ -114,48 +123,66 @@ static ttLibC_Video *FlvFrameManager_readH264Binary(
 				buf += size;
 				buf_size -= size;
 			} while(buf_size > 0);
-			ttLibC_H264 *h264 = ttLibC_H264_getFrame(
-					(ttLibC_H264 *)manager->video_frame,
-					data,
-					data_size,
-					true,
-					pts + dts,
-					1000);
-			if(h264 == NULL) {
-				ERR_PRINT("failed to make h264 data.");
-				return NULL;
-			}
-			return (ttLibC_Video *)h264;
+			buf = data;
+			buf_size = data_size;
+			do {
+				ttLibC_H264 *h264 = ttLibC_H264_getFrame(
+						(ttLibC_H264 *)manager->video_frame,
+						buf,
+						buf_size,
+						true,
+						pts + dts,
+						1000);
+				if(h264 == NULL) {
+					ERR_PRINT("failed to make h264 data.");
+					return false;
+				}
+				h264->inherit_super.inherit_super.id = 9;
+				h264->inherit_super.inherit_super.pts = pts;
+				h264->inherit_super.inherit_super.timebase = 1000;
+				manager->video_frame = (ttLibC_Frame *)h264;
+				manager->inherit_super.video_type = frameType_h264;
+				if(callback != NULL) {
+					if(!callback(ptr, (ttLibC_Frame *)h264)) {
+						return false;
+					}
+				}
+				buf += h264->inherit_super.inherit_super.buffer_size;
+				buf_size -= h264->inherit_super.inherit_super.buffer_size;
+			} while(buf_size > 0);
 		}
 		break;
 	default:
 	case 0x02: // end of stream.
+		// just ignore for now.
 		break;
 	}
-	return NULL;
+	return true;
 }
 
-ttLibC_Video *ttLibC_FlvFrameManager_readVideoBinary(
+bool ttLibC_FlvFrameManager_readVideoBinary(
 		ttLibC_FlvFrameManager *manager,
 		void *data,
 		size_t data_size,
-		uint64_t pts) {
+		uint64_t pts,
+		ttLibC_getFrameFunc callback,
+		void *ptr) {
 	ttLibC_FlvFrameManager_ *manager_ = (ttLibC_FlvFrameManager_ *)manager;
 	if(manager_ == NULL) {
-		return NULL;
+		return false;
 	}
 	if(data_size <= 1) {
-		return NULL;
+		return false;
 	}
 	uint8_t *buffer = (uint8_t *)data;
-	ttLibC_Video *video_frame = NULL;
+	ttLibC_Frame *video_frame = NULL;
 	switch((*buffer) & 0x0F) {
 	case FlvVideoCodec_jpeg:
 		ERR_PRINT("jpeg is not ready.");
-		return NULL;
+		return false;
 	case FlvVideoCodec_flv1:
 		{
-			video_frame = (ttLibC_Video *)ttLibC_Flv1_getFrame(
+			video_frame = (ttLibC_Frame *)ttLibC_Flv1_getFrame(
 					(ttLibC_Flv1 *)manager_->video_frame,
 					buffer + 1,
 					data_size - 1,
@@ -166,11 +193,11 @@ ttLibC_Video *ttLibC_FlvFrameManager_readVideoBinary(
 		break;
 	case FlvVideoCodec_screenVideo:
 		ERR_PRINT("screenVideo is not ready.");
-		return NULL;
+		return false;
 	case FlvVideoCodec_on2Vp6:
 		{
 			// first 4bit horizontal adjustment, next 4bit vertical adjustment. just skip.
-			video_frame = (ttLibC_Video *)ttLibC_Vp6_getFrame(
+			video_frame = (ttLibC_Frame *)ttLibC_Vp6_getFrame(
 					(ttLibC_Vp6 *)manager_->video_frame,
 					buffer + 2,
 					data_size - 2,
@@ -181,109 +208,54 @@ ttLibC_Video *ttLibC_FlvFrameManager_readVideoBinary(
 		break;
 	case FlvVideoCodec_on2Vp6Alpha:
 		ERR_PRINT("vp6 alpha is not ready.");
-		return NULL;
+		return false;
 	case FlvVideoCodec_screenVideoV2:
 		ERR_PRINT("screenVideoV2 is not ready.");
-		return NULL;
+		return false;
 	case FlvVideoCodec_avc:
 		{
-			video_frame = (ttLibC_Video *)FlvFrameManager_readH264Binary(
+			return FlvFrameManager_readH264Binary(
 					manager_,
 					buffer + 1,
 					data_size - 1,
-					pts);
+					pts,
+					callback,
+					ptr);
 		}
 		break;
 	default:
 		ERR_PRINT("unknown codec is not ready.");
-		return NULL;
+		return false;
 	}
 	if(video_frame != NULL) {
-		video_frame->inherit_super.id = 9; // flv related system, video id should be 9.
+		video_frame->id = 9; // flv related system, video id should be 9.
 		manager_->video_frame = video_frame;
+		manager_->inherit_super.video_type = video_frame->type;
+		if(callback != NULL) {
+			if(!callback(ptr, video_frame)) {
+				return false;
+			}
+		}
 	}
-	return video_frame;
+	return true;
 }
 
-static ttLibC_Audio *FlvFrameManager_readAacBinary(
-		ttLibC_FlvFrameManager_ *manager,
-		uint32_t sample_rate,
-		uint32_t bit_depth,
-		uint32_t channel_num,
-		uint8_t *data,
-		size_t data_size,
-		uint64_t pts) {
-	if(data_size <= 1) {
-		return NULL;
-	}
-	switch(*data) {
-	case 0x00:
-		{
-			memcpy(&manager->dsi_info, data + 1, data_size - 1);
-/*			ttLibC_Aac *aac = ttLibC_Aac_make(
-					(ttLibC_Aac *)manager->audio_frame,
-					AacType_dsi,
-					sample_rate,
-					0,
-					channel_num,
-					data + 1,
-					data_size - 1,
-					true,
-					pts,
-					1000,
-					manager->dsi_info);*/
-			ttLibC_Aac *aac = ttLibC_Aac_getFrame(
-					(ttLibC_Aac *)manager->audio_frame,
-					data + 1,
-					data_size - 1,
-					true,
-					pts,
-					1000);
-			if(aac == NULL) {
-				ERR_PRINT("failed to make aac dsi frame.");
-				return NULL;
-			}
-			return (ttLibC_Audio *)aac;
-		}
-	case 0x01:
-		{
-			ttLibC_Aac *aac = ttLibC_Aac_make(
-					(ttLibC_Aac *)manager->audio_frame,
-					AacType_raw,
-					sample_rate,
-					1024,
-					channel_num,
-					data + 1,
-					data_size - 1,
-					true,
-					pts,
-					1000,
-					manager->dsi_info);
-			if(aac == NULL) {
-				ERR_PRINT("failed to make aac raw frame.");
-				return NULL;
-			}
-			return (ttLibC_Audio *)aac;
-		}
-	default:
-		return NULL;
-	}
-}
-
-ttLibC_Audio *ttLibC_FlvFrameManager_readAudioBinary(
+bool ttLibC_FlvFrameManager_readAudioBinary(
 		ttLibC_FlvFrameManager *manager,
 		void *data,
 		size_t data_size,
-		uint64_t pts) {
+		uint64_t pts,
+		ttLibC_getFrameFunc callback,
+		void *ptr) {
 	ttLibC_FlvFrameManager_ *manager_ = (ttLibC_FlvFrameManager_ *)manager;
 	uint32_t sample_rate = 0;
 	uint32_t bit_depth = 0;
 	uint32_t channel_num = 0;
 	uint8_t *buffer = (uint8_t *)data;
 	if(data_size <= 1) {
-		return NULL;
+		return false;
 	}
-	ttLibC_Audio *audio = NULL;
+	ttLibC_Frame *audio_frame = NULL;
 	// 1st byte tells codecID, sampleRate, bitdepth, channelnum
 	switch((*buffer >> 2) & 0x03) {
 	default:
@@ -328,7 +300,7 @@ ttLibC_Audio *ttLibC_FlvFrameManager_readAudioBinary(
 	case FlvAudioCodec_mp3:
 	case FlvAudioCodec_mp38:
 		{
-			audio = (ttLibC_Audio *)ttLibC_Mp3_getFrame(
+			audio_frame = (ttLibC_Frame *)ttLibC_Mp3_getFrame(
 					(ttLibC_Mp3 *)manager_->audio_frame,
 					buffer + 1,
 					data_size - 1,
@@ -342,7 +314,7 @@ ttLibC_Audio *ttLibC_FlvFrameManager_readAudioBinary(
 		return NULL;
 	case FlvAudioCodec_nellymoser16:
 		{
-			audio = (ttLibC_Audio *)ttLibC_Nellymoser_make(
+			audio_frame = (ttLibC_Frame *)ttLibC_Nellymoser_make(
 					(ttLibC_Nellymoser *)manager_->audio_frame,
 					8000,
 					(data_size - 1) / 0x40 * 256,
@@ -356,7 +328,7 @@ ttLibC_Audio *ttLibC_FlvFrameManager_readAudioBinary(
 		break;
 	case FlvAudioCodec_nellymoser8:
 		{
-			audio = (ttLibC_Audio *)ttLibC_Nellymoser_make(
+			audio_frame = (ttLibC_Frame *)ttLibC_Nellymoser_make(
 					(ttLibC_Nellymoser *)manager_->audio_frame,
 					8000,
 					(data_size - 1) / 0x40 * 256,
@@ -369,19 +341,19 @@ ttLibC_Audio *ttLibC_FlvFrameManager_readAudioBinary(
 		}
 		break;
 	case FlvAudioCodec_nellymoser:
-	{
-		audio = (ttLibC_Audio *)ttLibC_Nellymoser_make(
-				(ttLibC_Nellymoser *)manager_->audio_frame,
-				sample_rate,
-				(data_size - 1) / 0x40 * 256,
-				channel_num,
-				buffer + 1,
-				data_size - 1,
-				true,
-				pts,
-				1000);
-	}
-	break;
+		{
+			audio_frame = (ttLibC_Frame *)ttLibC_Nellymoser_make(
+					(ttLibC_Nellymoser *)manager_->audio_frame,
+					sample_rate,
+					(data_size - 1) / 0x40 * 256,
+					channel_num,
+					buffer + 1,
+					data_size - 1,
+					true,
+					pts,
+					1000);
+		}
+		break;
 	case FlvAudioCodec_pcmAlaw:
 		ERR_PRINT("pcm alaw is not ready.");
 		return NULL;
@@ -392,20 +364,18 @@ ttLibC_Audio *ttLibC_FlvFrameManager_readAudioBinary(
 		return NULL;
 	case FlvAudioCodec_aac:
 		{
-			audio = FlvFrameManager_readAacBinary(
-					manager_,
-					sample_rate,
-					bit_depth,
-					channel_num,
-					buffer + 1,
+			audio_frame = (ttLibC_Frame *)ttLibC_Aac_getFrame(
+					(ttLibC_Aac *)manager_->audio_frame,
+					buffer + 2,
 					data_size - 1,
-					pts);
+					true,
+					pts,
+					1000);
 		}
 		break;
 	case FlvAudioCodec_speex:
-//		ERR_PRINT("speex is not ready.");
 		{
-			audio = (ttLibC_Audio *)ttLibC_Speex_getFrame(
+			audio_frame = (ttLibC_Frame *)ttLibC_Speex_getFrame(
 					(ttLibC_Speex *)manager_->audio_frame,
 					buffer + 1,
 					data_size - 1,
@@ -421,11 +391,17 @@ ttLibC_Audio *ttLibC_FlvFrameManager_readAudioBinary(
 	case FlvAudioCodec_deviceSpecific:
 		return NULL;
 	}
-	if(audio != NULL) {
-		audio->inherit_super.id = 8;
-		manager_->audio_frame = audio;
+	if(audio_frame != NULL) {
+		audio_frame->id = 8;
+		manager_->audio_frame = audio_frame;
+		manager_->inherit_super.audio_type = audio_frame->type;
+		if(callback != NULL) {
+			if(!callback(ptr, audio_frame)) {
+				return false;
+			}
+		}
 	}
-	return audio;
+	return true;
 }
 
 static bool FlvFrameManager_getAudioCodecByte(
@@ -539,8 +515,6 @@ static bool FlvFrameManager_getAacData(
 	ttLibC_DynamicBuffer_append(buffer, &data, 1);
 	uint8_t *aac_data = aac->inherit_super.inherit_super.data;
 	size_t aac_data_size = aac->inherit_super.inherit_super.buffer_size;
-	// ここでrawTypeの場合は・・・という話しがでてくる。
-	// うーん。
 	if(aac->type == AacType_adts) {
 		aac_data += 7;
 		aac_data_size -= 7;
@@ -647,30 +621,40 @@ static bool FlvFrameManager_getMp3Data(
 static bool FlvFrameManager_getNellymoserData(
 		ttLibC_Nellymoser *nellymoser,
 		ttLibC_DynamicBuffer *buffer) {
+	(void)nellymoser;
+	(void)buffer;
 	ERR_PRINT("FlvFrameManager_getNellymoserData is not ready");
 	return false;
 }
 static bool FlvFrameManager_getPcmAlawData(
 		ttLibC_PcmAlaw *pcm_alaw,
 		ttLibC_DynamicBuffer *buffer) {
+	(void)pcm_alaw;
+	(void)buffer;
 	ERR_PRINT("FlvFrameManager_getPcmAlawData is not ready");
 	return false;
 }
 static bool FlvFrameManager_getPcmMulawData(
 		ttLibC_PcmMulaw *pcm_mulaw,
 		ttLibC_DynamicBuffer *buffer) {
+	(void)pcm_mulaw;
+	(void)buffer;
 	ERR_PRINT("FlvFrameManager_getPcmMulawData is not ready");
 	return false;
 }
 static bool FlvFrameManager_getSpeexData(
 		ttLibC_Speex *speex,
 		ttLibC_DynamicBuffer *buffer) {
+	(void)speex;
+	(void)buffer;
 	ERR_PRINT("FlvFrameManager_getSpeexData is not ready");
 	return false;
 }
 static bool FlvFrameManager_getVp6Data(
 		ttLibC_Vp6 *vp6,
 		ttLibC_DynamicBuffer *buffer) {
+	(void)vp6;
+	(void)buffer;
 	ERR_PRINT("FlvFrameManager_getVp6Data is not ready");
 	return false;
 }
@@ -727,7 +711,7 @@ void ttLibC_FlvFrameManager_close(ttLibC_FlvFrameManager **manager) {
 	if(target == NULL) {
 		return;
 	}
-	ttLibC_Audio_close(&target->audio_frame);
-	ttLibC_Video_close(&target->video_frame);
+	ttLibC_Frame_close(&target->audio_frame);
+	ttLibC_Frame_close(&target->video_frame);
 	ttLibC_free(target);
 }

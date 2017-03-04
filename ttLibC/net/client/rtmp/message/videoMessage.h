@@ -19,6 +19,7 @@ extern "C" {
 #include "rtmpMessage.h"
 #include "../header/rtmpHeader.h"
 #include "../../../../frame/video/video.h"
+#include "../rtmpStream.h"
 
 /*
  * header
@@ -32,6 +33,7 @@ extern "C" {
 typedef struct ttLibC_Net_Client_Rtmp_Message_VideoMessage {
 	ttLibC_RtmpMessage inherit_super;
 	ttLibC_Video *video_frame;
+	uint8_t *data;
 } ttLibC_Net_Client_Rtmp_Message_VideoMessage;
 
 typedef ttLibC_Net_Client_Rtmp_Message_VideoMessage ttLibC_VideoMessage;
@@ -42,10 +44,12 @@ ttLibC_VideoMessage *ttLibC_VideoMessage_addFrame(
 		ttLibC_Video *frame);
 
 ttLibC_VideoMessage *ttLibC_VideoMessage_readBinary(
-		ttLibC_RtmpHeader *header,
-		ttLibC_RtmpStream *stream,
 		uint8_t *data,
 		size_t data_size);
+
+tetty_errornum ttLibC_VideoMessage_getFrame(
+		ttLibC_VideoMessage *message,
+		ttLibC_RtmpStream_ *stream);
 
 bool ttLibC_VideoMessage_getData(
 		ttLibC_VideoMessage *message,
