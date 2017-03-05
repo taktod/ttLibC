@@ -72,8 +72,11 @@ static bool FlvFrameManager_readH264Binary(
 	if(data_size < 4) {
 		return true;
 	}
-	uint32_t dts = (data[1] << 16) | (data[2] << 8) | data[3];
-	switch(data[0]) {
+	int32_t dts = (data[1] << 16) | (data[2] << 8) | data[3];
+	if((dts & 0x800000) != 0) {
+		dts = -0x01000000 + dts;
+	}
+	switch((int)data[0]) {
 	case 0x00: // configData
 		{
 			data += 4;
