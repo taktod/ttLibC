@@ -209,6 +209,11 @@ bool ttLibC_ContainerReader_read(
 		size_t data_size,
 		ttLibC_ContainerReadFunc callback,
 		void *ptr) {
+	(void)reader;
+	(void)data;
+	(void)data_size;
+	(void)callback;
+	(void)ptr;
 	// TODO make this.
 	return true;
 }
@@ -346,6 +351,10 @@ bool ttLibC_ContainerWriter_write(
 		ttLibC_Frame *frame,
 		ttLibC_ContainerWriteFunc callback,
 		void *ptr) {
+	(void)writer;
+	(void)frame;
+	(void)callback;
+	(void)ptr;
 	return true;
 }
 

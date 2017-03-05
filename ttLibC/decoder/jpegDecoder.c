@@ -139,23 +139,13 @@ bool ttLibC_JpegDecoder_decode(
 	uint8_t *y_data = data;
 	uint8_t *u_data = data + wh;
 	uint8_t *v_data = u_data + (wh >> 2);
-	for(int j = 0;j < decoder_->inherit_super.height;j += 16) {
-		int max = decoder_->inherit_super.height - j;
+	for(uint32_t j = 0;j < decoder_->inherit_super.height;j += 16) {
+		uint32_t max = decoder_->inherit_super.height - j;
 		if(max >= 16) {
 			max = 16;
 		}
-		for(int i = 0;i < 16;i ++) {
+		for(uint32_t i = 0;i < 16;i ++) {
 			if(i >= max) {
-/*				y[i] = decoder_->dummy_buffer + (i - max) * decoder_->inherit_super.width;
-				if((i & 0x01) == 0) {
-					cb[(i >> 1)] = decoder_->dummy_buffer + (16 - max) * decoder_->inherit_super.width + (i - max) * decoder_->inherit_super.width / 4;
-					cr[(i >> 1)] = decoder_->dummy_buffer + (16 - max) * decoder_->inherit_super.width * 5 / 4 + (i - max) * decoder_->inherit_super.width / 4;
-				}*/
-/*				y[i] = y_data - decoder_->inherit_super.width;
-				if((i & 0x01) == 0) {
-					cb[(i >> 1)] = u_data - (decoder_->inherit_super.width >> 1);
-					cr[(i >> 1)] = v_data - (decoder_->inherit_super.width >> 1);
-				}*/
 				y[i] = decoder_->dummy_buffer;
 				if((i & 0x01) == 0) {
 					cb[(i >> 1)] = decoder_->dummy_buffer + decoder_->inherit_super.width;

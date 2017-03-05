@@ -61,6 +61,8 @@ static void VtH264Decoder_decodeCallback(
 		CVImageBufferRef imageBuffer,
 		CMTime pts,
 		CMTime dts) {
+	(void)sourceFrameRefCon;
+	(void)infoFlags;
 	if(status != noErr) {
 		ERR_PRINT("error on decode h264 buffer.:%x(%d)", status, status);
 		return;

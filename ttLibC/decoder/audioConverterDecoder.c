@@ -122,6 +122,7 @@ static OSStatus AcDecoder_decodeDataProc(
 		AudioBufferList *ioData,
 		AudioStreamPacketDescription **outDataPacketDescription,
 		void *inUserData) {
+	(void)converter;
 	ttLibC_AcDecoder_ *decoder = (ttLibC_AcDecoder_ *)inUserData;
 	ttLibC_Audio *audio = decoder->audio;
 	if(audio == NULL) {

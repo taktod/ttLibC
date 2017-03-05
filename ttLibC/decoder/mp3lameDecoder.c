@@ -147,7 +147,7 @@ bool ttLibC_Mp3lameDecoder_decode(
 	int16_t *left_buf = decoder_->left_buffer;
 	int16_t *right_buf = decoder_->right_buffer;
 	int16_t *pcm_buf = decoder_->pcm_buffer;
-	for(uint32_t i = 0;i < num;++ i) {
+	for(int i = 0;i < num;++ i) {
 		(*pcm_buf) = (*left_buf);
 		++ pcm_buf;
 		++ left_buf;

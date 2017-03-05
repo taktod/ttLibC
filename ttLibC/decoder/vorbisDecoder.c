@@ -45,6 +45,7 @@ ttLibC_VorbisDecoder *ttLibC_VorbisDecoder_make() {
 }
 
 ttLibC_VorbisDecoder *ttLibC_VorbisDecoder_makeWithInfo(void *vi) {
+	(void)vi;
 	return NULL;
 }
 
