@@ -124,6 +124,8 @@ static bool MkvReader_readTag(
 	case MkvType_Void:
 	case MkvType_SeekHead:
 	case MkvType_EBML:
+	case MkvType_CRC32:
+	case MkvType_DisplayUnit:
 		{
 			// check the data size.
 			if(data_size < size + byte_reader->read_size) {
