@@ -651,6 +651,9 @@ int ttLibC_ContainerWriter_write_(
 				track->h26x_configData = (ttLibC_Frame *)h;
 				return 0;
 			}
+			if(h264->frame_type == H264FrameType_B && (writer->inherit_super.mode & containerWriter_enable_dts) == 0) {
+				ERR_PRINT("detect h264Bframe in non-dts write mode.");
+			}
 			if(!track->is_appending && h264->type != H264Type_sliceIDR) {
 				return 0;
 			}
@@ -675,6 +678,9 @@ int ttLibC_ContainerWriter_write_(
 				h->inherit_super.inherit_super.timebase = writer->inherit_super.timebase;
 				track->h26x_configData = (ttLibC_Frame *)h;
 				return 0;
+			}
+			if(h265->frame_type == H265FrameType_B && (writer->inherit_super.mode & containerWriter_enable_dts) == 0) {
+				ERR_PRINT("detect h265Bframe in non-dts write mode.");
 			}
 			if(!track->is_appending && h265->type != H265Type_sliceIDR) {
 				return 0;
