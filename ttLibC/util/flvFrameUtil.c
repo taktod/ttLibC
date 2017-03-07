@@ -141,8 +141,6 @@ static bool FlvFrameManager_readH264Binary(
 					return false;
 				}
 				h264->inherit_super.inherit_super.id = 9;
-				h264->inherit_super.inherit_super.pts = pts;
-				h264->inherit_super.inherit_super.timebase = 1000;
 				manager->video_frame = (ttLibC_Frame *)h264;
 				manager->inherit_super.video_type = frameType_h264;
 				if(callback != NULL) {
