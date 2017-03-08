@@ -356,8 +356,19 @@ bool ttLibC_FlvFrameManager_readAudioBinary(
 		}
 		break;
 	case FlvAudioCodec_pcmAlaw:
-		ERR_PRINT("pcm alaw is not ready.");
-		return NULL;
+		{
+			audio_frame = (ttLibC_Frame *)ttLibC_PcmAlaw_make(
+					(ttLibC_PcmAlaw *)manager_->audio_frame,
+					8000,
+					(data_size - 1),
+					channel_num,
+					buffer + 1,
+					data_size - 1,
+					true,
+					pts,
+					1000);
+		}
+		break;
 	case FlvAudioCodec_pcmMulaw:
 		{
 			audio_frame = (ttLibC_Frame *)ttLibC_PcmMulaw_make(
@@ -650,53 +661,6 @@ static bool FlvFrameManager_getAudioData(
 	ttLibC_DynamicBuffer_append(buffer, audio->inherit_super.data, audio->inherit_super.buffer_size);
 	return true;
 }
-/*
-static bool FlvFrameManager_getMp3Data(
-		ttLibC_Mp3 *mp3,
-		ttLibC_DynamicBuffer *buffer) {
-	if(!FlvFrameManager_getAudioCodecByte(
-			(ttLibC_Audio *)mp3,
-			buffer)) {
-		return false;
-	}
-	ttLibC_DynamicBuffer_append(buffer, mp3->inherit_super.inherit_super.data, mp3->inherit_super.inherit_super.buffer_size);
-	return true;
-}
-static bool FlvFrameManager_getNellymoserData(
-		ttLibC_Nellymoser *nellymoser,
-		ttLibC_DynamicBuffer *buffer) {
-	if(!FlvFrameManager_getAudioCodecByte(
-			(ttLibC_Audio *)nellymoser,
-			buffer)) {
-		return false;
-	}
-	ttLibC_DynamicBuffer_append(buffer, nellymoser->inherit_super.inherit_super.data, nellymoser->inherit_super.inherit_super.buffer_size);
-	return true;
-}*/
-static bool FlvFrameManager_getPcmAlawData(
-		ttLibC_PcmAlaw *pcm_alaw,
-		ttLibC_DynamicBuffer *buffer) {
-	(void)pcm_alaw;
-	(void)buffer;
-	ERR_PRINT("FlvFrameManager_getPcmAlawData is not ready");
-	return false;
-}
-/*static bool FlvFrameManager_getPcmMulawData(
-		ttLibC_PcmMulaw *pcm_mulaw,
-		ttLibC_DynamicBuffer *buffer) {
-	(void)pcm_mulaw;
-	(void)buffer;
-	ERR_PRINT("FlvFrameManager_getPcmMulawData is not ready");
-	return false;
-}*/
-static bool FlvFrameManager_getSpeexData(
-		ttLibC_Speex *speex,
-		ttLibC_DynamicBuffer *buffer) {
-	(void)speex;
-	(void)buffer;
-	ERR_PRINT("FlvFrameManager_getSpeexData is not ready");
-	return false;
-}
 
 bool ttLibC_FlvFrameManager_getData(
 		ttLibC_Frame *frame,
@@ -720,17 +684,11 @@ bool ttLibC_FlvFrameManager_getData(
 				buffer);
 	case frameType_mp3:
 	case frameType_nellymoser:
+	case frameType_pcm_alaw:
 	case frameType_pcm_mulaw:
+	case frameType_speex:
 		return FlvFrameManager_getAudioData(
 				(ttLibC_Audio *)frame,
-				buffer);
-	case frameType_pcm_alaw:
-		return FlvFrameManager_getPcmAlawData(
-				(ttLibC_PcmAlaw *)frame,
-				buffer);
-	case frameType_speex:
-		return FlvFrameManager_getSpeexData(
-				(ttLibC_Speex *)frame,
 				buffer);
 	default:
 		ERR_PRINT("frame is not compatible for flv.");
