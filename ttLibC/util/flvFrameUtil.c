@@ -359,8 +359,19 @@ bool ttLibC_FlvFrameManager_readAudioBinary(
 		ERR_PRINT("pcm alaw is not ready.");
 		return NULL;
 	case FlvAudioCodec_pcmMulaw:
-		ERR_PRINT("pcm mulaw is not ready.");
-		return NULL;
+		{
+			audio_frame = (ttLibC_Frame *)ttLibC_PcmMulaw_make(
+					(ttLibC_PcmMulaw *)manager_->audio_frame,
+					8000,
+					(data_size - 1),
+					channel_num,
+					buffer + 1,
+					data_size - 1,
+					true,
+					pts,
+					1000);
+		}
+		break;
 	case FlvAudioCodec_reserved:
 		return NULL;
 	case FlvAudioCodec_aac:
@@ -545,6 +556,25 @@ static bool FlvFrameManager_getFlv1Data(
 	return true;
 }
 
+static bool FlvFrameManager_getVp6Data(
+		ttLibC_Vp6 *vp6,
+		ttLibC_DynamicBuffer *buffer) {
+	uint8_t codecByte[2] = {FlvVideoCodec_on2Vp6, 0x00}; // 0x00:adjustment for vertical 4bit and horizontal 4bit
+	switch(vp6->inherit_super.type) {
+	case videoType_key:
+		codecByte[0] |= 0x10;
+		break;
+	case videoType_inner:
+		codecByte[0] |= 0x20;
+		break;
+	default:
+		return false;
+	}
+	ttLibC_DynamicBuffer_append(buffer, codecByte, 2);
+	ttLibC_DynamicBuffer_append(buffer, vp6->inherit_super.inherit_super.data, vp6->inherit_super.inherit_super.buffer_size);
+	return true;
+}
+
 static bool FlvFrameManager_getH264Data(
 		ttLibC_H264 *h264,
 		ttLibC_DynamicBuffer *buffer) {
@@ -608,6 +638,19 @@ static bool FlvFrameManager_getH264Data(
 		return false;
 	}
 }
+
+static bool FlvFrameManager_getAudioData(
+		ttLibC_Audio *audio,
+		ttLibC_DynamicBuffer *buffer) {
+	if(!FlvFrameManager_getAudioCodecByte(
+			audio,
+			buffer)) {
+		return false;
+	}
+	ttLibC_DynamicBuffer_append(buffer, audio->inherit_super.data, audio->inherit_super.buffer_size);
+	return true;
+}
+/*
 static bool FlvFrameManager_getMp3Data(
 		ttLibC_Mp3 *mp3,
 		ttLibC_DynamicBuffer *buffer) {
@@ -629,7 +672,7 @@ static bool FlvFrameManager_getNellymoserData(
 	}
 	ttLibC_DynamicBuffer_append(buffer, nellymoser->inherit_super.inherit_super.data, nellymoser->inherit_super.inherit_super.buffer_size);
 	return true;
-}
+}*/
 static bool FlvFrameManager_getPcmAlawData(
 		ttLibC_PcmAlaw *pcm_alaw,
 		ttLibC_DynamicBuffer *buffer) {
@@ -638,14 +681,14 @@ static bool FlvFrameManager_getPcmAlawData(
 	ERR_PRINT("FlvFrameManager_getPcmAlawData is not ready");
 	return false;
 }
-static bool FlvFrameManager_getPcmMulawData(
+/*static bool FlvFrameManager_getPcmMulawData(
 		ttLibC_PcmMulaw *pcm_mulaw,
 		ttLibC_DynamicBuffer *buffer) {
 	(void)pcm_mulaw;
 	(void)buffer;
 	ERR_PRINT("FlvFrameManager_getPcmMulawData is not ready");
 	return false;
-}
+}*/
 static bool FlvFrameManager_getSpeexData(
 		ttLibC_Speex *speex,
 		ttLibC_DynamicBuffer *buffer) {
@@ -653,24 +696,6 @@ static bool FlvFrameManager_getSpeexData(
 	(void)buffer;
 	ERR_PRINT("FlvFrameManager_getSpeexData is not ready");
 	return false;
-}
-static bool FlvFrameManager_getVp6Data(
-		ttLibC_Vp6 *vp6,
-		ttLibC_DynamicBuffer *buffer) {
-	uint8_t codecByte[2] = {FlvVideoCodec_on2Vp6, 0x00}; // 0x00:adjustment for vertical 4bit and horizontal 4bit
-	switch(vp6->inherit_super.type) {
-	case videoType_key:
-		codecByte[0] |= 0x10;
-		break;
-	case videoType_inner:
-		codecByte[0] |= 0x20;
-		break;
-	default:
-		return false;
-	}
-	ttLibC_DynamicBuffer_append(buffer, codecByte, 2);
-	ttLibC_DynamicBuffer_append(buffer, vp6->inherit_super.inherit_super.data, vp6->inherit_super.inherit_super.buffer_size);
-	return true;
 }
 
 bool ttLibC_FlvFrameManager_getData(
@@ -685,33 +710,27 @@ bool ttLibC_FlvFrameManager_getData(
 		return FlvFrameManager_getFlv1Data(
 				(ttLibC_Flv1 *)frame,
 				buffer);
+	case frameType_vp6:
+		return FlvFrameManager_getVp6Data(
+				(ttLibC_Vp6 *)frame,
+				buffer);
 	case frameType_h264:
 		return FlvFrameManager_getH264Data(
 				(ttLibC_H264 *)frame,
 				buffer);
 	case frameType_mp3:
-		return FlvFrameManager_getMp3Data(
-				(ttLibC_Mp3 *)frame,
-				buffer);
 	case frameType_nellymoser:
-		return FlvFrameManager_getNellymoserData(
-				(ttLibC_Nellymoser *)frame,
+	case frameType_pcm_mulaw:
+		return FlvFrameManager_getAudioData(
+				(ttLibC_Audio *)frame,
 				buffer);
 	case frameType_pcm_alaw:
 		return FlvFrameManager_getPcmAlawData(
 				(ttLibC_PcmAlaw *)frame,
 				buffer);
-	case frameType_pcm_mulaw:
-		return FlvFrameManager_getPcmMulawData(
-				(ttLibC_PcmMulaw *)frame,
-				buffer);
 	case frameType_speex:
 		return FlvFrameManager_getSpeexData(
 				(ttLibC_Speex *)frame,
-				buffer);
-	case frameType_vp6:
-		return FlvFrameManager_getVp6Data(
-				(ttLibC_Vp6 *)frame,
 				buffer);
 	default:
 		ERR_PRINT("frame is not compatible for flv.");
