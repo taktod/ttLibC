@@ -622,10 +622,13 @@ static bool FlvFrameManager_getMp3Data(
 static bool FlvFrameManager_getNellymoserData(
 		ttLibC_Nellymoser *nellymoser,
 		ttLibC_DynamicBuffer *buffer) {
-	(void)nellymoser;
-	(void)buffer;
-	ERR_PRINT("FlvFrameManager_getNellymoserData is not ready");
-	return false;
+	if(!FlvFrameManager_getAudioCodecByte(
+			(ttLibC_Audio *)nellymoser,
+			buffer)) {
+		return false;
+	}
+	ttLibC_DynamicBuffer_append(buffer, nellymoser->inherit_super.inherit_super.data, nellymoser->inherit_super.inherit_super.buffer_size);
+	return true;
 }
 static bool FlvFrameManager_getPcmAlawData(
 		ttLibC_PcmAlaw *pcm_alaw,
