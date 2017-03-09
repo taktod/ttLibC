@@ -14,6 +14,8 @@
 #include "../log.h"
 #include <vorbis/vorbisenc.h>
 #include <string.h>
+#include "../frame/audio/pcmf32.h"
+#include "../frame/audio/pcms16.h"
 #include "../util/hexUtil.h"
 
 typedef struct ttLibC_Encoder_VorbisEncoder_{
@@ -56,10 +58,12 @@ ttLibC_VorbisEncoder *ttLibC_VorbisEncoder_make(
 }
 
 ttLibC_VorbisEncoder *ttLibC_VorbisEncoder_makeWithInfo(void *vi) {
+	(void)vi;
 	return NULL;
 }
 
 void *ttLibC_VorbisEncoder_refNativeEncodeContext(ttLibC_VorbisEncoder *encoder) {
+	(void)encoder;
 	return NULL;
 }
 
@@ -135,15 +139,16 @@ bool ttLibC_VorbisEncoder_encode(
 	}
 	// encoder for input frame.
 	float **buffer = vorbis_analysis_buffer(&encoder_->vd, pcm->sample_num);
-	int i = 0;
+	uint32_t i = 0;
 	// only for interleave
 	switch(pcm->inherit_super.type) {
 	case frameType_pcmF32:
 		{
-			float *data = (float *)pcm->inherit_super.data;
+			ttLibC_PcmF32 *pcmf = (ttLibC_PcmF32 *)pcm;
 			switch(pcm->channel_num) {
 			case 1:
 				{
+					float *data = (float *)pcmf->l_data;
 					for(i = 0;i < pcm->sample_num; ++ i) {
 						buffer[0][i] = *data;
 						++ data;
@@ -152,11 +157,31 @@ bool ttLibC_VorbisEncoder_encode(
 				break;
 			case 2:
 				{
-					for(i = 0;i < pcm->sample_num; ++ i) {
-						buffer[0][i] = *data;
-						++ data;
-						buffer[1][i] = *data;
-						++ data;
+					switch(pcmf->type) {
+					default:
+					case PcmF32Type_interleave:
+						{
+							float *data = (float *)pcmf->l_data;
+							for(i = 0;i < pcm->sample_num; ++ i) {
+								buffer[0][i] = *data;
+								++ data;
+								buffer[1][i] = *data;
+								++ data;
+							}
+						}
+						break;
+					case PcmF32Type_planar:
+						{
+							float *l_data = (float *)pcmf->l_data;
+							float *r_data = (float *)pcmf->r_data;
+							for(i = 0;i < pcm->sample_num; ++ i) {
+								buffer[0][i] = *l_data;
+								++ l_data;
+								buffer[1][i] = *r_data;
+								++ r_data;
+							}
+						}
+						break;
 					}
 				}
 				break;
@@ -167,10 +192,11 @@ bool ttLibC_VorbisEncoder_encode(
 		break;
 	case frameType_pcmS16:
 		{
-			int16_t *data = (int16_t *)pcm->inherit_super.data;
+			ttLibC_PcmS16 *pcms = (ttLibC_PcmS16 *)pcm;
 			switch(pcm->channel_num) {
 			case 1:
 				{
+					int16_t *data = (int16_t *)pcms->l_data;
 					for(i = 0;i < pcm->sample_num; ++ i) {
 						buffer[0][i] = (*data) / 32768.f;
 						++ data;
@@ -179,11 +205,35 @@ bool ttLibC_VorbisEncoder_encode(
 				break;
 			case 2:
 				{
-					for(i = 0;i < pcm->sample_num; ++ i) {
-						buffer[0][i] = (*data) / 32768.f;
-						++ data;
-						buffer[1][i] = (*data) / 32768.f;
-						++ data;
+					switch(pcms->type) {
+					case PcmS16Type_bigEndian:
+					case PcmS16Type_bigEndian_planar:
+					default:
+						ERR_PRINT("not support bigendign.");
+						return false;
+					case PcmS16Type_littleEndian:
+						{
+							int16_t *data = (int16_t *)pcms->l_data;
+							for(i = 0;i < pcm->sample_num; ++ i) {
+								buffer[0][i] = (*data) / 32768.f;
+								++ data;
+								buffer[1][i] = (*data) / 32768.f;
+								++ data;
+							}
+						}
+						break;
+					case PcmS16Type_littleEndian_planar:
+						{
+							int16_t *l_data = (int16_t *)pcms->l_data;
+							int16_t *r_data = (int16_t *)pcms->r_data;
+							for(i = 0;i < pcm->sample_num; ++ i) {
+								buffer[0][i] = (*l_data) / 32768.f;
+								++ l_data;
+								buffer[1][i] = (*r_data) / 32768.f;
+								++ r_data;
+							}
+						}
+						break;
 					}
 				}
 				break;

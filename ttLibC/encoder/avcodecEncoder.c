@@ -342,7 +342,7 @@ static bool AvcodecEncoder_encode_PcmF32(
 	switch(pcmf32->type) {
 	default:
 	case PcmF32Type_interleave:
-		l_data = pcmf32->inherit_super.inherit_super.data;
+		l_data = pcmf32->l_data;
 		if(pcmf32->inherit_super.channel_num == 2) {
 			step = 8;
 		}
@@ -351,9 +351,9 @@ static bool AvcodecEncoder_encode_PcmF32(
 		}
 		break;
 	case PcmF32Type_planar:
-		l_data = pcmf32->inherit_super.inherit_super.data;
+		l_data = pcmf32->l_data;
 		if(pcmf32->inherit_super.channel_num == 2) {
-			r_data = l_data + pcmf32->inherit_super.sample_num * 4;
+			r_data = pcmf32->r_data;
 			r_data_size = encoder->frame_size * 4;
 		}
 		step = 4;
@@ -462,7 +462,7 @@ static bool AvcodecEncoder_encode_PcmS16(
 	case PcmS16Type_bigEndian:
 	default:
 	case PcmS16Type_littleEndian:
-		l_data = pcms16->inherit_super.inherit_super.data;
+		l_data = pcms16->l_data;
 		if(pcms16->inherit_super.channel_num == 2) {
 			step = 4;
 		}
@@ -472,9 +472,9 @@ static bool AvcodecEncoder_encode_PcmS16(
 		break;
 	case PcmS16Type_bigEndian_planar:
 	case PcmS16Type_littleEndian_planar:
-		l_data = pcms16->inherit_super.inherit_super.data;
+		l_data = pcms16->l_data;
 		if(pcms16->inherit_super.channel_num == 2) {
-			r_data = l_data + pcms16->inherit_super.sample_num * 2;
+			r_data = pcms16->r_data;
 			r_data_size = encoder->frame_size * 2;
 		}
 		step = 2;
@@ -563,6 +563,8 @@ static bool AvcodecEncoder_encode_Bgr(
 		ttLibC_Bgr *bgr,
 		ttLibC_AvcodecEncodeFunc callback,
 		void *ptr) {
+	(void)callback;
+	(void)ptr;
 	if(encoder == NULL) {
 		return false;
 	}
