@@ -519,7 +519,7 @@ void *ttLibC_AvcodecDecoder_getAVCodecContext(ttLibC_Frame_Type frame_type) {
 		codec = avcodec_find_decoder(AV_CODEC_ID_VORBIS);
 		break;
 	case frameType_vp6:
-		codec = avcodec_find_decoder(AV_CODEC_ID_VP6);
+		codec = avcodec_find_decoder(AV_CODEC_ID_VP6F);
 		break;
 	case frameType_vp8:
 		codec = avcodec_find_decoder(AV_CODEC_ID_VP8);

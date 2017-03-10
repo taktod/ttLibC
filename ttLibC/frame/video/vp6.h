@@ -73,18 +73,28 @@ bool ttLibC_Vp6_isKey(void *data, size_t data_size);
  * @param prev_frame ref for prev analyzed vp6 frame.
  * @param data       vp6 data
  * @param data_size  vp6 data size
+ * @param adjustment vp6 horizontal vertical shift data.
  * @return 0:error or width size.
  */
-uint32_t ttLibC_Vp6_getWidth(ttLibC_Vp6 *prev_frame, uint8_t *data, size_t data_size);
+uint32_t ttLibC_Vp6_getWidth(
+		ttLibC_Vp6 *prev_frame,
+		uint8_t *data,
+		size_t data_size,
+		uint8_t adjustment);
 
 /**
  * analyze the height information from vp6 binary.
  * @param prev_frame ref for prev analyzed vp6 frame.
  * @param data       vp6 data
  * @param data_size  vp6 data size
+ * @param adjustment vp6 horizontal vertical shift data.
  * @return 0:error or height size.
  */
-uint32_t ttLibC_Vp6_getHeight(ttLibC_Vp6 *prev_frame, uint8_t *data, size_t data_size);
+uint32_t ttLibC_Vp6_getHeight(
+		ttLibC_Vp6 *prev_frame,
+		uint8_t *data,
+		size_t data_size,
+		uint8_t adjustment);
 
 /**
  * make frame object from vp6 binary data.
@@ -94,6 +104,7 @@ uint32_t ttLibC_Vp6_getHeight(ttLibC_Vp6 *prev_frame, uint8_t *data, size_t data
  * @param non_copy_mode true:hold pointer. false:copy data.
  * @param pts           pts for vp6 frame.
  * @param timebase      timebase for pts.
+ * @param adjustment    vp6 horizontal vertical shift data.
  * @return vp6 frame
  */
 ttLibC_Vp6 *ttLibC_Vp6_getFrame(
@@ -102,7 +113,8 @@ ttLibC_Vp6 *ttLibC_Vp6_getFrame(
 		size_t data_size,
 		bool non_copy_mode,
 		uint64_t pts,
-		uint32_t timebase);
+		uint32_t timebase,
+		uint8_t adjustment);
 
 /**
  * close frame

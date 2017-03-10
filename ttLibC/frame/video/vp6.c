@@ -106,9 +106,14 @@ bool ttLibC_Vp6_isKey(void *data, size_t data_size) {
  * @param prev_frame ref for prev analyzed vp6 frame.
  * @param data       vp6 data
  * @param data_size  vp6 data size
+ * @param adjustment adjustment byte
  * @return 0:error or width size.
  */
-uint32_t ttLibC_Vp6_getWidth(ttLibC_Vp6 *prev_frame, uint8_t *data, size_t data_size) {
+uint32_t ttLibC_Vp6_getWidth(
+		ttLibC_Vp6 *prev_frame,
+		uint8_t *data,
+		size_t data_size,
+		uint8_t adjustment) {
 	/*
 	 * memo
 	 * 1bit frameMode 0:key frame 1:inner frame
@@ -144,14 +149,17 @@ uint32_t ttLibC_Vp6_getWidth(ttLibC_Vp6 *prev_frame, uint8_t *data, size_t data_
 	if(marker == 1 && version2 == 0) {
 		ttLibC_ByteReader_bit(reader, 16);
 	}
-	uint32_t width = ttLibC_ByteReader_bit(reader, 8) * 16;
 	ttLibC_ByteReader_bit(reader, 8);
+	ttLibC_ByteReader_bit(reader, 8);
+	ttLibC_ByteReader_bit(reader, 8);
+	uint32_t width = ttLibC_ByteReader_bit(reader, 8) * 16;
 	if(reader->error != Error_noError) {
 		LOG_ERROR(reader->error);
 		ttLibC_ByteReader_close(&reader);
 		return 0;
 	}
 	ttLibC_ByteReader_close(&reader);
+	width -= ((adjustment >> 4) & 0x0F);
 	return width;
 }
 
@@ -160,9 +168,14 @@ uint32_t ttLibC_Vp6_getWidth(ttLibC_Vp6 *prev_frame, uint8_t *data, size_t data_
  * @param prev_frame ref for prev analyzed vp6 frame.
  * @param data       vp6 data
  * @param data_size  vp6 data size
+ * @param adjustment adjustment byte
  * @return 0:error or height size.
  */
-uint32_t ttLibC_Vp6_getHeight(ttLibC_Vp6 *prev_frame, uint8_t *data, size_t data_size) {
+uint32_t ttLibC_Vp6_getHeight(
+		ttLibC_Vp6 *prev_frame,
+		uint8_t *data,
+		size_t data_size,
+		uint8_t adjustment) {
 	ttLibC_ByteReader *reader = ttLibC_ByteReader_make(data, data_size, ByteUtilType_default);
 	if(reader == NULL) {
 		ERR_PRINT("failed to make byteReader.");
@@ -186,13 +199,16 @@ uint32_t ttLibC_Vp6_getHeight(ttLibC_Vp6 *prev_frame, uint8_t *data, size_t data
 		ttLibC_ByteReader_bit(reader, 16);
 	}
 	ttLibC_ByteReader_bit(reader, 8);
+	ttLibC_ByteReader_bit(reader, 8);
 	uint32_t height = ttLibC_ByteReader_bit(reader, 8) * 16;
+	ttLibC_ByteReader_bit(reader, 8);
 	if(reader->error != Error_noError) {
 		LOG_ERROR(reader->error);
 		ttLibC_ByteReader_close(&reader);
 		return 0;
 	}
 	ttLibC_ByteReader_close(&reader);
+	height -= (adjustment & 0x0F);
 	return height;
 }
 
@@ -204,6 +220,7 @@ uint32_t ttLibC_Vp6_getHeight(ttLibC_Vp6 *prev_frame, uint8_t *data, size_t data
  * @param non_copy_mode true:hold pointer. false:copy data.
  * @param pts           pts for vp6 frame.
  * @param timebase      timebase for pts.
+ * @param adjustment    adjustment byte
  * @return vp6 frame
  */
 ttLibC_Vp6 *ttLibC_Vp6_getFrame(
@@ -212,14 +229,15 @@ ttLibC_Vp6 *ttLibC_Vp6_getFrame(
 		size_t data_size,
 		bool non_copy_mode,
 		uint64_t pts,
-		uint32_t timebase) {
+		uint32_t timebase,
+		uint8_t adjustment) {
 	if(data_size <= 1) {
 		ERR_PRINT("data size is too small for analyze.");
 		return NULL;
 	}
 	bool is_key = ttLibC_Vp6_isKey(data, data_size);
-	uint32_t width  = ttLibC_Vp6_getWidth(prev_frame, data, data_size);
-	uint32_t height = ttLibC_Vp6_getHeight(prev_frame, data, data_size);
+	uint32_t width  = ttLibC_Vp6_getWidth(prev_frame, data, data_size, adjustment);
+	uint32_t height = ttLibC_Vp6_getHeight(prev_frame, data, data_size, adjustment);
 	if(width == 0 || height == 0) {
 		return NULL;
 	}

@@ -210,7 +210,8 @@ bool ttLibC_FlvFrameManager_readVideoBinary(
 					data_size - 2,
 					true,
 					pts,
-					1000);
+					1000,
+					*(buffer + 1));
 		}
 		break;
 	case FlvVideoCodec_on2Vp6Alpha:
@@ -604,6 +605,7 @@ static bool FlvFrameManager_getVp6Data(
 		ttLibC_Vp6 *vp6,
 		ttLibC_DynamicBuffer *buffer) {
 	uint8_t codecByte[2] = {FlvVideoCodec_on2Vp6, 0x00}; // 0x00:adjustment for vertical 4bit and horizontal 4bit
+	codecByte[1] = (((16 - vp6->inherit_super.width % 16) << 4) | (16 - vp6->inherit_super.height % 16));
 	switch(vp6->inherit_super.type) {
 	case videoType_key:
 		codecByte[0] |= 0x10;
