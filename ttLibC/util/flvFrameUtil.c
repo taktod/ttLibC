@@ -183,6 +183,9 @@ bool ttLibC_FlvFrameManager_readVideoBinary(
 		return false;
 	case FlvVideoCodec_flv1:
 		{
+			if(manager_->video_frame != NULL && manager_->video_frame->type != frameType_flv1) {
+				ttLibC_Frame_close(&manager_->video_frame);
+			}
 			video_frame = (ttLibC_Frame *)ttLibC_Flv1_getFrame(
 					(ttLibC_Flv1 *)manager_->video_frame,
 					buffer + 1,
@@ -197,6 +200,9 @@ bool ttLibC_FlvFrameManager_readVideoBinary(
 		return false;
 	case FlvVideoCodec_on2Vp6:
 		{
+			if(manager_->video_frame != NULL && manager_->video_frame->type != frameType_vp6) {
+				ttLibC_Frame_close(&manager_->video_frame);
+			}
 			// first 4bit horizontal adjustment, next 4bit vertical adjustment. just skip.
 			video_frame = (ttLibC_Frame *)ttLibC_Vp6_getFrame(
 					(ttLibC_Vp6 *)manager_->video_frame,
@@ -215,6 +221,9 @@ bool ttLibC_FlvFrameManager_readVideoBinary(
 		return false;
 	case FlvVideoCodec_avc:
 		{
+			if(manager_->video_frame != NULL && manager_->video_frame->type != frameType_h264) {
+				ttLibC_Frame_close(&manager_->video_frame);
+			}
 			return FlvFrameManager_readH264Binary(
 					manager_,
 					buffer + 1,
@@ -301,6 +310,9 @@ bool ttLibC_FlvFrameManager_readAudioBinary(
 	case FlvAudioCodec_mp3:
 	case FlvAudioCodec_mp38:
 		{
+			if(manager_->audio_frame != NULL && manager_->audio_frame->type != frameType_mp3) {
+				ttLibC_Frame_close(&manager_->audio_frame);
+			}
 			audio_frame = (ttLibC_Frame *)ttLibC_Mp3_getFrame(
 					(ttLibC_Mp3 *)manager_->audio_frame,
 					buffer + 1,
@@ -315,9 +327,12 @@ bool ttLibC_FlvFrameManager_readAudioBinary(
 		return NULL;
 	case FlvAudioCodec_nellymoser16:
 		{
+			if(manager_->audio_frame != NULL && manager_->audio_frame->type != frameType_nellymoser) {
+				ttLibC_Frame_close(&manager_->audio_frame);
+			}
 			audio_frame = (ttLibC_Frame *)ttLibC_Nellymoser_make(
 					(ttLibC_Nellymoser *)manager_->audio_frame,
-					8000,
+					16000,
 					(data_size - 1) / 0x40 * 256,
 					1,
 					buffer + 1,
@@ -329,6 +344,9 @@ bool ttLibC_FlvFrameManager_readAudioBinary(
 		break;
 	case FlvAudioCodec_nellymoser8:
 		{
+			if(manager_->audio_frame != NULL && manager_->audio_frame->type != frameType_nellymoser) {
+				ttLibC_Frame_close(&manager_->audio_frame);
+			}
 			audio_frame = (ttLibC_Frame *)ttLibC_Nellymoser_make(
 					(ttLibC_Nellymoser *)manager_->audio_frame,
 					8000,
@@ -343,6 +361,9 @@ bool ttLibC_FlvFrameManager_readAudioBinary(
 		break;
 	case FlvAudioCodec_nellymoser:
 		{
+			if(manager_->audio_frame != NULL && manager_->audio_frame->type != frameType_nellymoser) {
+				ttLibC_Frame_close(&manager_->audio_frame);
+			}
 			audio_frame = (ttLibC_Frame *)ttLibC_Nellymoser_make(
 					(ttLibC_Nellymoser *)manager_->audio_frame,
 					sample_rate,
@@ -357,6 +378,9 @@ bool ttLibC_FlvFrameManager_readAudioBinary(
 		break;
 	case FlvAudioCodec_pcmAlaw:
 		{
+			if(manager_->audio_frame != NULL && manager_->audio_frame->type != frameType_pcm_alaw) {
+				ttLibC_Frame_close(&manager_->audio_frame);
+			}
 			audio_frame = (ttLibC_Frame *)ttLibC_PcmAlaw_make(
 					(ttLibC_PcmAlaw *)manager_->audio_frame,
 					8000,
@@ -371,6 +395,9 @@ bool ttLibC_FlvFrameManager_readAudioBinary(
 		break;
 	case FlvAudioCodec_pcmMulaw:
 		{
+			if(manager_->audio_frame != NULL && manager_->audio_frame->type != frameType_pcm_mulaw) {
+				ttLibC_Frame_close(&manager_->audio_frame);
+			}
 			audio_frame = (ttLibC_Frame *)ttLibC_PcmMulaw_make(
 					(ttLibC_PcmMulaw *)manager_->audio_frame,
 					8000,
@@ -387,6 +414,9 @@ bool ttLibC_FlvFrameManager_readAudioBinary(
 		return NULL;
 	case FlvAudioCodec_aac:
 		{
+			if(manager_->audio_frame != NULL && manager_->audio_frame->type != frameType_aac) {
+				ttLibC_Frame_close(&manager_->audio_frame);
+			}
 			audio_frame = (ttLibC_Frame *)ttLibC_Aac_getFrame(
 					(ttLibC_Aac *)manager_->audio_frame,
 					buffer + 2,
@@ -398,6 +428,9 @@ bool ttLibC_FlvFrameManager_readAudioBinary(
 		break;
 	case FlvAudioCodec_speex:
 		{
+			if(manager_->audio_frame != NULL && manager_->audio_frame->type != frameType_speex) {
+				ttLibC_Frame_close(&manager_->audio_frame);
+			}
 			audio_frame = (ttLibC_Frame *)ttLibC_Speex_getFrame(
 					(ttLibC_Speex *)manager_->audio_frame,
 					buffer + 1,
