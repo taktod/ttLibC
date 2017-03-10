@@ -87,6 +87,7 @@ void ttLibC_CvWindow_showBgr(ttLibC_CvWindow *window, ttLibC_Bgr *bgr) {
 		}
 	}
 	uint8_t *image_data = (uint8_t *)window_->image->imageData;
+	uint32_t image_stride_diff = window_->image->widthStep - 3 * window_->image->width;
 	uint8_t *src_data = bgr->inherit_super.inherit_super.data;
 	uint8_t *src_b_data;
 	uint8_t *src_g_data;
@@ -133,6 +134,9 @@ void ttLibC_CvWindow_showBgr(ttLibC_CvWindow *window, ttLibC_Bgr *bgr) {
 			src_b_data += src_width_stride_diff;
 			src_g_data += src_width_stride_diff;
 			src_r_data += src_width_stride_diff;
+		}
+		if(image_stride_diff > 0) {
+			image_data += image_stride_diff;
 		}
 	}
 	cvShowImage(window_->inherit_super.name, window_->image);
