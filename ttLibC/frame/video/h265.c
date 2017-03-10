@@ -32,6 +32,10 @@ ttLibC_H265 *ttLibC_H265_make(
 		bool non_copy_mode,
 		uint64_t pts,
 		uint32_t timebase) {
+	if(prev_frame != NULL && prev_frame->inherit_super.inherit_super.type != frameType_h265) {
+		ERR_PRINT("reuse with incompative frame.");
+		return NULL;
+	}
 	ttLibC_Video_Type video_type = videoType_info;
 	switch(type) {
 	case H265Type_configData:
@@ -475,7 +479,10 @@ uint32_t ttLibC_H265_getWidth(ttLibC_H265 *prev_frame, uint8_t *data, size_t dat
 	ttLibC_H265_NalInfo info;
 	uint8_t *check_data = data;
 	size_t check_size = data_size;
-	ttLibC_H265_Ref_t ref = {0};
+	ttLibC_H265_Ref_t ref;
+	ref.width = 0;
+	ref.height = 0;
+	ref.analyze_data_ptr = NULL;
 	if(ttLibC_H265_isHvcc(check_data, check_size)) {
 		do {
 			if(!ttLibC_H265_getHvccInfo(&info, check_data, check_size)) {
@@ -524,7 +531,10 @@ uint32_t ttLibC_H265_getHeight(ttLibC_H265 *prev_frame, uint8_t *data, size_t da
 	ttLibC_H265_NalInfo info;
 	uint8_t *check_data = data;
 	size_t check_size = data_size;
-	ttLibC_H265_Ref_t ref = {0};
+	ttLibC_H265_Ref_t ref;
+	ref.width = 0;
+	ref.height = 0;
+	ref.analyze_data_ptr = NULL;
 	if(ttLibC_H265_isHvcc(check_data, check_size)) {
 		do {
 			if(!ttLibC_H265_getHvccInfo(&info, check_data, check_size)) {
@@ -1012,7 +1022,7 @@ size_t ttLibC_H265_readHvccTag(
 		ttLibC_ByteConnector_bit(connector, nal_info.nal_unit_type, 8);
 		ttLibC_ByteConnector_bit(connector, 1, 16);
 		ttLibC_ByteConnector_bit(connector, nal_info.nal_size - nal_info.data_pos, 16);
-		ttLibC_ByteConnector_string(connector, buf + nal_info.data_pos, nal_info.nal_size - nal_info.data_pos);
+		ttLibC_ByteConnector_string(connector, (const char *)(buf + nal_info.data_pos), nal_info.nal_size - nal_info.data_pos);
 		buf += nal_info.nal_size;
 		buf_size -= nal_info.nal_size;
 	}

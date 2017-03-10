@@ -48,6 +48,10 @@ ttLibC_PcmS16 *ttLibC_PcmS16_make(
 		bool non_copy_mode,
 		uint64_t pts,
 		uint32_t timebase) {
+	if(prev_frame != NULL && prev_frame->inherit_super.inherit_super.type != frameType_pcmS16) {
+		ERR_PRINT("reuse with incompative frame.");
+		return NULL;
+	}
 	ttLibC_PcmS16 *pcms16 = prev_frame;
 	size_t data_size_ = data_size;
 	size_t buffer_size_ = data_size;
@@ -135,6 +139,8 @@ ttLibC_PcmS16 *ttLibC_PcmS16_make(
 static ttLibC_PcmS16 *PcmS16_cloneBigEndian(
 		ttLibC_PcmS16 *prev_frame,
 		ttLibC_PcmS16 *src_frame) {
+	(void)prev_frame;
+	(void)src_frame;
 	ERR_PRINT("clone bigendian is not created");
 	return NULL;
 }
@@ -197,6 +203,8 @@ static ttLibC_PcmS16 *PcmS16_cloneLittleEndian(
 static ttLibC_PcmS16 *PcmS16_cloneBigEndianPlanar(
 		ttLibC_PcmS16 *prev_frame,
 		ttLibC_PcmS16 *src_frame) {
+	(void)prev_frame;
+	(void)src_frame;
 	ERR_PRINT("clone bigendian planar is not created");
 	return NULL;
 }

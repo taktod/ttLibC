@@ -84,6 +84,10 @@ ttLibC_Aac *ttLibC_Aac_make(
 		uint64_t pts,
 		uint32_t timebase,
 		uint64_t dsi_info) {
+	if(prev_frame != NULL && prev_frame->inherit_super.inherit_super.type != frameType_aac) {
+		ERR_PRINT("reuse with incompative frame.");
+		return NULL;
+	}
 	ttLibC_Aac_ *aac = (ttLibC_Aac_ *)prev_frame;
 	size_t data_size_ = data_size;
 	size_t buffer_size_ = data_size;
@@ -435,6 +439,7 @@ size_t ttLibC_Aac_readDsiInfo(
 		ttLibC_Aac *aac,
 		void *data,
 		size_t data_size) {
+	(void)data_size;
 	ttLibC_Aac_ *aac_ = (ttLibC_Aac_ *)aac;
 	uint8_t *buf;
 	switch(aac->type) {

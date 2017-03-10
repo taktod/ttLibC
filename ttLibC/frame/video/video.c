@@ -56,6 +56,10 @@ ttLibC_Video *ttLibC_Video_make(
 		bool non_copy_mode,
 		uint64_t pts,
 		uint32_t timebase) {
+	if(prev_frame != NULL && prev_frame->inherit_super.type != frame_type) {
+		ERR_PRINT("reuse with incompative frame.");
+		return NULL;
+	}
 	ttLibC_Video *video = prev_frame;
 	size_t buffer_size_ = data_size;
 	size_t data_size_ = data_size;
@@ -187,11 +191,11 @@ ttLibC_Video *ttLibC_Video_clone(
 				(ttLibC_Vp9 *)prev_frame,
 				(ttLibC_Vp9 *)src_frame);
 	case frameType_wmv1:
-		return (ttLibC_Video *)ttLibC_Vp9_clone(
+		return (ttLibC_Video *)ttLibC_Wmv1_clone(
 				(ttLibC_Wmv1 *)prev_frame,
 				(ttLibC_Wmv1 *)src_frame);
 	case frameType_wmv2:
-		return (ttLibC_Video *)ttLibC_Vp9_clone(
+		return (ttLibC_Video *)ttLibC_Wmv2_clone(
 				(ttLibC_Wmv2 *)prev_frame,
 				(ttLibC_Wmv2 *)src_frame);
 	case frameType_yuv420:

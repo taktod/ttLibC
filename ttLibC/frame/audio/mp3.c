@@ -63,6 +63,10 @@ ttLibC_Mp3 *ttLibC_Mp3_make(
 		bool non_copy_mode,
 		uint64_t pts,
 		uint32_t timebase) {
+	if(prev_frame != NULL && prev_frame->inherit_super.inherit_super.type != frameType_mp3) {
+		ERR_PRINT("reuse with incompative frame.");
+		return NULL;
+	}
 	ttLibC_Mp3_ *mp3 = (ttLibC_Mp3_ *)prev_frame;
 	size_t data_size_ = data_size;
 	size_t buffer_size_ = data_size;
@@ -432,8 +436,8 @@ static ttLibC_Mp3 *Mp3_makeId3Frame(
 			data,
 			size,
 			non_copy_mode,
-			0,
-			44100);
+			pts,
+			timebase);
 	if(mp3 == NULL) {
 		return NULL;
 	}
@@ -447,6 +451,12 @@ static ttLibC_Mp3 *Mp3_makeTagFrame(
 		bool non_copy_mode,
 		uint64_t pts,
 		uint32_t timebase) {
+	(void)prev_frame;
+	(void)data;
+	(void)data_size;
+	(void)non_copy_mode;
+	(void)pts;
+	(void)timebase;
 	return NULL;
 }
 

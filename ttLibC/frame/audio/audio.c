@@ -54,6 +54,10 @@ ttLibC_Audio *ttLibC_Audio_make(
 		bool non_copy_mode,
 		uint64_t pts,
 		uint32_t timebase) {
+	if(prev_frame != NULL && prev_frame->inherit_super.type != frame_type) {
+		ERR_PRINT("reuse with incompative frame.");
+		return NULL;
+	}
 	ttLibC_Audio *audio = prev_frame;
 	size_t buffer_size_ = data_size;
 	size_t data_size_ = data_size;
