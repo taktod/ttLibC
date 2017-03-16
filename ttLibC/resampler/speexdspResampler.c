@@ -128,7 +128,21 @@ ttLibC_PcmS16 *ttLibC_SpeexdspResampler_resample(ttLibC_SpeexdspResampler *resam
 		res = speex_resampler_process_interleaved_int(resampler_->resampler, (const int16_t *)src_pcms16->l_data, &in_sample_num, (int16_t *)data, &out_sample_num);
 		break;
 	case PcmS16Type_littleEndian_planar:
-		res = speex_resampler_process_int(resampler_->resampler, resampler_->inherit_super.channel_num, (const int16_t *)src_pcms16->l_data, &in_sample_num, (int16_t *)data, &out_sample_num);
+		if(resampler_->inherit_super.channel_num == 2) {
+			res = speex_resampler_process_int(resampler_->resampler, 0, (const int16_t *)src_pcms16->l_data, &in_sample_num, (int16_t *)data, &out_sample_num);
+			if(res != 0) {
+				ERR_PRINT("failed to resampler: %s", speex_resampler_strerror(res));
+				if(alloc_flag) {
+					ttLibC_free(data);
+				}
+				resampler_->inherit_super.error = ttLibC_updateError(Target_On_Resampler, Error_LibraryError);
+				return NULL;
+			}
+			res = speex_resampler_process_int(resampler_->resampler, 1, (const int16_t *)src_pcms16->r_data, &in_sample_num, (int16_t *)(data + (out_sample_num * 2)), &out_sample_num);
+		}
+		else {
+			res = speex_resampler_process_int(resampler_->resampler, 0, (const int16_t *)src_pcms16->l_data, &in_sample_num, (int16_t *)data, &out_sample_num);
+		}
 		break;
 	}
 	if(res != 0) {

@@ -58,17 +58,82 @@
 #include <unistd.h>
 
 #ifdef __ENABLE_APPLE__
-#include <ttLibC/util/audioUnitUtil.h>
+#	include <ttLibC/util/audioUnitUtil.h>
 #endif
 
 #ifdef __ENABLE_MP3LAME_ENCODE__
-#include <ttLibC/encoder/mp3lameEncoder.h>
+#	include <ttLibC/encoder/mp3lameEncoder.h>
 #endif
 
 #ifdef __ENABLE_SOUNDTOUCH__
-#include <soundtouch/SoundTouch.h>
-#include <ttLibC/resampler/soundtouchResampler.h>
+#	include <soundtouch/SoundTouch.h>
+#	include <ttLibC/resampler/soundtouchResampler.h>
 #endif
+
+#ifdef __ENABLE_SPEEXDSP__
+#	include <ttLibC/resampler/speexdspResampler.h>
+#endif
+
+#if defined(__ENABLE_SPEEXDSP__) && defined(__ENABLE_APPLE__)
+#endif
+
+static void speexdspPlayTest() {
+	LOG_PRINT("speexdspResampleTest");
+#if defined(__ENABLE_SPEEXDSP__) && defined(__ENABLE_APPLE__)
+	uint32_t sampleRate = 44100;
+	uint32_t outputSampleRate = 48000;
+	uint32_t channelNum = 2;
+	ttLibC_BeepGenerator *generator = ttLibC_BeepGenerator_make(PcmS16Type_littleEndian_planar, 440, sampleRate, channelNum);
+	ttLibC_AuPlayer *auPlayer = ttLibC_AuPlayer_make(outputSampleRate, channelNum, AuPlayerType_DefaultOutput);
+	ttLibC_SpeexdspResampler *resampler = ttLibC_SpeexdspResampler_make(channelNum, sampleRate, outputSampleRate, 8);
+	ttLibC_PcmS16 *pcm = NULL, *p, *rpcm = NULL, *ipcm = NULL;
+	for(int i = 0;i < 10;++ i) {
+		// generator pcm
+		p = ttLibC_BeepGenerator_makeBeepByMiliSec(generator, pcm, 500);
+		if(p == NULL) {
+			break;
+		}
+		// resample sampleRate
+		pcm = p;
+		if(sampleRate != outputSampleRate) {
+			p = ttLibC_SpeexdspResampler_resample(resampler, rpcm, pcm);
+			if(p == NULL) {
+				break;
+			}
+			rpcm = p;
+		}
+		else {
+			rpcm = pcm;
+		}
+		// change pcm type to littleEndian interleave
+		if(rpcm->type != PcmS16Type_littleEndian) {
+			p = (ttLibC_PcmS16 *)ttLibC_AudioResampler_convertFormat((ttLibC_Audio *)ipcm, frameType_pcmS16, PcmS16Type_littleEndian, channelNum, (ttLibC_Audio *)rpcm);
+			if(p == NULL) {
+				break;
+			}
+			ipcm = p;
+		}
+		else {
+			ipcm = rpcm;
+		}
+		// play with audioUnit.
+		while(!ttLibC_AuPlayer_queue(auPlayer, (ttLibC_PcmS16 *)ipcm)) {
+			usleep(100);
+		}
+	}
+	ttLibC_AuPlayer_close(&auPlayer);
+	if(ipcm != rpcm) {
+		ttLibC_PcmS16_close(&ipcm);
+	}
+	if(rpcm != pcm) {
+		ttLibC_PcmS16_close(&rpcm);
+ 	}
+	ttLibC_PcmS16_close(&pcm);
+	ttLibC_SpeexdspResampler_close(&resampler);
+	ttLibC_BeepGenerator_close(&generator);
+#endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
 
 #if defined(__ENABLE_SOUNDTOUCH__) && defined(__ENABLE_APPLE__)
 
@@ -788,6 +853,7 @@ static void openalUtilTest() {
  */
 cute::suite utilTests(cute::suite s) {
 	s.clear();
+	s.push_back(CUTE(speexdspPlayTest));
 	s.push_back(CUTE(soundtouchPlayTest));
 	s.push_back(CUTE(audioUnitRecordTest));
 	s.push_back(CUTE(audioUnitPlayTest));
