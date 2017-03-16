@@ -41,9 +41,9 @@
 #ifdef __ENABLE_APPLE__
 #	include <ttLibC/util/audioUnitUtil.h>
 #	include <ttLibC/encoder/audioConverterEncoder.h>
-#	include <ttLibC/encoder/vtCompressSessionH264Encoder.h>
+#	include <ttLibC/encoder/vtCompressSessionEncoder.h>
 #	include <ttLibC/decoder/audioConverterDecoder.h>
-#	include <ttLibC/decoder/vtDecompressSessionH264Decoder.h>
+#	include <ttLibC/decoder/vtDecompressSessionDecoder.h>
 #endif
 
 #include <ttLibC/resampler/imageResampler.h>
@@ -313,7 +313,7 @@ typedef struct rtmpWatchTest_t {
 
 	// decoder
 //	ttLibC_AcDecoder *aac_decoder;
-	ttLibC_VtH264Decoder *h264_decoder;
+	ttLibC_VtDecoder *h264_decoder;
 
 	ttLibC_RtmpConnection *conn;
 	ttLibC_RtmpStream *stream;
@@ -341,9 +341,9 @@ static bool rtmpWatchTest_getFrameCallback(void *ptr, ttLibC_Frame *frame) {
 		if(((int32_t)frame->pts) < 0) {
 			return true;
 		}
-		return ttLibC_VtH264Decoder_decode(
+		return ttLibC_VtDecoder_decode(
 				testData->h264_decoder,
-				(ttLibC_H264 *)frame,
+				(ttLibC_Video *)frame,
 				rtmpWatchTest_h264DecodeCallback,
 				testData);
 	case frameType_aac:
@@ -382,7 +382,7 @@ static void rtmpWatchTest() {
 #if defined(__ENABLE_OPENCV__) && defined(__ENABLE_APPLE__)
 	rtmpWatchTest_t testData;
 //	testData.aac_decoder = NULL;
-	testData.h264_decoder = ttLibC_VtH264Decoder_make();
+	testData.h264_decoder = ttLibC_VtDecoder_make(frameType_h264);
 
 //	testData.player = NULL;
 	testData.window = NULL;
@@ -411,7 +411,7 @@ static void rtmpWatchTest() {
 		}
 	}
 //	ttLibC_AcDecoder_close(&testData.aac_decoder);
-	ttLibC_VtH264Decoder_close(&testData.h264_decoder);
+	ttLibC_VtDecoder_close(&testData.h264_decoder);
 
 	ttLibC_RtmpStream_close(&testData.stream);
 	ttLibC_RtmpConnection_close(&testData.conn);
@@ -441,7 +441,7 @@ typedef struct rtmpPublishTest_t {
 
 	// encoder
 	ttLibC_AcEncoder *aac_encoder;
-	ttLibC_VtH264Encoder *h264_encoder;
+	ttLibC_VtEncoder *h264_encoder;
 
 	// rtmp
 	ttLibC_RtmpConnection *conn;
@@ -454,7 +454,7 @@ static bool rtmpPublishTest_aacEncodeCallback(void *ptr, ttLibC_Audio *aac) {
 	return true;
 }
 
-static bool rtmpPublishTest_h264EncodeCallback(void *ptr, ttLibC_H264 *h264) {
+static bool rtmpPublishTest_h264EncodeCallback(void *ptr, ttLibC_Video *h264) {
 	rtmpPublishTest_t *testData = (rtmpPublishTest_t *)ptr;
 	ttLibC_RtmpStream_addFrame(testData->stream, (ttLibC_Frame *)h264);
 	return true;
@@ -537,7 +537,7 @@ static void rtmpPublishTest() {
 	testData.used_frame_list = ttLibC_StlList_make();
 
 	testData.aac_encoder  = ttLibC_AcEncoder_make(testData.sample_rate, testData.channel_num, 96000, frameType_aac);
-	testData.h264_encoder = ttLibC_VtH264Encoder_make(testData.width, testData.height);
+	testData.h264_encoder = ttLibC_VtEncoder_make(testData.width, testData.height, frameType_h264);
 
 	testData.conn = ttLibC_RtmpConnection_make();
 	testData.stream = NULL;
@@ -569,7 +569,8 @@ static void rtmpPublishTest() {
 				break;
 			}
 			yuv = y;
-			ttLibC_VtH264Encoder_encode(testData.h264_encoder, yuv, rtmpPublishTest_h264EncodeCallback, &testData);
+			ttLibC_VtEncoder_encode(testData.h264_encoder, yuv, rtmpPublishTest_h264EncodeCallback, &testData);
+//			ttLibC_VtH264Encoder_encode(testData.h264_encoder, yuv, rtmpPublishTest_h264EncodeCallback, &testData);
 			ttLibC_Frame *frame = NULL;
 			while(testData.frame_list->size > 2 && (frame = (ttLibC_Frame *)ttLibC_StlList_refFirst(testData.frame_list)) != NULL) {
 				ttLibC_StlList_remove(testData.frame_list, frame);
@@ -596,7 +597,8 @@ static void rtmpPublishTest() {
 	ttLibC_StlList_close(&testData.used_frame_list);
 
 	ttLibC_AcEncoder_close(&testData.aac_encoder);
-	ttLibC_VtH264Encoder_close(&testData.h264_encoder);
+	ttLibC_VtEncoder_close(&testData.h264_encoder);
+//	ttLibC_VtH264Encoder_close(&testData.h264_encoder);
 
 	ttLibC_Bgr_close(&bgr);
 	ttLibC_Yuv420_close(&yuv);

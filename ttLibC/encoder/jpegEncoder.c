@@ -31,18 +31,19 @@ typedef ttLibC_Encoder_JpegEncoder_ ttLibC_JpegEncoder_;
 
 // setup buffer.
 static void ttLibC_JpegEncoder_init_buffer(j_compress_ptr cinfo) {
-
+	(void)cinfo;
 }
 
 // in the case of buffer is full.
 static boolean ttLibC_JpegEncoder_empty_buffer(j_compress_ptr cinfo) {
+	(void)cinfo;
 	ERR_PRINT("need more buffer to make jpeg.");
 	return true;
 }
 
 // in the case of no more use.
 static void ttLibC_JpegEncoder_term_buffer(j_compress_ptr cinfo) {
-
+	(void)cinfo;
 }
 
 /*
@@ -168,7 +169,7 @@ bool ttLibC_JpegEncoder_encode(
 	planes[1] = cb;
 	planes[2] = cr;
 	jpeg_start_compress(&encoder_->cinfo, true);
-	for(int j = 0;j < yuv->inherit_super.height;j += 16) {
+	for(uint32_t j = 0;j < yuv->inherit_super.height;j += 16) {
 		int max = yuv->inherit_super.height - j;
 		if(max >= 16) {
 			max = 16;
@@ -180,11 +181,6 @@ bool ttLibC_JpegEncoder_encode(
 					cb[(i >> 1)] = yuv->u_data;
 					cr[(i >> 1)] = yuv->v_data;
 				}
-/*				y[i] = yuv->y_data + yuv->y_stride * (max - 1 + j);
-				if((i & 0x01) == 0) {
-					cb[(i >> 1)] = yuv->u_data + (yuv->u_stride * ((max - 1 + j) >> 1));
-					cr[(i >> 1)] = yuv->v_data + (yuv->v_stride * ((max - 1 + j) >> 1));
-				}*/
 			}
 			else {
 				y[i] = yuv->y_data + yuv->y_stride * (i + j);
@@ -235,7 +231,7 @@ bool ttLibC_JpegEncoder_setQuality(
 	if(encoder == NULL) {
 		return false;
 	}
-	ttLibC_JpegEncoder_ *encoder_ = encoder;
+	ttLibC_JpegEncoder_ *encoder_ = (ttLibC_JpegEncoder_ *)encoder;
 	jpeg_set_quality(&encoder_->cinfo, quality, true);
 	return true;
 }

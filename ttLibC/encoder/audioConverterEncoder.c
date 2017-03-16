@@ -147,6 +147,8 @@ static OSStatus AcEncoder_encodeDataProc(
 		AudioBufferList *ioData,
 		AudioStreamPacketDescription **outDataPacketDescription,
 		void *inUserData) {
+	(void)converter;
+	(void)outDataPacketDescription;
 	// use double pointer. for overwrite with NULL.
 	void **inud = (void **)inUserData;
 	ttLibC_PcmS16 *pcm = (ttLibC_PcmS16 *)*inud;
@@ -246,7 +248,7 @@ bool ttLibC_AcEncoder_encode(
 		}
 		// check for generate data.
 		pcm = NULL;
-		for(int i = 0;i < ioOutputDataPackets;++ i) {
+		for(uint32_t i = 0;i < ioOutputDataPackets;++ i) {
 			if(!AcEncoder_checkEncodedData(
 					encoder_,
 					encoder_->data + encoder_->outputPacketDescriptions[i].mStartOffset,

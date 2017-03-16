@@ -40,7 +40,7 @@ typedef struct ttLibC_Encoder_Openh264Encoder_ {
 	/** h264 frame (only ref) */
 	ttLibC_H264 *h264;
 	/** for control idr */
-	uint32_t idr_interval_count;
+	int32_t idr_interval_count;
 	/** reduce_mode */
 	bool is_reduce_mode;
 } ttLibC_Encoder_Openh264Encoder_;

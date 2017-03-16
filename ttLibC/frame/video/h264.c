@@ -30,16 +30,6 @@ typedef struct {
 } ttLibC_H264_Ref_t;
 
 /*
- * h264 frame definition(detail)
- * /
-typedef struct {
-	/** inherit data from ttLibC_H264 * /
-	ttLibC_H264 inherit_super;
-} ttLibC_Frame_Video_H264_;
-
-typedef ttLibC_Frame_Video_H264_ ttLibC_H264_;
-
-/*
  * make h264 frame
  * @param prev_frame    reuse frame.
  * @param type          type of h264
@@ -507,7 +497,7 @@ static Error_e H264_analyzeSequenceParameterSet(
 		ttLibC_ByteReader_expGolomb(reader, true);
 		ttLibC_ByteReader_expGolomb(reader, true);
 		uint32_t num_ref_frames_in_pic_order_cnt_cycle = ttLibC_ByteReader_expGolomb(reader, false);
-		for(int i = 0;i < num_ref_frames_in_pic_order_cnt_cycle;++ i) {
+		for(uint32_t i = 0;i < num_ref_frames_in_pic_order_cnt_cycle;++ i) {
 			ttLibC_ByteReader_expGolomb(reader, true);
 		}
 	}
@@ -553,7 +543,10 @@ uint32_t ttLibC_H264_getWidth(ttLibC_H264 *prev_frame, uint8_t *data, size_t dat
 	ttLibC_H264_NalInfo info;
 	uint8_t *check_data = data;
 	size_t check_size = data_size;
-	ttLibC_H264_Ref_t ref = {0};
+	ttLibC_H264_Ref_t ref;
+	ref.analyze_data_ptr = NULL;
+	ref.width  = 0;
+	ref.height = 0;
 	if(ttLibC_H264_isAvcc(check_data, check_size)) {
 		do {
 			if(!ttLibC_H264_getAvccInfo(&info, check_data, check_size)) {
@@ -646,7 +639,10 @@ uint32_t ttLibC_H264_getHeight(ttLibC_H264 *prev_frame, uint8_t *data, size_t da
 //	}
 	uint8_t *check_data = data;
 	size_t check_size = data_size;
-	ttLibC_H264_Ref_t ref = {0};
+	ttLibC_H264_Ref_t ref;
+	ref.analyze_data_ptr = NULL;
+	ref.width  = 0;
+	ref.height = 0;
 	if(ttLibC_H264_isAvcc(check_data, check_size)) {
 		do {
 			if(!ttLibC_H264_getAvccInfo(&info, check_data, check_size)) {
@@ -760,7 +756,7 @@ ttLibC_H264 *ttLibC_H264_getFrame(
 				height,
 				data,
 				nal_info.nal_size,
-				true,
+				non_copy_mode,
 				pts,
 				timebase);
 	case H264NalType_sequenceParameterSet:
@@ -791,7 +787,7 @@ ttLibC_H264 *ttLibC_H264_getFrame(
 				height,
 				data,
 				target_size,
-				true,
+				non_copy_mode,
 				pts,
 				timebase);
 	case H264NalType_pictureParameterSet:
@@ -806,7 +802,7 @@ ttLibC_H264 *ttLibC_H264_getFrame(
 				height,
 				data,
 				data_size,
-				true,
+				non_copy_mode,
 				pts,
 				timebase);
 	case H264NalType_slice:
@@ -818,7 +814,7 @@ ttLibC_H264 *ttLibC_H264_getFrame(
 				height,
 				data,
 				data_size,
-				true,
+				non_copy_mode,
 				pts,
 				timebase);
 	}
