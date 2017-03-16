@@ -72,7 +72,7 @@ bool ttLibC_UdpSocket_write(
 	if(size == -1) {
 		return false;
 	}
-	if(size == packet->data_size) {
+	if(size == (ssize_t)packet->data_size) {
 		return true;
 	}
 	else {

@@ -564,6 +564,7 @@ static bool TettyBootstrap_channelEach_callPipelineFlush_callback(void *ptr, voi
 }
 
 static bool TettyBootstrap_channelEach_flush_callback(void *ptr, void *item) {
+	(void)ptr;
 	ttLibC_TcpClientInfo_ *client_info = (ttLibC_TcpClientInfo_ *)item;
 	// check target write buffer.
 	if(ttLibC_DynamicBuffer_refSize(client_info->write_buffer) == 0) {

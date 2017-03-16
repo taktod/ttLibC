@@ -486,6 +486,8 @@ tetty_errornum ttLibC_TettyContext_super_flush(ttLibC_TettyContext *ctx) {
  * @param error_no
  */
 void ttLibC_TettyContext_super_exceptionCaught(ttLibC_TettyContext *ctx, tetty_errornum error_no) {
+	(void)ctx;
+	(void)error_no;
 }
 
 /**
