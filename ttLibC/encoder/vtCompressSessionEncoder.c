@@ -206,6 +206,9 @@ static void VtEncoder_encodeCallback(
 		OSStatus status,
 		VTEncodeInfoFlags infoFlags,
 		CMSampleBufferRef sampleBuffer) {
+	(void)sourceFrameRefCon;
+	(void)status;
+	(void)infoFlags;
 	ttLibC_VtEncoder_ *encoder = (ttLibC_VtEncoder_ *)outputCallbackRefCon;
 
 	switch(encoder->inherit_super.frame_type) {
@@ -463,7 +466,7 @@ bool ttLibC_VtEncoder_encode(
 	if(yuv420->y_stride != y_stride) {
 		uint8_t *y_buf = y_data;
 		uint8_t *y_org_buf = yuv420->y_data;
-		for(int i = 0;i < yuv420->inherit_super.height;++ i) {
+		for(uint32_t i = 0;i < yuv420->inherit_super.height;++ i) {
 			memcpy(y_buf, y_org_buf, yuv420->inherit_super.width);
 			y_buf += y_stride;
 			y_org_buf += yuv420->y_stride;
@@ -479,7 +482,7 @@ bool ttLibC_VtEncoder_encode(
 	if(yuv420->u_stride != u_stride) {
 		uint8_t *u_buf = u_data;
 		uint8_t *u_org_buf = yuv420->u_data;
-		for(int i = 0;i < chroma_height;++ i) {
+		for(uint32_t i = 0;i < chroma_height;++ i) {
 			memcpy(u_buf, u_org_buf, chroma_width);
 			u_buf += u_stride;
 			u_org_buf += yuv420->u_stride;
@@ -493,7 +496,7 @@ bool ttLibC_VtEncoder_encode(
 	if(yuv420->v_stride != v_stride) {
 		uint8_t *v_buf = v_data;
 		uint8_t *v_org_buf = yuv420->v_data;
-		for(int i = 0;i < chroma_height;++ i) {
+		for(uint32_t i = 0;i < chroma_height;++ i) {
 			memcpy(v_buf, v_org_buf, chroma_width);
 			v_buf += v_stride;
 			v_org_buf += yuv420->v_stride;

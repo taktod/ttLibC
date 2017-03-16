@@ -145,7 +145,7 @@ ttLibC_Vorbis *ttLibC_Vorbis_getFrame(
 							channel_num,
 							data,
 							data_size,
-							true,
+							non_copy_mode,
 							pts,
 							timebase);
 					if(vorbis == NULL) {
@@ -173,7 +173,7 @@ ttLibC_Vorbis *ttLibC_Vorbis_getFrame(
 							prev_frame->inherit_super.channel_num,
 							data,
 							data_size,
-							true,
+							non_copy_mode,
 							pts,
 							timebase);
 					if(vorbis == NULL) {
@@ -201,7 +201,7 @@ ttLibC_Vorbis *ttLibC_Vorbis_getFrame(
 							prev_frame->inherit_super.channel_num,
 							data,
 							data_size,
-							true,
+							non_copy_mode,
 							pts,
 							timebase);
 					if(vorbis == NULL) {
@@ -248,7 +248,7 @@ ttLibC_Vorbis *ttLibC_Vorbis_getFrame(
 			prev_frame->inherit_super.channel_num,
 			data,
 			data_size,
-			true,
+			non_copy_mode,
 			pts,
 			timebase);
 	if(vorbis == NULL) {

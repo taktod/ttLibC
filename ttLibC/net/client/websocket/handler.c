@@ -125,7 +125,7 @@ static tetty_errornum WebSocketHandler_channelRead(
 			buf = ttLibC_DynamicBuffer_refData(handler->read_buffer);
 		}
 		// current work for data body.
-		if(ttLibC_DynamicBuffer_refSize(handler->read_buffer) < handler->current_size) {
+		if(ttLibC_DynamicBuffer_refSize(handler->read_buffer) < (size_t)handler->current_size) {
 			// need more data. do later.
 			handler->in_reading = false;
 			return 0;

@@ -19,6 +19,7 @@
 #include <string.h>
 
 static tetty_errornum WebSocketHandshakeHandler_channelActive(ttLibC_TettyContext *ctx) {
+	(void)ctx;
 	return 0;
 }
 

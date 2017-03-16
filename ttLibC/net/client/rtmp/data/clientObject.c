@@ -40,6 +40,8 @@ ttLibC_ClientObject *ttLibC_ClientObject_make() {
 }
 
 static bool ClientObject_commandIdCommandCloseCallback(void *ptr, void *key, void *item) {
+	(void)ptr;
+	(void)key;
 	ttLibC_RtmpMessage_close((ttLibC_RtmpMessage **)&item);
 	return true;
 }
@@ -52,6 +54,8 @@ static bool ClientObject_commandIdCommandCloseCallback(void *ptr, void *key, voi
  * @return true to continue forEach.
  */
 static bool ClientObject_recvBuffersCloseCallback(void *ptr, void *key, void *item) {
+	(void)ptr;
+	(void)key;
 	ttLibC_DynamicBuffer_close((ttLibC_DynamicBuffer **)&item);
 	return true;
 }
@@ -64,6 +68,8 @@ static bool ClientObject_recvBuffersCloseCallback(void *ptr, void *key, void *it
  * @return true to continue forEach.
  */
 static bool ClientObject_rtmpHeadersCloseCallback(void *ptr, void *key, void *item) {
+	(void)ptr;
+	(void)key;
 	ttLibC_RtmpHeader_close((ttLibC_RtmpHeader **)&item);
 	return true;
 }

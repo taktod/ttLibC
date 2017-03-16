@@ -35,7 +35,7 @@ static tetty_errornum RtmpHandshake_channelActive(ttLibC_TettyContext *ctx) {
 	size_t c2_size = 1536;
 	uint8_t *c2 = ttLibC_malloc(c2_size);
 	// TODO make random.
-	for(int i = 0;i < c2_size;++ i) {
+	for(uint32_t i = 0;i < c2_size;++ i) {
 		c2[i] = (uint8_t)(i % 256);
 	}
 	c2[4] = 0; // for red5 handshake.

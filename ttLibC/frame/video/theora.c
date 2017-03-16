@@ -113,6 +113,9 @@ ttLibC_Theora *ttLibC_Theora_clone(
  * @return true: key frame false:inter frame
  */
 bool ttLibC_Theora_isKey(void *data, size_t data_size) {
+	if(data_size < 1) {
+		return false;
+	}
 	uint8_t first_byte = *((uint8_t *)data);
 	return (first_byte & 0xC0) != 0x40;
 }

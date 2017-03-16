@@ -28,6 +28,7 @@ static tetty_errornum RtmpClientHandler_channelRead(
 		ttLibC_TettyContext *ctx,
 		void *data,
 		size_t data_size) {
+	(void)data_size;
 	ttLibC_RtmpMessage *rtmp_message = (ttLibC_RtmpMessage *)data;
 	ttLibC_ClientObject *client_object = (ttLibC_ClientObject *)ctx->socket_info->ptr;
 	switch(rtmp_message->header->message_type) {

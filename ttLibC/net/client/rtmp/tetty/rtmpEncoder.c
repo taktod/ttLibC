@@ -21,6 +21,7 @@ static tetty_errornum RtmpEncoder_write(
 		ttLibC_TettyContext *ctx,
 		void *data,
 		size_t data_size) {
+	(void)data_size;
 	// message obj -> binary stream.
 	ttLibC_RtmpMessage *message = (ttLibC_RtmpMessage *)data;
 	ttLibC_ClientObject *client_object = (ttLibC_ClientObject *)ctx->socket_info->ptr;
