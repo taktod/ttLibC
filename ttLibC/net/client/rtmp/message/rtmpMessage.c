@@ -36,7 +36,9 @@ bool ttLibC_RtmpMessage_getData(
 	// rtmpMessage obj -> binary
 	switch(header->message_type) {
 	case RtmpMessageType_abortMessage:
+		return false;
 	case RtmpMessageType_acknowledgement:
+		return ttLibC_Acknowledgement_getData((ttLibC_Acknowledgement *)message, buffer);
 	case RtmpMessageType_aggregateMessage:
 		return false;
 	case RtmpMessageType_amf0Command:

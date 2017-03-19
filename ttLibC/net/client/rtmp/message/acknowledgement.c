@@ -29,6 +29,14 @@ ttLibC_Acknowledgement *ttLibC_Acknowledgement_make(uint32_t size) {
 	return ack;
 }
 
+bool ttLibC_Acknowledgement_getData(
+		ttLibC_Acknowledgement *acknowledgement,
+		ttLibC_DynamicBuffer *buffer) {
+	uint32_t size = be_uint32_t(acknowledgement->size);
+	ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&size, sizeof(size));
+	return true;
+}
+
 void ttLibC_Acknowledgement_close(ttLibC_Acknowledgement **ack) {
 	ttLibC_Acknowledgement *target = (ttLibC_Acknowledgement *)*ack;
 	if(target == NULL) {

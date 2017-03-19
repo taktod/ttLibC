@@ -16,6 +16,7 @@ extern "C" {
 #endif
 
 #include <stdint.h>
+#include "../../../../util/ioUtil.h"
 #include "rtmpMessage.h"
 
 /*
@@ -32,6 +33,10 @@ typedef struct ttLibC_Net_Client_Rtmp_Message_Acknowledgement {
 typedef ttLibC_Net_Client_Rtmp_Message_Acknowledgement ttLibC_Acknowledgement;
 
 ttLibC_Acknowledgement *ttLibC_Acknowledgement_make(uint32_t size);
+
+bool ttLibC_Acknowledgement_getData(
+		ttLibC_Acknowledgement *acknowledgement,
+		ttLibC_DynamicBuffer *buffer);
 
 void ttLibC_Acknowledgement_close(ttLibC_Acknowledgement **ack);
 

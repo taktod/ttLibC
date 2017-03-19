@@ -14,10 +14,12 @@
 #include "../../../../allocator.h"
 #include "../../../../util/stlMapUtil.h"
 #include "../data/clientObject.h"
+#include "../message/acknowledgement.h"
 #include "../message/aggregateMessage.h"
 #include "../message/audioMessage.h"
 #include "../message/rtmpMessage.h"
 #include "../message/setChunkSize.h"
+#include "../message/setPeerBandwidth.h"
 #include "../message/userControlMessage.h"
 #include "../message/videoMessage.h"
 #include "../message/windowAcknowledgementSize.h"
@@ -31,6 +33,17 @@ static tetty_errornum RtmpClientHandler_channelRead(
 	(void)data_size;
 	ttLibC_RtmpMessage *rtmp_message = (ttLibC_RtmpMessage *)data;
 	ttLibC_ClientObject *client_object = (ttLibC_ClientObject *)ctx->socket_info->ptr;
+	ttLibC_RtmpClientHandler *handler = (ttLibC_RtmpClientHandler *)ctx->channel_handler;
+	// update bytesRead
+	handler->bytesRead += rtmp_message->header->size;
+	if(handler->bytesRead - handler->bytesReadAcked >= handler->bytesReadWindow) {
+		// send ack.
+		ttLibC_Acknowledgement *acknowledgement = ttLibC_Acknowledgement_make((uint32_t)handler->bytesRead);
+		ttLibC_TettyContext_channel_write(ctx, acknowledgement, sizeof(ttLibC_Acknowledgement));
+		ttLibC_TettyContext_channel_flush(ctx);
+		ttLibC_UserControlMessage_close(&acknowledgement);
+		handler->bytesReadAcked = handler->bytesRead;
+	}
 	switch(rtmp_message->header->message_type) {
 	case RtmpMessageType_videoMessage:
 		{
@@ -87,6 +100,14 @@ static tetty_errornum RtmpClientHandler_channelRead(
 			ttLibC_WindowAcknowledgementSize *win_ack = (ttLibC_WindowAcknowledgementSize *)rtmp_message;
 			ttLibC_TettyContext_channel_write(ctx, win_ack, sizeof(ttLibC_WindowAcknowledgementSize));
 			ttLibC_TettyContext_channel_flush(ctx);
+			ttLibC_WindowAcknowledgementSize *windowAcknowledgementSize = (ttLibC_WindowAcknowledgementSize *)rtmp_message;
+			handler->bytesReadWindow = windowAcknowledgementSize->size;
+		}
+		break;
+	case RtmpMessageType_setPeerBandwidth:
+		{
+			ttLibC_SetPeerBandwidth *setPeerBandwidth = (ttLibC_SetPeerBandwidth *)rtmp_message;
+			handler->bytesWrittenWindow = setPeerBandwidth->size;
 		}
 		break;
 		// need to add more.(like userControlMessage for ping/pong.)
@@ -111,7 +132,7 @@ static tetty_errornum RtmpClientHandler_channelRead(
 			case Type_Ping:
 				{
 					// reply pong.
-					ttLibC_UserControlMessage *pong = ttLibC_UserControlMessage_make(Type_Pong, 0, 0, user_control_message->time);
+					ttLibC_UserControlMessage *pong = ttLibC_UserControlMessage_pong(user_control_message->time);
 					ttLibC_TettyContext_channel_write(ctx, pong, sizeof(ttLibC_UserControlMessage));
 					ttLibC_TettyContext_channel_flush(ctx);
 					ttLibC_UserControlMessage_close(&pong);
@@ -151,6 +172,8 @@ ttLibC_RtmpClientHandler *ttLibC_RtmpClientHandler_make() {
 		return NULL;
 	}
 	memset(handler, 0, sizeof(ttLibC_RtmpClientHandler));
+	handler->bytesReadWindow = 2500000;
+	handler->bytesWrittenWindow = 2500000;
 	handler->channel_handler.channelRead = RtmpClientHandler_channelRead;
 	handler->channel_handler.write = RtmpClientHandler_write;
 	return handler;

@@ -20,6 +20,10 @@ extern "C" {
 
 typedef struct ttLibC_Net_Client_Rtmp_Tetty_RtmpClientHandler{
 	ttLibC_TettyChannelHandler channel_handler;
+	uint32_t bytesReadWindow;
+	uint32_t bytesWrittenWindow;
+	uint64_t bytesRead;
+	uint64_t bytesReadAcked;
 } ttLibC_Net_Client_Rtmp_Tetty_RtmpClientHandler;
 
 typedef ttLibC_Net_Client_Rtmp_Tetty_RtmpClientHandler ttLibC_RtmpClientHandler;

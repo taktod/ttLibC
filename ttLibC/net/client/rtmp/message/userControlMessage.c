@@ -95,6 +95,14 @@ ttLibC_UserControlMessage *ttLibC_UserControlMessage_readBinary(
 	return NULL;
 }
 
+ttLibC_UserControlMessage *ttLibC_UserControlMessage_ping(uint32_t time) {
+	return ttLibC_UserControlMessage_make(Type_Ping, 0, 0, time);
+}
+
+ttLibC_UserControlMessage *ttLibC_UserControlMessage_pong(uint32_t time) {
+	return ttLibC_UserControlMessage_make(Type_Pong, 0, 0, time);
+}
+
 bool ttLibC_UserControlMessage_getData(
 		ttLibC_UserControlMessage *user_control_message,
 		ttLibC_DynamicBuffer *buffer) {
@@ -118,7 +126,6 @@ bool ttLibC_UserControlMessage_getData(
 		}
 		return true;
 	case Type_Ping:
-		return false;
 	case Type_Pong:
 		{
 			uint32_t be_time = be_uint32_t(user_control_message->time);

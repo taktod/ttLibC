@@ -81,6 +81,10 @@ ttLibC_UserControlMessage *ttLibC_UserControlMessage_readBinary(
 		uint8_t *data,
 		size_t data_size);
 
+ttLibC_UserControlMessage *ttLibC_UserControlMessage_ping(uint32_t time);
+
+ttLibC_UserControlMessage *ttLibC_UserControlMessage_pong(uint32_t time);
+
 bool ttLibC_UserControlMessage_getData(
 		ttLibC_UserControlMessage *user_control_message,
 		ttLibC_DynamicBuffer *buffer);
