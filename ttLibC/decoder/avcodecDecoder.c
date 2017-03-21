@@ -452,6 +452,119 @@ static bool AvcodecDecoder_decodeVideo(
 			}
 		}
 		break;
+	case AV_PIX_FMT_YUV422P:
+	case AV_PIX_FMT_YUV444P:
+		{
+			if(decoder->frame != NULL && decoder->frame->type != frameType_yuv420) {
+				ttLibC_Frame_close(&decoder->frame);
+			}
+			uint32_t width  = decoder->avframe->width;
+			uint32_t height = decoder->avframe->height;
+			uint32_t wh = ((width * height) >> 1);
+			uint8_t *data = NULL;
+			size_t data_size = wh;
+			wh = (wh >> 1);
+			bool is_alloc_flag = false;
+			if(decoder->frame != NULL && !decoder->frame->is_non_copy) {
+				if(decoder->frame->data_size < data_size) {
+					// need to realloc
+					ttLibC_free(decoder->frame->data);
+					decoder->frame->data = NULL;
+				}
+				else {
+					// can reuse prev data.
+					data = decoder->frame->data;
+					data_size = decoder->frame->data_size;
+				}
+			}
+			if(data == NULL) {
+				data = ttLibC_malloc(data_size);
+				if(data == NULL) {
+					ERR_PRINT("failed to alloc yuv buffer.");
+					return false;
+				}
+				is_alloc_flag = true;
+			}
+			// make uv.
+			uint8_t *u_data = data;
+			uint8_t *v_data = data + wh;
+			uint32_t u_stride = (width >> 1);
+			uint32_t v_stride = (width >> 1);
+			uint8_t *src_u_data = decoder->avframe->data[1];
+			uint8_t *src_v_data = decoder->avframe->data[2];
+			uint32_t src_u_stride = decoder->avframe->linesize[1];
+			uint32_t src_v_stride = decoder->avframe->linesize[2];
+			switch(decoder->dec->pix_fmt) {
+			case AV_PIX_FMT_YUV422P:
+				for(uint32_t j = 0;j < height;++ j) {
+					if((j & 0x01) == 1) {
+						memcpy(u_data, src_u_data, u_stride);
+						memcpy(v_data, src_v_data, v_stride);
+						u_data += u_stride;
+						v_data += v_stride;
+					}
+					src_u_data += src_u_stride;
+					src_v_data += src_v_stride;
+				}
+				break;
+			case AV_PIX_FMT_YUV444P:
+				for(uint32_t j = 0;j < height;++ j) {
+					if((j & 0x01) == 1) {
+						for(uint32_t i = 0;i < width;++ i) {
+							if((i & 0x01) == 0x00) {
+								*u_data = *(src_u_data + i);
+								*v_data = *(src_v_data + i);
+								++ u_data;
+								++ v_data;
+							}
+						}
+					}
+					src_u_data += src_u_stride;
+					src_v_data += src_v_stride;
+				}
+				break;
+			default:
+				ERR_PRINT("un-reachable.");
+				return false;
+			}
+			if(decoder->frame != NULL) {
+				decoder->frame->is_non_copy = true;
+			}
+			u_data = data;
+			v_data = data + wh;
+			ttLibC_Yuv420 *y = ttLibC_Yuv420_make(
+					(ttLibC_Yuv420 *)decoder->frame,
+					Yuv420Type_planar,
+					width,
+					height,
+					data,
+					data_size,
+					decoder->avframe->data[0],
+					decoder->avframe->linesize[0],
+					u_data,
+					u_stride,
+					v_data,
+					v_stride,
+					true,
+					decoder->avframe->pkt_pts,
+					frame->inherit_super.timebase);
+			if(y == NULL) {
+				if(is_alloc_flag) {
+					ttLibC_free(data);
+				}
+				ERR_PRINT("failed to make yuv420 frame object.");
+				return false;
+			}
+			decoder->frame = (ttLibC_Frame *)y;
+			decoder->frame->is_non_copy = false;
+			if(callback != NULL) {
+				return callback(ptr, decoder->frame);
+			}
+			else {
+				return true;
+			}
+		}
+		break;
 	case AV_PIX_FMT_NV12:
 	case AV_PIX_FMT_NV21:
 	case AV_PIX_FMT_BGR24:
