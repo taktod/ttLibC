@@ -453,6 +453,7 @@ static Error_e H264_analyzeSequenceParameterSet(
 		return ttLibC_updateError(Target_On_VideoFrame, Error_InvalidOperation);
 	}
 	uint8_t profile_idc = ttLibC_ByteReader_bit(reader, 8);
+	uint32_t ChromaArrayType = 1;
 	ttLibC_ByteReader_bit(reader, 8);
 	ttLibC_ByteReader_bit(reader, 8);
 	ttLibC_ByteReader_expGolomb(reader, false);
@@ -471,8 +472,15 @@ static Error_e H264_analyzeSequenceParameterSet(
 	case 134:
 		{
 			uint32_t chroma_format_idc = ttLibC_ByteReader_expGolomb(reader, false);
+			uint32_t separate_colour_plane_flag = 0;
 			if(chroma_format_idc == 3) {
-				ttLibC_ByteReader_bit(reader, 1);
+				separate_colour_plane_flag = ttLibC_ByteReader_bit(reader, 1);
+			}
+			if(separate_colour_plane_flag == 0) {
+				ChromaArrayType = chroma_format_idc;
+			}
+			else {
+				ChromaArrayType = 0;
 			}
 			ttLibC_ByteReader_expGolomb(reader, false);
 			ttLibC_ByteReader_expGolomb(reader, false);
@@ -521,9 +529,27 @@ static Error_e H264_analyzeSequenceParameterSet(
 		frame_crop_top_offset    = ttLibC_ByteReader_expGolomb(reader, false);
 		frame_crop_bottom_offset = ttLibC_ByteReader_expGolomb(reader, false);
 	}
-	ref->width = ((pic_width_in_mbs_minus1 + 1) * 16) - frame_crop_left_offset * 2 - frame_crop_right_offset * 2;
-	ref->height = ((2 - frame_mbs_only_flag)* (pic_height_in_map_units_minus1 +1) * 16) - (frame_crop_top_offset * 2) - (frame_crop_bottom_offset * 2);
-
+	uint32_t cropUnitX, cropUnitY;
+	if(ChromaArrayType == 0) {
+		cropUnitX = 1;
+		cropUnitY = 2 - frame_mbs_only_flag;
+	}
+	else {
+		if(ChromaArrayType <= 2) {
+			cropUnitX = 2;
+		}
+		else {
+			cropUnitX = 1;
+		}
+		if(ChromaArrayType <= 1) {
+			cropUnitY = 2 * (2 - frame_mbs_only_flag);
+		}
+		else {
+			cropUnitY = 1 * (2 - frame_mbs_only_flag);
+		}
+	}
+	ref->width = ((pic_width_in_mbs_minus1 + 1) * 16) - (frame_crop_left_offset * cropUnitX) - (frame_crop_right_offset * cropUnitX);
+	ref->height = ((2 - frame_mbs_only_flag)* (pic_height_in_map_units_minus1 +1) * 16) - (frame_crop_top_offset * cropUnitY) - (frame_crop_bottom_offset * cropUnitY);
 	Error_e result = reader->error;
 	ttLibC_ByteReader_close(&reader);
 	return ttLibC_updateError(Target_On_VideoFrame, result);

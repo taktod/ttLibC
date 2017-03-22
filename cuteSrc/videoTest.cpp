@@ -574,7 +574,12 @@ static void avcodecTest() {
 static void h264SequenceParameterSetAnalyzeTest() {
 	LOG_PRINT("h264SequenceParameterSetAnalyzeTest");
 	uint8_t buf[256];
-	uint32_t size = ttLibC_HexUtil_makeBuffer("00000001674D401E924201405FF2E02200000300C800002ED51E2C5C90", buf, 256);
+	uint32_t size = ttLibC_HexUtil_makeBuffer("00000001677A0034BCD940A02FF89840000003004007A12003C60C6580", buf, 256);
+//	uint32_t size = ttLibC_HexUtil_makeBuffer("000000016764001EACD940A02FF9701100000303E90000EA600F162D96", buf, 256);
+//	uint32_t size = ttLibC_HexUtil_makeBuffer("0000000167F4001E919B281405FF1308000003000800000301E078B16CB0", buf, 256);
+//	uint32_t size = ttLibC_HexUtil_makeBuffer("0000000167F4001E919B281405FC4C4C20000003002000000781E2C5B2C0", buf, 256);
+//	uint32_t size = ttLibC_HexUtil_makeBuffer("00000001677A001EBCD940A02FE58984000003000400000300F03C58B658", buf, 256);
+
 	uint32_t width = ttLibC_H264_getWidth(NULL, buf, size);
 	uint32_t height = ttLibC_H264_getHeight(NULL, buf, size);
 	LOG_PRINT("%d x %d", width, height);
