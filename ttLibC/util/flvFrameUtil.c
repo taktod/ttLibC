@@ -112,6 +112,10 @@ static bool FlvFrameManager_readH264Binary(
 			size_t buf_size = data_size;
 			do {
 				uint32_t size = 0;
+				if(buf_size < manager->size_length) {
+					LOG_PRINT("incomplete h264 data. skip this.");
+					return true;
+				}
 				for(uint32_t i = 1;i <= manager->size_length;++ i) {
 					size = (size << 8) | *buf;
 					if(i != manager->size_length) {
@@ -122,6 +126,10 @@ static bool FlvFrameManager_readH264Binary(
 					}
 					++ buf;
 					-- buf_size;
+				}
+				if(buf_size < size) {
+					LOG_PRINT("incomplete h264 data. skip this.");
+					return true;
 				}
 				buf += size;
 				buf_size -= size;
@@ -304,10 +312,10 @@ bool ttLibC_FlvFrameManager_readAudioBinary(
 	switch((*buffer >> 4) & 0x0F) {
 	case FlvAudioCodec_pcmBigEndian:
 		ERR_PRINT("pcmbe is not ready.");
-		return NULL;
+		return false;
 	case FlvAudioCodec_swfAdpcm:
 		ERR_PRINT("swfAdpcm is not ready.");
-		return NULL;
+		return false;
 	case FlvAudioCodec_mp3:
 	case FlvAudioCodec_mp38:
 		{
@@ -325,7 +333,7 @@ bool ttLibC_FlvFrameManager_readAudioBinary(
 		break;
 	case FlvAudioCodec_pcmLittleEndian:
 		ERR_PRINT("pcmle is not ready.");
-		return NULL;
+		return false;
 	case FlvAudioCodec_nellymoser16:
 		{
 			if(manager_->audio_frame != NULL && manager_->audio_frame->type != frameType_nellymoser) {
@@ -412,16 +420,19 @@ bool ttLibC_FlvFrameManager_readAudioBinary(
 		}
 		break;
 	case FlvAudioCodec_reserved:
-		return NULL;
+		return false;
 	case FlvAudioCodec_aac:
 		{
+			if(data_size <= 2) {
+				return false;
+			}
 			if(manager_->audio_frame != NULL && manager_->audio_frame->type != frameType_aac) {
 				ttLibC_Frame_close(&manager_->audio_frame);
 			}
 			audio_frame = (ttLibC_Frame *)ttLibC_Aac_getFrame(
 					(ttLibC_Aac *)manager_->audio_frame,
 					buffer + 2,
-					data_size - 1,
+					data_size - 2,
 					true,
 					pts,
 					1000);
@@ -442,11 +453,11 @@ bool ttLibC_FlvFrameManager_readAudioBinary(
 		}
 		break;
 	case FlvAudioCodec_unknown:
-		return NULL;
+		return false;
 	case FlvAudioCodec_undefined:
-		return NULL;
+		return false;
 	case FlvAudioCodec_deviceSpecific:
-		return NULL;
+		return false;
 	}
 	if(audio_frame != NULL) {
 		audio_frame->id = 8;
