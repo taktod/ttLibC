@@ -453,7 +453,9 @@ static bool AvcodecDecoder_decodeVideo(
 		}
 		break;
 	case AV_PIX_FMT_YUV422P:
+	case AV_PIX_FMT_YUVJ422P:
 	case AV_PIX_FMT_YUV444P:
+	case AV_PIX_FMT_YUVJ444P:
 		{
 			if(decoder->frame != NULL && decoder->frame->type != frameType_yuv420) {
 				ttLibC_Frame_close(&decoder->frame);
@@ -496,6 +498,7 @@ static bool AvcodecDecoder_decodeVideo(
 			uint32_t src_v_stride = decoder->avframe->linesize[2];
 			switch(decoder->dec->pix_fmt) {
 			case AV_PIX_FMT_YUV422P:
+			case AV_PIX_FMT_YUVJ422P:
 				for(uint32_t j = 0;j < height;++ j) {
 					if((j & 0x01) == 1) {
 						memcpy(u_data, src_u_data, u_stride);
@@ -508,6 +511,7 @@ static bool AvcodecDecoder_decodeVideo(
 				}
 				break;
 			case AV_PIX_FMT_YUV444P:
+			case AV_PIX_FMT_YUVJ444P:
 				for(uint32_t j = 0;j < height;++ j) {
 					if((j & 0x01) == 1) {
 						for(uint32_t i = 0;i < width;++ i) {
