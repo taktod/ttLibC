@@ -13,6 +13,7 @@
 #include "../../../log.h"
 #include "../../../allocator.h"
 #include "../../../util/amfUtil.h"
+#include "message/acknowledgement.h"
 #include <string.h>
 
 #include "message/amf0Command.h"
@@ -145,6 +146,16 @@ bool ttLibC_RtmpConnection_update(ttLibC_RtmpConnection* conn, uint32_t wait_int
 	ttLibC_RtmpConnection_ *conn_ = (ttLibC_RtmpConnection_ *)conn;
 	if(conn_ == NULL) {
 		return false;
+	}
+	ttLibC_RtmpClientHandler *client_handler = conn_->client_handler;
+	if(client_handler != NULL) {
+		if(client_handler->bytesRead - client_handler->bytesReadAcked >= client_handler->bytesReadWindow) {
+			ttLibC_Acknowledgement *acknowledgement = ttLibC_Acknowledgement_make((uint32_t)client_handler->bytesRead);
+			ttLibC_TettyBootstrap_channels_write(conn_->bootstrap, acknowledgement, sizeof(ttLibC_Acknowledgement));
+			ttLibC_TettyBootstrap_channels_flush(conn_->bootstrap);
+			ttLibC_Acknowledgement_close(&acknowledgement);
+			client_handler->bytesReadAcked = client_handler->bytesRead;
+		}
 	}
 	ttLibC_TettyBootstrap_update(conn_->bootstrap, wait_interval);
 	if(conn_->bootstrap->error_number != 0) {

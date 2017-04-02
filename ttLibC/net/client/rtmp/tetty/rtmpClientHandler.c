@@ -36,14 +36,14 @@ static tetty_errornum RtmpClientHandler_channelRead(
 	ttLibC_RtmpClientHandler *handler = (ttLibC_RtmpClientHandler *)ctx->channel_handler;
 	// update bytesRead
 	handler->bytesRead += rtmp_message->header->size;
-	if(handler->bytesRead - handler->bytesReadAcked >= handler->bytesReadWindow) {
+/*	if(handler->bytesRead - handler->bytesReadAcked >= handler->bytesReadWindow) {
 		// send ack.
 		ttLibC_Acknowledgement *acknowledgement = ttLibC_Acknowledgement_make((uint32_t)handler->bytesRead);
 		ttLibC_TettyContext_channel_write(ctx, acknowledgement, sizeof(ttLibC_Acknowledgement));
 		ttLibC_TettyContext_channel_flush(ctx);
-		ttLibC_UserControlMessage_close(&acknowledgement);
+		ttLibC_Acknowledgement_close(&acknowledgement);
 		handler->bytesReadAcked = handler->bytesRead;
-	}
+	}// */
 	switch(rtmp_message->header->message_type) {
 	case RtmpMessageType_videoMessage:
 		{
