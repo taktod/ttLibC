@@ -19,7 +19,7 @@ extern "C" {
 #include "../../util/stlListUtil.h"
 #include "context.h"
 
-#include "../tcp.h"
+#include "../net.h"
 
 /**
  * bootstrap detail definition

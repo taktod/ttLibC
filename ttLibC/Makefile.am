@@ -111,6 +111,7 @@ libttLibC_a_SOURCES= \
 	net/client/webrtc/factory.cpp \
 	net/client/webrtc/mediaStream.cpp \
 	net/client/webrtc/peerConnection.cpp \
+	net/net.c \
 	net/tcp.c \
 	net/tetty/bootstrap.c \
 	net/tetty/context.c \

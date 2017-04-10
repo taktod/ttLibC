@@ -12,7 +12,7 @@
 #include "context.h"
 #include "bootstrap.h"
 #include "../udp.h"
-#include "../tcpmisc.h"
+#include "../tcp.h"
 #include "../../allocator.h"
 #include "../../log.h"
 #include "../../util/hexUtil.h"
@@ -388,7 +388,7 @@ tetty_errornum ttLibC_TettyContext_super_userEventTriggered(
  * put binary data on write cache buffer.
  */
 static bool TettyContext_write_contextWriteBuffer(
-		ttLibC_TcpClientInfo_ *client_info,
+		ttLibC_TcpClientInfo *client_info,
 		void *data,
 		size_t data_size) {
 	if(client_info->write_buffer == NULL) {
@@ -405,7 +405,7 @@ static bool TettyContext_write_contextWriteBuffer(
  */
 static bool TettyContext_super_write_callback(void *ptr, void *item) {
 	ttLibC_TettyContext_ *ctx_ = (ttLibC_TettyContext_ *)ptr;
-	TettyContext_write_contextWriteBuffer((ttLibC_TcpClientInfo_ *)item, ctx_->data, ctx_->data_size);
+	TettyContext_write_contextWriteBuffer((ttLibC_TcpClientInfo *)item, ctx_->data, ctx_->data_size);
 	// TODO do something in the case of error.
 	return true;
 }
@@ -444,7 +444,7 @@ tetty_errornum ttLibC_TettyContext_super_write(ttLibC_TettyContext *ctx, void *d
 				}
 				else {
 					// user must call flush later to send message.
-					TettyContext_write_contextWriteBuffer((ttLibC_TcpClientInfo_ *)ctx_->socket_info, ctx_->data, ctx_->data_size);
+					TettyContext_write_contextWriteBuffer((ttLibC_TcpClientInfo *)ctx_->socket_info, ctx_->data, ctx_->data_size);
 				}
 				break;
 			case ChannelType_Udp:

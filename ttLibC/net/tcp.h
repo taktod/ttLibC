@@ -20,6 +20,7 @@ extern "C" {
 #include "net.h"
 #include <stdio.h>
 #include <stdbool.h>
+#include "../util/dynamicBufferUtil.h"
 
 /**
  * definition for server information.
@@ -36,7 +37,12 @@ typedef ttLibC_Net_TcpServerInfo ttLibC_TcpServerInfo;
 /**
  * definition of tcp client information.
  */
-typedef ttLibC_SocketInfo ttLibC_TcpClientInfo;
+typedef struct ttLibC_TcpClientInfo {
+	ttLibC_SocketInfo inherit_super;
+	ttLibC_DynamicBuffer *write_buffer;
+} ttLibC_Net_TcpClientInfo;
+
+typedef ttLibC_Net_TcpClientInfo ttLibC_TcpClientInfo;
 
 /**
  * make tcp wait socket
@@ -68,6 +74,32 @@ ttLibC_TcpClientInfo *ttLibC_TcpServer_wait(
  * @param server_info
  */
 void ttLibC_TcpServer_close(ttLibC_TcpServerInfo **server_info);
+
+/**
+ * make tcp client socket
+ * @param host
+ * @param por
+ * @return ttLibC_TcpClientInfo2 object.
+ */
+ttLibC_TcpClientInfo *ttLibC_TcpClient_make(
+		const char *host,
+		int port);
+
+int ttLibC_TcpClient_connect(ttLibC_TcpClientInfo *client_info);
+
+ssize_t ttLibC_TcpClient_read(
+		ttLibC_TcpClientInfo *client_info,
+		void * data,
+		size_t data_size);
+
+bool ttLibC_TcpClient_write(ttLibC_TcpClientInfo *client_info);
+
+int ttLibC_TcpClient_setSockOpt(
+		ttLibC_TcpClientInfo *client_info,
+		int target,
+		int option,
+		const void *value,
+		size_t value_size);
 
 /**
  * close client socket

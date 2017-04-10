@@ -15,6 +15,8 @@
 extern "C" {
 #endif
 
+#include <stdint.h>
+#include <stdbool.h>
 #include <sys/socket.h>
 #include <sys/select.h>
 #include <netinet/in.h>
@@ -31,6 +33,13 @@ typedef struct ttLibC_Net_SocketInfo {
 } ttLibC_Net_SocketInfo;
 
 typedef ttLibC_Net_SocketInfo ttLibC_SocketInfo;
+
+void ttLibC_SocketInfo_FD_ZERO(fd_set *set);
+void ttLibC_SocketInfo_FD_COPY(fd_set *dst, fd_set *org);
+void ttLibC_SocketInfo_FD_SET(ttLibC_SocketInfo *socket_info, fd_set *set);
+bool ttLibC_SocketInfo_FD_ISSET(ttLibC_SocketInfo *socket_info, fd_set *set);
+void ttLibC_SocketInfo_FD_CLR(ttLibC_SocketInfo *socket_info, fd_set *set);
+int ttLibC_SocketInfo_updateFDMax(ttLibC_SocketInfo *socket_info, int fd_max);
 
 #ifdef __cplusplus
 } /* extern "C" */

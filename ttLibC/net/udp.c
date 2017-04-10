@@ -80,7 +80,7 @@ bool ttLibC_UdpSocket_write(
 	}
 }
 
-size_t ttLibC_UdpSocket_read(
+ssize_t ttLibC_UdpSocket_read(
 		ttLibC_UdpSocketInfo *socket_info,
 		ttLibC_DatagramPacket *packet) {
 	// recvfrom

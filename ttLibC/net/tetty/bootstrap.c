@@ -16,7 +16,6 @@
 #include "../udp.h"
 #include "bootstrap.h"
 #include "promise.h"
-#include "../tcpmisc.h"
 #include "../../allocator.h"
 #include "../../log.h"
 #include "../../util/forkUtil.h"
@@ -40,7 +39,8 @@ ttLibC_TettyBootstrap *ttLibC_TettyBootstrap_make() {
 	bootstrap->tcp_nodelay  = false;
 	bootstrap->inherit_super.error_number = 0;
 	bootstrap->close_future = NULL;
-	FD_ZERO(&bootstrap->fdset);
+	ttLibC_SocketInfo_FD_ZERO(&bootstrap->fdset);
+//	FD_ZERO(&bootstrap->fdset);
 	return (ttLibC_TettyBootstrap *)bootstrap;
 }
 
@@ -133,7 +133,7 @@ bool ttLibC_TettyBootstrap_bind(
 	// call pipeline->bind
 	ttLibC_TettyContext_bind_((ttLibC_TettyBootstrap *)bootstrap_);
 	// update fd_set
-	FD_SET(bootstrap_->socket_info->socket, &bootstrap_->fdset);
+	ttLibC_SocketInfo_FD_SET(bootstrap_->socket_info, &bootstrap_->fdset);
 	// for udp, call channel active.(context is none.)
 	if(bootstrap_->channel_type == ChannelType_Udp) {
 		ttLibC_TettyContext_channelActive_((ttLibC_TettyBootstrap *)bootstrap_, NULL);
@@ -157,57 +157,36 @@ bool ttLibC_TettyBootstrap_connect(
 		ERR_PRINT("connect is not support in udp.");
 		return false;
 	}
-	struct hostent *servhost = NULL;
-	servhost = gethostbyname(host);
-	if(servhost == NULL) {
-		ERR_PRINT("failed to get ip addres from [%s]", host);
-		return false;
-	}
-	ttLibC_TcpClientInfo_ *client_info = ttLibC_malloc(sizeof(ttLibC_TcpClientInfo_));
+	ttLibC_TcpClientInfo *client_info = ttLibC_TcpClient_make(host, port);
 	if(client_info == NULL) {
-		ERR_PRINT("failed to make client info object.");
-		bootstrap->error_number = -2;
-		return false;
-	}
-	memset(client_info, 0, sizeof(ttLibC_TcpClientInfo_));
-	client_info->write_buffer = NULL;
-	memset(&client_info->inherit_super.addr, 0, sizeof(client_info->inherit_super.addr));
-
-	memcpy(&client_info->inherit_super.addr.sin_addr, servhost->h_addr_list[0], servhost->h_length);
-	client_info->inherit_super.addr.sin_family = AF_INET;
-	client_info->inherit_super.addr.sin_port = htons(port);
-	// make socket
-	if((client_info->inherit_super.socket = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-		ERR_PRINT("failed to make socket.");
-		ttLibC_free(client_info);
 		bootstrap->error_number = -3;
 		return false;
 	}
 	int optval = 1;
 	if(bootstrap_->so_keepalive) {
-		setsockopt(client_info->inherit_super.socket, SOL_SOCKET, SO_KEEPALIVE, &optval, sizeof(optval));
+		ttLibC_TcpClient_setSockOpt(client_info, SOL_SOCKET, SO_KEEPALIVE, &optval, sizeof(optval));
 	}
 /*	if(bootstrap_->so_reuseaddr) {
-		setsockopt(client_info->inherit_super.inherit_super.socket, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
+		ttLibC_TcpClient_setSockOpt(client_info, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
 	}*/
 	if(bootstrap_->tcp_nodelay) {
-		setsockopt(client_info->inherit_super.socket, IPPROTO_TCP, TCP_NODELAY, &optval, sizeof(optval));
+		ttLibC_TcpClient_setSockOpt(client_info, IPPROTO_TCP, TCP_NODELAY, &optval, sizeof(optval));
 	}
 	// connect
-	if(connect(client_info->inherit_super.socket, (struct sockaddr *)&client_info->inherit_super.addr, sizeof(client_info->inherit_super.addr)) == -1) {
+	if(ttLibC_TcpClient_connect(client_info) == -1) {
 		ERR_PRINT("failed to connect.");
 		ttLibC_free(client_info);
 		bootstrap->error_number = -4;
 		return false;
 	}
 	// update fd_set
-	FD_SET(client_info->inherit_super.socket, &bootstrap_->fdset);
+	ttLibC_SocketInfo_FD_SET((ttLibC_SocketInfo *)client_info, &bootstrap_->fdset);
 	// put it on the list.
 	ttLibC_StlList_addLast(bootstrap_->tcp_client_info_list, client_info);
 	// call pipeline->connect
-	ttLibC_TettyContext_connect_(bootstrap, (ttLibC_TcpClientInfo *)client_info);
+	ttLibC_TettyContext_connect_(bootstrap, (ttLibC_SocketInfo *)client_info);
 	// call pipeline->channelActive
-	ttLibC_TettyContext_channelActive_(bootstrap, (ttLibC_TcpClientInfo *)client_info);
+	ttLibC_TettyContext_channelActive_(bootstrap, (ttLibC_SocketInfo *)client_info);
 	return true;
 }
 
@@ -218,31 +197,28 @@ static bool TettyBootstrap_updateEach(void *ptr, void *item) {
 	ttLibC_TettyBootstrap_ *bootstrap_ = (ttLibC_TettyBootstrap_ *)ptr;
 	ttLibC_TcpClientInfo *client_info = (ttLibC_TcpClientInfo *)item;
 	// check fd_set
-	if(FD_ISSET(client_info->socket, &bootstrap_->fdchkset)) {
+	if(ttLibC_SocketInfo_FD_ISSET((ttLibC_SocketInfo *)client_info, &bootstrap_->fdchkset)) {
 		uint8_t buffer[1024];
 		size_t read_size = 0;
 		memset(buffer, 0, sizeof(buffer));
-		read_size = read(client_info->socket, buffer, sizeof(buffer));
+		read_size = ttLibC_TcpClient_read(client_info, buffer, sizeof(buffer));
 		if(read_size == 0) {
 			// closed.
-			ttLibC_TettyBootstrap_closeClient_((ttLibC_TettyBootstrap *)bootstrap_, client_info);
+			ttLibC_TettyBootstrap_closeClient_((ttLibC_TettyBootstrap *)bootstrap_, (ttLibC_SocketInfo *)client_info);
 			// remove from stl list.
 			ttLibC_StlList_remove(bootstrap_->tcp_client_info_list, client_info);
 		}
 		else {
 			// call pipeline->channelRead
-			ttLibC_TettyContext_channelRead_((ttLibC_TettyBootstrap *)bootstrap_, client_info, buffer, read_size);
+			ttLibC_TettyContext_channelRead_((ttLibC_TettyBootstrap *)bootstrap_, (ttLibC_SocketInfo *)client_info, buffer, read_size);
 		}
 	}
 	return true;
 }
 
 static bool TettyBootstrap_checkFdMaxValue(void *ptr, void *item) {
-	ttLibC_TcpClientInfo *client_info = (ttLibC_TcpClientInfo *)item;
 	int *pfd_max = (int *)ptr;
-	if(*pfd_max < client_info->socket) {
-		*pfd_max = client_info->socket;
-	}
+	*pfd_max = ttLibC_SocketInfo_updateFDMax((ttLibC_SocketInfo *)item, *pfd_max);
 	return true;
 }
 
@@ -267,7 +243,8 @@ bool ttLibC_TettyBootstrap_update(
 
 	// check fdset wait for 0.01 sec.
 	struct timeval timeout;
-	memcpy(&bootstrap_->fdchkset, &bootstrap_->fdset, sizeof(fd_set));
+//	memcpy(&bootstrap_->fdchkset, &bootstrap_->fdset, sizeof(1));
+	ttLibC_SocketInfo_FD_COPY(&bootstrap_->fdchkset, &bootstrap_->fdset);
 
 	timeout.tv_sec = wait_interval / 1000000;
 	timeout.tv_usec = wait_interval % 1000000;
@@ -276,7 +253,8 @@ bool ttLibC_TettyBootstrap_update(
 	// check all socket to decide fd_max
 	int fd_max = 0;
 	if(bootstrap_->socket_info != NULL) {
-		fd_max = bootstrap_->socket_info->socket;
+//		fd_max = bootstrap_->socket_info->socket;
+		fd_max = ttLibC_SocketInfo_updateFDMax(bootstrap_->socket_info, fd_max);
 	}
 	ttLibC_StlList_forEach(bootstrap_->tcp_client_info_list, TettyBootstrap_checkFdMaxValue, &fd_max);
 	++ fd_max;
@@ -299,18 +277,18 @@ bool ttLibC_TettyBootstrap_update(
 						// set tcp_nodelay and SO_KEEPALIVE
 						int optval = 1;
 						if(bootstrap_->so_keepalive) {
-							setsockopt(client_info->socket, SOL_SOCKET, SO_KEEPALIVE, &optval, sizeof(optval));
+							ttLibC_TcpClient_setSockOpt(client_info, SOL_SOCKET, SO_KEEPALIVE, &optval, sizeof(optval));
 						}
 /*						if(bootstrap_->so_reuseaddr) {
-							setsockopt(client_info->inherit_super.socket, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
+							ttLibC_TcpClient_setSockOpt(client_info, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
 						}*/
 						if(bootstrap_->tcp_nodelay) {
-							setsockopt(client_info->socket, IPPROTO_TCP, TCP_NODELAY, &optval, sizeof(optval));
+							ttLibC_TcpClient_setSockOpt(client_info, IPPROTO_TCP, TCP_NODELAY, &optval, sizeof(optval));
 						}
 						// update fdset with new data_socket.
-						FD_SET(client_info->socket, &bootstrap_->fdset);
+						ttLibC_SocketInfo_FD_SET((ttLibC_SocketInfo *)client_info, &bootstrap_->fdset);
 						// call pipeline->channelActive
-						ttLibC_TettyContext_channelActive_(bootstrap, client_info);
+						ttLibC_TettyContext_channelActive_(bootstrap, (ttLibC_SocketInfo *)client_info);
 						ttLibC_StlList_addLast(bootstrap_->tcp_client_info_list, client_info);
 						response = true;
 					}
@@ -357,7 +335,7 @@ bool ttLibC_TettyBootstrap_closeClient_(
 		return false;
 	}
 	// remove this socket from fdset.
-	FD_CLR(socket_info->socket, &bootstrap_->fdset);
+	ttLibC_SocketInfo_FD_CLR(socket_info, &bootstrap_->fdset);
 	// call pipeline->disconnect
 	ttLibC_TettyContext_disconnect_((ttLibC_TettyBootstrap *)bootstrap_, socket_info);
 	// call pipeline->close
@@ -379,7 +357,7 @@ bool ttLibC_TettyBootstrap_closeClient_(
 static bool TettyBootstrap_closeEach(void *ptr, void *item) {
 	return ttLibC_TettyBootstrap_closeClient_(
 			(ttLibC_TettyBootstrap *)ptr,
-			(ttLibC_TcpClientInfo *)item);
+			(ttLibC_SocketInfo *)item);
 }
 
 /*
@@ -390,7 +368,7 @@ void ttLibC_TettyBootstrap_closeServer(ttLibC_TettyBootstrap *bootstrap) {
 	ttLibC_TettyBootstrap_ *bootstrap_ = (ttLibC_TettyBootstrap_ *)bootstrap;
 	if(bootstrap_->socket_info != NULL) {
 		// remove from fdset.
-		FD_CLR(bootstrap_->socket_info->socket, &bootstrap_->fdset);
+		ttLibC_SocketInfo_FD_CLR(bootstrap_->socket_info, &bootstrap_->fdset);
 		switch(bootstrap_->channel_type) {
 		default:
 		case ChannelType_Tcp:
@@ -468,7 +446,7 @@ void ttLibC_TettyBootstrap_pipeline_remove(
 static bool TettyBootstrap_pipeline_each_fireUserEventTriggered_callback(void *ptr, void *item) {
 	ttLibC_TettyContext_ *ctx = (ttLibC_TettyContext_ *)ptr;
 	ttLibC_TcpClientInfo *client_info = item;
-	ttLibC_TettyContext_userEventTriggered_(ctx->bootstrap, client_info, ctx->data, ctx->data_size);
+	ttLibC_TettyContext_userEventTriggered_(ctx->bootstrap, (ttLibC_SocketInfo *)client_info, ctx->data, ctx->data_size);
 	return true;
 }
 
@@ -530,7 +508,7 @@ tetty_errornum ttLibC_TettyBootstrap_channels_write(
 static bool TettyBootstrap_channelEach_write_callback(void *ptr, void *item) {
 	ttLibC_TettyContext_ *ctx = (ttLibC_TettyContext_ *)ptr;
 	ttLibC_TcpClientInfo *client_info = item;
-	ttLibC_TettyContext_channel_write_(ctx->bootstrap, client_info, ctx->data, ctx->data_size);
+	ttLibC_TettyContext_channel_write_(ctx->bootstrap, (ttLibC_SocketInfo *)client_info, ctx->data, ctx->data_size);
 	return true;
 }
 
@@ -559,25 +537,13 @@ tetty_errornum ttLibC_TettyBootstrap_channelEach_write(
 
 static bool TettyBootstrap_channelEach_callPipelineFlush_callback(void *ptr, void *item) {
 	// call pipeline->flush
-	ttLibC_TettyContext_flush_((ttLibC_TettyBootstrap *)ptr, (ttLibC_TcpClientInfo *)item);
+	ttLibC_TettyContext_flush_((ttLibC_TettyBootstrap *)ptr, (ttLibC_SocketInfo *)item);
 	return true;
 }
 
 static bool TettyBootstrap_channelEach_flush_callback(void *ptr, void *item) {
 	(void)ptr;
-	ttLibC_TcpClientInfo_ *client_info = (ttLibC_TcpClientInfo_ *)item;
-	// check target write buffer.
-	if(ttLibC_DynamicBuffer_refSize(client_info->write_buffer) == 0) {
-		return true;
-	}
-	// send message.
-	write(
-			client_info->inherit_super.socket,
-			ttLibC_DynamicBuffer_refData(client_info->write_buffer),
-			ttLibC_DynamicBuffer_refSize(client_info->write_buffer));
-	// empty used buffer.
-	ttLibC_DynamicBuffer_empty(client_info->write_buffer);
-	return true;
+	return ttLibC_TcpClient_write((ttLibC_TcpClientInfo *)item);
 }
 
 tetty_errornum ttLibC_TettyBootstrap_channels_flush(ttLibC_TettyBootstrap *bootstrap) {
