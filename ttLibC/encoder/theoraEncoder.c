@@ -55,7 +55,7 @@ ttLibC_TheoraEncoder *ttLibC_TheoraEncoder_make_ex(
 		uint32_t bitrate,
 		uint32_t key_frame_interval) {
 	th_info ti;
-	th_comment tc;
+//	th_comment tc;
 	th_info_init(&ti);
 	ti.frame_width = (width % 16 == 0) ? width : ((int)(width / 16) + 1) * 16;
 	ti.frame_height = (height % 16 == 0) ? height : ((int)(height / 16) + 1) * 16;

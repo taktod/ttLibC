@@ -45,12 +45,19 @@ static bool ImageResizer_resizePlane(
 	 *
 	 * from the distance estimate the color of point.
 	 */
-	ImageResize_point_t target = {0};
-	ImageResize_point_t lt = {0}, lb = {0}, rt = {0}, rb = {0};
+#define clearPoint(t) t.x = 0;t.y = 0;t.val = 0;
+	ImageResize_point_t target;
+	ImageResize_point_t lt, lb, rt, rb;
+	clearPoint(target);
+	clearPoint(lt);
+	clearPoint(lb);
+	clearPoint(rt);
+	clearPoint(rb);
+#undef clearPoint
 	uint32_t lt_x = 0, lt_y = 0, rb_x = 0, rb_y = 0;
 	int32_t xxx = 0, yyy = 0;
-	uint32_t hmax = ((src_height - 1) * target_height) << 1;
-	uint32_t wmax = ((src_width - 1) * target_width) << 1;
+	int32_t hmax = ((src_height - 1) * target_height) << 1;
+	int32_t wmax = ((src_width - 1) * target_width) << 1;
 	for(uint32_t i = 0;i < target_height;++ i) { // for y
 		target.y = src_height * (1 + (i << 1));
 		yyy = target.y - target_height;
@@ -468,9 +475,9 @@ ttLibC_Bgr *ttLibC_ImageResizer_resizeBgr(
 			false);
 	if(a_data != NULL) {
 		// fill alpha = 255
-		for(int i = 0;i < height;++ i) {
+		for(uint32_t i = 0;i < height;++ i) {
 			uint8_t *a_buf = a_data;
-			for(int j = 0;j < width;++ j) {
+			for(uint32_t j = 0;j < width;++ j) {
 				*a_buf = 255;
 				++ a_buf;
 			}
