@@ -74,6 +74,9 @@ bool ttLibC_FlvHeaderTag_writeTag(
 		void *ptr) {
 	uint8_t buf[13];
 	size_t size = ttLibC_HexUtil_makeBuffer("464C5601000000000900000000", buf, 13);
+	if(size != 13) {
+		return false;
+	}
 	if(writer->audio_track.frame_type != frameType_unknown) {
 		buf[4] |= 0x04;
 	}

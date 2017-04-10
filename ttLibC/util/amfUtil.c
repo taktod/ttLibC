@@ -307,7 +307,7 @@ static ttLibC_Amf0Object *Amf0_make(uint8_t *data, size_t data_size) {
 		{
 			++ read_size;
 			// put limit, max is 255
-			size_t size = 255;
+			int size = 255;
 			ttLibC_Amf0MapObject *map_objects = ttLibC_malloc(sizeof(ttLibC_Amf0MapObject) * (size + 1));
 			memset(map_objects, 0, sizeof(ttLibC_Amf0MapObject) * (size + 1));
 			for(int i = 0;i < size;++ i) {
@@ -365,7 +365,7 @@ static ttLibC_Amf0Object *Amf0_make(uint8_t *data, size_t data_size) {
 		{
 			++ read_size;
 			// get the element size.
-			uint32_t size = be_uint32_t(*((uint32_t *)(data + read_size)));
+			int size = be_int32_t(*((int32_t *)(data + read_size)));
 			// with the response of fms, I found size = 0 map object.
 			if(size == 0) {
 				size = 255; // assume to have 255 elements for max

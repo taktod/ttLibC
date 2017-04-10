@@ -96,7 +96,7 @@ ttLibC_Pmt *ttLibC_Pmt_getPacket(
 	 * 32bit CRC32
 	 */
 	ttLibC_ByteReader_bit(reader, 3);
-	uint16_t pcrPid = ttLibC_ByteReader_bit(reader, 13);
+	/*uint16_t pcr_pid = */ttLibC_ByteReader_bit(reader, 13);
 	ttLibC_ByteReader_bit(reader, 4);
 	ttLibC_ByteReader_bit(reader, 12); // if this value is not 0, maybe we have some extra information later.
 	section_length -= 4;
@@ -104,9 +104,9 @@ ttLibC_Pmt *ttLibC_Pmt_getPacket(
 	// check the number of pes.
 	for(uint32_t i = 0;i < section_length - 4;++ i) {
 		++ pes_track_num;
-		uint8_t stream_type = ttLibC_ByteReader_bit(reader, 8);
+		/*uint8_t stream_type = */ttLibC_ByteReader_bit(reader, 8);
 		ttLibC_ByteReader_bit(reader, 3);
-		uint16_t pes_pid = ttLibC_ByteReader_bit(reader, 13);
+		/*uint16_t pes_pid = */ttLibC_ByteReader_bit(reader, 13);
 		ttLibC_ByteReader_bit(reader, 4);
 		uint16_t pes_info_length = ttLibC_ByteReader_bit(reader, 12);
 		for(int j = 0;j < pes_info_length;++ j) {

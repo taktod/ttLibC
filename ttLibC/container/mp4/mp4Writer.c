@@ -572,7 +572,7 @@ static bool Mp4Writer_makeInitMp4(ttLibC_ContainerWriter_ *writer) {
 		ERR_PRINT("failed to make buffer.");
 		return false;
 	}
-	uint8_t *b = NULL;
+//	uint8_t *b = NULL;
 	uint8_t buf[256];
 	// ftyp
 	size_t in_size;
@@ -817,7 +817,7 @@ static bool Mp4Writer_makeTraf(void *ptr, void *key, void *item) {
 				uint32_t frameCountPos = ttLibC_DynamicBuffer_refSize(buffer) - 8;
 				track->dataOffsetPosForTrun = frameCountPos + 4;
 				uint32_t frameCount = 0;
-				uint64_t target_pts = 0;
+//				uint64_t target_pts = 0;
 				while(true) {
 					ttLibC_Video *jpeg =(ttLibC_Video *)ttLibC_FrameQueue_ref_first(track->inherit_super.frame_queue);
 					if(jpeg == NULL) {

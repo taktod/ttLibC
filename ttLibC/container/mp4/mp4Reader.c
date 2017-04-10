@@ -318,7 +318,7 @@ static bool Mp4Reader_readAtom(
 	case Mp4Type_Ctts:
 		{
 			uint8_t version = ttLibC_ByteReader_bit(byte_reader, 8);
-			uint32_t flags = ttLibC_ByteReader_bit(byte_reader, 24);
+			/*uint32_t flags = */ttLibC_ByteReader_bit(byte_reader, 24);
 			switch(tag) {
 			case Mp4Type_Elst:
 				{
@@ -461,8 +461,8 @@ static bool Mp4Reader_readAtom(
 					case 'mp4a':
 						if(reader->track->is_video) {
 							ttLibC_ByteReader_skipByte(byte_reader, 24);
-							uint16_t width  = ttLibC_ByteReader_bit(byte_reader, 16);
-							uint16_t height = ttLibC_ByteReader_bit(byte_reader, 16);
+							/*uint16_t width  = */ttLibC_ByteReader_bit(byte_reader, 16);
+							/*uint16_t height = */ttLibC_ByteReader_bit(byte_reader, 16);
 							ttLibC_ByteReader_skipByte(byte_reader, 4);
 							ttLibC_ByteReader_skipByte(byte_reader, 4);
 							ttLibC_ByteReader_skipByte(byte_reader, 4);

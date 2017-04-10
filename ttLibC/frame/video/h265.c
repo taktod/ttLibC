@@ -105,8 +105,8 @@ ttLibC_H265 *ttLibC_H265_make(
 			case H265NalType_rsvVclR13:
 			case H265NalType_rsvVclR15:
 				{
-					uint32_t first_slice_segment_in_pic_flag = ttLibC_ByteReader_bit(reader, 1);
-					uint32_t slice_pic_parameter_set_id = ttLibC_ByteReader_expGolomb(reader, false);
+					/*uint32_t first_slice_segment_in_pic_flag = */ttLibC_ByteReader_bit(reader, 1);
+					/*uint32_t slice_pic_parameter_set_id = */ttLibC_ByteReader_expGolomb(reader, false);
 					h265->frame_type = ttLibC_ByteReader_expGolomb(reader, false);
 				}
 				break;
@@ -221,8 +221,8 @@ bool ttLibC_H265_getNalInfo(
 				case H265NalType_rsvVclR15:
 					{
 						ttLibC_ByteReader *reader = ttLibC_ByteReader_make(dat + 2, data_size - info->data_pos, ByteUtilType_h26x);
-						uint32_t first_slice_segment_in_pic_flag = ttLibC_ByteReader_bit(reader, 1);
-						uint32_t slice_pic_parameter_set_id = ttLibC_ByteReader_expGolomb(reader, false);
+						/*uint32_t first_slice_segment_in_pic_flag = */ttLibC_ByteReader_bit(reader, 1);
+						/*uint32_t slice_pic_parameter_set_id = */ttLibC_ByteReader_expGolomb(reader, false);
 						info->frame_type = ttLibC_ByteReader_expGolomb(reader, false);
 						ttLibC_ByteReader_close(&reader);
 					}
@@ -261,7 +261,7 @@ bool ttLibC_H265_getHvccInfo(ttLibC_H265_NalInfo* info, uint8_t *data, size_t da
 	info->nal_unit_type = H265NalType_error;
 	info->nal_size = ((data[0] << 24) | (data[1] << 16) | (data[2] << 8) | data[3]) + 4;
 	data += 4;
-	size_t pos = 0;
+//	size_t pos = 0;
 	if(data_size < info->nal_size) {
 		// not enough data size
 		return false;
@@ -321,8 +321,8 @@ bool ttLibC_H265_getHvccInfo_ex(
 	case H265NalType_rsvVclR15:
 		{
 			ttLibC_ByteReader *reader = ttLibC_ByteReader_make(data + 2, data_size - 2, ByteUtilType_h26x);
-			uint32_t first_slice_segment_in_pic_flag = ttLibC_ByteReader_bit(reader, 1);
-			uint32_t slice_pic_parameter_set_id = ttLibC_ByteReader_expGolomb(reader, false);
+			/*uint32_t first_slice_segment_in_pic_flag = */ttLibC_ByteReader_bit(reader, 1);
+			/*uint32_t slice_pic_parameter_set_id = */ttLibC_ByteReader_expGolomb(reader, false);
 			info->frame_type = ttLibC_ByteReader_expGolomb(reader, false);
 			ttLibC_ByteReader_close(&reader);
 		}
@@ -934,7 +934,7 @@ size_t ttLibC_H265_readHvccTag(
 				num_temporal_layers = ttLibC_ByteReader_bit(reader, 3) + 1;
 				temporal_id_nested_flag = ttLibC_ByteReader_bit(reader, 1);
 				ttLibC_ByteReader_bit(reader, 16);
-				uint8_t buf[12];
+//				uint8_t buf[12];
 				for(int i = 0;i < 12;++ i) {
 					generalInfo[i] = ttLibC_ByteReader_bit(reader, 8);
 				}
@@ -943,7 +943,6 @@ size_t ttLibC_H265_readHvccTag(
 			break;
 		case H265NalType_spsNut:
 			{
-//				LOG_DUMP(buf, nal_info.nal_size, true);
 				ttLibC_ByteReader *reader = ttLibC_ByteReader_make(buf + nal_info.data_pos, nal_info.nal_size - nal_info.data_pos, ByteUtilType_h26x);
 				// forbidden - temporal id nesting flag
 				ttLibC_ByteReader_bit(reader, 24);

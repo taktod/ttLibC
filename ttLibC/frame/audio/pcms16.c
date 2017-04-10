@@ -54,7 +54,7 @@ ttLibC_PcmS16 *ttLibC_PcmS16_make(
 	}
 	ttLibC_PcmS16 *pcms16 = prev_frame;
 	size_t data_size_ = data_size;
-	size_t buffer_size_ = data_size;
+//	size_t buffer_size_ = data_size;
 	uint32_t l_step = 2;
 	uint32_t r_step = 0;
 	switch(type) {

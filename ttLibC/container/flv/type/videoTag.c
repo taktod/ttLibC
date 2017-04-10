@@ -103,9 +103,9 @@ ttLibC_FlvVideoTag *ttLibC_FlvVideoTag_getTag(
 	size_t size = ((data[1] << 16) & 0xFF0000) | ((data[2] << 8) & 0xFF00) | (data[3] & 0xFF);
 	uint32_t timestamp = ((data[4] << 16) & 0xFF0000) | ((data[5] << 8) & 0xFF00) | (data[6] & 0xFF) | ((data[7] << 24) & 0xFF000000);
 	uint32_t track_id = ((data[8] << 16) & 0xFF0000) | ((data[9] << 8) & 0xFF00) | (data[10] & 0xFF);
-	uint8_t frame_type = ((data[11] >> 4) & 0x0F);
+//	uint8_t frame_type = ((data[11] >> 4) & 0x0F);
 	uint8_t codec_id = data[11] & 0x0F;
-	uint32_t dts = 0;
+//	uint32_t dts = 0;
 	data += 11;
 	data_size -= 11;
 

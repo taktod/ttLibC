@@ -187,10 +187,11 @@ ttLibC_Pes *ttLibC_Pes_getPacket(
 					| ((ttLibC_ByteReader_bit(reader, 16) >> 1)      & 0x00007FFF);
 		}
 		if(has_dts) {
-			ttLibC_ByteReader_bit(reader, 4);
+			ttLibC_ByteReader_skipByte(reader, 5);
+/*			ttLibC_ByteReader_bit(reader, 4);
 			uint64_t dts = ((ttLibC_ByteReader_bit(reader, 4) << 29) & 0xC0000000)
 					| ((ttLibC_ByteReader_bit(reader, 16) << 14)     & 0x3FFF8000)
-					| ((ttLibC_ByteReader_bit(reader, 16) >> 1)      & 0x00007FFF);
+					| ((ttLibC_ByteReader_bit(reader, 16) >> 1)      & 0x00007FFF);*/
 		}
 		data += reader->read_size;
 		data_size -= reader->read_size;

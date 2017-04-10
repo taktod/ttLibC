@@ -408,14 +408,14 @@ bool ttLibC_SimpleBlock_getFrame(
 		void *ptr) {
 	ttLibC_ByteReader *byte_reader = ttLibC_ByteReader_make(tag->inherit_super.inherit_super.data, tag->inherit_super.inherit_super.data_size, ByteUtilType_default);
 	// get information.
-	uint32_t type         = ttLibC_ByteReader_ebml(byte_reader, true);
-	uint64_t size         = ttLibC_ByteReader_ebml(byte_reader, false);
+	/*uint32_t type         = */ttLibC_ByteReader_ebml(byte_reader, true);
+	/*uint64_t size         = */ttLibC_ByteReader_ebml(byte_reader, false);
 	uint32_t track_id     = ttLibC_ByteReader_ebml(byte_reader, false);
 	int16_t timecode_diff = (int16_t)ttLibC_ByteReader_bit(byte_reader, 16);
 
-	bool is_key           = ttLibC_ByteReader_bit(byte_reader, 1) == 1;
+	/*bool is_key           = */ttLibC_ByteReader_bit(byte_reader, 1)/* == 1*/;
 	ttLibC_ByteReader_bit(byte_reader, 3);
-	bool is_invisible     = ttLibC_ByteReader_bit(byte_reader, 1) == 1;
+	/*bool is_invisible     = */ttLibC_ByteReader_bit(byte_reader, 1)/* == 1*/;
 	uint32_t lacing       = ttLibC_ByteReader_bit(byte_reader, 2);
 	ttLibC_ByteReader_bit(byte_reader, 1);
 

@@ -118,7 +118,7 @@ bool ttLibC_FlvReader_read(
 	do {
 		uint8_t *buffer = ttLibC_DynamicBuffer_refData(reader_->tmp_buffer);
 		size_t left_size = ttLibC_DynamicBuffer_refSize(reader_->tmp_buffer);
-		if(reader_->target_size > ttLibC_DynamicBuffer_refSize(reader_->tmp_buffer)) {
+		if(reader_->target_size > left_size) {
 			ttLibC_DynamicBuffer_clear(reader_->tmp_buffer);
 			reader_->is_reading = false;
 			return true; // continue

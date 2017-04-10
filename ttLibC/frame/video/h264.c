@@ -145,7 +145,7 @@ ttLibC_H264 *ttLibC_H264_make(
 				reader = ttLibC_ByteReader_make(buf + 5, buf_size - 5, ByteUtilType_h26x);
 				h264->is_disposable = (*(buf + 4) & 0x60) == 0;
 			}
-			uint32_t first_mb_in_slice = ttLibC_ByteReader_expGolomb(reader, false);
+			/*uint32_t first_mb_in_slice = */ttLibC_ByteReader_expGolomb(reader, false);
 			uint32_t slice_type = ttLibC_ByteReader_expGolomb(reader, false);
 			h264->frame_type = slice_type % 5;
 			ttLibC_ByteReader_close(&reader);
@@ -254,7 +254,7 @@ bool ttLibC_H264_getNalInfo(ttLibC_H264_NalInfo* info, uint8_t *data, size_t dat
 				case H264NalType_sliceIDR:
 					{
 						ttLibC_ByteReader *reader = ttLibC_ByteReader_make(dat + 1, data_size - info->data_pos - 1, ByteUtilType_h26x);
-						uint32_t first_mb_in_slice = ttLibC_ByteReader_expGolomb(reader, false);
+						/*uint32_t first_mb_in_slice = */ttLibC_ByteReader_expGolomb(reader, false);
 						uint32_t slice_type = ttLibC_ByteReader_expGolomb(reader, false);
 						info->frame_type = slice_type % 5;
 						ttLibC_ByteReader_close(&reader);
@@ -294,7 +294,7 @@ bool ttLibC_H264_getAvccInfo(ttLibC_H264_NalInfo* info, uint8_t *data, size_t da
 	info->nal_unit_type = H264NalType_error;
 	info->nal_size = ((data[0] << 24) | (data[1] << 16) | (data[2] << 8) | data[3]) + 4;
 	data += 4;
-	size_t pos = 0;
+	//size_t pos = 0;
 	if(data_size < info->nal_size) {
 		// not enough data size
 		return false;
@@ -344,7 +344,7 @@ bool ttLibC_H264_getAvccInfo_ex(
 	case H264NalType_sliceIDR:
 		{
 			ttLibC_ByteReader *reader = ttLibC_ByteReader_make(data + 1, data_size - length_size - 1, ByteUtilType_h26x);
-			uint32_t first_mb_in_slice = ttLibC_ByteReader_expGolomb(reader, false);
+			/*uint32_t first_mb_in_slice = */ttLibC_ByteReader_expGolomb(reader, false);
 			uint32_t slice_type = ttLibC_ByteReader_expGolomb(reader, false);
 			info->frame_type = slice_type % 5;
 			ttLibC_ByteReader_close(&reader);

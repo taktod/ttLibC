@@ -358,7 +358,7 @@ size_t ttLibC_Aac_readAdtsHeader(
 	uint32_t frequency_index = ttLibC_ByteReader_bit(reader, 4);
 	if(frequency_index == 15) {
 		ERR_PRINT("not tested yet. now return error.");
-		uint32_t frequency = ttLibC_ByteReader_bit(reader, 24);
+//		uint32_t frequency = ttLibC_ByteReader_bit(reader, 24);
 		ttLibC_ByteReader_close(&reader);
 		return 0;
 	}

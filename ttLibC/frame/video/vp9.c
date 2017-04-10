@@ -168,7 +168,7 @@ uint32_t ttLibC_Vp9_getWidth(ttLibC_Vp9 *prev_frame, uint8_t *data, size_t data_
 	ttLibC_ByteReader_bit(reader, 3);
 	ttLibC_ByteReader_bit(reader, 1);
 	uint32_t width_minus_1  = ttLibC_ByteReader_bit(reader, 16);
-	uint32_t height_minus_1 = ttLibC_ByteReader_bit(reader, 16);
+/*	uint32_t height_minus_1 = ttLibC_ByteReader_bit(reader, 16);*/
 	if(reader->error != Error_noError) {
 		LOG_ERROR(reader->error);
 		ttLibC_ByteReader_close(&reader);
@@ -223,7 +223,7 @@ uint32_t ttLibC_Vp9_getHeight(ttLibC_Vp9 *prev_frame, uint8_t *data, size_t data
 	}
 	ttLibC_ByteReader_bit(reader, 3);
 	ttLibC_ByteReader_bit(reader, 1);
-	uint32_t width_minus_1  = ttLibC_ByteReader_bit(reader, 16);
+	/*uint32_t width_minus_1  = */ttLibC_ByteReader_bit(reader, 16);
 	uint32_t height_minus_1 = ttLibC_ByteReader_bit(reader, 16);
 	if(reader->error != Error_noError) {
 		LOG_ERROR(reader->error);

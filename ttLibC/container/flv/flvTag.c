@@ -27,7 +27,6 @@ ttLibC_FlvTag *ttLibC_FlvTag_make(
 		uint32_t timebase,
 		ttLibC_Flv_Type type,
 		uint32_t track_id) {
-	ttLibC_Frame *prev_frame = NULL;
 	ttLibC_FlvTag *tag = (ttLibC_FlvTag *)ttLibC_Container_make(
 			(ttLibC_Container *)prev_tag,
 			sizeof(union {

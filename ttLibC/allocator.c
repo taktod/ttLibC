@@ -34,9 +34,9 @@ typedef struct {
  * @return memory pointer
  */
 void *ttLibC_Allocator_malloc(size_t size, const char *file_name, int line, const char *func_name) {
-	int ret;
 	void *ptr = malloc(size);
 #if __DEBUG_FLAG__ == 1
+	int ret;
 	if(ptr) {
 		if(ttLibC_Allocator_Table != NULL) {
 			ttLibC_Allocator_Info *info = malloc(sizeof(ttLibC_Allocator_Info));
@@ -60,9 +60,9 @@ void *ttLibC_Allocator_malloc(size_t size, const char *file_name, int line, cons
  * @return memory pointer
  */
 void *ttLibC_Allocator_calloc(size_t n, size_t size, const char *file_name, int line, const char *func_name) {
-	int ret;
 	void *ptr = calloc(n, size);
 #if __DEBUG_FLAG__ == 1
+	int ret;
 	if(ptr) {
 		if(ttLibC_Allocator_Table != NULL) {
 			ttLibC_Allocator_Info *info = malloc(sizeof(ttLibC_Allocator_Info));
