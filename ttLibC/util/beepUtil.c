@@ -205,7 +205,7 @@ ttLibC_PcmS16 *ttLibC_BeepGenerator_makeBeepBySampleNum(
 		l_data = data;
 		l_stride = sample_num * 2;
 		if(generator->channel_num == 2) {
-			r_data = data + l_stride;
+			r_data = (uint8_t *)data + l_stride;
 			r_stride = l_stride;
 		}
 		break;
