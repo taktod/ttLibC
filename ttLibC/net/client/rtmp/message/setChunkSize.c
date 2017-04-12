@@ -26,7 +26,7 @@ ttLibC_SetChunkSize *ttLibC_SetChunkSize_make(uint32_t size) {
 	}
 	chunk_size->inherit_super.header = header;
 	chunk_size->size = size;
-	ttLibC_RtmpMessage *rtmpMsg = (ttLibC_RtmpMessage *)chunk_size;
+//	ttLibC_RtmpMessage *rtmpMsg = (ttLibC_RtmpMessage *)chunk_size;
 	return chunk_size;
 }
 

@@ -67,7 +67,7 @@ tetty_errornum ttLibC_AggregateMessage_getFrame(
 			is_first_media = false;
 		}
 		timestamp += timestamp_diff;
-		uint32_t stream_id = (data[8] << 16) | (data[9] << 8) | data[10];
+//		uint32_t stream_id = (data[8] << 16) | (data[9] << 8) | data[10];
 		data += 11;
 		data_size -= 11;
 		if(data_size < size + 4) {
@@ -76,7 +76,7 @@ tetty_errornum ttLibC_AggregateMessage_getFrame(
 		switch(type) {
 		case RtmpMessageType_videoMessage:
 			{
-				bool result = ttLibC_FlvFrameManager_readVideoBinary(
+				/*bool result = */ttLibC_FlvFrameManager_readVideoBinary(
 						manager,
 						data,
 						size,
@@ -89,7 +89,7 @@ tetty_errornum ttLibC_AggregateMessage_getFrame(
 			break;
 		case RtmpMessageType_audioMessage:
 			{
-				bool result = ttLibC_FlvFrameManager_readAudioBinary(
+				/*bool result = */ttLibC_FlvFrameManager_readAudioBinary(
 						manager,
 						data,
 						size,

@@ -298,7 +298,7 @@ bool ttLibC_TettyBootstrap_update(
 						// for recv we need to acquire data at once. and udp max = 65536
 						uint8_t buf[65536];
 						ttLibC_DatagramPacket *packet = ttLibC_DatagramPacket_make(buf, 65536);
-						size_t read_size = ttLibC_UdpSocket_read((ttLibC_UdpSocketInfo *)bootstrap_->socket_info, packet);
+						/*size_t read_size = */ttLibC_UdpSocket_read((ttLibC_UdpSocketInfo *)bootstrap_->socket_info, packet);
 						// call pipeline_channelRead
 						ttLibC_TettyContext_channelRead_(
 								bootstrap,

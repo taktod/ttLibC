@@ -163,7 +163,7 @@ bool ttLibC_RtmpStream_addFrame(
 			// if we need to send dsi info, send audioMessage twice.
 			ttLibC_Aac *aac = (ttLibC_Aac *)frame;
 			uint64_t dsi_info = 0;
-			size_t size = ttLibC_Aac_readDsiInfo(aac, (uint8_t *)&dsi_info, 8);
+			/*size_t size = */ttLibC_Aac_readDsiInfo(aac, (uint8_t *)&dsi_info, 8);
 //			if(!stream_->sent_dsi_info) {
 				ttLibC_AudioMessage *audioMessage = ttLibC_AudioMessage_addFrame(stream, (ttLibC_Audio *)frame);
 				if(audioMessage != NULL) {

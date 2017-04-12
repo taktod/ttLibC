@@ -135,7 +135,7 @@ static void VtEncoder_encodeH264Callback(ttLibC_VtEncoder_ *encoder, CMSampleBuf
 	CMBlockBufferRef block = CMSampleBufferGetDataBuffer(sampleBuffer);
 	CFArrayRef attachments =CMSampleBufferGetSampleAttachmentsArray(sampleBuffer, false);
 	CMTime pts = CMSampleBufferGetPresentationTimeStamp(sampleBuffer);
-	CMTime dts = CMSampleBufferGetDecodeTimeStamp(sampleBuffer);
+//	CMTime dts = CMSampleBufferGetDecodeTimeStamp(sampleBuffer);
 	bool is_keyFrame = false;
 	if(attachments != NULL) {
 		CFDictionaryRef attachment;
@@ -175,7 +175,7 @@ static void VtEncoder_encodeH264Callback(ttLibC_VtEncoder_ *encoder, CMSampleBuf
 static void VtEncoder_encodeJpegCallback(ttLibC_VtEncoder_ *encoder, CMSampleBufferRef sampleBuffer) {
 	CMBlockBufferRef block = CMSampleBufferGetDataBuffer(sampleBuffer);
 	CMTime pts = CMSampleBufferGetPresentationTimeStamp(sampleBuffer);
-	CMTime dts = CMSampleBufferGetDecodeTimeStamp(sampleBuffer);
+//	CMTime dts = CMSampleBufferGetDecodeTimeStamp(sampleBuffer);
 
 	uint8_t *bufferData;
 	size_t size;
