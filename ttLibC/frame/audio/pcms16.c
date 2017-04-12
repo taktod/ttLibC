@@ -127,10 +127,10 @@ ttLibC_PcmS16 *ttLibC_PcmS16_make(
 		}
 		memcpy(pcms16->inherit_super.inherit_super.data, data, data_size);
 		if(l_data != NULL) {
-			pcms16->l_data = pcms16->inherit_super.inherit_super.data + (l_data - data);
+			pcms16->l_data = (uint8_t *)pcms16->inherit_super.inherit_super.data + ((uint8_t *)l_data - (uint8_t *)data);
 		}
 		if(r_data != NULL) {
-			pcms16->r_data = pcms16->inherit_super.inherit_super.data + (r_data - data);
+			pcms16->r_data = (uint8_t *)pcms16->inherit_super.inherit_super.data + ((uint8_t *)r_data - (uint8_t *)data);
 		}
 	}
 	return pcms16;

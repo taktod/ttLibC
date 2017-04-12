@@ -108,11 +108,11 @@ ttLibC_PcmS16 *ttLibC_BeepGenerator_makeBeepBySampleNum(
 	uint32_t step = 2;
 	switch(generator->type) {
 	case PcmS16Type_bigEndian:
-		left_u_data = data;
-		left_l_data = data + 1;
+		left_u_data = (uint8_t *)data;
+		left_l_data = (uint8_t *)data + 1;
 		if(generator->channel_num == 2) {
-			right_u_data = data + 2;
-			right_l_data = data + 3;
+			right_u_data = (uint8_t *)data + 2;
+			right_l_data = (uint8_t *)data + 3;
 			step = 4;
 		}
 		else {
@@ -120,20 +120,20 @@ ttLibC_PcmS16 *ttLibC_BeepGenerator_makeBeepBySampleNum(
 		}
 		break;
 	case PcmS16Type_bigEndian_planar:
-		left_u_data = data;
-		left_l_data = data + 1;
+		left_u_data = (uint8_t *)data;
+		left_l_data = (uint8_t *)data + 1;
 		if(generator->channel_num == 2) {
-			right_u_data = data + (data_size >> 1);
-			right_l_data = data + (data_size >> 1) + 1;
+			right_u_data = (uint8_t *)data + (data_size >> 1);
+			right_l_data = (uint8_t *)data + (data_size >> 1) + 1;
 		}
 		step = 2;
 		break;
 	case PcmS16Type_littleEndian:
-		left_u_data = data + 1;
-		left_l_data = data;
+		left_u_data = (uint8_t *)data + 1;
+		left_l_data = (uint8_t *)data;
 		if(generator->channel_num == 2) {
-			right_u_data = data + 3;
-			right_l_data = data + 2;
+			right_u_data = (uint8_t *)data + 3;
+			right_l_data = (uint8_t *)data + 2;
 			step = 4;
 		}
 		else {
@@ -141,11 +141,11 @@ ttLibC_PcmS16 *ttLibC_BeepGenerator_makeBeepBySampleNum(
 		}
 		break;
 	case PcmS16Type_littleEndian_planar:
-		left_u_data = data + 1;
-		left_l_data = data;
+		left_u_data = (uint8_t *)data + 1;
+		left_l_data = (uint8_t *)data;
 		if(generator->channel_num == 2) {
-			right_u_data = data + (data_size >> 1) + 1;
-			right_l_data = data + (data_size >> 1);
+			right_u_data = (uint8_t *)data + (data_size >> 1) + 1;
+			right_l_data = (uint8_t *)data + (data_size >> 1);
 		}
 		step = 2;
 		break;

@@ -132,13 +132,13 @@ ttLibC_Yuv420 *ttLibC_Yuv420_make(
 		memcpy(yuv420->inherit_super.inherit_super.data, data, data_size);
 		// update inner ref to use copyed buffer.
 		if(y_data != NULL) {
-			yuv420->y_data = yuv420->inherit_super.inherit_super.data + (y_data - data);
+			yuv420->y_data = (uint8_t *)yuv420->inherit_super.inherit_super.data + ((uint8_t *)y_data - (uint8_t *)data);
 		}
 		if(u_data != NULL) {
-			yuv420->u_data = yuv420->inherit_super.inherit_super.data + (u_data - data);
+			yuv420->u_data = (uint8_t *)yuv420->inherit_super.inherit_super.data + ((uint8_t *)u_data - (uint8_t *)data);
 		}
 		if(v_data != NULL) {
-			yuv420->v_data = yuv420->inherit_super.inherit_super.data + (v_data - data);
+			yuv420->v_data = (uint8_t *)yuv420->inherit_super.inherit_super.data + ((uint8_t *)v_data - (uint8_t *)data);
 		}
 	}
 	return yuv420;

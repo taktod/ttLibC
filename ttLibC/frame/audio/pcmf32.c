@@ -89,10 +89,10 @@ ttLibC_PcmF32 *ttLibC_PcmF32_make(
 		}
 		else {
 			if(l_data != NULL) {
-				pcmf32->l_data = pcmf32->inherit_super.inherit_super.data + (l_data - data);
+				pcmf32->l_data = (uint8_t *)pcmf32->inherit_super.inherit_super.data + ((uint8_t *)l_data - (uint8_t *)data);
 			}
 			if(r_data != NULL) {
-				pcmf32->r_data = pcmf32->inherit_super.inherit_super.data + (r_data - data);
+				pcmf32->r_data = (uint8_t *)pcmf32->inherit_super.inherit_super.data + ((uint8_t *)r_data - (uint8_t *)data);
 			}
 		}
 	}
