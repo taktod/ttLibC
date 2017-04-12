@@ -809,7 +809,6 @@ bool ttLibC_ByteConnector_ebml2(
 				return false;
 			}
 			if((value & 0xC00000) != 0) {
-				ERR_PRINT("不正なebml値です。");
 				connector_->inherit_super.error_number = 2;
 				connector_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_InvalidOperation);
 				return false;
@@ -830,7 +829,6 @@ bool ttLibC_ByteConnector_ebml2(
 				return false;
 			}
 			if((value & 0xE0000000) != 0) {
-				ERR_PRINT("不正なebml値です。");
 				connector_->inherit_super.error_number = 2;
 				connector_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_InvalidOperation);
 				return false;
