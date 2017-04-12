@@ -24,7 +24,7 @@
 typedef struct {
 	/** inherit data from ttLibC_Mp3 */
 	ttLibC_Mp3 inherit_super;
-	union {
+/*	union {
 		struct { // for frame
 		};
 		struct { // for id3
@@ -33,7 +33,7 @@ typedef struct {
 		struct { // for tag
 
 		};
-	};
+	};*/
 } ttLibC_Frame_Audio_Mp3_;
 
 typedef ttLibC_Frame_Audio_Mp3_ ttLibC_Mp3_;
