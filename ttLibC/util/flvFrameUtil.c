@@ -89,7 +89,7 @@ static bool FlvFrameManager_readH264Binary(
 					&size_length);
 			if(h264 == NULL) {
 				ERR_PRINT("failed to read avccTag.");
-				return NULL;
+				return false;
 			}
 			manager->size_length = size_length;
 			h264->inherit_super.inherit_super.pts = pts;
