@@ -18,7 +18,6 @@
 #include "promise.h"
 #include "../../allocator.h"
 #include "../../log.h"
-#include "../../util/forkUtil.h"
 #include <netdb.h>
 #include <netinet/tcp.h>
 
