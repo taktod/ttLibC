@@ -159,6 +159,22 @@ static bool AvcodecDecoder_decodeAudio(
 	if(got_frame != 1) {
 		return true;
 	}
+#ifdef TT_FF_OLD_AVCODEC
+	int result = avcodec_send_packet(decoder->dec, &decoder->packet);
+	if(result < 0 || result == AVERROR_EOF) {
+		ERR_PRINT("failed to decoder:%d", result);
+		return false;
+	}
+	do {
+		result = avcodec_receive_frame(decoder->dec, decoder->avframe);
+		if(result == AVERROR(EAGAIN)) {
+			return true;
+		}
+		if(result < 0) {
+			ERR_PRINT("failed to receive:%d", result);
+			return false;
+		}
+#endif
 	// decode complete, now to make frame and call callback.
 	decoder->inherit_super.sample_rate = decoder->avframe->sample_rate;
 	decoder->inherit_super.channel_num = decoder->avframe->channels;
@@ -305,6 +321,9 @@ static bool AvcodecDecoder_decodeAudio(
 		ERR_PRINT("unknown sample format:%d", decoder->dec->sample_fmt);
 		return false;
 	}
+#ifdef TT_FF_OLD_AVCODEC
+	} while(true);
+#endif
 	return false;
 }
 
@@ -417,7 +436,8 @@ static bool AvcodecDecoder_decodeVideo(
 	if(got_picture != 1) {
 		return true;
 	}
-/*	int result = avcodec_send_packet(decoder->dec, &decoder->packet);
+#ifdef TT_FF_OLD_AVCODEC
+	int result = avcodec_send_packet(decoder->dec, &decoder->packet);
 	if(result < 0) {
 		ERR_PRINT("failed to decode:%d", result);
 		return false;
@@ -426,14 +446,15 @@ static bool AvcodecDecoder_decodeVideo(
 		return true;
 	}
 	do {
-	result = avcodec_receive_frame(decoder->dec, decoder->avframe);
-	if(result == AVERROR(EAGAIN)) {
-		return true;
-	}
-	if(result < 0) {
-		ERR_PRINT("failed to receive:%d", result);
-		return false;
-	}*/
+		result = avcodec_receive_frame(decoder->dec, decoder->avframe);
+		if(result == AVERROR(EAGAIN)) {
+			return true;
+		}
+		if(result < 0) {
+			ERR_PRINT("failed to receive:%d", result);
+			return false;
+		}
+#endif
 	// decode complete now make frame and call callback.
 	decoder->inherit_super.width  = decoder->avframe->width;
 	decoder->inherit_super.height = decoder->avframe->height;
@@ -604,6 +625,9 @@ static bool AvcodecDecoder_decodeVideo(
 		ERR_PRINT("unknown pixfmt output.%d", decoder->dec->pix_fmt);
 		return false;
 	}
+#ifdef TT_FF_OLD_AVCODEC
+	}while(true);
+#endif
 	return false;
 }
 
