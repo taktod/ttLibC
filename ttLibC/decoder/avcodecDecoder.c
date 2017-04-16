@@ -184,7 +184,11 @@ static bool AvcodecDecoder_decodeAudio(
 					NULL,
 					0,
 					true,
+#ifndef FF_API_PKT_PTS
 					decoder->avframe->pkt_pts,
+#else
+					decoder->avframe->pts,
+#endif
 					frame->inherit_super.timebase);
 			if(pcmf32 != NULL) {
 				decoder->frame = (ttLibC_Frame *)pcmf32;
@@ -213,7 +217,11 @@ static bool AvcodecDecoder_decodeAudio(
 					decoder->avframe->data[1],
 					decoder->avframe->nb_samples * 4,
 					true,
+#ifndef FF_API_PKT_PTS
 					decoder->avframe->pkt_pts,
+#else
+					decoder->avframe->pts,
+#endif
 					frame->inherit_super.timebase);
 			if(pcmf32 != NULL) {
 				decoder->frame = (ttLibC_Frame *)pcmf32;
@@ -245,7 +253,11 @@ static bool AvcodecDecoder_decodeAudio(
 					NULL,
 					0,
 					true,
+#ifndef FF_API_PKT_PTS
 					decoder->avframe->pkt_pts,
+#else
+					decoder->avframe->pts,
+#endif
 					frame->inherit_super.timebase);
 			if(pcms16 != NULL) {
 				decoder->frame = (ttLibC_Frame *)pcms16;
@@ -274,7 +286,11 @@ static bool AvcodecDecoder_decodeAudio(
 					decoder->avframe->data[1],
 					decoder->avframe->nb_samples * 2,
 					true,
+#ifndef FF_API_PKT_PTS
 					decoder->avframe->pkt_pts,
+#else
+					decoder->avframe->pts,
+#endif
 					frame->inherit_super.timebase);
 			if(pcms16 != NULL) {
 				decoder->frame = (ttLibC_Frame *)pcms16;
@@ -439,7 +455,11 @@ static bool AvcodecDecoder_decodeVideo(
 					decoder->avframe->data[1], decoder->avframe->linesize[1],
 					decoder->avframe->data[2], decoder->avframe->linesize[2],
 					true,
+#ifndef FF_API_PKT_PTS
 					decoder->avframe->pkt_pts,
+#else
+					decoder->avframe->pts,
+#endif
 					frame->inherit_super.timebase);
 			if(y != NULL) {
 				decoder->frame = (ttLibC_Frame *)y;
@@ -550,7 +570,11 @@ static bool AvcodecDecoder_decodeVideo(
 					v_data,
 					v_stride,
 					true,
+#ifndef FF_API_PKT_PTS
 					decoder->avframe->pkt_pts,
+#else
+					decoder->avframe->pts,
+#endif
 					frame->inherit_super.timebase);
 			if(y == NULL) {
 				if(is_alloc_flag) {
@@ -991,7 +1015,11 @@ void ttLibC_AvcodecDecoder_close(ttLibC_AvcodecDecoder **decoder) {
 	if(target->avframe != NULL) {
 		av_free(target->avframe);
 	}
+#ifndef FF_API_AVPACKET_OLD_API
 	av_free_packet(&target->packet);
+#else
+	av_packet_unref(&target->packet);
+#endif
 	if(target->dec != NULL) {
 		avcodec_close(target->dec);
 		av_free(target->dec);
