@@ -773,6 +773,7 @@ ttLibC_H264 *ttLibC_H264_getFrame(
 	switch(nal_info.nal_unit_type) {
 	case H264NalType_accessUnitDelimiter:
 	case H264NalType_supplementalEnhancementInformation:
+	case H264NalType_pictureParameterSet:
 	default:
 		// type unknown.
 		return ttLibC_H264_make(
@@ -816,9 +817,6 @@ ttLibC_H264 *ttLibC_H264_getFrame(
 				non_copy_mode,
 				pts,
 				timebase);
-	case H264NalType_pictureParameterSet:
-		ERR_PRINT("unexpected.. to have pps first.");
-		return NULL;
 	case H264NalType_sliceIDR:
 		// TODO to improve this code. it is better to check, first mb in slice.
 		return ttLibC_H264_make(
