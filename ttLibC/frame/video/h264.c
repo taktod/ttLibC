@@ -771,10 +771,14 @@ ttLibC_H264 *ttLibC_H264_getFrame(
 		height = prev_frame->inherit_super.height;
 	}
 	switch(nal_info.nal_unit_type) {
+	default:
+		{
+			ERR_PRINT("unknown nal is found:%d", nal_info.nal_unit_type);
+		}
+		/* no break */
 	case H264NalType_accessUnitDelimiter:
 	case H264NalType_supplementalEnhancementInformation:
 	case H264NalType_pictureParameterSet:
-	default:
 		// type unknown.
 		return ttLibC_H264_make(
 				prev_frame,
