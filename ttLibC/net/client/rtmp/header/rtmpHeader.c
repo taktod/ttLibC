@@ -205,7 +205,7 @@ ttLibC_RtmpHeader *ttLibC_RtmpHeader_readBinary(
 				ttLibC_ByteReader_close(&reader);
 				return NULL;
 			}
- 			delta_time = ttLibC_ByteReader_bit(reader, 24);
+			delta_time = ttLibC_ByteReader_bit(reader, 24);
 			size = ttLibC_ByteReader_bit(reader, 24);
 			message_type = ttLibC_ByteReader_bit(reader, 8);
 			stream_id = prev_header->stream_id;
