@@ -67,8 +67,7 @@ bool ttLibC_TcpServer_open(ttLibC_TcpServerInfo *server_info) {
 	ttLibC_SockaddrIn_ *addr = (ttLibC_SockaddrIn_ *)server_info->inherit_super.addr;
 	if(bind(
 			server_info->inherit_super.socket,
-			&addr->addr,
-//			(struct sockaddr *)&server_info->inherit_super.addr,
+			(struct sockaddr *)&addr->addr,
 			sizeof(addr->addr)) == -1) {
 		ERR_PRINT("failed to bind.");
 		return false;
@@ -94,7 +93,7 @@ ttLibC_TcpClientInfo *ttLibC_TcpServer_wait(
 		socklen_t client_addr_len = sizeof(addr->addr);
 		client_info->inherit_super.socket = accept(
 				server_info->inherit_super.socket,
-				&addr->addr,
+				(struct sockaddr *)&addr->addr,
 				&client_addr_len);
 		if(client_info->inherit_super.socket != -1) {
 			break;
@@ -155,7 +154,7 @@ int ttLibC_TcpClient_connect(ttLibC_TcpClientInfo *client_info) {
 	ttLibC_SockaddrIn_ *addr = (ttLibC_SockaddrIn_ *)client_info->inherit_super.addr;
 	return connect(
 			client_info->inherit_super.socket,
-			&addr->addr,
+			(struct sockaddr *)&addr->addr,
 			sizeof(addr->addr));
 }
 

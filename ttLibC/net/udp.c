@@ -47,7 +47,7 @@ bool ttLibC_UdpSocket_open(ttLibC_UdpSocketInfo *socket_info) {
 	// bind
 	if(bind(
 			socket_info->socket,
-			&addr->addr,
+			(struct sockaddr *)&addr->addr,
 			sizeof(addr->addr)) == -1) {
 		ERR_PRINT("failed to bind.");
 		return false;
@@ -72,7 +72,7 @@ bool ttLibC_UdpSocket_write(
 			packet->data,
 			packet->data_size,
 			0,
-			&addr->addr,
+			(struct sockaddr *)&addr->addr,
 			sizeof(addr->addr));
 	if(size == -1) {
 		return false;
@@ -103,7 +103,7 @@ ssize_t ttLibC_UdpSocket_read(
 			packet->data,
 			packet->data_size,
 			0,
-			&addr->addr,
+			(struct sockaddr *)&addr->addr,
 			(socklen_t *)&sockaddr_in_size);
 	if(recv_size >= 0) {
 		packet->buffer_size = recv_size;
