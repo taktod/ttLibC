@@ -9,6 +9,9 @@
 #define TTLIBC_NET_NETCOMMON_H_
 
 #include "net.h"
+#include <sys/socket.h>
+#include <sys/select.h>
+#include <netinet/in.h>
 
 typedef struct ttLibC_Net_SockaddrIn_{
 	ttLibC_SockaddrIn inherit_super;

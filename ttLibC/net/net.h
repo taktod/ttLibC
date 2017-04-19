@@ -17,10 +17,6 @@ extern "C" {
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <sys/socket.h>
-#include <sys/select.h>
-#include <netinet/in.h>
-#include <stdint.h>
 
 typedef void* ttLibC_Net_SockaddrIn;
 typedef ttLibC_Net_SockaddrIn ttLibC_SockaddrIn;
