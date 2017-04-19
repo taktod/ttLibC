@@ -21,10 +21,11 @@ extern "C" {
 
 /**
  * definition of rtmpConnection.
- */
+ * /
 typedef struct ttLibC_Net_Client_Rtmp_RtmpConnection {
 
-} ttLibC_Net_Client_Rtmp_RtmpConnection;
+} ttLibC_Net_Client_Rtmp_RtmpConnection; */
+typedef void* ttLibC_Net_Client_Rtmp_RtmpConnection;
 
 typedef ttLibC_Net_Client_Rtmp_RtmpConnection ttLibC_RtmpConnection;
 
@@ -79,10 +80,11 @@ void ttLibC_RtmpConnection_close(ttLibC_RtmpConnection **conn);
 
 /**
  * definition of rtmpStream.
- */
+ * /
 typedef struct ttLibC_Net_Client_Rtmp_RtmpStream {
 
-} ttLibC_Net_Client_Rtmp_RtmpStream;
+} ttLibC_Net_Client_Rtmp_RtmpStream;*/
+typedef void* ttLibC_Net_Client_Rtmp_RtmpStream;
 
 typedef ttLibC_Net_Client_Rtmp_RtmpStream ttLibC_RtmpStream;
 
