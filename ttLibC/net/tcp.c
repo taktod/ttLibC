@@ -68,6 +68,7 @@ bool ttLibC_TcpServer_open(ttLibC_TcpServerInfo *server_info) {
 	if(bind(
 			server_info->inherit_super.socket,
 			&addr->addr,
+//			(struct sockaddr *)&server_info->inherit_super.addr,
 			sizeof(addr->addr)) == -1) {
 		ERR_PRINT("failed to bind.");
 		return false;
