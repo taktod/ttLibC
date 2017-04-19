@@ -772,8 +772,14 @@ ttLibC_H264 *ttLibC_H264_getFrame(
 	}
 	switch(nal_info.nal_unit_type) {
 	default:
+	case H264NalType_filterData:
 		{
-			ERR_PRINT("unknown nal is found:%d", nal_info.nal_unit_type);
+			if(nal_info.nal_unit_type != H264NalType_filterData) {
+				ERR_PRINT("unknown nal is found:%d", nal_info.nal_unit_type);
+			}
+			else if(!nal_info.is_disposable){
+				ERR_PRINT("non disposable filterData nal is found, we take this data as unknown.");
+			}
 		}
 		/* no break */
 	case H264NalType_accessUnitDelimiter:
