@@ -28,6 +28,12 @@ typedef ttLibC_Net_SockaddrIn ttLibC_SockaddrIn;
 ttLibC_SockaddrIn *ttLibC_SockaddrIn_make();
 void ttLibC_SockaddrIn_close(ttLibC_SockaddrIn **addr);
 
+typedef void* ttLibC_Net_Fdset;
+typedef ttLibC_Net_Fdset ttLibC_Fdset;
+
+ttLibC_Fdset *ttLibC_Fdset_make();
+void ttLibC_Fdset_close(ttLibC_Fdset **fdset);
+
 /**
  * definition of socket
  */
@@ -40,12 +46,18 @@ typedef struct ttLibC_Net_SocketInfo {
 
 typedef ttLibC_Net_SocketInfo ttLibC_SocketInfo;
 
-void ttLibC_SocketInfo_FD_ZERO(fd_set *set);
-void ttLibC_SocketInfo_FD_COPY(fd_set *dst, fd_set *org);
-void ttLibC_SocketInfo_FD_SET(ttLibC_SocketInfo *socket_info, fd_set *set);
-bool ttLibC_SocketInfo_FD_ISSET(ttLibC_SocketInfo *socket_info, fd_set *set);
-void ttLibC_SocketInfo_FD_CLR(ttLibC_SocketInfo *socket_info, fd_set *set);
-int ttLibC_SocketInfo_updateFDMax(ttLibC_SocketInfo *socket_info, int fd_max);
+void ttLibC_Fdset_FD_ZERO(ttLibC_Fdset *set);
+void ttLibC_Fdset_FD_COPY(ttLibC_Fdset *dst, ttLibC_Fdset *org);
+void ttLibC_Fdset_FD_SET(ttLibC_SocketInfo *socket_info, ttLibC_Fdset *set);
+bool ttLibC_Fdset_FD_ISSET(ttLibC_SocketInfo *socket_info, ttLibC_Fdset *set);
+void ttLibC_Fdset_FD_CLR(ttLibC_SocketInfo *socket_info, ttLibC_Fdset *set);
+int ttLibC_Fdset_updateFDMax(ttLibC_SocketInfo *socket_info, int fd_max);
+int ttLibC_Fdset_select(
+		int fd_max,
+		ttLibC_Fdset *readset,
+		ttLibC_Fdset *writeset,
+		ttLibC_Fdset *exceptset,
+		uint64_t wait_interval);
 
 #ifdef __cplusplus
 } /* extern "C" */

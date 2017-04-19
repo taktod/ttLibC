@@ -42,9 +42,9 @@ typedef struct ttLibC_Net_TettyBootstrap_ {
 	ttLibC_StlList *tcp_client_info_list;
 
 	/** fdset object for select. */
-	fd_set fdset;
+	ttLibC_Fdset *fdset;
 	/** fdset object for select work. */
-	fd_set fdchkset;
+	ttLibC_Fdset *fdchkset;
 
 	ttLibC_TettyFuture *close_future;
 } ttLibC_Net_TettyBootstrap_;

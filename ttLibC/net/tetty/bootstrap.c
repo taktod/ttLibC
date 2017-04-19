@@ -38,8 +38,9 @@ ttLibC_TettyBootstrap *ttLibC_TettyBootstrap_make() {
 	bootstrap->tcp_nodelay  = false;
 	bootstrap->inherit_super.error_number = 0;
 	bootstrap->close_future = NULL;
-	ttLibC_SocketInfo_FD_ZERO(&bootstrap->fdset);
-//	FD_ZERO(&bootstrap->fdset);
+	bootstrap->fdset = ttLibC_Fdset_make();
+	bootstrap->fdchkset = ttLibC_Fdset_make();
+	ttLibC_Fdset_FD_ZERO(bootstrap->fdset);
 	return (ttLibC_TettyBootstrap *)bootstrap;
 }
 
@@ -132,7 +133,7 @@ bool ttLibC_TettyBootstrap_bind(
 	// call pipeline->bind
 	ttLibC_TettyContext_bind_((ttLibC_TettyBootstrap *)bootstrap_);
 	// update fd_set
-	ttLibC_SocketInfo_FD_SET(bootstrap_->socket_info, &bootstrap_->fdset);
+	ttLibC_Fdset_FD_SET(bootstrap_->socket_info, bootstrap_->fdset);
 	// for udp, call channel active.(context is none.)
 	if(bootstrap_->channel_type == ChannelType_Udp) {
 		ttLibC_TettyContext_channelActive_((ttLibC_TettyBootstrap *)bootstrap_, NULL);
@@ -179,7 +180,7 @@ bool ttLibC_TettyBootstrap_connect(
 		return false;
 	}
 	// update fd_set
-	ttLibC_SocketInfo_FD_SET((ttLibC_SocketInfo *)client_info, &bootstrap_->fdset);
+	ttLibC_Fdset_FD_SET((ttLibC_SocketInfo *)client_info, bootstrap_->fdset);
 	// put it on the list.
 	ttLibC_StlList_addLast(bootstrap_->tcp_client_info_list, client_info);
 	// call pipeline->connect
@@ -196,7 +197,7 @@ static bool TettyBootstrap_updateEach(void *ptr, void *item) {
 	ttLibC_TettyBootstrap_ *bootstrap_ = (ttLibC_TettyBootstrap_ *)ptr;
 	ttLibC_TcpClientInfo *client_info = (ttLibC_TcpClientInfo *)item;
 	// check fd_set
-	if(ttLibC_SocketInfo_FD_ISSET((ttLibC_SocketInfo *)client_info, &bootstrap_->fdchkset)) {
+	if(ttLibC_Fdset_FD_ISSET((ttLibC_SocketInfo *)client_info, bootstrap_->fdchkset)) {
 		uint8_t buffer[1024];
 		size_t read_size = 0;
 		memset(buffer, 0, sizeof(buffer));
@@ -217,7 +218,7 @@ static bool TettyBootstrap_updateEach(void *ptr, void *item) {
 
 static bool TettyBootstrap_checkFdMaxValue(void *ptr, void *item) {
 	int *pfd_max = (int *)ptr;
-	*pfd_max = ttLibC_SocketInfo_updateFDMax((ttLibC_SocketInfo *)item, *pfd_max);
+	*pfd_max = ttLibC_Fdset_updateFDMax((ttLibC_SocketInfo *)item, *pfd_max);
 	return true;
 }
 
@@ -241,28 +242,22 @@ bool ttLibC_TettyBootstrap_update(
 	}
 
 	// check fdset wait for 0.01 sec.
-	struct timeval timeout;
-//	memcpy(&bootstrap_->fdchkset, &bootstrap_->fdset, sizeof(1));
-	ttLibC_SocketInfo_FD_COPY(&bootstrap_->fdchkset, &bootstrap_->fdset);
+	ttLibC_Fdset_FD_COPY(bootstrap_->fdchkset, bootstrap_->fdset);
 
-	timeout.tv_sec = wait_interval / 1000000;
-	timeout.tv_usec = wait_interval % 1000000;
 	bool response = false;
 
 	// check all socket to decide fd_max
 	int fd_max = 0;
 	if(bootstrap_->socket_info != NULL) {
-//		fd_max = bootstrap_->socket_info->socket;
-		fd_max = ttLibC_SocketInfo_updateFDMax(bootstrap_->socket_info, fd_max);
+		fd_max = ttLibC_Fdset_updateFDMax(bootstrap_->socket_info, fd_max);
 	}
 	ttLibC_StlList_forEach(bootstrap_->tcp_client_info_list, TettyBootstrap_checkFdMaxValue, &fd_max);
 	++ fd_max;
-
-	if(select(fd_max, &bootstrap_->fdchkset, NULL, NULL, &timeout)) {
+	if(ttLibC_Fdset_select(fd_max, bootstrap_->fdchkset, NULL, NULL, wait_interval)) {
 		// there is read wait socket.
 		if(bootstrap_->socket_info != NULL) {
 			// check server wait_socket.
-			if(FD_ISSET(bootstrap_->socket_info->socket, &bootstrap_->fdchkset)) {
+			if(ttLibC_Fdset_FD_ISSET(bootstrap_->socket_info, bootstrap_->fdchkset)) {
 				switch(bootstrap_->channel_type) {
 				default:
 				case ChannelType_Tcp:
@@ -285,7 +280,7 @@ bool ttLibC_TettyBootstrap_update(
 							ttLibC_TcpClient_setSockOpt(client_info, IPPROTO_TCP, TCP_NODELAY, &optval, sizeof(optval));
 						}
 						// update fdset with new data_socket.
-						ttLibC_SocketInfo_FD_SET((ttLibC_SocketInfo *)client_info, &bootstrap_->fdset);
+						ttLibC_Fdset_FD_SET((ttLibC_SocketInfo *)client_info, bootstrap_->fdset);
 						// call pipeline->channelActive
 						ttLibC_TettyContext_channelActive_(bootstrap, (ttLibC_SocketInfo *)client_info);
 						ttLibC_StlList_addLast(bootstrap_->tcp_client_info_list, client_info);
@@ -334,7 +329,7 @@ bool ttLibC_TettyBootstrap_closeClient_(
 		return false;
 	}
 	// remove this socket from fdset.
-	ttLibC_SocketInfo_FD_CLR(socket_info, &bootstrap_->fdset);
+	ttLibC_Fdset_FD_CLR(socket_info, bootstrap_->fdset);
 	// call pipeline->disconnect
 	ttLibC_TettyContext_disconnect_((ttLibC_TettyBootstrap *)bootstrap_, socket_info);
 	// call pipeline->close
@@ -367,7 +362,7 @@ void ttLibC_TettyBootstrap_closeServer(ttLibC_TettyBootstrap *bootstrap) {
 	ttLibC_TettyBootstrap_ *bootstrap_ = (ttLibC_TettyBootstrap_ *)bootstrap;
 	if(bootstrap_->socket_info != NULL) {
 		// remove from fdset.
-		ttLibC_SocketInfo_FD_CLR(bootstrap_->socket_info, &bootstrap_->fdset);
+		ttLibC_Fdset_FD_CLR(bootstrap_->socket_info, bootstrap_->fdset);
 		switch(bootstrap_->channel_type) {
 		default:
 		case ChannelType_Tcp:
@@ -409,6 +404,8 @@ void ttLibC_TettyBootstrap_close(ttLibC_TettyBootstrap **bootstrap) {
 	ttLibC_TettyBootstrap_closeServer((ttLibC_TettyBootstrap *)target);
 	ttLibC_StlList_close(&target->tcp_client_info_list);
 	ttLibC_StlList_close(&target->pipeline);
+	ttLibC_Fdset_close(&target->fdset);
+	ttLibC_Fdset_close(&target->fdchkset);
 	if(target->close_future != NULL) {
 		ttLibC_TettyPromise_ *promise = (ttLibC_TettyPromise_ *)target->close_future;
 		promise->promise_type = PromiseType_Promise;

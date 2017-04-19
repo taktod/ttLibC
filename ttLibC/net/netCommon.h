@@ -17,4 +17,11 @@ typedef struct ttLibC_Net_SockaddrIn_{
 
 typedef ttLibC_Net_SockaddrIn_ ttLibC_SockaddrIn_;
 
+typedef struct ttLibC_Net_Fdset_ {
+	ttLibC_Fdset inherit_super;
+	fd_set fdset;
+} ttLibC_Net_Fdset_;
+
+typedef ttLibC_Net_Fdset_ ttLibC_Fdset_;
+
 #endif /* TTLIBC_NET_NETCOMMON_H_ */
