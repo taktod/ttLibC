@@ -11,6 +11,7 @@
 #ifdef __ENABLE_SOCKET__
 
 #include "udp.h"
+#include "netCommon.h"
 #include "../allocator.h"
 #include "../log.h"
 #include <string.h>
@@ -25,9 +26,11 @@ ttLibC_UdpSocketInfo *ttLibC_UdpSocket_make(uint16_t port) {
 	}
 	memset(socket_info, 0, sizeof(ttLibC_UdpSocketInfo));
 	socket_info->socket = -1;
-	socket_info->addr.sin_family = AF_INET;
-	socket_info->addr.sin_port = htons(port);
-	socket_info->addr.sin_addr.s_addr = INADDR_ANY;
+	socket_info->addr = ttLibC_SockaddrIn_make();
+	ttLibC_SockaddrIn_ *addr = (ttLibC_SockaddrIn_ *)socket_info->addr;
+	addr->addr.sin_family = AF_INET;
+	addr->addr.sin_port = htons(port);
+	addr->addr.sin_addr.s_addr = INADDR_ANY;
 	return socket_info;
 }
 
@@ -40,11 +43,12 @@ bool ttLibC_UdpSocket_open(ttLibC_UdpSocketInfo *socket_info) {
 		ERR_PRINT("failed to open socket.");
 		return false;
 	}
+	ttLibC_SockaddrIn_ *addr = (ttLibC_SockaddrIn_ *)socket_info->addr;
 	// bind
 	if(bind(
 			socket_info->socket,
-			(struct sockaddr *)&socket_info->addr,
-			sizeof(socket_info->addr)) == -1) {
+			&addr->addr,
+			sizeof(addr->addr)) == -1) {
 		ERR_PRINT("failed to bind.");
 		return false;
 	}
@@ -62,13 +66,14 @@ bool ttLibC_UdpSocket_write(
 	if(packet == NULL) {
 		return false;
 	}
+	ttLibC_SockaddrIn_ *addr = (ttLibC_SockaddrIn_ *)packet->socket_info.addr;
 	ssize_t size = sendto(
 			socket_info->socket,
 			packet->data,
 			packet->data_size,
 			0,
-			(struct sockaddr *)&packet->socket_info.addr,
-			sizeof(packet->socket_info.addr));
+			&addr->addr,
+			sizeof(addr->addr));
 	if(size == -1) {
 		return false;
 	}
@@ -92,12 +97,13 @@ ssize_t ttLibC_UdpSocket_read(
 	}
 	// update datagramPacket information.
 	socklen_t sockaddr_in_size = sizeof(struct sockaddr_in);
+	ttLibC_SockaddrIn_ *addr = (ttLibC_SockaddrIn_ *)packet->socket_info.addr;
 	ssize_t recv_size = recvfrom(
 			socket_info->socket,
 			packet->data,
 			packet->data_size,
 			0,
-			(struct sockaddr *)&packet->socket_info.addr,
+			&addr->addr,
 			(socklen_t *)&sockaddr_in_size);
 	if(recv_size >= 0) {
 		packet->buffer_size = recv_size;
@@ -113,6 +119,7 @@ void ttLibC_UdpSocket_close(ttLibC_UdpSocketInfo **socket_info) {
 	if(target->socket != -1) {
 		close(target->socket);
 	}
+	ttLibC_SockaddrIn_close(&target->addr);
 	ttLibC_free(target);
 	*socket_info = NULL;
 }
@@ -133,9 +140,11 @@ ttLibC_DatagramPacket *ttLibC_DatagramPacket_makeWithTarget(
 	if(packet == NULL) {
 		return NULL;
 	}
-	packet->socket_info.addr.sin_family = AF_INET;
-	packet->socket_info.addr.sin_port = htons(target_port);
-	packet->socket_info.addr.sin_addr.s_addr = inet_addr(target_address);
+	packet->socket_info.addr = ttLibC_SockaddrIn_make();
+	ttLibC_SockaddrIn_ *addr = (ttLibC_SockaddrIn_ *)packet->socket_info.addr;
+	addr->addr.sin_family = AF_INET;
+	addr->addr.sin_port = htons(target_port);
+	addr->addr.sin_addr.s_addr = inet_addr(target_address);
 	packet->data = data;
 	packet->data_size = data_size;
 	packet->buffer_size = data_size;
@@ -147,6 +156,7 @@ void ttLibC_DatagramPacket_close(ttLibC_DatagramPacket **packet) {
 	if(target == NULL) {
 		return;
 	}
+	ttLibC_SockaddrIn_close(&target->socket_info.addr);
 	ttLibC_free(target);
 	*packet = NULL;
 }

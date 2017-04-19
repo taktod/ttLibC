@@ -11,6 +11,7 @@
 #ifdef __ENABLE_SOCKET__
 
 #include "tcp.h"
+#include "netCommon.h"
 
 #include <sys/types.h>
 #include <string.h>
@@ -31,9 +32,11 @@ ttLibC_TcpServerInfo *ttLibC_TcpServer_make(
 	}
 	memset(server_info, 0, sizeof(ttLibC_TcpServerInfo));
 	server_info->inherit_super.socket = -1;
-	server_info->inherit_super.addr.sin_family = AF_INET;
-	server_info->inherit_super.addr.sin_addr.s_addr = htonl(ip);
-	server_info->inherit_super.addr.sin_port = htons(port);
+	server_info->inherit_super.addr = ttLibC_SockaddrIn_make();
+	ttLibC_SockaddrIn_ *addr = (ttLibC_SockaddrIn_ *)server_info->inherit_super.addr;
+	addr->addr.sin_family = AF_INET;
+	addr->addr.sin_addr.s_addr = htonl(ip);
+	addr->addr.sin_port = htons(port);
 	server_info->use_reuse_addr  = false;
 	server_info->use_keep_alive  = false;
 	server_info->use_tcp_nodelay = false;
@@ -61,10 +64,11 @@ bool ttLibC_TcpServer_open(ttLibC_TcpServerInfo *server_info) {
 	if(server_info->use_tcp_nodelay) {
 		setsockopt(server_info->inherit_super.socket, IPPROTO_TCP, TCP_NODELAY, &optval, sizeof(optval));
 	}
+	ttLibC_SockaddrIn_ *addr = (ttLibC_SockaddrIn_ *)server_info->inherit_super.addr;
 	if(bind(
 			server_info->inherit_super.socket,
-			(struct sockaddr *)&server_info->inherit_super.addr,
-			sizeof(server_info->inherit_super.addr)) == -1) {
+			&addr->addr,
+			sizeof(addr->addr)) == -1) {
 		ERR_PRINT("failed to bind.");
 		return false;
 	}
@@ -85,10 +89,11 @@ ttLibC_TcpClientInfo *ttLibC_TcpServer_wait(
 	memset(client_info, 0, sizeof(ttLibC_TcpClientInfo));
 	client_info->write_buffer = NULL;
 	while(true) {
-		socklen_t client_addr_len = sizeof(client_info->inherit_super.addr);
+		ttLibC_SockaddrIn_ *addr = (ttLibC_SockaddrIn_ *)client_info->inherit_super.addr;
+		socklen_t client_addr_len = sizeof(addr->addr);
 		client_info->inherit_super.socket = accept(
 				server_info->inherit_super.socket,
-				(struct sockaddr *)&client_info->inherit_super.addr,
+				&addr->addr,
 				&client_addr_len);
 		if(client_info->inherit_super.socket != -1) {
 			break;
@@ -112,6 +117,7 @@ void ttLibC_TcpServer_close(ttLibC_TcpServerInfo **server_info) {
 		close(target->inherit_super.socket);
 		target->inherit_super.socket = -1;
 	}
+	ttLibC_SockaddrIn_close(&target->inherit_super.addr);
 	ttLibC_free(target);
 	*server_info = NULL;
 }
@@ -131,10 +137,11 @@ ttLibC_TcpClientInfo *ttLibC_TcpClient_make(
 		return NULL;
 	}
 	memset(client_info, 0, sizeof(ttLibC_TcpClientInfo));
-//	memset(&client_info->inherit_super.addr, 0, sizeof(client_info->inherit_super.addr));
-	memcpy(&client_info->inherit_super.addr.sin_addr, servhost->h_addr_list[0], servhost->h_length);
-	client_info->inherit_super.addr.sin_family = AF_INET;
-	client_info->inherit_super.addr.sin_port = htons(port);
+	client_info->inherit_super.addr = ttLibC_SockaddrIn_make();
+	ttLibC_SockaddrIn_ *addr = (ttLibC_SockaddrIn_ *)client_info->inherit_super.addr;
+	memcpy(&addr->addr.sin_addr, servhost->h_addr_list[0], servhost->h_length);
+	addr->addr.sin_family = AF_INET;
+	addr->addr.sin_port = htons(port);
 	if((client_info->inherit_super.socket = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
 		ERR_PRINT("failed to make socket.");
 		ttLibC_free(client_info);
@@ -144,7 +151,11 @@ ttLibC_TcpClientInfo *ttLibC_TcpClient_make(
 }
 
 int ttLibC_TcpClient_connect(ttLibC_TcpClientInfo *client_info) {
-	return connect(client_info->inherit_super.socket, (struct sockaddr *)&client_info->inherit_super.addr, sizeof(client_info->inherit_super.addr));
+	ttLibC_SockaddrIn_ *addr = (ttLibC_SockaddrIn_ *)client_info->inherit_super.addr;
+	return connect(
+			client_info->inherit_super.socket,
+			&addr->addr,
+			sizeof(addr->addr));
 }
 
 ssize_t ttLibC_TcpClient_read(
@@ -184,6 +195,7 @@ void ttLibC_TcpClient_close(ttLibC_TcpClientInfo **client_info) {
 		close(target->inherit_super.socket);
 		target->inherit_super.socket = -1;
 	}
+	ttLibC_SockaddrIn_close(&target->inherit_super.addr);
 	ttLibC_DynamicBuffer_close(&target->write_buffer);
 	ttLibC_free(target);
 	*client_info = NULL;

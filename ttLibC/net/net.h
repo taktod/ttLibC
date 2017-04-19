@@ -22,12 +22,18 @@ extern "C" {
 #include <netinet/in.h>
 #include <stdint.h>
 
+typedef void* ttLibC_Net_SockaddrIn;
+typedef ttLibC_Net_SockaddrIn ttLibC_SockaddrIn;
+
+ttLibC_SockaddrIn *ttLibC_SockaddrIn_make();
+void ttLibC_SockaddrIn_close(ttLibC_SockaddrIn **addr);
+
 /**
  * definition of socket
  */
 typedef struct ttLibC_Net_SocketInfo {
 	int socket;
-	struct sockaddr_in addr;
+	ttLibC_SockaddrIn *addr;
 	int32_t error_num;
 	void *ptr;
 } ttLibC_Net_SocketInfo;
