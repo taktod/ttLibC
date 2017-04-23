@@ -66,7 +66,7 @@ bool ttLibC_UdpSocket_write(
  * @param packet      target datagram packet, this packet will be update.
  * @return size of recv
  */
-ssize_t ttLibC_UdpSocket_read(
+int64_t ttLibC_UdpSocket_read(
 		ttLibC_UdpSocketInfo *socket_info,
 		ttLibC_DatagramPacket *packet);
 

@@ -67,7 +67,7 @@ bool ttLibC_UdpSocket_write(
 		return false;
 	}
 	ttLibC_SockaddrIn_ *addr = (ttLibC_SockaddrIn_ *)packet->socket_info.addr;
-	ssize_t size = sendto(
+	int64_t size = sendto(
 			socket_info->socket,
 			packet->data,
 			packet->data_size,
@@ -77,7 +77,7 @@ bool ttLibC_UdpSocket_write(
 	if(size == -1) {
 		return false;
 	}
-	if(size == (ssize_t)packet->data_size) {
+	if(size == (int64_t)packet->data_size) {
 		return true;
 	}
 	else {
@@ -85,7 +85,7 @@ bool ttLibC_UdpSocket_write(
 	}
 }
 
-ssize_t ttLibC_UdpSocket_read(
+int64_t ttLibC_UdpSocket_read(
 		ttLibC_UdpSocketInfo *socket_info,
 		ttLibC_DatagramPacket *packet) {
 	// recvfrom
@@ -98,7 +98,7 @@ ssize_t ttLibC_UdpSocket_read(
 	// update datagramPacket information.
 	socklen_t sockaddr_in_size = sizeof(struct sockaddr_in);
 	ttLibC_SockaddrIn_ *addr = (ttLibC_SockaddrIn_ *)packet->socket_info.addr;
-	ssize_t recv_size = recvfrom(
+	int64_t recv_size = recvfrom(
 			socket_info->socket,
 			packet->data,
 			packet->data_size,

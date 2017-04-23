@@ -87,7 +87,7 @@ ttLibC_TcpClientInfo *ttLibC_TcpClient_make(
 
 int ttLibC_TcpClient_connect(ttLibC_TcpClientInfo *client_info);
 
-ssize_t ttLibC_TcpClient_read(
+int64_t ttLibC_TcpClient_read(
 		ttLibC_TcpClientInfo *client_info,
 		void * data,
 		size_t data_size);

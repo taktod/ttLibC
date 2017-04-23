@@ -13,7 +13,12 @@
 #include "../../allocator.h"
 #include "../../log.h"
 
-#include <sys/time.h>
+#ifdef _WIN32
+#	include <sys/types.h>
+#	include <sys/timeb.h>
+#else
+#	include <sys/time.h>
+#endif
 #include <stdlib.h>
 #include <time.h>
 
@@ -84,16 +89,27 @@ void ttLibC_TettyPromise_awaitFor(ttLibC_TettyPromise *promise, uint32_t timeout
 		return;
 	}
 	// get start time.
+#ifdef _WIN32
+	struct _timeb start_time;
+	struct _timeb end_time;
+	_ftime(&start_time);
+#else
 	struct timeval start_time, end_time;
 	gettimeofday(&start_time, NULL);
+#endif
 
 	while(!promise_->is_done) {
 		ttLibC_TettyBootstrap_update(promise_->bootstrap, 100000);
 		// get current time.
+#ifdef _WIN32
+		_ftime(&end_time);
+		double milisec = end_time.time * 1000 + end_time.millitm - start_time.time * 1000 - start_time.millitm;
+#else
 		gettimeofday(&end_time, NULL);
 		time_t diffsec = difftime(end_time.tv_sec, start_time.tv_sec);
 		suseconds_t diffsub = end_time.tv_usec - start_time.tv_usec;
 		double milisec = diffsec * 1e3 + diffsub * 1e-3;
+#endif
 		if(milisec > timeout_milisec) {
 			// timeout done.
 			break;

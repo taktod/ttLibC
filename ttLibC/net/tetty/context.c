@@ -18,7 +18,6 @@
 #include "../../util/hexUtil.h"
 #include "../../util/dynamicBufferUtil.h"
 #include <string.h>
-#include <unistd.h>
 
 /*
  * update clientContextInformation.
