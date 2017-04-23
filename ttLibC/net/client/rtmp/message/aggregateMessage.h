@@ -49,7 +49,9 @@ ttLibC_AggregateMessage *ttLibC_AggregateMessage_make();
 ttLibC_AggregateMessage *ttLibC_AggregateMessage_readBinary(uint8_t *data);
 tetty_errornum ttLibC_AggregateMessage_getFrame(
 		ttLibC_AggregateMessage *message,
-		ttLibC_RtmpStream_ *stream);
+		ttLibC_FlvFrameManager *manager,
+		ttLibC_RtmpStream_getFrameFunc callback,
+		void *ptr);
 void ttLibC_AggregateMessage_close(ttLibC_AggregateMessage **message);
 
 #ifdef __cplusplus

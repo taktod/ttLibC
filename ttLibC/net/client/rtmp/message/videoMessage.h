@@ -40,7 +40,7 @@ typedef ttLibC_Net_Client_Rtmp_Message_VideoMessage ttLibC_VideoMessage;
 
 ttLibC_VideoMessage *ttLibC_VideoMessage_make();
 ttLibC_VideoMessage *ttLibC_VideoMessage_addFrame(
-		ttLibC_RtmpStream *stream,
+		uint32_t stream_id,
 		ttLibC_Video *frame);
 
 ttLibC_VideoMessage *ttLibC_VideoMessage_readBinary(
@@ -49,7 +49,9 @@ ttLibC_VideoMessage *ttLibC_VideoMessage_readBinary(
 
 tetty_errornum ttLibC_VideoMessage_getFrame(
 		ttLibC_VideoMessage *message,
-		ttLibC_RtmpStream_ *stream);
+		ttLibC_FlvFrameManager *manager,
+		ttLibC_RtmpStream_getFrameFunc callback,
+		void *ptr);
 
 bool ttLibC_VideoMessage_getData(
 		ttLibC_VideoMessage *message,

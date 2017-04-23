@@ -152,7 +152,7 @@ bool ttLibC_RtmpStream_addFrame(
 				return true; // forget it.
 			}
 			// make message and send.
-			ttLibC_VideoMessage *videoMessage = ttLibC_VideoMessage_addFrame(stream, (ttLibC_Video *)frame);
+			ttLibC_VideoMessage *videoMessage = ttLibC_VideoMessage_addFrame(stream_->stream_id, (ttLibC_Video *)frame);
 			ttLibC_TettyBootstrap_channels_write(stream_->conn->bootstrap, videoMessage, sizeof(ttLibC_VideoMessage));
 			ttLibC_TettyBootstrap_channels_flush(stream_->conn->bootstrap);
 			ttLibC_VideoMessage_close(&videoMessage);
@@ -165,7 +165,7 @@ bool ttLibC_RtmpStream_addFrame(
 			uint64_t dsi_info = 0;
 			/*size_t size = */ttLibC_Aac_readDsiInfo(aac, (uint8_t *)&dsi_info, 8);
 //			if(!stream_->sent_dsi_info) {
-				ttLibC_AudioMessage *audioMessage = ttLibC_AudioMessage_addFrame(stream, (ttLibC_Audio *)frame);
+				ttLibC_AudioMessage *audioMessage = ttLibC_AudioMessage_addFrame(stream_->stream_id, (ttLibC_Audio *)frame);
 				if(audioMessage != NULL) {
 					audioMessage->is_dsi_info = true;
 					ttLibC_TettyBootstrap_channels_write(stream_->conn->bootstrap, audioMessage, sizeof(ttLibC_AudioMessage));
@@ -176,7 +176,7 @@ bool ttLibC_RtmpStream_addFrame(
 		/* no break */
 	case frameType_mp3: // for any kind of audioMessage.
 		{
-			ttLibC_AudioMessage *audioMessage = ttLibC_AudioMessage_addFrame(stream, (ttLibC_Audio *)frame);
+			ttLibC_AudioMessage *audioMessage = ttLibC_AudioMessage_addFrame(stream_->stream_id, (ttLibC_Audio *)frame);
 			if(audioMessage != NULL) {
 				ttLibC_TettyBootstrap_channels_write(stream_->conn->bootstrap, audioMessage, sizeof(ttLibC_AudioMessage));
 				ttLibC_TettyBootstrap_channels_flush(stream_->conn->bootstrap);

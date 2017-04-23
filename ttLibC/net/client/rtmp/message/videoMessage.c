@@ -52,8 +52,10 @@ ttLibC_VideoMessage *ttLibC_VideoMessage_readBinary(
 
 tetty_errornum ttLibC_VideoMessage_getFrame(
 		ttLibC_VideoMessage *message,
-		ttLibC_RtmpStream_ *stream) {
-	if(stream == NULL) {
+		ttLibC_FlvFrameManager *manager,
+		ttLibC_RtmpStream_getFrameFunc callback,
+		void *ptr) {
+	if(manager == NULL) {
 		return 0;
 	}
 	uint8_t *data = message->data;
@@ -61,7 +63,6 @@ tetty_errornum ttLibC_VideoMessage_getFrame(
 	if(data == NULL) {
 		return 0;
 	}
-	ttLibC_FlvFrameManager *manager = stream->frame_manager;
 	switch(manager->video_type) {
 	case frameType_h264:
 		if(data_size <= 4) {
@@ -79,21 +80,16 @@ tetty_errornum ttLibC_VideoMessage_getFrame(
 			data,
 			message->inherit_super.header->size,
 			message->inherit_super.header->timestamp,
-			stream->frame_callback,
-			stream->frame_ptr)) {
+			callback,
+			ptr)) {
 		return 98;
 	}
 	return 0;
 }
 
 ttLibC_VideoMessage *ttLibC_VideoMessage_addFrame(
-		ttLibC_RtmpStream *stream,
+		uint32_t stream_id,
 		ttLibC_Video *frame) {
-	ttLibC_RtmpStream_ *stream_ = (ttLibC_RtmpStream_ *)stream;
-	if(stream == NULL) {
-		ERR_PRINT("need rtmpStream object.");
-		return NULL;
-	}
 	if(frame == NULL) {
 		return NULL;
 	}
@@ -106,7 +102,7 @@ ttLibC_VideoMessage *ttLibC_VideoMessage_addFrame(
 	message->video_frame = frame;
 	// update pts and stream_id
 	message->inherit_super.header->timestamp = message->video_frame->inherit_super.pts * 1000 / message->video_frame->inherit_super.timebase;
-	message->inherit_super.header->stream_id = stream_->stream_id;
+	message->inherit_super.header->stream_id = stream_id;
 	return message;
 }
 

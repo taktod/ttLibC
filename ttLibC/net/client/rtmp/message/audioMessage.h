@@ -55,12 +55,14 @@ ttLibC_AudioMessage *ttLibC_AudioMessage_readBinary(
 
 tetty_errornum ttLibC_AudioMessage_getFrame(
 		ttLibC_AudioMessage *message,
-		ttLibC_RtmpStream_ *stream);
+		ttLibC_FlvFrameManager *manager,
+		ttLibC_RtmpStream_getFrameFunc callback,
+		void *ptr);
 
 // for send
 
 ttLibC_AudioMessage *ttLibC_AudioMessage_addFrame(
-		ttLibC_RtmpStream *stream,
+		uint32_t stream_id,
 		ttLibC_Audio *frame);
 
 bool ttLibC_AudioMessage_getData(

@@ -42,8 +42,10 @@ ttLibC_AggregateMessage *ttLibC_AggregateMessage_readBinary(uint8_t *data) {
 }
 tetty_errornum ttLibC_AggregateMessage_getFrame(
 		ttLibC_AggregateMessage *message,
-		ttLibC_RtmpStream_ *stream) {
-	if(stream == NULL) {
+		ttLibC_FlvFrameManager *manager,
+		ttLibC_RtmpStream_getFrameFunc callback,
+		void *ptr) {
+	if(manager == NULL) {
 		return 0;
 	}
 	uint8_t *data = message->data;
@@ -53,7 +55,6 @@ tetty_errornum ttLibC_AggregateMessage_getFrame(
 	int32_t timestamp_diff = message->inherit_super.header->timestamp;
 	bool is_first_media = true;
 	size_t data_size = message->inherit_super.header->size;
-	ttLibC_FlvFrameManager *manager = stream->frame_manager;
 	while(data_size > 0) {
 		if(data_size < 11) {
 			ERR_PRINT("data size is too small for aggregate message.");
@@ -81,8 +82,8 @@ tetty_errornum ttLibC_AggregateMessage_getFrame(
 						data,
 						size,
 						timestamp,
-						stream->frame_callback,
-						stream->frame_ptr);
+						callback,
+						ptr);
 				data += (size + 4);
 				data_size -= (size + 4);
 			}
@@ -94,8 +95,8 @@ tetty_errornum ttLibC_AggregateMessage_getFrame(
 						data,
 						size,
 						timestamp,
-						stream->frame_callback,
-						stream->frame_ptr);
+						callback,
+						ptr);
 				data += (size + 4);
 				data_size -= (size + 4);
 			}

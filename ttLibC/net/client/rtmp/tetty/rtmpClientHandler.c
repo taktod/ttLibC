@@ -51,7 +51,9 @@ static tetty_errornum RtmpClientHandler_channelRead(
 			if(stream_ != NULL) {
 				tetty_errornum error_num = ttLibC_VideoMessage_getFrame(
 						(ttLibC_VideoMessage *)rtmp_message,
-						stream_);
+						stream_->frame_manager,
+						stream_->frame_callback,
+						stream_->frame_ptr);
 				if(error_num != 0) {
 					LOG_PRINT("something happen during videoMessage_getFrame.:%d", error_num);
 					ctx->bootstrap->error_number = error_num;
@@ -65,7 +67,9 @@ static tetty_errornum RtmpClientHandler_channelRead(
 			if(stream_ != NULL) {
 				tetty_errornum error_num = ttLibC_AudioMessage_getFrame(
 						(ttLibC_AudioMessage *)rtmp_message,
-						stream_);
+						stream_->frame_manager,
+						stream_->frame_callback,
+						stream_->frame_ptr);
 				if(error_num != 0) {
 					LOG_PRINT("something happen during audioMessage_getFrame.:%d", error_num);
 					ctx->bootstrap->error_number = error_num;
@@ -80,7 +84,9 @@ static tetty_errornum RtmpClientHandler_channelRead(
 				// get frame from aggregate message.
 				tetty_errornum error_num = ttLibC_AggregateMessage_getFrame(
 						(ttLibC_AggregateMessage *)rtmp_message,
-						stream_);
+						stream_->frame_manager,
+						stream_->frame_callback,
+						stream_->frame_ptr);
 				if(error_num != 0) {
 					LOG_PRINT("something happen during aggregateMessage_getFrame.:%d", error_num);
 					ctx->bootstrap->error_number = error_num;
