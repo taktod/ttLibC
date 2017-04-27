@@ -90,6 +90,10 @@
 #	include <ttLibC/decoder/vorbisDecoder.h>
 #endif
 
+#ifdef __ENABLE_LIBYUV__
+#	include <ttLibC/resampler/libyuvResampler.h>
+#endif
+
 #include <ttLibC/util/beepUtil.h>
 #include <ttLibC/frame/audio/pcms16.h>
 #include <ttLibC/frame/audio/mp3.h>
@@ -1037,6 +1041,100 @@ static void mp3lameTest() {
 	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
+static void libyuvImageRotateTest() {
+	LOG_PRINT("libyuvImageRotateTest");
+#if defined(__ENABLE_OPENCV__) && defined(__ENABLE_LIBYUV__)
+	ttLibC_CvCapture *capture = ttLibC_CvCapture_make(0, 320, 240);
+	ttLibC_CvWindow *window = ttLibC_CvWindow_make("original");
+	ttLibC_CvWindow *resampled_window = ttLibC_CvWindow_make("target");
+	ttLibC_Bgr *bgr = NULL, *b, *rbgr = NULL;
+	ttLibC_Yuv420 *yuv = NULL, *y, *ryuv = NULL;
+	while(true) {
+		b = ttLibC_CvCapture_queryFrame(capture, bgr);
+		if(b == NULL) {
+			break;
+		}
+		bgr = b;
+		y = ttLibC_ImageResampler_makeYuv420FromBgr(yuv, Yuv420Type_planar, bgr);
+		if(y == NULL) {
+			break;
+		}
+		yuv = y;
+		y = ttLibC_LibyuvResampler_rotate(ryuv, yuv, LibyuvRotate_270);
+		if(y == NULL) {
+			break;
+		}
+		ryuv = y;
+		b = ttLibC_ImageResampler_makeBgrFromYuv420(rbgr, BgrType_abgr, ryuv);
+		if(b == NULL) {
+			break;
+		}
+		rbgr = b;
+		ttLibC_CvWindow_showBgr(window, bgr);
+		ttLibC_CvWindow_showBgr(resampled_window, rbgr);
+		uint8_t key = ttLibC_CvWindow_waitForKeyInput(10);
+		if(key == Keychar_Esc) {
+			break;
+		}
+	}
+	ttLibC_Yuv420_close(&ryuv);
+	ttLibC_Yuv420_close(&yuv);
+	ttLibC_Bgr_close(&rbgr);
+	ttLibC_Bgr_close(&bgr);
+	ttLibC_CvWindow_close(&resampled_window);
+	ttLibC_CvWindow_close(&window);
+	ttLibC_CvCapture_close(&capture);
+#endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
+
+static void libyuvImageResizeTest() {
+	LOG_PRINT("libyuvImageResizeTest");
+#if defined(__ENABLE_OPENCV__) && defined(__ENABLE_LIBYUV__)
+	ttLibC_CvCapture *capture = ttLibC_CvCapture_make(0, 320, 240);
+	ttLibC_CvWindow *window = ttLibC_CvWindow_make("original");
+	ttLibC_CvWindow *resampled_window = ttLibC_CvWindow_make("target");
+	ttLibC_Bgr *bgr = NULL, *b, *rbgr = NULL;
+	ttLibC_Yuv420 *yuv = NULL, *y, *ryuv = NULL;
+	while(true) {
+		b = ttLibC_CvCapture_queryFrame(capture, bgr);
+		if(b == NULL) {
+			break;
+		}
+		bgr = b;
+		y = ttLibC_ImageResampler_makeYuv420FromBgr(yuv, Yuv420Type_planar, bgr);
+		if(y == NULL) {
+			break;
+		}
+		yuv = y;
+		y = ttLibC_LibyuvResampler_resize(ryuv, 480, 360, yuv, LibyuvFilter_Bilinear, LibyuvFilter_Bilinear, LibyuvFilter_Bilinear);
+		if(y == NULL) {
+			break;
+		}
+		ryuv = y;
+		b = ttLibC_ImageResampler_makeBgrFromYuv420(rbgr, BgrType_abgr, ryuv);
+		if(b == NULL) {
+			break;
+		}
+		rbgr = b;
+		ttLibC_CvWindow_showBgr(window, bgr);
+		ttLibC_CvWindow_showBgr(resampled_window, rbgr);
+		uint8_t key = ttLibC_CvWindow_waitForKeyInput(10);
+		if(key == Keychar_Esc) {
+			break;
+		}
+	}
+	ttLibC_Yuv420_close(&ryuv);
+	ttLibC_Yuv420_close(&yuv);
+	ttLibC_Bgr_close(&rbgr);
+	ttLibC_Bgr_close(&bgr);
+	ttLibC_CvWindow_close(&resampled_window);
+	ttLibC_CvWindow_close(&window);
+	ttLibC_CvCapture_close(&capture);
+#endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
+
 static void imageResizeTest() {
 	LOG_PRINT("imageResizeTest");
 #ifdef __ENABLE_OPENCV__
@@ -1157,6 +1255,8 @@ cute::suite encoderDecoderTests(cute::suite s) {
 	s.push_back(CUTE(openh264Test));
 	s.push_back(CUTE(faacEncoderTest));
 	s.push_back(CUTE(mp3lameTest));
+	s.push_back(CUTE(libyuvImageRotateTest));
+	s.push_back(CUTE(libyuvImageResizeTest));
 	s.push_back(CUTE(imageResizeTest));
 	s.push_back(CUTE(imageResamplerTest));
 	return s;
