@@ -94,7 +94,6 @@ static tetty_errornum udpTettyServerTest_channelInactive(ttLibC_TettyContext *ct
 static tetty_errornum udpTettyServerTest_channelRead(ttLibC_TettyContext *ctx, void *data, size_t data_size) {
 	LOG_PRINT("channelRead");
 	ttLibC_DatagramPacket *datagramPacket = (ttLibC_DatagramPacket *)data;
-	LOG_PRINT("address:%x port:%x", ctx->socket_info->addr.sin_addr.s_addr, ctx->socket_info->addr.sin_port);
 	return 0;
 }
 
