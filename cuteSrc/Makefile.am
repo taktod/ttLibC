@@ -35,7 +35,8 @@ cuteTest_CFLAGS=-I../ $(TEST_CFLAGS) \
 	$(VORBISDEC_CFLAGS) \
 	$(WEBRTC_CFLAGS) \
 	$(SOUNDTOUCH_CFLAGS) \
-	$(FDKAAC_CFLAGS)
+	$(FDKAAC_CFLAGS) \
+	$(LIBYUV_CFLAGS)
 cuteTest_CXXFLAGS=-std=c++0x -I../ $(TEST_CFLAGS) \
 	$(OPENCV_CFLAGS) \
 	$(OPENAL_CFLAGS) \
@@ -58,7 +59,8 @@ cuteTest_CXXFLAGS=-std=c++0x -I../ $(TEST_CFLAGS) \
 	$(VORBISDEC_CFLAGS) \
 	$(WEBRTC_CFLAGS) \
 	$(SOUNDTOUCH_CFLAGS) \
-	$(FDKAAC_CFLAGS)
+	$(FDKAAC_CFLAGS) \
+	$(LIBYUV_CFLAGS)
 cuteTest_LDADD=../ttLibC/libttLibC.a $(TEST_LIBS) \
 	$(OPENCV_LIBS) \
 	$(OPENAL_LIBS) \
@@ -81,6 +83,7 @@ cuteTest_LDADD=../ttLibC/libttLibC.a $(TEST_LIBS) \
 	$(VORBISDEC_LIBS) \
 	$(WEBRTC_LIBS) \
 	$(SOUNDTOUCH_LIBS) \
-	$(FDKAAC_LIBS)
+	$(FDKAAC_LIBS) \
+	$(LIBYUV_LIBS)
 
 endif

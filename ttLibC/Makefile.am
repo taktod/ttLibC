@@ -120,6 +120,7 @@ libttLibC_a_SOURCES= \
 	resampler/audioResampler.c \
 	resampler/imageResampler.c \
 	resampler/imageResizer.c \
+	resampler/libyuvResampler.c \
 	resampler/soundtouchResampler.cpp \
 	resampler/speexdspResampler.c \
 	util/amfUtil.c \
@@ -163,7 +164,8 @@ libttLibC_a_CFLAGS= \
 	$(VORBISDEC_CFLAGS) \
 	$(WEBRTC_CFLAGS) \
 	$(SOUNDTOUCH_CFLAGS) \
-	$(FDKAAC_CFLAGS)
+	$(FDKAAC_CFLAGS) \
+	$(LIBYUV_CFLAGS)
 libttLibC_a_CXXFLAGS=-std=c++0x \
 	$(OPENCV_CFLAGS) \
 	$(OPENAL_CFLAGS) \
@@ -186,4 +188,5 @@ libttLibC_a_CXXFLAGS=-std=c++0x \
 	$(VORBISDEC_CFLAGS) \
 	$(WEBRTC_CFLAGS) \
 	$(SOUNDTOUCH_CFLAGS) \
-	$(FDKAAC_CFLAGS)
+	$(FDKAAC_CFLAGS) \
+	$(LIBYUV_CFLAGS)

@@ -44,6 +44,7 @@ apple_flag=no
 webrtc_flag=no
 soundtouch_flag=no
 fdkaac_flag=no
+libyuv_flag=no
 
 # check result
 cute_check=no
@@ -70,6 +71,7 @@ apple_check=no
 webrtc_check=no
 soundtouch_check=no
 fdkaac_check=no
+libyuv_check=no
 
 AC_ARG_ENABLE(
 	[lgpl],
@@ -145,6 +147,7 @@ AC_ARG_ENABLE(
 		webrtc_flag=$enableval
 		soundtouch_flag=$enableval
 		fdkaac_flag=$enableval
+		libyuv_flag=$enableval
 	]
 )
 
@@ -278,6 +281,12 @@ AC_ARG_ENABLE(
 	[fdkaac],
 	AS_HELP_STRING([--enable-fdkaac/--disable-fdkaac], [enable/disable fdkaac code.]),
 	[fdkaac_flag=$enableval]
+)
+
+AC_ARG_ENABLE(
+	[libyuv],
+	AS_HELP_STRING([--enable-libyuv/--disable-libyuv], [enable/disable libyuv code.]),
+	[libyuv_flag=$enableval]
 )
 
 if test x$opencv_flag = "xyes"; then
@@ -599,6 +608,24 @@ if test x$fdkaac_flag = "xyes"; then
 		[fdkaac_check=no]
 	)
 fi
+if test x$libyuv_flag = "xyes"; then
+	AC_MSG_CHECKING(for LIBYUV)
+	AC_ARG_VAR([LIBYUV_INCLUDE_PATH], [path for libyuv compiled directory.])
+	AC_ARG_VAR([LIBYUV_PATH], [path for libyuv library.])
+	if test x$LIBYUV_PATH = "x";then
+		libyuv_check=no
+	else
+		libyuv_check=yes
+		if test x$LIBYUV_INCLUDE_PATH = "x"; then
+			LIBYUV_INCLUDE_PATH=$LIBYUV_PATH/include/
+		fi
+		LIBYUV_CFLAGS="-I${LIBYUV_INCLUDE_PATH}"
+		LIBYUV_LIBS="-L${LIBYUV_PATH} -lyuv"
+		AC_SUBST([LIBYUV_CFLAGS])
+		AC_SUBST([LIBYUV_LIBS])
+	fi
+	AC_MSG_RESULT([$libyuv_check])
+fi
 
 AC_MSG_CHECKING(for license)
 if test x$gpl_flag = "xyes"; then
@@ -746,6 +773,11 @@ if test x$fdkaac_flag$lgpl_flag$fdkaac_check = "xyesyesyes"; then
 	AC_DEFINE([__ENABLE_FDKAAC__])
 fi
 AM_CONDITIONAL(ENABLE_FDKAAC, test x$fdkaac_flag$lgpl_flag$fdkaac_check = "xyesyesyes")
+
+if test x$libyuv_flag$libyuv_check = "xyesyes"; then
+	AC_DEFINE([__ENABLE_LIBYUV__])
+fi
+AM_CONDITIONAL(ENABLE_LIBYUV, test x$libyuv_flag$libyuv_check = "xyesyes")
 
 AC_ARG_WITH(pkgconfigdir,
 	AS_HELP_STRING([--with-pkgconfigdir], [Use the specified pkgconfig dir.(default is $libdir/pkgconfig)]),
@@ -1060,4 +1092,13 @@ echo "fdkaac:           off(under lgpl only.)"
 	fi
 else
 echo "fdkaac:           off"
+fi
+if test x$libyuv_flag = "xyes"; then
+	if test x$libyuv_check = "xyes"; then
+echo "libyuv:           on"
+	else
+echo "libyuv:           off(libyuv library is missing.)"
+	fi
+else
+echo "libyuv:           off"
 fi

@@ -165,6 +165,11 @@ nobase_include_HEADERS += \
 	ttLibC/resampler/soundtouchResampler.h
 endif
 
+if ENABLE_LIBYUV
+nobase_include_HEADERS += \
+	ttLibC/resampler/libyuvResampler.h
+endif
+
 pkgconfigdir=@pkgconfigdir@
 pkgconfig_DATA=ttLibC.pc
 CLEANFILES=ttLibC.pc
