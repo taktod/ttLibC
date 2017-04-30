@@ -170,6 +170,16 @@ nobase_include_HEADERS += \
 	ttLibC/resampler/libyuvResampler.h
 endif
 
+if ENABLE_SWSCALE
+nobase_include_HEADERS += \
+	ttLibC/resampler/swscaleResampler.h
+endif
+
+if ENABLE_SWRESAMPLE
+nobase_include_HEADERS += \
+	ttLibC/resampler/swresampleResampler.h
+endif
+
 pkgconfigdir=@pkgconfigdir@
 pkgconfig_DATA=ttLibC.pc
 CLEANFILES=ttLibC.pc

@@ -45,6 +45,8 @@ webrtc_flag=no
 soundtouch_flag=no
 fdkaac_flag=no
 libyuv_flag=no
+swscale_flag=no
+swresample_flag=no
 
 # check result
 cute_check=no
@@ -72,6 +74,8 @@ webrtc_check=no
 soundtouch_check=no
 fdkaac_check=no
 libyuv_check=no
+swscale_check=no
+swresample_check=no
 
 AC_ARG_ENABLE(
 	[lgpl],
@@ -148,6 +152,8 @@ AC_ARG_ENABLE(
 		soundtouch_flag=$enableval
 		fdkaac_flag=$enableval
 		libyuv_flag=$enableval
+		swscale_flag=$enableval
+		swresample_flag=$enableval
 	]
 )
 
@@ -287,6 +293,18 @@ AC_ARG_ENABLE(
 	[libyuv],
 	AS_HELP_STRING([--enable-libyuv/--disable-libyuv], [enable/disable libyuv code.]),
 	[libyuv_flag=$enableval]
+)
+
+AC_ARG_ENABLE(
+	[swscale],
+	AS_HELP_STRING([--enable-swscale/--disable-swscale], [enable/disable swscale(ffmpeg or libav) code.]),
+	[swscale_flag=$enableval]
+)
+
+AC_ARG_ENABLE(
+	[swresample],
+	AS_HELP_STRING([--enable-swresample/--disable-swresample], [enable/disable swresample(ffmpeg or libav) code.]),
+	[swresample_flag=$enableval]
 )
 
 if test x$opencv_flag = "xyes"; then
@@ -626,6 +644,22 @@ if test x$libyuv_flag = "xyes"; then
 	fi
 	AC_MSG_RESULT([$libyuv_check])
 fi
+if test x$swscale_flag = "xyes"; then
+	PKG_CHECK_MODULES(
+		[LIBSWSCALE],
+		[libswscale],
+		[swscale_check=yes],
+		[swscale_check=no]
+	)
+fi
+if test x$swresample_flag = "xyes"; then
+	PKG_CHECK_MODULES(
+		[LIBSWRESAMPLE],
+		[libswresample],
+		[swresample_check=yes],
+		[swresample_check=no]
+	)
+fi
 
 AC_MSG_CHECKING(for license)
 if test x$gpl_flag = "xyes"; then
@@ -778,6 +812,17 @@ if test x$libyuv_flag$libyuv_check = "xyesyes"; then
 	AC_DEFINE([__ENABLE_LIBYUV__])
 fi
 AM_CONDITIONAL(ENABLE_LIBYUV, test x$libyuv_flag$libyuv_check = "xyesyes")
+
+if test x$swscale_flag$lgpl_flag$swscale_check = "xyesyesyes"; then
+	AC_DEFINE([__ENABLE_SWSCALE__])
+fi
+AM_CONDITIONAL(ENABLE_SWSCALE, test x$swscale_flag$lgpl_flag$swscale_check = "xyesyesyes")
+
+if test x$swresample_flag$lgpl_flag$swresample_check = "xyesyesyes"; then
+	AC_DEFINE([__ENABLE_SWRESAMPLE__])
+fi
+AM_CONDITIONAL(ENABLE_SWRESAMPLE, test x$swresample_flag$lgpl_flag$swresample_check = "xyesyesyes")
+
 
 AC_ARG_WITH(pkgconfigdir,
 	AS_HELP_STRING([--with-pkgconfigdir], [Use the specified pkgconfig dir.(default is $libdir/pkgconfig)]),
@@ -1101,4 +1146,30 @@ echo "libyuv:           off(libyuv library is missing.)"
 	fi
 else
 echo "libyuv:           off"
+fi
+if test x$swscale_flag = "xyes"; then
+	if test x$lgpl_flag = "xyes"; then
+		if test x$swscale_check = "xyes"; then
+echo "swscale:          on"
+		else 
+echo "swscale:          off(swscale library is missing.)"
+		fi
+	else
+echo "swscale:          off(under lgpl or gpl only.)"
+	fi
+else
+echo "swscale:          off"
+fi
+if test x$swresample_flag = "xyes"; then
+	if test x$lgpl_flag = "xyes"; then
+		if test x$swresample_check = "xyes"; then
+echo "swresample:       on"
+		else 
+echo "swresample:       off(swresample library is missing.)"
+		fi
+	else
+echo "swresample:       off(under lgpl or gpl only.)"
+	fi
+else
+echo "swresample:       off"
 fi

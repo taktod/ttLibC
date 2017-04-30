@@ -94,6 +94,14 @@
 #	include <ttLibC/resampler/libyuvResampler.h>
 #endif
 
+#ifdef __ENABLE_SWSCALE__
+#	include <ttLibC/resampler/swscaleResampler.h>
+#endif
+
+#ifdef __ENABLE_SWRESAMPLE__
+#	include <ttLibC/resampler/swresampleResampler.h>
+#endif
+
 #include <ttLibC/util/beepUtil.h>
 #include <ttLibC/frame/audio/pcms16.h>
 #include <ttLibC/frame/audio/mp3.h>
@@ -833,6 +841,44 @@ static void speexTest() {
 	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
+static bool swresampleTestCallback(void *ptr, ttLibC_Frame *pcm) {
+	ttLibC_AlDevice *device = (ttLibC_AlDevice *)ptr;
+	ttLibC_AlDevice_queue(device, (ttLibC_PcmS16 *)pcm);
+	return true;
+}
+
+static void swresampleTest() {
+	LOG_PRINT("swresampleTest");
+#if defined(__ENABLE_SWRESAMPLE__) && defined(__ENABLE_OPENAL__)
+	uint32_t channel = 2;
+	uint32_t in_sample_rate = 44100;
+	uint32_t out_sample_rate = 48000;
+	ttLibC_BeepGenerator *generator = ttLibC_BeepGenerator_make(PcmS16Type_littleEndian, 440, in_sample_rate, channel);
+	ttLibC_AlDevice *device = ttLibC_AlDevice_make(1000);
+	ttLibC_PcmS16 *pcm = NULL, *resampled_pcm = NULL, *p;
+	ttLibC_SwresampleResampler *resampler = ttLibC_SwresampleResampler_make(
+			frameType_pcmS16, PcmS16Type_littleEndian, in_sample_rate, channel,
+			frameType_pcmS16, PcmS16Type_littleEndian , out_sample_rate, channel);
+	for(int i = 0;i < 5;i ++) {
+		p = ttLibC_BeepGenerator_makeBeepByMiliSec(generator, pcm, 500);
+		if(p == NULL) {
+			break;
+		}
+		pcm = p;
+		if(!ttLibC_SwresampleResampler_resample(resampler, (ttLibC_Frame *)pcm, swresampleTestCallback, device)) {
+			break;
+		}
+	}
+	ttLibC_AlDevice_proceed(device, -1);
+	ttLibC_PcmS16_close(&pcm);
+	ttLibC_PcmS16_close(&resampled_pcm);
+	ttLibC_AlDevice_close(&device);
+	ttLibC_BeepGenerator_close(&generator);
+	ttLibC_SwresampleResampler_close(&resampler);
+#endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
+
 static void speexdspResamplerTest() {
 	LOG_PRINT("speexdspResamplerTest");
 #if defined(__ENABLE_SPEEXDSP__) && defined(__ENABLE_OPENAL__)
@@ -1037,6 +1083,50 @@ static void mp3lameTest() {
 	ttLibC_BeepGenerator_close(&generator);
 	ttLibC_Mp3lameDecoder_close(&decoder);
 	ttLibC_Mp3lameEncoder_close(&encoder);
+#endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
+
+static bool swscaleCallback(void *ptr, ttLibC_Frame *frame) {
+	ttLibC_CvWindow *resampled_window = (ttLibC_CvWindow *)ptr;
+	ttLibC_CvWindow_showBgr(resampled_window, (ttLibC_Bgr *)frame);
+	return true;
+}
+
+static void swscaleTest() {
+	LOG_PRINT("swscaleTest");
+#if defined(__ENABLE_OPENCV__) && defined(__ENABLE_SWSCALE__)
+	ttLibC_CvCapture *capture = ttLibC_CvCapture_make(0, 320, 240);
+	ttLibC_CvWindow *window = ttLibC_CvWindow_make("original");
+	ttLibC_CvWindow *resampled_window = ttLibC_CvWindow_make("target");
+	ttLibC_SwscaleResampler *resampler = ttLibC_SwscaleResampler_make(
+			frameType_bgr,
+			BgrType_bgr,
+			320, 240,
+			frameType_bgr,
+			BgrType_bgr,
+			400, 300,
+			SwscaleResampler_Bicubic);
+	ttLibC_Bgr *bgr = NULL, *b, *rbgr = NULL;
+	while(true) {
+		b = ttLibC_CvCapture_queryFrame(capture, bgr);
+		if(b == NULL) {
+			break;
+		}
+		bgr = b;
+		ttLibC_CvWindow_showBgr(window, bgr);
+		ttLibC_SwscaleResampler_resample(resampler, (ttLibC_Frame *)bgr, swscaleCallback, resampled_window);
+		uint8_t key = ttLibC_CvWindow_waitForKeyInput(10);
+		if(key == Keychar_Esc) {
+			break;
+		}
+	}
+	ttLibC_Bgr_close(&rbgr);
+	ttLibC_Bgr_close(&bgr);
+	ttLibC_SwscaleResampler_close(&resampler);
+	ttLibC_CvWindow_close(&resampled_window);
+	ttLibC_CvWindow_close(&window);
+	ttLibC_CvCapture_close(&capture);
 #endif
 	ASSERT(ttLibC_Allocator_dump() == 0);
 }
@@ -1251,10 +1341,12 @@ cute::suite encoderDecoderTests(cute::suite s) {
 	s.push_back(CUTE(jpegTest));
 	s.push_back(CUTE(opusTest));
 	s.push_back(CUTE(speexTest));
+	s.push_back(CUTE(swresampleTest));
 	s.push_back(CUTE(speexdspResamplerTest));
 	s.push_back(CUTE(openh264Test));
 	s.push_back(CUTE(faacEncoderTest));
 	s.push_back(CUTE(mp3lameTest));
+	s.push_back(CUTE(swscaleTest));
 	s.push_back(CUTE(libyuvImageRotateTest));
 	s.push_back(CUTE(libyuvImageResizeTest));
 	s.push_back(CUTE(imageResizeTest));
