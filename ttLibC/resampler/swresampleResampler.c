@@ -9,6 +9,7 @@
 
 #include "swresampleResampler.h"
 #include <libswresample/swresample.h>
+#include <libavutil/channel_layout.h>
 #include "../allocator.h"
 #include "../log.h"
 
