@@ -909,22 +909,21 @@ bool ttLibC_Openh264Encoder_paramParse(void *paramExt, const char *name, const c
 #undef SetB
 	return true;
 }
-bool ttLibC_Openh264Encoder_spatialParamParse(void *paramExt, uint32_t target, const char *name, const char *value) {
-	if(target >= MAX_SPATIAL_LAYER_NUM) {
+bool ttLibC_Openh264Encoder_spatialParamParse(void *paramExt, uint32_t id, const char *name, const char *value) {
+	if(id >= MAX_SPATIAL_LAYER_NUM) {
 		return false;
 	}
 	char *end = NULL;
 	SEncParamExt *pExt = (SEncParamExt *)paramExt;
-	SSpatialLayerConfig layer = pExt->sSpatialLayers[target];
 #define OPT(str)	else if(!strcmp(name, str))
 #define ENUM(str)	else if(!strcmp(value, str))
 #define SetI(target)	do {int val = strtol(value, &end, 0); \
 							if(end == value || *end != '\0') return false;\
-							layer.target = val;\
+							pExt->sSpatialLayers[id].target = val;\
 						} while(0);
 #define SetD(target)	do {double val = strtod(value, &end); \
 							if(end == value || *end != '\0') return false;\
-							layer.target = val;\
+							pExt->sSpatialLayers[id].target = val;\
 						} while(0);
 #define SetB(target)	do {bool val; \
 							if(!strcmp(value, "true")) val = true; \
@@ -934,7 +933,7 @@ bool ttLibC_Openh264Encoder_spatialParamParse(void *paramExt, uint32_t target, c
 								if(end == value || *end != '\0') return false;\
 								val = (v != 0); \
 							} \
-							layer.target = val;\
+							pExt->sSpatialLayers[id].target = val;\
 						} while(0);
 	if(0) {}
 	OPT("iVideoWidth")
@@ -984,7 +983,7 @@ bool ttLibC_Openh264Encoder_spatialParamParse(void *paramExt, uint32_t target, c
 		ENUM("PRO_SCALABLE_HIGH")
 			idc = PRO_SCALABLE_HIGH;
 		else return false;
-		layer.uiProfileIdc = idc;
+		pExt->sSpatialLayers[id].uiProfileIdc = idc;
 	}
 	OPT("uiLevelIdc")
 	{
@@ -1027,7 +1026,7 @@ bool ttLibC_Openh264Encoder_spatialParamParse(void *paramExt, uint32_t target, c
 		ENUM("LEVEL_5_2")
 			idc = LEVEL_5_2;
 		else return false;
-		layer.uiLevelIdc = idc;
+		pExt->sSpatialLayers[id].uiLevelIdc = idc;
 	}
 	OPT("iDLayerQp")
 	{
@@ -1083,7 +1082,7 @@ bool ttLibC_Openh264Encoder_spatialParamParse(void *paramExt, uint32_t target, c
 		ENUM("SM_RESERVED")
 			mode = SM_RESERVED;
 		else return false;
-		layer.sSliceArgument.uiSliceMode = mode;
+		pExt->sSpatialLayers[id].sSliceArgument.uiSliceMode = mode;
 	}
 	OPT("sSliceArgument.uiSliceNum")
 	{
@@ -1120,7 +1119,7 @@ bool ttLibC_Openh264Encoder_spatialParamParse(void *paramExt, uint32_t target, c
 		ENUM("VF_NUM_ENUM")
 			format = VF_NUM_ENUM;
 		else return false;
-		layer.uiVideoFormat = format;
+		pExt->sSpatialLayers[id].uiVideoFormat = format;
 	}
 	OPT("bFullRange")
 	{
@@ -1157,7 +1156,7 @@ bool ttLibC_Openh264Encoder_spatialParamParse(void *paramExt, uint32_t target, c
 		ENUM("CP_NUM_ENUM")
 			primaries = CP_NUM_ENUM;
 		else return false;
-		layer.uiColorPrimaries = primaries;
+		pExt->sSpatialLayers[id].uiColorPrimaries = primaries;
 	}
 	OPT("uiTransferCharacteristics")
 	{
@@ -1198,7 +1197,7 @@ bool ttLibC_Openh264Encoder_spatialParamParse(void *paramExt, uint32_t target, c
 		ENUM("TRC_NUM_ENUM")
 			characteristics = TRC_NUM_ENUM;
 		else return false;
-		layer.uiTransferCharacteristics = characteristics;
+		pExt->sSpatialLayers[id].uiTransferCharacteristics = characteristics;
 	}
 	OPT("uiColorMatrix")
 	{
@@ -1229,7 +1228,7 @@ bool ttLibC_Openh264Encoder_spatialParamParse(void *paramExt, uint32_t target, c
 		ENUM("CM_NUM_ENUM")
 			matrix = CM_NUM_ENUM;
 		else return false;
-		layer.uiColorMatrix = matrix;
+		pExt->sSpatialLayers[id].uiColorMatrix = matrix;
 	}
 #endif
 	else {
