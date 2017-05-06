@@ -288,19 +288,27 @@ ttLibC_PcmS16 *ttLibC_PcmS16_clone(
 		ERR_PRINT("try to use non pcms16 frame for reuse.");
 		return NULL;
 	}
+	ttLibC_PcmS16 *cloned_frame = NULL;
 	switch(src_frame->type) {
 	case PcmS16Type_bigEndian:
-		return PcmS16_cloneBigEndian(prev_frame, src_frame);
+		cloned_frame = PcmS16_cloneBigEndian(prev_frame, src_frame);
+		break;
 	case PcmS16Type_littleEndian:
-		return PcmS16_cloneLittleEndian(prev_frame, src_frame);
+		cloned_frame = PcmS16_cloneLittleEndian(prev_frame, src_frame);
+		break;
 	case PcmS16Type_bigEndian_planar:
-		return PcmS16_cloneBigEndianPlanar(prev_frame, src_frame);
+		cloned_frame = PcmS16_cloneBigEndianPlanar(prev_frame, src_frame);
+		break;
 	case PcmS16Type_littleEndian_planar:
-		return PcmS16_cloneLittleEndianPlanar(prev_frame, src_frame);
+		cloned_frame = PcmS16_cloneLittleEndianPlanar(prev_frame, src_frame);
+		break;
 	default:
 		break;
 	}
-	return NULL;
+	if(cloned_frame != NULL) {
+		cloned_frame->inherit_super.inherit_super.id = src_frame->inherit_super.inherit_super.id;
+	}
+	return cloned_frame;
 }
 
 /*

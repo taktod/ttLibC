@@ -233,15 +233,21 @@ ttLibC_PcmF32 *ttLibC_PcmF32_clone(
 		ERR_PRINT("try to use non pcmf32 frame for reuse.");
 		return NULL;
 	}
+	ttLibC_PcmF32 *cloned_frame = NULL;
 	switch(src_frame->type) {
 	case PcmF32Type_interleave:
-		return PcmF32_cloneInterleave(prev_frame, src_frame);
+		cloned_frame = PcmF32_cloneInterleave(prev_frame, src_frame);
+		break;
 	case PcmF32Type_planar:
-		return PcmF32_clonePlanar(prev_frame, src_frame);
+		cloned_frame = PcmF32_clonePlanar(prev_frame, src_frame);
+		break;
 	default:
 		break;
 	}
-	return NULL;
+	if(cloned_frame != NULL) {
+		cloned_frame->inherit_super.inherit_super.id = src_frame->inherit_super.inherit_super.id;
+	}
+	return cloned_frame;
 }
 /*
  * close frame
