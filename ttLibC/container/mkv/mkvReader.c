@@ -126,6 +126,7 @@ static bool MkvReader_readTag(
 	case MkvType_EBML:
 	case MkvType_CRC32:
 	case MkvType_DisplayUnit:
+	case MkvType_Colour:
 		{
 			// check the data size.
 			if(data_size < size + byte_reader->read_size) {
@@ -284,6 +285,10 @@ static bool MkvReader_readTag(
  						}
 						else if(strcmp(codecId, "A_MS/ACM") == 0){
 							reader->track->type = frameType_unknown;
+						}
+						else if(strcmp(codecId, "A_PCM/INT/LIT") == 0) {
+							// A_PCM/INT/BIG (for big endian)
+							reader->track->type = frameType_pcmS16;
 						}
 						else {
 							ERR_PRINT("unknown codec Id:%s", codecId);

@@ -23,6 +23,7 @@
 #include "../../../frame/audio/adpcmImaWav.h"
 #include "../../../frame/audio/mp3.h"
 #include "../../../frame/audio/opus.h"
+#include "../../../frame/audio/pcms16.h"
 #include "../../../frame/audio/speex.h"
 #include "../../../frame/audio/vorbis.h"
 
@@ -386,6 +387,39 @@ static void SimpleBlock_getLace0Frame(
 				speex->inherit_super.channel_num = track->channel_num;
 				speex->inherit_super.sample_rate = track->sample_rate;
 				track->frame = (ttLibC_Frame *)speex;
+				track->frame->id = track->track_number;
+				if(callback != NULL) {
+					if(!callback(ptr, track->frame)) {
+						reader->error_number = 5;
+					}
+				}
+			}
+		}
+		break;
+	case frameType_pcmS16:
+		{
+			uint32_t sample_num = data_size / sizeof(int16_t) / track->channel_num;
+			ttLibC_PcmS16 *pcm = ttLibC_PcmS16_make(
+					(ttLibC_PcmS16 *)track->frame,
+					PcmS16Type_littleEndian,
+					track->sample_rate,
+					sample_num,
+					track->channel_num,
+					data,
+					data_size,
+					data,
+					data_size,
+					NULL,
+					0,
+					true,
+					pts,
+					timebase);
+			if(pcm == NULL) {
+				ERR_PRINT("failed to make pcm data.");
+				reader->error_number = 5;
+			}
+			else {
+				track->frame = (ttLibC_Frame *)pcm;
 				track->frame->id = track->track_number;
 				if(callback != NULL) {
 					if(!callback(ptr, track->frame)) {

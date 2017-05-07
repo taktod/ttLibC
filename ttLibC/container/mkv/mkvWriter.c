@@ -82,6 +82,7 @@ static bool MkvWriter_makeTrackEntry(void *ptr, void *key, void *item) {
 		case frameType_opus:
 		case frameType_speex:
 		case frameType_vorbis:
+		case frameType_pcmS16:
 			break;
 		default:
 			ERR_PRINT("unexpected frame type.");
@@ -338,7 +339,7 @@ static bool MkvWriter_makeTrackEntry(void *ptr, void *key, void *item) {
 				ttLibC_ByteConnector_string(connector, (const char *)inner, innerConnector->write_size);
 				// codecPrivate (we must have OpusHead information or no sound.)
 				ttLibC_ByteConnector_ebml2(connector, MkvType_CodecPrivate, true);
-				ttLibC_ByteConnector_ebml2(connector, 0x14, false); // サイズは固定だと思う。
+				ttLibC_ByteConnector_ebml2(connector, 0x14, false);
 				// wave format ex
 				//  codecType 0x0011
 				ttLibC_ByteConnector_bit(connector, 0x1100, 16);
@@ -505,7 +506,7 @@ static bool MkvWriter_makeTrackEntry(void *ptr, void *key, void *item) {
 				ttLibC_ByteConnector_ebml2(connector, MkvType_Audio, true);
 				ttLibC_ByteConnector_ebml2(connector, innerConnector->write_size, false);
 				ttLibC_ByteConnector_string(connector, (const char *)inner, innerConnector->write_size);
-				// あとはprivateData
+				// privateData
 				ttLibC_Vorbis *identificationFrame = (ttLibC_Vorbis *)ttLibC_FrameQueue_dequeue_first(track->frame_queue);
 				ttLibC_Vorbis *commentFrame        = (ttLibC_Vorbis *)ttLibC_FrameQueue_dequeue_first(track->frame_queue);
 				ttLibC_Vorbis *setupFrame          = (ttLibC_Vorbis *)ttLibC_FrameQueue_dequeue_first(track->frame_queue);
@@ -524,6 +525,36 @@ static bool MkvWriter_makeTrackEntry(void *ptr, void *key, void *item) {
 				ttLibC_DynamicBuffer_append(trackEntryBuffer, identificationFrame->inherit_super.inherit_super.data, identificationFrame->inherit_super.inherit_super.buffer_size);
 				ttLibC_DynamicBuffer_append(trackEntryBuffer, commentFrame->inherit_super.inherit_super.data,        commentFrame->inherit_super.inherit_super.buffer_size);
 				ttLibC_DynamicBuffer_append(trackEntryBuffer, setupFrame->inherit_super.inherit_super.data,          setupFrame->inherit_super.inherit_super.buffer_size);
+			}
+			break;
+		case frameType_pcmS16:
+			{
+				// codecID
+				ttLibC_ByteConnector_ebml2(connector, MkvType_CodecID, true);
+				ttLibC_ByteConnector_ebml2(connector, 13, false);
+				ttLibC_ByteConnector_string(connector, "A_PCM/INT/LIT", 13);
+				// trackType
+				ttLibC_ByteConnector_ebml2(connector, MkvType_TrackType, true);
+				ttLibC_ByteConnector_ebml2(connector, 1, false);
+				ttLibC_ByteConnector_bit(connector, 2, 8);
+				// audioInformation
+				ttLibC_Audio *audio = (ttLibC_Audio *)ttLibC_FrameQueue_ref_first(track->frame_queue);
+				ttLibC_ByteConnector_ebml2(innerConnector, MkvType_SamplingFrequency, true);
+				ttLibC_ByteConnector_ebml2(innerConnector, 4, false);
+				float sr = audio->sample_rate;
+				ttLibC_ByteConnector_bit(innerConnector, *(uint32_t *)&sr, 32);
+				ttLibC_ByteConnector_ebml2(innerConnector, MkvType_Channels, true);
+				ttLibC_ByteConnector_ebml2(innerConnector, 1, false);
+				ttLibC_ByteConnector_bit(innerConnector, audio->channel_num, 8);
+				ttLibC_ByteConnector_ebml2(innerConnector, MkvType_BitDepth, true);
+				ttLibC_ByteConnector_ebml2(innerConnector, 1, false);
+				ttLibC_ByteConnector_bit(innerConnector, 0x10, 8);
+
+
+				ttLibC_ByteConnector_ebml2(connector, MkvType_Audio, true);
+				ttLibC_ByteConnector_ebml2(connector, innerConnector->write_size, false);
+				ttLibC_ByteConnector_string(connector, (const char *)inner, innerConnector->write_size);
+				ttLibC_DynamicBuffer_append(trackEntryBuffer, buf, connector->write_size);
 			}
 			break;
 		default:
@@ -876,6 +907,7 @@ static bool MkvWriter_makeData(
 				ttLibC_DynamicBuffer_append(buffer, data, data_size);
 			}
 			break;
+		case frameType_pcmS16:
 		case frameType_mp3:
 		case frameType_adpcm_ima_wav:
 		case frameType_opus:

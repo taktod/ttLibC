@@ -244,6 +244,9 @@ bool mkvTest_getFrameCallback(void *ptr, ttLibC_Frame *frame) {
 	case frameType_speex:
 //		LOG_PRINT("speex:%f", 1.0 *frame->pts / frame->timebase);
 		break;
+	case frameType_pcmS16:
+//		LOG_PRINT("frame:%f %d", 1.0 * frame->pts / frame->timebase, frame->id);
+		break;
 	default:
 		LOG_PRINT("frame:%f", 1.0 * frame->pts / frame->timebase);
 		return true;
@@ -404,6 +407,32 @@ static void mkvCodecTest() {
 	sprintf(file, "%s/tools/data/source/test.vp9.opus.webm", getenv("HOME"));
 	testData.fp_in = fopen(file, "rb");
 	sprintf(file, "%s/tools/data/c_out/test.vp9.opus.webm", getenv("HOME"));
+	testData.fp_out = fopen(file, "wb");
+	do {
+		uint8_t buffer[65536];
+		if(!testData.fp_in) {
+			break;
+		}
+		size_t read_size = fread(buffer, 1, 65536, testData.fp_in);
+		if(!ttLibC_MkvReader_read((ttLibC_MkvReader *)testData.reader, buffer, read_size, mkvTest_getMkvCallback, &testData)) {
+			ERR_PRINT("error occured!");
+			break;
+		}
+	} while(!feof(testData.fp_in));
+	ttLibC_ContainerReader_close(&testData.reader);
+	ttLibC_ContainerWriter_close(&testData.writer);
+	if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
+	if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
+	ASSERT(ttLibC_Allocator_dump() == 0);
+
+	LOG_PRINT("h264 / pcmS16");
+	testData.reader = (ttLibC_ContainerReader *)ttLibC_MkvReader_make();
+	types[0] = frameType_h264;
+	types[1] = frameType_pcmS16;
+	testData.writer = (ttLibC_ContainerWriter *)ttLibC_MkvWriter_make(types, 2);
+	sprintf(file, "%s/tools/data/source/test.h264.pcms16.mkv", getenv("HOME"));
+	testData.fp_in = fopen(file, "rb");
+	sprintf(file, "%s/tools/data/c_out/test.h264.pcms16.mkv", getenv("HOME"));
 	testData.fp_out = fopen(file, "wb");
 	do {
 		uint8_t buffer[65536];

@@ -91,6 +91,7 @@ typedef enum ttLibC_Mkv_Type {
 					MkvType_DisplayWidth = 0x54B0,
 					MkvType_DisplayHeight = 0x54BA,
 					MkvType_DisplayUnit = 0x54B2,
+					MkvType_Colour = 0x55B0,
 				MkvType_Audio = 0xE1,
 					MkvType_SamplingFrequency = 0xB5,
 					MkvType_Channels = 0x9F,
