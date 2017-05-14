@@ -51,6 +51,8 @@ libttLibC_a_SOURCES= \
 	encoder/faacEncoder.c \
 	encoder/jpegEncoder.c \
 	encoder/mp3lameEncoder.c \
+	encoder/msAacEncoder.cpp \
+	encoder/msH264Encoder.cpp \
 	encoder/openh264Encoder.cpp \
 	encoder/opusEncoder.c \
 	encoder/speexEncoder.c \
@@ -137,6 +139,8 @@ libttLibC_a_SOURCES= \
 	util/httpUtil.c \
 	util/ioUtil.c \
 	util/linkedListUtil.c \
+	util/mmAudioLoopbackUtil.cpp \
+	util/msGlobalUtil.cpp \
 	util/openalUtil.c \
 	util/opencvUtil.c \
 	util/stlListUtil.cpp \
