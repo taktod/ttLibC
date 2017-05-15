@@ -73,7 +73,15 @@ bool ttLibC_JpegDecoder_decode(
 	}
 	ttLibC_JpegDecoder_ *decoder_ = (ttLibC_JpegDecoder_ *)decoder;
 	// set memory source.
+	FILE *fp = NULL;
+#if JPEG_LIB_VERSION >= 80 || defined(MEM_SRCDST_SUPPORTED)
+	// set memory source.
 	jpeg_mem_src(&decoder_->dinfo, (unsigned char *)jpeg->inherit_super.inherit_super.data, jpeg->inherit_super.inherit_super.buffer_size);
+#else
+	// try do with memory map, for linux only.
+	fp = fmemopen((unsigned char *)jpeg->inherit_super.inherit_super.data, jpeg->inherit_super.inherit_super.buffer_size, "rb");
+	jpeg_stdio_src(&decoder_->dinfo, fp);
+#endif
 
 	jpeg_read_header(&decoder_->dinfo, TRUE);
 
@@ -167,6 +175,9 @@ bool ttLibC_JpegDecoder_decode(
 	}
 	jpeg_finish_decompress(&decoder_->dinfo);
 
+	if(fp) {
+		fclose(fp);
+	}
 	// setup yuv object.
 	yuv = ttLibC_Yuv420_make(
 			yuv,
