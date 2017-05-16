@@ -221,7 +221,8 @@ bool ttLibC_H264_getNalInfo(ttLibC_H264_NalInfo* info, uint8_t *data, size_t dat
 	info->nal_unit_type = H264NalType_error;
 	info->nal_size      = 0;
 	size_t pos = 0;
-	for(size_t i = 0;i < data_size; ++ i, ++ data) {
+	size_t i = 0;
+	for(i = 0;i < data_size; ++ i, ++ data) {
 		if(i == 0 && (*data) != 0) {
 			return false;
 		}
@@ -267,9 +268,19 @@ bool ttLibC_H264_getNalInfo(ttLibC_H264_NalInfo* info, uint8_t *data, size_t dat
 			}
 			pos = i + 1;
 		}
+		else {
+			if(i - pos == 3) {
+				// if continue with 00 for the padding.
+				pos ++;
+			}
+		}
 	}
 	if(info->nal_size == 0) {
 		info->nal_size = pos;
+		if(i == data_size) {
+			// if hit the end, take as one nal.
+			info->nal_size = i;
+		}
 	}
 	return true;
 }
