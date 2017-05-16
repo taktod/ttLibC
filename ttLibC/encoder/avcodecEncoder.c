@@ -731,7 +731,7 @@ static bool AvcodecEncoder_encode_Yuv420(
 										}
 										break;
 									case H264NalType_supplementalEnhancementInformation:
-		//								LOG_PRINT("supplementalEnhancementInformationをみつけた");
+		//								LOG_PRINT("supplementalEnhancementInformation");
 										start_ptr = data;
 										break;
 									case H264NalType_sliceIDR:
@@ -1157,7 +1157,7 @@ ttLibC_AvcodecEncoder *ttLibC_AvcodecEncoder_makeWithAVCodecContext(void *enc_co
 		encoder->inherit_super.height = encoder->enc->height;
 		switch(encoder->enc->pix_fmt) {
 			// support with ttLibC_Yuv420
-		case AV_PIX_FMT_YUV420P: // yuv420 planar　yyyy.... uuuu.... vvvv....
+		case AV_PIX_FMT_YUV420P: // yuv420 planar yyyy.... uuuu.... vvvv....
 			encoder->inherit_super.input_frame_type = frameType_yuv420;
 			encoder->inherit_super.input_format_type = Yuv420Type_planar;
 			encoder->avframe->linesize[0] = encoder->enc->width;
