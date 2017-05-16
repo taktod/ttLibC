@@ -418,19 +418,19 @@ ttLibC_Bgr *ttLibC_ImageResizer_resizeBgr(
 		}
 		return NULL;
 	case BgrType_bgr:
-		src_b_data = src_frame->inherit_super.inherit_super.data;
+		src_b_data = src_frame->data;
 		src_g_data = src_b_data + 1;
 		src_r_data = src_b_data + 2;
 		break;
 	case BgrType_abgr:
-		src_a_data = src_frame->inherit_super.inherit_super.data;
+		src_a_data = src_frame->data;
 		src_b_data = src_a_data + 1;
 		src_g_data = src_a_data + 2;
 		src_r_data = src_a_data + 3;
 		src_step = 4;
 		break;
 	case BgrType_bgra:
-		src_b_data = src_frame->inherit_super.inherit_super.data;
+		src_b_data = src_frame->data;
 		src_g_data = src_b_data + 1;
 		src_r_data = src_b_data + 2;
 		src_a_data = src_b_data + 3;

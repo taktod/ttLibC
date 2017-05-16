@@ -107,6 +107,7 @@ ttLibC_Bgr *ttLibC_Bgr_make(
 		}
 		memcpy(bgr->inherit_super.inherit_super.data, data, data_size);
 	}
+	bgr->data = bgr->inherit_super.inherit_super.data;
 	return bgr;
 }
 

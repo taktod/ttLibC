@@ -73,7 +73,7 @@ static bool SwscaleResampler_setupDataStride(
 	case frameType_bgr:
 		{
 			ttLibC_Bgr *bgr = (ttLibC_Bgr *)frame;
-			data[0]    = bgr->inherit_super.inherit_super.data;
+			data[0]    = bgr->data;
 			data[1]    = NULL;
 			data[2]    = NULL;
 			data[3]    = NULL;

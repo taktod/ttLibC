@@ -39,6 +39,8 @@ typedef struct ttLibC_Frame_Video_Bgr {
 	ttLibC_Bgr_Type type;
 	/** pixel unit size. */
 	uint32_t unit_size;
+	/** ref pointer for data. */
+	uint8_t *data;
 	/** stride data for width. */
 	uint32_t width_stride;
 } ttLibC_Frame_Video_Bgr;

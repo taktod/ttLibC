@@ -73,8 +73,8 @@ void ttLibC_CvWindow_showBgr(ttLibC_CvWindow *window, ttLibC_Bgr *bgr) {
 	}
 	ttLibC_CvWindow_ *window_ = (ttLibC_CvWindow_ *)window;
 	if(window_->image != NULL
-	&& (window_->image->width != bgr->inherit_super.width
-		|| window_->image->height != bgr->inherit_super.height)) {
+	&& (window_->image->width != (int32_t)bgr->inherit_super.width
+		|| window_->image->height != (int32_t)bgr->inherit_super.height)) {
 		// if width or height is changed, need to remake.
 		cvReleaseImage(&window_->image);
 		window_->image = NULL;
@@ -88,7 +88,7 @@ void ttLibC_CvWindow_showBgr(ttLibC_CvWindow *window, ttLibC_Bgr *bgr) {
 	}
 	uint8_t *image_data = (uint8_t *)window_->image->imageData;
 	uint32_t image_stride_diff = window_->image->widthStep - 3 * window_->image->width;
-	uint8_t *src_data = bgr->inherit_super.inherit_super.data;
+	uint8_t *src_data = bgr->data;
 	uint8_t *src_b_data;
 	uint8_t *src_g_data;
 	uint8_t *src_r_data;

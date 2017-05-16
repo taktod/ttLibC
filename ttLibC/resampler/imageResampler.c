@@ -129,7 +129,7 @@ ttLibC_Yuv420 *ttLibC_ImageResampler_makeYuv420FromBgr(
 		break;
 	}
 	// rgb data
-	uint8_t *src_data = src_frame->inherit_super.inherit_super.data;
+	uint8_t *src_data = src_frame->data;
 	uint32_t src_width_stride_diff = src_frame->width_stride;
 	uint8_t *src_b_data = NULL;
 	uint8_t *src_g_data = NULL;
