@@ -823,7 +823,6 @@ if test x$swresample_flag$lgpl_flag$swresample_check = "xyesyesyes"; then
 fi
 AM_CONDITIONAL(ENABLE_SWRESAMPLE, test x$swresample_flag$lgpl_flag$swresample_check = "xyesyesyes")
 
-
 AC_ARG_WITH(pkgconfigdir,
 	AS_HELP_STRING([--with-pkgconfigdir], [Use the specified pkgconfig dir.(default is $libdir/pkgconfig)]),
 	[pkgconfigdir=${withval}],
