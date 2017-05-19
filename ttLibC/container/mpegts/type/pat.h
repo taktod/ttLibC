@@ -8,8 +8,8 @@
  * @date   2016/11/18
  */
 
-#ifndef TTLIBC_CONTAINER_MPEGTS2_TYPE_PAT_H_
-#define TTLIBC_CONTAINER_MPEGTS2_TYPE_PAT_H_
+#ifndef TTLIBC_CONTAINER_MPEGTS_TYPE_PAT_H_
+#define TTLIBC_CONTAINER_MPEGTS_TYPE_PAT_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -53,4 +53,4 @@ void ttLibC_Pat_close(ttLibC_Pat **pat);
 } /* extern "C" */
 #endif
 
-#endif /* TTLIBC_CONTAINER_MPEGTS2_TYPE_PAT_H_ */
+#endif /* TTLIBC_CONTAINER_MPEGTS_TYPE_PAT_H_ */

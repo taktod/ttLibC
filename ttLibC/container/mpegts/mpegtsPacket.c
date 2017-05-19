@@ -8,11 +8,11 @@
  * @date   2016/11/18
  */
 
-#include "mpegtsPacket.h"
-#include "type/pat.h"
-#include "type/pes.h"
-#include "type/pmt.h"
-#include "type/sdt.h"
+#include <container/mpegts/mpegtsPacket.h>
+#include <container/mpegts/type/pat.h>
+#include <container/mpegts/type/pes.h>
+#include <container/mpegts/type/pmt.h>
+#include <container/mpegts/type/sdt.h>
 #include <stdlib.h>
 #include "../../log.h"
 #include "../../allocator.h"

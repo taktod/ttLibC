@@ -8,8 +8,8 @@
  * @date   2016/11/18
  */
 
-#ifndef TTLIBC_CONTAINER_MPEGTS2_TYPE_PMT_H_
-#define TTLIBC_CONTAINER_MPEGTS2_TYPE_PMT_H_
+#ifndef TTLIBC_CONTAINER_MPEGTS_TYPE_PMT_H_
+#define TTLIBC_CONTAINER_MPEGTS_TYPE_PMT_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -60,4 +60,4 @@ void ttLibC_Pmt_close(ttLibC_Pmt **pmt);
 } /* extern "C" */
 #endif
 
-#endif /* TTLIBC_CONTAINER_MPEGTS2_TYPE_PMT_H_ */
+#endif /* TTLIBC_CONTAINER_MPEGTS_TYPE_PMT_H_ */

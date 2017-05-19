@@ -8,8 +8,8 @@
  * @date   2016/11/18
  */
 
-#ifndef TTLIBC_CONTAINER_MPEGTS2_TYPE_SDT_H_
-#define TTLIBC_CONTAINER_MPEGTS2_TYPE_SDT_H_
+#ifndef TTLIBC_CONTAINER_MPEGTS_TYPE_SDT_H_
+#define TTLIBC_CONTAINER_MPEGTS_TYPE_SDT_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -50,4 +50,4 @@ void ttLibC_Sdt_close(ttLibC_Sdt **sdt);
 } /* extern "C" */
 #endif
 
-#endif /* TTLIBC_CONTAINER_MPEGTS2_TYPE_SDT_H_ */
+#endif /* TTLIBC_CONTAINER_MPEGTS_TYPE_SDT_H_ */

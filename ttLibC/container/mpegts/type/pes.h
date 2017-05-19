@@ -8,15 +8,15 @@
  * @date   2016/11/18
  */
 
-#ifndef TTLIBC_CONTAINER_MPEGTS2_TYPE_PES_H_
-#define TTLIBC_CONTAINER_MPEGTS2_TYPE_PES_H_
+#ifndef TTLIBC_CONTAINER_MPEGTS_TYPE_PES_H_
+#define TTLIBC_CONTAINER_MPEGTS_TYPE_PES_H_
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #include "../mpegtsPacket.h"
-#include "../mpegtsWriter.h"
+#include "../../mpegts/mpegtsWriter.h"
 #include "../../../util/dynamicBufferUtil.h"
 
 typedef struct ttLibC_Container_Mpegts_Pes {
@@ -70,4 +70,4 @@ void ttLibC_Pes_close(ttLibC_Pes **pes);
 } /* extern "C" */
 #endif
 
-#endif /* TTLIBC_CONTAINER_MPEGTS2_TYPE_PES_H_ */
+#endif /* TTLIBC_CONTAINER_MPEGTS_TYPE_PES_H_ */

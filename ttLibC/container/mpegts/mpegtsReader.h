@@ -8,19 +8,19 @@
  * @date   2016/11/18
  */
 
-#ifndef TTLIBC_CONTAINER_MPEGTS2_MPEGTSREADER_H_
-#define TTLIBC_CONTAINER_MPEGTS2_MPEGTSREADER_H_
+#ifndef TTLIBC_CONTAINER_MPEGTS_MPEGTSREADER_H_
+#define TTLIBC_CONTAINER_MPEGTS_MPEGTSREADER_H_
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include "mpegtsPacket.h"
+#include "../mpegts/mpegtsPacket.h"
 
-#include "type/pat.h"
-#include "type/pes.h"
-#include "type/pmt.h"
-#include "type/sdt.h"
+#include "../mpegts/type/pat.h"
+#include "../mpegts/type/pes.h"
+#include "../mpegts/type/pmt.h"
+#include "../mpegts/type/sdt.h"
 
 #include "../../util/dynamicBufferUtil.h"
 #include "../../util/stlMapUtil.h"
@@ -51,4 +51,4 @@ typedef ttLibC_ContainerReader_MpegtsReader_ ttLibC_MpegtsReader_;
 } /* extern "C" */
 #endif
 
-#endif /* TTLIBC_CONTAINER_MPEGTS2_MPEGTSREADER_H_ */
+#endif /* TTLIBC_CONTAINER_MPEGTS_MPEGTSREADER_H_ */

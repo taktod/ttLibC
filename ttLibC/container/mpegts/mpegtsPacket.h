@@ -8,8 +8,8 @@
  * @date   2016/11/18
  */
 
-#ifndef TTLIBC_CONTAINER_MPEGTS2_MPEGTSPACKET_H_
-#define TTLIBC_CONTAINER_MPEGTS2_MPEGTSPACKET_H_
+#ifndef TTLIBC_CONTAINER_MPEGTS_MPEGTSPACKET_H_
+#define TTLIBC_CONTAINER_MPEGTS_MPEGTSPACKET_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -136,4 +136,4 @@ void ttLibC_MpegtsPacket_close(ttLibC_MpegtsPacket **packet);
 } /* extern "C" */
 #endif
 
-#endif /* TTLIBC_CONTAINER_MPEGTS2_MPEGTSPACKET_H_ */
+#endif /* TTLIBC_CONTAINER_MPEGTS_MPEGTSPACKET_H_ */

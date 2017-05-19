@@ -8,8 +8,8 @@
  * @date   2016/11/18
  */
 
-#ifndef TTLIBC_CONTAINER_MPEGTS2_MPEGTSWRITER_H_
-#define TTLIBC_CONTAINER_MPEGTS2_MPEGTSWRITER_H_
+#ifndef TTLIBC_CONTAINER_MPEGTS_MPEGTSWRITER_H_
+#define TTLIBC_CONTAINER_MPEGTS_MPEGTSWRITER_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -46,4 +46,4 @@ typedef ttLibC_ContainerWriter_MpegtsWriter_ ttLibC_MpegtsWriter_;
 } /* extern "C" */
 #endif
 
-#endif /* TTLIBC_CONTAINER_MPEGTS2_MPEGTSWRITER_H_ */
+#endif /* TTLIBC_CONTAINER_MPEGTS_MPEGTSWRITER_H_ */

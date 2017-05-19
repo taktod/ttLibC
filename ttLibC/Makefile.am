@@ -27,13 +27,13 @@ libttLibC_a_SOURCES= \
 	container/mp4/mp4Atom.c \
 	container/mp4/mp4Reader.c \
 	container/mp4/mp4Writer.c \
-	container/mpegts2/type/pat.c \
-	container/mpegts2/type/pes.c \
-	container/mpegts2/type/pmt.c \
-	container/mpegts2/type/sdt.c \
-	container/mpegts2/mpegtsPacket.c \
-	container/mpegts2/mpegtsReader.c \
-	container/mpegts2/mpegtsWriter.c \
+	container/mpegts/type/pat.c \
+	container/mpegts/type/pes.c \
+	container/mpegts/type/pmt.c \
+	container/mpegts/type/sdt.c \
+	container/mpegts/mpegtsPacket.c \
+	container/mpegts/mpegtsReader.c \
+	container/mpegts/mpegtsWriter.c \
 	container/container.c \
 	container/misc2.c \
 	decoder/audioConverterDecoder.c \
