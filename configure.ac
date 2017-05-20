@@ -316,11 +316,15 @@ if test x$opencv_flag = "xyes"; then
 	)
 fi
 if test x$mp3lame_flag = "xyes"; then
+	CFLAGS_ORG=$CFLAGS
+	CFLAGS="-I/usr/local/include/ $CFLAGS"
+	CPPFLAGS_ORG=$CPPFLAGS
+	CPPFLAGS="-I/usr/local/include/ $CPPFLAGS"
 	AC_PREPROC_IFELSE(
 		[AC_LANG_SOURCE([@%:@include <lame/lame.h>])],
 		[
-			MP3LAME_CFLAGS=''
-			MP3LAME_LIBS='-lmp3lame'
+			MP3LAME_CFLAGS='-I/usr/local/include'
+			MP3LAME_LIBS='-L/usr/local/lib -lmp3lame'
 			AC_SUBST([MP3LAME_CFLAGS])
 			AC_SUBST([MP3LAME_LIBS])
 			AC_DEFINE([__ENABLE_MP3LAME__])
@@ -338,14 +342,20 @@ if test x$mp3lame_flag = "xyes"; then
 			AC_MSG_RESULT([no])
 		]
 	)
+	CFLAGS=$CFLAGS_ORG
+	CPPFLAGS=$CPPFLAGS_ORG
 fi
 if test x$faac_flag = "xyes"; then
+	CFLAGS_ORG=$CFLAGS
+	CFLAGS="-I/usr/local/include/ $CFLAGS"
+	CPPFLAGS_ORG=$CPPFLAGS
+	CPPFLAGS="-I/usr/local/include/ $CPPFLAGS"
 	AC_MSG_CHECKING(for FAAC)
 	AC_PREPROC_IFELSE(
 		[AC_LANG_SOURCE([@%:@include <faac.h>])],
 		[
-			FAAC_CFLAGS=''
-			FAAC_LIBS='-lfaac'
+			FAAC_CFLAGS='-I/usr/local/include'
+			FAAC_LIBS='-L/usr/local/lib -lfaac'
 			AC_SUBST([FAAC_CFLAGS])
 			AC_SUBST([FAAC_LIBS])
 			AC_DEFINE([__ENABLE_FAAC__])
@@ -358,15 +368,21 @@ if test x$faac_flag = "xyes"; then
 			AC_MSG_RESULT([no])
 		]
 	)
+	CFLAGS=$CFLAGS_ORG
+	CPPFLAGS=$CPPFLAGS_ORG
 fi
 
 if test x$jpeg_flag = "xyes"; then
+	CFLAGS_ORG=$CFLAGS
+	CFLAGS="-I/usr/local/include/ $CFLAGS"
+	CPPFLAGS_ORG=$CPPFLAGS
+	CPPFLAGS="-I/usr/local/include/ $CPPFLAGS"
 	AC_MSG_CHECKING(for JPEG)
 	AC_PREPROC_IFELSE(
 		[AC_LANG_SOURCE([@%:@include <jpeglib.h>])],
 		[
-			JPEG_CFLAGS=''
-			JPEG_LIBS='-ljpeg'
+			JPEG_CFLAGS='-I/usr/local/include'
+			JPEG_LIBS='-L/usr/local/lib -ljpeg'
 			AC_SUBST([JPEG_CFLAGS])
 			AC_SUBST([JPEG_LIBS])
 			jpeg_check=yes
@@ -376,6 +392,8 @@ if test x$jpeg_flag = "xyes"; then
 			AC_MSG_RESULT([no])
 		]
 	)
+	CFLAGS=$CFLAGS_ORG
+	CPPFLAGS=$CPPFLAGS_ORG
 fi
 
 if test x$openh264_flag = "xyes"; then
@@ -419,12 +437,16 @@ if test x$avcodec_flag = "xyes"; then
 	)
 fi
 if test x$faad_flag = "xyes"; then
+	CFLAGS_ORG=$CFLAGS
+	CFLAGS="-I/usr/local/include/ $CFLAGS"
+	CPPFLAGS_ORG=$CPPFLAGS
+	CPPFLAGS="-I/usr/local/include/ $CPPFLAGS"
 	AC_MSG_CHECKING(for FAAD)
 	AC_PREPROC_IFELSE(
 		[AC_LANG_SOURCE([@%:@include <faad.h>])],
 		[
-			FAAD_CFLAGS=''
-			FAAD_LIBS='-lfaad'
+			FAAD_CFLAGS='-I/usr/local/include'
+			FAAD_LIBS='-L/usr/local/lib -lfaad'
 			AC_SUBST([FAAD_CFLAGS])
 			AC_SUBST([FAAD_LIBS])
 			AC_DEFINE([__ENABLE_FAAD__])
@@ -437,6 +459,8 @@ if test x$faad_flag = "xyes"; then
 			AC_MSG_RESULT([no])
 		]
 	)
+	CFLAGS=$CFLAGS_ORG
+	CPPFLAGS=$CPPFLAGS_ORG
 fi
 if test x$apple_flag = "xyes"; then
 	# check "gcc --help" has framework or not.
