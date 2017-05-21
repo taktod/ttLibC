@@ -8,11 +8,11 @@
  * @date   2016/11/18
  */
 
-#include <container/mpegts/mpegtsWriter.h>
-#include <container/mpegts/type/pat.h>
-#include <container/mpegts/type/pes.h>
-#include <container/mpegts/type/pmt.h>
-#include <container/mpegts/type/sdt.h>
+#include "mpegtsWriter.h"
+#include "type/pat.h"
+#include "type/pes.h"
+#include "type/pmt.h"
+#include "type/sdt.h"
 #include "../mpegts.h"
 
 #include "../../frame/video/h264.h"

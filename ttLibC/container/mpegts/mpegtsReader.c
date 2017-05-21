@@ -8,7 +8,7 @@
  * @date   2016/11/18
  */
 
-#include <container/mpegts/mpegtsReader.h>
+#include "mpegtsReader.h"
 #include "../mpegts.h"
 #include "../../log.h"
 #include "../../allocator.h"
