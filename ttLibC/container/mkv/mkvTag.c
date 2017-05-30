@@ -80,6 +80,10 @@ void ttLibC_MkvTag_getPrivateDataFrame(
 	ttLibC_MkvReader_ *reader_ = (ttLibC_MkvReader_ *)reader;
 	uint8_t *private_data = track->private_data;
 	size_t private_data_size = track->private_data_size;
+	if(private_data == NULL || private_data_size == 0) {
+		// in the case of no private data. skip this task.
+		return;
+	}
 	switch(track->type) {
 	case frameType_h265:
 		{

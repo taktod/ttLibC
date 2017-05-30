@@ -46,22 +46,24 @@ static void SimpleBlock_getLace0Frame(
 		{
 			uint8_t *buf = data;
 			size_t buf_size = data_size;
-			do {
-				uint32_t size = 0;
-				for(uint32_t i = 1;i <= track->size_length;++ i) {
-					size = (size << 8) | *buf;
-					if(i != track->size_length) {
-						*buf = 0x00;
+			if(track->private_data != NULL && track->private_data_size != 0) {
+				do {
+					uint32_t size = 0;
+					for(uint32_t i = 1;i <= track->size_length;++ i) {
+						size = (size << 8) | *buf;
+						if(i != track->size_length) {
+							*buf = 0x00;
+						}
+						else {
+							*buf = 0x01;
+						}
+						++ buf;
+						-- buf_size;
 					}
-					else {
-						*buf = 0x01;
-					}
-					++ buf;
-					-- buf_size;
-				}
-				buf += size;
-				buf_size -= size;
-			} while(buf_size > 0);
+					buf += size;
+					buf_size -= size;
+				} while(buf_size > 0);
+			}
 			while(data_size > 0) {
 				ttLibC_H265 *h265 = ttLibC_H265_getFrame(
 						(ttLibC_H265 *)track->frame,
@@ -92,23 +94,26 @@ static void SimpleBlock_getLace0Frame(
 		{
 			uint8_t *buf = data;
 			size_t buf_size = data_size;
-			// sizenal -> nal
-			do {
-				uint32_t size = 0;
-				for(uint32_t i = 1;i <= track->size_length;++ i) {
-					size = (size << 8) | *buf;
-					if(i != track->size_length) {
-						*buf = 0x00;
+			// if no private_data data is nal(annexB), already.
+			if(track->private_data != NULL && track->private_data_size != 0) {
+				// sizenal -> nal
+				do {
+					uint32_t size = 0;
+					for(uint32_t i = 1;i <= track->size_length;++ i) {
+						size = (size << 8) | *buf;
+						if(i != track->size_length) {
+							*buf = 0x00;
+						}
+						else {
+							*buf = 0x01;
+						}
+						++ buf;
+						-- buf_size;
 					}
-					else {
-						*buf = 0x01;
-					}
-					++ buf;
-					-- buf_size;
-				}
-				buf += size;
-				buf_size -= size;
-			} while(buf_size > 0);
+					buf += size;
+					buf_size -= size;
+				} while(buf_size > 0);
+			}
 			while(data_size > 0) {
 				ttLibC_H264 *h264 = ttLibC_H264_getFrame(
 						(ttLibC_H264 *)track->frame,
