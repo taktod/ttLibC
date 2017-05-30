@@ -11,7 +11,7 @@
 
 #include "vorbisEncoder.h"
 #include "../allocator.h"
-#include "../log.h"
+#include "../_log.h"
 #include <vorbis/vorbisenc.h>
 #include <string.h>
 #include "../frame/audio/pcmf32.h"

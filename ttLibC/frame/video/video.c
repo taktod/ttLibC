@@ -26,7 +26,7 @@
 #include "wmv1.h"
 #include "wmv2.h"
 #include "yuv420.h"
-#include "../../log.h"
+#include "../../_log.h"
 #include "../../allocator.h"
 
 /*

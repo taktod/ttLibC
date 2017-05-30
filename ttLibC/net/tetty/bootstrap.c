@@ -17,7 +17,7 @@
 #include "bootstrap.h"
 #include "promise.h"
 #include "../../allocator.h"
-#include "../../log.h"
+#include "../../_log.h"
 #include <netdb.h>
 #include <netinet/tcp.h>
 

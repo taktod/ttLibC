@@ -12,7 +12,7 @@
 
 #include "vorbisDecoder.h"
 #include "../allocator.h"
-#include "../log.h"
+#include "../_log.h"
 #include <vorbis/codec.h>
 #include <string.h>
 

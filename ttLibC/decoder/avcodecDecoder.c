@@ -13,7 +13,7 @@
 #include "avcodecDecoder.h"
 
 #include <libavcodec/avcodec.h>
-#include "../log.h"
+#include "../_log.h"
 #include "../allocator.h"
 #include "../util/hexUtil.h"
 #include "../util/dynamicBufferUtil.h"

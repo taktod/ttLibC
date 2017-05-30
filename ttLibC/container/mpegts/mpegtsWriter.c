@@ -19,7 +19,7 @@
 #include "../../frame/audio/mp3.h"
 #include "../../frame/audio/aac.h"
 
-#include "../../log.h"
+#include "../../_log.h"
 #include "../../allocator.h"
 #include "../../util/hexUtil.h"
 

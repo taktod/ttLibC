@@ -10,7 +10,7 @@
 #ifdef __ENABLE_WIN32__
 
 #include "MSH264Encoder.h"
-#include <ttLibC/log.h>
+#include <ttLibC/_log.h>
 #include <ttLibC/allocator.h>
 #include <ttLibC/util/hexUtil.h>
 

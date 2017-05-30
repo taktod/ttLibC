@@ -9,7 +9,7 @@
  */
 
 #include "misc.h"
-#include "../log.h"
+#include "../_log.h"
 #include "../allocator.h"
 #include "../frame/video/video.h"
 #include <stdlib.h>

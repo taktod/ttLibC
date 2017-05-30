@@ -12,7 +12,7 @@
 
 #include "faacEncoder.h"
 #include "../frame/audio/aac.h"
-#include "../log.h"
+#include "../_log.h"
 #include "../allocator.h"
 #include <stdint.h>
 #include <stdlib.h>

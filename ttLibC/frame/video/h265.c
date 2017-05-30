@@ -9,7 +9,7 @@
  */
 
 #include "h265.h"
-#include "../../log.h"
+#include "../../_log.h"
 #include "../../allocator.h"
 #include "../../util/hexUtil.h"
 #include "../../util/byteUtil.h"

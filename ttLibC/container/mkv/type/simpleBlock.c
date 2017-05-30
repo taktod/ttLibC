@@ -10,7 +10,7 @@
 
 #include "simpleBlock.h"
 #include "../mkvReader.h"
-#include "../../../log.h"
+#include "../../../_log.h"
 #include "../../../util/hexUtil.h"
 #include "../../../util/byteUtil.h"
 #include "../../../frame/video/h264.h"

@@ -9,7 +9,7 @@
  */
 
 #include "vp8.h"
-#include "../../log.h"
+#include "../../_log.h"
 
 typedef ttLibC_Frame_Video_Vp8 ttLibC_Vp8_;
 

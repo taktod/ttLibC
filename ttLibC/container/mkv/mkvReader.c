@@ -11,7 +11,7 @@
 #include "mkvReader.h"
 #include <string.h>
 
-#include "../../log.h"
+#include "../../_log.h"
 #include "../../allocator.h"
 #include "../../util/hexUtil.h"
 #include "../../util/ioUtil.h"

@@ -13,7 +13,7 @@
 #ifdef __ENABLE_SPEEXDSP__
 
 #include "speexdspResampler.h"
-#include "../log.h"
+#include "../_log.h"
 #include "../allocator.h"
 #include "../ttLibC_common.h"
 #include <speex/speex_resampler.h>

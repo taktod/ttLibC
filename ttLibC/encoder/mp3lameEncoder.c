@@ -11,7 +11,7 @@
 #ifdef __ENABLE_MP3LAME_ENCODE__
 
 #include "mp3lameEncoder.h"
-#include "../log.h"
+#include "../_log.h"
 #include "../allocator.h"
 #include <stdint.h>
 #include <stdlib.h>

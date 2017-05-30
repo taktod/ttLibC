@@ -12,7 +12,7 @@
 #include "rtmpHandshake.h"
 #include "../data/clientObject.h"
 
-#include "../../../../log.h"
+#include "../../../../_log.h"
 #include "../../../../allocator.h"
 #include "../../../../util/hexUtil.h"
 

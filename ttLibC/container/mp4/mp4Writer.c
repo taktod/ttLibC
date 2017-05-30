@@ -8,7 +8,7 @@
 #include "../mp4.h"
 #include "mp4Writer.h"
 
-#include "../../log.h"
+#include "../../_log.h"
 #include "../../allocator.h"
 #include "../../util/hexUtil.h"
 #include "../../util/ioUtil.h"

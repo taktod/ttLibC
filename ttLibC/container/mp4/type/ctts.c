@@ -7,7 +7,7 @@
 
 #include "ctts.h"
 #include "../../../util/ioUtil.h"
-#include "../../../log.h"
+#include "../../../_log.h"
 
 ttLibC_Mp4 *ttLibC_Ctts_make(
 		uint8_t *data,

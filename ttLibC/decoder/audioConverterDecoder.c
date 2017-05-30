@@ -11,7 +11,7 @@
 #ifdef __ENABLE_APPLE__
 
 #include "audioConverterDecoder.h"
-#include "../log.h"
+#include "../_log.h"
 #include "../allocator.h"
 #include "../frame/audio/pcms16.h"
 #include "../frame/audio/aac.h"

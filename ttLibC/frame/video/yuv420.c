@@ -12,7 +12,7 @@
 #include <stdlib.h>
 
 #include "yuv420.h"
-#include "../../log.h"
+#include "../../_log.h"
 #include "../../allocator.h"
 
 /*

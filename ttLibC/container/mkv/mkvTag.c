@@ -11,7 +11,7 @@
 #include "mkvTag.h"
 #include "type/simpleBlock.h"
 #include "mkvReader.h"
-#include "../../log.h"
+#include "../../_log.h"
 #include "../../util/hexUtil.h"
 #include "../../allocator.h"
 #include "../../frame/video/h264.h"

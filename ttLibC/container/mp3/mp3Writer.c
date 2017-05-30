@@ -9,7 +9,7 @@
  */
 
 #include "mp3Writer.h"
-#include "../../log.h"
+#include "../../_log.h"
 #include "../../allocator.h"
 #include "../../frame/audio/mp3.h"
 #include <stdlib.h>

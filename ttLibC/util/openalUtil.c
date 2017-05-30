@@ -13,7 +13,7 @@
 #ifdef __ENABLE_OPENAL__
 
 #include "openalUtil.h"
-#include "../log.h"
+#include "../_log.h"
 #include "../allocator.h"
 #include "../ttLibC_common.h"
 #include <time.h>

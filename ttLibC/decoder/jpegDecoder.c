@@ -11,7 +11,7 @@
 #ifdef __ENABLE_JPEG__
 
 #include "jpegDecoder.h"
-#include "../log.h"
+#include "../_log.h"
 #include "../allocator.h"
 #include "../util/hexUtil.h"
 

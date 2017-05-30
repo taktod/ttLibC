@@ -15,7 +15,7 @@
 
 #include "flvTag.h"
 #include <stdlib.h>
-#include "../../log.h"
+#include "../../_log.h"
 #include "../../allocator.h"
 
 ttLibC_FlvTag *ttLibC_FlvTag_make(

@@ -9,7 +9,7 @@
  */
 
 #include "flv1.h"
-#include "../../log.h"
+#include "../../_log.h"
 
 #include "../../util/byteUtil.h"
 

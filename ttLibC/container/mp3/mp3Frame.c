@@ -10,7 +10,7 @@
 
 #include "mp3Frame.h"
 #include <stdlib.h>
-#include "../../log.h"
+#include "../../_log.h"
 #include "../../allocator.h"
 
 ttLibC_Mp3Frame *ttLibC_Mp3Frame_make(

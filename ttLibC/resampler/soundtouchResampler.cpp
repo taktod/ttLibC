@@ -9,7 +9,7 @@
 
 #include "soundtouchResampler.h"
 #include "../allocator.h"
-#include "../log.h"
+#include "../_log.h"
 #include "audioResampler.h"
 
 #include <stdio.h>

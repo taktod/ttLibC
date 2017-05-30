@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include "beepUtil.h"
-#include "../log.h"
+#include "../_log.h"
 #include "../allocator.h"
 
 /*

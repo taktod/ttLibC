@@ -10,7 +10,7 @@
 #ifdef __ENABLE_SOCKET__
 
 #include "rtmpConnection.h"
-#include "../../../log.h"
+#include "../../../_log.h"
 #include "../../../allocator.h"
 #include "../../../util/amfUtil.h"
 #include "message/acknowledgement.h"

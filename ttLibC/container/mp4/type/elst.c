@@ -7,7 +7,7 @@
 
 #include "elst.h"
 #include "../../../util/ioUtil.h"
-#include "../../../log.h"
+#include "../../../_log.h"
 
 ttLibC_Mp4 *ttLibC_Elst_make(
 		uint8_t *data,

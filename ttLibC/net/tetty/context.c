@@ -14,7 +14,7 @@
 #include "../udp.h"
 #include "../tcp.h"
 #include "../../allocator.h"
-#include "../../log.h"
+#include "../../_log.h"
 #include "../../util/hexUtil.h"
 #include "../../util/dynamicBufferUtil.h"
 #include <string.h>

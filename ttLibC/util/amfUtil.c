@@ -12,7 +12,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../log.h"
+#include "../_log.h"
 #include "../allocator.h"
 #include "ioUtil.h"
 #include "hexUtil.h"

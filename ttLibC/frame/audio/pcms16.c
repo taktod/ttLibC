@@ -12,7 +12,7 @@
 #include <stdlib.h>
 
 #include "pcms16.h"
-#include "../../log.h"
+#include "../../_log.h"
 #include "../../allocator.h"
 
 /*

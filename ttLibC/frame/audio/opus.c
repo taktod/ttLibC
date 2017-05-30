@@ -12,7 +12,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "../../log.h"
+#include "../../_log.h"
 #include "../../allocator.h"
 
 typedef ttLibC_Frame_Audio_Opus ttLibC_Opus_;

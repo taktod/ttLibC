@@ -9,7 +9,7 @@
  */
 
 #include "theora.h"
-#include "../../log.h"
+#include "../../_log.h"
 #include "../../util/byteUtil.h"
 #include "../../util/ioUtil.h"
 

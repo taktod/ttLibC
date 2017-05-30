@@ -8,7 +8,7 @@
 #ifdef __ENABLE_OPUS__
 
 #include "opusDecoder.h"
-#include "../log.h"
+#include "../_log.h"
 #include "../allocator.h"
 #include <stdlib.h>
 #include <opus/opus.h>

@@ -10,7 +10,7 @@
 #ifdef __ENABLE_SOCKET__
 
 #include "rtmpMessage.h"
-#include "../../../../log.h"
+#include "../../../../_log.h"
 #include "../rtmpStream.h"
 #include "acknowledgement.h"
 #include "aggregateMessage.h"

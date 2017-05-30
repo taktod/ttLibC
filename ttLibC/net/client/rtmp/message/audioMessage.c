@@ -10,7 +10,7 @@
 #ifdef __ENABLE_SOCKET__
 
 #include "audioMessage.h"
-#include "../../../../log.h"
+#include "../../../../_log.h"
 #include "../../../../allocator.h"
 #include "../rtmpStream.h"
 #include <string.h>

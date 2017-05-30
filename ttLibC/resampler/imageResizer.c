@@ -9,7 +9,7 @@
  */
 
 #include "../allocator.h"
-#include "../log.h"
+#include "../_log.h"
 #include "imageResizer.h"
 
 typedef struct ImageResize_point_t {

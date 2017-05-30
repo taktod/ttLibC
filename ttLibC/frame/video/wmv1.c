@@ -9,7 +9,7 @@
  */
 
 #include "wmv1.h"
-#include "../../log.h"
+#include "../../_log.h"
 
 typedef ttLibC_Frame_Video_Wmv1 ttLibC_Wmv1_;
 

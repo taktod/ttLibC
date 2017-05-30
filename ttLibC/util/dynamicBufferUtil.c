@@ -11,7 +11,7 @@
 #include "dynamicBufferUtil.h"
 #include "../allocator.h"
 #include <string.h>
-#include "../log.h"
+#include "../_log.h"
 #include "../ttLibC_common.h"
 
 typedef struct {

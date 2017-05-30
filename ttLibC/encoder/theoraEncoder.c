@@ -11,7 +11,7 @@
 
 #include "theoraEncoder.h"
 #include "../allocator.h"
-#include "../log.h"
+#include "../_log.h"
 #include <theora/theoraenc.h>
 #include <string.h>
 

@@ -11,7 +11,7 @@
 #include "sdt.h"
 #include "../mpegtsPacket.h"
 
-#include "../../../log.h"
+#include "../../../_log.h"
 #include "../../../allocator.h"
 #include "../../../util/hexUtil.h"
 #include "../../../util/crc32Util.h"

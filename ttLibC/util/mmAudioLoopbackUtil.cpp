@@ -10,7 +10,7 @@
 #include "mmAudioLoopbackUtil.h"
 #include "msGlobalUtil.h"
 #include <ttLibC/allocator.h>
-#include <ttLibC/log.h>
+#include <ttLibC/_log.h>
 #include <ttLibC/frame/audio/pcmS16.h>
 #include <ttLibC/util/stlListUtil.h>
 #include <ttLibC/container/mkv.h>

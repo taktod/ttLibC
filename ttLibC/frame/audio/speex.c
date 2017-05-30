@@ -12,7 +12,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "../../log.h"
+#include "../../_log.h"
 #include "../../allocator.h"
 #include "../../util/ioUtil.h"
 #include "../../util/byteUtil.h"

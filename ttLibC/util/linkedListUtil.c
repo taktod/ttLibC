@@ -13,7 +13,7 @@
 #include "linkedListUtil.h"
 #include <stdio.h>
 #include "../allocator.h"
-#include "../log.h"
+#include "../_log.h"
 #include <string.h>
 
 /**

@@ -10,7 +10,7 @@
 #ifdef __ENABLE_SOCKET__
 
 #include "clientObject.h"
-#include "../../../../log.h"
+#include "../../../../_log.h"
 #include "../../../../allocator.h"
 #include "../header/rtmpHeader.h"
 #include "../message/rtmpMessage.h"

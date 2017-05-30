@@ -11,7 +11,7 @@
 #ifdef __ENABLE_APPLE__
 
 #include "audioUnitUtil.h"
-#include "../log.h"
+#include "../_log.h"
 #include "../allocator.h"
 #include <AudioToolbox/AudioToolbox.h>
 #include <AudioUnit/AudioUnit.h>

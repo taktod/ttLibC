@@ -16,7 +16,7 @@
 #include "message/audioMessage.h"
 #include "message/userControlMessage.h"
 #include "data/clientObject.h"
-#include "../../../log.h"
+#include "../../../_log.h"
 #include "../../../allocator.h"
 #include <string.h>
 

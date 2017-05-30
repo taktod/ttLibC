@@ -13,7 +13,7 @@
 #ifdef __ENABLE_FILE__
 
 #include "forkUtil.h"
-#include "../log.h"
+#include "../_log.h"
 #include <sys/wait.h>
 #include <string.h>
 #include <unistd.h>

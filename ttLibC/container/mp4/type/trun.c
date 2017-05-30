@@ -10,7 +10,7 @@
 
 #include "trun.h"
 #include "../../../util/ioUtil.h"
-#include "../../../log.h"
+#include "../../../_log.h"
 #include "../../../util/hexUtil.h"
 
 ttLibC_Mp4 *ttLibC_Trun_make(

@@ -11,7 +11,7 @@
 #ifdef __ENABLE_OPENH264__
 
 #include "openh264Encoder.h"
-#include "../log.h"
+#include "../_log.h"
 #include "../allocator.h"
 #include "../util/dynamicBufferUtil.h"
 

@@ -20,7 +20,7 @@
 #include <netinet/tcp.h>
 #include <netdb.h>
 #include "../allocator.h"
-#include "../log.h"
+#include "../_log.h"
 
 ttLibC_TcpServerInfo *ttLibC_TcpServer_make(
 		uint64_t ip,

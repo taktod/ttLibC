@@ -11,7 +11,7 @@
 #ifdef __ENABLE_SPEEX__
 
 #include "speexDecoder.h"
-#include "../log.h"
+#include "../_log.h"
 #include "../allocator.h"
 #include <stdlib.h>
 #include <speex/speex.h>

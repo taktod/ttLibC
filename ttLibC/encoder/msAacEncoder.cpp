@@ -11,7 +11,7 @@
 #ifdef __ENABLE_WIN32__
 
 #include "msAacEncoder.h"
-#include <ttLibC/log.h>
+#include <ttLibC/_log.h>
 #include <ttLibC/allocator.h>
 #include <ttLibC/frame/audio/pcms16.h>
 

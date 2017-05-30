@@ -25,7 +25,7 @@
 #include "speex.h"
 #include "vorbis.h"
 
-#include "../../log.h"
+#include "../../_log.h"
 #include "../../allocator.h"
 
 /*

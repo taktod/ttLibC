@@ -10,7 +10,7 @@
 
 #include "stts.h"
 #include "../../../util/ioUtil.h"
-#include "../../../log.h"
+#include "../../../_log.h"
 
 ttLibC_Mp4 *ttLibC_Stts_make(
 		uint8_t *data,

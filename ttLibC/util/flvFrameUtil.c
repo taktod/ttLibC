@@ -9,7 +9,7 @@
  */
 
 #include "flvFrameUtil.h"
-#include "../log.h"
+#include "../_log.h"
 #include "../allocator.h"
 #include <string.h>
 #include "hexUtil.h"

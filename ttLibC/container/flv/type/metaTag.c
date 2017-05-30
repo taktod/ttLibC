@@ -10,7 +10,7 @@
 
 #include "metaTag.h"
 #include "../flvTag.h"
-#include "../../../log.h"
+#include "../../../_log.h"
 #include "../../../util/hexUtil.h"
 #include "../../../util/ioUtil.h"
 

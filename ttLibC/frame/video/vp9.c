@@ -9,7 +9,7 @@
  */
 
 #include "vp9.h"
-#include "../../log.h"
+#include "../../_log.h"
 #include "../../util/byteUtil.h"
 
 typedef ttLibC_Frame_Video_Vp9 ttLibC_Vp9_;

@@ -12,7 +12,7 @@
 
 #include "theoraDecoder.h"
 #include "../allocator.h"
-#include "../log.h"
+#include "../_log.h"
 #include <theora/theoradec.h>
 #include <string.h>
 

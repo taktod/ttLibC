@@ -10,7 +10,7 @@
 
 #include "stsc.h"
 #include "../../../util/ioUtil.h"
-#include "../../../log.h"
+#include "../../../_log.h"
 
 ttLibC_Mp4 *ttLibC_Stsc_make(
 		uint8_t *data,

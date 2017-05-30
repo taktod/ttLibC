@@ -13,7 +13,7 @@
 #include "udp.h"
 #include "netCommon.h"
 #include "../allocator.h"
-#include "../log.h"
+#include "../_log.h"
 #include <string.h>
 #include <unistd.h>
 #include <arpa/inet.h>

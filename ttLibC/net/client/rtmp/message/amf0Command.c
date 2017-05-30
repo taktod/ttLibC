@@ -10,7 +10,7 @@
 #ifdef __ENABLE_SOCKET__
 
 #include "amf0Command.h"
-#include "../../../../log.h"
+#include "../../../../_log.h"
 #include "../../../../allocator.h"
 #include <string.h>
 #include "../../../../util/hexUtil.h"

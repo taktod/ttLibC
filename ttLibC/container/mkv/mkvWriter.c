@@ -10,7 +10,7 @@
 
 #include "mkvWriter.h"
 
-#include "../../log.h"
+#include "../../_log.h"
 #include "../../allocator.h"
 #include "../../util/hexUtil.h"
 #include "../container.h"

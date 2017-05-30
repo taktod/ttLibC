@@ -11,7 +11,7 @@
 #ifdef __ENABLE_APPLE__
 
 #include "vtDecompressSessionDecoder.h"
-#include "../log.h"
+#include "../_log.h"
 #include "../allocator.h"
 #include "../util/dynamicBufferUtil.h"
 #include "../util/ioUtil.h"

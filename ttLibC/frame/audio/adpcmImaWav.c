@@ -23,7 +23,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "../../log.h"
+#include "../../_log.h"
 
 typedef ttLibC_Frame_Audio_AdpcmImaWav ttLibC_AdpcmImaWav_;
 

@@ -11,7 +11,7 @@
 #include <libswresample/swresample.h>
 #include <libavutil/channel_layout.h>
 #include "../allocator.h"
-#include "../log.h"
+#include "../_log.h"
 
 typedef struct {
 	ttLibC_SwresampleResampler inherit_super;

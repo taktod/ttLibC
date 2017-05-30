@@ -9,7 +9,7 @@
  */
 
 #include "jpeg.h"
-#include "../../log.h"
+#include "../../_log.h"
 
 typedef ttLibC_Frame_Video_Jpeg ttLibC_Jpeg_;
 

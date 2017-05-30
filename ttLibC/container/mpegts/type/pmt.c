@@ -11,7 +11,7 @@
 #include "pmt.h"
 #include "../mpegtsPacket.h"
 
-#include "../../../log.h"
+#include "../../../_log.h"
 #include "../../../allocator.h"
 #include "../../../util/byteUtil.h"
 #include "../../../util/ioUtil.h"

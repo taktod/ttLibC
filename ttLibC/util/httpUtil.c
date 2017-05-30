@@ -25,7 +25,7 @@
 #include <unistd.h>
 #include <stdbool.h>
 
-#include "../log.h"
+#include "../_log.h"
 #include "../allocator.h"
 
 #define BUF_LEN 256

@@ -11,7 +11,7 @@
 #ifdef __ENABLE_X265__
 
 #include "x265Encoder.h"
-#include "../log.h"
+#include "../_log.h"
 #include "../allocator.h"
 #include "../util/dynamicBufferUtil.h"
 #include <x265.h>

@@ -13,7 +13,7 @@
 #include "opencvUtil.h"
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
-#include "../log.h"
+#include "../_log.h"
 #include "../allocator.h"
 #include "../ttLibC_common.h"
 

@@ -9,7 +9,7 @@
 
 #include "handler.h"
 #include "../../../allocator.h"
-#include "../../../log.h"
+#include "../../../_log.h"
 #include "websocket.h"
 #include <string.h>
 

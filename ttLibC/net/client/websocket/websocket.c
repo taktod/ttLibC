@@ -13,7 +13,7 @@
 #include <string.h>
 
 #include "../../../allocator.h"
-#include "../../../log.h"
+#include "../../../_log.h"
 #include "../../tetty.h"
 #include "../../../util/ioUtil.h"
 #include "../../../util/hexUtil.h"

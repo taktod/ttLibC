@@ -14,7 +14,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../log.h"
+#include "../_log.h"
 #include "../allocator.h"
 #include "../ttLibC_common.h"
 

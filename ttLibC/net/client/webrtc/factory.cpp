@@ -14,7 +14,7 @@
 #include "peerConnection.h"
 #include "mediaStream.h"
 #include "../../../allocator.h"
-#include "../../../log.h"
+#include "../../../_log.h"
 #include <webrtc/base/ssladapter.h>
 #include <uuid/uuid.h>
 

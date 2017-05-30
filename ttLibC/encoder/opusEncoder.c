@@ -11,7 +11,7 @@
 #ifdef __ENABLE_OPUS__
 
 #include "opusEncoder.h"
-#include "../log.h"
+#include "../_log.h"
 #include "../allocator.h"
 #include <stdint.h>
 #include <stdlib.h>

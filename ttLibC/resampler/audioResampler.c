@@ -9,7 +9,7 @@
  */
 
 #include "audioResampler.h"
-#include "../log.h"
+#include "../_log.h"
 #include "../allocator.h"
 #include "../util/ioUtil.h"
 #include <stdlib.h>

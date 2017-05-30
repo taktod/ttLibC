@@ -10,7 +10,7 @@
 
 #include "headerTag.h"
 
-#include "../../../log.h"
+#include "../../../_log.h"
 #include "../../../util/ioUtil.h"
 #include "../../../util/hexUtil.h"
 

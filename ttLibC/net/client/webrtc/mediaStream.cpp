@@ -12,7 +12,7 @@
 
 #include "mediaStream.h"
 #include "../../../allocator.h"
-#include "../../../log.h"
+#include "../../../_log.h"
 #include "factory.h"
 #include <uuid/uuid.h>
 

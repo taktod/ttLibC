@@ -14,7 +14,7 @@
 #include "type/pmt.h"
 #include "type/sdt.h"
 #include <stdlib.h>
-#include "../../log.h"
+#include "../../_log.h"
 #include "../../allocator.h"
 #include "../../frame/frame.h"
 #include <stdio.h>

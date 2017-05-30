@@ -13,7 +13,7 @@
 #include "type/audioTag.h"
 #include "type/videoTag.h"
 #include "type/metaTag.h"
-#include "../../log.h"
+#include "../../_log.h"
 #include "../../allocator.h"
 #include "../../util/hexUtil.h"
 #include "../../frame/video/h264.h"

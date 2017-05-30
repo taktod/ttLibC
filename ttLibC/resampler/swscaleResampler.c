@@ -10,7 +10,7 @@
 #include "swscaleResampler.h"
 #include <libswscale/swscale.h>
 #include "../allocator.h"
-#include "../log.h"
+#include "../_log.h"
 
 typedef struct {
 	ttLibC_SwscaleResampler inherit_super;

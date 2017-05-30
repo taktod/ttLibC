@@ -13,7 +13,7 @@
 #include "frame.h"
 #include "audio/audio.h"
 #include "video/video.h"
-#include "../log.h"
+#include "../_log.h"
 
 /*
  * make clone frame.

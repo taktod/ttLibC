@@ -12,7 +12,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "../../log.h"
+#include "../../_log.h"
 #include "../../util/ioUtil.h"
 
 typedef ttLibC_Frame_Audio_Vorbis ttLibC_Vorbis_;

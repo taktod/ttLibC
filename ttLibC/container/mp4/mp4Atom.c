@@ -10,7 +10,7 @@
 
 #include "mp4Atom.h"
 #include "mp4Reader.h"
-#include "../../log.h"
+#include "../../_log.h"
 #include "../../allocator.h"
 #include "type/ctts.h"
 #include "type/stts.h"

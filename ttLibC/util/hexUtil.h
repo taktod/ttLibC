@@ -20,7 +20,7 @@ extern "C" {
 #include <stdint.h>
 
 #include "../ttLibC.h"
-#include "../log.h"
+#include "../_log.h"
 
 /**
  * dump memory data.

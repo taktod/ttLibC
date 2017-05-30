@@ -11,7 +11,7 @@
 
 #include "promise.h"
 #include "../../allocator.h"
-#include "../../log.h"
+#include "../../_log.h"
 
 #ifdef _WIN32
 #	include <sys/types.h>
