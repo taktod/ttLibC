@@ -498,8 +498,23 @@ static Error_e H264_analyzeSequenceParameterSet(
 			ttLibC_ByteReader_bit(reader, 1);
 			uint8_t seq_scaling_matrix_present_flag = ttLibC_ByteReader_bit(reader, 1);
 			if(seq_scaling_matrix_present_flag == 1) {
-				ERR_PRINT("not imprement for seq_scaling_matrix_present");
-				return ttLibC_updateError(Target_On_VideoFrame, Error_InvalidOperation);
+				// no need to restore matrix, just skip reading bit.
+				for(int i = 0, max = (chroma_format_idc != 3 ? 8 : 12);i < max;++ i) {
+					uint8_t seq_scaling_list_present_flag = ttLibC_ByteReader_bit(reader, 1);
+					if(seq_scaling_list_present_flag) {
+						int size = 16;
+						if(i >= 6) {
+							size = 64;
+						}
+						int last = 8, next = 8;
+						for(int j = 0;j < size;++ j) {
+							if(next > 0) {
+								next = (last + ttLibC_ByteReader_expGolomb(reader, true)) & 0xFF;
+							}
+							last = next ? next : last;
+						}
+					}
+				}
 			}
 		}
 		break;
