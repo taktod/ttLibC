@@ -173,12 +173,31 @@ static void drainH264(ttLibC_MsH264Encoder_ *encoder) {
 		outDataBuffer.pSample->GetSampleTime(&samplePts);
 		BYTE *pData;
 		pOutBuffer->Lock(&pData, NULL, &totalLength);
-		if(totalLength > 30) {
-			LOG_DUMP(pData, 30, true);
-		}
-		else {
-			LOG_DUMP(pData, totalLength, true);
-		}
+		uint8_t *buffer = pData;
+		size_t left_size = totalLength;
+		do {
+			ttLibC_H264 *h264 = ttLibC_H264_getFrame(
+				(ttLibC_H264 *)encoder->h264,
+				buffer,
+				left_size,
+				true,
+				samplePts,
+				10000);
+			if(h264 == NULL) {
+				puts("error failed to make h264 frame.");
+				break;
+			}
+			// ignore about id.
+			encoder->h264 = h264;
+			if(encoder->callback != NULL) {
+				if(!encoder->callback(encoder->ptr, encoder->h264)) {
+					puts("errored with callback.");
+					break;
+				}
+			}
+			buffer += h264->inherit_super.inherit_super.buffer_size;
+			left_size -= h264->inherit_super.inherit_super.buffer_size;
+		} while(left_size > 0);
 		pOutBuffer->Unlock();
 	}
 	if(FAILED(hr)) {
@@ -507,15 +526,22 @@ bool ttLibC_MsH264Encoder_encode(
 	sample->AddBuffer(buffer);
 
 	// we need to copy plane here.
-
+	BYTE *bufferData;
+	HRESULT hr = buffer->Lock(&bufferData, NULL, NULL);
+	if(SUCCEEDED(hr)) {
+		memcpy(bufferData, frame->inherit_super.inherit_super.data, frame->inherit_super.inherit_super.buffer_size);
+		hr = buffer->Unlock();
+	}
+	if(SUCCEEDED(hr)) {
+		hr = buffer->SetCurrentLength(frame->inherit_super.inherit_super.buffer_size);
+	}
 	// timebase = 10000
 	uint64_t pts = frame->inherit_super.inherit_super.pts * 10000 / frame->inherit_super.inherit_super.timebase;
-//	printf("inputPts:%lld\n", pts);
 	sample->SetSampleTime(pts);
 	sample->SetSampleDuration(100);
+	encoder_->callback = callback;
+	encoder_->ptr = ptr;
 	if(encoder_->is_async) {
-		encoder_->callback = callback;
-		encoder_->ptr = ptr;
 		encoder_->ringBuffer->pushSample(sample);
 	}
 	else {
