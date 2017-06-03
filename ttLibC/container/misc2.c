@@ -15,6 +15,15 @@
 #include <stdlib.h>
 #include "../util/stlListUtil.h"
 
+typedef enum {
+	frameStatus_preprocess1,
+	frameStatus_preprocess2,
+	frameStatus_setupInitial1,
+	frameStatus_setupInitial2,
+	frameStatus_nonPiramidal,
+	frameStatus_piramidal
+} frameStatus;
+
 /*
  * detail definition for FrameQueue (stlList version.)
  */
@@ -29,8 +38,13 @@ typedef struct ttLibC_Container_Misc_FrameQueue2_{
 	ttLibC_FrameQueueFunc callback;
 	/** ptr */
 	void *ptr;
-	// pts cache for h26x frame.
+	// data for h26x dts calculate.
+	/** frame cache */
+	ttLibC_Frame *frame_cache[3];
+	/** for calcurate */
 	uint64_t pts_cache[2];
+	/** process status */
+	frameStatus status;
 } ttLibC_Container_Misc_FrameQueue2_;
 
 typedef ttLibC_Container_Misc_FrameQueue2_ ttLibC_FrameQueue2_;
@@ -67,8 +81,12 @@ ttLibC_FrameQueue *ttLibC_FrameQueue_make(
 	queue->inherit_super.track_id = track_id;
 	queue->inherit_super.timebase = 1000;
 	queue->inherit_super.pts = 0;
+	queue->frame_cache[0] = NULL;
+	queue->frame_cache[1] = NULL;
+	queue->frame_cache[2] = NULL;
 	queue->pts_cache[0] = 0;
 	queue->pts_cache[1] = 0;
+	queue->status = frameStatus_preprocess1;
 	return (ttLibC_FrameQueue *)queue;
 }
 
@@ -166,17 +184,6 @@ ttLibC_Frame *ttLibC_FrameQueue_dequeue_first(ttLibC_FrameQueue *queue) {
 	return frame;
 }
 
-static bool FrameQueue_updateDtsCallback(void *ptr, void *item) {
-	uint64_t *buf = (uint64_t *)ptr;
-	ttLibC_Frame *frame = (ttLibC_Frame *)item;
-	++ buf[1];
-	if(buf[1] == 2) {
-		frame->dts = buf[0];
-		return false;
-	}
-	return true;
-}
-
 /*
  * add frame on queue.
  * @param queue target queue object.
@@ -211,37 +218,101 @@ bool ttLibC_FrameQueue_queue(
 			{
 				ttLibC_Video *v = (ttLibC_Video *)f;
 				if(v->type != videoType_info) {
-					if(f->pts == 0) {
-						// nothing to do for pts = 0
+					switch(queue_->status) {
+					case frameStatus_preprocess1:
+						queue_->frame_cache[1] = f;
+						queue_->status = frameStatus_preprocess2;
 						break;
-					}
-					if(queue_->pts_cache[0] == 0) {
-						queue_->pts_cache[0] = f->pts;
+					case frameStatus_preprocess2:
+						queue_->frame_cache[0] = f;
+						queue_->status = frameStatus_setupInitial1;
 						break;
-					}
-					if(queue_->pts_cache[1] == 0) {
-						queue_->pts_cache[1] = f->pts;
+					case frameStatus_setupInitial1:
+						if(queue_->frame_cache[1]->pts > queue_->frame_cache[0]->pts) {
+							ERR_PRINT("unexpected data. preprocess frame is flipped.");
+							return false;
+						}
+						else {
+							// set the dts of [1].
+							queue_->frame_cache[1]->dts = queue_->frame_cache[1]->pts;
+							queue_->inherit_super.pts = queue_->frame_cache[1]->pts;
+							if(queue_->frame_cache[0]->pts < f->pts) {
+								// [1] < [0] < f
+								// we don't need to deal with dts yet.
+								queue_->frame_cache[1] = queue_->frame_cache[0];
+								queue_->frame_cache[0] = f;
+							}
+							else {
+								// now we need to deal with dts.
+								queue_->frame_cache[2] = queue_->frame_cache[1];
+								queue_->frame_cache[1] = queue_->frame_cache[0];
+								queue_->frame_cache[0] = f;
+								queue_->status = frameStatus_setupInitial2;
+							}
+						}
 						break;
-					}
-					// pick up lowest pts
-					uint64_t pts = queue_->pts_cache[0];
-					if(pts > queue_->pts_cache[1]) {
-						pts = queue_->pts_cache[1];
-					}
-					if(pts > f->pts) {
-						pts = f->pts;
-					}
-					// update frame dts.
-					uint64_t buf[2] = {pts, 0};
-					ttLibC_StlList_forEachReverse(queue_->frame_list, FrameQueue_updateDtsCallback, buf);
-					// update pts for queue information.
-					queue_->inherit_super.pts = pts;
-					// update pts cache
-					if(pts == queue_->pts_cache[0]) {
-						queue_->pts_cache[0] = f->pts;
-					}
-					else if(pts == queue_->pts_cache[1]) {
-						queue_->pts_cache[1] = f->pts;
+					case frameStatus_setupInitial2:
+						if(queue_->frame_cache[0]->pts < f->pts) {
+							// non pyramidal bframe?
+							// [2] < [1] > [0] < f
+							queue_->frame_cache[1]->dts = (queue_->frame_cache[0]->pts + queue_->frame_cache[2]->pts * 2) / 3;
+							queue_->frame_cache[0]->dts = (queue_->frame_cache[0]->pts * 2 + queue_->frame_cache[2]->pts) / 3;
+							f->dts = queue_->frame_cache[0]->pts;
+							if(queue_->frame_cache[1]->pts < f->pts) {
+								queue_->pts_cache[0] = f->pts;
+								queue_->pts_cache[1] = queue_->frame_cache[1]->pts;
+							}
+							else {
+								queue_->pts_cache[1] = f->pts;
+								queue_->pts_cache[0] = queue_->frame_cache[1]->pts;
+							}
+							queue_->frame_cache[2] = NULL;
+							queue_->frame_cache[1] = NULL;
+							queue_->frame_cache[0] = NULL;
+							queue_->status = frameStatus_piramidal;
+						}
+						else {
+							// pyramidal bframe?
+							queue_->frame_cache[1]->dts = (f->pts + queue_->frame_cache[2]->pts * 2) / 3;
+							queue_->frame_cache[0]->dts = (f->pts * 2 + queue_->frame_cache[2]->pts) / 3;
+							f->dts = f->pts;
+							queue_->pts_cache[0] = queue_->frame_cache[1]->pts;
+							queue_->pts_cache[1] = queue_->frame_cache[0]->pts;
+							queue_->frame_cache[2] = NULL;
+							queue_->frame_cache[1] = NULL;
+							queue_->frame_cache[0] = NULL;
+							queue_->status = frameStatus_piramidal;
+						}
+						queue_->inherit_super.pts = f->dts;
+						break;
+					case frameStatus_nonPiramidal:
+						if(queue_->pts_cache[0] < f->pts) {
+							f->dts = queue_->pts_cache[0];
+							queue_->pts_cache[0] = f->pts;
+						}
+						else {
+							f->dts = f->pts;
+						}
+						queue_->inherit_super.pts = f->dts;
+						break;
+					case frameStatus_piramidal:
+						if(queue_->pts_cache[1] < f->pts) {
+							f->dts = queue_->pts_cache[1];
+							if(queue_->pts_cache[0] < f->pts) {
+								queue_->pts_cache[1] = queue_->pts_cache[0];
+								queue_->pts_cache[0] = f->pts;
+							}
+							else {
+								queue_->pts_cache[1] = f->pts;
+							}
+						}
+						else {
+							f->dts = f->pts;
+						}
+						queue_->inherit_super.pts = f->dts;
+						break;
+					default:
+						break;
 					}
 				}
 			}

@@ -143,6 +143,7 @@ bool ttLibC_FlvVideoTag_writeTag(
 		ttLibC_Frame *frame,
 		ttLibC_ContainerWriteFunc callback,
 		void *ptr) {
+	uint64_t pts = frame->pts;
 	if(frame->type == frameType_h264) {
 		ttLibC_H264 *h264 = (ttLibC_H264 *)frame;
 		if(h264->type == H264Type_configData) {
@@ -153,6 +154,7 @@ bool ttLibC_FlvVideoTag_writeTag(
 			}
 			writer->video_track.crc32 = crc32_value;
 		}
+		pts = frame->dts;
 	}
 	ttLibC_DynamicBuffer *buffer = ttLibC_DynamicBuffer_make();
 	ttLibC_DynamicBuffer_alloc(buffer, 11);
@@ -163,10 +165,10 @@ bool ttLibC_FlvVideoTag_writeTag(
 	data[2]  = 0x00;
 	data[3]  = 0x00;
 	// get pts from frame information.
-	data[4]  = (frame->pts >> 16) & 0xFF;
-	data[5]  = (frame->pts >> 8) & 0xFF;
-	data[6]  = frame->pts & 0xFF;
-	data[7]  = (frame->pts >> 24) & 0xFF;
+	data[4]  = (pts >> 16) & 0xFF;
+	data[5]  = (pts >> 8) & 0xFF;
+	data[6]  = pts & 0xFF;
+	data[7]  = (pts >> 24) & 0xFF;
 	// streamId...
 	data[8]  = 0x00;
 	data[9]  = 0x00;
@@ -181,6 +183,12 @@ bool ttLibC_FlvVideoTag_writeTag(
 	data[1]  = (size >> 16) & 0xFF;
 	data[2]  = (size >> 8) & 0xFF;
 	data[3]  = size & 0xFF;
+	if(frame->type == frameType_h264) {
+		uint32_t offset = frame->pts - frame->dts;
+		data[13] = (offset >> 16) & 0xFF;
+		data[14] = (offset >> 8) & 0xFF;
+		data[15] = offset & 0xFF;
+	}
 	// update size 2.
 	uint32_t endSize = ttLibC_DynamicBuffer_refSize(buffer);
 	uint32_t be_endSize = be_uint32_t(endSize);
