@@ -551,7 +551,7 @@ bool ttLibC_MsH264Encoder_encode(
 
 		drainH264(encoder_);
 	}
-	return false;
+	return SUCCEEDED(hr);
 }
 
 void ttLibC_MsH264Encoder_close(ttLibC_MsH264Encoder **encoder) {
