@@ -56,13 +56,13 @@ Error_e ttLibC_updateError(Error_Target_e target, Error_e error) {
 		return error;
 	}
 	if((error & 0xF0000000) == 0) {
-		return (target << 7) | error;
+		return (target << 28) | error;
 	}
 	else if((error & 0x0F000000) == 0) {
-		return (target << 6) | error;
+		return (target << 24) | error;
 	}
 	else if((error & 0x00F00000) == 0) {
-		return (target << 5) | error;
+		return (target << 20) | error;
 	}
 	else {
 		return error;
