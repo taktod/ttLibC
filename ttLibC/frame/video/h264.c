@@ -785,6 +785,9 @@ ttLibC_H264 *ttLibC_H264_getFrame(
 		uint64_t pts,
 		uint32_t timebase) {
 	// analyze data as nal. annex B.
+	if(data_size < 5) {
+		return NULL;
+	}
 	ttLibC_H264_NalInfo nal_info;
 	if(!ttLibC_H264_getNalInfo(&nal_info, data, data_size)) {
 		ERR_PRINT("failed to get nal info.");
@@ -896,6 +899,9 @@ ttLibC_H264 *ttLibC_H264_analyzeAvccTag(
 	size_t buffer_size = data_size; // assume sps is one pps is one.
 	uint8_t *buffer = NULL;
 	bool alloc_flag = false;
+	if(data_size <= 8) {
+		return NULL;
+	}
 	if(prev_frame != NULL) {
 		if(!prev_frame->inherit_super.inherit_super.is_non_copy) {
 			if(prev_frame->inherit_super.inherit_super.data_size > buffer_size) {
@@ -957,10 +963,17 @@ ttLibC_H264 *ttLibC_H264_analyzeAvccTag(
 		return NULL;
 	}
 	data += 6;
-	data_size -= 6 ;
+	data_size -= 6;
 	uint32_t sps_size = be_uint16_t(*((uint16_t *)data));
 	data += 2;
 	data_size -= 2;
+	if(data_size <= sps_size) {
+		ERR_PRINT("not have enough data size.");
+		if(alloc_flag) {
+			ttLibC_free(buffer);
+		}
+		return NULL;
+	}
 	*((uint32_t *)buf) = be_uint32_t(1);
 	buf += 4;
 	buf_pos += 4;
@@ -969,6 +982,13 @@ ttLibC_H264 *ttLibC_H264_analyzeAvccTag(
 	data_size -= sps_size;
 	buf += sps_size;
 	buf_pos += sps_size;
+	if(data_size < 3) {
+		ERR_PRINT("pps is missing.");
+		if(alloc_flag) {
+			ttLibC_free(buffer);
+		}
+		return NULL;
+	}
 	uint32_t pps_count = data[0];
 	if(pps_count != 1) {
 		ERR_PRINT("pps count is not 1.:%d", pps_count);
@@ -980,6 +1000,13 @@ ttLibC_H264 *ttLibC_H264_analyzeAvccTag(
 	uint32_t pps_size = be_uint16_t(*((uint16_t *)(data + 1)));
 	data += 3;
 	data_size -= 3;
+	if(data_size < pps_size) {
+		ERR_PRINT("not have enough data size.");
+		if(alloc_flag) {
+			ttLibC_free(buffer);
+		}
+		return NULL;
+	}
 	*((uint32_t *)buf) = be_uint32_t(1);
 	buf += 4;
 	buf_pos += 4;

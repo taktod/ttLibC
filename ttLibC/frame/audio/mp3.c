@@ -427,6 +427,9 @@ static ttLibC_Mp3 *Mp3_makeId3Frame(
 		return NULL;
 	}
 	ttLibC_ByteReader_close(&reader);
+	if(size < data_size) {
+		return NULL;
+	}
 	ttLibC_Mp3_ *mp3 = (ttLibC_Mp3_ *)ttLibC_Mp3_make(
 			prev_frame,
 			Mp3Type_id3,

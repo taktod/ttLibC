@@ -258,6 +258,9 @@ ttLibC_Speex *ttLibC_Speex_getFrame(
 		bool non_copy_mode,
 		uint64_t pts,
 		uint32_t timebase) {
+	if(data_size < 8) {
+		return NULL;
+	}
 	if(prev_frame == NULL) {
 		uint8_t *buf = data;
 		// first frame can be speex header.
@@ -269,6 +272,9 @@ ttLibC_Speex *ttLibC_Speex_getFrame(
 		&& buf[5] == ' '
 		&& buf[6] == ' '
 		&& buf[7] == ' ') {
+			if(data_size < 0x44) {
+				return NULL;
+			}
 			buf += 0x24;
 			uint32_t *buf_int = (uint32_t *)buf;
 			uint32_t sample_rate = le_uint32_t(*buf_int);
@@ -292,7 +298,7 @@ ttLibC_Speex *ttLibC_Speex_getFrame(
 		}
 		else {
 			// if not header, try to use as frame data.
-			ttLibC_ByteReader *reader = ttLibC_ByteReader_make(data, data_size, ByteUtilType_default);;
+			ttLibC_ByteReader *reader = ttLibC_ByteReader_make(data, data_size, ByteUtilType_default);
 			uint32_t frame_num;
 			SpeexBand band;
 			uint32_t sample_rate = 0;

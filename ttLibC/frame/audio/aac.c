@@ -277,7 +277,15 @@ ttLibC_Aac *ttLibC_Aac_getFrame(
 		bool non_copy_mode,
 		uint64_t pts,
 		uint32_t timebase) {
+	if(data_size < 2) {
+		// data_size is too short need more.
+		return NULL;
+	}
 	ttLibC_ByteReader *reader = ttLibC_ByteReader_make(data, data_size, ByteUtilType_default);
+	if(reader == NULL) {
+		ERR_PRINT("failed to make byteReader.");
+		return NULL;
+	}
 	if(ttLibC_ByteReader_bit(reader, 12) != 0xFFF) {
 		ttLibC_ByteReader_close(&reader);
 		return Aac_getRawFrame(
@@ -303,10 +311,6 @@ ttLibC_Aac *ttLibC_Aac_getFrame(
 	uint32_t frame_size = ttLibC_ByteReader_bit(reader, 13);
 	ttLibC_ByteReader_bit(reader, 11);
 	ttLibC_ByteReader_bit(reader, 2);
-	if(reader == NULL) {
-		ERR_PRINT("failed to make byteReader.");
-		return NULL;
-	}
 	if(reader->error != Error_noError) {
 		LOG_ERROR(reader->error);
 		ttLibC_ByteReader_close(&reader);
