@@ -191,8 +191,20 @@ static void AudioResampler_convertFormatSrcPcmF32(
 		switch(frame_type) {
 		case frameType_pcmS16:
 			{
-				int16_t int_l_val = (int16_t)(l_val * 32767);
-				int16_t int_r_val = (int16_t)(r_val * 32767);
+				int32_t int_l_val = (int32_t)(l_val * 32767);
+				int32_t int_r_val = (int32_t)(r_val * 32767);
+				if(int_l_val > 32767) {
+					int_l_val = 32767;
+				}
+				else if(int_l_val < -32767) {
+					int_l_val = -32767;
+				}
+				if(int_r_val > 32767) {
+					int_r_val = 32767;
+				}
+				else if(int_r_val < -32767) {
+					int_r_val = -32767;
+				}
 				switch(type) {
 				case PcmS16Type_bigEndian:
 				case PcmS16Type_bigEndian_planar:
