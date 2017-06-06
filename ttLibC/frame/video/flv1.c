@@ -134,7 +134,9 @@ ttLibC_Flv1_Type ttLibC_Flv1_getPictureType(
 		return -1;
 	}
 	if(ttLibC_ByteReader_bit(reader, 17) != 1) {
-		ERR_PRINT("invalid flv1 data.");
+		if((reader->error & 0x000FFFFF) != Error_NeedMoreInput) {
+			ERR_PRINT("invalid flv1 data.");
+		}
 		ttLibC_ByteReader_close(&reader);
 		return -1;
 	}
@@ -164,7 +166,9 @@ ttLibC_Flv1_Type ttLibC_Flv1_getPictureType(
 	}
 	uint32_t picture_type = ttLibC_ByteReader_bit(reader, 2);
 	if(reader->error != Error_noError) {
-		LOG_ERROR(reader->error);
+		if((reader->error & 0x000FFFFF) != Error_NeedMoreInput) {
+			ERR_ERROR(reader->error);
+		}
 		ttLibC_ByteReader_close(&reader);
 		return -1;
 	}
@@ -195,7 +199,9 @@ uint32_t ttLibC_Flv1_getWidth(void *data, size_t data_size) {
 		return 0;
 	}
 	if(ttLibC_ByteReader_bit(reader, 17) != 1) {
-		ERR_PRINT("invalid flv1 data.");
+		if((reader->error & 0x000FFFFF) != Error_NeedMoreInput) {
+			ERR_PRINT("invalid flv1 data.");
+		}
 		ttLibC_ByteReader_close(&reader);
 		return 0;
 	}
@@ -232,7 +238,9 @@ uint32_t ttLibC_Flv1_getWidth(void *data, size_t data_size) {
 		return 0;
 	}
 	if(reader->error != Error_noError) {
-		LOG_ERROR(reader->error);
+		if((reader->error & 0x000FFFFF) != Error_NeedMoreInput) {
+			ERR_ERROR(reader->error);
+		}
 		ttLibC_ByteReader_close(&reader);
 		return 0;
 	}
@@ -253,7 +261,9 @@ uint32_t ttLibC_Flv1_getHeight(void *data, size_t data_size) {
 		return 0;
 	}
 	if(ttLibC_ByteReader_bit(reader, 17) != 1) {
-		ERR_PRINT("invalid flv1 data.");
+		if((reader->error & 0x000FFFFF) != Error_NeedMoreInput) {
+			ERR_PRINT("invalid flv1 data.");
+		}
 		ttLibC_ByteReader_close(&reader);
 		return 0;
 	}
@@ -292,7 +302,9 @@ uint32_t ttLibC_Flv1_getHeight(void *data, size_t data_size) {
 		return 0;
 	}
 	if(reader->error != Error_noError) {
-		LOG_ERROR(reader->error);
+		if((reader->error & 0x000FFFFF) != Error_NeedMoreInput) {
+			ERR_ERROR(reader->error);
+		}
 		ttLibC_ByteReader_close(&reader);
 		return 0;
 	}

@@ -18,10 +18,13 @@ static const char *const errors[] = {
 static const char *const errorMessage[] = {
 		"no error",
 		"failed to memory allocate.",
-		"need more memory.",
+		"need more output buffer.",
 		"native library error.",
-		"require more data.",
-		"invalid operation."
+		"need more input data.",
+		"ttLibC internal error.",
+		"input data is broken.",
+		"missing required params.",
+		"input data is invalid data type."
 };
 
 static const char *const errorTarget[] = {

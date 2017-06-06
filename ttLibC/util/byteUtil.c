@@ -98,7 +98,7 @@ uint64_t ttLibC_ByteReader_bit(
 			if(reader_->data_size <= 0) {
 				LOG_PRINT("no more data buffer.");
 				reader_->inherit_super.error_number = 1;
-				reader_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_RequireMoreData);
+				reader_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_NeedMoreInput);
 				return 0;
 			}
 			++ reader_->inherit_super.read_size;
@@ -113,7 +113,7 @@ uint64_t ttLibC_ByteReader_bit(
 					if(reader_->data_size == 0) {
 						LOG_PRINT("no more data.");
 						reader_->inherit_super.error_number = 1;
-						reader_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_RequireMoreData);
+						reader_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_NeedMoreInput);
 						return 0;
 					}
 					-- reader_->data_size;
@@ -165,7 +165,7 @@ int32_t ttLibC_ByteReader_expGolomb(
 			if(reader_->data_size == 0) {
 				LOG_PRINT("no more data.");
 				reader_->inherit_super.error_number = 1;
-				reader_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_RequireMoreData);
+				reader_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_NeedMoreInput);
 				return 0;
 			}
 			++ reader_->inherit_super.read_size;
@@ -180,7 +180,7 @@ int32_t ttLibC_ByteReader_expGolomb(
 					if(reader_->data_size == 0) {
 						LOG_PRINT("no more data.");
 						reader_->inherit_super.error_number = 1;
-						reader_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_RequireMoreData);
+						reader_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_NeedMoreInput);
 						return 0;
 					}
 					++ reader_->inherit_super.read_size;
@@ -203,7 +203,7 @@ int32_t ttLibC_ByteReader_expGolomb(
 	if(count > 32) {
 		ERR_PRINT("too big exp golomb.");
 		reader_->inherit_super.error_number = 1;
-		reader_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_InvalidOperation);
+		reader_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_BrokenInput);
 		return 0;
 	}
 	val = ttLibC_ByteReader_bit(reader, count);
@@ -239,13 +239,13 @@ uint64_t ttLibC_ByteReader_ebml(
 	if(reader_->data_size == 0) {
 		LOG_PRINT("no more data.");
 		reader_->inherit_super.error_number = 1;
-		reader_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_RequireMoreData);
+		reader_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_NeedMoreInput);
 		return 0;
 	}
 	if(reader_->pos != 0) {
 		ERR_PRINT("ebml value need to begin with full byte");
 		reader_->inherit_super.error_number = 1;
-		reader_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_InvalidOperation);
+		reader_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_BrokenInput);
 		return 0;
 	}
 	uint64_t val = *reader_->data;
@@ -266,7 +266,7 @@ uint64_t ttLibC_ByteReader_ebml(
 			reader_->data += reader_->data_size;
 			reader_->data_size = 0;
 			reader_->inherit_super.error_number = 1;
-			reader_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_RequireMoreData);
+			reader_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_NeedMoreInput);
 			return 0;
 		}
 		val = (val << 8) | (*reader_->data);
@@ -286,7 +286,7 @@ uint64_t ttLibC_ByteReader_ebml(
 			reader_->data += reader_->data_size;
 			reader_->data_size = 0;
 			reader_->inherit_super.error_number = 1;
-			reader_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_RequireMoreData);
+			reader_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_NeedMoreInput);
 			return 0;
 		}
 		val = (val << 16) | (*(reader_->data) << 8) | (*(reader_->data + 1));
@@ -306,7 +306,7 @@ uint64_t ttLibC_ByteReader_ebml(
 			reader_->data += reader_->data_size;
 			reader_->data_size = 0;
 			reader_->inherit_super.error_number = 1;
-			reader_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_RequireMoreData);
+			reader_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_NeedMoreInput);
 			return 0;
 		}
 		val = (val << 24) | (*(reader_->data) << 16) | (*(reader_->data + 1) << 8) | (*(reader_->data + 2));
@@ -326,7 +326,7 @@ uint64_t ttLibC_ByteReader_ebml(
 			reader_->data += reader_->data_size;
 			reader_->data_size = 0;
 			reader_->inherit_super.error_number = 1;
-			reader_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_RequireMoreData);
+			reader_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_NeedMoreInput);
 			return 0;
 		}
 		val = (val << 32) | (*(reader_->data) << 24) | (*(reader_->data + 1) << 16) | (*(reader_->data + 2) << 8) | (*(reader_->data + 3));
@@ -346,7 +346,7 @@ uint64_t ttLibC_ByteReader_ebml(
 			reader_->data += reader_->data_size;
 			reader_->data_size = 0;
 			reader_->inherit_super.error_number = 1;
-			reader_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_RequireMoreData);
+			reader_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_NeedMoreInput);
 			return 0;
 		}
 		val = (val << 8) | (*(reader_->data));
@@ -367,7 +367,7 @@ uint64_t ttLibC_ByteReader_ebml(
 			reader_->data += reader_->data_size;
 			reader_->data_size = 0;
 			reader_->inherit_super.error_number = 1;
-			reader_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_RequireMoreData);
+			reader_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_NeedMoreInput);
 			return 0;
 		}
 		val = (val << 16) | (*(reader_->data) << 8) | (*(reader_->data + 1));
@@ -388,7 +388,7 @@ uint64_t ttLibC_ByteReader_ebml(
 			reader_->data += reader_->data_size;
 			reader_->data_size = 0;
 			reader_->inherit_super.error_number = 1;
-			reader_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_RequireMoreData);
+			reader_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_NeedMoreInput);
 			return 0;
 		}
 		val = (val << 24) | (*(reader_->data) << 16) | (*(reader_->data + 1) << 8) | (*(reader_->data + 2));
@@ -405,9 +405,9 @@ uint64_t ttLibC_ByteReader_ebml(
 	}
 	else {
 		ERR_PRINT("invalid ebml value.");
-		reader_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_InvalidOperation);
+		reader_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_BrokenInput);
 	}
-	return 0;
+	return Error_noError;
 }
 
 /*
@@ -429,13 +429,13 @@ size_t ttLibC_ByteReader_string(
 	}
 	if(buffer_size < target_size) {
 		ERR_PRINT("buffer size is too small for reading size.");
-		reader_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_MemoryShort);
+		reader_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_NeedMoreOutput);
 		return 0;
 	}
 	if(reader_->data_size < target_size) {
 		LOG_PRINT("hold buffer size is smaller than target_size");
 		reader_->inherit_super.error_number = 1;
-		reader_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_RequireMoreData);
+		reader_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_NeedMoreInput);
 		return 0;
 	}
 	memcpy(buffer, reader_->data, target_size);
@@ -458,7 +458,7 @@ size_t ttLibC_ByteReader_skipByte(
 	if(reader_->data_size < skip_size) {
 		LOG_PRINT("hold buffer size is smaller than skip_size.");
 		reader_->inherit_super.error_number = 1;
-		reader_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_RequireMoreData);
+		reader_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_NeedMoreInput);
 		return 0;
 	}
 	reader_->data += skip_size;
@@ -480,7 +480,7 @@ size_t ttLibC_ByteReader_rewindByte(
 	// TODO check with global val, bad coder can put fake value on this to destroy program.
 	if(reader_->inherit_super.read_size < rewind_size) {
 		ERR_PRINT("cannot rewind before original start position.");
-		reader_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_InvalidOperation);
+		reader_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_TtLibCError);
 		return 0;
 	}
 	reader_->data -= rewind_size;
@@ -563,7 +563,7 @@ bool ttLibC_ByteConnector_bit(
 		if(connector_->pos == 0) {
 			if(connector_->data_size == 0) {
 				ERR_PRINT("buffer is fulled. no way to add more data.");
-				connector_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_MemoryShort);
+				connector_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_NeedMoreOutput);
 				return false;
 			}
 			(*connector_->data) = 0;
@@ -641,14 +641,14 @@ bool ttLibC_ByteConnector_ebml2(
 	if(connector_->pos != 0) {
 		ERR_PRINT("ebml writing must start with complete byte.");
 		connector_->inherit_super.error_number = 1;
-		connector_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_InvalidOperation);
+		connector_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_BrokenInput);
 		return false;
 	}
 	if(!is_tag) {
 		if(value < 0x80) {
 			if(connector_->data_size < 1) {
 				connector_->inherit_super.error_number = 1;
-				connector_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_RequireMoreData);
+				connector_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_NeedMoreOutput);
 				return false;
 			}
 			connector_->data[0] = (0x80 | value);
@@ -660,7 +660,7 @@ bool ttLibC_ByteConnector_ebml2(
 		if(value < 0x4000) {
 			if(connector_->data_size < 2) {
 				connector_->inherit_super.error_number = 1;
-				connector_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_RequireMoreData);
+				connector_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_NeedMoreOutput);
 				return false;
 			}
 			connector_->data[0] = (0x40 | ((value >> 8) & 0xFF));
@@ -673,7 +673,7 @@ bool ttLibC_ByteConnector_ebml2(
 		if(value < 0x200000) {
 			if(connector_->data_size < 3) {
 				connector_->inherit_super.error_number = 1;
-				connector_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_RequireMoreData);
+				connector_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_NeedMoreOutput);
 				return false;
 			}
 			connector_->data[0] = (0x20 | ((value >> 16) & 0xFF));
@@ -687,7 +687,7 @@ bool ttLibC_ByteConnector_ebml2(
 		if(value < 0x10000000L) {
 			if(connector_->data_size < 4) {
 				connector_->inherit_super.error_number = 1;
-				connector_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_RequireMoreData);
+				connector_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_NeedMoreOutput);
 				return false;
 			}
 			connector_->data[0] = (0x10 | ((value >> 24) & 0xFF));
@@ -702,7 +702,7 @@ bool ttLibC_ByteConnector_ebml2(
 		if(value < 0x0800000000L) {
 			if(connector_->data_size < 5) {
 				connector_->inherit_super.error_number = 1;
-				connector_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_RequireMoreData);
+				connector_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_NeedMoreOutput);
 				return false;
 			}
 			connector_->data[0] = (0x08 | ((value >> 32) & 0xFF));
@@ -718,7 +718,7 @@ bool ttLibC_ByteConnector_ebml2(
 		if(value < 0x040000000000L) {
 			if(connector_->data_size < 6) {
 				connector_->inherit_super.error_number = 1;
-				connector_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_RequireMoreData);
+				connector_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_NeedMoreOutput);
 				return false;
 			}
 			connector_->data[0] = (0x04 | ((value >> 40) & 0xFF));
@@ -735,7 +735,7 @@ bool ttLibC_ByteConnector_ebml2(
 		if(value < 0x02000000000000L) {
 			if(connector_->data_size < 7) {
 				connector_->inherit_super.error_number = 1;
-				connector_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_RequireMoreData);
+				connector_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_NeedMoreOutput);
 				return false;
 			}
 			connector_->data[0] = (0x02 | ((value >> 48) & 0xFF));
@@ -753,7 +753,7 @@ bool ttLibC_ByteConnector_ebml2(
 		if(value < 0x0100000000000000L) {
 			if(connector_->data_size < 8) {
 				connector_->inherit_super.error_number = 1;
-				connector_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_RequireMoreData);
+				connector_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_NeedMoreOutput);
 				return false;
 			}
 			connector_->data[0] = 0x01;
@@ -774,7 +774,7 @@ bool ttLibC_ByteConnector_ebml2(
 		if(value < 0xFF) {
 			if(connector_->data_size < 1) {
 				connector_->inherit_super.error_number = 1;
-				connector_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_RequireMoreData);
+				connector_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_NeedMoreOutput);
 				return false;
 			}
 			connector_->data[0] = (value & 0xFF);
@@ -786,12 +786,12 @@ bool ttLibC_ByteConnector_ebml2(
 		else if(value < 0xFFFF) {
 			if(connector_->data_size < 2) {
 				connector_->inherit_super.error_number = 1;
-				connector_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_RequireMoreData);
+				connector_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_NeedMoreOutput);
 				return false;
 			}
 			if((value & 0x8000) != 0) {
 				connector_->inherit_super.error_number = 2;
-				connector_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_InvalidOperation);
+				connector_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_BrokenInput);
 				return false;
 			}
 			else {
@@ -805,12 +805,12 @@ bool ttLibC_ByteConnector_ebml2(
 		else if(value < 0xFFFFFF) {
 			if(connector_->data_size < 3) {
 				connector_->inherit_super.error_number = 1;
-				connector_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_RequireMoreData);
+				connector_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_NeedMoreOutput);
 				return false;
 			}
 			if((value & 0xC00000) != 0) {
 				connector_->inherit_super.error_number = 2;
-				connector_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_InvalidOperation);
+				connector_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_BrokenInput);
 				return false;
 			}
 			else {
@@ -825,12 +825,12 @@ bool ttLibC_ByteConnector_ebml2(
 		else if(value < 0xFFFFFFFF) {
 			if(connector_->data_size < 4) {
 				connector_->inherit_super.error_number = 1;
-				connector_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_RequireMoreData);
+				connector_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_NeedMoreOutput);
 				return false;
 			}
 			if((value & 0xE0000000) != 0) {
 				connector_->inherit_super.error_number = 2;
-				connector_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_InvalidOperation);
+				connector_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_BrokenInput);
 				return false;
 			}
 			else {
@@ -845,7 +845,7 @@ bool ttLibC_ByteConnector_ebml2(
 		}
 		return true;
 	}
-	connector_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_InvalidOperation);
+	connector_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_TtLibCError);
 	return false;
 }
 /*
@@ -866,13 +866,13 @@ bool ttLibC_ByteConnector_string(
 	if(connector_->pos != 0) {
 		ERR_PRINT("string writing must start with complete byte.");
 		connector_->inherit_super.error_number = 1;
-		connector_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_InvalidOperation);
+		connector_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_BrokenInput);
 		return false;
 	}
 	if(connector_->data_size < str_size) {
 		ERR_PRINT("buffer doesn't have enough size for string write.");
 		connector_->inherit_super.error_number = 1;
-		connector_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_MemoryShort);
+		connector_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_NeedMoreOutput);
 		return false;
 	}
 	memcpy(connector_->data, str, str_size);

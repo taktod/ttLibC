@@ -94,7 +94,6 @@ ttLibC_Vp6 *ttLibC_Vp6_clone(
  */
 bool ttLibC_Vp6_isKey(void *data, size_t data_size) {
 	if(data_size < 1) {
-		ERR_PRINT("data size is too small.");
 		return false;
 	}
 	uint8_t *dat = data;
@@ -232,7 +231,6 @@ ttLibC_Vp6 *ttLibC_Vp6_getFrame(
 		uint32_t timebase,
 		uint8_t adjustment) {
 	if(data_size <= 1) {
-		ERR_PRINT("data size is too small for analyze.");
 		return NULL;
 	}
 	bool is_key = ttLibC_Vp6_isKey(data, data_size);

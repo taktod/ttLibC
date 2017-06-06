@@ -82,7 +82,7 @@ void ttLibC_CvWindow_showBgr(ttLibC_CvWindow *window, ttLibC_Bgr *bgr) {
 	if(window_->image == NULL) {
 		window_->image = cvCreateImage(cvSize(bgr->inherit_super.width, bgr->inherit_super.height), 8, 3);
 		if(window_->image == NULL) {
-			window_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_LibraryError);
+			window_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_NativeError);
 			return;
 		}
 	}
@@ -236,7 +236,7 @@ ttLibC_Bgr *ttLibC_CvCapture_queryFrame(ttLibC_CvCapture *capture, ttLibC_Bgr *p
 	ttLibC_CvCapture_ *capture_ = (ttLibC_CvCapture_*)capture;
 	IplImage *frame = cvQueryFrame(capture_->capture);
 	if(frame == NULL) {
-		capture_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_LibraryError);
+		capture_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_NativeError);
 		return NULL;
 	}
 

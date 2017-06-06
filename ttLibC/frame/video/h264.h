@@ -16,6 +16,7 @@ extern "C" {
 #endif
 
 #include "video.h"
+#include "../../ttLibC.h"
 
 /**
  * h264 nal type.
@@ -154,6 +155,7 @@ ttLibC_H264 *ttLibC_H264_clone(
  * @return true:analyze success
  */
 bool ttLibC_H264_getNalInfo(ttLibC_H264_NalInfo* info, uint8_t *data, size_t data_size);
+Error_e ttLibC_H264_getNalInfo2(ttLibC_H264_NalInfo* info, uint8_t *data, size_t data_size);
 
 /**
  * analyez info of one nal(for avcc data).

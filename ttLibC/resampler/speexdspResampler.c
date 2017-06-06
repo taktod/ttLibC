@@ -78,7 +78,7 @@ ttLibC_PcmS16 *ttLibC_SpeexdspResampler_resample(ttLibC_SpeexdspResampler *resam
 	switch(src_pcms16->type) {
 	case PcmS16Type_bigEndian:
 	case PcmS16Type_bigEndian_planar:
-		resampler_->inherit_super.error = ttLibC_updateError(Target_On_Resampler, Error_InvalidOperation);
+		resampler_->inherit_super.error = ttLibC_updateError(Target_On_Resampler, Error_InvalidInput);
 		return NULL;
 	default:
 		return NULL;
@@ -135,7 +135,7 @@ ttLibC_PcmS16 *ttLibC_SpeexdspResampler_resample(ttLibC_SpeexdspResampler *resam
 				if(alloc_flag) {
 					ttLibC_free(data);
 				}
-				resampler_->inherit_super.error = ttLibC_updateError(Target_On_Resampler, Error_LibraryError);
+				resampler_->inherit_super.error = ttLibC_updateError(Target_On_Resampler, Error_NativeError);
 				return NULL;
 			}
 			res = speex_resampler_process_int(resampler_->resampler, 1, (const int16_t *)src_pcms16->r_data, &in_sample_num, (int16_t *)(data + (out_sample_num * 2)), &out_sample_num);
@@ -150,7 +150,7 @@ ttLibC_PcmS16 *ttLibC_SpeexdspResampler_resample(ttLibC_SpeexdspResampler *resam
 		if(alloc_flag) {
 			ttLibC_free(data);
 		}
-		resampler_->inherit_super.error = ttLibC_updateError(Target_On_Resampler, Error_LibraryError);
+		resampler_->inherit_super.error = ttLibC_updateError(Target_On_Resampler, Error_NativeError);
 		return NULL;
 	}
 	uint64_t pts = src_pcms16->inherit_super.inherit_super.pts * resampler_->inherit_super.output_sample_rate / src_pcms16->inherit_super.inherit_super.timebase;

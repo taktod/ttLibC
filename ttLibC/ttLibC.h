@@ -42,12 +42,15 @@ typedef enum Error_Target_e {
 } Error_Target_e;
 
 typedef enum Error_e {
-	Error_noError          = 0x00000000,
-	Error_MemoryAllocate   = 0x00000001,
-	Error_MemoryShort      = 0x00000002,
-	Error_LibraryError     = 0x00000003,
-	Error_RequireMoreData  = 0x00000004,
-	Error_InvalidOperation = 0x00000005,
+	Error_noError        = 0x00000000,
+	Error_MemoryAllocate = 0x00000001, // failed to allocate memory for working buffer.
+	Error_NeedMoreOutput = 0x00000002, // need more output buffer.
+	Error_NativeError    = 0x00000003, // native library error.
+	Error_NeedMoreInput  = 0x00000004, // need more input data.
+	Error_TtLibCError    = 0x00000005, // library error.
+	Error_BrokenInput    = 0x00000006, // input data is broken, cannot fix
+	Error_MissingParams  = 0x00000007, // some important param is missing.
+	Error_InvalidInput   = 0x00000008, // input type is different from target.
 } Error_e;
 
 /**

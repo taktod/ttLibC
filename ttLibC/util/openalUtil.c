@@ -303,7 +303,7 @@ bool ttLibC_AlPlayer_queue(ttLibC_AlPlayer *player, ttLibC_PcmS16 *pcmS16) {
 	case PcmS16Type_littleEndian_planar:
 	default:
 		ERR_PRINT("non support pcm type.");
-		player_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_InvalidOperation);
+		player_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_InvalidInput);
 		return false;
 	case PcmS16Type_littleEndian:
 		break;
@@ -318,7 +318,7 @@ bool ttLibC_AlPlayer_queue(ttLibC_AlPlayer *player, ttLibC_PcmS16 *pcmS16) {
 		break;
 	default:
 		ERR_PRINT("only support monoral or stereo.");
-		player_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_InvalidOperation);
+		player_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_InvalidInput);
 		return false;
 	}
 	int num;

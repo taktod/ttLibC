@@ -285,6 +285,86 @@ bool ttLibC_H264_getNalInfo(ttLibC_H264_NalInfo* info, uint8_t *data, size_t dat
 	return true;
 }
 
+Error_e ttLibC_H264_getNalInfo2(ttLibC_H264_NalInfo* info, uint8_t *data, size_t data_size) {
+	if(info == NULL) {
+		return ttLibC_updateError(Target_On_VideoFrame, Error_MissingParams);
+	}
+	if(data_size == 0) {
+		return ttLibC_updateError(Target_On_VideoFrame, Error_NeedMoreInput);
+	}
+	uint8_t *dat = data;
+//	info->pos           = 0;
+	info->data_pos      = 0;
+	info->nal_unit_type = H264NalType_error;
+	info->nal_size      = 0;
+	size_t pos = 0;
+	size_t i = 0;
+	for(i = 0;i < data_size; ++ i, ++ data) {
+		if(i == 0 && (*data) != 0) {
+			return ttLibC_updateError(Target_On_VideoFrame, Error_BrokenInput);
+		}
+		if((*data) != 0) {
+			if(i - pos == 2 || i - pos == 3) {
+				if((*data) == 1) {
+					if(info->nal_unit_type != H264NalType_error) {
+//						info->nal_size = pos - info->pos;
+						info->nal_size = pos;
+						break;
+					}
+//					info->pos = pos;
+					info->data_pos = i + 1;
+				}
+			}
+			else if(info->nal_unit_type == H264NalType_error && info->data_pos != 0) {
+				dat += info->data_pos;
+				if(((*data) & 0x80) != 0) {
+					return ttLibC_updateError(Target_On_VideoFrame, Error_BrokenInput);
+				}
+				info->is_disposable = ((*dat) & 0x60) == 0;
+				info->nal_unit_type = (*dat) & 0x1F;
+				// sliceType check
+				switch(info->nal_unit_type) {
+				case H264NalType_slice:
+//				case H264NalType_sliceDataPartitionA:
+//				case H264NalType_sliceDataPartitionB:
+//				case H264NalType_sliceDataPartitionC:
+				case H264NalType_sliceIDR:
+					{
+						ttLibC_ByteReader *reader = ttLibC_ByteReader_make(dat + 1, data_size - info->data_pos - 1, ByteUtilType_h26x);
+						/*uint32_t first_mb_in_slice = */ttLibC_ByteReader_expGolomb(reader, false);
+						uint32_t slice_type = ttLibC_ByteReader_expGolomb(reader, false);
+						info->frame_type = slice_type % 5;
+						ttLibC_ByteReader_close(&reader);
+					}
+					break;
+				default:
+					info->frame_type = H264FrameType_unknown;
+					break;
+				}
+			}
+			pos = i + 1;
+		}
+		else {
+			if(i - pos == 3) {
+				// if continue with 00 for the padding.
+				pos ++;
+			}
+		}
+	}
+	if(info->nal_size == 0) {
+		info->nal_size = pos;
+		if(i == data_size) {
+			// if hit the end, take as one nal.
+			info->nal_size = i;
+		}
+		if(info->nal_size == info->data_pos) {
+			// nal is missing.
+			return ttLibC_updateError(Target_On_VideoFrame, Error_NeedMoreInput);
+		}
+	}
+	return Error_noError;
+}
+
 /*
  * analyze info of one nal(for avcc data).
  * @param info      pointer for info data.(update with data.)
@@ -461,7 +541,7 @@ static Error_e H264_analyzeSequenceParameterSet(
 	if(type != H264NalType_sequenceParameterSet) {
 		ERR_PRINT("get non sps data.");
 		ttLibC_ByteReader_close(&reader);
-		return ttLibC_updateError(Target_On_VideoFrame, Error_InvalidOperation);
+		return ttLibC_updateError(Target_On_VideoFrame, Error_BrokenInput);
 	}
 	uint8_t profile_idc = ttLibC_ByteReader_bit(reader, 8);
 	uint32_t ChromaArrayType = 1;
@@ -789,8 +869,11 @@ ttLibC_H264 *ttLibC_H264_getFrame(
 		return NULL;
 	}
 	ttLibC_H264_NalInfo nal_info;
-	if(!ttLibC_H264_getNalInfo(&nal_info, data, data_size)) {
-		ERR_PRINT("failed to get nal info.");
+	Error_e e = ttLibC_H264_getNalInfo2(&nal_info, data, data_size);
+	if((e & 0x000FFFFF) != Error_noError) {
+		if((e & 0x000FFFFF) != Error_NeedMoreInput) {
+			ERR_PRINT("failed to get nal info. %x", e);
+		}
 		return NULL;
 	}
 	size_t target_size = 0;
@@ -834,8 +917,11 @@ ttLibC_H264 *ttLibC_H264_getFrame(
 			return NULL;
 		}
 		// try to get next data.
-		if(!ttLibC_H264_getNalInfo(&nal_info, data + target_size, data_size - target_size)) {
-			ERR_PRINT("failed to get nal info.");
+		Error_e e = ttLibC_H264_getNalInfo2(&nal_info, data + target_size, data_size - target_size);
+		if((e & 0x000FFFFF) != Error_noError) {
+			if((e & 0x000FFFFF) != Error_NeedMoreInput) {
+				ERR_PRINT("failed to get nal info. %x", e);
+			}
 			return NULL;
 		}
 		if(nal_info.nal_unit_type != H264NalType_pictureParameterSet) {

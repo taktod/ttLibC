@@ -101,7 +101,7 @@ bool ttLibC_DynamicBuffer_markAsRead(ttLibC_DynamicBuffer *buffer, size_t read_s
 	}
 	if(buffer_->read_pos + read_size > buffer_->target_size) {
 		ERR_PRINT("read_size is bigger than target_size, overflowed.");
-		buffer_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_InvalidOperation);
+		buffer_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_TtLibCError);
 		return false;
 	}
 	buffer_->read_pos += read_size;
@@ -232,7 +232,7 @@ bool ttLibC_DynamicBuffer_write(
 	}
 	if(write_pos + data_size > buffer_->target_size) {
 		ERR_PRINT("data is overflowed.");
-		buffer_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_MemoryShort);
+		buffer_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_NeedMoreOutput);
 		return false;
 	}
 	memcpy(buffer_->buffer + write_pos, data, data_size);

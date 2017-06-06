@@ -92,7 +92,7 @@ Error_e ttLibC_HexUtil_makeBuffer2(const char *target, void *ptr, size_t length,
 	}
 	*written_size = counter;
 	if(!(i < target_length)) {
-		error = Error_MemoryShort;
+		error = Error_NeedMoreOutput;
 	}
 	return ttLibC_updateError(Target_On_Util, error);
 }

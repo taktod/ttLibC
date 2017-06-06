@@ -304,7 +304,9 @@ ttLibC_Speex *ttLibC_Speex_getFrame(
 			uint32_t sample_rate = 0;
 			uint32_t sample_num = 0;
 			if(!Speex_analyzeFrameBuffer(reader, data_size, &frame_num, &band)) {
-				ERR_PRINT("1st speex frame is unknown.");
+				if((reader->error & 0x000FFFFF) != Error_NeedMoreInput) {
+					ERR_PRINT("1st speex frame is unknown.");
+				}
 			}
 			else {
 				switch(band) {
