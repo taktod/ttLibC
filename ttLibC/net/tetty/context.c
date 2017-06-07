@@ -131,6 +131,9 @@ static bool TettyContext_callNextForEach(void *ptr, void *item) {
 		// in the case of NULL, fire the first found handler.
 		switch(ctx->command) {
 		case Command_channelActive:
+			if(ctx->bootstrap->error_number != 0) {
+				return false;
+			}
 			if(channel_handler->channelActive == NULL) {
 				return true;
 			}
@@ -147,6 +150,9 @@ static bool TettyContext_callNextForEach(void *ptr, void *item) {
 			ctx->error_no = channel_handler->channelInactive((ttLibC_TettyContext *)ctx);
 			return false;
 		case Command_channelRead:
+			if(ctx->bootstrap->error_number != 0) {
+				return false;
+			}
 			if(channel_handler->channelRead == NULL) {
 				return true;
 			}
@@ -155,6 +161,9 @@ static bool TettyContext_callNextForEach(void *ptr, void *item) {
 			ctx->error_no = channel_handler->channelRead((ttLibC_TettyContext *)ctx, ctx->data, ctx->data_size);
 			return false;
 		case Command_bind:
+			if(ctx->bootstrap->error_number != 0) {
+				return false;
+			}
 			if(channel_handler->bind == NULL) {
 				return true;
 			}
@@ -163,6 +172,9 @@ static bool TettyContext_callNextForEach(void *ptr, void *item) {
 			ctx->error_no = channel_handler->bind((ttLibC_TettyContext *)ctx);
 			return false;
 		case Command_connect:
+			if(ctx->bootstrap->error_number != 0) {
+				return false;
+			}
 			if(channel_handler->connect == NULL) {
 				return true;
 			}
@@ -179,6 +191,9 @@ static bool TettyContext_callNextForEach(void *ptr, void *item) {
 			ctx->error_no = channel_handler->disconnect((ttLibC_TettyContext *)ctx);
 			return false;
 		case Command_write:
+			if(ctx->bootstrap->error_number != 0) {
+				return false;
+			}
 			if(channel_handler->write == NULL) {
 				return true;
 			}
@@ -187,6 +202,9 @@ static bool TettyContext_callNextForEach(void *ptr, void *item) {
 			ctx->error_no = channel_handler->write((ttLibC_TettyContext *)ctx, ctx->data, ctx->data_size);
 			return false;
 		case Command_flush:
+			if(ctx->bootstrap->error_number != 0) {
+				return false;
+			}
 			if(channel_handler->flush == NULL) {
 				return true;
 			}
@@ -203,6 +221,9 @@ static bool TettyContext_callNextForEach(void *ptr, void *item) {
 			ctx->error_no = channel_handler->close((ttLibC_TettyContext *)ctx);
 			return false;
 		case Command_userEventTriggered:
+			if(ctx->bootstrap->error_number != 0) {
+				return false;
+			}
 			if(channel_handler->userEventTriggered == NULL) {
 				return true;
 			}
