@@ -91,7 +91,7 @@ static bool MpegtsWriter_makeH264Data(
 	bool result = true;
 	while(true) {
 		ttLibC_H264 *h264 = (ttLibC_H264 *)ttLibC_FrameQueue_ref_first(track->inherit_super.frame_queue);
-		if(h264 != NULL && h264->inherit_super.inherit_super.pts < writer->inherit_super.target_pos) {
+		if(h264 != NULL && h264->inherit_super.inherit_super.dts < writer->inherit_super.target_pos) {
 			ttLibC_H264 *h = (ttLibC_H264 *)ttLibC_FrameQueue_dequeue_first(track->inherit_super.frame_queue);
 			if(h264 != h) {
 				ERR_PRINT("data is corrupted. broken?");
