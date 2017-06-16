@@ -11,6 +11,9 @@
 #ifdef __ENABLE_OPENCV__
 
 #include "opencvUtil.h"
+
+#include <opencv2/opencv_modules.hpp>
+#include <opencv2/core/version.hpp>
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
 #include "../_log.h"
@@ -175,7 +178,9 @@ uint8_t ttLibC_CvWindow_waitForKeyInput(int delay) {
 
 typedef struct {
 	ttLibC_CvCapture inherit_super;
+#if (CV_MAJOR_VERSION == 2) || ((CV_MAJOR_VERSION >= 3) && defined(HAVE_OPENCV_VIDEOIO))
 	CvCapture *capture;
+#endif
 #ifdef __APPLE__
 	uint64_t startTime;
 #else
@@ -196,6 +201,7 @@ ttLibC_CvCapture *ttLibC_CvCapture_make(
 		uint32_t camera_num,
 		uint32_t width,
 		uint32_t height) {
+#if (CV_MAJOR_VERSION == 2) || ((CV_MAJOR_VERSION >= 3) && defined(HAVE_OPENCV_VIDEOIO))
 	ttLibC_CvCapture_ *capture = ttLibC_malloc(sizeof(ttLibC_CvCapture_));
 	if(capture == NULL) {
 		ERR_PRINT("failed to allocate memory for cvCapture.");
@@ -215,6 +221,9 @@ ttLibC_CvCapture *ttLibC_CvCapture_make(
 	capture->inherit_super.camera_num = camera_num;
 	capture->inherit_super.error      = Error_noError;
 	return (ttLibC_CvCapture *)capture;
+#else
+	return NULL;
+#endif
 }
 
 ttLibC_CvCapture *ttLibC_CvCapture_makeCapture(
@@ -230,6 +239,7 @@ ttLibC_CvCapture *ttLibC_CvCapture_makeCapture(
  * @param prev_frame reuse bgr frame.
  */
 ttLibC_Bgr *ttLibC_CvCapture_queryFrame(ttLibC_CvCapture *capture, ttLibC_Bgr *prev_frame) {
+#if (CV_MAJOR_VERSION == 2) || ((CV_MAJOR_VERSION >= 3) && defined(HAVE_OPENCV_VIDEOIO))
 	if(capture == NULL) {
 		return NULL;
 	}
@@ -260,6 +270,9 @@ ttLibC_Bgr *ttLibC_CvCapture_queryFrame(ttLibC_CvCapture *capture, ttLibC_Bgr *p
 	else {
 		return ttLibC_Bgr_make(prev_frame, BgrType_bgr, frame->width, frame->height, frame->widthStep, frame->imageData, frame->imageSize, true, pts, timebase);
 	}
+#else
+	return NULL;
+#endif
 }
 
 /*
@@ -267,6 +280,7 @@ ttLibC_Bgr *ttLibC_CvCapture_queryFrame(ttLibC_CvCapture *capture, ttLibC_Bgr *p
  * @param capture target capture.
  */
 void ttLibC_CvCapture_close(ttLibC_CvCapture **capture) {
+#if (CV_MAJOR_VERSION == 2) || ((CV_MAJOR_VERSION >= 3) && defined(HAVE_OPENCV_VIDEOIO))
 	if(*capture == NULL) {
 		return;
 	}
@@ -277,6 +291,7 @@ void ttLibC_CvCapture_close(ttLibC_CvCapture **capture) {
 	}
 	ttLibC_free(capture_);
 	*capture = NULL;
+#endif
 }
 
 #endif /* __ENABLE_OPENCV__ */
