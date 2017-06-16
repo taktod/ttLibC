@@ -1087,11 +1087,13 @@ static void mp3lameTest() {
 	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
+#if defined(__ENABLE_OPENCV__) && defined(__ENABLE_SWSCALE__)
 static bool swscaleCallback(void *ptr, ttLibC_Frame *frame) {
 	ttLibC_CvWindow *resampled_window = (ttLibC_CvWindow *)ptr;
 	ttLibC_CvWindow_showBgr(resampled_window, (ttLibC_Bgr *)frame);
 	return true;
 }
+#endif
 
 static void swscaleTest() {
 	LOG_PRINT("swscaleTest");
