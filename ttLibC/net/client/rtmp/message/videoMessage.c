@@ -101,7 +101,12 @@ ttLibC_VideoMessage *ttLibC_VideoMessage_addFrame(
 	// hold the ref of frame.
 	message->video_frame = frame;
 	// update pts and stream_id
-	message->inherit_super.header->timestamp = message->video_frame->inherit_super.pts * 1000 / message->video_frame->inherit_super.timebase;
+	if(message->video_frame->inherit_super.timebase == 1000) {
+		message->inherit_super.header->timestamp = message->video_frame->inherit_super.dts;
+	}
+	else {
+		message->inherit_super.header->timestamp = message->video_frame->inherit_super.dts * 1000 / message->video_frame->inherit_super.timebase;
+	}
 	message->inherit_super.header->stream_id = stream_id;
 	return message;
 }

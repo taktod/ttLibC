@@ -550,7 +550,7 @@ static void rtmpPublishTest() {
 			&testData);
 	ttLibC_RtmpConnection_connect(
 			testData.conn,
-			"rtmp://localhost/live");
+			"rtmp://rtmpTestServer.com/live");
 	while(true) {
 		// check the socket status
 		if(!ttLibC_RtmpConnection_update(testData.conn, 10000)) {
@@ -569,7 +569,6 @@ static void rtmpPublishTest() {
 			}
 			yuv = y;
 			ttLibC_VtEncoder_encode(testData.h264_encoder, yuv, rtmpPublishTest_h264EncodeCallback, &testData);
-//			ttLibC_VtH264Encoder_encode(testData.h264_encoder, yuv, rtmpPublishTest_h264EncodeCallback, &testData);
 			ttLibC_Frame *frame = NULL;
 			while(testData.frame_list->size > 2 && (frame = (ttLibC_Frame *)ttLibC_StlList_refFirst(testData.frame_list)) != NULL) {
 				ttLibC_StlList_remove(testData.frame_list, frame);
@@ -597,7 +596,6 @@ static void rtmpPublishTest() {
 
 	ttLibC_AcEncoder_close(&testData.aac_encoder);
 	ttLibC_VtEncoder_close(&testData.h264_encoder);
-//	ttLibC_VtH264Encoder_close(&testData.h264_encoder);
 
 	ttLibC_Bgr_close(&bgr);
 	ttLibC_Yuv420_close(&yuv);

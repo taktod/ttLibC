@@ -87,7 +87,12 @@ ttLibC_AudioMessage *ttLibC_AudioMessage_addFrame(
 	}
 	message->audio_frame = frame;
 	// update pts and stream_id
-	message->inherit_super.header->timestamp = message->audio_frame->inherit_super.pts * 1000 / message->audio_frame->inherit_super.timebase;
+	if(message->audio_frame->inherit_super.timebase == 1000) {
+		message->inherit_super.header->timestamp = message->audio_frame->inherit_super.pts;
+	}
+	else {
+		message->inherit_super.header->timestamp = message->audio_frame->inherit_super.pts * 1000 / message->audio_frame->inherit_super.timebase;
+	}
 	message->inherit_super.header->stream_id = stream_id;
 	return message;
 }

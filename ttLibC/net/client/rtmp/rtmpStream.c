@@ -70,6 +70,10 @@ ttLibC_RtmpStream *ttLibC_RtmpStream_make(ttLibC_RtmpConnection *conn) {
 	stream->stream_id = 0;
 	stream->frame_manager = ttLibC_FlvFrameManager_make();
 	stream->sent_dsi_info = false;
+	stream->video_type = frameType_unknown;
+	stream->video_queue = ttLibC_FrameQueue_make(9, 1024);
+	stream->audio_type = frameType_unknown;
+	stream->audio_queue = ttLibC_FrameQueue_make(8, 1024);
 	// make createStream and send it to server.
 	ttLibC_Amf0Command *createStream = ttLibC_Amf0Command_createStream();
 	stream->promise = ttLibC_TettyBootstrap_makePromise(stream->conn->bootstrap);
@@ -139,7 +143,7 @@ bool ttLibC_RtmpStream_addFrame(
 	if(frame == NULL) {
 		return true;
 	}
-	uint64_t timestamp = frame->pts * 1000 / frame->timebase;
+	uint64_t timestamp = (uint64_t)(1.0 * frame->pts * 1000 / frame->timebase);
 	if(timestamp > stream_->pts) {
 		stream_->pts = timestamp;
 	}
@@ -148,44 +152,133 @@ bool ttLibC_RtmpStream_addFrame(
 		{
 			ttLibC_H264 *h264 = (ttLibC_H264 *)frame;
 			if(h264->type == H264Type_unknown) {
-				ERR_PRINT("unknown type of h264 frame.");
-				return true; // forget it.
+				return true;
 			}
-			// make message and send.
-			ttLibC_VideoMessage *videoMessage = ttLibC_VideoMessage_addFrame(stream_->stream_id, (ttLibC_Video *)frame);
-			ttLibC_TettyBootstrap_channels_write(stream_->conn->bootstrap, videoMessage, sizeof(ttLibC_VideoMessage));
-			ttLibC_TettyBootstrap_channels_flush(stream_->conn->bootstrap);
-			ttLibC_VideoMessage_close(&videoMessage);
+			if(h264->type == H264Type_configData) {
+				frame->pts = 0;
+				frame->dts = 0;
+			}
+		}
+		/* no break */
+	case frameType_flv1:
+	case frameType_vp6:
+		{
+			if(stream_->video_type == frameType_unknown) {
+				stream_->video_type = frame->type;
+			}
+			if(stream_->video_type != frame->type) {
+				return false;
+			}
+			if(!ttLibC_FrameQueue_queue(stream_->video_queue, frame)) {
+				return false;
+			}
 		}
 		break;
 	case frameType_aac:
+	case frameType_mp3:
+	case frameType_nellymoser:
+	case frameType_pcm_alaw:
+	case frameType_pcm_mulaw:
+	case frameType_pcmS16:
+	case frameType_speex:
 		{
-			// if we need to send dsi info, send audioMessage twice.
-			ttLibC_Aac *aac = (ttLibC_Aac *)frame;
-			uint64_t dsi_info = 0;
-			/*size_t size = */ttLibC_Aac_readDsiInfo(aac, (uint8_t *)&dsi_info, 8);
-//			if(!stream_->sent_dsi_info) {
-				ttLibC_AudioMessage *audioMessage = ttLibC_AudioMessage_addFrame(stream_->stream_id, (ttLibC_Audio *)frame);
-				if(audioMessage != NULL) {
-					audioMessage->is_dsi_info = true;
-					ttLibC_TettyBootstrap_channels_write(stream_->conn->bootstrap, audioMessage, sizeof(ttLibC_AudioMessage));
-					ttLibC_AudioMessage_close(&audioMessage);
-				}
-//			}
-		}
-		/* no break */
-	case frameType_mp3: // for any kind of audioMessage.
-		{
-			ttLibC_AudioMessage *audioMessage = ttLibC_AudioMessage_addFrame(stream_->stream_id, (ttLibC_Audio *)frame);
-			if(audioMessage != NULL) {
-				ttLibC_TettyBootstrap_channels_write(stream_->conn->bootstrap, audioMessage, sizeof(ttLibC_AudioMessage));
-				ttLibC_TettyBootstrap_channels_flush(stream_->conn->bootstrap);
-				ttLibC_AudioMessage_close(&audioMessage);
+			if(stream_->audio_type == frameType_unknown) {
+				stream_->audio_type = frame->type;
+			}
+			if(stream_->audio_type != frame->type) {
+				return false;
+			}
+			if(!ttLibC_FrameQueue_queue(stream_->audio_queue, frame)) {
+				return false;
 			}
 		}
 		break;
 	default:
-		break;
+		return false;
+	}
+	if(stream_->audio_type != frameType_unknown) {
+		if(stream_->video_type != frameType_unknown) {
+				// audio + video
+			while(true) {
+				ttLibC_Frame *video = ttLibC_FrameQueue_ref_first(stream_->video_queue);
+				ttLibC_Frame *audio = ttLibC_FrameQueue_ref_first(stream_->audio_queue);
+				if(video == NULL || audio == NULL) {
+					break;
+				}
+				if(video->dts == 0 && video->pts != 0) {
+					break;
+				}
+				if(video->dts > audio->pts) {
+					audio = ttLibC_FrameQueue_dequeue_first(stream_->audio_queue);
+					if(audio->type == frameType_aac) {
+						ttLibC_AudioMessage *audioMessage = ttLibC_AudioMessage_addFrame(stream_->stream_id, (ttLibC_Audio *)audio);
+						if(audioMessage != NULL) {
+							audioMessage->is_dsi_info = true;
+							ttLibC_TettyBootstrap_channels_write(stream_->conn->bootstrap, audioMessage, sizeof(ttLibC_AudioMessage));
+							ttLibC_AudioMessage_close(&audioMessage);
+						}
+					}
+					ttLibC_AudioMessage *audioMessage = ttLibC_AudioMessage_addFrame(stream_->stream_id, (ttLibC_Audio *)audio);
+					if(audioMessage != NULL) {
+						ttLibC_TettyBootstrap_channels_write(stream_->conn->bootstrap, audioMessage, sizeof(ttLibC_AudioMessage));
+						ttLibC_TettyBootstrap_channels_flush(stream_->conn->bootstrap);
+						ttLibC_AudioMessage_close(&audioMessage);
+					}
+				}
+				else {
+					video = ttLibC_FrameQueue_dequeue_first(stream_->video_queue);
+					ttLibC_VideoMessage *videoMessage = ttLibC_VideoMessage_addFrame(stream_->stream_id, (ttLibC_Video *)video);
+					if(videoMessage != NULL) {
+						ttLibC_TettyBootstrap_channels_write(stream_->conn->bootstrap, videoMessage, sizeof(ttLibC_VideoMessage));
+						ttLibC_TettyBootstrap_channels_flush(stream_->conn->bootstrap);
+						ttLibC_VideoMessage_close(&videoMessage);
+					}
+				}
+			}
+		}
+		else {
+			// audio only
+			while(true) {
+				ttLibC_Frame *audio = ttLibC_FrameQueue_ref_first(stream_->audio_queue);
+				if(audio == NULL) {
+					break;
+				}
+				audio = ttLibC_FrameQueue_dequeue_first(stream_->audio_queue);
+				if(audio->type == frameType_aac) {
+					ttLibC_AudioMessage *audioMessage = ttLibC_AudioMessage_addFrame(stream_->stream_id, (ttLibC_Audio *)audio);
+					if(audioMessage != NULL) {
+						audioMessage->is_dsi_info = true;
+						ttLibC_TettyBootstrap_channels_write(stream_->conn->bootstrap, audioMessage, sizeof(ttLibC_AudioMessage));
+						ttLibC_AudioMessage_close(&audioMessage);
+					}
+				}
+				ttLibC_AudioMessage *audioMessage = ttLibC_AudioMessage_addFrame(stream_->stream_id, (ttLibC_Audio *)audio);
+				if(audioMessage != NULL) {
+					ttLibC_TettyBootstrap_channels_write(stream_->conn->bootstrap, audioMessage, sizeof(ttLibC_AudioMessage));
+					ttLibC_TettyBootstrap_channels_flush(stream_->conn->bootstrap);
+					ttLibC_AudioMessage_close(&audioMessage);
+				}
+			}
+		}
+	}
+	else {
+		if(stream_->video_type != frameType_unknown) {
+			// video only
+			while(true) {
+				ttLibC_Frame *video = ttLibC_FrameQueue_ref_first(stream_->video_queue);
+				if(video == NULL) {
+					break;
+				}
+				if(video->dts == 0 && video->pts != 0) {
+					break;
+				}
+				video = ttLibC_FrameQueue_dequeue_first(stream_->video_queue);
+				ttLibC_VideoMessage *videoMessage = ttLibC_VideoMessage_addFrame(stream_->stream_id, (ttLibC_Video *)video);
+				ttLibC_TettyBootstrap_channels_write(stream_->conn->bootstrap, videoMessage, sizeof(ttLibC_VideoMessage));
+				ttLibC_TettyBootstrap_channels_flush(stream_->conn->bootstrap);
+				ttLibC_VideoMessage_close(&videoMessage);
+			}
+		}
 	}
 	return true;
 }
@@ -273,6 +366,8 @@ void ttLibC_RtmpStream_close(ttLibC_RtmpStream **stream) {
 		ttLibC_TettyPromise_close(&target->promise);
 	}
 	ttLibC_FlvFrameManager_close(&target->frame_manager);
+	ttLibC_FrameQueue_close(&target->video_queue);
+	ttLibC_FrameQueue_close(&target->audio_queue);
 	ttLibC_free(target);
 }
 
