@@ -653,6 +653,10 @@ static bool FlvFrameManager_getH264Data(
 			uint8_t first5byte[5] = {
 					0x17, 0x01, 0x00, 0x00, 0x00
 			};
+			uint32_t offset = h264->inherit_super.inherit_super.pts - h264->inherit_super.inherit_super.dts;
+			first5byte[2] = (offset >> 16) & 0xFF;
+			first5byte[3] = (offset >> 8) & 0xFF;
+			first5byte[4] = offset & 0xFF;
 			ttLibC_DynamicBuffer_append(buffer, first5byte, 5);
 			uint8_t *data = h264->inherit_super.inherit_super.data;
 			size_t data_size = h264->inherit_super.inherit_super.buffer_size;
@@ -674,6 +678,10 @@ static bool FlvFrameManager_getH264Data(
 			uint8_t first5byte[5] = {
 					0x27, 0x01, 0x00, 0x00, 0x00
 			};
+			uint32_t offset = h264->inherit_super.inherit_super.pts - h264->inherit_super.inherit_super.dts;
+			first5byte[2] = (offset >> 16) & 0xFF;
+			first5byte[3] = (offset >> 8) & 0xFF;
+			first5byte[4] = offset & 0xFF;
 			ttLibC_DynamicBuffer_append(buffer, first5byte, 5);
 			uint8_t *data = h264->inherit_super.inherit_super.data;
 			size_t data_size = h264->inherit_super.inherit_super.buffer_size;
