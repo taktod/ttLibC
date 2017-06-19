@@ -130,10 +130,11 @@ static bool FlvWriter_writeFrameAudioOnly(
 		ttLibC_ContainerWriteFunc callback,
 		void *ptr) {
 	while(true) {
-		ttLibC_Frame *audio = ttLibC_FrameQueue_dequeue_first(writer->audio_track.frame_queue);
+		ttLibC_Frame *audio = ttLibC_FrameQueue_ref_first(writer->audio_track.frame_queue);
 		if(audio == NULL) {
 			break;
 		}
+		audio = ttLibC_FrameQueue_dequeue_first(writer->audio_track.frame_queue);
 		writer->inherit_super.inherit_super.pts = audio->pts;
 		if(!ttLibC_FlvAudioTag_writeTag(writer, audio, callback, ptr)) {
 			return false;
@@ -147,13 +148,14 @@ static bool FlvWriter_writeFrameVideoOnly(
 		ttLibC_ContainerWriteFunc callback,
 		void *ptr) {
 	while(true) {
-		ttLibC_Frame *video = ttLibC_FrameQueue_dequeue_first(writer->video_track.frame_queue);
+		ttLibC_Frame *video = ttLibC_FrameQueue_ref_first(writer->video_track.frame_queue);
 		if(video == NULL) {
 			break;
 		}
 		if(video->dts == 0 && video->pts != 0) {
 			break;
 		}
+		video = ttLibC_FrameQueue_dequeue_first(writer->video_track.frame_queue);
 		writer->inherit_super.inherit_super.pts = video->dts;
 		if(!ttLibC_FlvVideoTag_writeTag(writer, video, callback, ptr)) {
 			return false;
