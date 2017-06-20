@@ -16,7 +16,7 @@ extern "C" {
 #endif
 
 #include "../mpegtsPacket.h"
-#include "../../mpegts/mpegtsWriter.h"
+#include "../mpegtsWriter.h"
 #include "../../../util/dynamicBufferUtil.h"
 
 typedef struct ttLibC_Container_Mpegts_Pes {

@@ -15,12 +15,12 @@
 extern "C" {
 #endif
 
-#include "../mpegts/mpegtsPacket.h"
+#include "mpegtsPacket.h"
 
-#include "../mpegts/type/pat.h"
-#include "../mpegts/type/pes.h"
-#include "../mpegts/type/pmt.h"
-#include "../mpegts/type/sdt.h"
+#include "type/pat.h"
+#include "type/pes.h"
+#include "type/pmt.h"
+#include "type/sdt.h"
 
 #include "../../util/dynamicBufferUtil.h"
 #include "../../util/stlMapUtil.h"
