@@ -426,7 +426,8 @@ bool ttLibC_FlvFrameManager_readAudioBinary(
 			if(data_size <= 2) {
 				return false;
 			}
-			if(manager_->audio_frame != NULL && manager_->audio_frame->type != frameType_aac) {
+			if(manager_->audio_frame != NULL
+			&& (manager_->audio_frame->type != frameType_aac || *(buffer + 1) == 0x00)) {
 				ttLibC_Frame_close(&manager_->audio_frame);
 			}
 			audio_frame = (ttLibC_Frame *)ttLibC_Aac_getFrame(
