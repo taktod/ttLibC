@@ -24,6 +24,7 @@ typedef struct ttLibC_Container_Misc_FrameQueue {
 	uint32_t track_id;
 	uint64_t pts;
 	uint32_t timebase;
+	bool isBframe_fixed;
 } ttLibC_Container_Misc_FrameQueue;
 
 typedef ttLibC_Container_Misc_FrameQueue ttLibC_FrameQueue;

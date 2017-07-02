@@ -36,6 +36,7 @@ ttLibC_FlvWriter *ttLibC_FlvWriter_make(
 		writer->video_track.frame_type  = video_type;
 		// we need to have enough size of queue. or drop some frame.
 		writer->video_track.frame_queue = ttLibC_FrameQueue_make(9, 255);
+		writer->video_track.frame_queue->isBframe_fixed = true;
 		break;
 	default:
 		writer->video_track.crc32       = 0;

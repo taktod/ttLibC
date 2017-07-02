@@ -72,6 +72,7 @@ ttLibC_RtmpStream *ttLibC_RtmpStream_make(ttLibC_RtmpConnection *conn) {
 	stream->sent_dsi_info = false;
 	stream->video_type = frameType_unknown;
 	stream->video_queue = ttLibC_FrameQueue_make(9, 1024);
+	stream->video_queue->isBframe_fixed = true;
 	stream->audio_type = frameType_unknown;
 	stream->audio_queue = ttLibC_FrameQueue_make(8, 1024);
 	// make createStream and send it to server.
