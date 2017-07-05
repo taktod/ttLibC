@@ -159,8 +159,12 @@ ttLibC_Yuv420 *ttLibC_ImageResizer_resizeYuv420(
 	}
 
 	ttLibC_Yuv420 *yuv = prev_frame;
-	uint32_t wh = width * height;
-	size_t data_size = wh + (wh >> 1);
+	uint32_t f_stride = ((((width - 1) >> 4) + 1) << 4);
+	uint32_t h_stride = (((((width >> 1) - 1) >> 4) + 1) << 4);
+	uint32_t y_size = f_stride * height;
+	uint32_t u_size = h_stride * (height >> 1);
+	uint32_t v_size = h_stride * (height >> 1);
+	uint32_t data_size = y_size + u_size + v_size;
 	bool alloc_flag = false;
 	uint8_t *data = NULL;
 	if(yuv != NULL) {
@@ -196,54 +200,54 @@ ttLibC_Yuv420 *ttLibC_ImageResizer_resizeYuv420(
 	uint32_t y_step = 1;
 	uint32_t u_step = 1;
 	uint32_t v_step = 1;
-	uint32_t y_stride = width;
-	uint32_t u_stride = width;
-	uint32_t v_stride = width;
+	uint32_t y_stride = f_stride;
+	uint32_t u_stride = h_stride;
+	uint32_t v_stride = h_stride;
 	switch(type) {
 	default:
 	case Yuv420Type_planar:
 		y_data = data;
-		u_data = data + wh;
-		v_data = data + wh + (wh >> 2);
+		u_data = data + y_size;
+		v_data = data + y_size + u_size;
 		y_step = 1;
 		u_step = 1;
 		v_step = 1;
-		y_stride = width;
-		u_stride = (width >> 1);
-		v_stride = (width >> 1);
+		y_stride = f_stride;
+		u_stride = h_stride;
+		v_stride = h_stride;
 		break;
 	case Yuv420Type_semiPlanar:
 		y_data = data;
-		u_data = data + wh;
-		v_data = data + wh + 1;
+		u_data = data + y_size;
+		v_data = data + y_size + 1;
 		y_step = 1;
 		u_step = 2;
 		v_step = 2;
-		y_stride = width;
-		u_stride = width;
-		v_stride = width;
+		y_stride = f_stride;
+		u_stride = f_stride;
+		v_stride = f_stride;
 		break;
 	case Yvu420Type_planar:
 		y_data = data;
-		u_data = data + wh + (wh >> 2);
-		v_data = data + wh;
+		u_data = data + y_size + v_size;
+		v_data = data + y_size;
 		y_step = 1;
 		u_step = 1;
 		v_step = 1;
-		y_stride = width;
-		u_stride = (width >> 1);
-		v_stride = (width >> 1);
+		y_stride = f_stride;
+		u_stride = h_stride;
+		v_stride = h_stride;
 		break;
 	case Yvu420Type_semiPlanar:
 		y_data = data;
-		u_data = data + wh + 1;
-		v_data = data + wh;
+		u_data = data + y_size + 1;
+		v_data = data + y_size;
 		y_step = 1;
 		u_step = 2;
 		v_step = 2;
-		y_stride = width;
-		u_stride = width;
-		v_stride = width;
+		y_stride = f_stride;
+		u_stride = f_stride;
+		v_stride = f_stride;
 		break;
 	}
 	ImageResizer_resizePlane(
@@ -330,14 +334,17 @@ ttLibC_Bgr *ttLibC_ImageResizer_resizeBgr(
 		ttLibC_Frame_close((ttLibC_Frame **)&prev_frame);
 	}
 	ttLibC_Bgr *bgr = prev_frame;
-	uint32_t wh = width * height;
+	uint32_t bgr_stride = ((((width - 1) >> 4) + 1) << 4);
+	uint32_t wh = bgr_stride * height;
 	size_t data_size = wh + (wh << 1);
 	bool alloc_flag = false;
 	switch(type) {
 	case BgrType_bgr:
+		bgr_stride = bgr_stride * 3;
 		break;
 	case BgrType_abgr:
 	case BgrType_bgra:
+		bgr_stride = bgr_stride * 4;
 		data_size = (wh << 2);
 		break;
 	default:
@@ -376,7 +383,6 @@ ttLibC_Bgr *ttLibC_ImageResizer_resizeBgr(
 	uint8_t *r_data = NULL;
 	uint8_t *a_data = NULL;
 	uint32_t step = 3;
-	uint32_t stride = width + (width << 1);
 	switch(type) {
 	default:
 		if(alloc_flag) {
@@ -394,7 +400,6 @@ ttLibC_Bgr *ttLibC_ImageResizer_resizeBgr(
 		g_data = data + 2;
 		r_data = data + 3;
 		step = 4;
-		stride = (width << 2);
 		break;
 	case BgrType_bgra:
 		b_data = data;
@@ -402,7 +407,6 @@ ttLibC_Bgr *ttLibC_ImageResizer_resizeBgr(
 		r_data = data + 2;
 		a_data = data + 3;
 		step = 4;
-		stride = (width << 2);
 		break;
 	}
 	uint8_t *src_b_data = NULL;
@@ -441,7 +445,7 @@ ttLibC_Bgr *ttLibC_ImageResizer_resizeBgr(
 			b_data,
 			width,
 			height,
-			stride,
+			bgr_stride,
 			step,
 			src_b_data,
 			src_frame->inherit_super.width,
@@ -453,7 +457,7 @@ ttLibC_Bgr *ttLibC_ImageResizer_resizeBgr(
 			g_data,
 			width,
 			height,
-			stride,
+			bgr_stride,
 			step,
 			src_g_data,
 			src_frame->inherit_super.width,
@@ -465,7 +469,7 @@ ttLibC_Bgr *ttLibC_ImageResizer_resizeBgr(
 			r_data,
 			width,
 			height,
-			stride,
+			bgr_stride,
 			step,
 			src_r_data,
 			src_frame->inherit_super.width,
@@ -481,7 +485,7 @@ ttLibC_Bgr *ttLibC_ImageResizer_resizeBgr(
 				*a_buf = 255;
 				++ a_buf;
 			}
-			a_data += stride;
+			a_data += bgr_stride;
 		}
 	}
 	bgr = ttLibC_Bgr_make(
@@ -489,7 +493,7 @@ ttLibC_Bgr *ttLibC_ImageResizer_resizeBgr(
 			type,
 			width,
 			height,
-			stride,
+			bgr_stride,
 			data,
 			data_size,
 			true,

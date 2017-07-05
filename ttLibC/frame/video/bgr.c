@@ -131,20 +131,61 @@ ttLibC_Bgr *ttLibC_Bgr_clone(
 		ERR_PRINT("try to use non bgr frame for reuse.");
 		return NULL;
 	}
+	uint32_t bgr_size = src_frame->inherit_super.height * src_frame->width_stride;
+	switch(src_frame->type) {
+	case BgrType_abgr:
+	case BgrType_bgra:
+		bgr_size = bgr_size * 4;
+		break;
+	case BgrType_bgr:
+		bgr_size = bgr_size * 3;
+		break;
+	default:
+		return NULL;
+	}
+	bool allocflag = false;
+	size_t buffer_size = bgr_size;
+	uint8_t *buffer = NULL;
+	if(prev_frame != NULL) {
+		if(!prev_frame->inherit_super.inherit_super.is_non_copy) {
+			if(prev_frame->inherit_super.inherit_super.data_size >= buffer_size) {
+				buffer = prev_frame->inherit_super.inherit_super.data;
+				buffer_size = prev_frame->inherit_super.inherit_super.data_size;
+			}
+			else {
+				ttLibC_free(prev_frame->inherit_super.inherit_super.data);
+			}
+			prev_frame->inherit_super.inherit_super.data = NULL;
+			prev_frame->inherit_super.inherit_super.is_non_copy = true;
+		}
+	}
+	if(buffer == NULL) {
+		buffer = ttLibC_malloc(buffer_size);
+		if(buffer == NULL) {
+			ERR_PRINT("failed to allocate buffer for yuv420 clone.");
+			return NULL;
+		}
+		allocflag = true;
+	}
+	memcpy(buffer, src_frame->data, bgr_size);
 	ttLibC_Bgr *bgr = ttLibC_Bgr_make(
 			prev_frame,
 			src_frame->type,
 			src_frame->inherit_super.width,
 			src_frame->inherit_super.height,
 			src_frame->width_stride,
-			src_frame->inherit_super.inherit_super.data,
-			src_frame->inherit_super.inherit_super.buffer_size,
+			buffer,
+			buffer_size,
 			false,
 			src_frame->inherit_super.inherit_super.pts,
 			src_frame->inherit_super.inherit_super.timebase);
-	if(bgr != NULL) {
-		bgr->inherit_super.inherit_super.id = src_frame->inherit_super.inherit_super.id;
+	if(bgr == NULL) {
+		if(allocflag) {
+			ttLibC_free(buffer);
+		}
+		return NULL;
 	}
+	bgr->inherit_super.inherit_super.id = src_frame->inherit_super.inherit_super.id;
 	return bgr;
 }
 
@@ -166,5 +207,52 @@ void ttLibC_Bgr_close(ttLibC_Bgr **frame) {
 	}
 	ttLibC_free(target);
 	*frame = NULL;
+}
+
+ttLibC_Bgr *ttLibC_Bgr_makeEmptyFrame(
+		ttLibC_Bgr_Type sub_type,
+		uint32_t        width,
+		uint32_t        height) {
+	uint8_t    *data = NULL;
+	ttLibC_Bgr *bgr  = NULL;
+	uint32_t memory_size = 0;
+	uint32_t stride      = 0;
+	switch(sub_type) {
+	case BgrType_abgr:
+	case BgrType_bgra:
+		stride = ((((width - 1) >> 4) + 1) << 4) * 4;
+		memory_size = stride * height;
+		break;
+	case BgrType_bgr:
+		stride = ((((width - 1) >> 4) + 1) << 4) * 3;
+		memory_size = stride * height;
+		break;
+	default:
+		return NULL;
+	}
+	data = ttLibC_malloc(memory_size);
+	if(data == NULL) {
+		return NULL;
+	}
+	memset(data, 0, memory_size);
+	bgr = ttLibC_Bgr_make(
+		NULL,
+		sub_type,
+		width,
+		height,
+		stride,
+		data,
+		memory_size,
+		true,
+		0,
+		1000);
+	if(bgr == NULL) {
+		ttLibC_free(data);
+		return NULL;
+	}
+	uintptr_t ptr = (uintptr_t)data;
+	bgr->data = (void *)(((ptr >> 4) + 1) << 4);
+	bgr->inherit_super.inherit_super.is_non_copy = false;
+	return bgr;
 }
 

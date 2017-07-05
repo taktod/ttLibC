@@ -27,8 +27,12 @@ ttLibC_Yuv420 *ttLibC_LibyuvResampler_resize(
 		ttLibC_Frame_close((ttLibC_Frame **)&prev_frame);
 	}
 	ttLibC_Yuv420 *yuv = prev_frame;
-	uint32_t wh = width * height;
-	size_t data_size = wh + (wh >> 1);
+	uint32_t f_stride = ((((width - 1) >> 4) + 1) << 4);
+	uint32_t h_stride = (((((width >> 1) - 1) >> 4) + 1) << 4);
+	uint32_t y_size = f_stride * height;
+	uint32_t u_size = h_stride * (height >> 1);
+	uint32_t v_size = h_stride * (height >> 1);
+	uint32_t data_size = y_size + u_size + v_size;
 	bool alloc_flag = false;
 	uint8_t *data = NULL;
 	if(yuv != NULL) {
@@ -74,7 +78,7 @@ ttLibC_Yuv420 *ttLibC_LibyuvResampler_resize(
 			src_frame->inherit_super.width,
 			src_frame->inherit_super.height,
 			data,
-			width,
+			f_stride,
 			width,
 			height,
 			filter);
@@ -97,8 +101,8 @@ ttLibC_Yuv420 *ttLibC_LibyuvResampler_resize(
 			src_frame->u_stride,
 			src_frame->inherit_super.width  / 2,
 			src_frame->inherit_super.height / 2,
-			data + wh,
-			width / 2,
+			data + y_size,
+			h_stride,
 			width / 2,
 			height / 2,
 			filter);
@@ -121,8 +125,8 @@ ttLibC_Yuv420 *ttLibC_LibyuvResampler_resize(
 			src_frame->v_stride,
 			src_frame->inherit_super.width  / 2,
 			src_frame->inherit_super.height / 2,
-			data + wh + (wh >> 2),
-			width / 2,
+			data + y_size + u_size,
+			h_stride,
 			width / 2,
 			height / 2,
 			filter);
@@ -134,11 +138,11 @@ ttLibC_Yuv420 *ttLibC_LibyuvResampler_resize(
 			data,
 			data_size,
 			data,
-			width,
-			data + wh,
-			width / 2,
-			data + wh + (wh >> 2),
-			width / 2,
+			f_stride,
+			data + y_size,
+			h_stride,
+			data + y_size + u_size,
+			h_stride,
 			true,
 			src_frame->inherit_super.inherit_super.pts,
 			src_frame->inherit_super.inherit_super.timebase);
@@ -165,8 +169,32 @@ ttLibC_Yuv420 *ttLibC_LibyuvResampler_rotate(
 	ttLibC_Yuv420 *yuv = prev_frame;
 	uint32_t width  = src_frame->inherit_super.width;
 	uint32_t height = src_frame->inherit_super.height;
-	uint32_t wh = width * height;
-	size_t data_size = wh + (wh >> 1);
+	RotationModeEnum rotate = kRotate0;
+	switch(mode) {
+	default:
+	case LibyuvRotate_0:
+		break;
+	case LibyuvRotate_90:
+		rotate =kRotate90;
+		width = src_frame->inherit_super.height;
+		height = src_frame->inherit_super.width;
+		break;
+	case LibyuvRotate_180:
+		rotate =kRotate180;
+		break;
+	case LibyuvRotate_270:
+		rotate =kRotate270;
+		width = src_frame->inherit_super.height;
+		height = src_frame->inherit_super.width;
+		break;
+	}
+	uint32_t f_stride = ((((width - 1) >> 4) + 1) << 4);
+	uint32_t h_stride = (((((width >> 1) - 1) >> 4) + 1) << 4);
+	uint32_t y_size = f_stride * height;
+	uint32_t u_size = h_stride * (height >> 1);
+	uint32_t v_size = h_stride * (height >> 1);
+
+	uint32_t data_size = y_size + u_size + v_size;
 	bool alloc_flag = false;
 	uint8_t *data = NULL;
 	if(yuv != NULL) {
@@ -192,26 +220,6 @@ ttLibC_Yuv420 *ttLibC_LibyuvResampler_rotate(
 		}
 		alloc_flag = true;
 	}
-	RotationModeEnum rotate = kRotate0;
-	switch(mode) {
-	default:
-	case LibyuvRotate_0:
-		break;
-	case LibyuvRotate_90:
-		rotate =kRotate90;
-		width = src_frame->inherit_super.height;
-		height = src_frame->inherit_super.width;
-		break;
-	case LibyuvRotate_180:
-		rotate =kRotate180;
-		break;
-	case LibyuvRotate_270:
-		rotate =kRotate270;
-		width = src_frame->inherit_super.height;
-		height = src_frame->inherit_super.width;
-		break;
-	}
-
 	I420Rotate(src_frame->y_data,
 			src_frame->y_stride,
 			src_frame->u_data,
@@ -219,11 +227,11 @@ ttLibC_Yuv420 *ttLibC_LibyuvResampler_rotate(
 			src_frame->v_data,
 			src_frame->v_stride,
 			data,
-			width,
-			data + wh,
-			width / 2,
-			data + wh + (wh >> 2),
-			width / 2,
+			f_stride,
+			data + y_size,
+			h_stride,
+			data + y_size + u_size,
+			h_stride,
 			src_frame->inherit_super.width,
 			src_frame->inherit_super.height,
 			rotate);
@@ -235,11 +243,11 @@ ttLibC_Yuv420 *ttLibC_LibyuvResampler_rotate(
 			data,
 			data_size,
 			data,
-			width,
-			data + wh,
-			width / 2,
-			data + wh + (wh >> 2),
-			width / 2,
+			f_stride,
+			data + y_size,
+			h_stride,
+			data + y_size + u_size,
+			h_stride,
 			true,
 			src_frame->inherit_super.inherit_super.pts,
 			src_frame->inherit_super.inherit_super.timebase);

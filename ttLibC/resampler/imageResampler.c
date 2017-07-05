@@ -29,9 +29,14 @@ ttLibC_Yuv420 *ttLibC_ImageResampler_makeYuv420FromBgr(
 	}
 	uint32_t width = src_frame->inherit_super.width;
 	uint32_t height = src_frame->inherit_super.height;
+	uint32_t f_stride = ((((width - 1) >> 4) + 1) << 4);
+	uint32_t h_stride = (((((width >> 1) - 1) >> 4) + 1) << 4);
+	uint32_t y_size = f_stride * height;
+	uint32_t u_size = h_stride * (height >> 1);
+	uint32_t v_size = h_stride * (height >> 1);
 	uint32_t wh = width * height;
 
-	size_t data_size = wh + (wh >> 1);
+	size_t data_size = y_size + u_size + v_size;
 	bool alloc_flag = false;
 	switch(type) {
 	case Yuv420Type_planar:
@@ -78,59 +83,58 @@ ttLibC_Yuv420 *ttLibC_ImageResampler_makeYuv420FromBgr(
 	uint32_t y_step = 1;
 	uint32_t u_step = 1;
 	uint32_t v_step = 1;
-	uint32_t y_stride = width;
-	uint32_t u_stride = width;
-	uint32_t v_stride = width;
+	uint32_t y_stride = f_stride;
+	uint32_t u_stride = h_stride;
+	uint32_t v_stride = h_stride;
 	switch(type) {
 	default:
 	case Yuv420Type_planar:
 		y_data = data;
-		u_data = data + wh;
-		v_data = data + wh + (wh >> 2);
+		u_data = data + y_size;
+		v_data = data + y_size + u_size;
 		y_step = 1;
 		u_step = 1;
 		v_step = 1;
-		y_stride = width;
-		u_stride = (width >> 1);
-		v_stride = (width >> 1);
+		y_stride = f_stride;
+		u_stride = h_stride;
+		v_stride = h_stride;
 		break;
 	case Yuv420Type_semiPlanar:
 		y_data = data;
-		u_data = data + wh;
-		v_data = data + wh + 1;
+		u_data = data + y_size;
+		v_data = data + y_size + 1;
 		y_step = 1;
 		u_step = 2;
 		v_step = 2;
-		y_stride = width;
-		u_stride = width;
-		v_stride = width;
+		y_stride = f_stride;
+		u_stride = f_stride;
+		v_stride = f_stride;
 		break;
 	case Yvu420Type_planar:
 		y_data = data;
-		u_data = data + wh + (wh >> 2);
-		v_data = data + wh;
+		u_data = data + y_size + v_size;
+		v_data = data + y_size;
 		y_step = 1;
 		u_step = 1;
 		v_step = 1;
-		y_stride = width;
-		u_stride = (width >> 1);
-		v_stride = (width >> 1);
+		y_stride = f_stride;
+		u_stride = h_stride;
+		v_stride = h_stride;
 		break;
 	case Yvu420Type_semiPlanar:
 		y_data = data;
-		u_data = data + wh + 1;
-		v_data = data + wh;
+		u_data = data + y_size + 1;
+		v_data = data + y_size;
 		y_step = 1;
 		u_step = 2;
 		v_step = 2;
-		y_stride = width;
-		u_stride = width;
-		v_stride = width;
+		y_stride = f_stride;
+		u_stride = f_stride;
+		v_stride = f_stride;
 		break;
 	}
 	// rgb data
 	uint8_t *src_data = src_frame->data;
-	uint32_t src_width_stride_diff = src_frame->width_stride;
 	uint8_t *src_b_data = NULL;
 	uint8_t *src_g_data = NULL;
 	uint8_t *src_r_data = NULL;
@@ -138,21 +142,18 @@ ttLibC_Yuv420 *ttLibC_ImageResampler_makeYuv420FromBgr(
 	switch(src_frame->type) {
 	case BgrType_bgr:
 		src_step = 3;
-		src_width_stride_diff = src_frame->width_stride - src_step * width;
 		src_b_data = src_data;
 		src_g_data = src_data + 1;
 		src_r_data = src_data + 2;
 		break;
 	case BgrType_abgr:
 		src_step = 4;
-		src_width_stride_diff = src_frame->width_stride - src_step * width;
 		src_b_data = src_data + 1;
 		src_g_data = src_data + 2;
 		src_r_data = src_data + 3;
 		break;
 	case BgrType_bgra:
 		src_step = 4;
-		src_width_stride_diff = src_frame->width_stride - src_step * width;
 		src_b_data = src_data;
 		src_g_data = src_data + 1;
 		src_r_data = src_data + 2;
@@ -164,6 +165,10 @@ ttLibC_Yuv420 *ttLibC_ImageResampler_makeYuv420FromBgr(
 		}
 		return NULL;
 	}
+	uint32_t dst_y_stride_diff = y_stride - width * y_step;
+	uint32_t dst_u_stride_diff = u_stride - (width >> 1) * u_step;
+	uint32_t dst_v_stride_diff = v_stride - (width >> 1) * v_step;
+	uint32_t src_width_stride_diff = src_frame->width_stride - src_step * width;
 	uint8_t r,g,b;
 	uint32_t y,u,v;
 	for(uint32_t i = 0;i < height;++ i) {
@@ -188,6 +193,15 @@ ttLibC_Yuv420 *ttLibC_ImageResampler_makeYuv420FromBgr(
 				u_data += u_step;
 				v_data += v_step;
 			}
+		}
+		if(dst_y_stride_diff > 0) {
+			y_data += dst_y_stride_diff;
+		}
+		if(dst_u_stride_diff > 0) {
+			u_data += dst_u_stride_diff;
+		}
+		if(dst_v_stride_diff > 0) {
+			v_data += dst_v_stride_diff;
 		}
 		if(src_width_stride_diff > 0) {
 			src_b_data += src_width_stride_diff;
@@ -269,14 +283,17 @@ ttLibC_Bgr *ttLibC_ImageResampler_makeBgrFromYuv420(
 	}
 	uint32_t width = src_frame->inherit_super.width;
 	uint32_t height = src_frame->inherit_super.height;
-	uint32_t wh = width * height;
+	uint32_t bgr_stride = ((((width - 1) >> 4) + 1) << 4);
+	uint32_t wh = bgr_stride * height;
 	size_t data_size = wh + (wh << 1);
 	bool alloc_flag = false;
 	switch(type) {
 	case BgrType_bgr:
+		bgr_stride = bgr_stride * 3;
 		break;
 	case BgrType_abgr:
 	case BgrType_bgra:
+		bgr_stride = bgr_stride * 4;
 		data_size = (wh << 2);
 		break;
 	default:
@@ -316,7 +333,6 @@ ttLibC_Bgr *ttLibC_ImageResampler_makeBgrFromYuv420(
 	uint8_t *r_data = NULL;
 	uint8_t *a_data = NULL;
 	uint32_t step = 3;
-	uint32_t width_stride = width + (width << 1);
 	switch(type) {
 	default:
 		if(alloc_flag) {
@@ -330,7 +346,6 @@ ttLibC_Bgr *ttLibC_ImageResampler_makeBgrFromYuv420(
 		r_data = data + 2;
 		a_data = NULL;
 		step = 3;
-		width_stride = width + (width << 1);
 		break;
 	case BgrType_abgr:
 		a_data = data;
@@ -338,7 +353,6 @@ ttLibC_Bgr *ttLibC_ImageResampler_makeBgrFromYuv420(
 		g_data = data + 2;
 		r_data = data + 3;
 		step = 4;
-		width_stride = (width << 2);
 		break;
 	case BgrType_bgra:
 		b_data = data;
@@ -346,7 +360,6 @@ ttLibC_Bgr *ttLibC_ImageResampler_makeBgrFromYuv420(
 		r_data = data + 2;
 		a_data = data + 3;
 		step = 4;
-		width_stride = (width << 2);
 		break;
 	}
 	// yuv420 data
@@ -359,6 +372,7 @@ ttLibC_Bgr *ttLibC_ImageResampler_makeBgrFromYuv420(
 	uint32_t src_y_stride_diff = src_frame->y_stride - width * src_y_step;
 	uint32_t src_u_stride_diff = src_frame->u_stride - (width >> 1) * src_u_step;
 	uint32_t src_v_stride_diff = src_frame->v_stride - (width >> 1) * src_v_step;
+	uint32_t dst_bgr_stride_diff = bgr_stride - width * step;
 
 	uint32_t y1192 = 0;
 	int32_t y = 0;
@@ -410,8 +424,16 @@ ttLibC_Bgr *ttLibC_ImageResampler_makeBgrFromYuv420(
 		if(src_v_stride_diff > 0) {
 			src_v_data += src_v_stride_diff;
 		}
+		if(dst_bgr_stride_diff > 0) {
+			b_data += dst_bgr_stride_diff;
+			g_data += dst_bgr_stride_diff;
+			r_data += dst_bgr_stride_diff;
+			if(a_data != NULL) {
+				a_data += dst_bgr_stride_diff;
+			}
+		}
 	}
-	bgr = ttLibC_Bgr_make(bgr, type, width, height, width_stride, data, data_size, true, src_frame->inherit_super.inherit_super.pts, src_frame->inherit_super.inherit_super.timebase);
+	bgr = ttLibC_Bgr_make(bgr, type, width, height, bgr_stride, data, data_size, true, src_frame->inherit_super.inherit_super.pts, src_frame->inherit_super.inherit_super.timebase);
 	if(bgr == NULL) {
 		if(alloc_flag) {
 			ttLibC_free(data);

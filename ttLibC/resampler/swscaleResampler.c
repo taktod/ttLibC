@@ -159,140 +159,27 @@ ttLibC_SwscaleResampler *ttLibC_SwscaleResampler_make(
 	switch(output_frame_type) {
 	case frameType_bgr:
 		{
-			uint8_t    *data = NULL;
-			ttLibC_Bgr *bgr  = NULL;
-			uint32_t memory_size = 0;
-			uint32_t stride      = 0;
-			switch(output_sub_type) {
-			case BgrType_abgr:
-			case BgrType_bgra:
-				{
-					memory_size = output_width * output_height * 4;
-					stride = output_width * 4;
-				}
-				break;
-			case BgrType_bgr:
-				{
-					memory_size = output_width * output_height * 3;
-					stride = output_width * 3;
-				}
-				break;
-			default:
-				{
-					ttLibC_free(resampler);
-					return NULL;
-				}
-			}
-			data = ttLibC_malloc(memory_size);
-			if(data == NULL) {
-				ttLibC_free(resampler);
-				return NULL;
-			}
-			memset(data, 0, memory_size);
-			bgr = ttLibC_Bgr_make(
-					NULL,
-					output_sub_type,
-					output_width,
-					output_height,
-					stride,
-					data,
-					memory_size,
-					true,
-					0,
-					1000);
+			ttLibC_Bgr *bgr = ttLibC_Bgr_makeEmptyFrame(
+				output_sub_type,
+				output_width,
+				output_height);
 			if(bgr == NULL) {
-				ttLibC_free(data);
 				ttLibC_free(resampler);
 				return NULL;
 			}
-			bgr->inherit_super.inherit_super.is_non_copy = false;
 			resampler->frame = (ttLibC_Frame *)bgr;
 		}
 		break;
 	case frameType_yuv420:
 		{
-			uint8_t       *data = NULL;
-			ttLibC_Yuv420 *yuv  = NULL;
-			uint32_t wh          = output_width * output_height;
-			uint32_t memory_size = wh + (wh >> 1);
-			data = ttLibC_malloc(memory_size);
-			if(data == NULL) {
-				ttLibC_free(resampler);
-				return NULL;
-			}
-			memset(data, 0, memory_size);
-			uint8_t *y_data = NULL;
-			uint8_t *u_data = NULL;
-			uint8_t *v_data = NULL;
-			uint32_t y_stride = 0;
-			uint32_t u_stride = 0;
-			uint32_t v_stride = 0;
-			switch(output_sub_type) {
-			case Yuv420Type_planar:
-				{
-					y_data = data;
-					u_data = data + wh;
-					v_data = data + wh + (wh >> 2);
-					y_stride = output_width;
-					u_stride = (output_width >> 1);
-					v_stride = (output_width >> 1);
-				}
-				break;
-			case Yuv420Type_semiPlanar:
-				{
-					y_data = data;
-					u_data = data + wh;
-					v_data = data + wh + 1;
-					y_stride = output_width;
-					u_stride = output_width;
-					v_stride = output_width;
-				}
-				break;
-			case Yvu420Type_planar:
-				{
-					y_data = data;
-					v_data = data + wh;
-					u_data = data + wh + (wh >> 2);
-					y_stride = output_width;
-					v_stride = (output_width >> 1);
-					u_stride = (output_width >> 1);
-				}
-				break;
-			case Yvu420Type_semiPlanar:
-				{
-					y_data = data;
-					v_data = data + wh;
-					u_data = data + wh + 1;
-					y_stride = output_width;
-					v_stride = output_width;
-					u_stride = output_width;
-				}
-				break;
-			default:
-				break;
-			}
-			yuv = ttLibC_Yuv420_make(
-					NULL,
-					output_sub_type,
-					output_width,
-					output_height,
-					data,
-					memory_size,
-					y_data,
-					y_stride,
-					u_data,
-					u_stride,
-					v_data,
-					v_stride,
-					true,
-					0,
-					1000);
+			ttLibC_Yuv420 *yuv = ttLibC_Yuv420_makeEmptyFrame(
+				output_sub_type,
+				output_width,
+				output_height);
 			if(yuv == NULL) {
-				ttLibC_free(data);
 				ttLibC_free(resampler);
 				return NULL;
 			}
-			yuv->inherit_super.inherit_super.is_non_copy = false;
 			resampler->frame = (ttLibC_Frame *)yuv;
 		}
 		break;

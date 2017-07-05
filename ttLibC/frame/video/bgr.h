@@ -89,6 +89,17 @@ ttLibC_Bgr *ttLibC_Bgr_clone(
  */
 void ttLibC_Bgr_close(ttLibC_Bgr **frame);
 
+/**
+ * generate empty frame
+ * @param sub_type type of bgr
+ * @param width    width of image
+ * @param height   height of image
+ */
+ttLibC_Bgr *ttLibC_Bgr_makeEmptyFrame(
+		ttLibC_Bgr_Type sub_type,
+		uint32_t        width,
+		uint32_t        height);
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

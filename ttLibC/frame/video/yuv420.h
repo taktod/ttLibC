@@ -113,6 +113,17 @@ ttLibC_Yuv420 *ttLibC_Yuv420_clone(
  */
 void ttLibC_Yuv420_close(ttLibC_Yuv420 **frame);
 
+/**
+ * generate empty frame
+ * @param sub_type type of yuv
+ * @param width    width of image
+ * @param height   height of image
+ */
+ttLibC_Yuv420 *ttLibC_Yuv420_makeEmptyFrame(
+		ttLibC_Yuv420_Type sub_type,
+		uint32_t           width,
+		uint32_t           height);
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

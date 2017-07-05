@@ -193,10 +193,7 @@ static bool AvcodecDecoder_decodeAudio(
 					NULL,
 					0,
 					decoder->avframe->data[0],
-//					decoder->avframe->nb_samples * 4,
 					decoder->avframe->nb_samples * 4 * decoder->avframe->channels,
-//					decoder->avframe->data[1],
-//					decoder->avframe->nb_samples * 4,
 					NULL,
 					0,
 					true,
@@ -262,10 +259,7 @@ static bool AvcodecDecoder_decodeAudio(
 					NULL,
 					0,
 					decoder->avframe->data[0],
-//					decoder->avframe->nb_samples * 2,
 					decoder->avframe->nb_samples * 2 * decoder->avframe->channels,
-//					decoder->avframe->data[1],
-//					decoder->avframe->nb_samples * 2,
 					NULL,
 					0,
 					true,
@@ -503,36 +497,36 @@ static bool AvcodecDecoder_decodeVideo(
 			}
 			uint32_t width  = decoder->avframe->width;
 			uint32_t height = decoder->avframe->height;
-			uint32_t wh = ((width * height) >> 1);
-			uint8_t *data = NULL;
-			size_t data_size = wh;
-			wh = (wh >> 1);
+			uint32_t uv_stride = (((((width >> 1) - 1) >> 4) + 1) << 4);
+			uint32_t uv_data_size = uv_stride * height;
+			size_t data_size = uv_data_size;
+			uint8_t *uv_data = NULL;
 			bool is_alloc_flag = false;
 			if(decoder->frame != NULL && !decoder->frame->is_non_copy) {
-				if(decoder->frame->data_size < data_size) {
+				if(decoder->frame->data_size < uv_data_size) {
 					// need to realloc
 					ttLibC_free(decoder->frame->data);
 					decoder->frame->data = NULL;
 				}
 				else {
 					// can reuse prev data.
-					data = decoder->frame->data;
+					uv_data = decoder->frame->data;
 					data_size = decoder->frame->data_size;
 				}
 			}
-			if(data == NULL) {
-				data = ttLibC_malloc(data_size);
-				if(data == NULL) {
-					ERR_PRINT("failed to alloc yuv buffer.");
+			if(uv_data == NULL) {
+				uv_data = ttLibC_malloc(uv_data_size);
+				if(uv_data == NULL) {
+					ERR_PRINT("failed to alloc uv buffer.");
 					return false;
 				}
 				is_alloc_flag = true;
 			}
 			// make uv.
-			uint8_t *u_data = data;
-			uint8_t *v_data = data + wh;
-			uint32_t u_stride = (width >> 1);
-			uint32_t v_stride = (width >> 1);
+			uint8_t *u_data = uv_data;
+			uint8_t *v_data = uv_data + (uv_data_size >> 1);
+			uint32_t u_stride = uv_stride;
+			uint32_t v_stride = uv_stride;
 			uint8_t *src_u_data = decoder->avframe->data[1];
 			uint8_t *src_v_data = decoder->avframe->data[2];
 			uint32_t src_u_stride = decoder->avframe->linesize[1];
@@ -575,14 +569,14 @@ static bool AvcodecDecoder_decodeVideo(
 			if(decoder->frame != NULL) {
 				decoder->frame->is_non_copy = true;
 			}
-			u_data = data;
-			v_data = data + wh;
+			u_data = uv_data;
+			v_data = uv_data + (uv_data_size >> 1);
 			ttLibC_Yuv420 *y = ttLibC_Yuv420_make(
 					(ttLibC_Yuv420 *)decoder->frame,
 					Yuv420Type_planar,
 					width,
 					height,
-					data,
+					uv_data,
 					data_size,
 					decoder->avframe->data[0],
 					decoder->avframe->linesize[0],
@@ -599,7 +593,7 @@ static bool AvcodecDecoder_decodeVideo(
 					frame->inherit_super.timebase);
 			if(y == NULL) {
 				if(is_alloc_flag) {
-					ttLibC_free(data);
+					ttLibC_free(uv_data);
 				}
 				ERR_PRINT("failed to make yuv420 frame object.");
 				return false;

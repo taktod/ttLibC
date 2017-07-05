@@ -441,3 +441,84 @@ void ttLibC_Yuv420_close(ttLibC_Yuv420 **frame) {
 	ttLibC_free(target);
 	*frame = NULL;
 }
+
+ttLibC_Yuv420 *ttLibC_Yuv420_makeEmptyFrame(
+		ttLibC_Yuv420_Type sub_type,
+		uint32_t           width,
+		uint32_t           height) {
+	uint8_t       *data = NULL;
+	ttLibC_Yuv420 *yuv  = NULL;
+	uint32_t f_stride = ((((width - 1) >> 4) + 1) << 4);
+	uint32_t h_stride = (((((width >> 1) - 1) >> 4) + 1) << 4);
+	uint32_t wh  = f_stride * height;
+	uint32_t hwh = h_stride * height / 2;
+	uint32_t memory_size = wh + (hwh << 1);
+	data = ttLibC_malloc(memory_size);
+	if(data == NULL) {
+		return NULL;
+	}
+	memset(data, 0, memory_size);
+	uint8_t *y_data = NULL;
+	uint8_t *u_data = NULL;
+	uint8_t *v_data = NULL;
+	uint32_t y_stride = 0;
+	uint32_t u_stride = 0;
+	uint32_t v_stride = 0;
+	uintptr_t ptr = (uintptr_t)data;
+	y_data = (void *)(((ptr >> 4) + 1) << 4);
+	switch(sub_type) {
+	case Yuv420Type_planar:
+		u_data = y_data + wh;
+		v_data = u_data + hwh;
+		y_stride = f_stride;
+		u_stride = h_stride;
+		v_stride = h_stride;
+		break;
+	case Yuv420Type_semiPlanar:
+		u_data = y_data + wh;
+		v_data = u_data + 1;
+		y_stride = f_stride;
+		u_stride = f_stride;
+		v_stride = f_stride;
+		break;
+	case Yvu420Type_planar:
+		v_data = y_data + wh;
+		u_data = v_data + hwh;
+		y_stride = f_stride;
+		v_stride = h_stride;
+		u_stride = h_stride;
+		break;
+	case Yvu420Type_semiPlanar:
+		v_data = y_data + wh;
+		u_data = v_data + 1;
+		y_stride = f_stride;
+		v_stride = f_stride;
+		u_stride = f_stride;
+		break;
+	default:
+		ttLibC_free(data);
+		return NULL;
+	}
+	yuv = ttLibC_Yuv420_make(
+		NULL,
+		sub_type,
+		width,
+		height,
+		data,
+		memory_size,
+		y_data,
+		y_stride,
+		u_data,
+		u_stride,
+		v_data,
+		v_stride,
+		true,
+		0,
+		1000);
+	if(yuv == NULL) {
+		ttLibC_free(data);
+		return NULL;
+	}
+	yuv->inherit_super.inherit_super.is_non_copy = false;
+	return yuv;
+}

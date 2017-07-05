@@ -100,8 +100,11 @@ bool ttLibC_JpegDecoder_decode(
 	uint8_t *data = NULL;
 	decoder_->inherit_super.width = decoder_->dinfo.output_width;
 	decoder_->inherit_super.height = decoder_->dinfo.output_height;
-	size_t wh = decoder_->inherit_super.width * decoder_->inherit_super.height;
-	size_t data_size = wh + (wh >> 1);
+	uint32_t f_stride = ((((decoder_->inherit_super.width - 1) >> 4) + 1) << 4);
+	uint32_t h_stride = (((((decoder_->inherit_super.width >> 1) - 1) >> 4) + 1) << 4);
+	size_t y_size = f_stride * decoder_->inherit_super.height;
+	size_t u_size = h_stride * (decoder_->inherit_super.height >> 1);
+	size_t data_size = y_size + (u_size << 1);
 	bool alloc_flag = false;
 	// check the size is multiple of 16 or not.
 	if(decoder_->inherit_super.height % 16 > 0) {
@@ -145,8 +148,8 @@ bool ttLibC_JpegDecoder_decode(
 	}
 
 	uint8_t *y_data = data;
-	uint8_t *u_data = data + wh;
-	uint8_t *v_data = u_data + (wh >> 2);
+	uint8_t *u_data = data + y_size;
+	uint8_t *v_data = u_data + u_size;
 	for(uint32_t j = 0;j < decoder_->inherit_super.height;j += 16) {
 		uint32_t max = decoder_->inherit_super.height - j;
 		if(max >= 16) {
@@ -162,12 +165,12 @@ bool ttLibC_JpegDecoder_decode(
 			}
 			else {
 				y[i] = y_data;
-				y_data += decoder_->inherit_super.width;
+				y_data += f_stride;
 				if((i & 0x01) == 0) {
 					cb[(i >> 1)] = u_data;
 					cr[(i >> 1)] = v_data;
-					u_data += (decoder_->inherit_super.width >> 1);
-					v_data += (decoder_->inherit_super.width >> 1);
+					u_data += h_stride;
+					v_data += h_stride;
 				}
 			}
 		}
@@ -188,9 +191,9 @@ bool ttLibC_JpegDecoder_decode(
 			data_size,
 			data,
 			decoder_->inherit_super.width,
-			data + wh,
+			data + y_size,
 			(decoder_->inherit_super.width >> 1),
-			data + wh + (wh >> 2),
+			data + y_size + u_size,
 			(decoder_->inherit_super.width >> 1),
 			true,
 			jpeg->inherit_super.inherit_super.pts,
@@ -203,7 +206,7 @@ bool ttLibC_JpegDecoder_decode(
 		return false;
 	}
 	yuv->inherit_super.inherit_super.is_non_copy = false;
-	yuv->inherit_super.inherit_super.buffer_size = wh + (wh >> 1);
+	yuv->inherit_super.inherit_super.buffer_size = data_size;
 	decoder_->yuv420 = yuv;
 	if(!callback(ptr, yuv)) {
 		return false;
