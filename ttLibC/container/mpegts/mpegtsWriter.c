@@ -55,7 +55,7 @@ ttLibC_MpegtsWriter *ttLibC_MpegtsWriter_make_ex(
 	writer->cc_pat = 0;
 	writer->cc_pmt = 0;
 	writer->data_buffer = NULL;
-	writer->dts_margin = 20000;
+	writer->dts_margin = 0;
 
 	ttLibC_Sdt_makePacket((const char *)"ttLibC", (const char *)"mpegtsMuxer", writer->sdt_buf, 188);
 	ttLibC_Pat_makePacket(writer->pat_buf, 188);
