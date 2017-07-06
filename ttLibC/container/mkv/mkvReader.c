@@ -127,6 +127,8 @@ static bool MkvReader_readTag(
 	case MkvType_CRC32:
 	case MkvType_DisplayUnit:
 	case MkvType_Colour:
+	case MkvType_MaxBlockAdditionID:
+	case MkvType_AlphaMode:
 		{
 			// check the data size.
 			if(data_size < size + byte_reader->read_size) {
@@ -336,7 +338,7 @@ static bool MkvReader_readTag(
 		}
 		break;
 	default:
-		LOG_PRINT("unknown tag.:%x", type);
+		ERR_PRINT("unknown tag.:%x", type);
 		LOG_DUMP(data, data_size, true);
 		reader->error_number = 1;
 		break;

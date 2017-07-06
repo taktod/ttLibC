@@ -86,6 +86,7 @@ typedef enum ttLibC_Mkv_Type {
 				MkvType_FrameRate = 0x2383E3,
 				MkvType_Video = 0xE0,
 					MkvType_FlagInterlaced = 0x9a,
+					MkvType_AlphaMode = 0x53C0,
 					MkvType_PixelWidth = 0xB0,
 					MkvType_PixelHeight = 0xBA,
 					MkvType_DisplayWidth = 0x54B0,
