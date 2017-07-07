@@ -16,7 +16,7 @@
 #include <string.h>
 #include "../../../../util/hexUtil.h"
 
-ttLibC_Amf0Command *ttLibC_Amf0Command_make(const char *command_name) {
+ttLibC_Amf0Command TT_VISIBILITY_HIDDEN *ttLibC_Amf0Command_make(const char *command_name) {
 	ttLibC_Amf0Command *command = ttLibC_malloc(sizeof(ttLibC_Amf0Command));
 	if(command == NULL) {
 		return NULL;
@@ -37,7 +37,7 @@ ttLibC_Amf0Command *ttLibC_Amf0Command_make(const char *command_name) {
 	return command;
 }
 
-ttLibC_Amf0Command *ttLibC_Amf0Command_connect(
+ttLibC_Amf0Command TT_VISIBILITY_HIDDEN *ttLibC_Amf0Command_connect(
 		const char *tcUrl,
 		const char *app) {
 	ttLibC_Amf0Command *connect = ttLibC_Amf0Command_make("connect");
@@ -69,7 +69,7 @@ ttLibC_Amf0Command *ttLibC_Amf0Command_connect(
 	return connect;
 }
 
-ttLibC_Amf0Command *ttLibC_Amf0Command_createStream() {
+ttLibC_Amf0Command TT_VISIBILITY_HIDDEN *ttLibC_Amf0Command_createStream() {
 	ttLibC_Amf0Command *createStream = ttLibC_Amf0Command_make("createStream");
 	if(createStream == NULL) {
 		return NULL;
@@ -78,7 +78,7 @@ ttLibC_Amf0Command *ttLibC_Amf0Command_createStream() {
 	return createStream;
 }
 
-ttLibC_Amf0Command *ttLibC_Amf0Command_publish(
+ttLibC_Amf0Command TT_VISIBILITY_HIDDEN *ttLibC_Amf0Command_publish(
 		uint32_t stream_id,
 		const char *name) {
 	ttLibC_Amf0Command *publish = ttLibC_Amf0Command_make("publish");
@@ -93,7 +93,7 @@ ttLibC_Amf0Command *ttLibC_Amf0Command_publish(
 	return publish;
 }
 
-ttLibC_Amf0Command *ttLibC_Amf0Command_receiveAudio(
+ttLibC_Amf0Command TT_VISIBILITY_HIDDEN *ttLibC_Amf0Command_receiveAudio(
 		uint32_t stream_id,
 		bool accept_audio) {
 	ttLibC_Amf0Command *receiveAudio = ttLibC_Amf0Command_make("receiveAudio");
@@ -107,7 +107,7 @@ ttLibC_Amf0Command *ttLibC_Amf0Command_receiveAudio(
 	return receiveAudio;
 }
 
-ttLibC_Amf0Command *ttLibC_Amf0Command_receiveVideo(
+ttLibC_Amf0Command TT_VISIBILITY_HIDDEN *ttLibC_Amf0Command_receiveVideo(
 		uint32_t stream_id,
 		bool accept_video) {
 	ttLibC_Amf0Command *receiveVideo = ttLibC_Amf0Command_make("receiveVideo");
@@ -121,7 +121,7 @@ ttLibC_Amf0Command *ttLibC_Amf0Command_receiveVideo(
 	return receiveVideo;
 }
 
-ttLibC_Amf0Command *ttLibC_Amf0Command_play(
+ttLibC_Amf0Command TT_VISIBILITY_HIDDEN *ttLibC_Amf0Command_play(
 		uint32_t stream_id,
 		const char *name) {
 	ttLibC_Amf0Command *play = ttLibC_Amf0Command_make("play");
@@ -135,7 +135,7 @@ ttLibC_Amf0Command *ttLibC_Amf0Command_play(
 	return play;
 }
 
-ttLibC_Amf0Command *ttLibC_Amf0Command_pause(uint32_t stream_id) {
+ttLibC_Amf0Command TT_VISIBILITY_HIDDEN *ttLibC_Amf0Command_pause(uint32_t stream_id) {
 	ttLibC_Amf0Command *pause = ttLibC_Amf0Command_make("pause");
 	if(pause == NULL) {
 		return NULL;
@@ -148,7 +148,7 @@ ttLibC_Amf0Command *ttLibC_Amf0Command_pause(uint32_t stream_id) {
 	return pause;
 }
 
-ttLibC_Amf0Command *ttLibC_Amf0Command_closeStream(uint32_t stream_id) {
+ttLibC_Amf0Command TT_VISIBILITY_HIDDEN *ttLibC_Amf0Command_closeStream(uint32_t stream_id) {
 	ttLibC_Amf0Command *closeStream = ttLibC_Amf0Command_make("closeStream");
 	if(closeStream == NULL) {
 		return NULL;
@@ -193,7 +193,7 @@ static bool Amf0Command_readBinaryObjectCallback(void *ptr, ttLibC_Amf0Object *a
 	return true;
 }
 
-ttLibC_Amf0Command *ttLibC_Amf0Command_readBinary(
+ttLibC_Amf0Command TT_VISIBILITY_HIDDEN *ttLibC_Amf0Command_readBinary(
 		uint8_t *data,
 		size_t data_size) {
 	ttLibC_Amf0Command *command = ttLibC_Amf0Command_make("");
@@ -215,7 +215,7 @@ static bool Amf0Command_writeCallback(void *ptr, void *data, size_t data_size) {
 	return true;
 }
 
-bool ttLibC_Amf0Command_getData(
+bool TT_VISIBILITY_HIDDEN ttLibC_Amf0Command_getData(
 		ttLibC_Amf0Command *command,
 		ttLibC_DynamicBuffer *buffer) {
 	// amf0Command -> binary for send message.
@@ -237,7 +237,7 @@ bool ttLibC_Amf0Command_getData(
 	return true;
 }
 
-void ttLibC_Amf0Command_close(ttLibC_Amf0Command **command) {
+void TT_VISIBILITY_HIDDEN ttLibC_Amf0Command_close(ttLibC_Amf0Command **command) {
 	ttLibC_Amf0Command *target = (ttLibC_Amf0Command *)*command;
 	if(target == NULL) {
 		return;

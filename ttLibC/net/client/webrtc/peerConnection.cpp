@@ -330,7 +330,7 @@ void PeerConnectionWrapper::OnIceConnectionReceivingChange(bool receiving) {
 
 extern "C" {
 
-bool ttLibC_WebrtcPeerConnection_createOffer(
+bool TT_VISIBILITY_HIDDEN ttLibC_WebrtcPeerConnection_createOffer(
 		ttLibC_WebrtcPeerConnection *conn,
 		ttLibC_WebrtcEventFunc func,
 		ttLibC_WebrtcConstraint *constraint) {
@@ -340,7 +340,7 @@ bool ttLibC_WebrtcPeerConnection_createOffer(
 	ttLibC_WebrtcPeerConnection_ *conn_ = (ttLibC_WebrtcPeerConnection_ *)conn;
 	return conn_->peerConnectionWrapper->createOffer(func, constraint);
 }
-bool ttLibC_WebrtcPeerConnection_createAnswer(
+bool TT_VISIBILITY_HIDDEN ttLibC_WebrtcPeerConnection_createAnswer(
 		ttLibC_WebrtcPeerConnection *conn,
 		ttLibC_WebrtcEventFunc func,
 		ttLibC_WebrtcConstraint *constraint) {
@@ -350,7 +350,7 @@ bool ttLibC_WebrtcPeerConnection_createAnswer(
 	ttLibC_WebrtcPeerConnection_ *conn_ = (ttLibC_WebrtcPeerConnection_ *)conn;
 	return conn_->peerConnectionWrapper->createAnswer(func, constraint);
 }
-bool ttLibC_WebrtcPeerConnection_setLocalDescription(
+bool TT_VISIBILITY_HIDDEN ttLibC_WebrtcPeerConnection_setLocalDescription(
 		ttLibC_WebrtcPeerConnection *conn,
 		ttLibC_WebrtcSdp *sdp) {
 	if(conn == NULL) {
@@ -359,7 +359,7 @@ bool ttLibC_WebrtcPeerConnection_setLocalDescription(
 	ttLibC_WebrtcPeerConnection_ *conn_ = (ttLibC_WebrtcPeerConnection_ *)conn;
 	return conn_->peerConnectionWrapper->setLocalDescription(sdp);
 }
-bool ttLibC_WebrtcPeerConnection_setRemoteDescription(
+bool TT_VISIBILITY_HIDDEN ttLibC_WebrtcPeerConnection_setRemoteDescription(
 		ttLibC_WebrtcPeerConnection *conn,
 		ttLibC_WebrtcSdp *sdp) {
 	if(conn == NULL) {
@@ -368,7 +368,7 @@ bool ttLibC_WebrtcPeerConnection_setRemoteDescription(
 	ttLibC_WebrtcPeerConnection_ *conn_ = (ttLibC_WebrtcPeerConnection_ *)conn;
 	return conn_->peerConnectionWrapper->setRemoteDescription(sdp);
 }
-bool ttLibC_WebrtcPeerConnection_addIceCandidate(
+bool TT_VISIBILITY_HIDDEN ttLibC_WebrtcPeerConnection_addIceCandidate(
 		ttLibC_WebrtcPeerConnection *conn,
 		ttLibC_WebrtcCandidate *candidate) {
 	if(conn == NULL) {
@@ -377,7 +377,7 @@ bool ttLibC_WebrtcPeerConnection_addIceCandidate(
 	ttLibC_WebrtcPeerConnection_ *conn_ = (ttLibC_WebrtcPeerConnection_ *)conn;
 	return conn_->peerConnectionWrapper->addIceCandidate(candidate);
 }
-void ttLibC_WebrtcPeerConnection_close(ttLibC_WebrtcPeerConnection **conn) {
+void TT_VISIBILITY_HIDDEN ttLibC_WebrtcPeerConnection_close(ttLibC_WebrtcPeerConnection **conn) {
 	ttLibC_WebrtcPeerConnection_ *target = (ttLibC_WebrtcPeerConnection_ *)*conn;
 	if(target == NULL) {
 		return;
@@ -387,7 +387,7 @@ void ttLibC_WebrtcPeerConnection_close(ttLibC_WebrtcPeerConnection **conn) {
 	*conn = NULL;
 }
 
-bool ttLibC_WebrtcPeerConnection_AddStream(
+bool TT_VISIBILITY_HIDDEN ttLibC_WebrtcPeerConnection_AddStream(
 		ttLibC_WebrtcPeerConnection *conn,
 		ttLibC_WebrtcMediaStream *stream) {
 	if(conn == NULL) {

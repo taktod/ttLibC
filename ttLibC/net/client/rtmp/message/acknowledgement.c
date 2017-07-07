@@ -15,7 +15,7 @@
 #include "../../../../allocator.h"
 #include <string.h>
 
-ttLibC_Acknowledgement *ttLibC_Acknowledgement_make(uint32_t size) {
+ttLibC_Acknowledgement TT_VISIBILITY_HIDDEN *ttLibC_Acknowledgement_make(uint32_t size) {
 	ttLibC_Acknowledgement *ack = ttLibC_malloc(sizeof(ttLibC_Acknowledgement));
 	if(ack == NULL) {
 		return NULL;
@@ -30,7 +30,7 @@ ttLibC_Acknowledgement *ttLibC_Acknowledgement_make(uint32_t size) {
 	return ack;
 }
 
-bool ttLibC_Acknowledgement_getData(
+bool TT_VISIBILITY_HIDDEN ttLibC_Acknowledgement_getData(
 		ttLibC_Acknowledgement *acknowledgement,
 		ttLibC_DynamicBuffer *buffer) {
 	uint32_t size = be_uint32_t(acknowledgement->size);
@@ -38,7 +38,7 @@ bool ttLibC_Acknowledgement_getData(
 	return true;
 }
 
-void ttLibC_Acknowledgement_close(ttLibC_Acknowledgement **ack) {
+void TT_VISIBILITY_HIDDEN ttLibC_Acknowledgement_close(ttLibC_Acknowledgement **ack) {
 	ttLibC_Acknowledgement *target = (ttLibC_Acknowledgement *)*ack;
 	if(target == NULL) {
 		return;

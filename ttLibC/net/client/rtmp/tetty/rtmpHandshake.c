@@ -113,7 +113,7 @@ static tetty_errornum RtmpHandshake_close(ttLibC_TettyContext *ctx) {
 	return 0;
 }
 
-ttLibC_RtmpHandshake *ttLibC_RtmpHandshake_make() {
+ttLibC_RtmpHandshake TT_VISIBILITY_HIDDEN *ttLibC_RtmpHandshake_make() {
 	ttLibC_RtmpHandshake *handshake = ttLibC_malloc(sizeof(ttLibC_RtmpHandshake));
 	if(handshake == NULL) {
 		return NULL;
@@ -125,7 +125,7 @@ ttLibC_RtmpHandshake *ttLibC_RtmpHandshake_make() {
 	return handshake;
 }
 
-ttLibC_TettyPromise *ttLibC_RtmpHandshake_getHandshakePromise(
+ttLibC_TettyPromise TT_VISIBILITY_HIDDEN *ttLibC_RtmpHandshake_getHandshakePromise(
 		ttLibC_TettyBootstrap *bootstrap,
 		ttLibC_RtmpHandshake *handshake) {
 	ttLibC_TettyPromise *promise = ttLibC_TettyBootstrap_makePromise(bootstrap);
@@ -133,7 +133,7 @@ ttLibC_TettyPromise *ttLibC_RtmpHandshake_getHandshakePromise(
 	return promise;
 }
 
-void ttLibC_RtmpHandshake_close(ttLibC_RtmpHandshake **handshake) {
+void TT_VISIBILITY_HIDDEN ttLibC_RtmpHandshake_close(ttLibC_RtmpHandshake **handshake) {
 	ttLibC_RtmpHandshake *target = (ttLibC_RtmpHandshake *)*handshake;
 	if(target == NULL) {
 		return;

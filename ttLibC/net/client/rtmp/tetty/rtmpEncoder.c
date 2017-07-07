@@ -84,7 +84,7 @@ static tetty_errornum RtmpEncoder_write(
 	return 0;
 }
 
-ttLibC_RtmpEncoder *ttLibC_RtmpEncoder_make() {
+ttLibC_RtmpEncoder TT_VISIBILITY_HIDDEN *ttLibC_RtmpEncoder_make() {
 	ttLibC_RtmpEncoder *encoder = ttLibC_malloc(sizeof(ttLibC_RtmpEncoder));
 	if(encoder == NULL) {
 		return NULL;
@@ -94,7 +94,7 @@ ttLibC_RtmpEncoder *ttLibC_RtmpEncoder_make() {
 	return encoder;
 }
 
-void ttLibC_RtmpEncoder_close(ttLibC_RtmpEncoder **encoder) {
+void TT_VISIBILITY_HIDDEN ttLibC_RtmpEncoder_close(ttLibC_RtmpEncoder **encoder) {
 	ttLibC_RtmpEncoder *target = (ttLibC_RtmpEncoder *)*encoder;
 	if(target == NULL) {
 		return;

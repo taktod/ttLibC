@@ -54,7 +54,7 @@ typedef ttLibC_Container_Misc_FrameQueue2_ ttLibC_FrameQueue2_;
  * @param max_size max number of holding frame object.
  * @return frame queue object.
  */
-ttLibC_FrameQueue *ttLibC_FrameQueue_make(
+ttLibC_FrameQueue TT_VISIBILITY_HIDDEN *ttLibC_FrameQueue_make(
 		uint32_t track_id,
 		uint32_t max_size) {
 	(void)max_size;
@@ -108,7 +108,7 @@ static bool FrameQueue_refCallback(void *ptr, void *item) {
  * @param ptr      user def pointer.
  * @return true:call all data. false:stopped.
  */
-bool ttLibC_FrameQueue_ref(
+bool TT_VISIBILITY_HIDDEN ttLibC_FrameQueue_ref(
 		ttLibC_FrameQueue *queue,
 		ttLibC_FrameQueueFunc callback,
 		void *ptr) {
@@ -129,7 +129,7 @@ bool ttLibC_FrameQueue_ref(
  * @param queue target queue object.
  * @return frame object.
  */
-ttLibC_Frame *ttLibC_FrameQueue_ref_first(ttLibC_FrameQueue *queue) {
+ttLibC_Frame TT_VISIBILITY_HIDDEN *ttLibC_FrameQueue_ref_first(ttLibC_FrameQueue *queue) {
 	ttLibC_FrameQueue2_ *queue_ = (ttLibC_FrameQueue2_ *)queue;
 	if(queue_ == NULL) {
 		return NULL;
@@ -145,7 +145,7 @@ ttLibC_Frame *ttLibC_FrameQueue_ref_first(ttLibC_FrameQueue *queue) {
  * @param ptr      user def pointer.
  * @return
  */
-bool ttLibC_FrameQueue_dequeue(
+bool TT_VISIBILITY_HIDDEN ttLibC_FrameQueue_dequeue(
 		ttLibC_FrameQueue *queue,
 		ttLibC_FrameQueueFunc callback,
 		void *ptr) {
@@ -170,7 +170,7 @@ bool ttLibC_FrameQueue_dequeue(
  * @param queue target queue object
  * @return frame object.
  */
-ttLibC_Frame *ttLibC_FrameQueue_dequeue_first(ttLibC_FrameQueue *queue) {
+ttLibC_Frame TT_VISIBILITY_HIDDEN *ttLibC_FrameQueue_dequeue_first(ttLibC_FrameQueue *queue) {
 	ttLibC_FrameQueue2_ *queue_ = (ttLibC_FrameQueue2_ *)queue;
 	if(queue_ == NULL) {
 		return NULL;
@@ -190,7 +190,7 @@ ttLibC_Frame *ttLibC_FrameQueue_dequeue_first(ttLibC_FrameQueue *queue) {
  * @param frame add frame object.
  * @return true:success false:error.
  */
-bool ttLibC_FrameQueue_queue(
+bool TT_VISIBILITY_HIDDEN ttLibC_FrameQueue_queue(
 		ttLibC_FrameQueue *queue,
 		ttLibC_Frame *frame) {
 	ttLibC_FrameQueue2_ *queue_ = (ttLibC_FrameQueue2_ *)queue;
@@ -709,7 +709,7 @@ static bool FrameQueue_frameClose(void *ptr, void *item) {
  * close queue object
  * @param queue
  */
-void ttLibC_FrameQueue_close(ttLibC_FrameQueue **queue) {
+void TT_VISIBILITY_HIDDEN ttLibC_FrameQueue_close(ttLibC_FrameQueue **queue) {
 	ttLibC_FrameQueue2_ *target = (ttLibC_FrameQueue2_ *)*queue;
 	if(target == NULL) {
 		return;

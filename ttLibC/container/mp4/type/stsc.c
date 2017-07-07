@@ -13,7 +13,7 @@
 #include "../../../util/ioUtil.h"
 #include "../../../_log.h"
 
-ttLibC_Mp4 *ttLibC_Stsc_make(
+ttLibC_Mp4 TT_VISIBILITY_HIDDEN *ttLibC_Stsc_make(
 		uint8_t *data,
 		size_t data_size,
 		uint32_t timebase) {
@@ -46,18 +46,18 @@ ttLibC_Mp4 *ttLibC_Stsc_make(
 	return (ttLibC_Mp4 *)stsc;
 }
 
-uint32_t ttLibC_Stsc_refChunkSampleNum(ttLibC_Mp4 *mp4) {
+uint32_t TT_VISIBILITY_HIDDEN ttLibC_Stsc_refChunkSampleNum(ttLibC_Mp4 *mp4) {
 	// stsc is only one, which will return sample num forever.
 	ttLibC_Stsc *stsc = (ttLibC_Stsc *)mp4;
 	return stsc->current_samples_in_chunk;
 }
 
-uint32_t ttLibC_Stsc_refSampleDescriptionRef(ttLibC_Mp4 *mp4) {
+uint32_t TT_VISIBILITY_HIDDEN ttLibC_Stsc_refSampleDescriptionRef(ttLibC_Mp4 *mp4) {
 	ttLibC_Stsc *stsc = (ttLibC_Stsc *)mp4;
 	return stsc->current_sample_description_ref;
 }
 
-void ttLibC_Stsc_moveNext(ttLibC_Mp4 *mp4) {
+void TT_VISIBILITY_HIDDEN ttLibC_Stsc_moveNext(ttLibC_Mp4 *mp4) {
 	ttLibC_Stsc *stsc = (ttLibC_Stsc *)mp4;
 	stsc->current_count ++;
 	if(stsc->current_count > stsc->first_chunk) {

@@ -10,7 +10,7 @@
 #include "../../../util/ioUtil.h"
 #include "../../../_log.h"
 
-ttLibC_Mp4 *ttLibC_Elst_make(
+ttLibC_Mp4 TT_VISIBILITY_HIDDEN *ttLibC_Elst_make(
 		uint8_t *data,
 		size_t data_size,
 		uint32_t timebase) {
@@ -52,7 +52,7 @@ ttLibC_Mp4 *ttLibC_Elst_make(
 	return (ttLibC_Mp4 *)elst;
 }
 
-uint32_t ttLibC_Elst_refCurrentMediatime(ttLibC_Mp4 *mp4) {
+uint32_t TT_VISIBILITY_HIDDEN ttLibC_Elst_refCurrentMediatime(ttLibC_Mp4 *mp4) {
 	ttLibC_Elst *elst = (ttLibC_Elst *)mp4;
 	if(elst == NULL) {
 		return 0;
@@ -60,7 +60,7 @@ uint32_t ttLibC_Elst_refCurrentMediatime(ttLibC_Mp4 *mp4) {
 	return elst->mediatime;
 }
 
-void ttLibC_Elst_moveNext(ttLibC_Mp4 *mp4, uint64_t pts) {
+void TT_VISIBILITY_HIDDEN ttLibC_Elst_moveNext(ttLibC_Mp4 *mp4, uint64_t pts) {
 	ttLibC_Elst *elst = (ttLibC_Elst *)mp4;
 	if(elst == NULL) {
 		return;

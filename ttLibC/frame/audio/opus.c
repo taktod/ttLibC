@@ -145,7 +145,7 @@ ttLibC_Opus TT_VISIBILITY_DEFAULT *ttLibC_Opus_clone(
 	return opus;
 }
 
-uint32_t ttLibC_Opus_getChannelNum(void *data, size_t data_size) {
+uint32_t TT_VISIBILITY_HIDDEN ttLibC_Opus_getChannelNum(void *data, size_t data_size) {
 	if(data_size < 1) {
 		ERR_PRINT("invalid opus data.");
 		return 0;
@@ -154,13 +154,13 @@ uint32_t ttLibC_Opus_getChannelNum(void *data, size_t data_size) {
 	return (u[0] & 0x04) ? 2 : 1;
 }
 
-uint32_t ttLibC_Opus_getSampleRate(void *data, size_t data_size) {
+uint32_t TT_VISIBILITY_HIDDEN ttLibC_Opus_getSampleRate(void *data, size_t data_size) {
 	(void)data;
 	(void)data_size;
 	return 48000;
 }
 
-uint32_t ttLibC_Opus_getNbFrameCount(void *data, size_t data_size) {
+uint32_t TT_VISIBILITY_HIDDEN ttLibC_Opus_getNbFrameCount(void *data, size_t data_size) {
 	if(data_size < 1) {
 		ERR_PRINT("invalid opus data.");
 		return 0;
@@ -180,7 +180,7 @@ uint32_t ttLibC_Opus_getNbFrameCount(void *data, size_t data_size) {
 	return u[1] & 0x3F;
 }
 
-uint32_t ttLibC_Opus_getSampleNum(void *data, size_t data_size) {
+uint32_t TT_VISIBILITY_HIDDEN ttLibC_Opus_getSampleNum(void *data, size_t data_size) {
 	uint32_t nbFrameCount = ttLibC_Opus_getNbFrameCount(data, data_size);
 	if(nbFrameCount == 0) {
 		return 0;

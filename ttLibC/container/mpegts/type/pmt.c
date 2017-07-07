@@ -20,7 +20,7 @@
 #include "../../../util/dynamicBufferUtil.h"
 #include "../../../util/hexUtil.h"
 
-ttLibC_Pmt *ttLibC_Pmt_make(
+ttLibC_Pmt TT_VISIBILITY_HIDDEN *ttLibC_Pmt_make(
 		ttLibC_Pmt *prev_pmt,
 		void *data,
 		size_t data_size,
@@ -69,7 +69,7 @@ ttLibC_Pmt *ttLibC_Pmt_make(
 	return pmt;
 }
 
-ttLibC_Pmt *ttLibC_Pmt_getPacket(
+ttLibC_Pmt TT_VISIBILITY_HIDDEN *ttLibC_Pmt_getPacket(
 		ttLibC_Pmt *prev_pmt,
 		uint8_t *data,
 		size_t data_size,
@@ -152,7 +152,7 @@ ttLibC_Pmt *ttLibC_Pmt_getPacket(
 	return pmt;
 }
 
-bool ttLibC_Pmt_makePacket(
+bool TT_VISIBILITY_HIDDEN ttLibC_Pmt_makePacket(
 		ttLibC_MpegtsWriter_ *writer,
 		uint8_t *data,
 		size_t data_size) {
@@ -207,7 +207,7 @@ bool ttLibC_Pmt_makePacket(
 	return true;
 }
 
-void ttLibC_Pmt_close(ttLibC_Pmt **pmt) {
+void TT_VISIBILITY_HIDDEN ttLibC_Pmt_close(ttLibC_Pmt **pmt) {
 	ttLibC_Pmt *target = *pmt;
 	if(target == NULL) {
 		return;

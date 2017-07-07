@@ -29,7 +29,7 @@
 #include "../../frame/audio/mp3.h"
 #include "../../frame/audio/vorbis.h"
 
-ttLibC_Mp4Atom *ttLibC_Mp4Atom_make(
+ttLibC_Mp4Atom TT_VISIBILITY_HIDDEN *ttLibC_Mp4Atom_make(
 		ttLibC_Mp4Atom *prev_atom,
 		void *data,
 		size_t data_size,
@@ -673,7 +673,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_Mp4_getFrame(
 	return true;
 }
 
-void ttLibC_Mp4Atom_close(ttLibC_Mp4Atom **atom) {
+void TT_VISIBILITY_HIDDEN ttLibC_Mp4Atom_close(ttLibC_Mp4Atom **atom) {
 	ttLibC_Mp4Atom *target = *atom;
 	if(target == NULL) {
 		return;

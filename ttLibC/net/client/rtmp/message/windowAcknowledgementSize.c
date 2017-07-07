@@ -16,7 +16,7 @@
 #include "../../../../util/ioUtil.h"
 #include <string.h>
 
-ttLibC_WindowAcknowledgementSize *ttLibC_WindowAcknowledgementSize_make(uint32_t size) {
+ttLibC_WindowAcknowledgementSize TT_VISIBILITY_HIDDEN *ttLibC_WindowAcknowledgementSize_make(uint32_t size) {
 	ttLibC_WindowAcknowledgementSize *win_ack = ttLibC_malloc(sizeof(ttLibC_WindowAcknowledgementSize));
 	if(win_ack == NULL) {
 		return NULL;
@@ -31,7 +31,7 @@ ttLibC_WindowAcknowledgementSize *ttLibC_WindowAcknowledgementSize_make(uint32_t
 	return win_ack;
 }
 
-bool ttLibC_WindowAcknowledgementSize_getData(
+bool TT_VISIBILITY_HIDDEN ttLibC_WindowAcknowledgementSize_getData(
 		ttLibC_WindowAcknowledgementSize *win_ack,
 		ttLibC_DynamicBuffer *buffer) {
 	uint32_t size = be_uint32_t(win_ack->size);
@@ -39,7 +39,7 @@ bool ttLibC_WindowAcknowledgementSize_getData(
 	return true;
 }
 
-void ttLibC_WindowAcknowledgementSize_close(ttLibC_WindowAcknowledgementSize **win_ack) {
+void TT_VISIBILITY_HIDDEN ttLibC_WindowAcknowledgementSize_close(ttLibC_WindowAcknowledgementSize **win_ack) {
 	ttLibC_WindowAcknowledgementSize *target = (ttLibC_WindowAcknowledgementSize *)*win_ack;
 	if(target == NULL) {
 		return;

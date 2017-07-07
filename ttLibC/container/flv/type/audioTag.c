@@ -19,7 +19,7 @@
 #include "../../../util/dynamicBufferUtil.h"
 #include "../../../util/ioUtil.h"
 
-ttLibC_FlvAudioTag *ttLibC_FlvAudioTag_make(
+ttLibC_FlvAudioTag TT_VISIBILITY_HIDDEN *ttLibC_FlvAudioTag_make(
 		ttLibC_FlvTag *prev_tag,
 		void *data,
 		size_t data_size,
@@ -138,7 +138,7 @@ ttLibC_FlvAudioTag *ttLibC_FlvAudioTag_make(
 	return audio_tag;
 }
 
-ttLibC_FlvAudioTag *ttLibC_FlvAudioTag_getTag(
+ttLibC_FlvAudioTag TT_VISIBILITY_HIDDEN *ttLibC_FlvAudioTag_getTag(
 		ttLibC_FlvTag *prev_tag,
 		uint8_t *data,
 		size_t data_size) {
@@ -182,7 +182,7 @@ ttLibC_FlvAudioTag *ttLibC_FlvAudioTag_getTag(
 			channel_flag);
 }
 
-bool ttLibC_FlvAudioTag_getFrame(
+bool TT_VISIBILITY_HIDDEN ttLibC_FlvAudioTag_getFrame(
 		ttLibC_FlvAudioTag *audio_tag,
 		ttLibC_getFrameFunc callback,
 		void *ptr) {
@@ -195,7 +195,7 @@ bool ttLibC_FlvAudioTag_getFrame(
 			ptr);
 }
 
-bool ttLibC_FlvAudioTag_writeTag(
+bool TT_VISIBILITY_HIDDEN ttLibC_FlvAudioTag_writeTag(
 		ttLibC_FlvWriter_ *writer,
 		ttLibC_Frame *frame,
 		ttLibC_ContainerWriteFunc callback,

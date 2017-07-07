@@ -39,7 +39,7 @@ static tetty_errornum RtmpDecoder_channelRead(
 	return 0;
 }
 
-ttLibC_RtmpDecoder *ttLibC_RtmpDecoder_make() {
+ttLibC_RtmpDecoder TT_VISIBILITY_HIDDEN *ttLibC_RtmpDecoder_make() {
 	ttLibC_RtmpDecoder *decoder = ttLibC_malloc(sizeof(ttLibC_RtmpDecoder));
 	if(decoder == NULL) {
 		return NULL;
@@ -48,7 +48,7 @@ ttLibC_RtmpDecoder *ttLibC_RtmpDecoder_make() {
 	decoder->channel_handler.channelRead = RtmpDecoder_channelRead;
 	return decoder;
 }
-void ttLibC_RtmpDecoder_close(ttLibC_RtmpDecoder **decoder) {
+void TT_VISIBILITY_HIDDEN ttLibC_RtmpDecoder_close(ttLibC_RtmpDecoder **decoder) {
 	ttLibC_RtmpDecoder *target = (ttLibC_RtmpDecoder *)*decoder;
 	if(target == NULL) {
 		return;

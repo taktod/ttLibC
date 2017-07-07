@@ -21,7 +21,7 @@
 #include "../../../../util/ioUtil.h"
 #include "../../../../util/flvFrameUtil.h"
 
-ttLibC_AudioMessage *ttLibC_AudioMessage_make() {
+ttLibC_AudioMessage TT_VISIBILITY_HIDDEN *ttLibC_AudioMessage_make() {
 	ttLibC_AudioMessage *message = ttLibC_malloc(sizeof(ttLibC_AudioMessage));
 	if(message == NULL) {
 		return NULL;
@@ -37,7 +37,7 @@ ttLibC_AudioMessage *ttLibC_AudioMessage_make() {
 	return message;
 }
 
-ttLibC_AudioMessage *ttLibC_AudioMessage_readBinary(
+ttLibC_AudioMessage TT_VISIBILITY_HIDDEN *ttLibC_AudioMessage_readBinary(
 		uint8_t *data,
 		size_t data_size) {
 	if(data_size <= 1) {
@@ -51,7 +51,7 @@ ttLibC_AudioMessage *ttLibC_AudioMessage_readBinary(
 	return message;
 }
 
-tetty_errornum ttLibC_AudioMessage_getFrame(
+tetty_errornum TT_VISIBILITY_HIDDEN ttLibC_AudioMessage_getFrame(
 		ttLibC_AudioMessage *message,
 		ttLibC_FlvFrameManager *manager,
 		ttLibC_RtmpStream_getFrameFunc callback,
@@ -75,7 +75,7 @@ tetty_errornum ttLibC_AudioMessage_getFrame(
 	return 0;
 }
 
-ttLibC_AudioMessage *ttLibC_AudioMessage_addFrame(
+ttLibC_AudioMessage TT_VISIBILITY_HIDDEN *ttLibC_AudioMessage_addFrame(
 		uint32_t stream_id,
 		ttLibC_Audio *frame) {
 	if(frame == NULL) {
@@ -98,7 +98,7 @@ ttLibC_AudioMessage *ttLibC_AudioMessage_addFrame(
 	return message;
 }
 
-bool ttLibC_AudioMessage_getData(
+bool TT_VISIBILITY_HIDDEN ttLibC_AudioMessage_getData(
 		ttLibC_AudioMessage *message,
 		ttLibC_DynamicBuffer *buffer) {
 	if(message->audio_frame->inherit_super.type == frameType_aac) {
@@ -113,7 +113,7 @@ bool ttLibC_AudioMessage_getData(
 			buffer);
 }
 
-void ttLibC_AudioMessage_close(ttLibC_AudioMessage **message) {
+void TT_VISIBILITY_HIDDEN ttLibC_AudioMessage_close(ttLibC_AudioMessage **message) {
 	ttLibC_AudioMessage *target = (ttLibC_AudioMessage *)*message;
 	if(target == NULL) {
 		return;

@@ -149,28 +149,28 @@ void TT_VISIBILITY_DEFAULT ttLibC_WebSocket_sendBinary(
 }
 
 // note below 3 functions can be hold any kind of message. however, skip.
-void ttLibC_WebSocket_sendPing(ttLibC_WebSocket *socket) {
+void TT_VISIBILITY_HIDDEN ttLibC_WebSocket_sendPing(ttLibC_WebSocket *socket) {
 	ttLibC_WebSocket__sendMessage(
 			socket, WebSocketOpcode_ping,
 			NULL,
 			0);
 }
 
-void ttLibC_WebSocket_sendPong(ttLibC_WebSocket *socket) {
+void TT_VISIBILITY_HIDDEN ttLibC_WebSocket_sendPong(ttLibC_WebSocket *socket) {
 	ttLibC_WebSocket__sendMessage(
 			socket, WebSocketOpcode_pong,
 			NULL,
 			0);
 }
 
-void ttLibC_WebSocket_sendClose(ttLibC_WebSocket *socket) {
+void TT_VISIBILITY_HIDDEN ttLibC_WebSocket_sendClose(ttLibC_WebSocket *socket) {
 	ttLibC_WebSocket__sendMessage(
 			socket, WebSocketOpcode_close,
 			NULL,
 			0);
 }
 
-void ttLibC_WebSocket__sendMessage(
+void TT_VISIBILITY_HIDDEN ttLibC_WebSocket__sendMessage(
 		ttLibC_WebSocket *socket,
 		ttLibC_WebSocketEvent_Opcode opcode,
 		void *data,

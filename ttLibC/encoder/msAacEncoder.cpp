@@ -199,7 +199,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_MsAacEncoder_encode(
 			return false;
 		}
 	}
-  while(true)
+	while(true)
 	{
 		// try to get output aac frame.
 		DWORD outputFlags, outputStatus;

@@ -58,12 +58,12 @@ ttLibC_VorbisEncoder TT_VISIBILITY_DEFAULT *ttLibC_VorbisEncoder_make(
 	return (ttLibC_VorbisEncoder *)encoder;
 }
 
-ttLibC_VorbisEncoder *ttLibC_VorbisEncoder_makeWithInfo(void *vi) {
+ttLibC_VorbisEncoder TT_VISIBILITY_HIDDEN *ttLibC_VorbisEncoder_makeWithInfo(void *vi) {
 	(void)vi;
 	return NULL;
 }
 
-void *ttLibC_VorbisEncoder_refNativeEncodeContext(ttLibC_VorbisEncoder *encoder) {
+void TT_VISIBILITY_HIDDEN *ttLibC_VorbisEncoder_refNativeEncodeContext(ttLibC_VorbisEncoder *encoder) {
 	(void)encoder;
 	return NULL;
 }

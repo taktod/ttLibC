@@ -15,7 +15,7 @@
 #include "../../../../allocator.h"
 #include <string.h>
 
-ttLibC_SetChunkSize *ttLibC_SetChunkSize_make(uint32_t size) {
+ttLibC_SetChunkSize TT_VISIBILITY_HIDDEN *ttLibC_SetChunkSize_make(uint32_t size) {
 	ttLibC_SetChunkSize *chunk_size = ttLibC_malloc(sizeof(ttLibC_SetChunkSize));
 	if(chunk_size == NULL) {
 		return NULL;
@@ -31,7 +31,7 @@ ttLibC_SetChunkSize *ttLibC_SetChunkSize_make(uint32_t size) {
 	return chunk_size;
 }
 
-void ttLibC_SetChunkSize_close(ttLibC_SetChunkSize **chunk_size) {
+void TT_VISIBILITY_HIDDEN ttLibC_SetChunkSize_close(ttLibC_SetChunkSize **chunk_size) {
 	ttLibC_SetChunkSize *target = (ttLibC_SetChunkSize *)*chunk_size;
 	if(target == NULL) {
 		return;

@@ -123,7 +123,7 @@ static bool StlList_forEach(
 	return true;
 }
 
-bool StlList_forEachReverse(
+static bool StlList_forEachReverse(
 		ttLibC_StlList_ *list,
 		ttLibC_StlListRefFunc callback,
 		void *ptr) {

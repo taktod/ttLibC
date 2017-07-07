@@ -14,7 +14,7 @@
 #include "../../_log.h"
 #include "../../allocator.h"
 
-ttLibC_Mp3Frame *ttLibC_Mp3Frame_make(
+ttLibC_Mp3Frame TT_VISIBILITY_HIDDEN *ttLibC_Mp3Frame_make(
 		ttLibC_Mp3Frame *prev_mp3frame,
 		void *data,
 		size_t data_size,
@@ -52,7 +52,7 @@ void TT_VISIBILITY_DEFAULT ttLibC_Container_Mp3_close(ttLibC_Container_Mp3 **mp3
 	ttLibC_Mp3Frame_close((ttLibC_Mp3Frame **)mp3);
 }
 
-void ttLibC_Mp3Frame_close(ttLibC_Mp3Frame **frame) {
+void TT_VISIBILITY_HIDDEN ttLibC_Mp3Frame_close(ttLibC_Mp3Frame **frame) {
 	ttLibC_Mp3Frame *target = *frame;
 	if(target == NULL) {
 		return;

@@ -28,7 +28,7 @@
  * @param bootstrap bootstrap object.
  * @return promise object.
  */
-ttLibC_TettyPromise *ttLibC_TettyPromise_make_(ttLibC_TettyBootstrap *bootstrap) {
+ttLibC_TettyPromise TT_VISIBILITY_HIDDEN *ttLibC_TettyPromise_make_(ttLibC_TettyBootstrap *bootstrap) {
 	ttLibC_TettyPromise_ *promise = ttLibC_malloc(sizeof(ttLibC_TettyPromise_));
 	if(promise == NULL) {
 		return NULL;

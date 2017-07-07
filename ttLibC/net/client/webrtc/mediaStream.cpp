@@ -224,7 +224,7 @@ void MediaStreamWrapper::OnData(
 
 extern "C" {
 
-bool ttLibC_WebrtcMediaStream_createNewVideoTrack(
+bool TT_VISIBILITY_HIDDEN ttLibC_WebrtcMediaStream_createNewVideoTrack(
 		ttLibC_WebrtcMediaStream *stream,
 		ttLibC_WebrtcConstraint *constraint) {
 	if(stream == NULL) {
@@ -234,7 +234,7 @@ bool ttLibC_WebrtcMediaStream_createNewVideoTrack(
 	return stream_->streamWrapper->createNewVideoTrack(constraint);
 }
 
-bool ttLibC_WebrtcMediaStream_createNewAudioTrack(
+bool TT_VISIBILITY_HIDDEN ttLibC_WebrtcMediaStream_createNewAudioTrack(
 		ttLibC_WebrtcMediaStream *stream,
 		ttLibC_WebrtcConstraint *constraint) {
 	if(stream == NULL) {
@@ -244,7 +244,7 @@ bool ttLibC_WebrtcMediaStream_createNewAudioTrack(
 	return stream_->streamWrapper->createNewAudioTrack(constraint);
 }
 
-bool ttLibC_WebrtcMediaStream_addFrameListener(
+bool TT_VISIBILITY_HIDDEN ttLibC_WebrtcMediaStream_addFrameListener(
 		ttLibC_WebrtcMediaStream *stream,
 		ttLibC_WebrtcMediaStreamFrameFunc callback,
 		void *ptr) {
@@ -256,7 +256,7 @@ bool ttLibC_WebrtcMediaStream_addFrameListener(
 }
 
 // indexはframe.idでなんとかすることにする。
-bool ttLibC_WebrtcMediaStream_addFrame(
+bool TT_VISIBILITY_HIDDEN ttLibC_WebrtcMediaStream_addFrame(
 		ttLibC_WebrtcMediaStream *stream,
 		ttLibC_Frame *frame) {
 	if(stream == NULL) {

@@ -55,7 +55,7 @@ static const char *version = "ttLibC"
 #endif
 ;
 
-Error_e ttLibC_updateError(Error_Target_e target, Error_e error) {
+Error_e TT_VISIBILITY_HIDDEN ttLibC_updateError(Error_Target_e target, Error_e error) {
 	if(error == Error_noError) {
 		return error;
 	}

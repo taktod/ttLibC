@@ -19,7 +19,7 @@
 #include "../../_log.h"
 #include "../../allocator.h"
 
-ttLibC_FlvTag *ttLibC_FlvTag_make(
+ttLibC_FlvTag TT_VISIBILITY_HIDDEN *ttLibC_FlvTag_make(
 		ttLibC_FlvTag *prev_tag,
 		void *data,
 		size_t data_size,
@@ -67,7 +67,7 @@ void TT_VISIBILITY_DEFAULT ttLibC_Flv_close(ttLibC_Flv **flv) {
 	ttLibC_FlvTag_close((ttLibC_FlvTag **)flv);
 }
 
-void ttLibC_FlvTag_close(ttLibC_FlvTag **tag) {
+void TT_VISIBILITY_HIDDEN ttLibC_FlvTag_close(ttLibC_FlvTag **tag) {
 	ttLibC_FlvTag *target = *tag;
 	if(target == NULL) {
 		return;

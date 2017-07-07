@@ -13,7 +13,7 @@
 #include "../../../util/ioUtil.h"
 #include "../../../_log.h"
 
-ttLibC_Mp4 *ttLibC_Stco_make(
+ttLibC_Mp4 TT_VISIBILITY_HIDDEN *ttLibC_Stco_make(
 		uint8_t *data,
 		size_t data_size,
 		uint32_t timebase) {
@@ -36,7 +36,7 @@ ttLibC_Mp4 *ttLibC_Stco_make(
 
 }
 
-uint32_t ttLibC_Stco_refOffset(ttLibC_Mp4 *mp4) {
+uint32_t TT_VISIBILITY_HIDDEN ttLibC_Stco_refOffset(ttLibC_Mp4 *mp4) {
 	ttLibC_Stco *stco = (ttLibC_Stco *)mp4;
 	if(stco->entry_count > 0) {
 		return be_uint32_t(*stco->chunk_offset_data);
@@ -46,7 +46,7 @@ uint32_t ttLibC_Stco_refOffset(ttLibC_Mp4 *mp4) {
 	}
 }
 
-uint32_t ttLibC_Stco_refNextOffset(ttLibC_Mp4 *mp4) {
+uint32_t TT_VISIBILITY_HIDDEN ttLibC_Stco_refNextOffset(ttLibC_Mp4 *mp4) {
 	ttLibC_Stco *stco = (ttLibC_Stco *)mp4;
 	if(stco->entry_count > 1) {
 		return be_uint32_t(*(stco->chunk_offset_data + 1));
@@ -56,7 +56,7 @@ uint32_t ttLibC_Stco_refNextOffset(ttLibC_Mp4 *mp4) {
 	}
 }
 
-void ttLibC_Stco_moveNext(ttLibC_Mp4 *mp4) {
+void TT_VISIBILITY_HIDDEN ttLibC_Stco_moveNext(ttLibC_Mp4 *mp4) {
 	ttLibC_Stco *stco = (ttLibC_Stco *)mp4;
 	if(stco->entry_count == 0) {
 		return;

@@ -32,7 +32,7 @@ ttLibC_Mp3Reader TT_VISIBILITY_DEFAULT *ttLibC_Mp3Reader_make() {
 	return (ttLibC_Mp3Reader *)reader;
 }
 
-bool Mp3Reader_updateMp3Frame(
+bool TT_VISIBILITY_HIDDEN Mp3Reader_updateMp3Frame(
 		ttLibC_Mp3Reader_ *reader,
 		ttLibC_Mp3 *mp3) {
 	ttLibC_Mp3Frame *mp3_frame = ttLibC_Mp3Frame_make(
@@ -50,7 +50,7 @@ bool Mp3Reader_updateMp3Frame(
 	return true;
 }
 
-ttLibC_Mp3 *Mp3Reader_readMp3FromBinary(
+ttLibC_Mp3 TT_VISIBILITY_HIDDEN *Mp3Reader_readMp3FromBinary(
 		ttLibC_Mp3Reader_ *reader,
 		uint8_t *data,
 		size_t data_size) {

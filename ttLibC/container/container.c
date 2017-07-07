@@ -45,7 +45,7 @@
  * @param pts            pts for container
  * @param timebase       timebase for pts.
  */
-ttLibC_Container *ttLibC_Container_make(
+ttLibC_Container TT_VISIBILITY_HIDDEN *ttLibC_Container_make(
 		ttLibC_Container *prev_container,
 		size_t container_size,
 		ttLibC_Container_Type container_type,
@@ -187,7 +187,7 @@ void ttLibC_Container_close(ttLibC_Container **container) {
  * @param reader_size    sizeof object.
  * @return reader object.
  */
-ttLibC_ContainerReader *ttLibC_ContainerReader_make(
+ttLibC_ContainerReader TT_VISIBILITY_HIDDEN *ttLibC_ContainerReader_make(
 		ttLibC_Container_Type container_type,
 		size_t reader_size) {
 	if(reader_size == 0) {
@@ -260,7 +260,7 @@ void TT_VISIBILITY_DEFAULT ttLibC_ContainerReader_close(ttLibC_ContainerReader *
  * @param timebase       timebase for writer.
  * @return writer object.
  */
-ttLibC_ContainerWriter *ttLibC_ContainerWriter_make(
+ttLibC_ContainerWriter TT_VISIBILITY_HIDDEN *ttLibC_ContainerWriter_make(
 		ttLibC_Container_Type container_type,
 		size_t writer_size,
 		uint32_t timebase) {
@@ -281,7 +281,7 @@ ttLibC_ContainerWriter *ttLibC_ContainerWriter_make(
 	return writer;
 }
 
-ttLibC_ContainerWriter *ttLibC_ContainerWriter_make_(
+ttLibC_ContainerWriter TT_VISIBILITY_HIDDEN *ttLibC_ContainerWriter_make_(
 		ttLibC_Container_Type container_type,
 		size_t                writer_size,
 		uint32_t              timebase,
@@ -335,7 +335,7 @@ static bool ContainerWriter_closeTracks(void *ptr, void *key, void *item) {
 	return true;
 }
 
-void ttLibC_ContainerWriter_close_(ttLibC_ContainerWriter_ **writer) {
+void TT_VISIBILITY_HIDDEN ttLibC_ContainerWriter_close_(ttLibC_ContainerWriter_ **writer) {
 	ttLibC_ContainerWriter_ *target = (ttLibC_ContainerWriter_ *)*writer;
 	if(target == NULL) {
 		return;
@@ -392,7 +392,7 @@ void TT_VISIBILITY_DEFAULT ttLibC_ContainerWriter_close(ttLibC_ContainerWriter *
 	}
 }
 
-ttLibC_ContainerWriter_WriteTrack *ttLibC_ContainerWriteTrack_make(
+ttLibC_ContainerWriter_WriteTrack TT_VISIBILITY_HIDDEN *ttLibC_ContainerWriteTrack_make(
 		size_t            track_size,
 		uint32_t          track_id,
 		ttLibC_Frame_Type frame_type) {
@@ -450,14 +450,14 @@ static bool ContainerWriter_isReadyToStartCallback(void *ptr, void *key, void *i
 	}
 }
 
-bool ttLibC_ContainerWriter_isReadyToStart(ttLibC_ContainerWriter_ *writer) {
+bool TT_VISIBILITY_HIDDEN ttLibC_ContainerWriter_isReadyToStart(ttLibC_ContainerWriter_ *writer) {
 	if(ttLibC_StlMap_forEach(writer->track_list, ContainerWriter_isReadyToStartCallback, writer)) {
 		return true;
 	}
 	return false;
 }
 
-bool ttLibC_ContainerWriter_primaryTrackCheck(void *ptr, ttLibC_Frame *frame) {
+bool TT_VISIBILITY_HIDDEN ttLibC_ContainerWriter_primaryTrackCheck(void *ptr, ttLibC_Frame *frame) {
 	ttLibC_ContainerWriter_ *writer = (ttLibC_ContainerWriter_ *)ptr;
 	ttLibC_ContainerWriter_WriteTrack *track = (ttLibC_ContainerWriter_WriteTrack *)ttLibC_StlMap_get(writer->track_list, (void *)(long)frame->id);
 	if(ttLibC_Frame_isAudio(frame)) {
@@ -600,14 +600,14 @@ static bool ContainerWriter_isReadyToWriteCallback(void *ptr, void *key, void *i
 	}
 	return false;
 }
-bool ttLibC_ContainerWriter_isReadyToWrite(ttLibC_ContainerWriter_ *writer) {
+bool TT_VISIBILITY_HIDDEN ttLibC_ContainerWriter_isReadyToWrite(ttLibC_ContainerWriter_ *writer) {
 	if(ttLibC_StlMap_forEach(writer->track_list, ContainerWriter_isReadyToWriteCallback, writer)) {
 		return true;
 	}
 	return false;
 }
 
-int ttLibC_ContainerWriter_write_(
+int TT_VISIBILITY_HIDDEN ttLibC_ContainerWriter_write_(
 		ttLibC_ContainerWriter_ *writer,
 		ttLibC_Frame *frame,
 		ttLibC_ContainerWriteFunc callback,
@@ -829,7 +829,7 @@ int ttLibC_ContainerWriter_write_(
 	return 1;
 }
 
-bool ttLibC_ContainerWriteTrack_appendQueue(
+bool TT_VISIBILITY_HIDDEN ttLibC_ContainerWriteTrack_appendQueue(
 		ttLibC_ContainerWriter_WriteTrack *track,
 		ttLibC_Frame                      *frame,
 		uint32_t                           timebase,
@@ -1017,7 +1017,7 @@ bool ttLibC_ContainerWriteTrack_appendQueue(
 	return true;
 }
 
-void ttLibC_ContainerWriteTrack_close(ttLibC_ContainerWriter_WriteTrack **track) {
+void TT_VISIBILITY_HIDDEN ttLibC_ContainerWriteTrack_close(ttLibC_ContainerWriter_WriteTrack **track) {
 	ttLibC_ContainerWriter_WriteTrack *target = (ttLibC_ContainerWriter_WriteTrack *)*track;
 	if(target == NULL) {
 		return;

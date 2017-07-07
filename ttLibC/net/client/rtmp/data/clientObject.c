@@ -16,7 +16,7 @@
 #include "../header/rtmpHeader.h"
 #include "../message/rtmpMessage.h"
 
-ttLibC_ClientObject *ttLibC_ClientObject_make() {
+ttLibC_ClientObject TT_VISIBILITY_HIDDEN *ttLibC_ClientObject_make() {
 	ttLibC_ClientObject *client_object = ttLibC_malloc(sizeof(ttLibC_ClientObject));
 	if(client_object == NULL) {
 		return NULL;
@@ -75,7 +75,7 @@ static bool ClientObject_rtmpHeadersCloseCallback(void *ptr, void *key, void *it
 	return true;
 }
 
-void ttLibC_ClientObject_close(ttLibC_ClientObject **client_object) {
+void TT_VISIBILITY_HIDDEN ttLibC_ClientObject_close(ttLibC_ClientObject **client_object) {
 	ttLibC_ClientObject *target = (ttLibC_ClientObject *)*client_object;
 	if(target == NULL) {
 		return;

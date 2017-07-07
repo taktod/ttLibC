@@ -110,7 +110,7 @@ static tetty_errornum RtmpCommandHandler_write(
 	return 0;
 }
 
-ttLibC_RtmpCommandHandler *ttLibC_RtmpCommandHandler_make() {
+ttLibC_RtmpCommandHandler TT_VISIBILITY_HIDDEN *ttLibC_RtmpCommandHandler_make() {
 	ttLibC_RtmpCommandHandler *handler = ttLibC_malloc(sizeof(ttLibC_RtmpCommandHandler));
 	if(handler == NULL) {
 		return NULL;
@@ -121,7 +121,7 @@ ttLibC_RtmpCommandHandler *ttLibC_RtmpCommandHandler_make() {
 	return handler;
 }
 
-void ttLibC_RtmpCommandHandler_close(ttLibC_RtmpCommandHandler **handler) {
+void TT_VISIBILITY_HIDDEN ttLibC_RtmpCommandHandler_close(ttLibC_RtmpCommandHandler **handler) {
 	ttLibC_RtmpCommandHandler *target = (ttLibC_RtmpCommandHandler *)*handler;
 	if(target == NULL) {
 		return;

@@ -45,7 +45,7 @@ ttLibC_VorbisDecoder TT_VISIBILITY_DEFAULT *ttLibC_VorbisDecoder_make() {
 	return (ttLibC_VorbisDecoder *)decoder;
 }
 
-ttLibC_VorbisDecoder *ttLibC_VorbisDecoder_makeWithInfo(void *vi) {
+ttLibC_VorbisDecoder TT_VISIBILITY_HIDDEN *ttLibC_VorbisDecoder_makeWithInfo(void *vi) {
 	(void)vi;
 	return NULL;
 }

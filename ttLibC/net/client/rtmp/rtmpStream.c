@@ -30,7 +30,7 @@
 /**
  * callback for createStream.
  */
- static void RtmpStream_createStreamCallback(void *ptr, ttLibC_TettyPromise *promise) {
+static void RtmpStream_createStreamCallback(void *ptr, ttLibC_TettyPromise *promise) {
 	if(!promise->is_success) {
 		return;
 	}

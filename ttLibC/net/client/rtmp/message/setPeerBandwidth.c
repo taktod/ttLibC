@@ -15,7 +15,7 @@
 #include "../../../../allocator.h"
 #include <string.h>
 
-ttLibC_SetPeerBandwidth *ttLibC_SetPeerBandwidth_make(
+ttLibC_SetPeerBandwidth TT_VISIBILITY_HIDDEN *ttLibC_SetPeerBandwidth_make(
 		uint32_t size,
 		ttLibC_SetPeerBandwidth_LimitType limit_type) {
 	ttLibC_SetPeerBandwidth *bandwidth = ttLibC_malloc(sizeof(ttLibC_SetPeerBandwidth));
@@ -33,7 +33,7 @@ ttLibC_SetPeerBandwidth *ttLibC_SetPeerBandwidth_make(
 	return bandwidth;
 }
 
-void ttLibC_SetPeerBandwidth_close(ttLibC_SetPeerBandwidth **bandwidth) {
+void TT_VISIBILITY_HIDDEN ttLibC_SetPeerBandwidth_close(ttLibC_SetPeerBandwidth **bandwidth) {
 	ttLibC_SetPeerBandwidth *target = (ttLibC_SetPeerBandwidth *)*bandwidth;
 	if(target == NULL) {
 		return;

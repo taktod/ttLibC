@@ -442,7 +442,7 @@ static void SimpleBlock_getLace0Frame(
 	}
 }
 
-bool ttLibC_SimpleBlock_getFrame(
+bool TT_VISIBILITY_HIDDEN ttLibC_SimpleBlock_getFrame(
 		ttLibC_MkvTag *tag,
 		ttLibC_getFrameFunc callback,
 		void *ptr) {

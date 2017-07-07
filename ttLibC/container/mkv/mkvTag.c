@@ -25,7 +25,7 @@
 #include "../../util/byteUtil.h"
 #include <string.h>
 
-ttLibC_MkvTag *ttLibC_MkvTag_make(
+ttLibC_MkvTag TT_VISIBILITY_HIDDEN *ttLibC_MkvTag_make(
 		ttLibC_MkvTag *prev_tag,
 		void *data,
 		size_t data_size,
@@ -73,7 +73,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_Mkv_getFrame(ttLibC_Mkv *mkv, ttLibC_getFrameF
  * @note in the case of first reply of simple block, we will return private data information.
  * this code will be move to mkvTag.c
  */
-void ttLibC_MkvTag_getPrivateDataFrame(
+void TT_VISIBILITY_HIDDEN ttLibC_MkvTag_getPrivateDataFrame(
 		ttLibC_MkvReader *reader,
 		ttLibC_MkvTrack *track,
 		ttLibC_getFrameFunc callback,
@@ -377,7 +377,7 @@ void ttLibC_MkvTag_getPrivateDataFrame(
 	}
 }
 
-void ttLibC_MkvTag_close(ttLibC_MkvTag **tag) {
+void TT_VISIBILITY_HIDDEN ttLibC_MkvTag_close(ttLibC_MkvTag **tag) {
 	ttLibC_MkvTag *target = *tag;
 	if(target == NULL) {
 		return;

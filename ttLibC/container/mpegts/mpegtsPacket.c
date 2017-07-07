@@ -20,7 +20,7 @@
 #include "../../frame/frame.h"
 #include <stdio.h>
 
-ttLibC_MpegtsPacket *ttLibC_MpegtsPacket_make(
+ttLibC_MpegtsPacket TT_VISIBILITY_HIDDEN *ttLibC_MpegtsPacket_make(
 		ttLibC_MpegtsPacket *prev_packet,
 		void *data,
 		size_t data_size,
@@ -67,7 +67,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_Mpegts_getFrame(
 	}
 }
 
-bool ttLibC_MpegtsPacket_loadMpegtsPacketHeader(
+bool TT_VISIBILITY_HIDDEN ttLibC_MpegtsPacket_loadMpegtsPacketHeader(
 		ttLibC_ByteReader *reader,
 		ttLibC_MpegtsPacket_Header *header_info) {
 	if(ttLibC_ByteReader_bit(reader, 8) != 0x47) {
@@ -141,7 +141,7 @@ bool ttLibC_MpegtsPacket_loadMpegtsPacketHeader(
 	return true;
 }
 
-bool ttLibC_MpegtsPacket_loadProgramPacketHeader(
+bool TT_VISIBILITY_HIDDEN ttLibC_MpegtsPacket_loadProgramPacketHeader(
 		ttLibC_ByteReader *reader,
 		ttLibC_ProgramPacket_Header *header_info) {
 	if(!ttLibC_MpegtsPacket_loadMpegtsPacketHeader(reader, &header_info->header)) {
@@ -169,7 +169,7 @@ void TT_VISIBILITY_DEFAULT ttLibC_Mpegts_close(ttLibC_Mpegts **mpegts) {
 	ttLibC_MpegtsPacket_close((ttLibC_MpegtsPacket **)mpegts);
 }
 
-void ttLibC_MpegtsPacket_close(ttLibC_MpegtsPacket **packet) {
+void TT_VISIBILITY_HIDDEN ttLibC_MpegtsPacket_close(ttLibC_MpegtsPacket **packet) {
 	ttLibC_MpegtsPacket *target = *packet;
 	if(target == NULL) {
 		return;

@@ -200,7 +200,7 @@ static tetty_errornum WebSocketHandler_write(
 	return ttLibC_TettyContext_super_write(ctx, data, data_size);
 }
 
-ttLibC_WebSocketHandler *ttLibC_WebSocketHandler_make() {
+ttLibC_WebSocketHandler TT_VISIBILITY_HIDDEN *ttLibC_WebSocketHandler_make() {
 	ttLibC_WebSocketHandler *handler = ttLibC_malloc(sizeof(ttLibC_WebSocketHandler));
 	if(handler == NULL) {
 		return NULL;
@@ -220,7 +220,7 @@ ttLibC_WebSocketHandler *ttLibC_WebSocketHandler_make() {
 	return handler;
 }
 
-void ttLibC_WebSocketHandler_close(ttLibC_WebSocketHandler **handler) {
+void TT_VISIBILITY_HIDDEN ttLibC_WebSocketHandler_close(ttLibC_WebSocketHandler **handler) {
 	ttLibC_WebSocketHandler *target = (ttLibC_WebSocketHandler *)*handler;
 	if(target == NULL) {
 		return;

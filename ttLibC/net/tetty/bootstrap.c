@@ -321,7 +321,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_TettyBootstrap_update(
  * @param client_info
  * @return true:ok false:error
  */
-bool ttLibC_TettyBootstrap_closeClient_(
+bool TT_VISIBILITY_HIDDEN ttLibC_TettyBootstrap_closeClient_(
 		ttLibC_TettyBootstrap *bootstrap,
 		ttLibC_SocketInfo *socket_info) {
 	ttLibC_TettyBootstrap_ *bootstrap_ = (ttLibC_TettyBootstrap_ *)bootstrap;
@@ -543,7 +543,7 @@ static bool TettyBootstrap_channelEach_flush_callback(void *ptr, void *item) {
 	return ttLibC_TcpClient_write((ttLibC_TcpClientInfo *)item);
 }
 
-tetty_errornum ttLibC_TettyBootstrap_channels_flush(ttLibC_TettyBootstrap *bootstrap) {
+tetty_errornum TT_VISIBILITY_HIDDEN ttLibC_TettyBootstrap_channels_flush(ttLibC_TettyBootstrap *bootstrap) {
 	ttLibC_TettyBootstrap_ *bootstrap_ = (ttLibC_TettyBootstrap_ *)bootstrap;
 	// call pipeline->flush
 	ttLibC_StlList_forEach(bootstrap_->tcp_client_info_list, TettyBootstrap_channelEach_callPipelineFlush_callback, bootstrap);

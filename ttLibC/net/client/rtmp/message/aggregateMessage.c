@@ -18,7 +18,7 @@
 #include "../../../../util/flvFrameUtil.h"
 #include "../rtmpStream.h"
 
-ttLibC_AggregateMessage *ttLibC_AggregateMessage_make() {
+ttLibC_AggregateMessage TT_VISIBILITY_HIDDEN *ttLibC_AggregateMessage_make() {
 	ttLibC_AggregateMessage *message = ttLibC_malloc(sizeof(ttLibC_AggregateMessage));
 	if(message == NULL) {
 		return NULL;
@@ -33,7 +33,7 @@ ttLibC_AggregateMessage *ttLibC_AggregateMessage_make() {
 	return message;
 }
 
-ttLibC_AggregateMessage *ttLibC_AggregateMessage_readBinary(uint8_t *data) {
+ttLibC_AggregateMessage TT_VISIBILITY_HIDDEN *ttLibC_AggregateMessage_readBinary(uint8_t *data) {
 	ttLibC_AggregateMessage *message = ttLibC_AggregateMessage_make();
 	if(message == NULL) {
 		return NULL;
@@ -41,7 +41,7 @@ ttLibC_AggregateMessage *ttLibC_AggregateMessage_readBinary(uint8_t *data) {
 	message->data = data;
 	return message;
 }
-tetty_errornum ttLibC_AggregateMessage_getFrame(
+tetty_errornum TT_VISIBILITY_HIDDEN ttLibC_AggregateMessage_getFrame(
 		ttLibC_AggregateMessage *message,
 		ttLibC_FlvFrameManager *manager,
 		ttLibC_RtmpStream_getFrameFunc callback,
@@ -109,7 +109,7 @@ tetty_errornum ttLibC_AggregateMessage_getFrame(
 	return 0;
 }
 
-void ttLibC_AggregateMessage_close(ttLibC_AggregateMessage **message) {
+void TT_VISIBILITY_HIDDEN ttLibC_AggregateMessage_close(ttLibC_AggregateMessage **message) {
 	ttLibC_AggregateMessage *target = (ttLibC_AggregateMessage *)*message;
 	if(target == NULL) {
 		return;

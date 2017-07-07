@@ -26,7 +26,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-ttLibC_Pes *ttLibC_Pes_make(
+ttLibC_Pes TT_VISIBILITY_HIDDEN *ttLibC_Pes_make(
 		ttLibC_Pes *prev_pes,
 		void *data,
 		size_t data_size,
@@ -107,7 +107,7 @@ ttLibC_Pes *ttLibC_Pes_make(
 	return pes;
 }
 
-ttLibC_Pes *ttLibC_Pes_getPacket(
+ttLibC_Pes TT_VISIBILITY_HIDDEN *ttLibC_Pes_getPacket(
 		ttLibC_Pes *prev_pes,
 		uint8_t *data,
 		size_t data_size,
@@ -259,7 +259,7 @@ ttLibC_Pes *ttLibC_Pes_getPacket(
 	}
 }
 
-bool ttLibC_Pes_getFrame(
+bool TT_VISIBILITY_HIDDEN ttLibC_Pes_getFrame(
 		ttLibC_Pes *pes,
 		ttLibC_getFrameFunc callback,
 		void *ptr) {
@@ -369,7 +369,7 @@ bool ttLibC_Pes_getFrame(
 	return false;
 }
 
-bool ttLibC_Pes_writePacket(
+bool TT_VISIBILITY_HIDDEN ttLibC_Pes_writePacket(
 		ttLibC_MpegtsWriteTrack *track, // for continuity counter
 		bool has_randomAccess, // for random access flag
 		bool has_pcr,
@@ -532,7 +532,7 @@ bool ttLibC_Pes_writePacket(
 	return true;
 }
 
-void ttLibC_Pes_close(ttLibC_Pes **pes) {
+void TT_VISIBILITY_HIDDEN ttLibC_Pes_close(ttLibC_Pes **pes) {
 	ttLibC_Pes *target = *pes;
 	if(target == NULL) {
 		return;

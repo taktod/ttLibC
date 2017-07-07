@@ -173,7 +173,7 @@ static tetty_errornum RtmpClientHandler_write(
 	}
 }
 
-ttLibC_RtmpClientHandler *ttLibC_RtmpClientHandler_make() {
+ttLibC_RtmpClientHandler TT_VISIBILITY_HIDDEN *ttLibC_RtmpClientHandler_make() {
 	ttLibC_RtmpClientHandler *handler = ttLibC_malloc(sizeof(ttLibC_RtmpClientHandler));
 	if(handler == NULL) {
 		return NULL;
@@ -186,7 +186,7 @@ ttLibC_RtmpClientHandler *ttLibC_RtmpClientHandler_make() {
 	return handler;
 }
 
-void ttLibC_RtmpClientHandler_close(ttLibC_RtmpClientHandler **handler) {
+void TT_VISIBILITY_HIDDEN ttLibC_RtmpClientHandler_close(ttLibC_RtmpClientHandler **handler) {
 	ttLibC_RtmpClientHandler *target = (ttLibC_RtmpClientHandler *)*handler;
 	if(target == NULL) {
 		return;

@@ -561,7 +561,7 @@ tetty_errornum TT_VISIBILITY_DEFAULT ttLibC_TettyContext_super_writeEach(ttLibC_
  * @param client_info
  * @return
  */
-tetty_errornum ttLibC_TettyContext_channelActive_(
+tetty_errornum TT_VISIBILITY_HIDDEN ttLibC_TettyContext_channelActive_(
 		ttLibC_TettyBootstrap *bootstrap,
 		ttLibC_SocketInfo *socket_info) {
 	ttLibC_TettyContext_ ctx;
@@ -580,7 +580,7 @@ tetty_errornum ttLibC_TettyContext_channelActive_(
  * @param client_info
  * @return
  */
-tetty_errornum ttLibC_TettyContext_channelInactive_(
+tetty_errornum TT_VISIBILITY_HIDDEN ttLibC_TettyContext_channelInactive_(
 		ttLibC_TettyBootstrap *bootstrap,
 		ttLibC_SocketInfo *socket_info) {
 	ttLibC_TettyContext_ ctx;
@@ -601,7 +601,7 @@ tetty_errornum ttLibC_TettyContext_channelInactive_(
  * @param data_size
  * @return
  */
-tetty_errornum ttLibC_TettyContext_channelRead_(
+tetty_errornum TT_VISIBILITY_HIDDEN ttLibC_TettyContext_channelRead_(
 		ttLibC_TettyBootstrap *bootstrap,
 		ttLibC_SocketInfo *socket_info,
 		void *data,
@@ -621,7 +621,7 @@ tetty_errornum ttLibC_TettyContext_channelRead_(
  * @param bootstrap
  * @return
  */
-tetty_errornum ttLibC_TettyContext_bind_(ttLibC_TettyBootstrap *bootstrap) {
+tetty_errornum TT_VISIBILITY_HIDDEN ttLibC_TettyContext_bind_(ttLibC_TettyBootstrap *bootstrap) {
 	ttLibC_TettyContext_ ctx;
 	TettyContext_updateContextInfo(
 			&ctx,
@@ -638,7 +638,7 @@ tetty_errornum ttLibC_TettyContext_bind_(ttLibC_TettyBootstrap *bootstrap) {
  * @param client_info
  * @return
  */
-tetty_errornum ttLibC_TettyContext_connect_(
+tetty_errornum TT_VISIBILITY_HIDDEN ttLibC_TettyContext_connect_(
 		ttLibC_TettyBootstrap *bootstrap,
 		ttLibC_SocketInfo *socket_info) {
 	ttLibC_TettyContext_ ctx;
@@ -657,7 +657,7 @@ tetty_errornum ttLibC_TettyContext_connect_(
  * @param client_info
  * @return
  */
-tetty_errornum ttLibC_TettyContext_disconnect_(
+tetty_errornum TT_VISIBILITY_HIDDEN ttLibC_TettyContext_disconnect_(
 		ttLibC_TettyBootstrap *bootstrap,
 		ttLibC_SocketInfo *socket_info) {
 	ttLibC_TettyContext_ ctx;
@@ -678,7 +678,7 @@ tetty_errornum ttLibC_TettyContext_disconnect_(
  * @param data_size
  * @return
  */
-tetty_errornum ttLibC_TettyContext_channel_write_(
+tetty_errornum TT_VISIBILITY_HIDDEN ttLibC_TettyContext_channel_write_(
 		ttLibC_TettyBootstrap *bootstrap,
 		ttLibC_SocketInfo *socket_info,
 		void *data,
@@ -699,7 +699,7 @@ tetty_errornum ttLibC_TettyContext_channel_write_(
  * @param client_info
  * @return
  */
-tetty_errornum ttLibC_TettyContext_flush_(
+tetty_errornum TT_VISIBILITY_HIDDEN ttLibC_TettyContext_flush_(
 		ttLibC_TettyBootstrap *bootstrap,
 		ttLibC_SocketInfo *socket_info) {
 	ttLibC_TettyContext_ ctx;
@@ -718,7 +718,7 @@ tetty_errornum ttLibC_TettyContext_flush_(
  * @param client_info
  * @return
  */
-tetty_errornum ttLibC_TettyContext_close_(
+tetty_errornum TT_VISIBILITY_HIDDEN ttLibC_TettyContext_close_(
 		ttLibC_TettyBootstrap *bootstrap,
 		ttLibC_SocketInfo *socket_info) {
 	ttLibC_TettyContext_ ctx;
@@ -734,7 +734,7 @@ tetty_errornum ttLibC_TettyContext_close_(
 /**
  * call for userEventTriggered
  */
-tetty_errornum ttLibC_TettyContext_userEventTriggered_(
+tetty_errornum TT_VISIBILITY_HIDDEN ttLibC_TettyContext_userEventTriggered_(
 		ttLibC_TettyBootstrap *bootstrap,
 		ttLibC_SocketInfo *socket_info,
 		void *data,

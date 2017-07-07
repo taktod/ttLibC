@@ -192,14 +192,14 @@ void FactoryWrapper::registMediaStream(
 
 extern "C" {
 
-void ttLibC_WebrtcFactory_initSSL() {
+void TT_VISIBILITY_HIDDEN ttLibC_WebrtcFactory_initSSL() {
 	rtc::InitializeSSL();
 }
-void ttLibC_WebrtcFactory_cleanSSL() {
+void TT_VISIBILITY_HIDDEN ttLibC_WebrtcFactory_cleanSSL() {
 	rtc::CleanupSSL();
 }
 
-ttLibC_WebrtcFactory *ttLibC_WebrtcFactory_make() {
+ttLibC_WebrtcFactory TT_VISIBILITY_HIDDEN *ttLibC_WebrtcFactory_make() {
 	ttLibC_WebrtcFactory_ *factory = (ttLibC_WebrtcFactory_ *)ttLibC_malloc(sizeof(ttLibC_WebrtcFactory_));
 	if(factory == NULL) {
 		return NULL;
@@ -210,7 +210,7 @@ ttLibC_WebrtcFactory *ttLibC_WebrtcFactory_make() {
 	return (ttLibC_WebrtcFactory *)factory;
 }
 
-void ttLibC_WebrtcFactory_close(ttLibC_WebrtcFactory **factory) {
+void TT_VISIBILITY_HIDDEN ttLibC_WebrtcFactory_close(ttLibC_WebrtcFactory **factory) {
 	ttLibC_WebrtcFactory_ *target = (ttLibC_WebrtcFactory_ *)*factory;
 	if(target == NULL) {
 		return;
@@ -220,7 +220,7 @@ void ttLibC_WebrtcFactory_close(ttLibC_WebrtcFactory **factory) {
 	*factory = NULL;
 }
 
-ttLibC_WebrtcPeerConnection *ttLibC_WebrtcFactory_createPeerConnection(
+ttLibC_WebrtcPeerConnection TT_VISIBILITY_HIDDEN *ttLibC_WebrtcFactory_createPeerConnection(
 		ttLibC_WebrtcFactory *factory,
 		ttLibC_WebrtcConfig *config) {
 	if(factory == NULL) {
@@ -243,7 +243,7 @@ ttLibC_WebrtcPeerConnection *ttLibC_WebrtcFactory_createPeerConnection(
 	return (ttLibC_WebrtcPeerConnection *)peerConnection;
 }
 
-ttLibC_WebrtcMediaStream *ttLibC_WebrtcFactory_createLocalStream(
+ttLibC_WebrtcMediaStream TT_VISIBILITY_HIDDEN *ttLibC_WebrtcFactory_createLocalStream(
 		ttLibC_WebrtcFactory *factory) {
 	if(factory == NULL) {
 		return NULL;
@@ -262,7 +262,7 @@ ttLibC_WebrtcMediaStream *ttLibC_WebrtcFactory_createLocalStream(
 	return (ttLibC_WebrtcMediaStream *)stream;
 }
 
-ttLibC_WebrtcMediaStream *ttLibC_WebrtcFactory_createRemoteStream(
+ttLibC_WebrtcMediaStream TT_VISIBILITY_HIDDEN *ttLibC_WebrtcFactory_createRemoteStream(
 		FactoryWrapper *factoryWrapper,
 		rtc::scoped_refptr<webrtc::MediaStreamInterface> nativeStream) {
 	if(factoryWrapper == NULL) {
