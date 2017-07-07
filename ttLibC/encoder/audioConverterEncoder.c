@@ -11,6 +11,7 @@
 #ifdef __ENABLE_APPLE__
 
 #include "audioConverterEncoder.h"
+#include "../ttLibC_predef.h"
 #include "../_log.h"
 #include "../allocator.h"
 #include "../util/hexUtil.h"
@@ -43,7 +44,7 @@ typedef struct ttLibC_Encoder_AudioConverter_AcEncoder_ {
 
 typedef ttLibC_Encoder_AudioConverter_AcEncoder_ ttLibC_AcEncoder_;
 
-ttLibC_AcEncoder *ttLibC_AcEncoder_make(
+ttLibC_AcEncoder TT_VISIBILITY_DEFAULT *ttLibC_AcEncoder_make(
 		uint32_t sample_rate,
 		uint32_t channel_num,
 		uint32_t target_bitrate,
@@ -208,7 +209,7 @@ static bool AcEncoder_checkEncodedData(
 	return true;
 }
 
-bool ttLibC_AcEncoder_encode(
+bool TT_VISIBILITY_DEFAULT ttLibC_AcEncoder_encode(
 		ttLibC_AcEncoder *encoder,
 		ttLibC_PcmS16 *pcm,
 		ttLibC_AcEncodeFunc callback,
@@ -262,7 +263,7 @@ bool ttLibC_AcEncoder_encode(
 	return true;
 }
 
-void ttLibC_AcEncoder_close(ttLibC_AcEncoder **encoder) {
+void TT_VISIBILITY_DEFAULT ttLibC_AcEncoder_close(ttLibC_AcEncoder **encoder) {
 	ttLibC_AcEncoder_ *target = (ttLibC_AcEncoder_ *)*encoder;
 	if(target == NULL) {
 		return;

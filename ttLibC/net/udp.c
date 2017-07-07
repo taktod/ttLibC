@@ -12,13 +12,14 @@
 
 #include "udp.h"
 #include "netCommon.h"
+#include "../ttLibC_predef.h"
 #include "../allocator.h"
 #include "../_log.h"
 #include <string.h>
 #include <unistd.h>
 #include <arpa/inet.h>
 
-ttLibC_UdpSocketInfo *ttLibC_UdpSocket_make(uint16_t port) {
+ttLibC_UdpSocketInfo TT_VISIBILITY_DEFAULT *ttLibC_UdpSocket_make(uint16_t port) {
 	ttLibC_UdpSocketInfo *socket_info = (ttLibC_UdpSocketInfo *)ttLibC_malloc(sizeof(ttLibC_UdpSocketInfo));
 	if(socket_info == NULL) {
 		ERR_PRINT("failed to allocator ttLibC_UdpSocketInfo.");
@@ -34,7 +35,7 @@ ttLibC_UdpSocketInfo *ttLibC_UdpSocket_make(uint16_t port) {
 	return socket_info;
 }
 
-bool ttLibC_UdpSocket_open(ttLibC_UdpSocketInfo *socket_info) {
+bool TT_VISIBILITY_DEFAULT ttLibC_UdpSocket_open(ttLibC_UdpSocketInfo *socket_info) {
 	if(socket_info == NULL) {
 		return false;
 	}
@@ -56,7 +57,7 @@ bool ttLibC_UdpSocket_open(ttLibC_UdpSocketInfo *socket_info) {
 	return true;
 }
 
-bool ttLibC_UdpSocket_write(
+bool TT_VISIBILITY_DEFAULT ttLibC_UdpSocket_write(
 		ttLibC_UdpSocketInfo *socket_info,
 		ttLibC_DatagramPacket *packet) {
 	// sendto with datagramPacket.
@@ -85,7 +86,7 @@ bool ttLibC_UdpSocket_write(
 	}
 }
 
-int64_t ttLibC_UdpSocket_read(
+int64_t TT_VISIBILITY_DEFAULT ttLibC_UdpSocket_read(
 		ttLibC_UdpSocketInfo *socket_info,
 		ttLibC_DatagramPacket *packet) {
 	// recvfrom
@@ -111,7 +112,7 @@ int64_t ttLibC_UdpSocket_read(
 	return recv_size;
 }
 
-void ttLibC_UdpSocket_close(ttLibC_UdpSocketInfo **socket_info) {
+void TT_VISIBILITY_DEFAULT ttLibC_UdpSocket_close(ttLibC_UdpSocketInfo **socket_info) {
 	ttLibC_UdpSocketInfo *target = *socket_info;
 	if(target == NULL) {
 		return;
@@ -124,14 +125,14 @@ void ttLibC_UdpSocket_close(ttLibC_UdpSocketInfo **socket_info) {
 	*socket_info = NULL;
 }
 
-ttLibC_DatagramPacket *ttLibC_DatagramPacket_make(
+ttLibC_DatagramPacket TT_VISIBILITY_DEFAULT *ttLibC_DatagramPacket_make(
 		void *data,
 		size_t data_size) {
 	return ttLibC_DatagramPacket_makeWithTarget(
 			data, data_size, "127.0.0.1", 0);
 }
 
-ttLibC_DatagramPacket *ttLibC_DatagramPacket_makeWithTarget(
+ttLibC_DatagramPacket TT_VISIBILITY_DEFAULT *ttLibC_DatagramPacket_makeWithTarget(
 		void *data,
 		size_t data_size,
 		const char *target_address,
@@ -151,7 +152,7 @@ ttLibC_DatagramPacket *ttLibC_DatagramPacket_makeWithTarget(
 	return packet;
 }
 
-void ttLibC_DatagramPacket_close(ttLibC_DatagramPacket **packet) {
+void TT_VISIBILITY_DEFAULT ttLibC_DatagramPacket_close(ttLibC_DatagramPacket **packet) {
 	ttLibC_DatagramPacket *target = *packet;
 	if(target == NULL) {
 		return;

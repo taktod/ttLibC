@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "../../ttLibC_predef.h"
 #include "../../_log.h"
 
 typedef ttLibC_Frame_Audio_AdpcmImaWav ttLibC_AdpcmImaWav_;
@@ -40,7 +41,7 @@ typedef ttLibC_Frame_Audio_AdpcmImaWav ttLibC_AdpcmImaWav_;
  * @param timebase      timebase number for pts.
  * @return adpcm_ima_wav object.
  */
-ttLibC_AdpcmImaWav *ttLibC_AdpcmImaWav_make(
+ttLibC_AdpcmImaWav TT_VISIBILITY_DEFAULT *ttLibC_AdpcmImaWav_make(
 		ttLibC_AdpcmImaWav *prev_frame,
 		uint32_t sample_rate,
 		uint32_t sample_num,
@@ -71,7 +72,7 @@ ttLibC_AdpcmImaWav *ttLibC_AdpcmImaWav_make(
  * @param src_frame  source of clone.
  * @return cloned frame.
  */
-ttLibC_AdpcmImaWav *ttLibC_AdpcmImaWav_clone(
+ttLibC_AdpcmImaWav TT_VISIBILITY_DEFAULT *ttLibC_AdpcmImaWav_clone(
 		ttLibC_AdpcmImaWav *prev_frame,
 		ttLibC_AdpcmImaWav *src_frame) {
 	if(src_frame == NULL) {
@@ -104,7 +105,7 @@ ttLibC_AdpcmImaWav *ttLibC_AdpcmImaWav_clone(
  * close frame
  * @param frame
  */
-void ttLibC_AdpcmImaWav_close(ttLibC_AdpcmImaWav **frame){
+void TT_VISIBILITY_DEFAULT ttLibC_AdpcmImaWav_close(ttLibC_AdpcmImaWav **frame){
 	ttLibC_Audio_close_((ttLibC_Audio **)frame);
 }
 

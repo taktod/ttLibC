@@ -10,6 +10,7 @@
 #ifdef __ENABLE_SOCKET__
 
 #include "rtmpHeader.h"
+#include "../../../../ttLibC_predef.h"
 #include "../../../../_log.h"
 #include "../../../../allocator.h"
 #include "../../../../util/byteUtil.h"

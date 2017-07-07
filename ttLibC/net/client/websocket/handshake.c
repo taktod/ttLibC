@@ -11,6 +11,7 @@
 #ifdef __ENABLE_SOCKET__
 
 #include "handshake.h"
+#include "../../../ttLibC_predef.h"
 #include "../../../allocator.h"
 #include "../../../_log.h"
 #include "../../../util/hexUtil.h"

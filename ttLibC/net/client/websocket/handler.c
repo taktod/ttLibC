@@ -8,6 +8,7 @@
 #ifdef __ENABLE_SOCKET__
 
 #include "handler.h"
+#include "../../../ttLibC_predef.h"
 #include "../../../allocator.h"
 #include "../../../_log.h"
 #include "websocket.h"

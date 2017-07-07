@@ -11,6 +11,7 @@
 #ifdef __ENABLE_JPEG__
 
 #include "jpegDecoder.h"
+#include "../ttLibC_predef.h"
 #include "../_log.h"
 #include "../allocator.h"
 #include "../util/hexUtil.h"
@@ -37,7 +38,7 @@ typedef ttLibC_Decoder_JpegDecoder_ ttLibC_JpegDecoder_;
  * make jpeg decoder
  * @return jpegDecoder object.
  */
-ttLibC_JpegDecoder *ttLibC_JpegDecoder_make() {
+ttLibC_JpegDecoder TT_VISIBILITY_DEFAULT *ttLibC_JpegDecoder_make() {
 	ttLibC_JpegDecoder_ *decoder = ttLibC_malloc(sizeof(ttLibC_JpegDecoder_));
 	if(decoder == NULL) {
 		ERR_PRINT("failed to allocate decoder object.");
@@ -60,7 +61,7 @@ ttLibC_JpegDecoder *ttLibC_JpegDecoder_make() {
  * @param ptr      pointer for use def value, which will call in callback.
  * @return true / false
  */
-bool ttLibC_JpegDecoder_decode(
+bool TT_VISIBILITY_DEFAULT ttLibC_JpegDecoder_decode(
 		ttLibC_JpegDecoder *decoder,
 		ttLibC_Jpeg *jpeg,
 		ttLibC_JpegDecodeFunc callback,
@@ -218,7 +219,7 @@ bool ttLibC_JpegDecoder_decode(
  * close jpeg decoder
  * @param decoder
  */
-void ttLibC_JpegDecoder_close(ttLibC_JpegDecoder **decoder) {
+void TT_VISIBILITY_DEFAULT ttLibC_JpegDecoder_close(ttLibC_JpegDecoder **decoder) {
 	ttLibC_JpegDecoder_ *target = (ttLibC_JpegDecoder_ *)*decoder;
 	if(target == NULL) {
 		return;

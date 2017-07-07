@@ -163,13 +163,13 @@ bool ttLibC_MpegtsWriter_updateDtsMargin(
  * @param ptr         user def pointer.
  * @return true:success false:error
  */
-bool ttLibC_MpegtsWriter_write__(
+/*bool ttLibC_MpegtsWriter_write__(
 		ttLibC_MpegtsWriter *writer,
 		bool update_info,
 		uint16_t pid,
 		ttLibC_Frame *frame,
 		ttLibC_ContainerWriteFunc callback,
-		void *ptr);
+		void *ptr);*/
 
 /**
  * write binaries for sdt pat pmt.

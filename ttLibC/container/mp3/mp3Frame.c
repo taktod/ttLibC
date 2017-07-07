@@ -10,6 +10,7 @@
 
 #include "mp3Frame.h"
 #include <stdlib.h>
+#include "../../ttLibC_predef.h"
 #include "../../_log.h"
 #include "../../allocator.h"
 
@@ -39,7 +40,7 @@ ttLibC_Mp3Frame *ttLibC_Mp3Frame_make(
 	return frame;
 }
 
-bool ttLibC_Container_Mp3_getFrame(
+bool TT_VISIBILITY_DEFAULT ttLibC_Container_Mp3_getFrame(
 		ttLibC_Container_Mp3 *mp3,
 		ttLibC_getFrameFunc callback,
 		void *ptr) {
@@ -47,7 +48,7 @@ bool ttLibC_Container_Mp3_getFrame(
 	return callback(ptr, (ttLibC_Frame *)mp3frame->frame);
 }
 
-void ttLibC_Container_Mp3_close(ttLibC_Container_Mp3 **mp3) {
+void TT_VISIBILITY_DEFAULT ttLibC_Container_Mp3_close(ttLibC_Container_Mp3 **mp3) {
 	ttLibC_Mp3Frame_close((ttLibC_Mp3Frame **)mp3);
 }
 

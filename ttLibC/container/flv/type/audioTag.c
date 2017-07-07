@@ -10,6 +10,7 @@
 
 #include "audioTag.h"
 #include "../flvTag.h"
+#include "../../../ttLibC_predef.h"
 #include "../../../_log.h"
 #include "../../../util/hexUtil.h"
 

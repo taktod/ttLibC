@@ -9,6 +9,7 @@
  */
 
 #include "h265.h"
+#include "../../ttLibC_predef.h"
 #include "../../_log.h"
 #include "../../allocator.h"
 #include "../../util/hexUtil.h"
@@ -22,7 +23,7 @@ typedef struct {
 	void *analyze_data_ptr;
 } ttLibC_H265_Ref_t;
 
-ttLibC_H265 *ttLibC_H265_make(
+ttLibC_H265 TT_VISIBILITY_DEFAULT *ttLibC_H265_make(
 		ttLibC_H265 *prev_frame,
 		ttLibC_H265_Type type,
 		uint32_t width,
@@ -133,7 +134,7 @@ ttLibC_H265 *ttLibC_H265_make(
 	return h265;
 }
 
-ttLibC_H265 *ttLibC_H265_clone(
+ttLibC_H265 TT_VISIBILITY_DEFAULT *ttLibC_H265_clone(
 		ttLibC_H265 *prev_frame,
 		ttLibC_H265 *src_frame) {
 	if(src_frame == NULL) {
@@ -163,7 +164,7 @@ ttLibC_H265 *ttLibC_H265_clone(
 	return h265;
 }
 
-bool ttLibC_H265_getNalInfo(
+bool TT_VISIBILITY_DEFAULT ttLibC_H265_getNalInfo(
 		ttLibC_H265_NalInfo* info,
 		uint8_t *data,
 		size_t data_size) {
@@ -250,7 +251,7 @@ bool ttLibC_H265_getNalInfo(
 	return true;
 }
 
-bool ttLibC_H265_getHvccInfo(ttLibC_H265_NalInfo* info, uint8_t *data, size_t data_size) {
+bool TT_VISIBILITY_DEFAULT ttLibC_H265_getHvccInfo(ttLibC_H265_NalInfo* info, uint8_t *data, size_t data_size) {
 	if(info == NULL) {
 		return false;
 	}
@@ -273,7 +274,7 @@ bool ttLibC_H265_getHvccInfo(ttLibC_H265_NalInfo* info, uint8_t *data, size_t da
 	info->nal_unit_type = ((*data) >> 1) & 0x3F;
 	return true;
 }
-bool ttLibC_H265_getHvccInfo_ex(
+bool TT_VISIBILITY_DEFAULT ttLibC_H265_getHvccInfo_ex(
 		ttLibC_H265_NalInfo* info,
 		uint8_t *data,
 		size_t data_size,
@@ -342,7 +343,7 @@ bool ttLibC_H265_getHvccInfo_ex(
 	return true;
 }
 
-bool ttLibC_H265_isNal(uint8_t *data, size_t data_size) {
+bool TT_VISIBILITY_DEFAULT ttLibC_H265_isNal(uint8_t *data, size_t data_size) {
 	if(data_size < 4) {
 		return false;
 	}
@@ -367,7 +368,7 @@ bool ttLibC_H265_isNal(uint8_t *data, size_t data_size) {
 	return false;
 }
 
-bool ttLibC_H265_isHvcc(uint8_t *data, size_t data_size) {
+bool TT_VISIBILITY_DEFAULT ttLibC_H265_isHvcc(uint8_t *data, size_t data_size) {
 	if(data_size < 4) {
 		return false;
 	}
@@ -382,7 +383,7 @@ bool ttLibC_H265_isHvcc(uint8_t *data, size_t data_size) {
 	return true;
 }
 
-bool ttLibC_H265_isKey(uint8_t *data, size_t data_size) {
+bool TT_VISIBILITY_DEFAULT ttLibC_H265_isKey(uint8_t *data, size_t data_size) {
 	ttLibC_H265_NalInfo info;
 	if(ttLibC_H265_isHvcc(data, data_size)) {
 		if(!ttLibC_H265_getHvccInfo(&info, data, data_size)) {
@@ -467,7 +468,7 @@ static Error_e H265_analyzeSPSNut(
 	return 0;
 }
 
-uint32_t ttLibC_H265_getWidth(ttLibC_H265 *prev_frame, uint8_t *data, size_t data_size) {
+uint32_t TT_VISIBILITY_DEFAULT ttLibC_H265_getWidth(ttLibC_H265 *prev_frame, uint8_t *data, size_t data_size) {
 	// nalを分解して、spsをみつけたら、そこからwidthを取り出す
 	uint32_t width = 0;
 	if(prev_frame != 0) {
@@ -519,7 +520,7 @@ uint32_t ttLibC_H265_getWidth(ttLibC_H265 *prev_frame, uint8_t *data, size_t dat
 	return 0;
 }
 
-uint32_t ttLibC_H265_getHeight(ttLibC_H265 *prev_frame, uint8_t *data, size_t data_size) {
+uint32_t TT_VISIBILITY_DEFAULT ttLibC_H265_getHeight(ttLibC_H265 *prev_frame, uint8_t *data, size_t data_size) {
 	// nalを分解して、spsを見つけたらそこからheightを取り出す。
 	uint32_t height = 0;
 	if(prev_frame != 0) {
@@ -571,7 +572,7 @@ uint32_t ttLibC_H265_getHeight(ttLibC_H265 *prev_frame, uint8_t *data, size_t da
 	return 0;
 }
 
-ttLibC_H265 *ttLibC_H265_getFrame(
+ttLibC_H265 TT_VISIBILITY_DEFAULT *ttLibC_H265_getFrame(
 		ttLibC_H265 *prev_frame,
 		uint8_t *data,
 		size_t data_size,
@@ -755,7 +756,7 @@ ttLibC_H265 *ttLibC_H265_getFrame(
 	return NULL;
 }
 
-ttLibC_H265 *ttLibC_H265_analyzeHvccTag(
+ttLibC_H265 TT_VISIBILITY_DEFAULT *ttLibC_H265_analyzeHvccTag(
 		ttLibC_H265 *prev_frame,
 		uint8_t *data,
 		size_t data_size,
@@ -886,7 +887,7 @@ ttLibC_H265 *ttLibC_H265_analyzeHvccTag(
 	return h265;
 }
 
-uint32_t ttLibC_H265_getConfigCrc32(ttLibC_H265 *h265) {
+uint32_t TT_VISIBILITY_DEFAULT ttLibC_H265_getConfigCrc32(ttLibC_H265 *h265) {
 	if(h265->type != H265Type_configData) {
 		return 0;
 	}
@@ -901,7 +902,7 @@ uint32_t ttLibC_H265_getConfigCrc32(ttLibC_H265 *h265) {
 	return value;
 }
 
-size_t ttLibC_H265_readHvccTag(
+size_t TT_VISIBILITY_DEFAULT ttLibC_H265_readHvccTag(
 		ttLibC_H265 *h265,
 		void *data,
 		size_t data_size) {
@@ -1031,7 +1032,7 @@ size_t ttLibC_H265_readHvccTag(
 	return write_size;
 }
 
-void ttLibC_H265_close(ttLibC_H265 **frame) {
+void TT_VISIBILITY_DEFAULT ttLibC_H265_close(ttLibC_H265 **frame) {
 	ttLibC_H265 *target = *frame;
 	if(target == NULL) {
 		return;

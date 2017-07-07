@@ -8,6 +8,7 @@
  * @date   2015/07/20
  */
 
+#include "ttLibC_predef.h"
 #include "ttLibC_common.h"
 #include "log.h"
 
@@ -72,7 +73,7 @@ Error_e ttLibC_updateError(Error_Target_e target, Error_e error) {
 	}
 }
 
-void ttLibC_printLastError(Error_e error, bool is_errorMessage, const char *func, uint32_t line) {
+void TT_VISIBILITY_DEFAULT ttLibC_printLastError(Error_e error, bool is_errorMessage, const char *func, uint32_t line) {
 	if((error & 0x000FFFFF) == Error_noError) {
 		return;
 	}
@@ -99,7 +100,7 @@ void ttLibC_printLastError(Error_e error, bool is_errorMessage, const char *func
 	return;
 }
 
-const char *ttLibC_getLastError(int error_no) {
+const char TT_VISIBILITY_DEFAULT *ttLibC_getLastError(int error_no) {
 	int error_num = sizeof(errors) / sizeof(errors[0]) - 1;
 	if(error_no > 0 || error_no < -error_num) {
 		return errors[error_num];
@@ -107,6 +108,6 @@ const char *ttLibC_getLastError(int error_no) {
 	return errors[-error_no];
 }
 
-const char *ttLibC_getVersion() {
+const char TT_VISIBILITY_DEFAULT *ttLibC_getVersion() {
 	return version;
 }

@@ -11,6 +11,7 @@
 #ifdef __ENABLE_APPLE__
 
 #include "vtCompressSessionEncoder.h"
+#include "../ttLibC_predef.h"
 #include "../_log.h"
 #include "../allocator.h"
 #include "../util/hexUtil.h"
@@ -234,7 +235,7 @@ static void VtEncoder_encodeCallback(
  * @param target_frame_type
  * @return ttLibC_VtEncoder object.
  */
-ttLibC_VtEncoder *ttLibC_VtEncoder_make(
+ttLibC_VtEncoder TT_VISIBILITY_DEFAULT *ttLibC_VtEncoder_make(
 		uint32_t width,
 		uint32_t height,
 		ttLibC_Frame_Type target_frame_type) {
@@ -256,7 +257,7 @@ ttLibC_VtEncoder *ttLibC_VtEncoder_make(
  * @param is_baseline true:baseline false:main
  * @param target_frame_type
  */
-ttLibC_VtEncoder *ttLibC_VtEncoder_make_ex(
+ttLibC_VtEncoder TT_VISIBILITY_DEFAULT *ttLibC_VtEncoder_make_ex(
 		uint32_t width,
 		uint32_t height,
 		uint32_t fps,
@@ -432,7 +433,7 @@ ttLibC_VtEncoder *ttLibC_VtEncoder_make_ex(
 	return (ttLibC_VtEncoder *)encoder;
 }
 
-bool ttLibC_VtEncoder_encode(
+bool TT_VISIBILITY_DEFAULT ttLibC_VtEncoder_encode(
 		ttLibC_VtEncoder *encoder,
 		ttLibC_Yuv420 *yuv420,
 		ttLibC_VtEncodeFunc callback,
@@ -511,7 +512,7 @@ bool ttLibC_VtEncoder_encode(
 	return true;
 }
 
-void ttLibC_VtEncoder_close(ttLibC_VtEncoder **encoder) {
+void TT_VISIBILITY_DEFAULT ttLibC_VtEncoder_close(ttLibC_VtEncoder **encoder) {
 	ttLibC_VtEncoder_ *target = (ttLibC_VtEncoder_ *)*encoder;
 	if(target == NULL) {
 		return;

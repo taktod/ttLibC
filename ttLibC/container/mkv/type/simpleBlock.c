@@ -10,6 +10,7 @@
 
 #include "simpleBlock.h"
 #include "../mkvReader.h"
+#include "../../../ttLibC_predef.h"
 #include "../../../_log.h"
 #include "../../../util/hexUtil.h"
 #include "../../../util/byteUtil.h"

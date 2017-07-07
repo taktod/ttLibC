@@ -11,6 +11,7 @@
 #ifdef __ENABLE_X265__
 
 #include "x265Encoder.h"
+#include "../ttLibC_predef.h"
 #include "../_log.h"
 #include "../allocator.h"
 #include "../util/dynamicBufferUtil.h"
@@ -32,7 +33,7 @@ typedef struct ttLibC_Encoder_X265Encoder_ {
 
 typedef ttLibC_Encoder_X265Encoder_ ttLibC_X265Encoder_;
 
-ttLibC_X265Encoder *ttLibC_X265Encoder_make(
+ttLibC_X265Encoder TT_VISIBILITY_DEFAULT *ttLibC_X265Encoder_make(
 		uint32_t width,
 		uint32_t height) {
 	x265_api *api;
@@ -43,7 +44,7 @@ ttLibC_X265Encoder *ttLibC_X265Encoder_make(
 	return ttLibC_X265Encoder_makeWithX265ApiAndParam(api, param);
 }
 
-ttLibC_X265Encoder *ttLibC_X265Encoder_make_ex(
+ttLibC_X265Encoder TT_VISIBILITY_DEFAULT *ttLibC_X265Encoder_make_ex(
 		uint32_t width,
 		uint32_t height,
 		uint32_t bitrate) {
@@ -56,7 +57,7 @@ ttLibC_X265Encoder *ttLibC_X265Encoder_make_ex(
 	return ttLibC_X265Encoder_makeWithX265ApiAndParam(api, param);
 }
 
-bool ttLibC_X265Encoder_getDefaultX265ApiAndParam(
+bool TT_VISIBILITY_DEFAULT ttLibC_X265Encoder_getDefaultX265ApiAndParam(
 		void **api,
 		void **param,
 		const char *preset,
@@ -90,7 +91,7 @@ bool ttLibC_X265Encoder_getDefaultX265ApiAndParam(
 	return true;
 }
 
-ttLibC_X265Encoder *ttLibC_X265Encoder_makeWithX265ApiAndParam(
+ttLibC_X265Encoder TT_VISIBILITY_DEFAULT *ttLibC_X265Encoder_makeWithX265ApiAndParam(
 		void *api,
 		void *param) {
 	if(api == NULL || param == NULL) {
@@ -119,7 +120,7 @@ ttLibC_X265Encoder *ttLibC_X265Encoder_makeWithX265ApiAndParam(
 	return (ttLibC_X265Encoder *)encoder;
 }
 
-bool ttLibC_X265Encoder_forceNextFrameType(
+bool TT_VISIBILITY_DEFAULT ttLibC_X265Encoder_forceNextFrameType(
 		ttLibC_X265Encoder *encoder,
 		ttLibC_X265Encoder_FrameType frame_type) {
 	ttLibC_X265Encoder_ *encoder_ = (ttLibC_X265Encoder_ *)encoder;
@@ -281,7 +282,7 @@ static bool X265Encoder_checkEncodedData(
 	return result;
 }
 
-bool ttLibC_X265Encoder_encode(
+bool TT_VISIBILITY_DEFAULT ttLibC_X265Encoder_encode(
 		ttLibC_X265Encoder *encoder,
 		ttLibC_Yuv420 *yuv420,
 		ttLibC_X265EncodeFunc callback,
@@ -361,7 +362,7 @@ bool ttLibC_X265Encoder_encode(
 	return X265Encoder_checkEncodedData(encoder_, nal, i_nal, output_flag, callback, ptr);
 }
 
-void ttLibC_X265Encoder_close(ttLibC_X265Encoder **encoder) {
+void TT_VISIBILITY_DEFAULT ttLibC_X265Encoder_close(ttLibC_X265Encoder **encoder) {
 	ttLibC_X265Encoder_ *target = (ttLibC_X265Encoder_ *)*encoder;
 	if(target == NULL) {
 		return;

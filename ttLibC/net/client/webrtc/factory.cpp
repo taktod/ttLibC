@@ -13,6 +13,7 @@
 #include "factory.h"
 #include "peerConnection.h"
 #include "mediaStream.h"
+#include "../../../ttLibC_predef.h"
 #include "../../../allocator.h"
 #include "../../../_log.h"
 #include <webrtc/base/ssladapter.h>

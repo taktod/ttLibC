@@ -9,13 +9,14 @@
  */
 
 #include "mp3Reader.h"
+#include "../../ttLibC_predef.h"
 #include "../../_log.h"
 #include "../../allocator.h"
 #include "../../frame/audio/mp3.h"
 #include <stdlib.h>
 #include <string.h>
 
-ttLibC_Mp3Reader *ttLibC_Mp3Reader_make() {
+ttLibC_Mp3Reader TT_VISIBILITY_DEFAULT *ttLibC_Mp3Reader_make() {
 	ttLibC_Mp3Reader_ *reader = (ttLibC_Mp3Reader_ *)ttLibC_ContainerReader_make(containerType_mp3, sizeof(ttLibC_Mp3Reader_));
 	if(reader == NULL) {
 		ERR_PRINT("failed to allocate memory for reader.");
@@ -75,7 +76,7 @@ ttLibC_Mp3 *Mp3Reader_readMp3FromBinary(
 	return mp3;
 }
 
-bool ttLibC_Mp3Reader_read(
+bool TT_VISIBILITY_DEFAULT ttLibC_Mp3Reader_read(
 		ttLibC_Mp3Reader *reader,
 		void *data,
 		size_t data_size,
@@ -113,7 +114,7 @@ bool ttLibC_Mp3Reader_read(
 	} while(true);
 }
 
-void ttLibC_Mp3Reader_close(ttLibC_Mp3Reader **reader) {
+void TT_VISIBILITY_DEFAULT ttLibC_Mp3Reader_close(ttLibC_Mp3Reader **reader) {
 	ttLibC_Mp3Reader_ *target = (ttLibC_Mp3Reader_ *)*reader;
 	if(target == NULL) {
 		return;

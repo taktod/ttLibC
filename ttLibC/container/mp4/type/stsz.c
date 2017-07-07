@@ -9,6 +9,7 @@
  */
 
 #include "stsz.h"
+#include "../../../ttLibC_predef.h"
 #include "../../../util/ioUtil.h"
 
 ttLibC_Mp4 *ttLibC_Stsz_make(

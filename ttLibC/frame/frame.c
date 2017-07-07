@@ -13,6 +13,7 @@
 #include "frame.h"
 #include "audio/audio.h"
 #include "video/video.h"
+#include "../ttLibC_predef.h"
 #include "../_log.h"
 
 /*
@@ -21,7 +22,7 @@
  * @param prev_frame reuse frame object.
  * @param src_frame  source of clone.
  */
-ttLibC_Frame *ttLibC_Frame_clone(
+ttLibC_Frame TT_VISIBILITY_DEFAULT *ttLibC_Frame_clone(
 		ttLibC_Frame *prev_frame,
 		ttLibC_Frame *src_frame) {
 	if(src_frame == NULL) {
@@ -69,7 +70,7 @@ ttLibC_Frame *ttLibC_Frame_clone(
  * @param frame
  * @return true:audio false:not audio
  */
-bool ttLibC_Frame_isAudio(ttLibC_Frame *frame) {
+bool TT_VISIBILITY_DEFAULT ttLibC_Frame_isAudio(ttLibC_Frame *frame) {
 	if(frame == NULL) {
 		return false;
 	}
@@ -111,7 +112,7 @@ bool ttLibC_Frame_isAudio(ttLibC_Frame *frame) {
  * @param frame
  * @return true:video false:not video
  */
-bool ttLibC_Frame_isVideo(ttLibC_Frame *frame) {
+bool TT_VISIBILITY_DEFAULT ttLibC_Frame_isVideo(ttLibC_Frame *frame) {
 	if(frame == NULL) {
 		return false;
 	}
@@ -152,7 +153,7 @@ bool ttLibC_Frame_isVideo(ttLibC_Frame *frame) {
  * release frame
  * @param frame
  */
-void ttLibC_Frame_close(ttLibC_Frame **frame) {
+void TT_VISIBILITY_DEFAULT ttLibC_Frame_close(ttLibC_Frame **frame) {
 	ttLibC_Frame *target = *frame;
 	if(target == NULL) {
 		return;

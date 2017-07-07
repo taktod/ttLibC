@@ -9,6 +9,7 @@
  */
 
 #include "stlListUtil.h"
+#include "../ttLibC_predef.h"
 #include <list>
 #include "../_log.h"
 #include "../allocator.h"
@@ -158,11 +159,11 @@ static void StlList_close(ttLibC_StlList_ **list) {
 
 extern "C" {
 
-ttLibC_StlList *ttLibC_StlList_make() {
+ttLibC_StlList TT_VISIBILITY_DEFAULT *ttLibC_StlList_make() {
 	return (ttLibC_StlList *)StlList_make();
 }
 
-bool ttLibC_StlList_addFirst(
+bool TT_VISIBILITY_DEFAULT ttLibC_StlList_addFirst(
 		ttLibC_StlList *list,
 		void *add_item) {
 	return StlList_addFirst(
@@ -170,7 +171,7 @@ bool ttLibC_StlList_addFirst(
 			add_item);
 }
 
-bool ttLibC_StlList_addLast(
+bool TT_VISIBILITY_DEFAULT ttLibC_StlList_addLast(
 		ttLibC_StlList *list,
 		void *add_item) {
 	return StlList_addLast(
@@ -178,15 +179,15 @@ bool ttLibC_StlList_addLast(
 			add_item);
 }
 
-void *ttLibC_StlList_refFirst(ttLibC_StlList *list) {
+void TT_VISIBILITY_DEFAULT *ttLibC_StlList_refFirst(ttLibC_StlList *list) {
 	return StlList_refFirst((ttLibC_StlList_ *)list);
 }
 
-void *ttLibC_StlList_refLast(ttLibC_StlList *list) {
+void TT_VISIBILITY_DEFAULT *ttLibC_StlList_refLast(ttLibC_StlList *list) {
 	return StlList_refLast((ttLibC_StlList_ *)list);
 }
 
-bool ttLibC_StlList_remove(
+bool TT_VISIBILITY_DEFAULT ttLibC_StlList_remove(
 		ttLibC_StlList *list,
 		void *remove_item) {
 	return StlList_remove(
@@ -194,11 +195,11 @@ bool ttLibC_StlList_remove(
 			remove_item);
 }
 
-bool ttLibC_StlList_removeAll(ttLibC_StlList *list) {
+bool TT_VISIBILITY_DEFAULT ttLibC_StlList_removeAll(ttLibC_StlList *list) {
 	return StlList_removeAll((ttLibC_StlList_ *)list);
 }
 
-bool ttLibC_StlList_forEach(
+bool TT_VISIBILITY_DEFAULT ttLibC_StlList_forEach(
 		ttLibC_StlList *list,
 		ttLibC_StlListRefFunc callback,
 		void *ptr) {
@@ -208,7 +209,7 @@ bool ttLibC_StlList_forEach(
 			ptr);
 }
 
-bool ttLibC_StlList_forEachReverse(
+bool TT_VISIBILITY_DEFAULT ttLibC_StlList_forEachReverse(
 		ttLibC_StlList *list,
 		ttLibC_StlListRefFunc callback,
 		void *ptr) {
@@ -217,7 +218,7 @@ bool ttLibC_StlList_forEachReverse(
 			callback,
 			ptr);
 }
-void ttLibC_StlList_close(ttLibC_StlList **list) {
+void TT_VISIBILITY_DEFAULT ttLibC_StlList_close(ttLibC_StlList **list) {
 	StlList_close((ttLibC_StlList_ **)list);
 }
 

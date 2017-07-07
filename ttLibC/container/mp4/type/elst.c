@@ -6,6 +6,7 @@
  */
 
 #include "elst.h"
+#include "../../../ttLibC_predef.h"
 #include "../../../util/ioUtil.h"
 #include "../../../_log.h"
 

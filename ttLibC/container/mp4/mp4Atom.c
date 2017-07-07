@@ -10,6 +10,7 @@
 
 #include "mp4Atom.h"
 #include "mp4Reader.h"
+#include "../../ttLibC_predef.h"
 #include "../../_log.h"
 #include "../../allocator.h"
 #include "type/ctts.h"
@@ -617,7 +618,7 @@ static bool Mp4Atom_analyzeStsd(
 	return true;
 }
 
-bool ttLibC_Mp4_getFrame(
+bool TT_VISIBILITY_DEFAULT ttLibC_Mp4_getFrame(
 		ttLibC_Mp4 *mp4,
 		ttLibC_getFrameFunc callback,
 		void *ptr) {

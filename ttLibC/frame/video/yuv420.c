@@ -12,6 +12,7 @@
 #include <stdlib.h>
 
 #include "yuv420.h"
+#include "../../ttLibC_predef.h"
 #include "../../_log.h"
 #include "../../allocator.h"
 
@@ -34,7 +35,7 @@
  * @param timebase      timebase number for pts.
  * @return yuv420 object.
  */
-ttLibC_Yuv420 *ttLibC_Yuv420_make(
+ttLibC_Yuv420 TT_VISIBILITY_DEFAULT *ttLibC_Yuv420_make(
 		ttLibC_Yuv420 *prev_frame,
 		ttLibC_Yuv420_Type type,
 		uint32_t width,
@@ -386,7 +387,7 @@ static ttLibC_Yuv420 *Yvu420_cloneSemiPlanar(
  * @param prev_frame reuse frame object.
  * @param src_frame  source of clone.
  */
-ttLibC_Yuv420 *ttLibC_Yuv420_clone(
+ttLibC_Yuv420 TT_VISIBILITY_DEFAULT *ttLibC_Yuv420_clone(
 		ttLibC_Yuv420 *prev_frame,
 		ttLibC_Yuv420 *src_frame) {
 	if(src_frame == NULL) {
@@ -427,7 +428,7 @@ ttLibC_Yuv420 *ttLibC_Yuv420_clone(
  * close frame
  * @param frame
  */
-void ttLibC_Yuv420_close(ttLibC_Yuv420 **frame) {
+void TT_VISIBILITY_DEFAULT ttLibC_Yuv420_close(ttLibC_Yuv420 **frame) {
 	ttLibC_Yuv420 *target = (*frame);
 	if(target == NULL) {
 		return;
@@ -442,7 +443,7 @@ void ttLibC_Yuv420_close(ttLibC_Yuv420 **frame) {
 	*frame = NULL;
 }
 
-ttLibC_Yuv420 *ttLibC_Yuv420_makeEmptyFrame(
+ttLibC_Yuv420 TT_VISIBILITY_DEFAULT *ttLibC_Yuv420_makeEmptyFrame(
 		ttLibC_Yuv420_Type sub_type,
 		uint32_t           width,
 		uint32_t           height) {

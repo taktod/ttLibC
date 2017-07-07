@@ -11,6 +11,7 @@
 #include "mkvTag.h"
 #include "type/simpleBlock.h"
 #include "mkvReader.h"
+#include "../../ttLibC_predef.h"
 #include "../../_log.h"
 #include "../../util/hexUtil.h"
 #include "../../allocator.h"
@@ -49,7 +50,7 @@ ttLibC_MkvTag *ttLibC_MkvTag_make(
 	return tag;
 }
 
-bool ttLibC_Mkv_getFrame(ttLibC_Mkv *mkv, ttLibC_getFrameFunc callback, void *ptr) {
+bool TT_VISIBILITY_DEFAULT ttLibC_Mkv_getFrame(ttLibC_Mkv *mkv, ttLibC_getFrameFunc callback, void *ptr) {
 	switch(mkv->type) {
 	case MkvType_SimpleBlock:
 		// just now, only simpleBlock support to get frame.

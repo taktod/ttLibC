@@ -12,6 +12,7 @@
 
 #include "linkedListUtil.h"
 #include <stdio.h>
+#include "../ttLibC_predef.h"
 #include "../allocator.h"
 #include "../_log.h"
 #include <string.h>
@@ -84,7 +85,7 @@ typedef struct {
 
 typedef ttLibC_Util_LinkedList_ ttLibC_LinkedList_;
 
-ttLibC_LinkedList *ttLibC_LinkedList_make() {
+ttLibC_LinkedList TT_VISIBILITY_DEFAULT *ttLibC_LinkedList_make() {
 	LOG_PRINT("make is called.");
 	ttLibC_LinkedList_ *linkedList = ttLibC_malloc(sizeof(ttLibC_LinkedList_));
 	if(linkedList == NULL) {
@@ -98,7 +99,7 @@ ttLibC_LinkedList *ttLibC_LinkedList_make() {
 }
 
 // 先頭にデータを追加する。
-bool ttLibC_LinkedList_addFirst(
+bool TT_VISIBILITY_DEFAULT ttLibC_LinkedList_addFirst(
 		ttLibC_LinkedList *list,
 		void *add_item,
 		size_t add_item_size,
@@ -122,7 +123,7 @@ bool ttLibC_LinkedList_addFirst(
 }
 
 // 終端にデータを追加する
-bool ttLibC_LinkedList_addLast(
+bool TT_VISIBILITY_DEFAULT ttLibC_LinkedList_addLast(
 		ttLibC_LinkedList *list,
 		void *add_item,
 		size_t add_item_size,
@@ -183,7 +184,7 @@ bool ttLibC_LinkedList_addBefore(
 
 // ややこしいので、この実装は後回しにしておく
 */
-bool ttLibC_LinkedList_remove(
+bool TT_VISIBILITY_DEFAULT ttLibC_LinkedList_remove(
 		ttLibC_LinkedList *list,
 		void *remove_item) {
 	ttLibC_LinkedList_ *linkedList_ = (ttLibC_LinkedList_ *)list;
@@ -229,7 +230,7 @@ bool ttLibC_LinkedList_remove(
 }
 
 // こっちの実装は簡単なので、すぐに実装しておく
-bool ttLibC_LinkedList_removeAll(ttLibC_LinkedList *list) {
+bool TT_VISIBILITY_DEFAULT ttLibC_LinkedList_removeAll(ttLibC_LinkedList *list) {
 	ttLibC_LinkedList_ *linkedList_ = (ttLibC_LinkedList_ *)list;
 	// listの中にあるnodeをすべて削除する。
 	// こっちは普通に前から順に削除していけばOK
@@ -246,7 +247,7 @@ bool ttLibC_LinkedList_removeAll(ttLibC_LinkedList *list) {
 }
 
 // 関数で見つけたものを応答する形にしたい。
-bool ttLibC_LinkedList_forEach(
+bool TT_VISIBILITY_DEFAULT ttLibC_LinkedList_forEach(
 		ttLibC_LinkedList *list,
 		ttLibC_LinkedListRefFunc callback,
 		void *ptr) {
@@ -265,7 +266,7 @@ bool ttLibC_LinkedList_forEach(
 	return true;
 }
 
-void ttLibC_LinkedList_close(ttLibC_LinkedList **list) {
+void TT_VISIBILITY_DEFAULT ttLibC_LinkedList_close(ttLibC_LinkedList **list) {
 	LOG_PRINT("close is called.");
 	ttLibC_LinkedList_ *target = (ttLibC_LinkedList_ *)*list;
 	if(target == NULL) {

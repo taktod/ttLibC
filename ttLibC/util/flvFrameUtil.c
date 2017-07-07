@@ -9,6 +9,7 @@
  */
 
 #include "flvFrameUtil.h"
+#include "../ttLibC_predef.h"
 #include "../_log.h"
 #include "../allocator.h"
 #include <string.h>
@@ -48,7 +49,7 @@ typedef ttLibC_Util_FlvFrameManager_ ttLibC_FlvFrameManager_;
  * make manager
  * @return ttLibC_FlvFrameManager object.
  */
-ttLibC_FlvFrameManager *ttLibC_FlvFrameManager_make() {
+ttLibC_FlvFrameManager TT_VISIBILITY_DEFAULT *ttLibC_FlvFrameManager_make() {
 	ttLibC_FlvFrameManager_ *manager = ttLibC_malloc(sizeof(ttLibC_FlvFrameManager_));
 	if(manager == NULL) {
 		return NULL;
@@ -169,7 +170,7 @@ static bool FlvFrameManager_readH264Binary(
 	return true;
 }
 
-bool ttLibC_FlvFrameManager_readVideoBinary(
+bool TT_VISIBILITY_DEFAULT ttLibC_FlvFrameManager_readVideoBinary(
 		ttLibC_FlvFrameManager *manager,
 		void *data,
 		size_t data_size,
@@ -259,7 +260,7 @@ bool ttLibC_FlvFrameManager_readVideoBinary(
 	return true;
 }
 
-bool ttLibC_FlvFrameManager_readAudioBinary(
+bool TT_VISIBILITY_DEFAULT ttLibC_FlvFrameManager_readAudioBinary(
 		ttLibC_FlvFrameManager *manager,
 		void *data,
 		size_t data_size,
@@ -544,7 +545,7 @@ static bool FlvFrameManager_getAudioCodecByte(
 	return true;
 }
 
-bool ttLibC_FlvFrameManager_getAacDsiData(
+bool TT_VISIBILITY_DEFAULT ttLibC_FlvFrameManager_getAacDsiData(
 		ttLibC_Frame *frame,
 		ttLibC_DynamicBuffer *buffer) {
 	if(frame->type != frameType_aac) {
@@ -717,7 +718,7 @@ static bool FlvFrameManager_getAudioData(
 	return true;
 }
 
-bool ttLibC_FlvFrameManager_getData(
+bool TT_VISIBILITY_DEFAULT ttLibC_FlvFrameManager_getData(
 		ttLibC_Frame *frame,
 		ttLibC_DynamicBuffer *buffer) {
 	switch(frame->type) {
@@ -752,7 +753,7 @@ bool ttLibC_FlvFrameManager_getData(
 	return true;
 }
 
-void ttLibC_FlvFrameManager_close(ttLibC_FlvFrameManager **manager) {
+void TT_VISIBILITY_DEFAULT ttLibC_FlvFrameManager_close(ttLibC_FlvFrameManager **manager) {
 	ttLibC_FlvFrameManager_ *target = (ttLibC_FlvFrameManager_ *)*manager;
 	if(target == NULL) {
 		return;

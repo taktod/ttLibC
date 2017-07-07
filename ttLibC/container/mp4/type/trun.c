@@ -9,6 +9,7 @@
  */
 
 #include "trun.h"
+#include "../../../ttLibC_predef.h"
 #include "../../../util/ioUtil.h"
 #include "../../../_log.h"
 #include "../../../util/hexUtil.h"

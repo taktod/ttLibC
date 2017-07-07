@@ -11,6 +11,7 @@
 #include "crc32Util.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include "../ttLibC_predef.h"
 #include "../allocator.h"
 
 /**
@@ -26,7 +27,7 @@ static const uint32_t POLYNOMINAL = 0x04C11DB7L;
  * memo:for mpegts initial_data 0xFFFFFFFFL
  * @return crc32 object.
  */
-ttLibC_Crc32 *ttLibC_Crc32_make(uint32_t initial_data) {
+ttLibC_Crc32 TT_VISIBILITY_DEFAULT *ttLibC_Crc32_make(uint32_t initial_data) {
 	ttLibC_Crc32 *crc32 = ttLibC_malloc(sizeof(ttLibC_Crc32));
 	if(crc32 == NULL) {
 		return NULL;
@@ -52,7 +53,7 @@ ttLibC_Crc32 *ttLibC_Crc32_make(uint32_t initial_data) {
  * @param crc32 crc32 object.
  * @param byte  update byte value.
  */
-void ttLibC_Crc32_update(ttLibC_Crc32 *crc32, uint8_t byte) {
+void TT_VISIBILITY_DEFAULT ttLibC_Crc32_update(ttLibC_Crc32 *crc32, uint8_t byte) {
 	if(crc32 == NULL) {
 		return;
 	}
@@ -63,7 +64,7 @@ void ttLibC_Crc32_update(ttLibC_Crc32 *crc32, uint8_t byte) {
  * get value
  * @param crc32
  */
-uint32_t ttLibC_Crc32_getValue(ttLibC_Crc32 *crc32) {
+uint32_t TT_VISIBILITY_DEFAULT ttLibC_Crc32_getValue(ttLibC_Crc32 *crc32) {
 	if(crc32 == NULL) {
 		return 0;
 	}
@@ -74,7 +75,7 @@ uint32_t ttLibC_Crc32_getValue(ttLibC_Crc32 *crc32) {
  * close crc32 object.
  * @param crc32
  */
-void ttLibC_Crc32_close(ttLibC_Crc32 **crc32) {
+void TT_VISIBILITY_DEFAULT ttLibC_Crc32_close(ttLibC_Crc32 **crc32) {
 	ttLibC_Crc32 *target = *crc32;
 	if(target == NULL) {
 		return;

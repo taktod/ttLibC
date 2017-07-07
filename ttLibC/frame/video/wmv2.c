@@ -9,6 +9,7 @@
  */
 
 #include "wmv2.h"
+#include "../../ttLibC_predef.h"
 #include "../../_log.h"
 
 typedef ttLibC_Frame_Video_Wmv2 ttLibC_Wmv2_;
@@ -25,7 +26,7 @@ typedef ttLibC_Frame_Video_Wmv2 ttLibC_Wmv2_;
  * @param pts           pts for wmv2 data.
  * @param timebase      timebase number for pts.
  */
-ttLibC_Wmv2 *ttLibC_Wmv2_make(
+ttLibC_Wmv2 TT_VISIBILITY_DEFAULT *ttLibC_Wmv2_make(
 		ttLibC_Wmv2 *prev_frame,
 		ttLibC_Video_Type video_type,
 		uint32_t width,
@@ -55,7 +56,7 @@ ttLibC_Wmv2 *ttLibC_Wmv2_make(
  * @param prev_frame reuse frame object.
  * @param src_frame  source of clone.
  */
-ttLibC_Wmv2 *ttLibC_Wmv2_clone(
+ttLibC_Wmv2 TT_VISIBILITY_DEFAULT *ttLibC_Wmv2_clone(
 		ttLibC_Wmv2 *prev_frame,
 		ttLibC_Wmv2 *src_frame) {
 	if(src_frame == NULL) {
@@ -89,7 +90,7 @@ ttLibC_Wmv2 *ttLibC_Wmv2_clone(
  * close frame
  * @param frame
  */
-void ttLibC_Wmv2_close(ttLibC_Wmv2 **frame) {
+void TT_VISIBILITY_DEFAULT ttLibC_Wmv2_close(ttLibC_Wmv2 **frame) {
 	ttLibC_Video_close_((ttLibC_Video **)frame);
 }
 

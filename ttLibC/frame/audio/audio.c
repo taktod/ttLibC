@@ -25,6 +25,7 @@
 #include "speex.h"
 #include "vorbis.h"
 
+#include "../../ttLibC_predef.h"
 #include "../../_log.h"
 #include "../../allocator.h"
 
@@ -42,7 +43,7 @@
  * @param pts           pts for data.
  * @param timebase      timebase for pts.
  */
-ttLibC_Audio *ttLibC_Audio_make(
+ttLibC_Audio TT_VISIBILITY_DEFAULT *ttLibC_Audio_make(
 		ttLibC_Audio *prev_frame,
 		size_t frame_size,
 		ttLibC_Frame_Type frame_type,
@@ -135,7 +136,7 @@ ttLibC_Audio *ttLibC_Audio_make(
  * @param prev_frame reuse frame object.
  * @param src_frame  source of clone.
  */
-ttLibC_Audio *ttLibC_Audio_clone(
+ttLibC_Audio TT_VISIBILITY_DEFAULT *ttLibC_Audio_clone(
 		ttLibC_Audio *prev_frame,
 		ttLibC_Audio *src_frame) {
 	if(src_frame == NULL) {
@@ -196,7 +197,7 @@ ttLibC_Audio *ttLibC_Audio_clone(
  * close frame(use internal)
  * @param frame
  */
-void ttLibC_Audio_close_(ttLibC_Audio **frame) {
+void TT_VISIBILITY_DEFAULT ttLibC_Audio_close_(ttLibC_Audio **frame) {
 	ttLibC_Audio *target = *frame;
 	if(target == NULL) {
 		return;
@@ -212,7 +213,7 @@ void ttLibC_Audio_close_(ttLibC_Audio **frame) {
  * close frame
  * @param frame
  */
-void ttLibC_Audio_close(ttLibC_Audio **frame) {
+void TT_VISIBILITY_DEFAULT ttLibC_Audio_close(ttLibC_Audio **frame) {
 	ttLibC_Audio *target = *frame;
 	if(target == NULL) {
 		return;

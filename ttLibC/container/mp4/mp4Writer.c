@@ -8,6 +8,7 @@
 #include "../mp4.h"
 #include "mp4Writer.h"
 
+#include "../../ttLibC_predef.h"
 #include "../../_log.h"
 #include "../../allocator.h"
 #include "../../util/hexUtil.h"
@@ -26,7 +27,7 @@
 #include <stdlib.h>
 
 // just support fmp4 only for now.
-ttLibC_Mp4Writer *ttLibC_Mp4Writer_make(
+ttLibC_Mp4Writer TT_VISIBILITY_DEFAULT *ttLibC_Mp4Writer_make(
 		ttLibC_Frame_Type* target_frame_types,
 		uint32_t types_num) {
 	return ttLibC_Mp4Writer_make_ex(
@@ -35,7 +36,7 @@ ttLibC_Mp4Writer *ttLibC_Mp4Writer_make(
 			5000); // 5sec for target_unit_duration.
 }
 
-ttLibC_Mp4Writer *ttLibC_Mp4Writer_make_ex(
+ttLibC_Mp4Writer TT_VISIBILITY_DEFAULT *ttLibC_Mp4Writer_make_ex(
 		ttLibC_Frame_Type* target_frame_types,
 		uint32_t types_num,
 		uint32_t unit_duration) {
@@ -1153,7 +1154,7 @@ static bool Mp4Writer_writeFromQueue(
 	return true;
 }
 
-bool ttLibC_Mp4Writer_write(
+bool TT_VISIBILITY_DEFAULT ttLibC_Mp4Writer_write(
 		ttLibC_Mp4Writer *writer,
 		ttLibC_Frame *frame,
 		ttLibC_ContainerWriteFunc callback,
@@ -1196,7 +1197,7 @@ static bool Mp4Writer_closeTracks(void *ptr, void *key, void *item) {
  * close writer
  * @param writer
  */
-void ttLibC_Mp4Writer_close(ttLibC_Mp4Writer **writer) {
+void TT_VISIBILITY_DEFAULT ttLibC_Mp4Writer_close(ttLibC_Mp4Writer **writer) {
 	ttLibC_Mp4Writer_ *target = (ttLibC_Mp4Writer_ *)*writer;
 	if(target == NULL) {
 		return;

@@ -10,6 +10,7 @@
 #ifdef __ENABLE_VORBIS_ENCODE__
 
 #include "vorbisEncoder.h"
+#include "../ttLibC_predef.h"
 #include "../allocator.h"
 #include "../_log.h"
 #include <vorbis/vorbisenc.h>
@@ -30,7 +31,7 @@ typedef struct ttLibC_Encoder_VorbisEncoder_{
 
 typedef ttLibC_Encoder_VorbisEncoder_ ttLibC_VorbisEncoder_;
 
-ttLibC_VorbisEncoder *ttLibC_VorbisEncoder_make(
+ttLibC_VorbisEncoder TT_VISIBILITY_DEFAULT *ttLibC_VorbisEncoder_make(
 		uint32_t sample_rate,
 		uint32_t channel_num) {
 	ttLibC_VorbisEncoder_ *encoder = ttLibC_malloc(sizeof(ttLibC_VorbisEncoder_));
@@ -67,7 +68,7 @@ void *ttLibC_VorbisEncoder_refNativeEncodeContext(ttLibC_VorbisEncoder *encoder)
 	return NULL;
 }
 
-bool ttLibC_VorbisEncoder_encode(
+bool TT_VISIBILITY_DEFAULT ttLibC_VorbisEncoder_encode(
 		ttLibC_VorbisEncoder *encoder,
 		ttLibC_Audio *pcm,
 		ttLibC_VorbisEncodeFunc callback,
@@ -272,7 +273,7 @@ bool ttLibC_VorbisEncoder_encode(
 	return true;
 }
 
-void ttLibC_VorbisEncoder_close(ttLibC_VorbisEncoder **encoder) {
+void TT_VISIBILITY_DEFAULT ttLibC_VorbisEncoder_close(ttLibC_VorbisEncoder **encoder) {
 	ttLibC_VorbisEncoder_ *target = (ttLibC_VorbisEncoder_ *)*encoder;
 	if(target == NULL) {
 		return;

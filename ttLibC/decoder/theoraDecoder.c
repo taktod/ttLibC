@@ -11,6 +11,7 @@
 #ifdef __ENABLE_THEORA__
 
 #include "theoraDecoder.h"
+#include "../ttLibC_predef.h"
 #include "../allocator.h"
 #include "../_log.h"
 #include <theora/theoradec.h>
@@ -32,11 +33,11 @@ typedef struct ttLibC_Decoder_TheoraDecoder_ {
 
 typedef ttLibC_Decoder_TheoraDecoder_ ttLibC_TheoraDecoder_;
 
-ttLibC_TheoraDecoder *ttLibC_TheoraDecoder_make() {
+ttLibC_TheoraDecoder TT_VISIBILITY_DEFAULT *ttLibC_TheoraDecoder_make() {
 	return ttLibC_TheoraDecoder_makeWithInfo(NULL);
 }
 
-ttLibC_TheoraDecoder *ttLibC_TheoraDecoder_makeWithInfo(void *ti) {
+ttLibC_TheoraDecoder TT_VISIBILITY_DEFAULT *ttLibC_TheoraDecoder_makeWithInfo(void *ti) {
 	ttLibC_TheoraDecoder_ *decoder = ttLibC_malloc(sizeof(ttLibC_TheoraDecoder_));
 	if(decoder == NULL) {
 		return NULL;
@@ -56,7 +57,7 @@ ttLibC_TheoraDecoder *ttLibC_TheoraDecoder_makeWithInfo(void *ti) {
 	return (ttLibC_TheoraDecoder *)decoder;
 }
 
-void *ttLibC_TheoraDecoder_refNativeDecodeContext(ttLibC_TheoraDecoder *decoder) {
+void TT_VISIBILITY_DEFAULT *ttLibC_TheoraDecoder_refNativeDecodeContext(ttLibC_TheoraDecoder *decoder) {
 	ttLibC_TheoraDecoder_ *decoder_ = (ttLibC_TheoraDecoder_ *)decoder;
 	if(decoder_ == NULL) {
 		return NULL;
@@ -64,7 +65,7 @@ void *ttLibC_TheoraDecoder_refNativeDecodeContext(ttLibC_TheoraDecoder *decoder)
 	return decoder_->ctx;
 }
 
-bool ttLibC_TheoraDecoder_decode(
+bool TT_VISIBILITY_DEFAULT ttLibC_TheoraDecoder_decode(
 		ttLibC_TheoraDecoder *decoder,
 		ttLibC_Theora *theora,
 		ttLibC_TheoraDecodeFunc callback,
@@ -181,7 +182,7 @@ bool ttLibC_TheoraDecoder_decode(
 	return true;
 }
 
-void ttLibC_TheoraDecoder_close(ttLibC_TheoraDecoder **decoder) {
+void TT_VISIBILITY_DEFAULT ttLibC_TheoraDecoder_close(ttLibC_TheoraDecoder **decoder) {
 	ttLibC_TheoraDecoder_ *target = (ttLibC_TheoraDecoder_ *)*decoder;
 	if(target == NULL) {
 		return;

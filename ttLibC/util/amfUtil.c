@@ -12,12 +12,13 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include "../ttLibC_predef.h"
 #include "../_log.h"
 #include "../allocator.h"
 #include "ioUtil.h"
 #include "hexUtil.h"
 
-ttLibC_Amf0Object *ttLibC_Amf0_map(ttLibC_Amf0MapObject *list) {
+ttLibC_Amf0Object TT_VISIBILITY_DEFAULT *ttLibC_Amf0_map(ttLibC_Amf0MapObject *list) {
 	uint32_t element_num = 0;
 	for(int i = 0;list[i].key != NULL && list[i].amf0_obj != NULL;++ i) {
 		++ element_num;
@@ -59,7 +60,7 @@ ttLibC_Amf0Object *ttLibC_Amf0_map(ttLibC_Amf0MapObject *list) {
 	return (ttLibC_Amf0Object *)obj;
 }
 
-ttLibC_Amf0Object *ttLibC_Amf0_object(ttLibC_Amf0MapObject *list) {
+ttLibC_Amf0Object TT_VISIBILITY_DEFAULT *ttLibC_Amf0_object(ttLibC_Amf0MapObject *list) {
 	uint32_t element_num = 0;
 	for(int i = 0;list[i].key != NULL && list[i].amf0_obj != NULL;++ i) {
 		++ element_num;
@@ -101,7 +102,7 @@ ttLibC_Amf0Object *ttLibC_Amf0_object(ttLibC_Amf0MapObject *list) {
 	return (ttLibC_Amf0Object *)obj;
 }
 
-ttLibC_Amf0Object *ttLibC_Amf0_number(double number) {
+ttLibC_Amf0Object TT_VISIBILITY_DEFAULT *ttLibC_Amf0_number(double number) {
 	ttLibC_Amf0Object *obj = ttLibC_malloc(sizeof(ttLibC_Amf0Object));
 	if(obj == NULL) {
 		return NULL;
@@ -114,7 +115,7 @@ ttLibC_Amf0Object *ttLibC_Amf0_number(double number) {
 	return (ttLibC_Amf0Object *)obj;
 }
 
-ttLibC_Amf0Object *ttLibC_Amf0_boolean(bool flag) {
+ttLibC_Amf0Object TT_VISIBILITY_DEFAULT *ttLibC_Amf0_boolean(bool flag) {
 	ttLibC_Amf0Object *obj = ttLibC_malloc(sizeof(ttLibC_Amf0Object));
 	if(obj == NULL) {
 		return NULL;
@@ -132,7 +133,7 @@ ttLibC_Amf0Object *ttLibC_Amf0_boolean(bool flag) {
 	return (ttLibC_Amf0Object *)obj;
 }
 
-ttLibC_Amf0Object *ttLibC_Amf0_null() {
+ttLibC_Amf0Object TT_VISIBILITY_DEFAULT *ttLibC_Amf0_null() {
 	ttLibC_Amf0Object *obj = ttLibC_malloc(sizeof(ttLibC_Amf0Object));
 	if(obj == NULL) {
 		return NULL;
@@ -143,7 +144,7 @@ ttLibC_Amf0Object *ttLibC_Amf0_null() {
 	return (ttLibC_Amf0Object *)obj;
 }
 
-ttLibC_Amf0Object *ttLibC_Amf0_string(const char *string) {
+ttLibC_Amf0Object TT_VISIBILITY_DEFAULT *ttLibC_Amf0_string(const char *string) {
 	ttLibC_Amf0Object *obj = ttLibC_malloc(sizeof(ttLibC_Amf0Object));
 	if(obj == NULL) {
 		return NULL;
@@ -164,7 +165,7 @@ ttLibC_Amf0Object *ttLibC_Amf0_string(const char *string) {
  * @param key
  * @return ttLibC_Amf0Object
  */
-ttLibC_Amf0Object *ttLibC_Amf0_getElement(ttLibC_Amf0Object *amf0_map, const char *key) {
+ttLibC_Amf0Object TT_VISIBILITY_DEFAULT *ttLibC_Amf0_getElement(ttLibC_Amf0Object *amf0_map, const char *key) {
 	switch(amf0_map->type) {
 	case amf0Type_Object:
 	case amf0Type_Map:
@@ -184,7 +185,7 @@ ttLibC_Amf0Object *ttLibC_Amf0_getElement(ttLibC_Amf0Object *amf0_map, const cha
 	return NULL;
 }
 
-ttLibC_Amf0Object *ttLibC_Amf0_clone(ttLibC_Amf0Object *src_obj) {
+ttLibC_Amf0Object TT_VISIBILITY_DEFAULT *ttLibC_Amf0_clone(ttLibC_Amf0Object *src_obj) {
 	switch(src_obj->type) {
 	case amf0Type_Number:
 		return ttLibC_Amf0_number(*((double*)src_obj->object));
@@ -433,7 +434,7 @@ static ttLibC_Amf0Object *Amf0_make(uint8_t *data, size_t data_size) {
 	return NULL;
 }
 
-bool ttLibC_Amf0_read(void *data, size_t data_size, ttLibC_Amf0ObjectReadFunc callback, void *ptr) {
+bool TT_VISIBILITY_DEFAULT ttLibC_Amf0_read(void *data, size_t data_size, ttLibC_Amf0ObjectReadFunc callback, void *ptr) {
 	uint8_t *dat = data;
 	while(data_size > 0) {
 		ttLibC_Amf0Object *amf0_obj = Amf0_make(dat, data_size);
@@ -584,14 +585,14 @@ static bool Amf0_write(ttLibC_Amf0Object *amf0_obj, ttLibC_AmfObjectWriteFunc ca
 	return true;
 }
 
-bool ttLibC_Amf0_write(ttLibC_Amf0Object *amf0_obj, ttLibC_AmfObjectWriteFunc callback, void *ptr) {
+bool TT_VISIBILITY_DEFAULT ttLibC_Amf0_write(ttLibC_Amf0Object *amf0_obj, ttLibC_AmfObjectWriteFunc callback, void *ptr) {
 	if(!Amf0_write(amf0_obj, callback, ptr)) {
 		return false;
 	}
 	return true;
 }
 
-void ttLibC_Amf0_close(ttLibC_Amf0Object **amf0_obj) {
+void TT_VISIBILITY_DEFAULT ttLibC_Amf0_close(ttLibC_Amf0Object **amf0_obj) {
 	ttLibC_Amf0Object *target = *amf0_obj;
 	if(target == NULL) {
 		return;

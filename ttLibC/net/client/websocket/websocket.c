@@ -12,6 +12,7 @@
 #include "../websocket.h"
 #include <string.h>
 
+#include "../../../ttLibC_predef.h"
 #include "../../../allocator.h"
 #include "../../../_log.h"
 #include "../../tetty.h"
@@ -26,7 +27,7 @@
  * @param address  target websocket server address. ex:) ws://localhost:8080/test
  * @return ttLibC_WebSocket object.
  */
-ttLibC_WebSocket *ttLibC_WebSocket_make(const char *address) {
+ttLibC_WebSocket TT_VISIBILITY_DEFAULT *ttLibC_WebSocket_make(const char *address) {
 	// make struct object.
 	ttLibC_WebSocket_ *socket = ttLibC_malloc(sizeof(ttLibC_WebSocket_));
 	if(socket == NULL) {
@@ -100,7 +101,7 @@ ttLibC_WebSocket *ttLibC_WebSocket_make(const char *address) {
  * @param wait_interval interval in micro sec.
  * @return true:success false:error
  */
-bool ttLibC_WebSocket_update(
+bool TT_VISIBILITY_DEFAULT ttLibC_WebSocket_update(
 		ttLibC_WebSocket *socket,
 		uint32_t wait_interval) {
 	ttLibC_WebSocket_ *socket_ = (ttLibC_WebSocket_ *)socket;
@@ -120,7 +121,7 @@ bool ttLibC_WebSocket_update(
  * @param socket
  * @param message
  */
-void ttLibC_WebSocket_sendText(
+void TT_VISIBILITY_DEFAULT ttLibC_WebSocket_sendText(
 		ttLibC_WebSocket *socket,
 		const char *message) {
 	ttLibC_WebSocket__sendMessage(
@@ -136,7 +137,7 @@ void ttLibC_WebSocket_sendText(
  * @param data
  * @param data_size
  */
-void ttLibC_WebSocket_sendBinary(
+void TT_VISIBILITY_DEFAULT ttLibC_WebSocket_sendBinary(
 		ttLibC_WebSocket *socket,
 		void *data,
 		size_t data_size) {
@@ -246,7 +247,7 @@ void ttLibC_WebSocket__sendMessage(
 	ttLibC_TettyBootstrap_channels_flush(socket_->bootstrap);
 }
 
-void ttLibC_WebSocket_close(ttLibC_WebSocket **socket) {
+void TT_VISIBILITY_DEFAULT ttLibC_WebSocket_close(ttLibC_WebSocket **socket) {
 	ttLibC_WebSocket_ *target = (ttLibC_WebSocket_ *)*socket;
 	if(target == NULL) {
 		return;

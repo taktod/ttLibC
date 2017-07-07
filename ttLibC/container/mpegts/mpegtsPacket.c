@@ -14,6 +14,7 @@
 #include "type/pmt.h"
 #include "type/sdt.h"
 #include <stdlib.h>
+#include "../../ttLibC_predef.h"
 #include "../../_log.h"
 #include "../../allocator.h"
 #include "../../frame/frame.h"
@@ -51,7 +52,7 @@ ttLibC_MpegtsPacket *ttLibC_MpegtsPacket_make(
 	return mpegts_packet;
 }
 
-bool ttLibC_Mpegts_getFrame(
+bool TT_VISIBILITY_DEFAULT ttLibC_Mpegts_getFrame(
 		ttLibC_Mpegts *mpegts,
 		ttLibC_getFrameFunc callback,
 		void *ptr) {
@@ -164,7 +165,7 @@ bool ttLibC_MpegtsPacket_loadProgramPacketHeader(
 	return true;
 }
 
-void ttLibC_Mpegts_close(ttLibC_Mpegts **mpegts) {
+void TT_VISIBILITY_DEFAULT ttLibC_Mpegts_close(ttLibC_Mpegts **mpegts) {
 	ttLibC_MpegtsPacket_close((ttLibC_MpegtsPacket **)mpegts);
 }
 

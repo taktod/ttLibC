@@ -10,6 +10,7 @@
 #ifdef __ENABLE_THEORA__
 
 #include "theoraEncoder.h"
+#include "../ttLibC_predef.h"
 #include "../allocator.h"
 #include "../_log.h"
 #include <theora/theoraenc.h>
@@ -33,7 +34,7 @@ typedef ttLibC_Encoder_TheoraEncoder_ ttLibC_TheoraEncoder_;
 /**
  * make theora encoder.
  */
-ttLibC_TheoraEncoder *ttLibC_TheoraEncoder_make(
+ttLibC_TheoraEncoder TT_VISIBILITY_DEFAULT *ttLibC_TheoraEncoder_make(
 		uint32_t width,
 		uint32_t height) {
 	return ttLibC_TheoraEncoder_make_ex(width, height, 0, 320000, 15);
@@ -48,7 +49,7 @@ ttLibC_TheoraEncoder *ttLibC_TheoraEncoder_make(
  * @param key_frame_interval 1 - 31
  * @return theoraEncoder object.
  */
-ttLibC_TheoraEncoder *ttLibC_TheoraEncoder_make_ex(
+ttLibC_TheoraEncoder TT_VISIBILITY_DEFAULT *ttLibC_TheoraEncoder_make_ex(
 		uint32_t width,
 		uint32_t height,
 		uint32_t quality,
@@ -76,7 +77,7 @@ ttLibC_TheoraEncoder *ttLibC_TheoraEncoder_make_ex(
 	return encoder;
 }
 
-ttLibC_TheoraEncoder *ttLibC_TheoraEncoder_makeWithInfo(void *ti) {
+ttLibC_TheoraEncoder TT_VISIBILITY_DEFAULT *ttLibC_TheoraEncoder_makeWithInfo(void *ti) {
 	ttLibC_TheoraEncoder_ *encoder = ttLibC_malloc(sizeof(ttLibC_TheoraEncoder_));
 	if(encoder == NULL) {
 		return NULL;
@@ -102,7 +103,7 @@ ttLibC_TheoraEncoder *ttLibC_TheoraEncoder_makeWithInfo(void *ti) {
 	return (ttLibC_TheoraEncoder *)encoder;
 }
 
-void *ttLibC_TheoraEncoder_refNativeEncodeContext(ttLibC_TheoraEncoder *encoder) {
+void TT_VISIBILITY_DEFAULT *ttLibC_TheoraEncoder_refNativeEncodeContext(ttLibC_TheoraEncoder *encoder) {
 	ttLibC_TheoraEncoder_ *encoder_ = (ttLibC_TheoraEncoder_ *)encoder;
 	if(encoder_ == NULL) {
 		return NULL;
@@ -110,7 +111,7 @@ void *ttLibC_TheoraEncoder_refNativeEncodeContext(ttLibC_TheoraEncoder *encoder)
 	return encoder_->ctx;
 }
 
-bool ttLibC_TheoraEncoder_encode(
+bool TT_VISIBILITY_DEFAULT ttLibC_TheoraEncoder_encode(
 		ttLibC_TheoraEncoder *encoder,
 		ttLibC_Yuv420 *yuv420,
 		ttLibC_TheoraEncodeFunc callback,
@@ -199,7 +200,7 @@ bool ttLibC_TheoraEncoder_encode(
 	return true;
 }
 
-void ttLibC_TheoraEncoder_close(ttLibC_TheoraEncoder **encoder) {
+void TT_VISIBILITY_DEFAULT ttLibC_TheoraEncoder_close(ttLibC_TheoraEncoder **encoder) {
 	ttLibC_TheoraEncoder_ *target = (ttLibC_TheoraEncoder_ *)*encoder;
 	if(target == NULL) {
 		return;

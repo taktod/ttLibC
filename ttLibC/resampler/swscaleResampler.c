@@ -9,6 +9,7 @@
 
 #include "swscaleResampler.h"
 #include <libswscale/swscale.h>
+#include "../ttLibC_predef.h"
 #include "../allocator.h"
 #include "../_log.h"
 
@@ -135,7 +136,7 @@ static bool SwscaleResampler_setupDataStride(
 	return true;
 }
 
-ttLibC_SwscaleResampler *ttLibC_SwscaleResampler_make(
+ttLibC_SwscaleResampler TT_VISIBILITY_DEFAULT *ttLibC_SwscaleResampler_make(
 		ttLibC_Frame_Type            input_frame_type,
 		uint32_t                     input_sub_type,
 		uint32_t                     input_width,
@@ -246,7 +247,7 @@ ttLibC_SwscaleResampler *ttLibC_SwscaleResampler_make(
 	return (ttLibC_SwscaleResampler *)resampler;
 }
 
-bool ttLibC_SwscaleResampler_resample(
+bool TT_VISIBILITY_DEFAULT ttLibC_SwscaleResampler_resample(
 		ttLibC_SwscaleResampler *resampler,
 		ttLibC_Frame *frame,
 		ttLibC_getSwscaleFrameFunc callback,
@@ -298,7 +299,7 @@ bool ttLibC_SwscaleResampler_resample(
 	return true;
 }
 
-void ttLibC_SwscaleResampler_close(ttLibC_SwscaleResampler **resampler) {
+void TT_VISIBILITY_DEFAULT ttLibC_SwscaleResampler_close(ttLibC_SwscaleResampler **resampler) {
 	ttLibC_SwscaleResampler_ *target = (ttLibC_SwscaleResampler_ *)*resampler;
 	if(target == NULL) {
 		return;

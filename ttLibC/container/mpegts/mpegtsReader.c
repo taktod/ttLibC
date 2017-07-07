@@ -10,6 +10,7 @@
 
 #include "mpegtsReader.h"
 #include "../mpegts.h"
+#include "../../ttLibC_predef.h"
 #include "../../_log.h"
 #include "../../allocator.h"
 #include "../../util/hexUtil.h"
@@ -21,7 +22,7 @@
 /*
  * make mpegtsReader.
  */
-ttLibC_MpegtsReader *ttLibC_MpegtsReader_make() {
+ttLibC_MpegtsReader TT_VISIBILITY_DEFAULT *ttLibC_MpegtsReader_make() {
 	ttLibC_MpegtsReader_ *reader = (ttLibC_MpegtsReader_ *)ttLibC_ContainerReader_make(containerType_mpegts, sizeof(ttLibC_MpegtsReader_));
 
 	reader->pat = NULL;
@@ -133,7 +134,7 @@ static bool MpegtsReader_read(
 	return result;
 }
 
-bool ttLibC_MpegtsReader_read(
+bool TT_VISIBILITY_DEFAULT ttLibC_MpegtsReader_read(
 		ttLibC_MpegtsReader *reader,
 		void *data,
 		size_t data_size,
@@ -177,7 +178,7 @@ static bool MpegtsReader_closePes(void *ptr, void *key, void *item) {
 	return true;
 }
 
-void ttLibC_MpegtsReader_close(ttLibC_MpegtsReader **reader) {
+void TT_VISIBILITY_DEFAULT ttLibC_MpegtsReader_close(ttLibC_MpegtsReader **reader) {
 	ttLibC_MpegtsReader_ *target = (ttLibC_MpegtsReader_ *)*reader;
 	if(target == NULL) {
 		return;

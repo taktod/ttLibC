@@ -9,6 +9,7 @@
  */
 
 #include "theora.h"
+#include "../../ttLibC_predef.h"
 #include "../../_log.h"
 #include "../../util/byteUtil.h"
 #include "../../util/ioUtil.h"
@@ -27,7 +28,7 @@ typedef ttLibC_Frame_Video_Theora ttLibC_Theora_;
  * @param pts           pts for theora data.
  * @param timebase      timebase number for pts.
  */
-ttLibC_Theora *ttLibC_Theora_make(
+ttLibC_Theora TT_VISIBILITY_DEFAULT *ttLibC_Theora_make(
 		ttLibC_Theora *prev_frame,
 		ttLibC_Theora_Type type,
 		uint32_t width,
@@ -76,7 +77,7 @@ ttLibC_Theora *ttLibC_Theora_make(
  * @param prev_frame reuse frame object.
  * @param src_frame  source of clone.
  */
-ttLibC_Theora *ttLibC_Theora_clone(
+ttLibC_Theora TT_VISIBILITY_DEFAULT *ttLibC_Theora_clone(
 		ttLibC_Theora *prev_frame,
 		ttLibC_Theora *src_frame) {
 	if(src_frame == NULL) {
@@ -112,7 +113,7 @@ ttLibC_Theora *ttLibC_Theora_clone(
  * @param data_size theora data size
  * @return true: key frame false:inter frame
  */
-bool ttLibC_Theora_isKey(void *data, size_t data_size) {
+bool TT_VISIBILITY_DEFAULT ttLibC_Theora_isKey(void *data, size_t data_size) {
 	if(data_size < 1) {
 		return false;
 	}
@@ -127,7 +128,7 @@ bool ttLibC_Theora_isKey(void *data, size_t data_size) {
  * @param data_size  theora data size
  * @return 0:error or width size.
  */
-uint32_t ttLibC_Theora_getWidth(ttLibC_Theora *prev_frame, uint8_t *data, size_t data_size) {
+uint32_t TT_VISIBILITY_DEFAULT ttLibC_Theora_getWidth(ttLibC_Theora *prev_frame, uint8_t *data, size_t data_size) {
 	/*
 	 * 1bit header flag 1:header 0:frame
 	 * 1bit intra flag 0:keyframe 1:inner frame.
@@ -190,7 +191,7 @@ uint32_t ttLibC_Theora_getWidth(ttLibC_Theora *prev_frame, uint8_t *data, size_t
  * @param data_size  theora data size
  * @return 0:error or height size.
  */
-uint32_t ttLibC_Theora_getHeight(ttLibC_Theora *prev_frame, uint8_t *data, size_t data_size) {
+uint32_t TT_VISIBILITY_DEFAULT ttLibC_Theora_getHeight(ttLibC_Theora *prev_frame, uint8_t *data, size_t data_size) {
 	if(prev_frame != NULL) {
 		return prev_frame->inherit_super.height;
 	}
@@ -234,7 +235,7 @@ uint32_t ttLibC_Theora_getHeight(ttLibC_Theora *prev_frame, uint8_t *data, size_
  * @param timebase      timebase for pts.
  * @return theora frame
  */
-ttLibC_Theora *ttLibC_Theora_getFrame(
+ttLibC_Theora TT_VISIBILITY_DEFAULT *ttLibC_Theora_getFrame(
 		ttLibC_Theora *prev_frame,
 		uint8_t *data,
 		size_t data_size,
@@ -285,6 +286,6 @@ ttLibC_Theora *ttLibC_Theora_getFrame(
  * close frame
  * @param frame
  */
-void ttLibC_Theora_close(ttLibC_Theora **frame) {
+void TT_VISIBILITY_DEFAULT ttLibC_Theora_close(ttLibC_Theora **frame) {
 	ttLibC_Video_close_((ttLibC_Video **)frame);
 }

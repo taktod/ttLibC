@@ -10,6 +10,7 @@
 #ifdef __ENABLE_SOCKET__
 
 #include "rtmpEncoder.h"
+#include "../../../../ttLibC_predef.h"
 #include "../../../../_log.h"
 #include "../../../../allocator.h"
 #include <string.h>

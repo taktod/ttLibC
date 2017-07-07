@@ -11,6 +11,7 @@
 #include "sdt.h"
 #include "../mpegtsPacket.h"
 
+#include "../../../ttLibC_predef.h"
 #include "../../../_log.h"
 #include "../../../allocator.h"
 #include "../../../util/hexUtil.h"

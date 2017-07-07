@@ -11,6 +11,7 @@
 #ifdef __ENABLE_WEBRTC__
 
 #include "mediaStream.h"
+#include "../../../ttLibC_predef.h"
 #include "../../../allocator.h"
 #include "../../../_log.h"
 #include "factory.h"

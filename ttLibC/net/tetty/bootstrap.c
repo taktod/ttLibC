@@ -16,6 +16,7 @@
 #include "../udp.h"
 #include "bootstrap.h"
 #include "promise.h"
+#include "../../ttLibC_predef.h"
 #include "../../allocator.h"
 #include "../../_log.h"
 #include <netdb.h>
@@ -25,7 +26,7 @@
  * make bootstrap object.
  * @return bootstrap object.
  */
-ttLibC_TettyBootstrap *ttLibC_TettyBootstrap_make() {
+ttLibC_TettyBootstrap TT_VISIBILITY_DEFAULT *ttLibC_TettyBootstrap_make() {
 	ttLibC_TettyBootstrap_ *bootstrap = ttLibC_malloc(sizeof(ttLibC_TettyBootstrap_));
 	bootstrap->channel_type = ChannelType_Tcp;
 	bootstrap->inherit_super.channel_type = ChannelType_Tcp;
@@ -50,7 +51,7 @@ ttLibC_TettyBootstrap *ttLibC_TettyBootstrap_make() {
  * @param channel_type channelType_Tcp or channelType_Udp(udp is not supported yet.)
  * @return true:success false:error
  */
-bool ttLibC_TettyBootstrap_channel(
+bool TT_VISIBILITY_DEFAULT ttLibC_TettyBootstrap_channel(
 		ttLibC_TettyBootstrap *bootstrap,
 		ttLibC_Tetty_ChannelType channel_type) {
 	ttLibC_TettyBootstrap_ *bootstrap_ = (ttLibC_TettyBootstrap_ *)bootstrap;
@@ -65,7 +66,7 @@ bool ttLibC_TettyBootstrap_channel(
  * @param option    target option type.
  * @return true:success false:error
  */
-bool ttLibC_TettyBootstrap_option(
+bool TT_VISIBILITY_DEFAULT ttLibC_TettyBootstrap_option(
 		ttLibC_TettyBootstrap *bootstrap,
 		ttLibC_Tetty_Option option) {
 	ttLibC_TettyBootstrap_ *bootstrap_ = (ttLibC_TettyBootstrap_ *)bootstrap;
@@ -89,7 +90,7 @@ bool ttLibC_TettyBootstrap_option(
  * @param port      port number for bind.
  * @return true:success false:error
  */
-bool ttLibC_TettyBootstrap_bind(
+bool TT_VISIBILITY_DEFAULT ttLibC_TettyBootstrap_bind(
 		ttLibC_TettyBootstrap *bootstrap,
 		int port) {
 	ttLibC_TettyBootstrap_ *bootstrap_ = (ttLibC_TettyBootstrap_ *)bootstrap;
@@ -148,7 +149,7 @@ bool ttLibC_TettyBootstrap_bind(
  * @param port      target port to connect
  * @return true:success false:error
  */
-bool ttLibC_TettyBootstrap_connect(
+bool TT_VISIBILITY_DEFAULT ttLibC_TettyBootstrap_connect(
 		ttLibC_TettyBootstrap *bootstrap,
 		const char *host,
 		int port) {
@@ -227,7 +228,7 @@ static bool TettyBootstrap_checkFdMaxValue(void *ptr, void *item) {
  * @param bootstrap bootstrap object.
  * @return true:new client_connection is established false:usual work.
  */
-bool ttLibC_TettyBootstrap_update(
+bool TT_VISIBILITY_DEFAULT ttLibC_TettyBootstrap_update(
 		ttLibC_TettyBootstrap *bootstrap,
 		uint32_t wait_interval) {
 	ttLibC_TettyBootstrap_ *bootstrap_ = (ttLibC_TettyBootstrap_ *)bootstrap;
@@ -358,7 +359,7 @@ static bool TettyBootstrap_closeEach(void *ptr, void *item) {
  * close server socket.
  * @param bootstrap bootstrap object.
  */
-void ttLibC_TettyBootstrap_closeServer(ttLibC_TettyBootstrap *bootstrap) {
+void TT_VISIBILITY_DEFAULT ttLibC_TettyBootstrap_closeServer(ttLibC_TettyBootstrap *bootstrap) {
 	ttLibC_TettyBootstrap_ *bootstrap_ = (ttLibC_TettyBootstrap_ *)bootstrap;
 	if(bootstrap_->socket_info != NULL) {
 		// remove from fdset.
@@ -384,7 +385,7 @@ void ttLibC_TettyBootstrap_closeServer(ttLibC_TettyBootstrap *bootstrap) {
  * close all client socket.
  * @param bootstrap bootstrap object.
  */
-void ttLibC_TettyBootstrap_closeClients(ttLibC_TettyBootstrap *bootstrap) {
+void TT_VISIBILITY_DEFAULT ttLibC_TettyBootstrap_closeClients(ttLibC_TettyBootstrap *bootstrap) {
 	ttLibC_TettyBootstrap_ *bootstrap_ = (ttLibC_TettyBootstrap_ *)bootstrap;
 	if(bootstrap_->tcp_client_info_list != NULL) {
 		ttLibC_StlList_forEach(bootstrap_->tcp_client_info_list, TettyBootstrap_closeEach, bootstrap_);
@@ -395,7 +396,7 @@ void ttLibC_TettyBootstrap_closeClients(ttLibC_TettyBootstrap *bootstrap) {
  * close all
  * @param bootstrap bootstrap object.
  */
-void ttLibC_TettyBootstrap_close(ttLibC_TettyBootstrap **bootstrap) {
+void TT_VISIBILITY_DEFAULT ttLibC_TettyBootstrap_close(ttLibC_TettyBootstrap **bootstrap) {
 	ttLibC_TettyBootstrap_ *target = (ttLibC_TettyBootstrap_ *)*bootstrap;
 	if(target == NULL) {
 		return;
@@ -420,7 +421,7 @@ void ttLibC_TettyBootstrap_close(ttLibC_TettyBootstrap **bootstrap) {
  * @param bootstrap       bootstrap object.
  * @param channel_handler use def channel_handler object.
  */
-void ttLibC_TettyBootstrap_pipeline_addLast(
+void TT_VISIBILITY_DEFAULT ttLibC_TettyBootstrap_pipeline_addLast(
 		ttLibC_TettyBootstrap *bootstrap,
 		ttLibC_TettyChannelHandler *channel_handler) {
 	ttLibC_TettyBootstrap_ *bootstrap_ = (ttLibC_TettyBootstrap_ *)bootstrap;
@@ -432,7 +433,7 @@ void ttLibC_TettyBootstrap_pipeline_addLast(
  * @param bootstrap       bootstrap object.
  * @param channel_handler use def channel_handler object.
  */
-void ttLibC_TettyBootstrap_pipeline_remove(
+void TT_VISIBILITY_DEFAULT ttLibC_TettyBootstrap_pipeline_remove(
 		ttLibC_TettyBootstrap *bootstrap,
 		ttLibC_TettyChannelHandler *channel_handler) {
 	ttLibC_TettyBootstrap_ *bootstrap_ = (ttLibC_TettyBootstrap_ *)bootstrap;
@@ -452,7 +453,7 @@ static bool TettyBootstrap_pipeline_each_fireUserEventTriggered_callback(void *p
  * @param data      passing data
  * @param data_size passing data_size
  */
-tetty_errornum ttLibC_TettyBootstrap_pipeline_fireUserEventTriggered(
+tetty_errornum TT_VISIBILITY_DEFAULT ttLibC_TettyBootstrap_pipeline_fireUserEventTriggered(
 		ttLibC_TettyBootstrap *bootstrap,
 		ttLibC_SocketInfo *socket_info,
 		void *data,
@@ -484,7 +485,7 @@ tetty_errornum ttLibC_TettyBootstrap_pipeline_fireUserEventTriggered(
  * @param data_size
  * @return errornum
  */
-tetty_errornum ttLibC_TettyBootstrap_channels_write(
+tetty_errornum TT_VISIBILITY_DEFAULT ttLibC_TettyBootstrap_channels_write(
 		ttLibC_TettyBootstrap *bootstrap,
 		void *data,
 		size_t data_size) {
@@ -515,7 +516,7 @@ static bool TettyBootstrap_channelEach_write_callback(void *ptr, void *item) {
  * @param data_size
  * @return errornum
  */
-tetty_errornum ttLibC_TettyBootstrap_channelEach_write(
+tetty_errornum TT_VISIBILITY_DEFAULT ttLibC_TettyBootstrap_channelEach_write(
 		ttLibC_TettyBootstrap *bootstrap,
 		void *data,
 		size_t data_size) {
@@ -553,7 +554,7 @@ tetty_errornum ttLibC_TettyBootstrap_channels_flush(ttLibC_TettyBootstrap *boots
 	return 0;
 }
 
-tetty_errornum ttLibC_TettyBootstrap_channels_writeAndFlush(
+tetty_errornum TT_VISIBILITY_DEFAULT ttLibC_TettyBootstrap_channels_writeAndFlush(
 		ttLibC_TettyBootstrap *bootstrap,
 		void *data,
 		size_t data_size) {
@@ -565,7 +566,7 @@ tetty_errornum ttLibC_TettyBootstrap_channels_writeAndFlush(
 	return error_num;
 }
 
-tetty_errornum ttLibC_TettyBootstrap_channelEach_writeAndFlush(
+tetty_errornum TT_VISIBILITY_DEFAULT ttLibC_TettyBootstrap_channelEach_writeAndFlush(
 		ttLibC_TettyBootstrap *bootstrap,
 		void *data,
 		size_t data_size) {
@@ -582,7 +583,7 @@ tetty_errornum ttLibC_TettyBootstrap_channelEach_writeAndFlush(
  * make promise
  * @param bootstrap
  */
-ttLibC_TettyPromise *ttLibC_TettyBootstrap_makePromise(ttLibC_TettyBootstrap *bootstrap) {
+ttLibC_TettyPromise TT_VISIBILITY_DEFAULT *ttLibC_TettyBootstrap_makePromise(ttLibC_TettyBootstrap *bootstrap) {
 	if(bootstrap->error_number != 0) {
 		return NULL;
 	}
@@ -594,7 +595,7 @@ ttLibC_TettyPromise *ttLibC_TettyBootstrap_makePromise(ttLibC_TettyBootstrap *bo
  * @param bootstrap
  * @return future
  */
-ttLibC_TettyFuture *ttLibC_TettyBootstrap_closeFuture(ttLibC_TettyBootstrap *bootstrap) {
+ttLibC_TettyFuture TT_VISIBILITY_DEFAULT *ttLibC_TettyBootstrap_closeFuture(ttLibC_TettyBootstrap *bootstrap) {
 	ttLibC_TettyBootstrap_ *bootstrap_ = (ttLibC_TettyBootstrap_ *)bootstrap;
 	ttLibC_TettyPromise_ *future = (ttLibC_TettyPromise_ *)ttLibC_TettyPromise_make_(bootstrap);
 	future->promise_type = PromiseType_Future;

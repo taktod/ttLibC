@@ -10,6 +10,7 @@
 
 #include "mkvWriter.h"
 
+#include "../../ttLibC_predef.h"
 #include "../../_log.h"
 #include "../../allocator.h"
 #include "../../util/hexUtil.h"
@@ -33,7 +34,7 @@
 
 #include <stdlib.h>
 
-ttLibC_MkvWriter *ttLibC_MkvWriter_make(
+ttLibC_MkvWriter TT_VISIBILITY_DEFAULT *ttLibC_MkvWriter_make(
 		ttLibC_Frame_Type* target_frame_types,
 		uint32_t types_num) {
 	return ttLibC_MkvWriter_make_ex(
@@ -42,7 +43,7 @@ ttLibC_MkvWriter *ttLibC_MkvWriter_make(
 			5000); // 5sec for target_unit_duration
 }
 
-ttLibC_MkvWriter *ttLibC_MkvWriter_make_ex(
+ttLibC_MkvWriter TT_VISIBILITY_DEFAULT *ttLibC_MkvWriter_make_ex(
 		ttLibC_Frame_Type* target_frame_types,
 		uint32_t types_num,
 		uint32_t unit_duration) {
@@ -1013,7 +1014,7 @@ static bool MkvWriter_writeFromQueue(
 	return true;
 }
 
-bool ttLibC_MkvWriter_write(
+bool TT_VISIBILITY_DEFAULT ttLibC_MkvWriter_write(
 		ttLibC_MkvWriter *writer,
 		ttLibC_Frame *frame,
 		ttLibC_ContainerWriteFunc callback,
@@ -1034,7 +1035,7 @@ bool ttLibC_MkvWriter_write(
 	return MkvWriter_writeFromQueue((ttLibC_ContainerWriter_ *)writer);
 }
 
-void ttLibC_MkvWriter_close(ttLibC_MkvWriter **writer) {
+void TT_VISIBILITY_DEFAULT ttLibC_MkvWriter_close(ttLibC_MkvWriter **writer) {
 	ttLibC_ContainerWriter_ *target = (ttLibC_ContainerWriter_ *)*writer;
 	if(target == NULL) {
 		return;

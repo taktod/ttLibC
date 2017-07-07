@@ -11,6 +11,7 @@
 #ifdef __ENABLE_OPENH264__
 
 #include "openh264Encoder.h"
+#include "../ttLibC_predef.h"
 #include "../_log.h"
 #include "../allocator.h"
 #include "../util/dynamicBufferUtil.h"
@@ -458,7 +459,7 @@ extern "C" {
 /*
  * call make for c code
  */
-ttLibC_Openh264Encoder *ttLibC_Openh264Encoder_make(
+ttLibC_Openh264Encoder TT_VISIBILITY_DEFAULT *ttLibC_Openh264Encoder_make(
 		uint32_t width,
 		uint32_t height) {
 	SEncParamExt paramExt;
@@ -469,7 +470,7 @@ ttLibC_Openh264Encoder *ttLibC_Openh264Encoder_make(
 /*
  * call make for c code
  */
-ttLibC_Openh264Encoder *ttLibC_Openh264Encoder_make_ex(
+ttLibC_Openh264Encoder TT_VISIBILITY_DEFAULT *ttLibC_Openh264Encoder_make_ex(
 		uint32_t width,
 		uint32_t height,
 		uint32_t max_quantizer,
@@ -486,7 +487,7 @@ ttLibC_Openh264Encoder *ttLibC_Openh264Encoder_make_ex(
 	return Openh264Encoder_make(&paramExt);
 }
 
-void ttLibC_Openh264Encoder_getDefaultSEncParamExt(
+void TT_VISIBILITY_DEFAULT ttLibC_Openh264Encoder_getDefaultSEncParamExt(
 		void *paramExt,
 		uint32_t width,
 		uint32_t height) {
@@ -571,14 +572,14 @@ void ttLibC_Openh264Encoder_getDefaultSEncParamExt(
 	pParamExt->bIsLosslessLink            = false;
 }
 
-ttLibC_Openh264Encoder *ttLibC_Openh264Encoder_makeWithSEncParamExt(void *paramExt) {
+ttLibC_Openh264Encoder TT_VISIBILITY_DEFAULT *ttLibC_Openh264Encoder_makeWithSEncParamExt(void *paramExt) {
 	return Openh264Encoder_make((SEncParamExt *)paramExt);
 }
 
 /*
  * call encode for c code
  */
-bool ttLibC_Openh264Encoder_encode(
+bool TT_VISIBILITY_DEFAULT ttLibC_Openh264Encoder_encode(
 		ttLibC_Openh264Encoder* encoder,
 		ttLibC_Yuv420 *yuv420,
 		ttLibC_Openh264EncodeFunc callback,
@@ -592,7 +593,7 @@ bool ttLibC_Openh264Encoder_encode(
  * @param encoder openh264 encoder object.
  * @return ISVCEncoder pointer.
  */
-void *ttLibC_Openh264Encoder_refNativeEncoder(ttLibC_Openh264Encoder *encoder) {
+void TT_VISIBILITY_DEFAULT *ttLibC_Openh264Encoder_refNativeEncoder(ttLibC_Openh264Encoder *encoder) {
 	ttLibC_Openh264Encoder_ *encoder_ = (ttLibC_Openh264Encoder_ *)encoder;
 	return encoder_->encoder;
 }
@@ -603,7 +604,7 @@ void *ttLibC_Openh264Encoder_refNativeEncoder(ttLibC_Openh264Encoder *encoder) {
  * @param interval
  * @return true / false
  */
-bool ttLibC_Openh264Encoder_setIDRInterval(
+bool TT_VISIBILITY_DEFAULT ttLibC_Openh264Encoder_setIDRInterval(
 		ttLibC_Openh264Encoder *encoder,
 		int32_t interval) {
 	ttLibC_Openh264Encoder_ *encoder_ = (ttLibC_Openh264Encoder_ *)encoder;
@@ -628,7 +629,7 @@ bool ttLibC_Openh264Encoder_setIDRInterval(
  * force next encode picture will be key frame(sliceIDR).
  * @param
  */
-bool ttLibC_Openh264Encoder_forceNextKeyFrame(ttLibC_Openh264Encoder *encoder) {
+bool TT_VISIBILITY_DEFAULT ttLibC_Openh264Encoder_forceNextKeyFrame(ttLibC_Openh264Encoder *encoder) {
 	ttLibC_Openh264Encoder_ *encoder_ = (ttLibC_Openh264Encoder_ *)encoder;
 	int iIDRPeriod  = 1;
 	encoder_->idr_interval_count = 1;
@@ -636,7 +637,7 @@ bool ttLibC_Openh264Encoder_forceNextKeyFrame(ttLibC_Openh264Encoder *encoder) {
 	return true;
 }
 
-bool ttLibC_Openh264Encoder_setRCMode(
+bool TT_VISIBILITY_DEFAULT ttLibC_Openh264Encoder_setRCMode(
 		ttLibC_Openh264Encoder *encoder,
 		ttLibC_Openh264Encoder_RCType rcType) {
 	ttLibC_Openh264Encoder_ *encoder_ = (ttLibC_Openh264Encoder_ *)encoder;
@@ -667,7 +668,7 @@ bool ttLibC_Openh264Encoder_setRCMode(
 	return true;
 }
 
-bool ttLibC_Openh264Encoder_setReduceMode(
+bool TT_VISIBILITY_DEFAULT ttLibC_Openh264Encoder_setReduceMode(
 		ttLibC_Openh264Encoder *encoder,
 		bool reduce_mode_flag) {
 	ttLibC_Openh264Encoder_ *encoder_ = (ttLibC_Openh264Encoder_ *)encoder;
@@ -682,14 +683,14 @@ bool ttLibC_Openh264Encoder_setReduceMode(
 /*
  * call close for c code
  */
-void ttLibC_Openh264Encoder_close(ttLibC_Openh264Encoder **encoder) {
+void TT_VISIBILITY_DEFAULT ttLibC_Openh264Encoder_close(ttLibC_Openh264Encoder **encoder) {
 	Openh264Encoder_close(encoder);
 }
 
 /**
  * parse param with c string.
  */
-bool ttLibC_Openh264Encoder_paramParse(void *paramExt, const char *name, const char *value) {
+bool TT_VISIBILITY_DEFAULT ttLibC_Openh264Encoder_paramParse(void *paramExt, const char *name, const char *value) {
 	char *end = NULL;
 	SEncParamExt *pExt = (SEncParamExt *)paramExt;
 #define OPT(str)	else if(!strcmp(name, str))
@@ -909,7 +910,7 @@ bool ttLibC_Openh264Encoder_paramParse(void *paramExt, const char *name, const c
 #undef SetB
 	return true;
 }
-bool ttLibC_Openh264Encoder_spatialParamParse(void *paramExt, uint32_t id, const char *name, const char *value) {
+bool TT_VISIBILITY_DEFAULT ttLibC_Openh264Encoder_spatialParamParse(void *paramExt, uint32_t id, const char *name, const char *value) {
 	if(id >= MAX_SPATIAL_LAYER_NUM) {
 		return false;
 	}

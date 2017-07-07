@@ -16,6 +16,7 @@
 #include <opencv2/core/version.hpp>
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
+#include "../ttLibC_predef.h"
 #include "../_log.h"
 #include "../allocator.h"
 #include "../ttLibC_common.h"
@@ -40,7 +41,7 @@ typedef ttLibC_Util_OpencvUtil_CvWindow_ ttLibC_CvWindow_;
  * @param name window name
  * @return ttLibC_CvWindow object
  */
-ttLibC_CvWindow *ttLibC_CvWindow_make(const char *name) {
+ttLibC_CvWindow TT_VISIBILITY_DEFAULT *ttLibC_CvWindow_make(const char *name) {
 	ttLibC_CvWindow_ *window = ttLibC_malloc(sizeof(ttLibC_CvWindow_));
 	if(window == NULL) {
 		ERR_PRINT("failed to allocate memory for window.");
@@ -58,7 +59,7 @@ ttLibC_CvWindow *ttLibC_CvWindow_make(const char *name) {
 	window->inherit_super.error = Error_noError;
 	return (ttLibC_CvWindow* )window;
 }
-ttLibC_CvWindow *ttLibC_CvWindow_makeWindow(const char *name) {
+ttLibC_CvWindow TT_VISIBILITY_DEFAULT *ttLibC_CvWindow_makeWindow(const char *name) {
 	return ttLibC_CvWindow_make(name);
 }
 
@@ -67,7 +68,7 @@ ttLibC_CvWindow *ttLibC_CvWindow_makeWindow(const char *name) {
  * @param window target window
  * @param bgr    target bgr image.
  */
-void ttLibC_CvWindow_showBgr(ttLibC_CvWindow *window, ttLibC_Bgr *bgr) {
+void TT_VISIBILITY_DEFAULT ttLibC_CvWindow_showBgr(ttLibC_CvWindow *window, ttLibC_Bgr *bgr) {
 	if(window == NULL) {
 		return;
 	}
@@ -149,7 +150,7 @@ void ttLibC_CvWindow_showBgr(ttLibC_CvWindow *window, ttLibC_Bgr *bgr) {
  * close cvWindow
  * @param window target window
  */
-void ttLibC_CvWindow_close(ttLibC_CvWindow **window) {
+void TT_VISIBILITY_DEFAULT ttLibC_CvWindow_close(ttLibC_CvWindow **window) {
 	if(*window == NULL) {
 		return;
 	}
@@ -171,7 +172,7 @@ void ttLibC_CvWindow_close(ttLibC_CvWindow **window) {
  * @param delay waiting interval in mili sec.
  * @return pressed key code.
  */
-uint8_t ttLibC_CvWindow_waitForKeyInput(int delay) {
+uint8_t TT_VISIBILITY_DEFAULT ttLibC_CvWindow_waitForKeyInput(int delay) {
 	return cvWaitKey(delay);
 }
 
@@ -197,7 +198,7 @@ typedef ttLibC_Util_OpencvUtil_CvCapture_ ttLibC_CvCapture_;
  * @param height     capture height
  * @return ttLibC_CvCapture object.
  */
-ttLibC_CvCapture *ttLibC_CvCapture_make(
+ttLibC_CvCapture TT_VISIBILITY_DEFAULT *ttLibC_CvCapture_make(
 		uint32_t camera_num,
 		uint32_t width,
 		uint32_t height) {
@@ -226,7 +227,7 @@ ttLibC_CvCapture *ttLibC_CvCapture_make(
 #endif
 }
 
-ttLibC_CvCapture *ttLibC_CvCapture_makeCapture(
+ttLibC_CvCapture TT_VISIBILITY_DEFAULT *ttLibC_CvCapture_makeCapture(
 		uint32_t camera_num,
 		uint32_t width,
 		uint32_t height) {
@@ -238,7 +239,7 @@ ttLibC_CvCapture *ttLibC_CvCapture_makeCapture(
  * @param capture    CvCapture object.
  * @param prev_frame reuse bgr frame.
  */
-ttLibC_Bgr *ttLibC_CvCapture_queryFrame(ttLibC_CvCapture *capture, ttLibC_Bgr *prev_frame) {
+ttLibC_Bgr TT_VISIBILITY_DEFAULT *ttLibC_CvCapture_queryFrame(ttLibC_CvCapture *capture, ttLibC_Bgr *prev_frame) {
 #if (CV_MAJOR_VERSION == 2) || ((CV_MAJOR_VERSION >= 3) && defined(HAVE_OPENCV_VIDEOIO))
 	if(capture == NULL) {
 		return NULL;
@@ -279,7 +280,7 @@ ttLibC_Bgr *ttLibC_CvCapture_queryFrame(ttLibC_CvCapture *capture, ttLibC_Bgr *p
  * close cvCapture
  * @param capture target capture.
  */
-void ttLibC_CvCapture_close(ttLibC_CvCapture **capture) {
+void TT_VISIBILITY_DEFAULT ttLibC_CvCapture_close(ttLibC_CvCapture **capture) {
 #if (CV_MAJOR_VERSION == 2) || ((CV_MAJOR_VERSION >= 3) && defined(HAVE_OPENCV_VIDEOIO))
 	if(*capture == NULL) {
 		return;

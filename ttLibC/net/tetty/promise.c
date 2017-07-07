@@ -10,6 +10,7 @@
 #ifdef __ENABLE_SOCKET__
 
 #include "promise.h"
+#include "../../ttLibC_predef.h"
 #include "../../allocator.h"
 #include "../../_log.h"
 
@@ -48,7 +49,7 @@ ttLibC_TettyPromise *ttLibC_TettyPromise_make_(ttLibC_TettyBootstrap *bootstrap)
  * await until promise/future done
  * @param promise target promise/future
  */
-void ttLibC_TettyPromise_await(ttLibC_TettyPromise *promise) {
+void TT_VISIBILITY_DEFAULT ttLibC_TettyPromise_await(ttLibC_TettyPromise *promise) {
 	ttLibC_TettyPromise_* promise_ = (ttLibC_TettyPromise_ *)promise;
 	if(promise == NULL) {
 		return;
@@ -83,7 +84,7 @@ void ttLibC_TettyPromise_await(ttLibC_TettyPromise *promise) {
  * @param promise         target promise/future.
  * @param timeout_milisec timeout time length in mili sec.
  */
-void ttLibC_TettyPromise_awaitFor(ttLibC_TettyPromise *promise, uint32_t timeout_milisec) {
+void TT_VISIBILITY_DEFAULT ttLibC_TettyPromise_awaitFor(ttLibC_TettyPromise *promise, uint32_t timeout_milisec) {
 	ttLibC_TettyPromise_* promise_ = (ttLibC_TettyPromise_ *)promise;
 	if(promise == NULL) {
 		return;
@@ -141,7 +142,7 @@ void ttLibC_TettyPromise_awaitFor(ttLibC_TettyPromise *promise, uint32_t timeout
  * @param promise  target promise/future
  * @param listener listener
  */
-void ttLibC_TettyPromise_addEventListener(
+void TT_VISIBILITY_DEFAULT ttLibC_TettyPromise_addEventListener(
 		ttLibC_TettyPromise *promise,
 		ttLibC_TettyPromiseListener listener,
 		void *ptr) {
@@ -158,7 +159,7 @@ void ttLibC_TettyPromise_addEventListener(
  * @param promise target promise
  * @param data    sub information.
  */
-void ttLibC_TettyPromise_setSuccess(
+void TT_VISIBILITY_DEFAULT ttLibC_TettyPromise_setSuccess(
 		ttLibC_TettyPromise *promise,
 		void *data) {
 	ttLibC_TettyPromise_ *promise_ = (ttLibC_TettyPromise_ *)promise;
@@ -185,7 +186,7 @@ void ttLibC_TettyPromise_setSuccess(
  * @param promise target promise
  * @param data    sub information.
  */
-void ttLibC_TettyPromise_setFailure(ttLibC_TettyPromise *promise, void *data) {
+void TT_VISIBILITY_DEFAULT ttLibC_TettyPromise_setFailure(ttLibC_TettyPromise *promise, void *data) {
 	ttLibC_TettyPromise_ *promise_ = (ttLibC_TettyPromise_ *)promise;
 	if(promise == NULL) {
 		return;
@@ -209,7 +210,7 @@ void ttLibC_TettyPromise_setFailure(ttLibC_TettyPromise *promise, void *data) {
  * close generated promise
  * @param promise target promise
  */
-void ttLibC_TettyPromise_close(ttLibC_TettyPromise **promise) {
+void TT_VISIBILITY_DEFAULT ttLibC_TettyPromise_close(ttLibC_TettyPromise **promise) {
 	ttLibC_TettyPromise_ *target = (ttLibC_TettyPromise_ *)*promise;
 	if(target == NULL) {
 		return;

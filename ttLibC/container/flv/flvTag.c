@@ -15,6 +15,7 @@
 
 #include "flvTag.h"
 #include <stdlib.h>
+#include "../../ttLibC_predef.h"
 #include "../../_log.h"
 #include "../../allocator.h"
 
@@ -48,7 +49,7 @@ ttLibC_FlvTag *ttLibC_FlvTag_make(
 	return tag;
 }
 
-bool ttLibC_Flv_getFrame(ttLibC_Flv *flv, ttLibC_getFrameFunc callback, void *ptr) {
+bool TT_VISIBILITY_DEFAULT ttLibC_Flv_getFrame(ttLibC_Flv *flv, ttLibC_getFrameFunc callback, void *ptr) {
 	switch(flv->type) {
 	case FlvType_audio:
 		return ttLibC_FlvAudioTag_getFrame((ttLibC_FlvAudioTag *)flv, callback, ptr);
@@ -62,7 +63,7 @@ bool ttLibC_Flv_getFrame(ttLibC_Flv *flv, ttLibC_getFrameFunc callback, void *pt
 	return true;
 }
 
-void ttLibC_Flv_close(ttLibC_Flv **flv) {
+void TT_VISIBILITY_DEFAULT ttLibC_Flv_close(ttLibC_Flv **flv) {
 	ttLibC_FlvTag_close((ttLibC_FlvTag **)flv);
 }
 

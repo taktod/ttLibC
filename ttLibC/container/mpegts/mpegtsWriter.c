@@ -19,13 +19,14 @@
 #include "../../frame/audio/mp3.h"
 #include "../../frame/audio/aac.h"
 
+#include "../../ttLibC_predef.h"
 #include "../../_log.h"
 #include "../../allocator.h"
 #include "../../util/hexUtil.h"
 
 #include <stdlib.h>
 
-ttLibC_MpegtsWriter *ttLibC_MpegtsWriter_make(
+ttLibC_MpegtsWriter TT_VISIBILITY_DEFAULT *ttLibC_MpegtsWriter_make(
 		ttLibC_Frame_Type *target_frame_types,
 		uint32_t types_num) {
 	return ttLibC_MpegtsWriter_make_ex(
@@ -34,7 +35,7 @@ ttLibC_MpegtsWriter *ttLibC_MpegtsWriter_make(
 			180000);
 }
 
-ttLibC_MpegtsWriter *ttLibC_MpegtsWriter_make_ex(
+ttLibC_MpegtsWriter TT_VISIBILITY_DEFAULT *ttLibC_MpegtsWriter_make_ex(
 		ttLibC_Frame_Type *target_frame_types,
 		uint32_t types_num,
 		uint32_t unit_duration) {
@@ -69,7 +70,7 @@ ttLibC_MpegtsWriter *ttLibC_MpegtsWriter_make_ex(
  * @param margin
  * @node default is 20000
  */
-bool ttLibC_MpegtsWriter_updateDtsMargin(
+bool TT_VISIBILITY_DEFAULT ttLibC_MpegtsWriter_updateDtsMargin(
 		ttLibC_MpegtsWriter *writer,
 		uint64_t margin) {
 	ttLibC_MpegtsWriter_ *writer_ = (ttLibC_MpegtsWriter_ *)writer;
@@ -392,7 +393,7 @@ static bool MpegtsWriter_writeFromQueue(
 	return true;
 }
 
-bool ttLibC_MpegtsWriter_write(
+bool TT_VISIBILITY_DEFAULT ttLibC_MpegtsWriter_write(
 		ttLibC_MpegtsWriter *writer,
 		ttLibC_Frame *frame,
 		ttLibC_ContainerWriteFunc callback,
@@ -418,7 +419,7 @@ bool ttLibC_MpegtsWriter_write(
 	return MpegtsWriter_writeFromQueue(writer_);
 }
 
-bool ttLibC_MpegtsWriter_writeInfo(
+bool TT_VISIBILITY_DEFAULT ttLibC_MpegtsWriter_writeInfo(
 		ttLibC_MpegtsWriter *writer,
 		ttLibC_ContainerWriteFunc callback,
 		void *ptr) {
@@ -450,7 +451,7 @@ bool ttLibC_MpegtsWriter_writeInfo(
 	return true;
 }
 
-bool ttLibC_MpegtsWriter_setReduceMode(
+bool TT_VISIBILITY_DEFAULT ttLibC_MpegtsWriter_setReduceMode(
 		ttLibC_MpegtsWriter *writer,
 		bool reduce_mode_flag) {
 	ttLibC_MpegtsWriter_ *writer_ = (ttLibC_MpegtsWriter_ *)writer;
@@ -473,7 +474,7 @@ static bool MpegtsWriter_closeTracks(void *ptr, void *key, void *item) {
 	return true;
 }
 
-void ttLibC_MpegtsWriter_close(ttLibC_MpegtsWriter **writer) {
+void TT_VISIBILITY_DEFAULT ttLibC_MpegtsWriter_close(ttLibC_MpegtsWriter **writer) {
 	ttLibC_MpegtsWriter_ *target = (ttLibC_MpegtsWriter_ *)*writer;
 	if(target == NULL) {
 		return;

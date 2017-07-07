@@ -10,6 +10,7 @@
 
 #include "headerTag.h"
 
+#include "../../../ttLibC_predef.h"
 #include "../../../_log.h"
 #include "../../../util/ioUtil.h"
 #include "../../../util/hexUtil.h"

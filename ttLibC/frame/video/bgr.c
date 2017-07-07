@@ -12,6 +12,7 @@
 #include <stdlib.h>
 
 #include "bgr.h"
+#include "../../ttLibC_predef.h"
 #include "../../_log.h"
 #include "../../allocator.h"
 
@@ -29,7 +30,7 @@
  * @param timebase      timebase number for pts.
  * @return bgr object.
  */
-ttLibC_Bgr *ttLibC_Bgr_make(
+ttLibC_Bgr TT_VISIBILITY_DEFAULT *ttLibC_Bgr_make(
 		ttLibC_Bgr *prev_frame,
 		ttLibC_Bgr_Type type,
 		uint32_t width,
@@ -117,7 +118,7 @@ ttLibC_Bgr *ttLibC_Bgr_make(
  * @param prev_frame reuse frame object.
  * @param src_frame  source of clone.
  */
-ttLibC_Bgr *ttLibC_Bgr_clone(
+ttLibC_Bgr TT_VISIBILITY_DEFAULT *ttLibC_Bgr_clone(
 		ttLibC_Bgr *prev_frame,
 		ttLibC_Bgr *src_frame) {
 	if(src_frame == NULL) {
@@ -193,7 +194,7 @@ ttLibC_Bgr *ttLibC_Bgr_clone(
  * close frame
  * @param frame
  */
-void ttLibC_Bgr_close(ttLibC_Bgr **frame) {
+void TT_VISIBILITY_DEFAULT ttLibC_Bgr_close(ttLibC_Bgr **frame) {
 	ttLibC_Bgr *target = (*frame);
 	if(target == NULL) {
 		return;
@@ -209,7 +210,7 @@ void ttLibC_Bgr_close(ttLibC_Bgr **frame) {
 	*frame = NULL;
 }
 
-ttLibC_Bgr *ttLibC_Bgr_makeEmptyFrame(
+ttLibC_Bgr TT_VISIBILITY_DEFAULT *ttLibC_Bgr_makeEmptyFrame(
 		ttLibC_Bgr_Type sub_type,
 		uint32_t        width,
 		uint32_t        height) {

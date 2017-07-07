@@ -11,6 +11,7 @@
 #ifdef __ENABLE_WEBRTC__
 
 #include "peerConnection.h"
+#include "../../../ttLibC_predef.h"
 #include "../../../allocator.h"
 #include "factory.h"
 #include "mediaStream.h"

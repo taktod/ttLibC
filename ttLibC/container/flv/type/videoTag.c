@@ -10,6 +10,7 @@
 
 #include "videoTag.h"
 #include "../flvTag.h"
+#include "../../../ttLibC_predef.h"
 #include "../../../_log.h"
 #include "../../../frame/video/h264.h"
 #include "../../../frame/video/flv1.h"

@@ -10,6 +10,7 @@
 #ifdef __ENABLE_SOCKET__
 
 #include "rtmpMessage.h"
+#include "../../../../ttLibC_predef.h"
 #include "../../../../_log.h"
 #include "../rtmpStream.h"
 #include "acknowledgement.h"

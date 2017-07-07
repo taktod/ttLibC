@@ -30,6 +30,7 @@
 #include "../frame/audio/speex.h"
 #include "../frame/audio/vorbis.h"
 
+#include "../ttLibC_predef.h"
 #include "../_log.h"
 #include "../allocator.h"
 
@@ -125,7 +126,7 @@ ttLibC_Container *ttLibC_Container_make(
  * @param ptr       user def pointer object.
  * @return true:success false:error
  */
-bool ttLibC_Container_getFrame(
+bool TT_VISIBILITY_DEFAULT ttLibC_Container_getFrame(
 		ttLibC_Container *container,
 		ttLibC_getFrameFunc callback,
 		void *ptr) {
@@ -203,7 +204,7 @@ ttLibC_ContainerReader *ttLibC_ContainerReader_make(
 	return reader;
 }
 
-bool ttLibC_ContainerReader_read(
+bool TT_VISIBILITY_DEFAULT ttLibC_ContainerReader_read(
 		ttLibC_ContainerReader *reader,
 		void *data,
 		size_t data_size,
@@ -221,7 +222,7 @@ bool ttLibC_ContainerReader_read(
 /*
  * close container reader
  */
-void ttLibC_ContainerReader_close(ttLibC_ContainerReader **reader) {
+void TT_VISIBILITY_DEFAULT ttLibC_ContainerReader_close(ttLibC_ContainerReader **reader) {
 	ttLibC_ContainerReader *target = *reader;
 	if(target == NULL) {
 		return;
@@ -346,7 +347,7 @@ void ttLibC_ContainerWriter_close_(ttLibC_ContainerWriter_ **writer) {
 	*writer = NULL;
 }
 
-bool ttLibC_ContainerWriter_write(
+bool TT_VISIBILITY_DEFAULT ttLibC_ContainerWriter_write(
 		ttLibC_ContainerWriter *writer,
 		ttLibC_Frame *frame,
 		ttLibC_ContainerWriteFunc callback,
@@ -361,7 +362,7 @@ bool ttLibC_ContainerWriter_write(
 /*
  * close container writer
  */
-void ttLibC_ContainerWriter_close(ttLibC_ContainerWriter **writer) {
+void TT_VISIBILITY_DEFAULT ttLibC_ContainerWriter_close(ttLibC_ContainerWriter **writer) {
 	ttLibC_ContainerWriter *target = *writer;
 	if(target == NULL) {
 		return;

@@ -9,6 +9,7 @@
  */
 
 #include "misc.h"
+#include "../ttLibC_predef.h"
 #include "../_log.h"
 #include "../allocator.h"
 

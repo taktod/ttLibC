@@ -9,6 +9,7 @@
  */
 
 #include "dynamicBufferUtil.h"
+#include "../ttLibC_predef.h"
 #include "../allocator.h"
 #include <string.h>
 #include "../_log.h"
@@ -24,7 +25,7 @@ typedef struct {
 
 typedef ttLibC_Util_DynamicBuffer_ ttLibC_DynamicBuffer_;
 
-ttLibC_DynamicBuffer* ttLibC_DynamicBuffer_make() {
+ttLibC_DynamicBuffer TT_VISIBILITY_DEFAULT *ttLibC_DynamicBuffer_make() {
 	ttLibC_DynamicBuffer_ *buffer = ttLibC_malloc(sizeof(ttLibC_DynamicBuffer_));
 	if(buffer == NULL) {
 		return NULL;
@@ -39,7 +40,7 @@ ttLibC_DynamicBuffer* ttLibC_DynamicBuffer_make() {
 	return (ttLibC_DynamicBuffer *)buffer;
 }
 
-bool ttLibC_DynamicBuffer_append(
+bool TT_VISIBILITY_DEFAULT ttLibC_DynamicBuffer_append(
 		ttLibC_DynamicBuffer *buffer,
 		uint8_t *data,
 		size_t data_size) {
@@ -94,7 +95,7 @@ bool ttLibC_DynamicBuffer_append(
 	}
 }
 
-bool ttLibC_DynamicBuffer_markAsRead(ttLibC_DynamicBuffer *buffer, size_t read_size) {
+bool TT_VISIBILITY_DEFAULT ttLibC_DynamicBuffer_markAsRead(ttLibC_DynamicBuffer *buffer, size_t read_size) {
 	ttLibC_DynamicBuffer_ *buffer_ = (ttLibC_DynamicBuffer_ *)buffer;
 	if(buffer_ == NULL) {
 		return false;
@@ -108,7 +109,7 @@ bool ttLibC_DynamicBuffer_markAsRead(ttLibC_DynamicBuffer *buffer, size_t read_s
 	return true;
 }
 
-uint8_t *ttLibC_DynamicBuffer_refData(ttLibC_DynamicBuffer *buffer) {
+uint8_t TT_VISIBILITY_DEFAULT *ttLibC_DynamicBuffer_refData(ttLibC_DynamicBuffer *buffer) {
 	ttLibC_DynamicBuffer_ *buffer_ = (ttLibC_DynamicBuffer_ *)buffer;
 	if(buffer_ == NULL) {
 		return NULL;
@@ -116,7 +117,7 @@ uint8_t *ttLibC_DynamicBuffer_refData(ttLibC_DynamicBuffer *buffer) {
 	return buffer_->buffer + buffer_->read_pos;
 }
 
-size_t ttLibC_DynamicBuffer_refSize(ttLibC_DynamicBuffer *buffer) {
+size_t TT_VISIBILITY_DEFAULT ttLibC_DynamicBuffer_refSize(ttLibC_DynamicBuffer *buffer) {
 	ttLibC_DynamicBuffer_ *buffer_ = (ttLibC_DynamicBuffer_ *)buffer;
 	if(buffer_ == NULL) {
 		return 0;
@@ -124,7 +125,7 @@ size_t ttLibC_DynamicBuffer_refSize(ttLibC_DynamicBuffer *buffer) {
 	return buffer_->target_size - buffer_->read_pos;
 }
 
-bool ttLibC_DynamicBuffer_clear(ttLibC_DynamicBuffer *buffer) {
+bool TT_VISIBILITY_DEFAULT ttLibC_DynamicBuffer_clear(ttLibC_DynamicBuffer *buffer) {
 	ttLibC_DynamicBuffer_ *buffer_ = (ttLibC_DynamicBuffer_ *)buffer;
 	if(buffer_ == NULL) {
 		return false;
@@ -144,7 +145,7 @@ bool ttLibC_DynamicBuffer_clear(ttLibC_DynamicBuffer *buffer) {
 	return true;
 }
 
-bool ttLibC_DynamicBuffer_reset(ttLibC_DynamicBuffer *buffer) {
+bool TT_VISIBILITY_DEFAULT ttLibC_DynamicBuffer_reset(ttLibC_DynamicBuffer *buffer) {
 	ttLibC_DynamicBuffer_ *buffer_ = (ttLibC_DynamicBuffer_ *)buffer;
 	if(buffer_ == NULL) {
 		return false;
@@ -156,7 +157,7 @@ bool ttLibC_DynamicBuffer_reset(ttLibC_DynamicBuffer *buffer) {
 /**
  * set empty for writing buffer.
  */
-bool ttLibC_DynamicBuffer_empty(ttLibC_DynamicBuffer *buffer) {
+bool TT_VISIBILITY_DEFAULT ttLibC_DynamicBuffer_empty(ttLibC_DynamicBuffer *buffer) {
 	ttLibC_DynamicBuffer_ *buffer_ = (ttLibC_DynamicBuffer_ *)buffer;
 	if(buffer_ == NULL) {
 		return false;
@@ -167,7 +168,7 @@ bool ttLibC_DynamicBuffer_empty(ttLibC_DynamicBuffer *buffer) {
 	return true;
 }
 
-bool ttLibC_DynamicBuffer_alloc(
+bool TT_VISIBILITY_DEFAULT ttLibC_DynamicBuffer_alloc(
 		ttLibC_DynamicBuffer *buffer,
 		size_t size) {
 	ttLibC_DynamicBuffer_ *buffer_ = (ttLibC_DynamicBuffer_ *)buffer;
@@ -217,7 +218,7 @@ bool ttLibC_DynamicBuffer_alloc(
 	return true;
 }
 
-bool ttLibC_DynamicBuffer_write(
+bool TT_VISIBILITY_DEFAULT ttLibC_DynamicBuffer_write(
 		ttLibC_DynamicBuffer *buffer,
 		size_t write_pos,
 		uint8_t *data,
@@ -239,7 +240,7 @@ bool ttLibC_DynamicBuffer_write(
 	return true;
 }
 
-void ttLibC_DynamicBuffer_close(ttLibC_DynamicBuffer **buffer) {
+void TT_VISIBILITY_DEFAULT ttLibC_DynamicBuffer_close(ttLibC_DynamicBuffer **buffer) {
 	ttLibC_DynamicBuffer_ *target = (ttLibC_DynamicBuffer_ *)*buffer;
 	if(target == NULL) {
 		return;

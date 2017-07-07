@@ -8,6 +8,7 @@
  * @date   2015/12/18
  */
 
+#include "../ttLibC_predef.h"
 #include "stlMapUtil.h"
 
 #include <map>
@@ -117,11 +118,11 @@ static void StlMap_close(ttLibC_StlMap_ **map) {
 
 extern "C" {
 
-ttLibC_StlMap *ttLibC_StlMap_make() {
+ttLibC_StlMap TT_VISIBILITY_DEFAULT *ttLibC_StlMap_make() {
 	return (ttLibC_StlMap *)StlMap_make();
 }
 
-bool ttLibC_StlMap_put(
+bool TT_VISIBILITY_DEFAULT ttLibC_StlMap_put(
 		ttLibC_StlMap *map,
 		void *key,
 		void *item) {
@@ -132,7 +133,7 @@ bool ttLibC_StlMap_put(
 			item);
 }
 
-void *ttLibC_StlMap_get(
+void TT_VISIBILITY_DEFAULT *ttLibC_StlMap_get(
 		ttLibC_StlMap *map,
 		void *key) {
 	return StlMap_get(
@@ -140,7 +141,7 @@ void *ttLibC_StlMap_get(
 			key);
 }
 
-bool ttLibC_StlMap_remove(
+bool TT_VISIBILITY_DEFAULT ttLibC_StlMap_remove(
 		ttLibC_StlMap *map,
 		void *key) {
 	return StlMap_remove(
@@ -148,11 +149,11 @@ bool ttLibC_StlMap_remove(
 			key);
 }
 
-bool ttLibC_StlMap_removeAll(ttLibC_StlMap *map) {
+bool TT_VISIBILITY_DEFAULT ttLibC_StlMap_removeAll(ttLibC_StlMap *map) {
 	return StlMap_removeAll((ttLibC_StlMap_ *)map);
 }
 
-bool ttLibC_StlMap_forEach(
+bool TT_VISIBILITY_DEFAULT ttLibC_StlMap_forEach(
 		ttLibC_StlMap *map,
 		ttLibC_StlMapRefFunc callback,
 		void *ptr) {
@@ -162,7 +163,7 @@ bool ttLibC_StlMap_forEach(
 			ptr);
 }
 
-void ttLibC_StlMap_close(ttLibC_StlMap **map) {
+void TT_VISIBILITY_DEFAULT ttLibC_StlMap_close(ttLibC_StlMap **map) {
 	StlMap_close((ttLibC_StlMap_ **)map);
 }
 

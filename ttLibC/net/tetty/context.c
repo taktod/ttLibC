@@ -13,6 +13,7 @@
 #include "bootstrap.h"
 #include "../udp.h"
 #include "../tcp.h"
+#include "../../ttLibC_predef.h"
 #include "../../allocator.h"
 #include "../../_log.h"
 #include "../../util/hexUtil.h"
@@ -46,7 +47,7 @@ static void TettyContext_updateContextInfo(
  * @param data_size data object size.
  * @return error_num
  */
-tetty_errornum ttLibC_TettyContext_channel_write(
+tetty_errornum TT_VISIBILITY_DEFAULT ttLibC_TettyContext_channel_write(
 		ttLibC_TettyContext *ctx,
 		void *data,
 		size_t data_size) {
@@ -63,7 +64,7 @@ tetty_errornum ttLibC_TettyContext_channel_write(
 	return ctx_.error_no;
 }
 
-tetty_errornum ttLibC_TettyContext_channel_flush(ttLibC_TettyContext *ctx) {
+tetty_errornum TT_VISIBILITY_DEFAULT ttLibC_TettyContext_channel_flush(ttLibC_TettyContext *ctx) {
 	/*
 	 * ttLibC_TettyContext_super_writeEach can expand the write target from ctx to bootstrap.
 	 * in this case, target for flush must be all connection of bootstrap.
@@ -73,7 +74,7 @@ tetty_errornum ttLibC_TettyContext_channel_flush(ttLibC_TettyContext *ctx) {
 	return error_num;
 }
 
-tetty_errornum ttLibC_TettyContext_channel_writeAndFlush(
+tetty_errornum TT_VISIBILITY_DEFAULT ttLibC_TettyContext_channel_writeAndFlush(
 		ttLibC_TettyContext *ctx,
 		void *data,
 		size_t data_size) {
@@ -90,7 +91,7 @@ tetty_errornum ttLibC_TettyContext_channel_writeAndFlush(
  * @param ctx target context
  * @return error_num
  */
-tetty_errornum ttLibC_TettyContext_close(
+tetty_errornum TT_VISIBILITY_DEFAULT ttLibC_TettyContext_close(
 		ttLibC_TettyContext *ctx) {
 	ttLibC_TettyContext_ *ctx_ = (ttLibC_TettyContext_ *)ctx;
 	if(ctx_->bootstrap->channel_type == ChannelType_Udp) {
@@ -246,7 +247,7 @@ static bool TettyContext_callNextForEach(void *ptr, void *item) {
  * @param ctx
  * @return errornum
  */
-tetty_errornum ttLibC_TettyContext_super_channelActive(ttLibC_TettyContext *ctx) {
+tetty_errornum TT_VISIBILITY_DEFAULT ttLibC_TettyContext_super_channelActive(ttLibC_TettyContext *ctx) {
 	ttLibC_TettyContext_ *ctx_ = (ttLibC_TettyContext_ *)ctx;
 	ctx_->command = Command_channelActive;
 	ttLibC_TettyBootstrap_ *bootstrap = (ttLibC_TettyBootstrap_ *)ctx_->bootstrap;
@@ -265,7 +266,7 @@ tetty_errornum ttLibC_TettyContext_super_channelActive(ttLibC_TettyContext *ctx)
  * @param ctx
  * @return errornum
  */
-tetty_errornum ttLibC_TettyContext_super_channelInactive(ttLibC_TettyContext *ctx) {
+tetty_errornum TT_VISIBILITY_DEFAULT ttLibC_TettyContext_super_channelInactive(ttLibC_TettyContext *ctx) {
 	ttLibC_TettyContext_ *ctx_ = (ttLibC_TettyContext_ *)ctx;
 	ctx_->command = Command_channelInactive;
 	ttLibC_TettyBootstrap_ *bootstrap = (ttLibC_TettyBootstrap_ *)ctx_->bootstrap;
@@ -286,7 +287,7 @@ tetty_errornum ttLibC_TettyContext_super_channelInactive(ttLibC_TettyContext *ct
  * @param data_size
  * @return errornum
  */
-tetty_errornum ttLibC_TettyContext_super_channelRead(ttLibC_TettyContext *ctx, void *data, size_t data_size) {
+tetty_errornum TT_VISIBILITY_DEFAULT ttLibC_TettyContext_super_channelRead(ttLibC_TettyContext *ctx, void *data, size_t data_size) {
 	ttLibC_TettyContext_ *ctx_ = (ttLibC_TettyContext_ *)ctx;
 	ctx_->command = Command_channelRead;
 	ttLibC_TettyBootstrap_ *bootstrap = (ttLibC_TettyBootstrap_ *)ctx_->bootstrap;
@@ -307,7 +308,7 @@ tetty_errornum ttLibC_TettyContext_super_channelRead(ttLibC_TettyContext *ctx, v
  * @param ctx
  * @return errornum
  */
-tetty_errornum ttLibC_TettyContext_super_bind(ttLibC_TettyContext *ctx) {
+tetty_errornum TT_VISIBILITY_DEFAULT ttLibC_TettyContext_super_bind(ttLibC_TettyContext *ctx) {
 	ttLibC_TettyContext_ *ctx_ = (ttLibC_TettyContext_ *)ctx;
 	ctx_->command = Command_bind;
 	ttLibC_TettyBootstrap_ *bootstrap = (ttLibC_TettyBootstrap_ *)ctx_->bootstrap;
@@ -326,7 +327,7 @@ tetty_errornum ttLibC_TettyContext_super_bind(ttLibC_TettyContext *ctx) {
  * @param ctx
  * @return errornum
  */
-tetty_errornum ttLibC_TettyContext_super_connect(ttLibC_TettyContext *ctx) {
+tetty_errornum TT_VISIBILITY_DEFAULT ttLibC_TettyContext_super_connect(ttLibC_TettyContext *ctx) {
 	ttLibC_TettyContext_ *ctx_ = (ttLibC_TettyContext_ *)ctx;
 	ctx_->command = Command_connect;
 	ttLibC_TettyBootstrap_ *bootstrap = (ttLibC_TettyBootstrap_ *)ctx_->bootstrap;
@@ -345,7 +346,7 @@ tetty_errornum ttLibC_TettyContext_super_connect(ttLibC_TettyContext *ctx) {
  * @param ctx
  * @return errornum
  */
-tetty_errornum ttLibC_TettyContext_super_disconnect(ttLibC_TettyContext *ctx) {
+tetty_errornum TT_VISIBILITY_DEFAULT ttLibC_TettyContext_super_disconnect(ttLibC_TettyContext *ctx) {
 	ttLibC_TettyContext_ *ctx_ = (ttLibC_TettyContext_ *)ctx;
 	ctx_->command = Command_disconnect;
 	ttLibC_TettyBootstrap_ *bootstrap = (ttLibC_TettyBootstrap_ *)ctx_->bootstrap;
@@ -364,7 +365,7 @@ tetty_errornum ttLibC_TettyContext_super_disconnect(ttLibC_TettyContext *ctx) {
  * @param ctx
  * @return errornum
  */
-tetty_errornum ttLibC_TettyContext_super_close(ttLibC_TettyContext *ctx) {
+tetty_errornum TT_VISIBILITY_DEFAULT ttLibC_TettyContext_super_close(ttLibC_TettyContext *ctx) {
 	ttLibC_TettyContext_ *ctx_ = (ttLibC_TettyContext_ *)ctx;
 	ctx_->command = Command_close;
 	ttLibC_TettyBootstrap_ *bootstrap = (ttLibC_TettyBootstrap_ *)ctx_->bootstrap;
@@ -385,7 +386,7 @@ tetty_errornum ttLibC_TettyContext_super_close(ttLibC_TettyContext *ctx) {
  * @param data_size
  * @return error_no
  */
-tetty_errornum ttLibC_TettyContext_super_userEventTriggered(
+tetty_errornum TT_VISIBILITY_DEFAULT ttLibC_TettyContext_super_userEventTriggered(
 		ttLibC_TettyContext *ctx,
 		void *data,
 		size_t data_size) {
@@ -437,7 +438,7 @@ static bool TettyContext_super_write_callback(void *ptr, void *item) {
  * @param data_size
  * @return errornum
  */
-tetty_errornum ttLibC_TettyContext_super_write(ttLibC_TettyContext *ctx, void *data, size_t data_size) {
+tetty_errornum TT_VISIBILITY_DEFAULT ttLibC_TettyContext_super_write(ttLibC_TettyContext *ctx, void *data, size_t data_size) {
 	ttLibC_TettyContext_ *ctx_ = (ttLibC_TettyContext_ *)ctx;
 	ctx_->command = Command_write;
 	ttLibC_TettyBootstrap_ *bootstrap = (ttLibC_TettyBootstrap_ *)ctx_->bootstrap;
@@ -486,7 +487,7 @@ tetty_errornum ttLibC_TettyContext_super_write(ttLibC_TettyContext *ctx, void *d
  * @param ctx
  * @return errornum
  */
-tetty_errornum ttLibC_TettyContext_super_flush(ttLibC_TettyContext *ctx) {
+tetty_errornum TT_VISIBILITY_DEFAULT ttLibC_TettyContext_super_flush(ttLibC_TettyContext *ctx) {
 	ttLibC_TettyContext_ *ctx_ = (ttLibC_TettyContext_ *)ctx;
 	ctx_->command = Command_flush;
 	ttLibC_TettyBootstrap_ *bootstrap = (ttLibC_TettyBootstrap_ *)ctx_->bootstrap;
@@ -505,7 +506,7 @@ tetty_errornum ttLibC_TettyContext_super_flush(ttLibC_TettyContext *ctx) {
  * @param ctx
  * @param error_no
  */
-void ttLibC_TettyContext_super_exceptionCaught(ttLibC_TettyContext *ctx, tetty_errornum error_no) {
+void TT_VISIBILITY_DEFAULT ttLibC_TettyContext_super_exceptionCaught(ttLibC_TettyContext *ctx, tetty_errornum error_no) {
 	(void)ctx;
 	(void)error_no;
 }
@@ -541,7 +542,7 @@ static bool TettyContext_super_writeEach_callback(void *ptr, void *item) {
  * @param data_size
  * @return error_no
  */
-tetty_errornum ttLibC_TettyContext_super_writeEach(ttLibC_TettyContext *ctx, void *data, size_t data_size) {
+tetty_errornum TT_VISIBILITY_DEFAULT ttLibC_TettyContext_super_writeEach(ttLibC_TettyContext *ctx, void *data, size_t data_size) {
 	ttLibC_TettyContext_ *ctx_ = (ttLibC_TettyContext_ *)ctx;
 	ttLibC_TettyBootstrap_ *bootstrap = (ttLibC_TettyBootstrap_ *)ctx_->bootstrap;
 	if(bootstrap == NULL) {

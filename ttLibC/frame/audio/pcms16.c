@@ -12,6 +12,7 @@
 #include <stdlib.h>
 
 #include "pcms16.h"
+#include "../../ttLibC_predef.h"
 #include "../../_log.h"
 #include "../../allocator.h"
 
@@ -33,7 +34,7 @@
  * @param timebase      timebase number for pts.
  * @return pcms16 object.
  */
-ttLibC_PcmS16 *ttLibC_PcmS16_make(
+ttLibC_PcmS16 TT_VISIBILITY_DEFAULT *ttLibC_PcmS16_make(
 		ttLibC_PcmS16 *prev_frame,
 		ttLibC_PcmS16_Type type,
 		uint32_t sample_rate,
@@ -274,7 +275,7 @@ static ttLibC_PcmS16 *PcmS16_cloneLittleEndianPlanar(
  * @param prev_frame reuse frame object.
  * @param src_frame  source of clone.
  */
-ttLibC_PcmS16 *ttLibC_PcmS16_clone(
+ttLibC_PcmS16 TT_VISIBILITY_DEFAULT *ttLibC_PcmS16_clone(
 		ttLibC_PcmS16 *prev_frame,
 		ttLibC_PcmS16 *src_frame) {
 	if(src_frame == NULL) {
@@ -315,7 +316,7 @@ ttLibC_PcmS16 *ttLibC_PcmS16_clone(
  * close frame
  * @param frame
  */
-void ttLibC_PcmS16_close(ttLibC_PcmS16 **frame) {
+void TT_VISIBILITY_DEFAULT ttLibC_PcmS16_close(ttLibC_PcmS16 **frame) {
 	ttLibC_PcmS16 *target = (*frame);
 	if(target == NULL) {
 		return;

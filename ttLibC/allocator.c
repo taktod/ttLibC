@@ -8,6 +8,7 @@
  * @date   2015/09/07
  */
 
+#include "ttLibC_predef.h"
 #include "log.h"
 
 #include "allocator.h"
@@ -33,7 +34,7 @@ typedef struct {
  * @param func_name caller func name
  * @return memory pointer
  */
-void *ttLibC_Allocator_malloc(size_t size, const char *file_name, int line, const char *func_name) {
+void TT_VISIBILITY_DEFAULT *ttLibC_Allocator_malloc(size_t size, const char *file_name, int line, const char *func_name) {
 	void *ptr = malloc(size);
 #if __DEBUG_FLAG__ == 1
 	int ret;
@@ -59,7 +60,7 @@ void *ttLibC_Allocator_malloc(size_t size, const char *file_name, int line, cons
  * @param func_name caller func name
  * @return memory pointer
  */
-void *ttLibC_Allocator_calloc(size_t n, size_t size, const char *file_name, int line, const char *func_name) {
+void TT_VISIBILITY_DEFAULT *ttLibC_Allocator_calloc(size_t n, size_t size, const char *file_name, int line, const char *func_name) {
 	void *ptr = calloc(n, size);
 #if __DEBUG_FLAG__ == 1
 	int ret;
@@ -80,7 +81,7 @@ void *ttLibC_Allocator_calloc(size_t n, size_t size, const char *file_name, int 
  * free with information
  * @param ptr memory pointer
  */
-void ttLibC_Allocator_free(void *ptr) {
+void TT_VISIBILITY_DEFAULT ttLibC_Allocator_free(void *ptr) {
 	if(ptr) {
 #if __DEBUG_FLAG__ == 1
 		if(ttLibC_Allocator_Table != NULL) {
@@ -97,7 +98,7 @@ void ttLibC_Allocator_free(void *ptr) {
  * initialize information table.
  * @return true:success false:error(ignore info collecting.)
  */
-bool ttLibC_Allocator_init() {
+bool TT_VISIBILITY_DEFAULT ttLibC_Allocator_init() {
 #if __DEBUG_FLAG__ == 1
 	if(ttLibC_Allocator_Table == NULL) {
 		ttLibC_Allocator_Table = kh_init(ttLibC_Allocator);
@@ -112,7 +113,7 @@ bool ttLibC_Allocator_init() {
  * dump current memory information.
  * @return total size of allocate.
  */
-size_t ttLibC_Allocator_dump() {
+size_t TT_VISIBILITY_DEFAULT ttLibC_Allocator_dump() {
 #if __DEBUG_FLAG__ == 1
 	if(ttLibC_Allocator_Table == NULL) {
 		return 0;
@@ -137,7 +138,7 @@ size_t ttLibC_Allocator_dump() {
 /*
  * close information table.
  */
-void ttLibC_Allocator_close() {
+void TT_VISIBILITY_DEFAULT ttLibC_Allocator_close() {
 #if __DEBUG_FLAG__ == 1
 	khiter_t it;
 	for(it = kh_begin(ttLibC_Allocator_Table);it != kh_end(ttLibC_Allocator_Table); ++ it) {

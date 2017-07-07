@@ -25,6 +25,7 @@
 #include <unistd.h>
 #include <stdbool.h>
 
+#include "../ttLibC_predef.h"
 #include "../_log.h"
 #include "../allocator.h"
 
@@ -46,7 +47,7 @@ typedef ttLibC_Util_HttpUtil_HttpClient_ ttLibC_HttpClient_;
  * @param wait_interval interval for each download.
  * @return http client object.
  */
-ttLibC_HttpClient *ttLibC_HttpClient_make(
+ttLibC_HttpClient TT_VISIBILITY_DEFAULT *ttLibC_HttpClient_make(
 		size_t buffer_size,
 		uint32_t wait_interval) {
 	ttLibC_HttpClient_ *client = (ttLibC_HttpClient_ *)ttLibC_malloc(sizeof(ttLibC_HttpClient_));
@@ -76,7 +77,7 @@ ttLibC_HttpClient *ttLibC_HttpClient_make(
  * @param callback       callback for download data.
  * @param ptr            user def data pointer.
  */
-void ttLibC_HttpClient_get(
+void TT_VISIBILITY_DEFAULT ttLibC_HttpClient_get(
 		ttLibC_HttpClient *client,
 		const char *target_address,
 		bool is_binary,
@@ -95,7 +96,7 @@ void ttLibC_HttpClient_get(
  * @param callback       callback for download data.
  * @param ptr            user def data pointer.
  */
-void ttLibC_HttpClient_getRange(
+void TT_VISIBILITY_DEFAULT ttLibC_HttpClient_getRange(
 		ttLibC_HttpClient *client,
 		const char *target_address,
 		size_t range_start,
@@ -269,7 +270,7 @@ void ttLibC_HttpClient_getRange(
  * close http client
  * @param client
  */
-void ttLibC_HttpClient_close(ttLibC_HttpClient **client) {
+void TT_VISIBILITY_DEFAULT ttLibC_HttpClient_close(ttLibC_HttpClient **client) {
 	ttLibC_HttpClient_ *target = (ttLibC_HttpClient_ *)*client;
 	if(target == NULL) {
 		return;

@@ -65,7 +65,7 @@ ttLibC_Mp3lameEncoder *ttLibC_Mp3lameEncoder_make(
 /**
  * function to make mp3lame encoder for vbr or abr, I'm planning to make later.
  */
-ttLibC_Mp3lameEncoder *ttLibC_Mp3lameEncoder_make_ex();
+//ttLibC_Mp3lameEncoder *ttLibC_Mp3lameEncoder_make_ex();
 
 /**
  * encode frame.
