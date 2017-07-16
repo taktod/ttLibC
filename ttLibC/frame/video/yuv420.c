@@ -465,8 +465,7 @@ ttLibC_Yuv420 TT_VISIBILITY_DEFAULT *ttLibC_Yuv420_makeEmptyFrame(
 	uint32_t y_stride = 0;
 	uint32_t u_stride = 0;
 	uint32_t v_stride = 0;
-	uintptr_t ptr = (uintptr_t)data;
-	y_data = (void *)(((ptr >> 4) + 1) << 4);
+	y_data = data;
 	switch(sub_type) {
 	case Yuv420Type_planar:
 		u_data = y_data + wh;

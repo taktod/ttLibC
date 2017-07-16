@@ -251,8 +251,7 @@ ttLibC_Bgr TT_VISIBILITY_DEFAULT *ttLibC_Bgr_makeEmptyFrame(
 		ttLibC_free(data);
 		return NULL;
 	}
-	uintptr_t ptr = (uintptr_t)data;
-	bgr->data = (void *)(((ptr >> 4) + 1) << 4);
+	bgr->data = data;
 	bgr->inherit_super.inherit_super.is_non_copy = false;
 	return bgr;
 }
