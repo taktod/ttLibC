@@ -92,7 +92,13 @@ int64_t ttLibC_TcpClient_read(
 		void * data,
 		size_t data_size);
 
-bool ttLibC_TcpClient_write(ttLibC_TcpClientInfo *client_info);
+bool ttLibC_TcpClient_write(
+	ttLibC_TcpClientInfo *client_info,
+	void *data,
+	size_t data_size);
+
+
+bool ttLibC_TcpClient_flush(ttLibC_TcpClientInfo *client_info);
 
 int ttLibC_TcpClient_setSockOpt(
 		ttLibC_TcpClientInfo *client_info,

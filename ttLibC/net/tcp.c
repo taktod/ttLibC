@@ -166,7 +166,17 @@ int64_t TT_VISIBILITY_DEFAULT ttLibC_TcpClient_read(
 	return read(client_info->inherit_super.socket, data, data_size);
 }
 
-bool TT_VISIBILITY_DEFAULT ttLibC_TcpClient_write(ttLibC_TcpClientInfo *client_info) {
+bool TT_VISIBILITY_DEFAULT ttLibC_TcpClient_write(
+		ttLibC_TcpClientInfo *client_info,
+		void *data,
+		size_t data_size) {
+	if(client_info->write_buffer == NULL) {
+		client_info->write_buffer = ttLibC_DynamicBuffer_make();
+	}
+	return ttLibC_DynamicBuffer_append(client_info->write_buffer, data, data_size);
+}
+
+bool TT_VISIBILITY_DEFAULT ttLibC_TcpClient_flush(ttLibC_TcpClientInfo *client_info) {
 	if(ttLibC_DynamicBuffer_refSize(client_info->write_buffer) == 0) {
 		return true;
 	}

@@ -176,7 +176,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_TettyBootstrap_connect(
 	// connect
 	if(ttLibC_TcpClient_connect(client_info) == -1) {
 		ERR_PRINT("failed to connect.");
-		ttLibC_free(client_info);
+		ttLibC_TcpClient_close(&client_info);
 		bootstrap->error_number = -4;
 		return false;
 	}
@@ -540,7 +540,7 @@ static bool TettyBootstrap_channelEach_callPipelineFlush_callback(void *ptr, voi
 
 static bool TettyBootstrap_channelEach_flush_callback(void *ptr, void *item) {
 	(void)ptr;
-	return ttLibC_TcpClient_write((ttLibC_TcpClientInfo *)item);
+	return ttLibC_TcpClient_flush((ttLibC_TcpClientInfo *)item);
 }
 
 tetty_errornum TT_VISIBILITY_HIDDEN ttLibC_TettyBootstrap_channels_flush(ttLibC_TettyBootstrap *bootstrap) {
