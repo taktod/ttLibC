@@ -7,6 +7,7 @@
 
 #include "context.h"
 #include "bootstrap.h"
+#include "../../ttLibC_predef.h"
 #include "../../allocator.h"
 #include "../../_log.h"
 #include "../dynamicBufferUtil.h"
@@ -33,7 +34,7 @@ static void Tetty2Context_copyContextInfo(
 			src_ctx->inherit_super.tetty_info);
 }
 
-tetty2_errornum ttLibC_Tetty2Context_channel_write(
+tetty2_errornum TT_VISIBILITY_DEFAULT ttLibC_Tetty2Context_channel_write(
 		ttLibC_Tetty2Context *ctx,
 		void *data,
 		size_t data_size) {
@@ -44,7 +45,7 @@ tetty2_errornum ttLibC_Tetty2Context_channel_write(
 	return ctx_.error_no;
 }
 
-tetty2_errornum ttLibC_Tetty2Context_channel_flush(ttLibC_Tetty2Context *ctx) {
+tetty2_errornum TT_VISIBILITY_DEFAULT ttLibC_Tetty2Context_channel_flush(ttLibC_Tetty2Context *ctx) {
 	ttLibC_Tetty2Context_ ctx_;
 	Tetty2Context_copyContextInfo(&ctx_, (ttLibC_Tetty2Context_ *)ctx);
 	ctx_.error_no = 0;
@@ -52,7 +53,7 @@ tetty2_errornum ttLibC_Tetty2Context_channel_flush(ttLibC_Tetty2Context *ctx) {
 	return ctx_.error_no;
 }
 
-tetty2_errornum ttLibC_Tetty2Context_channel_writeAndFlush(
+tetty2_errornum TT_VISIBILITY_DEFAULT ttLibC_Tetty2Context_channel_writeAndFlush(
 		ttLibC_Tetty2Context *ctx,
 		void *data,
 		size_t data_size) {
@@ -64,7 +65,7 @@ tetty2_errornum ttLibC_Tetty2Context_channel_writeAndFlush(
 	return error_num;
 }
 
-tetty2_errornum ttLibC_Tetty2Context_close(ttLibC_Tetty2Context *ctx) {
+tetty2_errornum TT_VISIBILITY_DEFAULT ttLibC_Tetty2Context_close(ttLibC_Tetty2Context *ctx) {
 	ttLibC_Tetty2Context_ gen_ctx;
 	Tetty2Context_copyContextInfo(&gen_ctx, (ttLibC_Tetty2Context_ *)ctx);
 	gen_ctx.error_no = 0;
@@ -174,13 +175,13 @@ static tetty2_errornum Tetty2Context_callSuper(
 	return ctx_->error_no;
 }
 
-tetty2_errornum ttLibC_Tetty2Context_super_channelActive(ttLibC_Tetty2Context *ctx) {
+tetty2_errornum TT_VISIBILITY_DEFAULT ttLibC_Tetty2Context_super_channelActive(ttLibC_Tetty2Context *ctx) {
 	return Tetty2Context_callSuper(ctx, Tetty2Command_channelActive);
 }
-tetty2_errornum ttLibC_Tetty2Context_super_channelInactive(ttLibC_Tetty2Context *ctx) {
+tetty2_errornum TT_VISIBILITY_DEFAULT ttLibC_Tetty2Context_super_channelInactive(ttLibC_Tetty2Context *ctx) {
 	return Tetty2Context_callSuper(ctx, Tetty2Command_channelInactive);
 }
-tetty2_errornum ttLibC_Tetty2Context_super_channelRead(
+tetty2_errornum TT_VISIBILITY_DEFAULT ttLibC_Tetty2Context_super_channelRead(
 		ttLibC_Tetty2Context *ctx,
 		void *data,
 		size_t data_size) {
@@ -189,11 +190,11 @@ tetty2_errornum ttLibC_Tetty2Context_super_channelRead(
 	ctx_->data_size = data_size;
 	return Tetty2Context_callSuper(ctx, Tetty2Command_channelRead);
 }
-tetty2_errornum ttLibC_Tetty2Context_super_close(ttLibC_Tetty2Context *ctx) {
+tetty2_errornum TT_VISIBILITY_DEFAULT ttLibC_Tetty2Context_super_close(ttLibC_Tetty2Context *ctx) {
 	return Tetty2Context_callSuper(ctx, Tetty2Command_close);
 }
 
-tetty2_errornum ttLibC_Tetty2Context_super_write(
+tetty2_errornum TT_VISIBILITY_DEFAULT ttLibC_Tetty2Context_super_write(
 		ttLibC_Tetty2Context *ctx,
 		void *data,
 		size_t data_size) {
@@ -228,7 +229,7 @@ tetty2_errornum ttLibC_Tetty2Context_super_write(
 	return ctx_->error_no;
 }
 
-tetty2_errornum ttLibC_Tetty2Context_super_flush(ttLibC_Tetty2Context *ctx) {
+tetty2_errornum TT_VISIBILITY_DEFAULT ttLibC_Tetty2Context_super_flush(ttLibC_Tetty2Context *ctx) {
 	ttLibC_Tetty2Context_ *ctx_ = (ttLibC_Tetty2Context_ *)ctx;
 	ctx_->command = Tetty2Command_flush;
 	ttLibC_Tetty2Bootstrap_ *bootstrap = (ttLibC_Tetty2Bootstrap_ *)ctx_->inherit_super.bootstrap;
@@ -248,14 +249,14 @@ tetty2_errornum ttLibC_Tetty2Context_super_flush(ttLibC_Tetty2Context *ctx) {
 	ctx_->inherit_super.channel_handler = channel_handler;
 	return ctx_->error_no;
 }
-tetty2_errornum ttLibC_Tetty2Context_super_exceptionCaught(
+tetty2_errornum TT_VISIBILITY_DEFAULT ttLibC_Tetty2Context_super_exceptionCaught(
 		ttLibC_Tetty2Context *ctx,
 		tetty2_errornum error_no) {
 	(void)ctx;
 	(void)error_no;
 	return 0;
 }
-tetty2_errornum ttLibC_Tetty2Context_super_userEventTriggered(
+tetty2_errornum TT_VISIBILITY_DEFAULT ttLibC_Tetty2Context_super_userEventTriggered(
 		ttLibC_Tetty2Context *ctx,
 		void *data,
 		size_t data_size) {
@@ -265,7 +266,7 @@ tetty2_errornum ttLibC_Tetty2Context_super_userEventTriggered(
 	return Tetty2Context_callSuper(ctx, Tetty2Command_userEventTriggered);
 }
 
-tetty2_errornum ttLibC_Tetty2Context_channelActive_(
+tetty2_errornum TT_VISIBILITY_HIDDEN ttLibC_Tetty2Context_channelActive_(
 		ttLibC_Tetty2Bootstrap *bootstrap,
 		ttLibC_Tetty2Info *tetty_info) {
 	ttLibC_Tetty2Context_ ctx;
@@ -279,7 +280,7 @@ tetty2_errornum ttLibC_Tetty2Context_channelActive_(
 	return ctx.error_no;
 }
 
-tetty2_errornum ttLibC_Tetty2Context_channelInactive_(
+tetty2_errornum TT_VISIBILITY_HIDDEN ttLibC_Tetty2Context_channelInactive_(
 		ttLibC_Tetty2Bootstrap *bootstrap,
 		ttLibC_Tetty2Info *tetty_info) {
 	ttLibC_Tetty2Context_ ctx;
@@ -293,7 +294,7 @@ tetty2_errornum ttLibC_Tetty2Context_channelInactive_(
 	return ctx.error_no;
 }
 
-tetty2_errornum ttLibC_Tetty2Context_channelRead_(
+tetty2_errornum TT_VISIBILITY_HIDDEN ttLibC_Tetty2Context_channelRead_(
 		ttLibC_Tetty2Bootstrap *bootstrap,
 		ttLibC_Tetty2Info *tetty_info,
 		void *data,
@@ -309,7 +310,7 @@ tetty2_errornum ttLibC_Tetty2Context_channelRead_(
 	return ctx.error_no;
 }
 
-tetty2_errornum ttLibC_Tetty2Context_write_(
+tetty2_errornum TT_VISIBILITY_HIDDEN ttLibC_Tetty2Context_write_(
 		ttLibC_Tetty2Bootstrap *bootstrap,
 		ttLibC_Tetty2Info *tetty_info,
 		void *data,
@@ -325,7 +326,7 @@ tetty2_errornum ttLibC_Tetty2Context_write_(
 	return ctx.error_no;
 }
 
-tetty2_errornum ttLibC_Tetty2Context_flush_(
+tetty2_errornum TT_VISIBILITY_HIDDEN ttLibC_Tetty2Context_flush_(
 		ttLibC_Tetty2Bootstrap *bootstrap,
 		ttLibC_Tetty2Info *tetty_info) {
 	ttLibC_Tetty2Context_ ctx;
@@ -339,7 +340,7 @@ tetty2_errornum ttLibC_Tetty2Context_flush_(
 	return ctx.error_no;
 }
 
-tetty2_errornum ttLibC_Tetty2Context_close_(
+tetty2_errornum TT_VISIBILITY_HIDDEN ttLibC_Tetty2Context_close_(
 		ttLibC_Tetty2Bootstrap *bootstrap,
 		ttLibC_Tetty2Info *tetty_info) {
 	ttLibC_Tetty2Context_ ctx;
@@ -353,7 +354,7 @@ tetty2_errornum ttLibC_Tetty2Context_close_(
 	return ctx.error_no;
 }
 
-tetty2_errornum ttLibC_Tetty2Context_userEventTriggered_(
+tetty2_errornum TT_VISIBILITY_HIDDEN ttLibC_Tetty2Context_userEventTriggered_(
 		ttLibC_Tetty2Bootstrap *bootstrap,
 		ttLibC_Tetty2Info *tetty_info,
 		void *data,

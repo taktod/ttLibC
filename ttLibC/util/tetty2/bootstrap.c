@@ -7,12 +7,13 @@
 
 #include "bootstrap.h"
 #include "promise.h"
+#include "../../ttLibC_predef.h"
 #include "../../allocator.h"
 #include "../../_log.h"
 #include <string.h>
 
 
-ttLibC_Tetty2Bootstrap *ttLibC_Tetty2Bootstrap_make(size_t bootstrap_size) {
+ttLibC_Tetty2Bootstrap TT_VISIBILITY_HIDDEN *ttLibC_Tetty2Bootstrap_make(size_t bootstrap_size) {
 	ttLibC_Tetty2Bootstrap_ *bootstrap = ttLibC_malloc(bootstrap_size);
 	if(bootstrap == NULL) {
 		return NULL;
@@ -31,7 +32,7 @@ ttLibC_Tetty2Bootstrap *ttLibC_Tetty2Bootstrap_make(size_t bootstrap_size) {
 	return (ttLibC_Tetty2Bootstrap *)bootstrap;
 }
 
-void ttLibC_Tetty2Bootstrap_close(ttLibC_Tetty2Bootstrap **bootstrap) {
+void TT_VISIBILITY_DEFAULT ttLibC_Tetty2Bootstrap_close(ttLibC_Tetty2Bootstrap **bootstrap) {
 	ttLibC_Tetty2Bootstrap_ *target = (ttLibC_Tetty2Bootstrap_ *)*bootstrap;
 	if(target == NULL) {
 		return;
@@ -45,7 +46,7 @@ void ttLibC_Tetty2Bootstrap_close(ttLibC_Tetty2Bootstrap **bootstrap) {
 	*bootstrap = NULL;
 }
 
-void ttLibC_Tetty2Bootstrap_pipeline_addLast(
+void TT_VISIBILITY_DEFAULT ttLibC_Tetty2Bootstrap_pipeline_addLast(
 		ttLibC_Tetty2Bootstrap *bootstrap,
 		void *channel_handler) {
 	ttLibC_Tetty2Bootstrap_ *bootstrap_ = (ttLibC_Tetty2Bootstrap_ *)bootstrap;
@@ -55,7 +56,7 @@ void ttLibC_Tetty2Bootstrap_pipeline_addLast(
 	ttLibC_StlList_addLast(bootstrap_->pipeline, channel_handler);
 }
 
-void ttLibC_Tetty2Bootstrap_pipeline_remove(
+void TT_VISIBILITY_DEFAULT ttLibC_Tetty2Bootstrap_pipeline_remove(
 		ttLibC_Tetty2Bootstrap *bootstrap,
 		void *channel_handler) {
 	ttLibC_Tetty2Bootstrap_ *bootstrap_ = (ttLibC_Tetty2Bootstrap_ *)bootstrap;
@@ -65,7 +66,7 @@ void ttLibC_Tetty2Bootstrap_pipeline_remove(
 	ttLibC_StlList_remove(bootstrap_->pipeline, channel_handler);
 }
 
-tetty2_errornum ttLibC_Tetty2Bootstrap_userEventTriggered(
+tetty2_errornum TT_VISIBILITY_DEFAULT ttLibC_Tetty2Bootstrap_userEventTriggered(
 		ttLibC_Tetty2Bootstrap *bootstrap,
 		void *data,
 		size_t data_size) {
@@ -76,7 +77,7 @@ tetty2_errornum ttLibC_Tetty2Bootstrap_userEventTriggered(
 	return ttLibC_Tetty2Context_userEventTriggered_(bootstrap, &bootstrap_->tetty_info, data, data_size);
 }
 
-tetty2_errornum ttLibC_Tetty2Bootstrap_write(
+tetty2_errornum TT_VISIBILITY_DEFAULT ttLibC_Tetty2Bootstrap_write(
 		ttLibC_Tetty2Bootstrap *bootstrap,
 		void *data,
 		size_t data_size) {
@@ -87,7 +88,7 @@ tetty2_errornum ttLibC_Tetty2Bootstrap_write(
 	return ttLibC_Tetty2Context_write_(bootstrap, &bootstrap_->tetty_info, data, data_size);
 }
 
-tetty2_errornum ttLibC_Tetty2Bootstrap_flush(ttLibC_Tetty2Bootstrap *bootstrap) {
+tetty2_errornum TT_VISIBILITY_DEFAULT ttLibC_Tetty2Bootstrap_flush(ttLibC_Tetty2Bootstrap *bootstrap) {
 	if(bootstrap == NULL) {
 		return 0;
 	}
@@ -95,7 +96,7 @@ tetty2_errornum ttLibC_Tetty2Bootstrap_flush(ttLibC_Tetty2Bootstrap *bootstrap) 
 	return ttLibC_Tetty2Context_flush_(bootstrap, &bootstrap_->tetty_info);
 }
 
-tetty2_errornum ttLibC_Tetty2Bootstrap_writeAndFlush(
+tetty2_errornum TT_VISIBILITY_DEFAULT ttLibC_Tetty2Bootstrap_writeAndFlush(
 		ttLibC_Tetty2Bootstrap *bootstrap,
 		void *data,
 		size_t data_size) {
@@ -109,7 +110,7 @@ tetty2_errornum ttLibC_Tetty2Bootstrap_writeAndFlush(
 	return ttLibC_Tetty2Bootstrap_flush(bootstrap);
 }
 
-ttLibC_Tetty2Promise *ttLibC_Tetty2Bootstrap_makePromise(ttLibC_Tetty2Bootstrap *bootstrap) {
+ttLibC_Tetty2Promise TT_VISIBILITY_DEFAULT *ttLibC_Tetty2Bootstrap_makePromise(ttLibC_Tetty2Bootstrap *bootstrap) {
 	if(bootstrap->error_number != 0) {
 		return NULL;
 	}
