@@ -118,6 +118,7 @@ libttLibC_a_SOURCES= \
 	net/tetty/bootstrap.c \
 	net/tetty/context.c \
 	net/tetty/promise.c \
+	net/tetty2/tcpBootstrap.c \
 	net/udp.c \
 	resampler/audioResampler.c \
 	resampler/imageResampler.c \
@@ -145,6 +146,9 @@ libttLibC_a_SOURCES= \
 	util/opencvUtil.c \
 	util/stlListUtil.cpp \
 	util/stlMapUtil.cpp \
+	util/tetty2/bootstrap.c \
+	util/tetty2/context.c \
+	util/tetty2/promise.c \
 	allocator.c \
 	ttLibC.c
 

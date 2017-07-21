@@ -46,9 +46,78 @@
 #	include <ttLibC/decoder/vtDecompressSessionDecoder.h>
 #endif
 
+#include <ttLibC/net/tetty2/tcpBootstrap.h>
+
 #include <ttLibC/resampler/imageResampler.h>
 
 #include <ttLibC/net/client/websocket.h>
+
+static tetty2_errornum tetty2ClientTest_channelActive(ttLibC_Tetty2Context *ctx) {
+	ttLibC_Tetty2Context_channel_writeAndFlush(ctx, (void *)"hogehoge", 9);
+	return 0;
+}
+
+static tetty2_errornum tetty2ClientTest_channelRead(ttLibC_Tetty2Context *ctx, void *data, size_t data_size) {
+	puts((const char *)data);
+	ctx->bootstrap->error_number =5;
+}
+
+static void tetty2ClientTest() {
+	LOG_PRINT("tetty2ClientTest");
+	ttLibC_Tetty2Bootstrap *bootstrap = ttLibC_TcpBootstrap_make();
+	ttLibC_TcpBootstrap_setOption(bootstrap, Tetty2Option_SO_KEEPALIVE);
+	ttLibC_TcpBootstrap_setOption(bootstrap, Tetty2Option_TCP_NODELAY);
+	ttLibC_Tetty2ChannelHandler handler;
+	memset(&handler, 0, sizeof(handler));
+	handler.channelActive = tetty2ClientTest_channelActive;
+	handler.channelRead = tetty2ClientTest_channelRead;
+	ttLibC_Tetty2Bootstrap_pipeline_addLast(bootstrap, &handler);
+
+	ttLibC_TcpBootstrap_connect(bootstrap, "localhost", 12345);
+
+	while(true) {
+		ttLibC_TcpBootstrap_update(bootstrap, 1000);
+		if(bootstrap->error_number != 0) {
+			break;
+		}
+	}
+	ttLibC_Tetty2Bootstrap_close(&bootstrap);
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
+
+static tetty2_errornum tetty2ServerTest_channelRead(ttLibC_Tetty2Context *ctx, void *data, size_t data_size) {
+	puts((const char *)data);
+	ttLibC_Tetty2Context_channel_writeAndFlush(ctx, (void *)"test", 5);
+//	ttLibC_Tetty2Bootstrap_writeAndFlush(ctx->bootstrap, (void *)"test", 5);
+	return 0;
+}
+
+static void tetty2ServerTest() {
+	LOG_PRINT("tetty2ServerTest");
+
+	ttLibC_Tetty2Bootstrap *bootstrap = ttLibC_TcpBootstrap_make();
+	ttLibC_TcpBootstrap_setOption(bootstrap, Tetty2Option_SO_KEEPALIVE);
+	ttLibC_TcpBootstrap_setOption(bootstrap, Tetty2Option_SO_REUSEADDR);
+	ttLibC_TcpBootstrap_setOption(bootstrap, Tetty2Option_TCP_NODELAY);
+
+	ttLibC_Tetty2ChannelHandler handler;
+	memset(&handler, 0, sizeof(handler));
+	handler.channelRead = tetty2ServerTest_channelRead;
+
+	ttLibC_Tetty2Bootstrap_pipeline_addLast(bootstrap, &handler);
+
+	ttLibC_TcpBootstrap_bind(bootstrap, 12345);
+	// あとはupdateを実行し続ければよい
+	while(true) {
+		ttLibC_TcpBootstrap_update(bootstrap, 1000);
+		if(bootstrap->error_number != 0) {
+			break;
+		}
+	}
+	ttLibC_Tetty2Bootstrap_close(&bootstrap);
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
+
 
 static bool websocketClientTest_onopen(ttLibC_WebSocketEvent *event) {
 	ttLibC_WebSocket_sendText(event->target, "hogehoge");
@@ -684,6 +753,8 @@ static void echoServerTest() {
 cute::suite netTests(cute::suite s) {
 	s.clear();
 #ifdef __ENABLE_SOCKET__
+	s.push_back(CUTE(tetty2ClientTest));
+	s.push_back(CUTE(tetty2ServerTest));
 	s.push_back(CUTE(websocketClientTest));
 	s.push_back(CUTE(udpTettyServerTest));
 	s.push_back(CUTE(udpClientTest));
