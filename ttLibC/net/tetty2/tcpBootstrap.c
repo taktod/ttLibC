@@ -83,6 +83,7 @@ static tetty2_errornum TcpBootstrap_close(
 	ttLibC_Fdset_close(&target->fdset);
 	return 0;
 }
+
 static bool TcpBootstrap_flushAllClient(void *ptr, void *item) {
 	ttLibC_TcpBootstrap *bootstrap = (ttLibC_TcpBootstrap *)ptr;
 	ttLibC_TcpClientInfo *client_info = (ttLibC_TcpClientInfo *)item;
@@ -368,6 +369,37 @@ bool ttLibC_TcpBootstrap_update(
 		return true;
 	}
 	return false;
+}
+
+bool ttLibC_TcpBootstrap_isServerContext(ttLibC_Tetty2Context *ctx) {
+	if(ctx == NULL) {
+		return false;
+	}
+	if(!TcpBootstrap_check(ctx->bootstrap)) {
+		return false;
+	}
+	ttLibC_TcpBootstrap *tcpBootstrap = (ttLibC_TcpBootstrap *)ctx->bootstrap;
+	return ctx->tetty_info->bootstrap_ptr == tcpBootstrap->inherit_super.tetty_info.bootstrap_ptr;
+}
+
+static bool TcpBootstrap_Context_writeAllClientsCallback(void *ptr, void *item) {
+	ttLibC_Tetty2Context_ *ctx_ = (ttLibC_Tetty2Context_ *)ptr;
+	ttLibC_TcpClientInfo *client_info = (ttLibC_TcpClientInfo *)item;
+	ttLibC_Tetty2Info info;
+	info.bootstrap_ptr = client_info;
+	info.ptr = client_info->inherit_super.ptr;
+	ttLibC_Tetty2Context_write_(ctx_->inherit_super.bootstrap, &info, ctx_->data, ctx_->data_size);
+	client_info->inherit_super.ptr = info.ptr;
+	return true;
+}
+
+tetty2_errornum ttLibC_TcpBootstrap_Context_writeAllClients(ttLibC_Tetty2Context *ctx) {
+	if(!ttLibC_TcpBootstrap_isServerContext(ctx)) {
+		return 0;
+	}
+	ttLibC_TcpBootstrap *tcpBootstrap = (ttLibC_TcpBootstrap *)ctx->bootstrap;
+	ttLibC_StlList_forEach(tcpBootstrap->tcp_client_info_list, TcpBootstrap_Context_writeAllClientsCallback, ctx);
+	return tcpBootstrap->inherit_super.inherit_super.error_number;
 }
 
 #endif

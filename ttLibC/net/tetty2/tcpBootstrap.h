@@ -40,6 +40,10 @@ bool ttLibC_TcpBootstrap_update(
 		ttLibC_Tetty2Bootstrap *bootstrap,
 		uint32_t wait_interval);
 
+bool ttLibC_TcpBootstrap_isServerContext(ttLibC_Tetty2Context *ctx);
+
+tetty2_errornum ttLibC_TcpBootstrap_Context_writeAllClients(ttLibC_Tetty2Context *ctx);
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
