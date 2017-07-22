@@ -16,6 +16,7 @@ extern "C" {
 #endif
 
 #include "../rtmp.h"
+#include "../../tetty.h"
 #include "tetty/rtmpClientHandler.h"
 #include "tetty/rtmpCommandHandler.h"
 #include "tetty/rtmpDecoder.h"

@@ -18,7 +18,7 @@ extern "C" {
 #include <stdint.h>
 #include "rtmpMessage.h"
 #include "../../../../frame/audio/audio.h"
-#include "../rtmpStream.h"
+#include "../../../../util/flvFrameUtil.h"
 
 /*
  * same as flv.

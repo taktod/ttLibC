@@ -16,7 +16,6 @@
 #include <string.h>
 #include "../../../../util/hexUtil.h"
 #include "../../../../util/flvFrameUtil.h"
-#include "../rtmpStream.h"
 
 ttLibC_AggregateMessage TT_VISIBILITY_HIDDEN *ttLibC_AggregateMessage_make() {
 	ttLibC_AggregateMessage *message = ttLibC_malloc(sizeof(ttLibC_AggregateMessage));

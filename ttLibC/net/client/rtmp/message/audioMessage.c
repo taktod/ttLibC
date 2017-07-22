@@ -13,7 +13,6 @@
 #include "../../../../ttLibC_predef.h"
 #include "../../../../_log.h"
 #include "../../../../allocator.h"
-#include "../rtmpStream.h"
 #include <string.h>
 #include "../../../../util/hexUtil.h"
 #include "../../../../frame/audio/aac.h"

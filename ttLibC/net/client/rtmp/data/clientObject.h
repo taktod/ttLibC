@@ -21,6 +21,12 @@ extern "C" {
 #include "../../../../util/stlMapUtil.h"
 #include "../../../../util/stlListUtil.h"
 
+typedef enum ttLibC_RtmpHandshake_Phase {
+	phase_s1,
+	phase_s2,
+	phase_s3
+} ttLibC_RtmpHandshake_Phase;
+
 /**
  * definition of client_object.
  */
@@ -39,6 +45,7 @@ typedef struct ttLibC_Net_Client_Rtmp_Data_ClientObject{
 	ttLibC_StlMap *send_headers; // int -> header map
 
 	// handshake
+	// あとはこれがまずいのか・・・
 	ttLibC_RtmpHandshake_Phase phase;
 	uint8_t *c2_value;
 //	uint8_t *s2_value;

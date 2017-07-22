@@ -12,7 +12,6 @@
 #include "rtmpMessage.h"
 #include "../../../../ttLibC_predef.h"
 #include "../../../../_log.h"
-#include "../rtmpStream.h"
 #include "acknowledgement.h"
 #include "aggregateMessage.h"
 #include "amf0Command.h"
@@ -95,16 +94,6 @@ ttLibC_RtmpMessage TT_VISIBILITY_HIDDEN *ttLibC_RtmpMessage_readBinary(
 	} while(ttLibC_DynamicBuffer_refSize(data_buffer) < header->size); // if complete, do next.
 	ttLibC_RtmpMessage *rtmp_message = NULL;
 
-	ttLibC_RtmpStream *stream = NULL;
-	if(header->stream_id != 0) {
-		stream = ttLibC_StlMap_get(client_object->streamId_rtmpStream_map, (void *)((long)header->stream_id));
-		if(stream != NULL) {
-			ttLibC_RtmpStream_ *stream_ = (ttLibC_RtmpStream_ *)stream;
-			if(header->timestamp > stream_->pts) {
-				stream_->pts = header->timestamp;
-			}
-		}
-	}
 	// make message from data.
 	switch(header->message_type) {
 	case RtmpMessageType_setChunkSize:

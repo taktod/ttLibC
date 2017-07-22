@@ -37,6 +37,15 @@ static tetty_errornum RtmpClientHandler_channelRead(
 	ttLibC_RtmpClientHandler *handler = (ttLibC_RtmpClientHandler *)ctx->channel_handler;
 	// update bytesRead
 	handler->bytesRead += rtmp_message->header->size;
+	ttLibC_RtmpStream_ *stream_ = NULL;
+	if(rtmp_message->header->stream_id != 0) {
+		stream_ = ttLibC_StlMap_get(client_object->streamId_rtmpStream_map, (void *)((long)rtmp_message->header->stream_id));
+		if(stream_ != NULL) {
+			if(rtmp_message->header->timestamp > stream_->pts) {
+				stream_->pts = rtmp_message->header->timestamp;
+			}
+		}
+	}
 /*	if(handler->bytesRead - handler->bytesReadAcked >= handler->bytesReadWindow) {
 		// send ack.
 		ttLibC_Acknowledgement *acknowledgement = ttLibC_Acknowledgement_make((uint32_t)handler->bytesRead);
@@ -48,7 +57,6 @@ static tetty_errornum RtmpClientHandler_channelRead(
 	switch(rtmp_message->header->message_type) {
 	case RtmpMessageType_videoMessage:
 		{
-			ttLibC_RtmpStream_ *stream_ = ttLibC_StlMap_get(client_object->streamId_rtmpStream_map, (void *)((long)rtmp_message->header->stream_id));
 			if(stream_ != NULL) {
 				tetty_errornum error_num = ttLibC_VideoMessage_getFrame(
 						(ttLibC_VideoMessage *)rtmp_message,
@@ -64,7 +72,6 @@ static tetty_errornum RtmpClientHandler_channelRead(
 		break;
 	case RtmpMessageType_audioMessage:
 		{
-			ttLibC_RtmpStream_ *stream_ = ttLibC_StlMap_get(client_object->streamId_rtmpStream_map, (void *)((long)rtmp_message->header->stream_id));
 			if(stream_ != NULL) {
 				tetty_errornum error_num = ttLibC_AudioMessage_getFrame(
 						(ttLibC_AudioMessage *)rtmp_message,
@@ -80,7 +87,6 @@ static tetty_errornum RtmpClientHandler_channelRead(
 		break;
 	case RtmpMessageType_aggregateMessage:
 		{
-			ttLibC_RtmpStream_ *stream_ = ttLibC_StlMap_get(client_object->streamId_rtmpStream_map, (void *)((long)rtmp_message->header->stream_id));
 			if(stream_ != NULL) {
 				// get frame from aggregate message.
 				tetty_errornum error_num = ttLibC_AggregateMessage_getFrame(

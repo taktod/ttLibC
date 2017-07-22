@@ -16,12 +16,7 @@ extern "C" {
 #endif
 
 #include "../../rtmp.h"
-
-typedef enum ttLibC_RtmpHandshake_Phase {
-	phase_s1,
-	phase_s2,
-	phase_s3
-} ttLibC_RtmpHandshake_Phase;
+#include "../../../tetty.h"
 
 typedef struct ttLibC_Net_Client_Rtmp_Tetty_RtmpHandshake{
 	ttLibC_TettyChannelHandler channel_handler;

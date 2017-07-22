@@ -16,6 +16,7 @@ extern "C" {
 #endif
 
 #include "../../rtmp.h"
+#include "../../../tetty.h"
 #include "../../../../util/stlMapUtil.h"
 
 typedef struct ttLibC_Net_Client_Rtmp_Tetty_RtmpClientHandler{

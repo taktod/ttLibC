@@ -16,6 +16,7 @@ extern "C" {
 #endif
 
 #include "../../rtmp.h"
+#include "../../../tetty.h"
 
 typedef struct ttLibC_Net_Client_Rtmp_Tetty_RtmpEncoder{
 	ttLibC_TettyChannelHandler channel_handler;

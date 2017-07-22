@@ -15,7 +15,6 @@
 extern "C" {
 #endif
 
-#include "../tetty.h"
 #include "../../util/amfUtil.h"
 #include "../../frame/frame.h"
 
