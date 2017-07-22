@@ -78,6 +78,7 @@ static tetty2_errornum TcpBootstrap_close(
 	ttLibC_TcpBootstrap *target = (ttLibC_TcpBootstrap *)bootstrap;
 	ttLibC_StlList_forEach(target->tcp_client_info_list, TcpBootstrap_closeAllClient, target);
 	ttLibC_StlList_close(&target->tcp_client_info_list);
+	ttLibC_Tetty2Context_close_((ttLibC_Tetty2Bootstrap *)target, &target->inherit_super.tetty_info);
 	ttLibC_TcpServerInfo *server_info = (ttLibC_TcpServerInfo *)target->inherit_super.tetty_info.bootstrap_ptr;
 	ttLibC_TcpServer_close(&server_info);
 	ttLibC_Fdset_close(&target->fdchkset);

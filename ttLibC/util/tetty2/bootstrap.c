@@ -41,6 +41,9 @@ void TT_VISIBILITY_DEFAULT ttLibC_Tetty2Bootstrap_close(ttLibC_Tetty2Bootstrap *
 	if(target->close_event != NULL) {
 		target->close_event((ttLibC_Tetty2Bootstrap *)target, NULL);
 	}
+	else {
+		ttLibC_Tetty2Context_close_((ttLibC_Tetty2Bootstrap *)target, &target->tetty_info);
+	}
 	ttLibC_StlList_close(&target->pipeline);
 	ttLibC_free(target);
 	*bootstrap = NULL;

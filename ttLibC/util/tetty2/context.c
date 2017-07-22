@@ -142,7 +142,7 @@ static bool Tetty2Context_callNextForEach(void *ptr, void *item) {
 			return Tetty2Context_callNextContext(
 					ctx,
 					channel_handler,
-					channel_handler->flush,
+					channel_handler->close,
 					false);
 		case Tetty2Command_userEventTriggered:
 			return Tetty2Context_callNextData(
@@ -212,7 +212,7 @@ tetty2_errornum TT_VISIBILITY_DEFAULT ttLibC_Tetty2Context_super_write(
 	ctx_->data = data;
 	ctx_->data_size = data_size;
 	ttLibC_Tetty2ChannelHandler *channel_handler = ctx_->inherit_super.channel_handler;
-	if(ttLibC_StlList_forEach(bootstrap->pipeline, Tetty2Context_callNextForEach, ctx)) {
+	if(ttLibC_StlList_forEachReverse(bootstrap->pipeline, Tetty2Context_callNextForEach, ctx)) {
 		// if finish the iterator, we need to write
 		if(ctx_->data != NULL) {
 			// data is available
@@ -238,7 +238,7 @@ tetty2_errornum TT_VISIBILITY_DEFAULT ttLibC_Tetty2Context_super_flush(ttLibC_Te
 		return 0;
 	}
 	ttLibC_Tetty2ChannelHandler *channel_handler = ctx_->inherit_super.channel_handler;
-	if(ttLibC_StlList_forEach(bootstrap->pipeline, Tetty2Context_callNextForEach, ctx)) {
+	if(ttLibC_StlList_forEachReverse(bootstrap->pipeline, Tetty2Context_callNextForEach, ctx)) {
 		// if finish the iterator, we need to flush
 		if(bootstrap->flush_event != NULL) {
 			bootstrap->flush_event(
