@@ -317,6 +317,9 @@ static bool Mp4Reader_readAtom(
 	case Mp4Type_Mvex:
 	case Mp4Type_Mfhd: // for html5 mediaSource, sequence number = 0 is works.
 	case Mp4Type_Ctts:
+	case Mp4Type_Tref:
+	case Mp4Type_Chap:
+	case Mp4Type_Gmhd:
 		{
 			uint8_t version = ttLibC_ByteReader_bit(byte_reader, 8);
 			/*uint32_t flags = */ttLibC_ByteReader_bit(byte_reader, 24);
