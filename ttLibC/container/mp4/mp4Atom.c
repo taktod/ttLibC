@@ -88,6 +88,10 @@ static bool Mp4Atom_getFrame(
 					++ buf;
 					-- buf_size;
 				}
+				if(buf_size < size) {
+					LOG_PRINT("incomplete h264 data, skip.");
+					return true;
+				}
 				buf += size;
 				buf_size -= size;
 			} while(buf_size > 0);
@@ -131,6 +135,10 @@ static bool Mp4Atom_getFrame(
 					}
 					++ buf;
 					-- buf_size;
+				}
+				if(buf_size < size) {
+					LOG_PRINT("incomplete h265 data, skip.");
+					return true;
 				}
 				buf += size;
 				buf_size -= size;
@@ -297,13 +305,16 @@ static bool Mp4Atom_getTrackFrame(
 			// ignore the data which pts < 0.
 			if(pts + pts_offset >= ttLibC_Elst_refCurrentMediatime(track->elst)) {
 				pts = pts + pts_offset - ttLibC_Elst_refCurrentMediatime(track->elst);
-				uint32_t duration = ttLibC_Stts_refCurrentDelta(track->stts);
+			}
+			else {
+				pts = 0;
+			}
+			uint32_t duration = ttLibC_Stts_refCurrentDelta(track->stts);
 
-				if(!Mp4Atom_getFrame(track, mdat_data + currentPos - reader->mdat_start_pos, sample_size, pts, track->timebase, duration, callback, ptr)) {
-					reader->error_number = 5;
-					// quit the loop.
-					return false;
-				}
+			if(!Mp4Atom_getFrame(track, mdat_data + currentPos - reader->mdat_start_pos, sample_size, pts, track->timebase, duration, callback, ptr)) {
+				reader->error_number = 5;
+				// quit the loop.
+				return false;
 			}
 			ttLibC_Stts_moveNext(track->stts); // prepare next sample time information
 			ttLibC_Ctts_moveNext(track->ctts);
