@@ -408,6 +408,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_SwresampleResampler_resample(
 		{
 			ttLibC_PcmF32 *pcm = (ttLibC_PcmF32 *)resampler_->frame;
 			pcm->inherit_super.sample_num = sample_num;
+			pcm->inherit_super.inherit_super.buffer_size = sample_num * 4 * pcm->inherit_super.channel_num;
 			switch(pcm->type) {
 			case PcmF32Type_interleave:
 				pcm->l_stride = sample_num * 4 * pcm->inherit_super.channel_num;
@@ -427,6 +428,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_SwresampleResampler_resample(
 		{
 			ttLibC_PcmS16 *pcm = (ttLibC_PcmS16 *)resampler_->frame;
 			pcm->inherit_super.sample_num = sample_num;
+			pcm->inherit_super.inherit_super.buffer_size = sample_num * 2 * pcm->inherit_super.channel_num;
 			switch(pcm->type) {
 			case PcmS16Type_bigEndian:
 			case PcmS16Type_bigEndian_planar:
