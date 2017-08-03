@@ -950,6 +950,30 @@ static void flvCodecTest() {
 	if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
 	if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
 	ASSERT(ttLibC_Allocator_dump() == 0);
+
+	LOG_PRINT("h264b / aac");
+	testData.reader = (ttLibC_ContainerReader *)ttLibC_FlvReader_make();
+	testData.writer = (ttLibC_ContainerWriter *)ttLibC_FlvWriter_make(frameType_h264, frameType_aac);
+	sprintf(file, "%s/tools/data/source/test.h264b.aac.flv", getenv("HOME"));
+	testData.fp_in = fopen(file, "rb");
+	sprintf(file, "%s/tools/data/c_out/test.h264b.aac.flv", getenv("HOME"));
+	testData.fp_out = fopen(file, "wb");
+	do {
+		uint8_t buffer[65536];
+		if(!testData.fp_in) {
+			break;
+		}
+		size_t read_size = fread(buffer, 1, 65536, testData.fp_in);
+		if(!ttLibC_FlvReader_read((ttLibC_FlvReader *)testData.reader, buffer, read_size, flvTest_getFlvCallback, &testData)) {
+			ERR_PRINT("error occured!");
+			break;
+		}
+	} while(!feof(testData.fp_in));
+	ttLibC_ContainerReader_close(&testData.reader);
+	ttLibC_ContainerWriter_close(&testData.writer);
+	if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
+	if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
+	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
 static void flvFlv1AacTest() {

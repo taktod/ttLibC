@@ -41,7 +41,7 @@ typedef struct ttLibC_Container_Misc_FrameQueue2_{
 	/** frame cache */
 	ttLibC_Frame *frame_cache[3];
 	/** for calcurate */
-	uint64_t pts_cache[2];
+	uint64_t pts_cache[3];
 	/** process status */
 	frameStatus status;
 } ttLibC_Container_Misc_FrameQueue2_;
@@ -86,6 +86,7 @@ ttLibC_FrameQueue TT_VISIBILITY_HIDDEN *ttLibC_FrameQueue_make(
 	queue->frame_cache[2] = NULL;
 	queue->pts_cache[0] = 0;
 	queue->pts_cache[1] = 0;
+	queue->pts_cache[2] = 0;
 	queue->status = frameStatus_normal;
 	return (ttLibC_FrameQueue *)queue;
 }
@@ -184,6 +185,153 @@ ttLibC_Frame TT_VISIBILITY_HIDDEN *ttLibC_FrameQueue_dequeue_first(ttLibC_FrameQ
 	return frame;
 }
 
+/**
+ * check frame cache status.
+ * @param queue
+ * @return true:filled by cache, false:have more slot.
+ */
+static bool FrameQueue_checkFrameQueueIsFull(ttLibC_FrameQueue2_ *queue) {
+	return queue->frame_cache[0] != NULL
+		&& queue->frame_cache[1] != NULL
+		&& queue->frame_cache[2] != NULL;
+}
+
+/**
+ * get the lowest pts among frames.
+ * @param frame 
+ * @param queue
+ * @param check_pts_cache
+ * @return lowest pts
+ */
+static uint64_t FrameQueue_getLowestPts(
+		ttLibC_Frame *frame,
+		ttLibC_FrameQueue2_ *queue,
+		bool check_pts_cache) {
+	uint64_t lowest_pts = frame->pts;
+	for(int i = 0;i < 3;++ i) {
+		if(lowest_pts > queue->frame_cache[i]->pts) {
+			lowest_pts = queue->frame_cache[i]->pts;
+		}
+	}
+	if(check_pts_cache) {
+		for(int i = 0;i < 3;++ i) {
+			if(queue->pts_cache[i] == 0) {
+				continue;
+			}
+			if(lowest_pts > queue->pts_cache[i]) {
+				lowest_pts = queue->pts_cache[i];
+			}
+		}
+	}
+	return lowest_pts;
+}
+
+/**
+ * update pts cache in the queue
+ * @param queue
+ * @param pts
+ */
+static void FrameQueue_updatePtsCache(
+		ttLibC_FrameQueue2_ *queue,
+		uint64_t pts) {
+	for(int i = 0;i < 3;++ i) {
+		if(queue->pts_cache[i] == 0) {
+			queue->pts_cache[i] = pts;
+			return;
+		}
+	}
+}
+
+/**
+ * update frame with pts cache
+ * @param queue
+ * @param lowest_pts
+ * @return true:cache is update false:nothing is changed.
+ */
+static bool FrameQueue_updateFrameCache(
+		ttLibC_FrameQueue2_ *queue,
+		uint64_t lowest_pts) {
+	for(int i = 0;i < 3;++ i) {
+		if(queue->pts_cache[i] != 0) {
+			if(queue->pts_cache[i] == lowest_pts) {
+				queue->frame_cache[2]->dts = lowest_pts;
+				queue->pts_cache[i] = queue->frame_cache[2]->pts;
+				queue->frame_cache[2] = NULL;
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+/**
+ * update frame with frame cache
+ * @param queue
+ * @param lowest_pts
+ * @return true:frame cache is update false:nothing is changed.
+ */
+static bool FrameQueue_updateFrameQueue(
+		ttLibC_FrameQueue2_ *queue,
+		uint64_t lowest_pts) {
+	if(queue->frame_cache[2]->pts == lowest_pts) {
+		queue->frame_cache[2]->dts = lowest_pts;
+		queue->frame_cache[2] = NULL;
+		return true;
+	}
+	if(queue->frame_cache[1]->pts == lowest_pts) {
+		uint64_t diff = (lowest_pts - queue->inherit_super.pts) / 2;
+		queue->frame_cache[2]->dts = queue->inherit_super.pts + diff;
+		FrameQueue_updatePtsCache(queue, queue->frame_cache[2]->pts);
+		queue->frame_cache[2] = NULL;
+		queue->frame_cache[1]->dts = lowest_pts;
+		queue->frame_cache[1] = NULL;
+		return true;
+	}
+	if(queue->frame_cache[0]->pts == lowest_pts) {
+		uint64_t diff = (lowest_pts - queue->inherit_super.pts) / 3;
+		queue->frame_cache[2]->dts = queue->inherit_super.pts + diff;
+		FrameQueue_updatePtsCache(queue, queue->frame_cache[2]->pts);
+		queue->frame_cache[2] = NULL;
+		queue->frame_cache[1]->dts = queue->inherit_super.pts + 2 * diff;
+		FrameQueue_updatePtsCache(queue, queue->frame_cache[1]->pts);
+		queue->frame_cache[1] = NULL;
+		queue->frame_cache[0]->dts = lowest_pts;
+		queue->frame_cache[0] = NULL;
+		return true;
+	}
+	return false;
+}
+
+/**
+ * update frame
+ * @param frame
+ * @param queue
+ * @param lowests_pts
+ * @return true:frame is update, false:nothing change(no way to here.)
+ */
+static bool FrameQueue_updateFrame(
+		ttLibC_Frame *frame,
+		ttLibC_FrameQueue2_ *queue,
+		uint64_t lowest_pts) {
+	if(frame->pts != lowest_pts) {
+		ERR_PRINT("unexpected. lowest pts is not match any frame.");
+		return false;
+	}
+	uint64_t diff = (lowest_pts - queue->inherit_super.pts) / 4;
+	queue->frame_cache[2]->dts = queue->inherit_super.pts + diff;
+	FrameQueue_updatePtsCache(queue, queue->frame_cache[2]->pts);
+	queue->frame_cache[2] = NULL;
+	queue->frame_cache[1]->dts = queue->inherit_super.pts + 2 * diff;
+	FrameQueue_updatePtsCache(queue, queue->frame_cache[1]->pts);
+	queue->frame_cache[1] = NULL;
+	queue->frame_cache[0]->dts = queue->inherit_super.pts + 3 * diff;
+	FrameQueue_updatePtsCache(queue, queue->frame_cache[0]->pts);
+	queue->frame_cache[0] = NULL;
+	frame->dts = lowest_pts;
+	frame = NULL;
+	return true;
+}
+
 /*
  * add frame on queue.
  * @param queue target queue object.
@@ -224,231 +372,61 @@ bool TT_VISIBILITY_HIDDEN ttLibC_FrameQueue_queue(
 					break;
 				case H264Type_slice:
 				case H264Type_sliceIDR:
-					switch(h->frame_type) {
-					case H264FrameType_I:
-					case H264FrameType_B:
-					case H264FrameType_P:
-						break;
-					default:
-						{
-							ERR_PRINT("support only i b p frame.");
-						}
-						return false;
-					}
-					if(queue_->frame_cache[0] == NULL) {
-						queue_->frame_cache[0] = f;
-					}
-					else {
-						uint64_t a_pts, b_pts, c_pts, d_pts, e_pts;
-						a_pts = f->pts;
-						b_pts = queue_->frame_cache[0]->pts;
-						c_pts = (queue_->frame_cache[1] == NULL ? 0 : queue_->frame_cache[1]->pts);
-						d_pts = queue_->pts_cache[0];
-						e_pts = queue_->pts_cache[1];
-						ttLibC_H264 *bh = (ttLibC_H264 *)queue_->frame_cache[0];
-						switch(queue_->status) {
-						default:
-						case frameStatus_normal:
-							switch(h->frame_type) {
-							case H264FrameType_I:
-							case H264FrameType_P:
-								switch(bh->frame_type) {
-								case H264FrameType_I:
-								case H264FrameType_P:
-									{
-										queue_->frame_cache[0]->dts = b_pts;
-										queue_->inherit_super.pts = b_pts;
-										queue_->frame_cache[0] = f;
-										queue_->frame_cache[1] = NULL;
-										queue_->pts_cache[0] = b_pts;
-										queue_->pts_cache[1] = 0;
+					{
+						ttLibC_Frame *ff = f;
+						// if queue is full, need to calcurate dts
+						if(FrameQueue_checkFrameQueueIsFull(queue_)) {
+							// in the case of bframe fixed(flv or rtmp)
+							if(queue_->inherit_super.isBframe_fixed) {
+								uint64_t lowest_pts = FrameQueue_getLowestPts(
+									ff,
+									queue_,
+									true);
+								// check with pts_cache
+								if(!FrameQueue_updateFrameCache(
+									queue_,
+									lowest_pts)) {
+									// check with frame_cache
+									if(!FrameQueue_updateFrameQueue(
+										queue_,
+										lowest_pts)) {
+										// check with frame
+										FrameQueue_updateFrame(
+											ff,
+											queue_,
+											lowest_pts);
+										ff = NULL;
 									}
-									break;
-								case H264FrameType_B:
-									{
-										uint64_t min = a_pts;
-										if(min > b_pts) {
-											min = b_pts;
-										}
-										if(min > c_pts) {
-											min = c_pts;
-										}
-										queue_->pts_cache[0] = b_pts;
-										queue_->pts_cache[1] = c_pts;
-										queue_->frame_cache[1]->dts = (min + 2 * d_pts) / 3;
-										queue_->frame_cache[0]->dts = (min * 2 + d_pts) / 3;
-										queue_->inherit_super.pts = queue_->frame_cache[0]->dts;
-										if(queue_->inherit_super.isBframe_fixed) {
-											f->dts = min;
-											queue_->inherit_super.pts = min;
-										}
-										queue_->frame_cache[1] = NULL;
-										queue_->frame_cache[0] = f;
-										queue_->status = frameStatus_inBframe;
-									}
-									break;
-								default:
-									break;
 								}
-								break;
-							case H264FrameType_B:
-								switch(bh->frame_type) {
-								case H264FrameType_I:
-								case H264FrameType_P:
-									{
-										queue_->frame_cache[1] = queue_->frame_cache[0];
-										queue_->frame_cache[0] = f;
-									}
-									break;
-								case H264FrameType_B:
-									{
-										uint64_t min = a_pts;
-										if(min > b_pts) {
-											min = b_pts;
-										}
-										if(min > c_pts) {
-											min = c_pts;
-										}
-										queue_->pts_cache[0] = b_pts;
-										queue_->pts_cache[1] = c_pts;
-										queue_->frame_cache[1]->dts = (min + 2 * d_pts) / 3;
-										queue_->frame_cache[0]->dts = (min * 2 + d_pts) / 3;
-										f->dts = min;
-										queue_->inherit_super.pts = min;
-										queue_->frame_cache[1] = NULL;
-										queue_->frame_cache[0] = f;
-										queue_->status = frameStatus_inBframe;
-									}
-									break;
-								default:
-									break;
-								}
-								break;
-							default:
-								break;
+								queue_->inherit_super.pts = lowest_pts;
 							}
-							break;
-						case frameStatus_inBframe:
-							switch(h->frame_type) {
-							case H264FrameType_I:
-							case H264FrameType_P:
-								if(!queue_->inherit_super.isBframe_fixed) {
-									switch(bh->frame_type) {
-									case H264FrameType_I:
-									case H264FrameType_P:
-										{
-											queue_->frame_cache[0]->dts = queue_->frame_cache[0]->pts;
-											queue_->inherit_super.pts = queue_->frame_cache[0]->dts;
-											queue_->pts_cache[0] = queue_->frame_cache[0]->pts;
-											queue_->pts_cache[1] = 0;
-											queue_->frame_cache[0] = f;
-											queue_->frame_cache[1] = NULL;
-											queue_->status = frameStatus_normal;
-										}
-										break;
-									case H264FrameType_B:
-										{
-											queue_->frame_cache[0] = f;
-										}
-										break;
-									default:
-										break;
-									}
-									break;
+							else {
+								uint64_t lowest_pts = FrameQueue_getLowestPts(
+									ff,
+									queue_,
+									false);
+								// check with frame_cache
+								if(!FrameQueue_updateFrameQueue(
+									queue_,
+									lowest_pts)) {
+									// check with frame
+									FrameQueue_updateFrame(
+										ff,
+										queue_,
+										lowest_pts);
+									ff = NULL;
 								}
-								/* no break */
-							case H264FrameType_B:
-								switch(bh->frame_type) {
-								case H264FrameType_I:
-								case H264FrameType_P:
-									if(!queue_->inherit_super.isBframe_fixed)
-									{
-										uint64_t min = b_pts;
-										if(min > d_pts) {
-											min = d_pts;
-										}
-										if(min > e_pts) {
-											min = e_pts;
-										}
-										uint64_t *pcache = queue_->pts_cache;
-										if(b_pts != min) {
-											*pcache = b_pts;
-											++ pcache;
-										}
-										if(d_pts != min) {
-											*pcache = d_pts;
-											++ pcache;
-										}
-										if(e_pts != min) {
-											*pcache = e_pts;
-											++ pcache;
-										}
-										queue_->frame_cache[0]->dts = min;
-										min = a_pts;
-										d_pts = queue_->pts_cache[0];
-										e_pts = queue_->pts_cache[1];
-										if(min > d_pts) {
-											min = d_pts;
-										}
-										if(min > e_pts) {
-											min = e_pts;
-										}
-										pcache = queue_->pts_cache;
-										if(a_pts != min) {
-											*pcache = a_pts;
-											++ pcache;
-										}
-										if(d_pts != min) {
-											*pcache = d_pts;
-											++ pcache;
-										}
-										if(e_pts != min) {
-											*pcache = e_pts;
-											++ pcache;
-										}
-										f->dts = min;
-										queue_->inherit_super.pts = min;
-										queue_->frame_cache[0] = f;
-										break;
-									}
-									/* no break */
-								case H264FrameType_B:
-									{
-										uint64_t min = a_pts;
-										if(min > d_pts) {
-											min = d_pts;
-										}
-										if(min > e_pts) {
-											min = e_pts;
-										}
-										uint64_t *pcache = queue_->pts_cache;
-										if(a_pts != min) {
-											*pcache = a_pts;
-											++ pcache;
-										}
-										if(d_pts != min) {
-											*pcache = d_pts;
-											++ pcache;
-										}
-										if(e_pts != min) {
-											*pcache = e_pts;
-											++ pcache;
-										}
-										f->dts = min;
-										queue_->inherit_super.pts = min;
-										queue_->frame_cache[0] = f;
-										queue_->frame_cache[1] = NULL;
-									}
-									break;
-								default:
-									break;
-								}
-								break;
-							default:
-								break;
+								// clear pts_cache (in this mode, not use.)
+								queue_->pts_cache[0] = 0;
+								queue_->pts_cache[1] = 0;
+								queue_->pts_cache[2] = 0;
+								queue_->inherit_super.pts = lowest_pts;
 							}
-							break;
 						}
+						// rotate frame cache
+						queue_->frame_cache[2] = queue_->frame_cache[1];
+						queue_->frame_cache[1] = queue_->frame_cache[0];
+						queue_->frame_cache[0] = ff;
 					}
 					break;
 				}
@@ -465,222 +443,61 @@ bool TT_VISIBILITY_HIDDEN ttLibC_FrameQueue_queue(
 					break;
 				case H265Type_slice:
 				case H265Type_sliceIDR:
-					switch(h->frame_type) {
-					case H265FrameType_I:
-					case H265FrameType_B:
-					case H265FrameType_P:
-						break;
-					default:
-						{
-							ERR_PRINT("support only i b p frame.");
-						}
-						return false;
-					}
-					if(queue_->frame_cache[0] == NULL) {
-						queue_->frame_cache[0] = f;
-					}
-					else {
-						uint64_t a_pts, b_pts, c_pts, d_pts, e_pts;
-						a_pts = f->pts;
-						b_pts = queue_->frame_cache[0]->pts;
-						c_pts = (queue_->frame_cache[1] == NULL ? 0 : queue_->frame_cache[1]->pts);
-						d_pts = queue_->pts_cache[0];
-						e_pts = queue_->pts_cache[1];
-						ttLibC_H265 *bh = (ttLibC_H265 *)queue_->frame_cache[0];
-						switch(queue_->status) {
-						default:
-						case frameStatus_normal:
-							switch(h->frame_type) {
-							case H265FrameType_I:
-							case H265FrameType_P:
-								switch(bh->frame_type) {
-								case H265FrameType_I:
-								case H265FrameType_P:
-									{
-										queue_->frame_cache[0]->dts = b_pts;
-										queue_->inherit_super.pts = b_pts;
-										queue_->frame_cache[0] = f;
-										queue_->frame_cache[1] = NULL;
-										queue_->pts_cache[0] = b_pts;
-										queue_->pts_cache[1] = 0;
+					{
+						ttLibC_Frame *ff = f;
+						// if queue is full, need to calcurate dts
+						if(FrameQueue_checkFrameQueueIsFull(queue_)) {
+							// in the case of bframe fixed(flv or rtmp)
+							if(queue_->inherit_super.isBframe_fixed) {
+								uint64_t lowest_pts = FrameQueue_getLowestPts(
+									ff,
+									queue_,
+									true);
+								// check with pts_cache
+								if(!FrameQueue_updateFrameCache(
+									queue_,
+									lowest_pts)) {
+									// check with frame_cache
+									if(!FrameQueue_updateFrameQueue(
+										queue_,
+										lowest_pts)) {
+										// check with frame
+										FrameQueue_updateFrame(
+											ff,
+											queue_,
+											lowest_pts);
+										ff = NULL;
 									}
-									break;
-								case H265FrameType_B:
-									{
-										uint64_t min = a_pts;
-										if(min > b_pts) {
-											min = b_pts;
-										}
-										if(min > c_pts) {
-											min = c_pts;
-										}
-										queue_->pts_cache[0] = b_pts;
-										queue_->pts_cache[1] = c_pts;
-										queue_->frame_cache[1]->dts = (min + 2 * d_pts) / 3;
-										queue_->frame_cache[0]->dts = (min * 2 + d_pts) / 3;
-										queue_->inherit_super.pts = queue_->frame_cache[0]->dts;
-										queue_->frame_cache[1] = NULL;
-										queue_->frame_cache[0] = f;
-										queue_->status = frameStatus_inBframe;
-									}
-									break;
-								default:
-									break;
 								}
-								break;
-							case H265FrameType_B:
-								switch(bh->frame_type) {
-								case H265FrameType_I:
-								case H265FrameType_P:
-									{
-										queue_->frame_cache[1] = queue_->frame_cache[0];
-										queue_->frame_cache[0] = f;
-									}
-									break;
-								case H265FrameType_B:
-									{
-										uint64_t min = a_pts;
-										if(min > b_pts) {
-											min = b_pts;
-										}
-										if(min > c_pts) {
-											min = c_pts;
-										}
-										queue_->pts_cache[0] = b_pts;
-										queue_->pts_cache[1] = c_pts;
-										queue_->frame_cache[1]->dts = (min + 2 * d_pts) / 3;
-										queue_->frame_cache[0]->dts = (min * 2 + d_pts) / 3;
-										f->dts = min;
-										queue_->inherit_super.pts = min;
-										queue_->frame_cache[1] = NULL;
-										queue_->frame_cache[0] = f;
-										queue_->status = frameStatus_inBframe;
-									}
-									break;
-								default:
-									break;
-								}
-								break;
-							default:
-								break;
+								queue_->inherit_super.pts = lowest_pts;
 							}
-							break;
-						case frameStatus_inBframe:
-							switch(h->frame_type) {
-							case H265FrameType_I:
-							case H265FrameType_P:
-								switch(bh->frame_type) {
-								case H265FrameType_I:
-								case H265FrameType_P:
-									{
-										queue_->frame_cache[0]->dts = queue_->frame_cache[0]->pts;
-										queue_->inherit_super.pts = queue_->frame_cache[0]->dts;
-										queue_->pts_cache[0] = queue_->frame_cache[0]->pts;
-										queue_->pts_cache[1] = 0;
-										queue_->frame_cache[0] = f;
-										queue_->frame_cache[1] = NULL;
-										queue_->status = frameStatus_normal;
-									}
-									break;
-								case H265FrameType_B:
-									{
-										queue_->frame_cache[0] = f;
-									}
-									break;
-								default:
-									break;
+							else {
+								uint64_t lowest_pts = FrameQueue_getLowestPts(
+									ff,
+									queue_,
+									false);
+								// check with frame_cache
+								if(!FrameQueue_updateFrameQueue(
+									queue_,
+									lowest_pts)) {
+									// check with frame
+									FrameQueue_updateFrame(
+										ff,
+										queue_,
+										lowest_pts);
+									ff = NULL;
 								}
-								break;
-							case H265FrameType_B:
-								switch(bh->frame_type) {
-								case H265FrameType_I:
-								case H265FrameType_P:
-									{
-										uint64_t min = b_pts;
-										if(min > d_pts) {
-											min = d_pts;
-										}
-										if(min > e_pts) {
-											min = e_pts;
-										}
-										uint64_t *pcache = queue_->pts_cache;
-										if(b_pts != min) {
-											*pcache = b_pts;
-											++ pcache;
-										}
-										if(d_pts != min) {
-											*pcache = d_pts;
-											++ pcache;
-										}
-										if(e_pts != min) {
-											*pcache = e_pts;
-											++ pcache;
-										}
-										queue_->frame_cache[0]->dts = min;
-										min = a_pts;
-										d_pts = queue_->pts_cache[0];
-										e_pts = queue_->pts_cache[1];
-										if(min > d_pts) {
-											min = d_pts;
-										}
-										if(min > e_pts) {
-											min = e_pts;
-										}
-										pcache = queue_->pts_cache;
-										if(a_pts != min) {
-											*pcache = a_pts;
-											++ pcache;
-										}
-										if(d_pts != min) {
-											*pcache = d_pts;
-											++ pcache;
-										}
-										if(e_pts != min) {
-											*pcache = e_pts;
-											++ pcache;
-										}
-										f->dts = min;
-										queue_->inherit_super.pts = min;
-										queue_->frame_cache[0] = f;
-									}
-									break;
-								case H265FrameType_B:
-									{
-										uint64_t min = a_pts;
-										if(min > d_pts) {
-											min = d_pts;
-										}
-										if(min > e_pts) {
-											min = e_pts;
-										}
-										uint64_t *pcache = queue_->pts_cache;
-										if(a_pts != min) {
-											*pcache = a_pts;
-											++ pcache;
-										}
-										if(d_pts != min) {
-											*pcache = d_pts;
-											++ pcache;
-										}
-										if(e_pts != min) {
-											*pcache = e_pts;
-											++ pcache;
-										}
-										f->dts = min;
-										queue_->inherit_super.pts = min;
-										queue_->frame_cache[0] = f;
-										queue_->frame_cache[1] = NULL;
-									}
-									break;
-								default:
-									break;
-								}
-								break;
-							default:
-								break;
+								// clear pts_cache (in this mode, not use.)
+								queue_->pts_cache[0] = 0;
+								queue_->pts_cache[1] = 0;
+								queue_->pts_cache[2] = 0;
+								queue_->inherit_super.pts = lowest_pts;
 							}
-							break;
 						}
+						// rotate frame cache
+						queue_->frame_cache[2] = queue_->frame_cache[1];
+						queue_->frame_cache[1] = queue_->frame_cache[0];
+						queue_->frame_cache[0] = ff;
 					}
 					break;
 				}
