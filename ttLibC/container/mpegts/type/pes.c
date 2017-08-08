@@ -209,7 +209,7 @@ ttLibC_Pes TT_VISIBILITY_HIDDEN *ttLibC_Pes_getPacket(
 		bool alloc_flag = false;
 		// if no data, alloc.
 		if(frame_buffer == NULL) {
-			frame_buffer_size = 65536;
+			frame_buffer_size = 0x7FFFFFFF;
 			frame_buffer = ttLibC_malloc(frame_buffer_size);
 			if(frame_buffer == NULL) {
 				ERR_PRINT("failed to allocate frame buffer for pes.");
