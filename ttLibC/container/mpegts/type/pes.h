@@ -25,6 +25,7 @@ typedef struct ttLibC_Container_Mpegts_Pes {
 	ttLibC_Frame *frame;
 	size_t frame_size;
 	bool is_used;
+	ttLibC_DynamicBuffer *buffer; // reading buffer.
 } ttLibC_Container_Mpegts_Pes;
 
 typedef ttLibC_Container_Mpegts_Pes ttLibC_Pes;

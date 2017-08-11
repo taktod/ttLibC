@@ -113,12 +113,7 @@ ttLibC_Pes TT_VISIBILITY_HIDDEN *ttLibC_Pes_getPacket(
 		size_t data_size,
 		uint8_t stream_type,
 		uint16_t pid) {
-	// just now, possible to handle only 65536 byte of data.
-	// TODO to use dynamicBuffer to use more than 65536 byte.
-	// hold the buffer for frame.
-	uint8_t *frame_buffer = NULL; // target buffer.
-	size_t frame_buffer_size = 0; // total buffer size.
-	size_t frame_buffer_next_pos = 0; // current update position
+	ttLibC_DynamicBuffer *frame_buffer = NULL;
 
 	// read header.
 	ttLibC_ByteReader *reader = ttLibC_ByteReader_make(data, data_size, ByteUtilType_default);
@@ -199,9 +194,7 @@ ttLibC_Pes TT_VISIBILITY_HIDDEN *ttLibC_Pes_getPacket(
 		if(prev_pes != NULL) {
 			// get prev frame data, and use it.
 			if(!prev_pes->inherit_super.inherit_super.inherit_super.is_non_copy) {
-				frame_buffer = prev_pes->inherit_super.inherit_super.inherit_super.data;
-				frame_buffer_size = prev_pes->inherit_super.inherit_super.inherit_super.data_size;
-				frame_buffer_next_pos = 0;
+				frame_buffer = prev_pes->buffer;
 			}
 			// assume as non copy.
 			prev_pes->inherit_super.inherit_super.inherit_super.is_non_copy = true;
@@ -209,19 +202,16 @@ ttLibC_Pes TT_VISIBILITY_HIDDEN *ttLibC_Pes_getPacket(
 		bool alloc_flag = false;
 		// if no data, alloc.
 		if(frame_buffer == NULL) {
-			frame_buffer_size = 0x7FFFFFFF;
-			frame_buffer = ttLibC_malloc(frame_buffer_size);
-			if(frame_buffer == NULL) {
-				ERR_PRINT("failed to allocate frame buffer for pes.");
-				return NULL;
-			}
+			frame_buffer = ttLibC_DynamicBuffer_make();
 			alloc_flag = true;
-			frame_buffer_next_pos = 0;
+		}
+		else {
+			ttLibC_DynamicBuffer_empty(frame_buffer);
 		}
 		ttLibC_Pes *pes = ttLibC_Pes_make(
 				prev_pes,
-				frame_buffer,
-				frame_buffer_size,
+				NULL,
+				0,
 				true,
 				pts,
 				90000,
@@ -231,14 +221,14 @@ ttLibC_Pes TT_VISIBILITY_HIDDEN *ttLibC_Pes_getPacket(
 		if(pes == NULL) {
 			ERR_PRINT("failed to make pes.");
 			if(alloc_flag) {
-				ttLibC_free(frame_buffer);
+				ttLibC_DynamicBuffer_close(&frame_buffer);
 			}
 			return NULL;
 		}
 		pes->frame_size = frame_size;
 		pes->inherit_super.inherit_super.inherit_super.is_non_copy = false;
-		memcpy(frame_buffer, data, data_size);
-		pes->inherit_super.inherit_super.inherit_super.buffer_size = data_size; // write the copyed size.
+		pes->buffer = frame_buffer;
+		ttLibC_DynamicBuffer_append(frame_buffer, data, data_size);
 		return pes;
 	}
 	else {
@@ -246,15 +236,8 @@ ttLibC_Pes TT_VISIBILITY_HIDDEN *ttLibC_Pes_getPacket(
 		data_size -= reader->read_size;
 		ttLibC_ByteReader_close(&reader);
 
-		frame_buffer = prev_pes->inherit_super.inherit_super.inherit_super.data;
-		frame_buffer_size = prev_pes->inherit_super.inherit_super.inherit_super.data_size;
-		frame_buffer_next_pos = prev_pes->inherit_super.inherit_super.inherit_super.buffer_size;
-		if(frame_buffer_size < frame_buffer_next_pos + data_size) {
-			ERR_PRINT("data is overflowed.");
-			return NULL;
-		}
-		memcpy(frame_buffer + frame_buffer_next_pos, data, data_size);
-		prev_pes->inherit_super.inherit_super.inherit_super.buffer_size += data_size; // update copyed size.
+		frame_buffer = prev_pes->buffer;
+		ttLibC_DynamicBuffer_append(frame_buffer, data, data_size);
 		return prev_pes;
 	}
 }
@@ -263,14 +246,12 @@ bool TT_VISIBILITY_HIDDEN ttLibC_Pes_getFrame(
 		ttLibC_Pes *pes,
 		ttLibC_getFrameFunc callback,
 		void *ptr) {
-	uint8_t *buffer = NULL;
-	size_t left_size = 0;
+	uint8_t *buffer = ttLibC_DynamicBuffer_refData(pes->buffer);
+	size_t left_size = ttLibC_DynamicBuffer_refSize(pes->buffer);
 	switch(pes->frame_type) {
 	case frameType_aac:
 		{
 			// data should be adts.
-			buffer = pes->inherit_super.inherit_super.inherit_super.data;
-			left_size = pes->inherit_super.inherit_super.inherit_super.buffer_size;
 			uint64_t sample_num_count = 0;
 			uint32_t sample_rate = 0;
 			do {
@@ -304,8 +285,6 @@ bool TT_VISIBILITY_HIDDEN ttLibC_Pes_getFrame(
 	case frameType_h264:
 		{
 			// data should be h264 nal.
-			buffer = pes->inherit_super.inherit_super.inherit_super.data;
-			left_size = pes->inherit_super.inherit_super.inherit_super.buffer_size;
 			do {
 				ttLibC_H264 *h264 = ttLibC_H264_getFrame(
 						(ttLibC_H264 *)pes->frame,
@@ -330,8 +309,6 @@ bool TT_VISIBILITY_HIDDEN ttLibC_Pes_getFrame(
 		break;
 	case frameType_mp3:
 		{
-			buffer = pes->inherit_super.inherit_super.inherit_super.data;
-			left_size = pes->inherit_super.inherit_super.inherit_super.buffer_size;
 			uint64_t sample_num_count = 0;
 			uint32_t sample_rate = 0;
 			do {
@@ -542,6 +519,7 @@ void TT_VISIBILITY_HIDDEN ttLibC_Pes_close(ttLibC_Pes **pes) {
 			ttLibC_free(target->inherit_super.inherit_super.inherit_super.data);
 		}
 	}
+	ttLibC_DynamicBuffer_close(&target->buffer);
 	ttLibC_Frame_close(&target->frame);
 	ttLibC_free(target);
 	*pes = NULL;
