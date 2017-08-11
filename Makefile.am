@@ -102,7 +102,8 @@ nobase_include_HEADERS += \
 	ttLibC/net/net.h \
 	ttLibC/net/tcp.h \
 	ttLibC/net/tetty.h \
-	ttLibC/net/udp.h
+	ttLibC/net/udp.h \
+	ttLibC/net/tetty2/tcpBootstrap.h
 endif
 
 if ENABLE_OPUS
