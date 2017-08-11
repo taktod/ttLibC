@@ -43,6 +43,7 @@ nobase_include_HEADERS= \
 	ttLibC/util/ioUtil.h \
 	ttLibC/util/stlListUtil.h \
 	ttLibC/util/stlMapUtil.h \
+	ttLibC/util/tetty2.h \
 	ttLibC/allocator.h \
 	ttLibC/log.h \
 	ttLibC/ttLibC.h
