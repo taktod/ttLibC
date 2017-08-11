@@ -17,6 +17,7 @@
 #include "../../../ttLibC_predef.h"
 #include "../../../_log.h"
 #include "../../../allocator.h"
+#include "../../tetty2/tcpBootstrap.h"
 #include <string.h>
 
 #include "../../../frame/frame.h"
