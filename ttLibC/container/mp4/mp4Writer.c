@@ -212,7 +212,7 @@ static bool Mp4Writer_makeTrak(void *ptr, void *key, void *item) {
 			case frameType_h264:
 			case frameType_h265:
 				if((track->use_mode & containerWriter_enable_dts) != 0) {
-					// edtsとelst([duration 0] [mediatime = timebase] [rate 1.0]にする。)
+					// edts elst([duration 0] [mediatime = timebase] [rate 1.0])
 					in_size = ttLibC_HexUtil_makeBuffer("00 00 00 24 65 64 74 73 00 00 00 1C 65 6C 73 74 00 00 00 00 00 00 00 01 00 00 00 00", buf, 256);
 					ttLibC_DynamicBuffer_append(buffer, buf, in_size);
 					uint32_t be_mediatime = be_uint32_t(track->h26x_configData->timebase / 5);

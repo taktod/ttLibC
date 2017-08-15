@@ -23,8 +23,8 @@ extern "C" {
 typedef struct ttLibC_MpegtsWriteTrack {
 	ttLibC_ContainerWriter_WriteTrack inherit_super;
 	uint8_t cc; // continuity counter.
-	ttLibC_DynamicBuffer *tmp_buffer; // mpegtsのデータを構築するときに利用する一時buffer
-	ttLibC_DynamicBuffer *tmp_frame_buffer; // mpegtsデータを構築するときに一時的に利用するbuffer.
+	ttLibC_DynamicBuffer *tmp_buffer;
+	ttLibC_DynamicBuffer *tmp_frame_buffer;
 } ttLibC_MpegtsWriteTrack;
 
 typedef struct ttLibC_ContainerWriter_MpegtsWriter_ {

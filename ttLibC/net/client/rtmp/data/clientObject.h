@@ -45,7 +45,6 @@ typedef struct ttLibC_Net_Client_Rtmp_Data_ClientObject{
 	ttLibC_StlMap *send_headers; // int -> header map
 
 	// handshake
-	// あとはこれがまずいのか・・・
 	ttLibC_RtmpHandshake_Phase phase;
 	uint8_t *c2_value;
 //	uint8_t *s2_value;

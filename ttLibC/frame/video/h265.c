@@ -409,17 +409,13 @@ static Error_e H265_analyzeSPSNut(
 		uint8_t *data,
 		size_t data_size) {
 //	LOG_DUMP(data, data_size, true);
-	// 解析を実施してみる。
-	// とりあえず先頭の2byteはどのnalであるかといった情報なので、パス。
-/*	data += 2;
-	data_size -= 2;*/
-	// あとは内容を読んでいけばいいか。
+	// try to analyze.
 	ttLibC_ByteReader *reader = ttLibC_ByteReader_make(data, data_size, ByteUtilType_h26x);
 	// for bidden 1 bit sync用
 	ttLibC_ByteReader_bit(reader, 1);
 	// nal type
 	ttLibC_ByteReader_bit(reader, 6);
-	// nuh_layer_id これが0じゃない場合はこのままでは動作しないかも。
+	// nuh_layer_id (this should be 0?)
 	ttLibC_ByteReader_bit(reader, 6);
 	// nuh temporal id + 1
 	ttLibC_ByteReader_bit(reader, 3);
@@ -437,7 +433,7 @@ static Error_e H265_analyzeSPSNut(
 		ttLibC_ByteReader_bit(reader, 1);
 		// general profile idc
 		ttLibC_ByteReader_bit(reader, 5);
-		// general profile compatibility flags 32個
+		// general profile compatibility flags (32 information)
 		ttLibC_ByteReader_bit(reader, 32);
 		// general progressive source flag
 		ttLibC_ByteReader_bit(reader, 1);
@@ -469,7 +465,6 @@ static Error_e H265_analyzeSPSNut(
 }
 
 uint32_t TT_VISIBILITY_DEFAULT ttLibC_H265_getWidth(ttLibC_H265 *prev_frame, uint8_t *data, size_t data_size) {
-	// nalを分解して、spsをみつけたら、そこからwidthを取り出す
 	uint32_t width = 0;
 	if(prev_frame != 0) {
 		width = prev_frame->inherit_super.width;
@@ -490,7 +485,6 @@ uint32_t TT_VISIBILITY_DEFAULT ttLibC_H265_getWidth(ttLibC_H265 *prev_frame, uin
 				return 0;
 			}
 			if(info.nal_unit_type == H265NalType_spsNut) {
-				// spsを解析して、結果のwidthを応答すればよい。
 				H265_analyzeSPSNut(
 						&ref,
 						check_data + info.data_pos,
@@ -521,7 +515,6 @@ uint32_t TT_VISIBILITY_DEFAULT ttLibC_H265_getWidth(ttLibC_H265 *prev_frame, uin
 }
 
 uint32_t TT_VISIBILITY_DEFAULT ttLibC_H265_getHeight(ttLibC_H265 *prev_frame, uint8_t *data, size_t data_size) {
-	// nalを分解して、spsを見つけたらそこからheightを取り出す。
 	uint32_t height = 0;
 	if(prev_frame != 0) {
 		height = prev_frame->inherit_super.height;
@@ -542,7 +535,6 @@ uint32_t TT_VISIBILITY_DEFAULT ttLibC_H265_getHeight(ttLibC_H265 *prev_frame, ui
 				return 0;
 			}
 			if(info.nal_unit_type == H265NalType_spsNut) {
-				// spsを解析して、結果のwidthを応答すればよい。
 				H265_analyzeSPSNut(
 						&ref,
 						check_data + info.data_pos,
@@ -625,7 +617,8 @@ ttLibC_H265 TT_VISIBILITY_DEFAULT *ttLibC_H265_getFrame(
 //	case H265NalType_rsvVclR13:
 //	case H265NalType_rsvVclN14:
 //	case H265NalType_rsvVclR15:
-		// 多分ここ以下がkeyFrameとして扱ってよいものだと思われ。
+
+	// keyFrame begin?
 //	case H265NalType_blaWLp:
 //	case H265NalType_blaWRadl:
 //	case H265NalType_blaNLp:
@@ -641,7 +634,7 @@ ttLibC_H265 TT_VISIBILITY_DEFAULT *ttLibC_H265_getFrame(
 				pts,
 				timebase);
 //	case H265NalType_idrNLp:
-	case H265NalType_craNut: // もうsliceIDR扱いだとちょっとまずそうだね。
+	case H265NalType_craNut:
 		return ttLibC_H265_make(
 				prev_frame,
 				H265Type_sliceIDR,
@@ -652,7 +645,7 @@ ttLibC_H265 TT_VISIBILITY_DEFAULT *ttLibC_H265_getFrame(
 				non_copy_mode,
 				pts,
 				timebase);
-		// ここまでkeyFrame扱いできそうではある。
+		// -- keyFrame end?
 //	case H265NalType_rsvIrapVcl22:
 //	case H265NalType_rsvIrapVcl22:
 //	case H265NalType_rsvVcl24:
@@ -667,14 +660,11 @@ ttLibC_H265 TT_VISIBILITY_DEFAULT *ttLibC_H265_getFrame(
 	case H265NalType_vpsNut:
 	case H265NalType_spsNut:
 	case H265NalType_ppsNut:
-		// 前から順にデータを確認していって、これ以外のnalがみつかったら、動作完了(というか処理おわりとしなければならない。)
 		{
 			uint8_t *dat = data;
 			size_t dat_size = 0;
 			bool has_more = true;
-			// このデータサイズについて処理していく。
 			do {
-				// なんらかの処理を実施する。
 				switch(nal_info.nal_unit_type) {
 				case H265NalType_spsNut:
 				case H265NalType_vpsNut:
@@ -683,7 +673,7 @@ ttLibC_H265 TT_VISIBILITY_DEFAULT *ttLibC_H265_getFrame(
 					dat_size += nal_info.nal_size;
 					break;
 				default:
-					// 他の不順物がはいるまでループさせとく。
+					// if we found anything else, stop.
 					has_more = false;
 					break;
 				}
@@ -695,7 +685,6 @@ ttLibC_H265 TT_VISIBILITY_DEFAULT *ttLibC_H265_getFrame(
 				}
 			} while(true);
 			if(dat_size != 0) {
-				// なにかしらのデータがあるなら、応答する。(ほんとはsps pps vpsがきちんとあるか確認すべき)
 				return ttLibC_H265_make(
 						prev_frame,
 						H265Type_configData,
@@ -790,7 +779,7 @@ ttLibC_H265 TT_VISIBILITY_DEFAULT *ttLibC_H265_analyzeHvccTag(
 	size_t buf_size = 0;
 	/*
 	 * 1byte version
-	 * from vps 別にspsでもいいけど、spsだとこの情報がはいっていないことがまれにある模様。
+	 * from vps (sps could have version info, however, sometimes missing in sps.)
 	 * 2bit general profile space
 	 * 1bit general tier flag
 	 * 5bit general profile idc
@@ -798,9 +787,9 @@ ttLibC_H265 TT_VISIBILITY_DEFAULT *ttLibC_H265_analyzeHvccTag(
 	 * 6btye general constraint indicator flags
 	 * 1byte general level idc
 	 * 4bit reserved
-	 * 12bit spatial segmentation idc(使わない)
+	 * 12bit spatial segmentation idc(...)
 	 * 6bit reserved
-	 * 2bit parallelism type.(使わない?)
+	 * 2bit parallelism type.(...)
 	 * from sps
 	 *
 	 * 6bit reserved
@@ -812,12 +801,12 @@ ttLibC_H265 TT_VISIBILITY_DEFAULT *ttLibC_H265_analyzeHvccTag(
 	 * 5bit reserved
 	 * 3bit bit depth chroma minus 8
 	 *
-	 * 2byte framerate(使わない)
-	 * 2bit constant frame rate(使わない)
-	 * 3bit num temporal layers(vpsから)
-	 * 1bit temporal id nested(vpsから)
-	 * 2bit length size minus 1(3で埋める:4byteのsizeNalにしたいため。)
-	 * 1byte 要素数
+	 * 2byte framerate(...)
+	 * 2bit constant frame rate(...)
+	 * 3bit num temporal layers(from vps)
+	 * 1bit temporal id nested(from vps)
+	 * 2bit length size minus 1(should be 3, I want 4byte length size.)
+	 * 1byte (element num)
 	 *
 	 * loop for each nal
 	 *  1bit array complete ness.
@@ -835,9 +824,6 @@ ttLibC_H265 TT_VISIBILITY_DEFAULT *ttLibC_H265_analyzeHvccTag(
 	uint8_t *dat = data;
 	dat += 23;
 	for(uint32_t i = 0;i < nal_count;++ i) {
-		// ループして、vps sps ppsについては、記録しておく。
-		// それ以外の場合は、撤去してしまう。(SEIとか)
-		// 処理する。
 		ttLibC_H265_NalType nal_type = dat[0] & 0x3F;
 		uint32_t nal_count = (dat[1] << 8) | dat[2];
 		if(nal_count != 1) {
@@ -848,9 +834,7 @@ ttLibC_H265 TT_VISIBILITY_DEFAULT *ttLibC_H265_analyzeHvccTag(
 		case H265NalType_spsNut:
 		case H265NalType_ppsNut:
 		case H265NalType_vpsNut:
-			// 大丈夫っぽい。
 			{
-				// このnalは必要なので、データを書き出す必要がある。
 				buf[0] = 0x00;
 				buf[1] = 0x00;
 				buf[2] = 0x00;
@@ -909,16 +893,15 @@ size_t TT_VISIBILITY_DEFAULT ttLibC_H265_readHvccTag(
 	if(h265->type != H265Type_configData) {
 		return 0;
 	}
-	// まずvps sps ppsが全体でいくつあるか調べる
 	ttLibC_H265_NalInfo nal_info;
 	uint8_t *buf = h265->inherit_super.inherit_super.data;
 	size_t buf_size = h265->inherit_super.inherit_super.buffer_size;
-	// vps由来
+	// from vps
 	uint8_t  generalInfo[12] = {0};
 	uint32_t num_temporal_layers = 1;
 	uint32_t temporal_id_nested_flag = 1;
 
-	// sps由来
+	// from sps
 	uint32_t chroma_idc = 0;
 	uint32_t bitdepth_luna_minus8 = 0;
 	uint32_t bitdepth_chroma_minus8 = 0;
@@ -931,11 +914,10 @@ size_t TT_VISIBILITY_DEFAULT ttLibC_H265_readHvccTag(
 		case H265NalType_vpsNut:
 			{
 				ttLibC_ByteReader *reader = ttLibC_ByteReader_make(buf + nal_info.data_pos, nal_info.nal_size - nal_info.data_pos, ByteUtilType_h26x);
-				ttLibC_ByteReader_bit(reader, 28); // 16bit + 12bit読み飛ばし
+				ttLibC_ByteReader_bit(reader, 28); // 16bit + 12bit
 				num_temporal_layers = ttLibC_ByteReader_bit(reader, 3) + 1;
 				temporal_id_nested_flag = ttLibC_ByteReader_bit(reader, 1);
 				ttLibC_ByteReader_bit(reader, 16);
-//				uint8_t buf[12];
 				for(int i = 0;i < 12;++ i) {
 					generalInfo[i] = ttLibC_ByteReader_bit(reader, 8);
 				}
@@ -963,7 +945,6 @@ size_t TT_VISIBILITY_DEFAULT ttLibC_H265_readHvccTag(
 				uint32_t width, height;
 				width = ttLibC_ByteReader_expGolomb(reader, false);
 				height = ttLibC_ByteReader_expGolomb(reader, false);
-//				LOG_PRINT("%d x %d", width, height);
 				if(ttLibC_ByteReader_bit(reader, 1) == 1) {
 					ttLibC_ByteReader_expGolomb(reader, false);
 					ttLibC_ByteReader_expGolomb(reader, false);
@@ -981,37 +962,33 @@ size_t TT_VISIBILITY_DEFAULT ttLibC_H265_readHvccTag(
 		buf += nal_info.nal_size;
 		buf_size -= nal_info.nal_size;
 	}
-	// vpsから必要な情報を取り出す。
-	// spsから必要な情報を取り出す。
-	// データをつくっていく。bitでコントロールしているので、大きさは固定できるかな？
 	ttLibC_ByteConnector *connector = ttLibC_ByteConnector_make(data, data_size, ByteUtilType_default);
-	// Hvccタグの初めのbyteデータを作る。
-	// 初めは01固定
+	// start with 01
 	ttLibC_ByteConnector_bit(connector, 1, 8);
-	// vpsの4byte目以降12byteをかく(ただしnalを復元しなければならない。00 00 03を取り去る的なやつ。)
+	// TODO binary data from vps(4 - 16byte(however, remove nal syntax like 00 00 03))  
 	ttLibC_ByteConnector_string(connector, (const char *)generalInfo, 12);
 	// F0 00
 	ttLibC_ByteConnector_bit(connector, 0xF000, 16);
 	// FC
 	ttLibC_ByteConnector_bit(connector, 0xFC, 8);
-	// 6bit埋め chroma
+	// 6bit chroma
 	ttLibC_ByteConnector_bit(connector, 0x3F, 6);
 	ttLibC_ByteConnector_bit(connector, chroma_idc & 0x3, 2);
-	// 5bit埋め bitdepth luma minus 8
+	// 5bit bitdepth luma minus 8
 	ttLibC_ByteConnector_bit(connector, 0x1F, 5);
 	ttLibC_ByteConnector_bit(connector, bitdepth_luna_minus8 & 0x7, 3);
-	// 5bit埋め bitdepth chroa minus 8
+	// 5bit bitdepth chroa minus 8
 	ttLibC_ByteConnector_bit(connector, 0x1F, 5);
 	ttLibC_ByteConnector_bit(connector, bitdepth_chroma_minus8 & 0x7, 3);
 	// 00 00
 	ttLibC_ByteConnector_bit(connector, 0x0000, 16);
 	// 2bit 00
 	ttLibC_ByteConnector_bit(connector, 0x0, 2);
-	//  3bit temporal layersは1の方が都合がいい。それ以外がきたら、要注意
+	//  3bit temporal layers(if not 1, be careful)
 	ttLibC_ByteConnector_bit(connector, num_temporal_layers, 3);
-	// temporal id nested 1と思われ
+	// temporal id nested(1?)
 	ttLibC_ByteConnector_bit(connector, temporal_id_nested_flag, 1);
-	// 2bit 11(size lengthを4byteにする。これは固定したい)
+	// 2bit 11(size length = 4byte, I want to use this always.)
 	ttLibC_ByteConnector_bit(connector, 3, 2);
 	ttLibC_ByteConnector_bit(connector, nal_count, 8);
 
@@ -1027,7 +1004,6 @@ size_t TT_VISIBILITY_DEFAULT ttLibC_H265_readHvccTag(
 		buf_size -= nal_info.nal_size;
 	}
 	uint32_t write_size = connector->write_size;
-	// おしまい。
 	ttLibC_ByteConnector_close(&connector);
 	return write_size;
 }

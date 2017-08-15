@@ -419,7 +419,6 @@ bool TT_VISIBILITY_HIDDEN ttLibC_Pes_writePacket(
 			Buf_t_hex(header_buf, "00 00 80 80 05");
 			Buf_t_timestamp(header_buf, 0x21, pts);
 
-			// データをつくっておく。
 			switch(track->inherit_super.frame_type) {
 			case frameType_h264:
 //			case frameType_h265:

@@ -128,7 +128,7 @@ typedef struct ttLibC_ContainerWriter_WriteTrack {
 	ttLibC_ContainerWriter_Mode use_mode;
 } ttLibC_ContainerWriter_WriteTrack;
 
-// ContainerWriterの詳細
+// ContainerWriter
 typedef struct ttLibC_ContainerWriter_ {
 	ttLibC_ContainerWriter     inherit_super;
 	ttLibC_StlMap             *track_list;
@@ -173,7 +173,6 @@ bool ttLibC_ContainerWriter_isReadyToWrite(ttLibC_ContainerWriter_ *writer);
 
 void ttLibC_ContainerWriteTrack_close(ttLibC_ContainerWriter_WriteTrack **track);
 
-// 内部で利用するcontainerWriterのmake動作
 ttLibC_ContainerWriter *ttLibC_ContainerWriter_make_(
 		ttLibC_Container_Type container_type,
 		size_t                writer_size,

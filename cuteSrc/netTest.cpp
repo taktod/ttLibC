@@ -107,7 +107,6 @@ static void tetty2ServerTest() {
 	ttLibC_Tetty2Bootstrap_pipeline_addLast(bootstrap, &handler);
 
 	ttLibC_TcpBootstrap_bind(bootstrap, 12345);
-	// あとはupdateを実行し続ければよい
 	while(true) {
 		ttLibC_TcpBootstrap_update(bootstrap, 1000);
 		if(bootstrap->error_number != 0) {
