@@ -945,25 +945,61 @@ ttLibC_H264 TT_VISIBILITY_DEFAULT *ttLibC_H264_getFrame(
 				timebase);
 	case H264NalType_sliceIDR:
 		// TODO to improve this code. it is better to check, first mb in slice.
+		target_size = nal_info.nal_size;
+		// try to get next data.
+		do {
+			if(target_size == data_size) {
+				break;
+			}
+			Error_e e = ttLibC_H264_getNalInfo2(&nal_info, data + target_size, data_size - target_size);
+			if((e & 0x000FFFFF) != Error_noError) {
+				if((e & 0x000FFFFF) != Error_NeedMoreInput) {
+					ERR_PRINT("failed to get nal info. %x", e);
+				}
+				return NULL;
+			}
+			if(nal_info.nal_unit_type != H264NalType_sliceIDR) {
+				break;
+				target_size += nal_info.nal_size;
+			}
+		} while(true);
 		return ttLibC_H264_make(
 				prev_frame,
 				H264Type_sliceIDR,
 				width,
 				height,
 				data,
-				data_size,
+				target_size,
 				non_copy_mode,
 				pts,
 				timebase);
 	case H264NalType_slice:
 		// TODO to improve this code. it is better to check, first mb in slice.
+		target_size = nal_info.nal_size;
+		// try to get next data.
+		do {
+			if(target_size == data_size) {
+				break;
+			}
+			Error_e e = ttLibC_H264_getNalInfo2(&nal_info, data + target_size, data_size - target_size);
+			if((e & 0x000FFFFF) != Error_noError) {
+				if((e & 0x000FFFFF) != Error_NeedMoreInput) {
+					ERR_PRINT("failed to get nal info. %x", e);
+				}
+				return NULL;
+			}
+			if(nal_info.nal_unit_type != H264NalType_slice) {
+				break;
+				target_size +=  nal_info.nal_size;
+			}
+		} while(true);
 		return ttLibC_H264_make(
 				prev_frame,
 				H264Type_slice,
 				width,
 				height,
 				data,
-				data_size,
+				target_size,
 				non_copy_mode,
 				pts,
 				timebase);
