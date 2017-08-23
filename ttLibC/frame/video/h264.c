@@ -960,8 +960,8 @@ ttLibC_H264 TT_VISIBILITY_DEFAULT *ttLibC_H264_getFrame(
 			}
 			if(nal_info.nal_unit_type != H264NalType_sliceIDR) {
 				break;
-				target_size += nal_info.nal_size;
 			}
+			target_size += nal_info.nal_size;
 		} while(true);
 		return ttLibC_H264_make(
 				prev_frame,
@@ -990,8 +990,8 @@ ttLibC_H264 TT_VISIBILITY_DEFAULT *ttLibC_H264_getFrame(
 			}
 			if(nal_info.nal_unit_type != H264NalType_slice) {
 				break;
-				target_size +=  nal_info.nal_size;
 			}
+			target_size +=  nal_info.nal_size;
 		} while(true);
 		return ttLibC_H264_make(
 				prev_frame,
