@@ -200,6 +200,12 @@ bool TT_VISIBILITY_HIDDEN ttLibC_FlvAudioTag_writeTag(
 		ttLibC_Frame *frame,
 		ttLibC_ContainerWriteFunc callback,
 		void *ptr) {
+	if(frame->type == frameType_aac) {
+		ttLibC_Aac *aac = (ttLibC_Aac *)frame;
+		if(aac->type == AacType_dsi) {
+			return true;
+		}
+	}
 	ttLibC_DynamicBuffer *buffer = ttLibC_DynamicBuffer_make();
 	ttLibC_DynamicBuffer_alloc(buffer, 11);
 	uint8_t *data = ttLibC_DynamicBuffer_refData(buffer);
