@@ -391,18 +391,21 @@ static bool Mp4Atom_getFmp4FrameCallback(
 		}
 		if(pts + pts_offset >= ttLibC_Elst_refCurrentMediatime(track->elst)) {
 			pts = pts + pts_offset - ttLibC_Elst_refCurrentMediatime(track->elst);
-			if(!Mp4Atom_getFrame(
-					track,
-					target_buffer,
-					size,
-					pts,
-					track->timebase,
-					duration,
-					reader->callback,
-					reader->ptr)) {
-				reader->error_number = 5;
-				return false;
-			}
+		}
+		else {
+			pts = 0;
+		}
+		if(!Mp4Atom_getFrame(
+				track,
+				target_buffer,
+				size,
+				pts,
+				track->timebase,
+				duration,
+				reader->callback,
+				reader->ptr)) {
+			reader->error_number = 5;
+			return false;
 		}
 	} while(ttLibC_Trun_moveNext(track->trun));
 	return true;
