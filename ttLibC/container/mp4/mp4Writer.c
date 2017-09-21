@@ -699,6 +699,12 @@ static bool Mp4Writer_makeTraf(void *ptr, void *key, void *item) {
 							ERR_PRINT("ref frame is invalid.");
 							return false;
 						}
+						if(h264->inherit_super.type == videoType_key) {
+							// for keyFrame we need to update sap information
+							if(writer->current_sap_diff == 0xFFFFFFFF) {
+								writer->current_sap_diff = h264->inherit_super.inherit_super.pts - writer->inherit_super.current_pts_pos;
+							}
+						}
 						// get next frame to get duration of frame.
 						ttLibC_Frame *next_frame = ttLibC_FrameQueue_ref_first(track->inherit_super.frame_queue);
 						uint32_t duration = next_frame->dts - h264->inherit_super.inherit_super.dts;
@@ -1030,6 +1036,7 @@ static bool Mp4Writer_makeData(ttLibC_Mp4Writer_ *writer) {
 	writer->currentWritingBuffer = buffer;
 
 	// styp
+	writer->current_sap_diff = 0xFFFFFFFF; // clear sap_diff
 	size_t in_size = ttLibC_HexUtil_makeBuffer("00 00 00 18 73 74 79 70 6D 73 64 68 00 00 00 00 6D 73 64 68 6D 73 69 78", buf, 256);
 	ttLibC_DynamicBuffer_append(buffer, buf, in_size);
 	// sidx
@@ -1046,7 +1053,8 @@ static bool Mp4Writer_makeData(ttLibC_Mp4Writer_ *writer) {
 	uint32_t duration_diff = writer->inherit_super.target_pos - writer->inherit_super.current_pts_pos;
 	uint32_t be_duration = be_uint32_t(duration_diff);
 	ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_duration, 4);
-	in_size = ttLibC_HexUtil_makeBuffer("90 00 00 00", buf, 256);
+	uint32_t sidx_sapPos = ttLibC_DynamicBuffer_refSize(buffer);
+	in_size = ttLibC_HexUtil_makeBuffer("00 00 00 00", buf, 256);
 	ttLibC_DynamicBuffer_append(buffer, buf, in_size);
 	// moof
 	uint32_t moofSizePos = ttLibC_DynamicBuffer_refSize(buffer);
@@ -1072,6 +1080,17 @@ static bool Mp4Writer_makeData(ttLibC_Mp4Writer_ *writer) {
 	b = ttLibC_DynamicBuffer_refData(buffer);
 	b += sidx_inner_sizePos;
 	*((uint32_t *)b) = be_uint32_t((ttLibC_DynamicBuffer_refSize(buffer) - moofSizePos));
+	if(writer->current_sap_diff != 0xFFFFFFFF) {
+		b = ttLibC_DynamicBuffer_refData(buffer);
+		b += sidx_sapPos;
+		if(writer->current_sap_diff == 0) {
+			*b = 0x90;
+		}
+		else {
+			*((uint32_t *)b) = be_uint32_t(writer->current_sap_diff);
+			*b = 0x10;
+		}
+	}
 	// done.
 
 	bool result = true;

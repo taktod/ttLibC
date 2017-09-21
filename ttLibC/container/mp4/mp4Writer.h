@@ -33,6 +33,7 @@ typedef struct ttLibC_ContainerWriter_Mp4Writer_ {
 	ttLibC_DynamicBuffer   *currentWritingBuffer;
 	uint32_t                currentMoofSizePos;
 	uint32_t                chunk_counter;
+	uint32_t                current_sap_diff; // sap = stream access point 
 } ttLibC_ContainerWriter_Mp4Writer_;
 
 typedef ttLibC_ContainerWriter_Mp4Writer_ ttLibC_Mp4Writer_;
