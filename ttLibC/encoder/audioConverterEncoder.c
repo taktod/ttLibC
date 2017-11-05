@@ -16,6 +16,8 @@
 #include "../allocator.h"
 #include "../util/hexUtil.h"
 #include "../frame/audio/aac.h"
+#include "../frame/audio/pcmAlaw.h"
+#include "../frame/audio/pcmMulaw.h"
 #include <AudioToolbox/AudioToolbox.h>
 #include <string.h>
 
@@ -87,9 +89,15 @@ ttLibC_AcEncoder TT_VISIBILITY_DEFAULT *ttLibC_AcEncoder_make(
 		ttLibC_Aac_getDsiInfo(AacObject_Low, sample_rate, channel_num, &encoder->aac_dsi_info, sizeof(uint64_t));
 		break;
 	case frameType_mp3:
-		ERR_PRINT("mp3 encode is not support.");
+		ERR_PRINT("mp3 encode is not support."); // @see https://developer.apple.com/library/content/documentation/MusicAudio/Conceptual/CoreAudioOverview/SupportedAudioFormatsMacOSX/SupportedAudioFormatsMacOSX.html#//apple_ref/doc/uid/TP40003577-CH7-SW1
 		ttLibC_free(encoder);
 		return NULL;
+	case frameType_pcm_alaw:
+		dstFormat.mFormatID = kAudioFormatALaw;
+		break;
+	case frameType_pcm_mulaw:
+		dstFormat.mFormatID = kAudioFormatULaw;
+		break;
 	default:
 		ERR_PRINT("unknown frame type:%d", encoder->frame_type);
 		ttLibC_free(encoder);
@@ -109,11 +117,19 @@ ttLibC_AcEncoder TT_VISIBILITY_DEFAULT *ttLibC_AcEncoder_make(
 	}
 	uint32_t size = 0;
 	size = sizeof(target_bitrate);
-	err = AudioConverterSetProperty(encoder->converter, kAudioConverterEncodeBitRate, size, &target_bitrate);
-	if(err != noErr) {
-		ERR_PRINT("failed to set bitrate for audioConverter.");
-		ttLibC_AcEncoder_close((ttLibC_AcEncoder **)&encoder);
-		return NULL;
+	switch(encoder->frame_type) {
+	case frameType_aac:
+		{
+			err = AudioConverterSetProperty(encoder->converter, kAudioConverterEncodeBitRate, size, &target_bitrate);
+			if(err != noErr) {
+				ERR_PRINT("failed to set bitrate for audioConverter.");
+				ttLibC_AcEncoder_close((ttLibC_AcEncoder **)&encoder);
+				return NULL;
+			}
+		}
+		break;
+	default:
+		break;
 	}
 	// setup buffer for data.
 	size = sizeof(dstFormat);
@@ -202,6 +218,48 @@ static bool AcEncoder_checkEncodedData(
 			return callback(ptr, encoder->audio);
 		}
 		break;
+	case frameType_pcm_alaw:
+		{
+			ttLibC_PcmAlaw *pcmAlaw = ttLibC_PcmAlaw_make(
+				(ttLibC_PcmAlaw *)encoder->audio,
+				encoder->sample_rate,
+				data_size,
+				encoder->channel_num,
+				data,
+				data_size,
+				true,
+				encoder->pts,
+				encoder->sample_rate);
+			if(pcmAlaw == NULL) {
+				ERR_PRINT("failed to make pamalaw frame.");
+				return false;
+			}
+			encoder->pts += data_size;
+			encoder->audio = (ttLibC_Audio *)pcmAlaw;
+			return callback(ptr, encoder->audio);
+		}
+		break;
+	case frameType_pcm_mulaw:
+		{
+			ttLibC_PcmMulaw *pcmMulaw = ttLibC_PcmMulaw_make(
+				(ttLibC_PcmMulaw *)encoder->audio,
+				encoder->sample_rate,
+				data_size,
+				encoder->channel_num,
+				data,
+				data_size,
+				true,
+				encoder->pts,
+				encoder->sample_rate);
+			if(pcmMulaw == NULL) {
+				ERR_PRINT("failed to make pamalaw frame.");
+				return false;
+			}
+			encoder->pts += data_size;
+			encoder->audio = (ttLibC_Audio *)pcmMulaw;
+			return callback(ptr, encoder->audio);
+		}
+		break;
 	default:
 		LOG_PRINT("unsupported audio frame:%d", encoder->frame_type);
 		return false;
@@ -249,14 +307,28 @@ bool TT_VISIBILITY_DEFAULT ttLibC_AcEncoder_encode(
 		}
 		// check for generate data.
 		pcm = NULL;
-		for(uint32_t i = 0;i < ioOutputDataPackets;++ i) {
+		
+		if(encoder_->outputPacketDescriptions == NULL) {
 			if(!AcEncoder_checkEncodedData(
-					encoder_,
-					encoder_->data + encoder_->outputPacketDescriptions[i].mStartOffset,
-					encoder_->outputPacketDescriptions[i].mDataByteSize,
-					callback,
-					ptr)) {
+				encoder_,
+				encoder_->data,
+				ioOutputDataPackets,
+				callback,
+				ptr
+			)) {
 				return false;
+			}
+		}
+		else {
+			for(uint32_t i = 0;i < ioOutputDataPackets;++ i) {
+				if(!AcEncoder_checkEncodedData(
+						encoder_,
+						encoder_->data + encoder_->outputPacketDescriptions[i].mStartOffset,
+						encoder_->outputPacketDescriptions[i].mDataByteSize,
+						callback,
+						ptr)) {
+					return false;
+				}
 			}
 		}
 	} while(err == noErr);

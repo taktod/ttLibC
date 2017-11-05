@@ -76,6 +76,12 @@ ttLibC_AcDecoder TT_VISIBILITY_DEFAULT *ttLibC_AcDecoder_make(
 	case frameType_mp3:
 		srcFormat.mFormatID         = kAudioFormatMPEGLayer3;
 		break;
+	case frameType_pcm_alaw:
+		srcFormat.mFormatID         = kAudioFormatALaw;
+		break;
+	case frameType_pcm_mulaw:
+		srcFormat.mFormatID         = kAudioFormatULaw;
+		break;
 	default:
 		ttLibC_free(decoder);
 		ERR_PRINT("unknown frame type:%d", decoder->frame_type);
@@ -148,16 +154,27 @@ static OSStatus AcDecoder_decodeDataProc(
 				return 0;
 			}
 		}
+		/* no break */
+	case frameType_mp3:
+		{
+			decoder->aspds.mDataByteSize = data_size;
+			decoder->aspds.mStartOffset = 0;
+			decoder->aspds.mVariableFramesInPacket = audio->sample_num;
+			*ioNumberDataPackets = 1;
+		}
+		break;
+	case frameType_pcm_alaw:
+	case frameType_pcm_mulaw:
+		{
+			decoder->aspds.mDataByteSize = data_size;
+			decoder->aspds.mStartOffset = 0;
+			decoder->aspds.mVariableFramesInPacket = 1;
+			*ioNumberDataPackets = audio->sample_num;
+		}
 		break;
 	default:
 		break;
 	}
-	// update information.
-	decoder->aspds.mDataByteSize = data_size;
-	decoder->aspds.mStartOffset = 0;
-	decoder->aspds.mVariableFramesInPacket = audio->sample_num;
-	// packet number.
-	*ioNumberDataPackets = 1;
 	// supply data.
 	ioData->mBuffers[0].mData = data;
 	ioData->mBuffers[0].mDataByteSize = data_size;

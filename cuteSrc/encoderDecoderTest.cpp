@@ -361,6 +361,132 @@ static void theoraTest() {
 	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
+#if defined(__ENABLE_APPLE__)
+typedef struct acMulawTest_t{
+	ttLibC_AuPlayer *player;
+	ttLibC_AcDecoder *decoder;
+} acMulawTest_t;
+
+static bool acMulawTest_decodeCallback(void *ptr, ttLibC_PcmS16 *pcm) {
+	acMulawTest_t *testData = (acMulawTest_t *)ptr;
+	while(!ttLibC_AuPlayer_queue(testData->player, pcm)) {
+		usleep(10);
+	}
+	return true;
+}
+
+static bool acMulawTest_encodeCallback(void *ptr, ttLibC_Audio *mulaw) {
+	acMulawTest_t *testData = (acMulawTest_t *)ptr;
+	return ttLibC_AcDecoder_decode(testData->decoder, mulaw, acMulawTest_decodeCallback, ptr);
+}
+#endif
+
+static void acMulawTest() {
+	LOG_PRINT("acMulawTest");
+#if defined(__ENABLE_APPLE__)
+	uint32_t sample_rate = 8000, channel_num = 1;
+	ttLibC_BeepGenerator *generator = ttLibC_BeepGenerator_make(
+			PcmS16Type_littleEndian,
+			440,
+			sample_rate,
+			channel_num);
+	ttLibC_AuPlayer *player = ttLibC_AuPlayer_make(sample_rate, channel_num, AuPlayerType_DefaultOutput);
+	ttLibC_AcEncoder *encoder = ttLibC_AcEncoder_make(
+			sample_rate,
+			channel_num,
+			96000,
+			frameType_pcm_mulaw);
+	ttLibC_AcDecoder *decoder = ttLibC_AcDecoder_make(
+			sample_rate,
+			channel_num,
+			frameType_pcm_mulaw);
+	ttLibC_PcmS16 *pcm = NULL, *p;
+	acMulawTest_t testData;
+	generator->amplitude = 30000;
+	testData.decoder = decoder;
+	testData.player = player;
+	for(int i = 0;i < 100;++ i) {
+		p = ttLibC_BeepGenerator_makeBeepByMiliSec(generator, pcm, 100);
+		if(p == NULL) {
+			break;
+		}
+		pcm = p;
+		if(!ttLibC_AcEncoder_encode(encoder, pcm, acMulawTest_encodeCallback, &testData)) {
+			break;
+		}
+	}
+	ttLibC_AcDecoder_close(&decoder);
+	ttLibC_AcEncoder_close(&encoder);
+	ttLibC_PcmS16_close(&pcm);
+	ttLibC_AuPlayer_close(&player);
+	ttLibC_BeepGenerator_close(&generator);
+#endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
+
+#if defined(__ENABLE_APPLE__)
+typedef struct acAlawTest_t{
+	ttLibC_AuPlayer *player;
+	ttLibC_AcDecoder *decoder;
+} acAlawTest_t;
+
+static bool acAlawTest_decodeCallback(void *ptr, ttLibC_PcmS16 *pcm) {
+	acAlawTest_t *testData = (acAlawTest_t *)ptr;
+	while(!ttLibC_AuPlayer_queue(testData->player, pcm)) {
+		usleep(10);
+	}
+	return true;
+}
+
+static bool acAlawTest_encodeCallback(void *ptr, ttLibC_Audio *alaw) {
+	acAlawTest_t *testData = (acAlawTest_t *)ptr;
+	return ttLibC_AcDecoder_decode(testData->decoder, alaw, acAlawTest_decodeCallback, ptr);
+}
+#endif
+
+static void acAlawTest() {
+	LOG_PRINT("acAlawTest");
+#if defined(__ENABLE_APPLE__)
+	uint32_t sample_rate = 8000, channel_num = 1;
+	ttLibC_BeepGenerator *generator = ttLibC_BeepGenerator_make(
+			PcmS16Type_littleEndian,
+			440,
+			sample_rate,
+			channel_num);
+	ttLibC_AuPlayer *player = ttLibC_AuPlayer_make(sample_rate, channel_num, AuPlayerType_DefaultOutput);
+	ttLibC_AcEncoder *encoder = ttLibC_AcEncoder_make(
+			sample_rate,
+			channel_num,
+			96000,
+			frameType_pcm_alaw);
+	ttLibC_AcDecoder *decoder = ttLibC_AcDecoder_make(
+			sample_rate,
+			channel_num,
+			frameType_pcm_alaw);
+	ttLibC_PcmS16 *pcm = NULL, *p;
+	acAlawTest_t testData;
+	generator->amplitude = 30000;
+	testData.decoder = decoder;
+	testData.player = player;
+	for(int i = 0;i < 100;++ i) {
+		p = ttLibC_BeepGenerator_makeBeepByMiliSec(generator, pcm, 100);
+		if(p == NULL) {
+			break;
+		}
+		pcm = p;
+		if(!ttLibC_AcEncoder_encode(encoder, pcm, acAlawTest_encodeCallback, &testData)) {
+			break;
+		}
+	}
+	ttLibC_AcDecoder_close(&decoder);
+	ttLibC_AcEncoder_close(&encoder);
+	ttLibC_PcmS16_close(&pcm);
+	ttLibC_AuPlayer_close(&player);
+	ttLibC_BeepGenerator_close(&generator);
+#endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
+
 #if defined(__ENABLE_APPLE__) && defined(__ENABLE_MP3LAME_ENCODE__)
 typedef struct acMp3Test_t {
 	ttLibC_AuPlayer *player;
@@ -1336,6 +1462,8 @@ cute::suite encoderDecoderTests(cute::suite s) {
 	s.push_back(CUTE(vtTest));
 	s.push_back(CUTE(vorbisTest));
 	s.push_back(CUTE(theoraTest));
+	s.push_back(CUTE(acMulawTest));
+	s.push_back(CUTE(acAlawTest));
 	s.push_back(CUTE(acMp3Test));
 	s.push_back(CUTE(acAacTest));
 	s.push_back(CUTE(x265Test));
