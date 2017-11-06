@@ -130,6 +130,8 @@ static bool MkvReader_readTag(
 	case MkvType_Colour:
 	case MkvType_MaxBlockAdditionID:
 	case MkvType_AlphaMode:
+	case MkvType_BlockAdditions:
+	case MkvType_ReferenceBlock:
 		{
 			// check the data size.
 			if(data_size < size + byte_reader->read_size) {

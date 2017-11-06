@@ -62,6 +62,11 @@ typedef enum ttLibC_Mkv_Type {
 				MkvType_BlockDuration = 0x9B,
 				MkvType_ReferenceBlock = 0xFB,
 				MkvType_DiscardPadding = 0x75A2,
+
+				MkvType_BlockAdditions = 0x75A1,
+					MkvType_BlockMore = 0xA6,
+						MkvType_BlockAddID = 0xEE,
+						MkvType_BlockAdditional = 0xA5,
 			MkvType_EncryptedBlock = 0xAF, // deplicated
 		MkvType_Tracks = 0x1654AE6B,
 			MkvType_TrackEntry = 0xAE,
