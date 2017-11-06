@@ -21,7 +21,7 @@
  * @param type
  * @return true:audio false:not audio
  */
-bool ttLibC_isAudio(ttLibC_Frame_Type type) {
+bool TT_VISIBILITY_DEFAULT ttLibC_isAudio(ttLibC_Frame_Type type) {
 	switch(type) {
 	case frameType_aac:
 	case frameType_adpcm_ima_wav:
@@ -45,7 +45,7 @@ bool ttLibC_isAudio(ttLibC_Frame_Type type) {
  * @param type
  * @return true:video false:not video
  */
-bool ttLibC_isVideo(ttLibC_Frame_Type type) {
+bool TT_VISIBILITY_DEFAULT ttLibC_isVideo(ttLibC_Frame_Type type) {
 	switch(type) {
 	case frameType_bgr:
 	case frameType_flv1:
