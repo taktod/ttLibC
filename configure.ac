@@ -655,18 +655,33 @@ if test x$libyuv_flag = "xyes"; then
 	AC_ARG_VAR([LIBYUV_INCLUDE_PATH], [path for libyuv compiled directory.])
 	AC_ARG_VAR([LIBYUV_PATH], [path for libyuv library.])
 	if test x$LIBYUV_PATH = "x";then
-		libyuv_check=no
+		LIBYUV_PATH=/usr/local/lib
+		LIBYUV_INCLUDE_PATH=/usr/local/include
 	else
-		libyuv_check=yes
 		if test x$LIBYUV_INCLUDE_PATH = "x"; then
 			LIBYUV_INCLUDE_PATH=$LIBYUV_PATH/include/
 		fi
-		LIBYUV_CFLAGS="-I${LIBYUV_INCLUDE_PATH}"
-		LIBYUV_LIBS="-L${LIBYUV_PATH} -lyuv"
-		AC_SUBST([LIBYUV_CFLAGS])
-		AC_SUBST([LIBYUV_LIBS])
 	fi
-	AC_MSG_RESULT([$libyuv_check])
+	CFLAGS_ORG=$CFLAGS
+	CFLAGS="-I$LIBYUV_INCLUDE_PATH $CFLAGS"
+	CPPFLAGS_ORG=$CPPFLAGS
+	CPPFLAGS="-I$LIBYUV_INCLUDE_PATH $CPPFLAGS"
+	AC_PREPROC_IFELSE(
+		[AC_LANG_SOURCE([@%:@include <libyuv.h>])],
+		[
+			LIBYUV_CFLAGS="-I${LIBYUV_INCLUDE_PATH}"
+			LIBYUV_LIBS="-L${LIBYUV_PATH} -lyuv"
+			AC_SUBST([LIBYUV_CFLAGS])
+			AC_SUBST([LIBYUV_LIBS])
+			libyuv_check=yes
+			AC_MSG_RESULT([yes])
+		],
+		[
+			AC_MSG_RESULT([no])
+		]
+	)
+	CFLAGS=$CFLAGS_ORG
+	CPPFLAGS=$CPPFLAGS_ORG
 fi
 if test x$swscale_flag = "xyes"; then
 	PKG_CHECK_MODULES(
