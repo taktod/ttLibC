@@ -649,8 +649,8 @@ static void openh264Test() {
 	encoder->SetOption(ENCODER_OPTION_DATAFORMAT, &videoFormat);
 	int iIDRPeriod = 15;
 	encoder->SetOption(ENCODER_OPTION_IDR_INTERVAL, &iIDRPeriod);
-	bool bval = false;
-	encoder->SetOption(ENCODER_OPTION_ENABLE_SPS_PPS_ID_ADDITION, &bval);
+//	bool bval = false;
+//	encoder->SetOption(ENCODER_OPTION_ENABLE_SPS_PPS_ID_ADDITION, &bval);
 
 	SFrameBSInfo info;
 /*	memset(&info, 0, sizeof(SFrameBSInfo));
