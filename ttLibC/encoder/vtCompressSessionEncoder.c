@@ -31,7 +31,7 @@ typedef struct ttLibC_Encoder_VtCompressSession_VtEncoder_ {
 	CVPixelBufferRef image_buffer;
 	uint32_t fps;
 
-	ttLibC_H264 *configData;
+	ttLibC_Video *configData;
 	ttLibC_Video *video;
 
 	void *ptr;
@@ -48,7 +48,7 @@ static bool VtEncoder_makeH264Frame(
 	ttLibC_H264 *h264 = NULL;
 	if(target_type == H264Type_configData) {
 		h264 = ttLibC_H264_make(
-				encoder->configData,
+				(ttLibC_H264 *)encoder->configData,
 				target_type,
 				encoder->inherit_super.width,
 				encoder->inherit_super.height,
@@ -62,7 +62,7 @@ static bool VtEncoder_makeH264Frame(
 			ttLibC_DynamicBuffer_close(&buffer);
 			return false;
 		}
-		encoder->configData = h264;
+		encoder->configData = (ttLibC_Video *)h264;
 	}
 	else {
 		h264 = ttLibC_H264_make(
@@ -357,10 +357,24 @@ ttLibC_VtEncoder TT_VISIBILITY_DEFAULT *ttLibC_VtEncoder_make_ex(
 	}
 	// baseline
 	if(err == noErr) {
-		CFBooleanRef allowFrameReordering = is_baseline ? kCFBooleanFalse : kCFBooleanTrue;
-		err = VTSessionSetProperty(encoder->session, kVTCompressionPropertyKey_AllowFrameReordering, allowFrameReordering);
-		if(err == kVTPropertyNotSupportedErr) {
-			err = noErr;
+		switch(target_frame_type) {
+		case frameType_h264:
+			{
+				CFBooleanRef allowFrameReordering = is_baseline ? kCFBooleanFalse : kCFBooleanTrue;
+				err = VTSessionSetProperty(encoder->session, kVTCompressionPropertyKey_AllowFrameReordering, allowFrameReordering);
+				if(err == kVTPropertyNotSupportedErr) {
+					err = noErr;
+				}
+			}
+			break;
+		default:
+			{
+				err = VTSessionSetProperty(encoder->session, kVTCompressionPropertyKey_AllowFrameReordering, kCFBooleanFalse);
+				if(err == kVTPropertyNotSupportedErr) {
+					err = noErr;
+				}
+			}
+			break;
 		}
 	}
 	// bitrate
@@ -389,18 +403,32 @@ ttLibC_VtEncoder TT_VISIBILITY_DEFAULT *ttLibC_VtEncoder_make_ex(
 	}
 	// profile level
 	if(err == noErr) {
-		CFStringRef profileLevel = is_baseline ? kVTProfileLevel_H264_Baseline_AutoLevel : kVTProfileLevel_H264_Main_AutoLevel;
-		err = VTSessionSetProperty(encoder->session, kVTCompressionPropertyKey_ProfileLevel, profileLevel);
-		if(err == kVTPropertyNotSupportedErr) {
-			err = noErr;
+		switch(target_frame_type) {
+		case frameType_h264:
+			{
+				CFStringRef profileLevel = is_baseline ? kVTProfileLevel_H264_Baseline_AutoLevel : kVTProfileLevel_H264_Main_AutoLevel;
+				err = VTSessionSetProperty(encoder->session, kVTCompressionPropertyKey_ProfileLevel, profileLevel);
+				if(err == kVTPropertyNotSupportedErr) {
+					err = noErr;
+				}
+			}
+			break;
+		default:
+			break;
 		}
 	}	// entropy
 	if(err == noErr) {
-		if(is_baseline) {
-			err = VTSessionSetProperty(encoder->session, kVTCompressionPropertyKey_H264EntropyMode, kVTH264EntropyMode_CAVLC);
-		}
-		else {
-			err = VTSessionSetProperty(encoder->session, kVTCompressionPropertyKey_H264EntropyMode, kVTH264EntropyMode_CABAC);
+		switch(target_frame_type) {
+		case frameType_h264:
+			if(is_baseline) {
+				err = VTSessionSetProperty(encoder->session, kVTCompressionPropertyKey_H264EntropyMode, kVTH264EntropyMode_CAVLC);
+			}
+			else {
+				err = VTSessionSetProperty(encoder->session, kVTCompressionPropertyKey_H264EntropyMode, kVTH264EntropyMode_CABAC);
+			}
+			break;
+		default:
+			break;
 		}
 		if(err == kVTPropertyNotSupportedErr) {
 			err = noErr;
@@ -526,7 +554,7 @@ void TT_VISIBILITY_DEFAULT ttLibC_VtEncoder_close(ttLibC_VtEncoder **encoder) {
 		CFRelease(target->session);
 		target->session = NULL;
 	}
-	ttLibC_H264_close(&target->configData);
+	ttLibC_Video_close(&target->configData);
 	ttLibC_Video_close(&target->video);
 	ttLibC_free(target);
 	*encoder = NULL;
