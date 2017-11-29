@@ -17,6 +17,7 @@
 #include "../util/hexUtil.h"
 #include "../util/dynamicBufferUtil.h"
 #include "../frame/video/h264.h"
+#include "../frame/video/h265.h"
 #include "../frame/video/jpeg.h"
 
 #include <VideoToolbox/VideoToolbox.h>
@@ -173,6 +174,142 @@ static void VtEncoder_encodeH264Callback(ttLibC_VtEncoder_ *encoder, CMSampleBuf
 	VtEncoder_checkH264EncodedData(encoder, bufferData, size, pts);
 }
 
+static bool VtEncoder_makeH265Frame(
+		ttLibC_H265_Type target_type,
+		ttLibC_VtEncoder_ *encoder,
+		ttLibC_DynamicBuffer *buffer,
+		CMTime pts) {
+	ttLibC_H265 *h265 = NULL;
+	if(target_type == H265Type_configData) {
+		h265 = ttLibC_H265_make(
+				(ttLibC_H265 *)encoder->configData,
+				target_type,
+				encoder->inherit_super.width,
+				encoder->inherit_super.height,
+				ttLibC_DynamicBuffer_refData(buffer),
+				ttLibC_DynamicBuffer_refSize(buffer),
+				false,
+				pts.value,
+				pts.timescale);
+		if(h265 == NULL) {
+			ERR_PRINT("failed to make configData for h265Frame.");
+			ttLibC_DynamicBuffer_close(&buffer);
+			return false;
+		}
+		encoder->configData = (ttLibC_Video *)h265;
+	}
+	else {
+		h265 = ttLibC_H265_make(
+				(ttLibC_H265 *)encoder->video,
+				target_type,
+				encoder->inherit_super.width,
+				encoder->inherit_super.height,
+				ttLibC_DynamicBuffer_refData(buffer),
+				ttLibC_DynamicBuffer_refSize(buffer),
+				true,
+				pts.value,
+				pts.timescale);
+		if(h265 == NULL) {
+			ERR_PRINT("failed to make h265 frame.");
+			ttLibC_DynamicBuffer_close(&buffer);
+			return false;
+		}
+		encoder->video = (ttLibC_Video *)h265;
+	}
+	if(encoder->callback != NULL) {
+		if(!encoder->callback(encoder->ptr, (ttLibC_Video *)h265)) {
+			ttLibC_DynamicBuffer_close(&buffer);
+			return false;
+		}
+	}
+	return true;
+}
+
+
+static bool VtEncoder_checkH265EncodedData(
+		ttLibC_VtEncoder_ *encoder,
+		uint8_t *data,
+		size_t data_size,
+		CMTime pts) {
+	if(data_size == 0) {
+		return true;
+	}
+	uint8_t separator[] = {0x00, 0x00, 0x00, 0x01};
+	ttLibC_H265_Type target_type;
+	ttLibC_DynamicBuffer *data_buffer = ttLibC_DynamicBuffer_make();
+	ttLibC_H265_NalInfo nal_info;
+	while(ttLibC_H265_getHvccInfo(&nal_info, data, data_size)) {
+		switch(nal_info.nal_unit_type) {
+		case H265NalType_trailN:
+		case H265NalType_trailR:
+			target_type = H265Type_slice;
+			ttLibC_DynamicBuffer_append(data_buffer, separator, 4);
+			ttLibC_DynamicBuffer_append(data_buffer, data + nal_info.data_pos, nal_info.nal_size - nal_info.data_pos);
+			break;
+		case H265NalType_idrWRadl:
+			target_type = H265Type_sliceIDR;
+			ttLibC_DynamicBuffer_append(data_buffer, separator, 4);
+			ttLibC_DynamicBuffer_append(data_buffer, data + nal_info.data_pos, nal_info.nal_size - nal_info.data_pos);
+			break;
+		default:
+			LOG_PRINT("nal_type:%x", nal_info.nal_unit_type);
+			break;
+		}
+		data +=  nal_info.nal_size;
+		data_size -=  nal_info.nal_size;
+	}
+	if(!VtEncoder_makeH265Frame(target_type, encoder, data_buffer, pts)) {
+		return false;
+	}
+	ttLibC_DynamicBuffer_close(&data_buffer);
+	return true;
+}
+
+static void VtEncoder_encodeH265Callback(ttLibC_VtEncoder_ *encoder, CMSampleBufferRef sampleBuffer) {
+	CMBlockBufferRef block = CMSampleBufferGetDataBuffer(sampleBuffer);
+	CFArrayRef attachments =CMSampleBufferGetSampleAttachmentsArray(sampleBuffer, false);
+	CMTime pts = CMSampleBufferGetPresentationTimeStamp(sampleBuffer);
+//	CMTime dts = CMSampleBufferGetDecodeTimeStamp(sampleBuffer);
+	bool is_keyFrame = false;
+	if(attachments != NULL) {
+		CFDictionaryRef attachment;
+		CFBooleanRef dependsOnOthers;
+		attachment = (CFDictionaryRef)CFArrayGetValueAtIndex(attachments, 0);
+		dependsOnOthers = (CFBooleanRef)CFDictionaryGetValue(attachment, kCMSampleAttachmentKey_DependsOnOthers);
+		is_keyFrame = (dependsOnOthers == kCFBooleanFalse);
+	}
+
+	if(is_keyFrame) {
+		CMFormatDescriptionRef format = CMSampleBufferGetFormatDescription(sampleBuffer);
+		size_t sps_size, pps_size, vps_size;
+		size_t parm_count;
+		uint8_t *sps, *pps, *vps;
+
+		CMVideoFormatDescriptionGetHEVCParameterSetAtIndex(format, 0, (const uint8_t **)&sps, &sps_size, &parm_count, NULL);
+		CMVideoFormatDescriptionGetHEVCParameterSetAtIndex(format, 1, (const uint8_t **)&pps, &pps_size, &parm_count, NULL);
+		CMVideoFormatDescriptionGetHEVCParameterSetAtIndex(format, 2, (const uint8_t **)&vps, &vps_size, &parm_count, NULL);
+
+		ttLibC_DynamicBuffer *data_buffer = ttLibC_DynamicBuffer_make();
+		uint8_t separator[] = {0x00, 0x00, 0x00, 0x01};
+		ttLibC_DynamicBuffer_append(data_buffer, separator, 4);
+		ttLibC_DynamicBuffer_append(data_buffer, sps, sps_size);
+		ttLibC_DynamicBuffer_append(data_buffer, separator, 4);
+		ttLibC_DynamicBuffer_append(data_buffer, pps, pps_size);
+		ttLibC_DynamicBuffer_append(data_buffer, separator, 4);
+		ttLibC_DynamicBuffer_append(data_buffer, vps, vps_size);
+		if(!VtEncoder_makeH265Frame(H265Type_configData, encoder, data_buffer, pts)) {
+			ERR_PRINT("failed to make configData frame.");
+			ttLibC_DynamicBuffer_close(&data_buffer);
+			return;
+		}
+		ttLibC_DynamicBuffer_close(&data_buffer);
+	}
+	uint8_t *bufferData;
+	size_t size;
+	CMBlockBufferGetDataPointer(block, 0, NULL, &size, (char **)&bufferData);
+	VtEncoder_checkH265EncodedData(encoder, bufferData, size, pts);
+}
+
 static void VtEncoder_encodeJpegCallback(ttLibC_VtEncoder_ *encoder, CMSampleBufferRef sampleBuffer) {
 	CMBlockBufferRef block = CMSampleBufferGetDataBuffer(sampleBuffer);
 	CMTime pts = CMSampleBufferGetPresentationTimeStamp(sampleBuffer);
@@ -214,14 +351,13 @@ static void VtEncoder_encodeCallback(
 
 	switch(encoder->inherit_super.frame_type) {
 	case frameType_jpeg:
-		{
-			VtEncoder_encodeJpegCallback(encoder, sampleBuffer);
-		}
+		VtEncoder_encodeJpegCallback(encoder, sampleBuffer);
 		break;
 	case frameType_h264:
-		{
-			VtEncoder_encodeH264Callback(encoder, sampleBuffer);
-		}
+		VtEncoder_encodeH264Callback(encoder, sampleBuffer);
+		break;
+	case frameType_h265:
+		VtEncoder_encodeH265Callback(encoder, sampleBuffer);
 		break;
 	default:
 		return;
@@ -272,9 +408,9 @@ ttLibC_VtEncoder TT_VISIBILITY_DEFAULT *ttLibC_VtEncoder_make_ex(
 	case frameType_h264:
 		codecType = kCMVideoCodecType_H264;
 		break;
-//	case frameType_h265:
-//		codecType = kCMVideoCodecType_HEVC;
-//		break;
+	case frameType_h265:
+		codecType = kCMVideoCodecType_HEVC;
+		break;
 	case frameType_jpeg:
 		codecType = kCMVideoCodecType_JPEG;
 		break;
@@ -367,6 +503,15 @@ ttLibC_VtEncoder TT_VISIBILITY_DEFAULT *ttLibC_VtEncoder_make_ex(
 				}
 			}
 			break;
+		case frameType_h265:
+			{
+				// no baseline, need to allow frame reorder.
+				err = VTSessionSetProperty(encoder->session, kVTCompressionPropertyKey_AllowFrameReordering, kCFBooleanTrue);
+				if(err == kVTPropertyNotSupportedErr) {
+					err = noErr;
+				}
+			}
+			break;
 		default:
 			{
 				err = VTSessionSetProperty(encoder->session, kVTCompressionPropertyKey_AllowFrameReordering, kCFBooleanFalse);
@@ -413,6 +558,18 @@ ttLibC_VtEncoder TT_VISIBILITY_DEFAULT *ttLibC_VtEncoder_make_ex(
 				}
 			}
 			break;
+		case frameType_h265:
+			{
+				if(is_baseline) {
+					// baseline is not available.
+				}
+				CFStringRef profileLevel = kVTProfileLevel_HEVC_Main10_AutoLevel;
+				err = VTSessionSetProperty(encoder->session, kVTCompressionPropertyKey_ProfileLevel, profileLevel);
+				if(err == kVTPropertyNotSupportedErr) {
+					err = noErr;
+				}
+			}
+			break;
 		default:
 			break;
 		}
@@ -426,6 +583,9 @@ ttLibC_VtEncoder TT_VISIBILITY_DEFAULT *ttLibC_VtEncoder_make_ex(
 			else {
 				err = VTSessionSetProperty(encoder->session, kVTCompressionPropertyKey_H264EntropyMode, kVTH264EntropyMode_CABAC);
 			}
+			break;
+		case frameType_h265:
+//			err = VTSessionSetProperty(encoder->session, kVTCompressionPropertyKey_H264EntropyMode, kVTH264EntropyMode_CAVLC);
 			break;
 		default:
 			break;
