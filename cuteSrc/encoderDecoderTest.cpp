@@ -123,6 +123,94 @@
 
 #include <unistd.h>
 
+#if defined(__ENABLE_APPLE__) && defined(__ENABLE_OPENCV__) && defined(__ENABLE_AVCODEC__)
+typedef struct {
+	ttLibC_CvWindow *target;
+	ttLibC_AvcodecDecoder *decoder;
+	ttLibC_Bgr *dbgr;
+} vtH265AvcodecDecodeTest_t;
+
+static bool vtH265AvcodecDecodeTest_decodeCallback(void *ptr, ttLibC_Frame *yuv) {
+	vtH265AvcodecDecodeTest_t *testData = (vtH265AvcodecDecodeTest_t *)ptr;
+	ttLibC_Bgr *b = ttLibC_ImageResampler_makeBgrFromYuv420(testData->dbgr, BgrType_bgr, (ttLibC_Yuv420 *)yuv);
+	if(b == NULL) {
+		return false;
+	}
+	testData->dbgr = b;
+	ttLibC_CvWindow_showBgr(testData->target, testData->dbgr);
+	return true;
+}
+
+static bool vtH265AvcodecDecodeTest_encodeCallback(void *ptr, ttLibC_Video *video) {
+	vtH265AvcodecDecodeTest_t *testData = (vtH265AvcodecDecodeTest_t *)ptr;
+	ttLibC_H265 *h265 = (ttLibC_H265 *)video;
+	switch(h265->frame_type) {
+	case H265FrameType_B:
+		LOG_PRINT("h265:disposable:%d b frame", h265->is_disposable);
+		break;
+	case H265FrameType_P:
+		LOG_PRINT("h265:disposable:%d p frame", h265->is_disposable);
+		break;
+	case H265FrameType_I:
+		LOG_PRINT("h265:disposable:%d i frame", h265->is_disposable);
+		break;
+	case H265FrameType_unknown:
+	default:
+		LOG_PRINT("h265:disposable:%d", h265->is_disposable);
+		break;
+	}
+	return ttLibC_AvcodecDecoder_decode(testData->decoder, (ttLibC_Frame *)video, vtH265AvcodecDecodeTest_decodeCallback, ptr);
+}
+#endif
+
+static void vtH265AvcodecDecodeTest() {
+	LOG_PRINT("vtH265AvcodecDecodeTest");
+#if defined(__ENABLE_APPLE__) && defined(__ENABLE_OPENCV__) && defined(__ENABLE_AVCODEC__)
+	uint32_t width =320, height = 240;
+	ttLibC_CvCapture *capture = ttLibC_CvCapture_make(0, width, height);
+	ttLibC_CvWindow *original = ttLibC_CvWindow_make("original");
+	ttLibC_CvWindow *target = ttLibC_CvWindow_make("target");
+	ttLibC_VtEncoder *encoder = ttLibC_VtEncoder_make(width, height, frameType_h265);
+	ttLibC_AvcodecDecoder *decoder = ttLibC_AvcodecVideoDecoder_make(frameType_h265, width, height);
+	ttLibC_Bgr *bgr = NULL, *dbgr = NULL, *b;
+	ttLibC_Yuv420 *yuv = NULL, *y;
+	vtH265AvcodecDecodeTest_t testData;
+	testData.dbgr = NULL;
+	testData.target = target;
+	testData.decoder = decoder;
+	while(true) {
+		b = ttLibC_CvCapture_queryFrame(capture, bgr);
+		if(b == NULL) {
+			break;
+		}
+		bgr = b;
+		ttLibC_CvWindow_showBgr(original, bgr);
+		y = ttLibC_ImageResampler_makeYuv420FromBgr(yuv, Yuv420Type_planar, bgr);
+		if(y == NULL) {
+			break;
+		}
+		yuv = y;
+		if(!ttLibC_VtEncoder_encode(encoder, yuv, vtH265AvcodecDecodeTest_encodeCallback, &testData)) {
+			break;
+		}
+		dbgr = testData.dbgr;
+		uint8_t key = ttLibC_CvWindow_waitForKeyInput(66);
+		if(key == Keychar_Esc) {
+			break;
+		}
+	}
+	ttLibC_Bgr_close(&bgr);
+	ttLibC_Bgr_close(&dbgr);
+	ttLibC_Yuv420_close(&yuv);
+	ttLibC_AvcodecDecoder_close(&decoder);
+	ttLibC_VtEncoder_close(&encoder);
+	ttLibC_CvWindow_close(&original);
+	ttLibC_CvWindow_close(&target);
+	ttLibC_CvCapture_close(&capture);
+#endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
+
 #if defined(__ENABLE_APPLE__) && defined(__ENABLE_OPENCV__)
 typedef struct {
 	ttLibC_CvWindow *target;
@@ -1531,6 +1619,7 @@ static void imageResamplerTest() {
  */
 cute::suite encoderDecoderTests(cute::suite s) {
 	s.clear();
+	s.push_back(CUTE(vtH265AvcodecDecodeTest));
 	s.push_back(CUTE(vtH264Test));
 	s.push_back(CUTE(vtJpegTest));
 	s.push_back(CUTE(vorbisTest));
