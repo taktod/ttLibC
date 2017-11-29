@@ -282,7 +282,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_SwscaleResampler_resample(
 	ttLibC_Video *video = (ttLibC_Video *)frame;
 	sws_scale(
 			resampler_->convertCtx,
-			(const uint8_t * const *)src_data,
+			(const uint8_t *const *)src_data,
 			(const int *)src_stride,
 			0,
 			video->height,

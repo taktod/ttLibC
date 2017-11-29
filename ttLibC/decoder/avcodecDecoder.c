@@ -30,6 +30,10 @@
 #include "../frame/audio/speex.h"
 #include "../frame/audio/vorbis.h"
 
+#ifdef __ENABLE_SWSCALE__
+#	include <libswscale/swscale.h>
+#endif
+
 /*
  * avcodecDecoder detail definition
  */
@@ -43,6 +47,11 @@ typedef struct {
 	ttLibC_Frame *frame;
 	ttLibC_Frame *h26x_configData;
 	ttLibC_DynamicBuffer *extraDataBuffer;
+
+#ifdef __ENABLE_SWSCALE__
+	struct SwsContext *convertCtx;
+	enum AVPixelFormat inFormat;
+#endif
 } ttLibC_Decoder_AvcodecDecoder_;
 
 typedef ttLibC_Decoder_AvcodecDecoder_ ttLibC_AvcodecDecoder_;
@@ -609,12 +618,90 @@ static bool AvcodecDecoder_decodeVideo(
 			}
 		}
 		break;
+	case AV_PIX_FMT_YUV420P10LE:
+		{
+#ifdef __ENABLE_SWSCALE__
+			if(decoder->inFormat != AV_PIX_FMT_NONE
+			&& decoder->inFormat != decoder->dec->pix_fmt) {
+				ERR_PRINT("format is changed.");
+				return false;
+			}
+			// use swscale to convert into yuv420.
+			if(decoder->frame == NULL) {
+				decoder->frame = (ttLibC_Frame *)ttLibC_Yuv420_makeEmptyFrame(
+					Yuv420Type_planar,
+					decoder->avframe->width,
+					decoder->avframe->height);
+				if(decoder->frame == NULL) {
+					ERR_PRINT("failed to make empty yuvFrame for output.");
+					return false;
+				}
+			}
+			if(decoder->convertCtx == NULL) {
+				decoder->convertCtx = sws_getContext(
+						decoder->avframe->width,
+						decoder->avframe->height,
+						decoder->dec->pix_fmt,
+						decoder->avframe->width,
+						decoder->avframe->height,
+						AV_PIX_FMT_YUV420P,
+						SWS_FAST_BILINEAR,
+						NULL,
+						NULL,
+						NULL);
+				if(decoder->convertCtx == NULL) {
+					ERR_PRINT("failed to make swscale convertContext. pixfmt.%d", decoder->dec->pix_fmt);
+					return false;
+				}
+				decoder->inFormat = decoder->dec->pix_fmt;
+			}
+			ttLibC_Yuv420 *yuv = (ttLibC_Yuv420 *)decoder->frame;
+
+			uint8_t *dst_data[4];
+			uint32_t dst_stride[4];
+			dst_data[0] = yuv->y_data;
+			dst_data[1] = yuv->u_data;
+			dst_data[2] = yuv->v_data;
+			dst_data[3] = NULL;
+			dst_stride[0] = yuv->y_stride;
+			dst_stride[1] = yuv->u_stride;
+			dst_stride[2] = yuv->v_stride;
+			dst_stride[3] = 0;
+			// try to convert.
+			sws_scale(
+					decoder->convertCtx,
+					(const uint8_t *const *)decoder->avframe->data,
+					(const int *)decoder->avframe->linesize,
+					0,
+					decoder->avframe->height,
+					(uint8_t *const *)dst_data,
+					(const int *)dst_stride);
+			// update timestamp.
+#ifndef FF_API_PKT_PTS
+			decoder->frame->pts = decoder->avframe->pkt_pts,
+#else
+			decoder->frame->pts = decoder->avframe->pts,
+#endif
+			decoder->frame->timebase = frame->inherit_super.timebase;
+			// done.
+			if(callback != NULL) {
+				return callback(ptr, decoder->frame);
+			}
+			else {
+				return true;
+			}
+#else
+			ERR_PRINT("unknown pixfmt output.%d", decoder->dec->pix_fmt);
+			return false;
+#endif
+		}
+		break;
 	case AV_PIX_FMT_NV12:
 	case AV_PIX_FMT_NV21:
 	case AV_PIX_FMT_BGR24:
 	case AV_PIX_FMT_ABGR:
 	case AV_PIX_FMT_BGRA:
-		ERR_PRINT("not make yet.");
+		ERR_PRINT("not make yet.%d", decoder->dec->pix_fmt);
 		return false;
 	default:
 		ERR_PRINT("unknown pixfmt output.%d", decoder->dec->pix_fmt);
@@ -797,6 +884,10 @@ ttLibC_AvcodecDecoder TT_VISIBILITY_DEFAULT *ttLibC_AvcodecDecoder_makeWithAVCod
 		av_free(dec);
 		return NULL;
 	}
+#ifdef __ENABLE_SWSCALE__
+	decoder->convertCtx = NULL;
+	decoder->inFormat = AV_PIX_FMT_NONE;
+#endif
 	decoder->dec = dec;
 	decoder->is_opened = false;
 	if(frame_type != frameType_theora
@@ -819,6 +910,7 @@ ttLibC_AvcodecDecoder TT_VISIBILITY_DEFAULT *ttLibC_AvcodecDecoder_makeWithAVCod
 		ttLibC_free(decoder);
 		return NULL;
 	}
+	puts("called?");
 	decoder->inherit_super.frame_type = frame_type;
 	switch(dec->codec->type) {
 	case AVMEDIA_TYPE_AUDIO:
@@ -1043,6 +1135,12 @@ void TT_VISIBILITY_DEFAULT ttLibC_AvcodecDecoder_close(ttLibC_AvcodecDecoder **d
 		avcodec_close(target->dec);
 		av_free(target->dec);
 	}
+#ifdef __ENABLE_SWSCALE__
+	if(target->convertCtx != NULL) {
+		sws_freeContext(target->convertCtx);
+		target->convertCtx = NULL;
+	}
+#endif
 	ttLibC_DynamicBuffer_close(&target->extraDataBuffer);
 	ttLibC_Frame_close(&target->frame);
 	ttLibC_Frame_close(&target->h26x_configData);
