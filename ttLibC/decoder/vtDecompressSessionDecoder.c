@@ -18,6 +18,7 @@
 #include "../util/ioUtil.h"
 #include "../util/hexUtil.h"
 #include "../frame/video/h264.h"
+#include "../frame/video/h265.h"
 #include "../frame/video/jpeg.h"
 
 #include <string.h>
@@ -294,6 +295,154 @@ static bool VtDecoder_decodeH264(
 	return true;
 }
 
+static bool VtDecoder_decodeH265(
+		ttLibC_VtDecoder_ *decoder,
+		ttLibC_H265 *h265,
+		ttLibC_VtDecodeFunc callback,
+		ttLibC_VtDecodeRawFunc raw_callback,
+		void *ptr) {
+	decoder->callback = callback;
+	decoder->raw_callback = raw_callback;
+	decoder->ptr = ptr;
+	uint8_t *data = (uint8_t *)h265->inherit_super.inherit_super.data;
+	size_t data_size = h265->inherit_super.inherit_super.buffer_size;
+	OSStatus err = noErr;
+	switch(h265->type) {
+	case H265Type_configData:
+		{
+			// support only sps pps vps 1:1:1.
+			uint8_t *param_sets[3];
+			size_t param_sets_size[3];
+			ttLibC_H265_NalInfo nal_info;
+			int pos = 0;
+			while(ttLibC_H265_getNalInfo(&nal_info, data, data_size)) {
+				switch(nal_info.nal_unit_type) {
+				case H265NalType_spsNut:
+				case H265NalType_vpsNut:
+				case H265NalType_ppsNut:
+					if(pos > 2) {
+						ERR_PRINT("nal count is too many.");
+						return false;
+					}
+					param_sets[pos] = data + nal_info.data_pos;
+					param_sets_size[pos] = nal_info.nal_size - nal_info.data_pos;
+					pos ++;
+				default:
+					break;
+				}
+				data += nal_info.nal_size;
+				data_size -= nal_info.nal_size;
+			}
+			if(decoder->desc != NULL) {
+				CFRelease(decoder->desc);
+				decoder->desc = NULL;
+			}
+			err = CMVideoFormatDescriptionCreateFromHEVCParameterSets(
+				kCFAllocatorDefault, 3, (const uint8_t *const *)param_sets, param_sets_size, 4, NULL, &decoder->desc);
+			if(err != noErr) {
+				ERR_PRINT("failed to make video format description,%x %d", err, err);
+				return false;
+			}
+			if(decoder->session == NULL) {
+				CFMutableDictionaryRef destinationPixelBufferAttributes;
+				destinationPixelBufferAttributes = CFDictionaryCreateMutable(NULL, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+				CFNumberRef number;
+
+//				int val = kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange;
+				int val = kCVPixelFormatType_420YpCbCr8Planar;
+				number = CFNumberCreate(NULL, kCFNumberSInt32Type, &val);
+				CFDictionarySetValue(destinationPixelBufferAttributes, kCVPixelBufferPixelFormatTypeKey,number);
+				CFRelease(number);
+
+				VTDecompressionOutputCallbackRecord outputCallback;
+				outputCallback.decompressionOutputCallback = VtDecoder_decodeCallback;
+				outputCallback.decompressionOutputRefCon = decoder;
+				err = VTDecompressionSessionCreate(NULL, decoder->desc, NULL, destinationPixelBufferAttributes, &outputCallback, &decoder->session);
+				if(err != noErr) {
+					ERR_PRINT("failed to make decompress session.:%x %d", err, err);
+					return FALSE;
+				}
+			}
+		}
+		break;
+	case H265Type_slice:
+	case H265Type_sliceIDR:
+		{
+			CMSampleBufferRef sampleBuffer = NULL;
+			CMBlockBufferRef blockBuffer = NULL;
+			ttLibC_DynamicBuffer_empty(decoder->buffer);
+			uint8_t *data = h265->inherit_super.inherit_super.data;
+			size_t data_size = h265->inherit_super.inherit_super.buffer_size;
+			ttLibC_H265_NalInfo nal_info;
+			uint32_t nal_data_size = 0;
+			uint32_t nal_data_size_be;
+			do {
+				ttLibC_H265_getNalInfo(&nal_info, data, data_size);
+				nal_data_size = nal_info.nal_size - nal_info.data_pos;
+				nal_data_size_be = be_uint32_t(nal_data_size);
+				ttLibC_DynamicBuffer_append(decoder->buffer, (uint8_t *)(&nal_data_size_be), 4);
+				ttLibC_DynamicBuffer_append(decoder->buffer, data + nal_info.data_pos, nal_data_size);
+				data += nal_info.nal_size;
+				data_size -= nal_info.nal_size;
+			} while(data_size > 0);
+			uint8_t *buffer = ttLibC_DynamicBuffer_refData(decoder->buffer);
+			size_t buffer_size = ttLibC_DynamicBuffer_refSize(decoder->buffer);
+			// make buffer for OSX or iOS
+			err = CMBlockBufferCreateWithMemoryBlock(
+				NULL,
+				buffer,
+				buffer_size,
+				kCFAllocatorNull,
+				NULL,
+				0,
+				buffer_size,
+				0,
+				&blockBuffer);
+			if(err != noErr) {
+				ERR_PRINT("failed to make blockBuffer.%x %d", err, err);
+				return false;
+			}
+			err = CMSampleBufferCreate(
+					kCFAllocatorDefault,
+					blockBuffer,
+					true,
+					NULL,
+					NULL,
+					decoder->desc,
+					1,
+					0,
+					NULL,
+					1,
+					&buffer_size,
+					&sampleBuffer);
+			if(err != noErr) {
+				ERR_PRINT("failed to make sampleBuffer.%x %d", err, err);
+				CFRelease(blockBuffer);
+				return false;
+			}
+			CMSampleBufferSetOutputPresentationTimeStamp(sampleBuffer, CMTimeMake(h265->inherit_super.inherit_super.pts, h265->inherit_super.inherit_super.timebase));
+			if(decoder->session) {
+				VTDecodeFrameFlags flags = 0;
+				VTDecodeInfoFlags flagsOut;
+				err = VTDecompressionSessionDecodeFrame(decoder->session, sampleBuffer, flags, NULL, &flagsOut);
+				if(err != noErr) {
+					ERR_PRINT("failed to decode frame.%x %d", err, err);
+					CFRelease(blockBuffer);
+					CFRelease(sampleBuffer);
+					return false;
+				}
+			}
+			CFRelease(blockBuffer);
+			CFRelease(sampleBuffer);
+		}
+		break;
+	default:
+		ERR_PRINT("unexpected nal:%d", h265->type);
+		break;
+	}
+	return true;
+}
+
 static bool VtDecoder_decodeJpeg(
 		ttLibC_VtDecoder_ *decoder,
 		ttLibC_Jpeg *jpeg,
@@ -400,6 +549,12 @@ static bool VtDecoder_decode(
 	case frameType_h264:
 		return VtDecoder_decodeH264(decoder_,
 				(ttLibC_H264 *)video,
+				callback,
+				raw_callback,
+				ptr);
+	case frameType_h265:
+		return VtDecoder_decodeH265(decoder_,
+				(ttLibC_H265 *)video,
 				callback,
 				raw_callback,
 				ptr);
