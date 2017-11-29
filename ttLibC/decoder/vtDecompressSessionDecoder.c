@@ -199,7 +199,6 @@ static bool VtDecoder_decodeH264(
 				destinationPixelBufferAttributes = CFDictionaryCreateMutable(NULL, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
 				CFNumberRef number;
 
-//				int val = kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange;
 				int val = kCVPixelFormatType_420YpCbCr8Planar;
 				number = CFNumberCreate(NULL, kCFNumberSInt32Type, &val);
 				CFDictionarySetValue(destinationPixelBufferAttributes, kCVPixelBufferPixelFormatTypeKey,number);
@@ -317,7 +316,6 @@ static bool VtDecoder_decodeJpeg(
 		destinationPixelBufferAttributes = CFDictionaryCreateMutable(NULL, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
 		CFNumberRef number;
 
-//		int val = kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange;
 		int val = kCVPixelFormatType_420YpCbCr8Planar;
 		number = CFNumberCreate(NULL, kCFNumberSInt32Type, &val);
 		CFDictionarySetValue(destinationPixelBufferAttributes, kCVPixelBufferPixelFormatTypeKey,number);
