@@ -186,6 +186,7 @@ static void vtH265Test() {
 			break;
 		}
 	}
+	testData.decoder = NULL;
 	ttLibC_Bgr_close(&bgr);
 	ttLibC_Bgr_close(&dbgr);
 	ttLibC_Yuv420_close(&yuv);
@@ -274,6 +275,7 @@ static void vtH265AvcodecDecodeTest() {
 			break;
 		}
 	}
+	testData.decoder = NULL;
 	ttLibC_Bgr_close(&bgr);
 	ttLibC_Bgr_close(&dbgr);
 	ttLibC_Yuv420_close(&yuv);
@@ -346,6 +348,7 @@ static void vtH264Test() {
 			break;
 		}
 	}
+	testData.decoder = NULL;
 	ttLibC_Bgr_close(&bgr);
 	ttLibC_Bgr_close(&dbgr);
 	ttLibC_Yuv420_close(&yuv);
@@ -418,6 +421,7 @@ static void vtJpegTest() {
 			break;
 		}
 	}
+	testData.decoder = NULL;
 	ttLibC_Bgr_close(&bgr);
 	ttLibC_Bgr_close(&dbgr);
 	ttLibC_Yuv420_close(&yuv);
