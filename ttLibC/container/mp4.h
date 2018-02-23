@@ -20,6 +20,7 @@ extern "C" {
 typedef enum ttLibC_Mp4_Type {
 	Mp4Type_Ftyp = 'ftyp',
 	Mp4Type_Free = 'free',
+	Mp4Type_Emsg = 'emsg',
 	Mp4Type_Mdat = 'mdat',
 	Mp4Type_Moov = 'moov',
 		Mp4Type_Mvhd = 'mvhd',

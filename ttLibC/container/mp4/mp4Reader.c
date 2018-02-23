@@ -320,6 +320,7 @@ static bool Mp4Reader_readAtom(
 	case Mp4Type_Tref:
 	case Mp4Type_Chap:
 	case Mp4Type_Gmhd:
+	case Mp4Type_Emsg:
 		{
 			uint8_t version = ttLibC_ByteReader_bit(byte_reader, 8);
 			/*uint32_t flags = */ttLibC_ByteReader_bit(byte_reader, 24);
