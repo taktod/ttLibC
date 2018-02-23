@@ -368,10 +368,6 @@ static bool Mp4Atom_getFmp4FrameCallback(
 	if(reader->error_number != 0) {
 		return false;
 	}
-	if(!ttLibC_Trun_isValid(track->trun)) {
-		// no more for trun.
-		return true;
-	}
 	uint8_t *mdat_buffer = mdatAtom->inherit_super.inherit_super.data;
 	uint64_t pos, pts;
 	uint32_t size, duration, pts_offset;

@@ -78,10 +78,6 @@ uint32_t TT_VISIBILITY_HIDDEN ttLibC_Trun_refCurrentTimeOffset(ttLibC_Mp4 *mp4) 
 	ttLibC_Trun *trun = (ttLibC_Trun *)mp4;
 	return trun->current_composition_time_offset;
 }
-bool TT_VISIBILITY_HIDDEN ttLibC_Trun_isValid(ttLibC_Mp4 *mp4) {
-	ttLibC_Trun *trun = (ttLibC_Trun *)mp4;
-	return trun->sample_count != 0 || trun->data_size != 0;
-}
 bool TT_VISIBILITY_HIDDEN ttLibC_Trun_moveNext(ttLibC_Mp4 *mp4) {
 	ttLibC_Trun *trun = (ttLibC_Trun *)mp4;
 	ttLibC_Mp4Track *track = trun->track;
