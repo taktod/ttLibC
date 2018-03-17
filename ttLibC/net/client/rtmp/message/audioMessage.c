@@ -107,7 +107,7 @@ bool TT_VISIBILITY_HIDDEN ttLibC_AudioMessage_getData(
 					buffer);
 		}
 		ttLibC_Aac *aac = (ttLibC_Aac *)message->audio_frame;
-		if(aac->type == aacType_dsi) {
+		if(aac->type == AacType_dsi) {
 			return true;
 		}
 	}
