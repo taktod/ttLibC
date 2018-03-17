@@ -35,6 +35,9 @@ static tetty2_errornum RtmpEncoder_write(
 	// now ready to send.
 	uint8_t *buffer = ttLibC_DynamicBuffer_refData(client_object->send_buffer);
 	size_t buffer_size = ttLibC_DynamicBuffer_refSize(client_object->send_buffer);
+	if(buffer_size == 0) {
+		return 0;
+	}
 
 	// update rtmpHeader.
 	ttLibC_RtmpHeader *prev_header = ttLibC_StlMap_get(client_object->send_headers, (void *)((long)message->header->cs_id));
