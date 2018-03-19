@@ -163,7 +163,7 @@ ttLibC_RtmpHeader TT_VISIBILITY_HIDDEN *ttLibC_RtmpHeader_readBinary(
 		target_buffer_size = ttLibC_DynamicBuffer_refSize(target_buffer);
 	}
 	uint64_t timestamp = 0;
-	uint32_t delta_time = 0;
+	int32_t  delta_time = 0;
 	uint32_t size = 0;
 	ttLibC_RtmpMessage_Type message_type = 0;
 	uint32_t stream_id = 0;
@@ -254,9 +254,9 @@ ttLibC_RtmpHeader TT_VISIBILITY_HIDDEN *ttLibC_RtmpHeader_readBinary(
 			size = prev_header->size;
 			message_type = prev_header->message_type;
 			stream_id = prev_header->stream_id;
-			if(delta_time == 0xFFFFFFL) {
-				delta_time = ttLibC_ByteReader_bit(reader, 32);
-			}
+//			if(delta_time == 0xFFFFFFL) {
+//				delta_time = ttLibC_ByteReader_bit(reader, 32);
+//			}
 		}
 		break;
 	}

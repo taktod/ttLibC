@@ -101,7 +101,7 @@ typedef struct ttLibC_Net_Client_Rtmp_Header_RtmpHeader {
 	uint32_t cs_id;
 
 	uint64_t timestamp;
-	uint32_t delta_time;
+	int32_t  delta_time;
 	uint32_t size;
 	ttLibC_RtmpMessage_Type message_type;
 	uint32_t stream_id;
