@@ -143,7 +143,7 @@ libttLibC_a_SOURCES= \
 	util/mmAudioLoopbackUtil.cpp \
 	util/msGlobalUtil.cpp \
 	util/openalUtil.c \
-	util/opencvUtil.c \
+	util/opencvUtil.cpp \
 	util/stlListUtil.cpp \
 	util/stlMapUtil.cpp \
 	util/tetty2/bootstrap.c \

@@ -42,13 +42,13 @@ typedef ttLibC_Util_OpencvUtil_CvWindow_ ttLibC_CvWindow_;
  * @return ttLibC_CvWindow object
  */
 ttLibC_CvWindow TT_VISIBILITY_DEFAULT *ttLibC_CvWindow_make(const char *name) {
-	ttLibC_CvWindow_ *window = ttLibC_malloc(sizeof(ttLibC_CvWindow_));
+	ttLibC_CvWindow_ *window = (ttLibC_CvWindow_ *)ttLibC_malloc(sizeof(ttLibC_CvWindow_));
 	if(window == NULL) {
 		ERR_PRINT("failed to allocate memory for window.");
 		return NULL;
 	}
 	size_t len = strlen(name);
-	window->inherit_super.name = ttLibC_malloc(len + 1);
+	window->inherit_super.name = (char *)ttLibC_malloc(len + 1);
 	if(window->inherit_super.name == NULL) {
 		ttLibC_free(window);
 		return NULL;
@@ -203,7 +203,7 @@ ttLibC_CvCapture TT_VISIBILITY_DEFAULT *ttLibC_CvCapture_make(
 		uint32_t width,
 		uint32_t height) {
 #if (CV_MAJOR_VERSION == 2) || ((CV_MAJOR_VERSION >= 3) && defined(HAVE_OPENCV_VIDEOIO))
-	ttLibC_CvCapture_ *capture = ttLibC_malloc(sizeof(ttLibC_CvCapture_));
+	ttLibC_CvCapture_ *capture = (ttLibC_CvCapture_ *)ttLibC_malloc(sizeof(ttLibC_CvCapture_));
 	if(capture == NULL) {
 		ERR_PRINT("failed to allocate memory for cvCapture.");
 		return NULL;
