@@ -159,6 +159,24 @@ ttLibC_Yuv420 TT_VISIBILITY_DEFAULT *ttLibC_ImageResampler_makeYuv420FromBgr(
 		src_g_data = src_data + 1;
 		src_r_data = src_data + 2;
 		break;
+	case BgrType_rgb:
+		src_step = 3;
+		src_b_data = src_data + 2;
+		src_g_data = src_data + 1;
+		src_r_data = src_data;
+		break;
+	case BgrType_argb:
+		src_step = 4;
+		src_b_data = src_data + 3;
+		src_g_data = src_data + 2;
+		src_r_data = src_data + 1;
+		break;
+	case BgrType_rgba:
+		src_step = 4;
+		src_b_data = src_data + 2;
+		src_g_data = src_data + 1;
+		src_r_data = src_data;
+		break;
 	default:
 		ERR_PRINT("found unknown bgr type for src_frame:%d", src_frame->type);
 		if(alloc_flag) {
@@ -359,6 +377,27 @@ ttLibC_Bgr TT_VISIBILITY_DEFAULT *ttLibC_ImageResampler_makeBgrFromYuv420(
 		b_data = data;
 		g_data = data + 1;
 		r_data = data + 2;
+		a_data = data + 3;
+		step = 4;
+		break;
+	case BgrType_rgb:
+		b_data = data + 2;
+		g_data = data + 1;
+		r_data = data;
+		a_data = NULL;
+		step = 3;
+		break;
+	case BgrType_argb:
+		a_data = data;
+		b_data = data + 3;
+		g_data = data + 2;
+		r_data = data + 1;
+		step = 4;
+		break;
+	case BgrType_rgba:
+		b_data = data + 2;
+		g_data = data + 1;
+		r_data = data;
 		a_data = data + 3;
 		step = 4;
 		break;

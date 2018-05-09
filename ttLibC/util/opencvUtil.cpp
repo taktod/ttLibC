@@ -121,6 +121,27 @@ void TT_VISIBILITY_DEFAULT ttLibC_CvWindow_showBgr(ttLibC_CvWindow *window, ttLi
 		src_g_data = src_data + 2;
 		src_r_data = src_data + 3;
 		break;
+	case BgrType_rgb:
+		src_step = 3;
+		src_width_stride_diff = bgr->width_stride - src_step * bgr->inherit_super.width;
+		src_b_data = src_data + 2;
+		src_g_data = src_data + 1;
+		src_r_data = src_data;
+		break;
+	case BgrType_rgba:
+		src_step = 4;
+		src_width_stride_diff = bgr->width_stride - src_step * bgr->inherit_super.width;
+		src_b_data = src_data + 2;
+		src_g_data = src_data + 1;
+		src_r_data = src_data;
+		break;
+	case BgrType_argb:
+		src_step = 4;
+		src_width_stride_diff = bgr->width_stride - src_step * bgr->inherit_super.width;
+		src_b_data = src_data + 3;
+		src_g_data = src_data + 2;
+		src_r_data = src_data + 1;
+		break;
 	}
 	for(uint32_t i = 0;i < bgr->inherit_super.height;++ i) {
 		for(uint32_t j = 0;j < bgr->inherit_super.width;++ j) {

@@ -341,10 +341,13 @@ ttLibC_Bgr TT_VISIBILITY_DEFAULT *ttLibC_ImageResizer_resizeBgr(
 	bool alloc_flag = false;
 	switch(type) {
 	case BgrType_bgr:
+	case BgrType_rgb:
 		bgr_stride = bgr_stride * 3;
 		break;
 	case BgrType_abgr:
 	case BgrType_bgra:
+	case BgrType_argb:
+	case BgrType_rgba:
 		bgr_stride = bgr_stride * 4;
 		data_size = (wh << 2);
 		break;
@@ -409,6 +412,25 @@ ttLibC_Bgr TT_VISIBILITY_DEFAULT *ttLibC_ImageResizer_resizeBgr(
 		a_data = data + 3;
 		step = 4;
 		break;
+	case BgrType_rgb:
+		b_data = data + 2;
+		g_data = data + 1;
+		r_data = data;
+		break;
+	case BgrType_argb:
+		a_data = data;
+		b_data = data + 3;
+		g_data = data + 2;
+		r_data = data + 1;
+		step = 4;
+		break;
+	case BgrType_rgba:
+		b_data = data + 2;
+		g_data = data + 1;
+		r_data = data;
+		a_data = data + 3;
+		step = 4;
+		break;
 	}
 	uint8_t *src_b_data = NULL;
 	uint8_t *src_g_data = NULL;
@@ -439,6 +461,25 @@ ttLibC_Bgr TT_VISIBILITY_DEFAULT *ttLibC_ImageResizer_resizeBgr(
 		src_g_data = src_b_data + 1;
 		src_r_data = src_b_data + 2;
 		src_a_data = src_b_data + 3;
+		src_step = 4;
+		break;
+	case BgrType_rgb:
+		src_r_data = src_frame->data;
+		src_g_data = src_r_data + 1;
+		src_b_data = src_r_data + 2;
+		break;
+	case BgrType_argb:
+		src_a_data = src_frame->data;
+		src_r_data = src_a_data + 1;
+		src_g_data = src_a_data + 2;
+		src_b_data = src_a_data + 3;
+		src_step = 4;
+		break;
+	case BgrType_rgba:
+		src_r_data = src_frame->data;
+		src_g_data = src_r_data + 1;
+		src_b_data = src_r_data + 2;
+		src_a_data = src_r_data + 3;
 		src_step = 4;
 		break;
 	}

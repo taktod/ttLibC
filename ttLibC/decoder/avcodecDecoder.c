@@ -698,9 +698,13 @@ static bool AvcodecDecoder_decodeVideo(
 		break;
 	case AV_PIX_FMT_NV12:
 	case AV_PIX_FMT_NV21:
+	
 	case AV_PIX_FMT_BGR24:
 	case AV_PIX_FMT_ABGR:
 	case AV_PIX_FMT_BGRA:
+	case AV_PIX_FMT_RGB24:
+	case AV_PIX_FMT_ARGB:
+	case AV_PIX_FMT_RGBA:
 		ERR_PRINT("not make yet.%d", decoder->dec->pix_fmt);
 		return false;
 	default:
