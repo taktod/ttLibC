@@ -1194,8 +1194,21 @@ ttLibC_AvcodecEncoder TT_VISIBILITY_DEFAULT *ttLibC_AvcodecEncoder_makeWithAVCod
 			encoder->inherit_super.input_format_type = BgrType_bgr;
 			encoder->avframe->linesize[0] = (encoder->enc->width << 1) + encoder->enc->width;
 			break;
-//		case AV_PIX_FMT_ARGB:
-//		case AV_PIX_FMT_RGBA:
+		case AV_PIX_FMT_ARGB:
+			encoder->inherit_super.input_frame_type = frameType_bgr;
+			encoder->inherit_super.input_format_type = BgrType_argb;
+			encoder->avframe->linesize[0] = (encoder->enc->width << 2);
+			break;
+		case AV_PIX_FMT_RGBA:
+			encoder->inherit_super.input_frame_type = frameType_bgr;
+			encoder->inherit_super.input_format_type = BgrType_rgba;
+			encoder->avframe->linesize[0] = (encoder->enc->width << 2);
+			break;
+		case AV_PIX_FMT_RGB24:
+			encoder->inherit_super.input_frame_type = frameType_bgr;
+			encoder->inherit_super.input_format_type = BgrType_rgb;
+			encoder->avframe->linesize[0] = (encoder->enc->width << 1) + encoder->enc->width;
+			break;
 		default:
 			ERR_PRINT("unsupported picture format.:%d", encoder->enc->pix_fmt);
 			av_free(encoder->avframe);

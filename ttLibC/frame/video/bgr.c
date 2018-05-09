@@ -51,9 +51,12 @@ ttLibC_Bgr TT_VISIBILITY_DEFAULT *ttLibC_Bgr_make(
 	uint32_t unit_size = 3;
 	switch(type) {
 	case BgrType_bgr:
+	case BgrType_rgb:
 		break;
 	case BgrType_abgr:
 	case BgrType_bgra:
+	case BgrType_argb:
+	case BgrType_rgba:
 		unit_size = 4;
 		break;
 	default:
@@ -136,9 +139,12 @@ ttLibC_Bgr TT_VISIBILITY_DEFAULT *ttLibC_Bgr_clone(
 	switch(src_frame->type) {
 	case BgrType_abgr:
 	case BgrType_bgra:
+	case BgrType_argb:
+	case BgrType_rgba:
 		bgr_size = bgr_size * 4;
 		break;
 	case BgrType_bgr:
+	case BgrType_rgb:
 		bgr_size = bgr_size * 3;
 		break;
 	default:
@@ -221,10 +227,13 @@ ttLibC_Bgr TT_VISIBILITY_DEFAULT *ttLibC_Bgr_makeEmptyFrame(
 	switch(sub_type) {
 	case BgrType_abgr:
 	case BgrType_bgra:
+	case BgrType_argb:
+	case BgrType_rgba:
 		stride = ((((width - 1) >> 4) + 1) << 4) * 4;
 		memory_size = stride * height;
 		break;
 	case BgrType_bgr:
+	case BgrType_rgb:
 		stride = ((((width - 1) >> 4) + 1) << 4) * 3;
 		memory_size = stride * height;
 		break;

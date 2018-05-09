@@ -39,6 +39,12 @@ static enum AVPixelFormat SwscaleResampler_getPixFormat(
 				return AV_PIX_FMT_BGR24;
 			case BgrType_bgra:
 				return AV_PIX_FMT_BGRA;
+			case BgrType_argb:
+				return AV_PIX_FMT_ARGB;
+			case BgrType_rgb:
+				return AV_PIX_FMT_RGB24;
+			case BgrType_rgba:
+				return AV_PIX_FMT_RGBA;
 			default:
 				return AV_PIX_FMT_NONE;
 			}

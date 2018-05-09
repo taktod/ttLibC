@@ -23,10 +23,16 @@ extern "C" {
 typedef enum ttLibC_Bgr_Type {
 	/** 24bit bgr */
 	BgrType_bgr,
-	/** unknown bgr */
+	/** 32bit abgr */
 	BgrType_abgr,
 	/** 32bit bgra */
-	BgrType_bgra
+	BgrType_bgra,
+	/** 24bit rgb */
+	BgrType_rgb,
+	/** 32bit argb */
+	BgrType_argb,
+	/** 32bit rgba */
+	BgrType_rgba
 } ttLibC_Bgr_Type;
 
 /**
