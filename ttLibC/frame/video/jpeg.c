@@ -106,12 +106,16 @@ ttLibC_Jpeg TT_VISIBILITY_DEFAULT *ttLibC_Jpeg_getFrame(
 	buf_size -= 2;
 	do {
 		// check tag.
+		if(*buf != 0xFF) {
+			break;
+		}
 		uint32_t tag = (*buf << 8) | *(buf + 1);
 		buf += 2;
 		buf_size -= 2;
 		uint32_t size = (*buf << 8) | *(buf + 1);
 		switch(tag) {
 		case 0xFFC0:
+		case 0xFFC2:
 			is_find_size = true;
 			height = (*(buf + 3) << 8) | *(buf + 4);
 			width = (*(buf + 5) << 8) | *(buf + 6);
@@ -128,9 +132,6 @@ ttLibC_Jpeg TT_VISIBILITY_DEFAULT *ttLibC_Jpeg_getFrame(
 			break;
 		}
 	} while(buf_size > 0);
-	if(width == 0 || height == 0) {
-		return NULL;
-	}
 
 	return ttLibC_Jpeg_make(
 			prev_frame,
