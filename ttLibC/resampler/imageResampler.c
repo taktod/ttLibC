@@ -308,10 +308,13 @@ ttLibC_Bgr TT_VISIBILITY_DEFAULT *ttLibC_ImageResampler_makeBgrFromYuv420(
 	bool alloc_flag = false;
 	switch(type) {
 	case BgrType_bgr:
+	case BgrType_rgb:
 		bgr_stride = bgr_stride * 3;
 		break;
 	case BgrType_abgr:
 	case BgrType_bgra:
+	case BgrType_argb:
+	case BgrType_rgba:
 		bgr_stride = bgr_stride * 4;
 		data_size = (wh << 2);
 		break;
