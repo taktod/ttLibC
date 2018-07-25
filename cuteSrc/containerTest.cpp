@@ -247,6 +247,8 @@ bool mkvTest_getFrameCallback(void *ptr, ttLibC_Frame *frame) {
 	case frameType_pcmS16:
 //		LOG_PRINT("frame:%f %d", 1.0 * frame->pts / frame->timebase, frame->id);
 		break;
+	case frameType_png:
+		break;
 	default:
 		LOG_PRINT("frame:%f", 1.0 * frame->pts / frame->timebase);
 		return true;
@@ -449,6 +451,25 @@ static void mkvCodecTest() {
 	ttLibC_ContainerWriter_close(&testData.writer);
 	if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
 	if(testData.fp_out) {fclose(testData.fp_out);testData.fp_out = NULL;}
+	ASSERT(ttLibC_Allocator_dump() == 0); 
+
+	LOG_PRINT("png");
+	testData.reader = (ttLibC_ContainerReader *)ttLibC_MkvReader_make();
+	sprintf(file, "%s/tools/data/source/test.png.mkv", getenv("HOME"));
+	testData.fp_in = fopen(file, "rb");
+	do {
+		uint8_t buffer[65536];
+		if(!testData.fp_in) {
+			break;
+		}
+		size_t read_size = fread(buffer, 1, 65536, testData.fp_in);
+		if(!ttLibC_MkvReader_read((ttLibC_MkvReader *)testData.reader, buffer, read_size, mkvTest_getMkvCallback, &testData)) {
+			ERR_PRINT("error occured!");
+			break;
+		}
+	} while(!feof(testData.fp_in));
+	ttLibC_ContainerReader_close(&testData.reader);
+	if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
 	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 

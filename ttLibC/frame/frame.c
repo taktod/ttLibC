@@ -52,6 +52,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_isVideo(ttLibC_Frame_Type type) {
 	case frameType_h264:
 	case frameType_h265:
 	case frameType_jpeg:
+	case frameType_png:
 	case frameType_theora:
 	case frameType_vp6:
 	case frameType_vp8:

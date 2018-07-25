@@ -428,6 +428,12 @@ static bool AvcodecDecoder_decodeVideo(
 			}
 		}
 		break;
+	case frameType_jpeg :
+	case frameType_png:
+		{
+			decoder->packet.flags = AV_PKT_FLAG_KEY;
+		}
+		break;
 	default:
 		break;
 	}
@@ -696,16 +702,69 @@ static bool AvcodecDecoder_decodeVideo(
 #endif
 		}
 		break;
+	case AV_PIX_FMT_RGB24: // rgbrgb...
+	case AV_PIX_FMT_BGR24: // bgrbgr...
+	case AV_PIX_FMT_ABGR: // abgrabgr...
+	case AV_PIX_FMT_BGRA: // bgrabgra...
+	case AV_PIX_FMT_ARGB: // argbargb...
+	case AV_PIX_FMT_RGBA: // rgbargba...
+		{
+			if(decoder->frame != NULL && decoder->frame->type != frameType_bgr) {
+				ttLibC_Frame_close(&decoder->frame);
+			}
+			ttLibC_Bgr_Type type = BgrType_bgr;
+			switch(decoder->dec->pix_fmt) {
+			case AV_PIX_FMT_RGB24: // rgbrgb...
+				type = BgrType_rgb;
+				break;
+			case AV_PIX_FMT_BGR24: // bgrbgr...
+				type = BgrType_bgr;
+				break;
+			case AV_PIX_FMT_ABGR: // abgrabgr...
+				type = BgrType_abgr;
+				break;
+			case AV_PIX_FMT_BGRA: // bgrabgra...
+				type = BgrType_bgra;
+				break;
+			case AV_PIX_FMT_ARGB: // argbargb...
+				type = BgrType_argb;
+				break;
+			case AV_PIX_FMT_RGBA: // rgbargba...
+				type = BgrType_rgba;
+				break;
+			default:
+				break;
+			}
+			ttLibC_Bgr *b = ttLibC_Bgr_make(
+					(ttLibC_Bgr *)decoder->frame,
+					type,
+					decoder->avframe->width,
+					decoder->avframe->height,
+					decoder->avframe->linesize[0],
+					decoder->avframe->data[0],
+					decoder->avframe->linesize[0] * decoder->avframe->height,
+					true,
+#ifndef FF_API_PKT_PTS
+					decoder->avframe->pkt_pts,
+#else
+					decoder->avframe->pts,
+#endif
+					frame->inherit_super.timebase);
+			if(b != NULL) {
+				decoder->frame = (ttLibC_Frame *)b;
+				if(callback != NULL) {
+					return callback(ptr, decoder->frame);
+				}
+				else {
+					return true;
+				}
+			}
+		}
+		break;
+
 	case AV_PIX_FMT_NV12:
 	case AV_PIX_FMT_NV21:
-	
-	case AV_PIX_FMT_BGR24:
-	case AV_PIX_FMT_ABGR:
-	case AV_PIX_FMT_BGRA:
-	case AV_PIX_FMT_RGB24:
-	case AV_PIX_FMT_ARGB:
-	case AV_PIX_FMT_RGBA:
-		ERR_PRINT("not make yet.%d", decoder->dec->pix_fmt);
+		ERR_PRINT("not make yet.%d %d", decoder->dec->pix_fmt, AV_PIX_FMT_RGB24);
 		return false;
 	default:
 		ERR_PRINT("unknown pixfmt output.%d", decoder->dec->pix_fmt);
@@ -750,6 +809,9 @@ void TT_VISIBILITY_DEFAULT *ttLibC_AvcodecDecoder_getAVCodecContext(ttLibC_Frame
 		break;
 	case frameType_nellymoser:
 		codec = avcodec_find_decoder(AV_CODEC_ID_NELLYMOSER);
+		break;
+	case frameType_png:
+		codec = avcodec_find_decoder(AV_CODEC_ID_PNG);
 		break;
 	case frameType_opus:
 		codec = avcodec_find_decoder(AV_CODEC_ID_OPUS);
@@ -851,6 +913,9 @@ ttLibC_AvcodecDecoder TT_VISIBILITY_DEFAULT *ttLibC_AvcodecDecoder_makeWithAVCod
 	case AV_CODEC_ID_PCM_MULAW:
 		frame_type = frameType_pcm_mulaw;
 		break;
+	case AV_CODEC_ID_PNG:
+		frame_type = frameType_png;
+		break;
 	case AV_CODEC_ID_SPEEX:
 		frame_type = frameType_speex;
 		break;
@@ -914,7 +979,6 @@ ttLibC_AvcodecDecoder TT_VISIBILITY_DEFAULT *ttLibC_AvcodecDecoder_makeWithAVCod
 		ttLibC_free(decoder);
 		return NULL;
 	}
-	puts("called?");
 	decoder->inherit_super.frame_type = frame_type;
 	switch(dec->codec->type) {
 	case AVMEDIA_TYPE_AUDIO:

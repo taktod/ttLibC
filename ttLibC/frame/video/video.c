@@ -18,8 +18,9 @@
 #include "flv1.h"
 #include "h264.h"
 #include "h265.h"
-#include "theora.h"
 #include "jpeg.h"
+#include "png.h"
+#include "theora.h"
 #include "vp6.h"
 #include "vp8.h"
 #include "vp9.h"
@@ -69,8 +70,9 @@ ttLibC_Video TT_VISIBILITY_DEFAULT *ttLibC_Video_make(
 	case frameType_flv1:
 	case frameType_h264:
 	case frameType_h265:
-	case frameType_theora:
 	case frameType_jpeg:
+	case frameType_png:
+	case frameType_theora:
 	case frameType_vp6:
 	case frameType_vp8:
 	case frameType_vp9:
@@ -175,6 +177,10 @@ ttLibC_Video TT_VISIBILITY_DEFAULT *ttLibC_Video_clone(
 		return (ttLibC_Video *)ttLibC_Jpeg_clone(
  				(ttLibC_Jpeg *)prev_frame,
 				(ttLibC_Jpeg *)src_frame);
+	case frameType_png:
+		return (ttLibC_Video *)ttLibC_Png_clone(
+ 				(ttLibC_Png *)prev_frame,
+				(ttLibC_Png *)src_frame);
 	case frameType_theora:
 		return (ttLibC_Video *)ttLibC_Theora_clone(
 				(ttLibC_Theora *)prev_frame,
@@ -249,6 +255,9 @@ void TT_VISIBILITY_DEFAULT ttLibC_Video_close(ttLibC_Video **frame) {
 		break;
 	case frameType_jpeg:
 		ttLibC_Jpeg_close((ttLibC_Jpeg **)frame);
+		break;
+	case frameType_png:
+		ttLibC_Png_close((ttLibC_Png **)frame);
 		break;
 	case frameType_yuv420:
 		ttLibC_Yuv420_close((ttLibC_Yuv420 **)frame);

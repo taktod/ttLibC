@@ -22,6 +22,7 @@ nobase_include_HEADERS= \
 	ttLibC/frame/video/h264.h \
 	ttLibC/frame/video/h265.h \
 	ttLibC/frame/video/jpeg.h \
+	ttLibC/frame/video/png.h \
 	ttLibC/frame/video/theora.h \
 	ttLibC/frame/video/video.h \
 	ttLibC/frame/video/vp6.h \

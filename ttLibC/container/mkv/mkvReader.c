@@ -260,40 +260,57 @@ static bool MkvReader_readTag(
 					else {
 						if(strstr(codecId, "AVC") != 0) {
 							reader->track->type = frameType_h264;
+							reader->track->is_video = true;
 						}
 						else if(strstr(codecId, "HEVC") != 0) {
 							reader->track->type = frameType_h265;
+							reader->track->is_video = true;
 						}
 						else if(strcmp(codecId, "V_VP8") == 0) {
 							reader->track->type = frameType_vp8;
+							reader->track->is_video = true;
 						}
 						else if(strcmp(codecId, "V_VP9") == 0) {
 							reader->track->type = frameType_vp9;
-						}
-						else if(strcmp(codecId, "V_THEORA") == 0) {
-							reader->track->type = frameType_theora;
-						}
-						else if(strcmp(codecId, "V_MJPEG") == 0) {
-							reader->track->type = frameType_jpeg;
-						}
-						else if(strcmp(codecId, "A_OPUS") == 0) {
-							reader->track->type = frameType_opus;
-						}
-						else if(strcmp(codecId, "A_VORBIS") == 0) {
-							reader->track->type = frameType_vorbis;
+							reader->track->is_video = true;
 						}
 						else if(strstr(codecId, "A_AAC") != 0) {
 							reader->track->type = frameType_aac;
+							reader->track->is_video = false;
+						}
+						else if(strcmp(codecId, "A_OPUS") == 0) {
+							reader->track->type = frameType_opus;
+							reader->track->is_video = false;
+						}
+						else if(strcmp(codecId, "V_MJPEG") == 0) {
+							reader->track->type = frameType_jpeg;
+							reader->track->is_video = true;
+						}
+						else if(strcmp(codecId, "V_THEORA") == 0) {
+							reader->track->type = frameType_theora;
+							reader->track->is_video = true;
+						}
+						else if(strcmp(codecId, "A_VORBIS") == 0) {
+							reader->track->type = frameType_vorbis;
+							reader->track->is_video = false;
+						}
+						else if(strcmp(codecId, "A_MS/ACM") == 0){
+							reader->track->type = frameType_unknown;
+							reader->track->is_video = false;
 						}
 						else if(strcmp(codecId, "A_MPEG/L3") == 0) {
 							reader->track->type = frameType_mp3;
+							reader->track->is_video = false;
  						}
-						else if(strcmp(codecId, "A_MS/ACM") == 0){
-							reader->track->type = frameType_unknown;
-						}
 						else if(strcmp(codecId, "A_PCM/INT/LIT") == 0) {
 							// A_PCM/INT/BIG (for big endian)
 							reader->track->type = frameType_pcmS16;
+							reader->track->is_video = false;
+						}
+						else if(strcmp(codecId, "V_MS/VFW/FOURCC") == 0) {
+							// for ms, set as unknown, check later.
+							reader->track->type = frameType_unknown;
+							reader->track->is_video = true;
 						}
 						else {
 							ERR_PRINT("unknown codec Id:%s", codecId);

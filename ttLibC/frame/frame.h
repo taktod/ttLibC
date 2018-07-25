@@ -33,6 +33,8 @@ typedef enum ttLibC_Frame_Type {
 	frameType_h265,
 	/** ttLibC_Jpeg video frame */
 	frameType_jpeg,
+	/** ttLibC_Png video frame */
+	frameType_png,
 	/** ttLibC_Theora video frame */
 	frameType_theora,
 	/** ttLibC_Vp6 video frame */

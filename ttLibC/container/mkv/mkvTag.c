@@ -309,7 +309,28 @@ void TT_VISIBILITY_HIDDEN ttLibC_MkvTag_getPrivateDataFrame(
 		// in the case of riff, we will be here. such as speex, adpcmimawav
 		{
 			// try to read binary as wave format ex.
-			if(!track->is_video) {
+			if(track->is_video) {
+				ttLibC_ByteReader *reader = ttLibC_ByteReader_make(private_data, private_data_size, ByteUtilType_default);
+				// take as MS private date.
+				uint32_t be_size = ttLibC_ByteReader_bit(reader, 32);
+				uint32_t size = be_uint32_t(be_size); // data size(little endian)
+				if(size <= private_data_size) {
+					// ok
+					ttLibC_ByteReader_skipByte(reader, 4); // width
+					ttLibC_ByteReader_skipByte(reader, 4); // height
+					ttLibC_ByteReader_skipByte(reader, 4); // unknown
+					char tag[5] = {0};
+					ttLibC_ByteReader_string(reader, tag, 5, 4);
+					if(strncmp(tag, "MPNG", 4) == 0) {
+						track->type = frameType_png;
+					}
+					else {
+						ERR_PRINT("unknown format.");
+					}
+				}
+				ttLibC_ByteReader_close(&reader);
+			}
+			else {
 				// must be audio
 				ttLibC_ByteReader *reader = ttLibC_ByteReader_make(private_data, private_data_size, ByteUtilType_default);
 				uint16_t be_tag = ttLibC_ByteReader_bit(reader, 16);

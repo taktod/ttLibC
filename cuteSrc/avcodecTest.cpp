@@ -29,6 +29,13 @@ extern "C" {
 #	include <ttLibC/util/openalUtil.h>
 #endif
 
+#ifdef __ENABLE_SWSCALE__
+#include <ttLibC/resampler/swscaleResampler.h>
+#endif
+
+#ifdef __ENABLE_JPEG__
+#include <ttLibC/encoder/jpegEncoder.h>
+#endif
 #include <ttLibC/util/beepUtil.h>
 #include <ttLibC/resampler/imageResampler.h>
 #include <ttLibC/resampler/audioResampler.h>
@@ -39,6 +46,83 @@ extern "C" {
 #include <ttLibC/frame/frame.h>
 
 #include <ttLibC/container/flv.h>
+#include <ttLibC/container/mkv.h>
+
+#if defined(__ENABLE_AVCODEC__) && defined(__ENABLE_JPEG__) && defined(__ENABLE_SWSCALE__)
+typedef struct pngDecodeTest_t {
+	ttLibC_AvcodecDecoder *decoder;
+	ttLibC_ContainerReader *reader;
+	ttLibC_SwscaleResampler *resampler;
+	ttLibC_JpegEncoder *encoder;
+	FILE *fp_in;
+} pngDecodeTest_t;
+
+static bool pngDecoderTest_jpegEncodeCallback(void *ptr, ttLibC_Jpeg *jpeg) {
+	char buffer[256];
+	sprintf(buffer, "jpeg/output%d.jpg", jpeg->inherit_super.inherit_super.pts);
+	FILE *fp = fopen(buffer, "w");
+	if(fp) {
+		fwrite(jpeg->inherit_super.inherit_super.data, jpeg->inherit_super.inherit_super.buffer_size, 1, fp);
+		fclose(fp);
+	}
+	return true;
+}
+
+static bool pngDecoderTest_resamplerCallback(void *ptr, ttLibC_Frame *frame) {
+	pngDecodeTest_t *testData = (pngDecodeTest_t *)ptr;
+	return ttLibC_JpegEncoder_encode(testData->encoder, (ttLibC_Yuv420 *)frame, pngDecoderTest_jpegEncodeCallback, ptr);
+}
+
+static bool pngDecoderTest_pngDecodeCallback(void *ptr, ttLibC_Frame *frame) {
+	pngDecodeTest_t *testData = (pngDecodeTest_t *)ptr;
+	return ttLibC_SwscaleResampler_resample(testData->resampler, frame, pngDecoderTest_resamplerCallback, ptr);
+}
+
+static bool pngDecoderTest_pngFrameCallback(void *ptr, ttLibC_Frame *frame) {
+	pngDecodeTest_t *testData = (pngDecodeTest_t *)ptr;
+	if(frame->type != frameType_png) {
+		ERR_PRINT("not png frame.");
+		return false;
+	}
+	return ttLibC_AvcodecDecoder_decode(testData->decoder, frame, pngDecoderTest_pngDecodeCallback, ptr);
+}
+
+static bool pngDecoderTest_mkvCallback(void *ptr, ttLibC_Mkv *mkv) {
+	return ttLibC_Mkv_getFrame(mkv, pngDecoderTest_pngFrameCallback, ptr);
+}
+#endif
+
+static void pngDecodeTest() {
+	LOG_PRINT("pngDecodeTest");
+#if defined(__ENABLE_AVCODEC__) && defined(__ENABLE_JPEG__) && defined(__ENABLE_SWSCALE__)
+	char file[256];
+	pngDecodeTest_t testData;
+	testData.reader = (ttLibC_ContainerReader *)ttLibC_MkvReader_make();
+	testData.decoder = ttLibC_AvcodecVideoDecoder_make(frameType_png, 640, 360);
+	testData.resampler = ttLibC_SwscaleResampler_make(frameType_bgr, BgrType_rgb, 640, 360, frameType_yuv420, Yuv420Type_planar, 320, 180, SwscaleResampler_Bilinear);
+	testData.encoder = ttLibC_JpegEncoder_make(320, 180, 90);
+	sprintf(file, "%s/tools/data/source/test.png.mkv", getenv("HOME"));
+//	sprintf(file, "%s/tools/data/source/out.mkv", getenv("HOME"));
+	testData.fp_in = fopen(file, "rb");
+	do {
+		uint8_t buffer[65536];
+		if(!testData.fp_in) {
+			break;
+		}
+		size_t read_size = fread(buffer, 1, 65536, testData.fp_in);
+		if(!ttLibC_MkvReader_read((ttLibC_MkvReader *)testData.reader, buffer, read_size, pngDecoderTest_mkvCallback, &testData)) {
+			ERR_PRINT("error occured!");
+			break;
+		}
+	} while(!feof(testData.fp_in));
+	ttLibC_AvcodecDecoder_close(&testData.decoder);
+	ttLibC_ContainerReader_close(&testData.reader);
+	ttLibC_SwscaleResampler_close(&testData.resampler);
+	ttLibC_JpegEncoder_close(&testData.encoder);
+	if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
+#endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
 
 #if defined(__ENABLE_AVCODEC__)
 typedef struct flvDecodeTest_t {
@@ -856,6 +940,7 @@ static void h264Test() {
  */
 cute::suite avcodecTests(cute::suite s) {
 	s.clear();
+	s.push_back(CUTE(pngDecodeTest));
 	s.push_back(CUTE(flvDecodeTest));
 	s.push_back(CUTE(aacTest));
 	s.push_back(CUTE(adpcmImaWavTest));

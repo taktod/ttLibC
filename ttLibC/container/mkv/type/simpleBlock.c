@@ -17,6 +17,7 @@
 #include "../../../frame/video/h264.h"
 #include "../../../frame/video/h265.h"
 #include "../../../frame/video/jpeg.h"
+#include "../../../frame/video/png.h"
 #include "../../../frame/video/theora.h"
 #include "../../../frame/video/vp8.h"
 #include "../../../frame/video/vp9.h"
@@ -156,6 +157,30 @@ static void SimpleBlock_getLace0Frame(
 			}
 			else {
 				track->frame = (ttLibC_Frame *)jpeg;
+				track->frame->id = track->track_number;
+				if(callback != NULL) {
+					if(!callback(ptr, track->frame)) {
+						reader->error_number = 5;
+					}
+				}
+			}
+		}
+		break;
+	case frameType_png:
+		{
+			ttLibC_Png *png = ttLibC_Png_getFrame(
+					(ttLibC_Png *)track->frame,
+					data,
+					data_size,
+					true,
+					pts,
+					timebase);
+			if(png == NULL) {
+				ERR_PRINT("failed to make png frame");
+				reader->error_number = 5;
+			}
+			else {
+				track->frame = (ttLibC_Frame *)png;
 				track->frame->id = track->track_number;
 				if(callback != NULL) {
 					if(!callback(ptr, track->frame)) {

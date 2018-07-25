@@ -78,6 +78,7 @@ libttLibC_a_SOURCES= \
 	frame/video/h264.c \
 	frame/video/h265.c \
 	frame/video/jpeg.c \
+	frame/video/png.c \
 	frame/video/theora.c \
 	frame/video/video.c \
 	frame/video/vp6.c \
