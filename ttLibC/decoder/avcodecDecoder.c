@@ -565,6 +565,8 @@ static bool AvcodecDecoder_decodeVideo(
 			case AV_PIX_FMT_YUVJ444P:
 				for(uint32_t j = 0;j < height;++ j) {
 					if((j & 0x01) == 1) {
+						uint8_t *u_base_data = u_data;
+						uint8_t *v_base_data = v_data;
 						for(uint32_t i = 0;i < width;++ i) {
 							if((i & 0x01) == 0x00) {
 								*u_data = *(src_u_data + i);
@@ -573,6 +575,8 @@ static bool AvcodecDecoder_decodeVideo(
 								++ v_data;
 							}
 						}
+						u_data = u_base_data + uv_stride;
+						v_data = v_base_data + uv_stride;
 					}
 					src_u_data += src_u_stride;
 					src_v_data += src_v_stride;

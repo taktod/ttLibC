@@ -123,6 +123,46 @@
 
 #include <unistd.h>
 
+static bool jpegDecodeBinaryTest_encodeCallback(void *ptr, ttLibC_Jpeg *jpeg) {
+	FILE *fp = fopen("./cuteSrc/output.jpeg", "wb");
+	if(fp) {
+		fwrite(jpeg->inherit_super.inherit_super.data, 1, jpeg->inherit_super.inherit_super.buffer_size, fp);
+		fclose(fp);
+	}
+	return true;
+}
+
+static bool jpegDecodeBinaryTest_decodeCallback(void *ptr, ttLibC_Frame *frame) {
+	ttLibC_Yuv420 *yuv = (ttLibC_Yuv420 *)frame;
+	LOG_PRINT("%d %d %d", yuv->y_stride, yuv->u_stride, yuv->v_stride);
+	ttLibC_JpegEncoder *encoder = ttLibC_JpegEncoder_make(200, 200, 90);
+	ttLibC_JpegEncoder_encode(encoder, yuv, jpegDecodeBinaryTest_encodeCallback, NULL);
+	ttLibC_JpegEncoder_close(&encoder);
+	return true;
+}
+
+static void jpegDecodeBinaryTest() {
+	LOG_PRINT("jpegDecodeBinaryTest");
+	FILE *fp = fopen("./cuteSrc/target.jpeg", "rb");
+	if(fp) {
+		fpos_t fsize;
+		fseek(fp,0,SEEK_END);
+		fgetpos(fp,&fsize);
+		uint8_t *buf = new uint8_t[fsize];
+		fseek(fp,0,SEEK_SET);
+		fread(buf, 1, fsize, fp);
+		ttLibC_Jpeg *jpeg = ttLibC_Jpeg_getFrame(NULL, buf, fsize, false, 0, 1000);
+		LOG_PRINT("%d x %d", jpeg->inherit_super.width, jpeg->inherit_super.height);
+		ttLibC_AvcodecDecoder *decoder = ttLibC_AvcodecVideoDecoder_make(frameType_jpeg, jpeg->inherit_super.width, jpeg->inherit_super.height);
+		ttLibC_AvcodecDecoder_decode(decoder, (ttLibC_Frame *)jpeg, jpegDecodeBinaryTest_decodeCallback, NULL);
+		ttLibC_AvcodecDecoder_close(&decoder);
+		ttLibC_Jpeg_close(&jpeg);
+		delete[] buf;
+		fclose(fp);
+	}
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
+
 #if defined(__ENABLE_APPLE__) && defined(__ENABLE_OPENCV__)
 typedef struct {
 	ttLibC_CvWindow *target;
@@ -1698,6 +1738,7 @@ static void imageResamplerTest() {
  */
 cute::suite encoderDecoderTests(cute::suite s) {
 	s.clear();
+	s.push_back(CUTE(jpegDecodeBinaryTest));
 	s.push_back(CUTE(vtH265Test));
 	s.push_back(CUTE(vtH265AvcodecDecodeTest));
 	s.push_back(CUTE(vtH264Test));
