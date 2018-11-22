@@ -114,6 +114,7 @@
 #include <ttLibC/frame/video/h264.h>
 #include <ttLibC/frame/video/h265.h>
 #include <ttLibC/frame/video/jpeg.h>
+#include <ttLibC/frame/video/png.h>
 
 #include <ttLibC/resampler/imageResampler.h>
 #include <ttLibC/resampler/imageResizer.h>
@@ -123,8 +124,64 @@
 
 #include <unistd.h>
 
+#if defined(__ENABLE_AVCODEC__) && defined(__ENABLE_JPEG__) && defined(__ENABLE_SWSCALE__)
+
+static bool pngDecodeBinaryTest_encodeCallback(void *ptr, ttLibC_Jpeg *jpeg) {
+	FILE *fp = fopen("./cuteSrc/output_png.jpeg", "wb");
+	if(fp) {
+		fwrite(jpeg->inherit_super.inherit_super.data, 1, jpeg->inherit_super.inherit_super.buffer_size, fp);
+		fclose(fp);
+	}
+	return true;
+}
+
+static bool pngDecodeBinaryTest_scaleCallback(void *ptr, ttLibC_Frame *frame) {
+	ttLibC_Yuv420 *yuv = (ttLibC_Yuv420 *)frame;
+	LOG_PRINT("%d %d %d", yuv->y_stride, yuv->u_stride, yuv->v_stride);
+	ttLibC_JpegEncoder *encoder = ttLibC_JpegEncoder_make(200, 200, 90);
+	ttLibC_JpegEncoder_encode(encoder, yuv, pngDecodeBinaryTest_encodeCallback, NULL);
+	ttLibC_JpegEncoder_close(&encoder);
+	return true;
+}
+
+static bool pngDecodeBinaryTest_decodeCallback(void *ptr, ttLibC_Frame *frame) {
+	ttLibC_Bgr *bgr = (ttLibC_Bgr *)frame;
+	ttLibC_SwscaleResampler *resampler = ttLibC_SwscaleResampler_make(bgr->inherit_super.inherit_super.type, bgr->type, bgr->inherit_super.width, bgr->inherit_super.height,
+		frameType_yuv420, Yuv420Type_planar, bgr->inherit_super.width, bgr->inherit_super.height,
+		SwscaleResampler_Bilinear);
+	ttLibC_SwscaleResampler_resample(resampler, frame, pngDecodeBinaryTest_scaleCallback, NULL);
+	ttLibC_SwscaleResampler_close(&resampler);
+	return true;
+}
+#endif
+
+static void pngDecodeBinaryTest() {
+	LOG_PRINT("pngDecodeBinaryTest");
+#if defined(__ENABLE_AVCODEC__) && defined(__ENABLE_JPEG__) && defined(__ENABLE_SWSCALE__)
+	FILE *fp = fopen("./cuteSrc/target.png", "rb");
+	if(fp) {
+		fpos_t fsize;
+		fseek(fp,0,SEEK_END);
+		fgetpos(fp,&fsize);
+		uint8_t *buf = new uint8_t[fsize];
+		fseek(fp,0,SEEK_SET);
+		fread(buf, 1, fsize, fp);
+		ttLibC_Png *png = ttLibC_Png_getFrame(NULL, buf, fsize, false, 0, 1000);
+		ttLibC_AvcodecDecoder *decoder = ttLibC_AvcodecVideoDecoder_make(frameType_png, png->inherit_super.width, png->inherit_super.height);
+		ttLibC_AvcodecDecoder_decode(decoder, (ttLibC_Frame *)png, pngDecodeBinaryTest_decodeCallback, NULL);
+		ttLibC_AvcodecDecoder_close(&decoder);
+		ttLibC_Png_close(&png);
+		delete[] buf;
+		fclose(fp);
+	}
+#endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
+
+#if defined(__ENABLE_AVCODEC__) && defined(__ENABLE_JPEG__)
+
 static bool jpegDecodeBinaryTest_encodeCallback(void *ptr, ttLibC_Jpeg *jpeg) {
-	FILE *fp = fopen("./cuteSrc/output.jpeg", "wb");
+	FILE *fp = fopen("./cuteSrc/output_jpeg.jpeg", "wb");
 	if(fp) {
 		fwrite(jpeg->inherit_super.inherit_super.data, 1, jpeg->inherit_super.inherit_super.buffer_size, fp);
 		fclose(fp);
@@ -140,9 +197,11 @@ static bool jpegDecodeBinaryTest_decodeCallback(void *ptr, ttLibC_Frame *frame) 
 	ttLibC_JpegEncoder_close(&encoder);
 	return true;
 }
+#endif
 
 static void jpegDecodeBinaryTest() {
 	LOG_PRINT("jpegDecodeBinaryTest");
+#if defined(__ENABLE_AVCODEC__) && defined(__ENABLE_JPEG__)
 	FILE *fp = fopen("./cuteSrc/target.jpeg", "rb");
 	if(fp) {
 		fpos_t fsize;
@@ -160,6 +219,7 @@ static void jpegDecodeBinaryTest() {
 		delete[] buf;
 		fclose(fp);
 	}
+#endif
 	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
@@ -1692,7 +1752,7 @@ static void imageResizeTest() {
 static void imageResamplerTest() {
 	LOG_PRINT("imageResamplerTest");
 #ifdef __ENABLE_OPENCV__
-	ttLibC_CvCapture *capture = ttLibC_CvCapture_make(0, 320, 240);
+	ttLibC_CvCapture *capture = ttLibC_CvCapture_make(0, 360, 240);
 	ttLibC_CvWindow *window = ttLibC_CvWindow_make("original");
 	ttLibC_CvWindow *resampled_window = ttLibC_CvWindow_make("target");
 	ttLibC_Bgr *bgr = NULL;
@@ -1738,6 +1798,7 @@ static void imageResamplerTest() {
  */
 cute::suite encoderDecoderTests(cute::suite s) {
 	s.clear();
+	s.push_back(CUTE(pngDecodeBinaryTest));
 	s.push_back(CUTE(jpegDecodeBinaryTest));
 	s.push_back(CUTE(vtH265Test));
 	s.push_back(CUTE(vtH265AvcodecDecodeTest));
