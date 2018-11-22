@@ -493,6 +493,22 @@ static bool AvcodecDecoder_decodeVideo(
 #endif
 					frame->inherit_super.timebase);
 			if(y != NULL) {
+				// 0-255 -> 16->235
+				if(decoder->dec->pix_fmt == AV_PIX_FMT_YUVJ420P) {
+					uint8_t *y_data = y->y_data;
+					uint8_t *u_data = y->u_data;
+					uint8_t *v_data = y->v_data;
+					for(int i = 0, max = y->y_stride * y->inherit_super.height;i < max;++ i) {
+						(*y_data) = (uint8_t)((((*y_data) * 219 + 383) >> 8) + 16);
+						++ y_data;
+					}
+					for(int i = 0, max = y->u_stride * y->inherit_super.height;i < max;++ i) {
+						(*u_data) = (uint8_t)((((*u_data) * 219 + 383) >> 8) + 16);
+						(*v_data) = (uint8_t)((((*v_data) * 219 + 383) >> 8) + 16);
+						++ u_data;
+						++ v_data;
+					}
+				}
 				decoder->frame = (ttLibC_Frame *)y;
 				if(callback != NULL) {
 					return callback(ptr, decoder->frame);
@@ -617,6 +633,23 @@ static bool AvcodecDecoder_decodeVideo(
 				}
 				ERR_PRINT("failed to make yuv420 frame object.");
 				return false;
+			}
+			// 0-255 -> 16->235
+			if(decoder->dec->pix_fmt == AV_PIX_FMT_YUVJ422P
+			|| decoder->dec->pix_fmt == AV_PIX_FMT_YUVJ444P) {
+				uint8_t *y_data = y->y_data;
+				uint8_t *u_data = y->u_data;
+				uint8_t *v_data = y->v_data;
+				for(int i = 0, max = y->y_stride * y->inherit_super.height;i < max;++ i) {
+					(*y_data) = (uint8_t)((((*y_data) * 219 + 383) >> 8) + 16);
+					++ y_data;
+				}
+				for(int i = 0, max = y->u_stride * y->inherit_super.height;i < max;++ i) {
+					(*u_data) = (uint8_t)((((*u_data) * 219 + 383) >> 8) + 16);
+					(*v_data) = (uint8_t)((((*v_data) * 219 + 383) >> 8) + 16);
+					++ u_data;
+					++ v_data;
+				}
 			}
 			decoder->frame = (ttLibC_Frame *)y;
 			decoder->frame->is_non_copy = false;

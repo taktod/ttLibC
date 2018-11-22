@@ -182,6 +182,20 @@ bool TT_VISIBILITY_DEFAULT ttLibC_JpegDecoder_decode(
 	if(fp) {
 		fclose(fp);
 	}
+	// 0-255 -> 16->235
+	y_data = data;
+	u_data = data + y_size;
+	v_data = u_data + u_size;
+	for(int i = 0;i < y_size;++ i) {
+		(*y_data) = (uint8_t)((((*y_data) * 219 + 383) >> 8) + 16);
+		++ y_data;
+	}
+	for(int i = 0;i < u_size;++ i) {
+		(*u_data) = (uint8_t)((((*u_data) * 219 + 383) >> 8) + 16);
+		(*v_data) = (uint8_t)((((*v_data) * 219 + 383) >> 8) + 16);
+		++ u_data;
+		++ v_data;
+	}
 	// setup yuv object.
 	yuv = ttLibC_Yuv420_make(
 			yuv,

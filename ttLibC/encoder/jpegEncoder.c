@@ -161,6 +161,38 @@ bool TT_VISIBILITY_DEFAULT ttLibC_JpegEncoder_encode(
 		}
 		alloc_flag = true;
 	}
+	// 16->235 -> 0-255
+	size_t y_size = yuv->y_stride * yuv->inherit_super.height;
+	size_t u_size = yuv->u_stride * yuv->inherit_super.height / 2;
+	size_t v_size = yuv->v_stride * yuv->inherit_super.height / 2;
+	uint8_t *y_data = malloc(y_size);
+	uint8_t *u_data = malloc(u_size);
+	uint8_t *v_data = malloc(v_size);
+
+	uint8_t *yd = y_data;
+	uint8_t *ys = yuv->y_data;
+	for(int i = 0;i < y_size;++ i) {
+		uint32_t y = (((((*ys) * 1197) >> 6) - 299) >> 4);
+		*yd = y > 255 ? 255 : y;
+		++ yd;
+		++ ys;
+	}
+	uint8_t *ud = u_data;
+	uint8_t *us = yuv->u_data;
+	for(int i = 0;i < u_size;++ i) {
+		uint32_t u = (((((*us) * 1197) >> 6) - 299) >> 4);
+		*ud = u > 255 ? 255 : u;
+		++ ud;
+		++ us;
+	}
+	uint8_t *vd = v_data;
+	uint8_t *vs = yuv->v_data;
+	for(int i = 0;i < v_size;++ i) {
+		uint32_t v = (((((*vs) * 1197) >> 6) - 299) >> 4);
+		*vd = v > 255 ? 255 : v;
+		++ vd;
+		++ vs;
+	}
 	// do convert.
 	encoder_->dmgr.next_output_byte = data;
 	encoder_->dmgr.free_in_buffer = data_size;
@@ -177,23 +209,26 @@ bool TT_VISIBILITY_DEFAULT ttLibC_JpegEncoder_encode(
 		}
 		for(int i = 0;i < 16;i ++) {
 			if(i >= max) {
-				y[i] = yuv->y_data;
+				y[i] = y_data;
 				if((i & 0x01) == 0) {
-					cb[(i >> 1)] = yuv->u_data;
-					cr[(i >> 1)] = yuv->v_data;
+					cb[(i >> 1)] = u_data;
+					cr[(i >> 1)] = v_data;
 				}
 			}
 			else {
-				y[i] = yuv->y_data + yuv->y_stride * (i + j);
+				y[i] = y_data + yuv->y_stride * (i + j);
 				if((i & 0x01) == 0) {
-					cb[(i >> 1)] = yuv->u_data + ((yuv->u_stride * (i + j)) >> 1);
-					cr[(i >> 1)] = yuv->v_data + ((yuv->v_stride * (i + j)) >> 1);
+					cb[(i >> 1)] = u_data + ((yuv->u_stride * (i + j)) >> 1);
+					cr[(i >> 1)] = v_data + ((yuv->v_stride * (i + j)) >> 1);
 				}
 			}
 		}
 		jpeg_write_raw_data(&encoder_->cinfo, planes, 16);
 	}
 	jpeg_finish_compress(&encoder_->cinfo);
+	free(y_data);
+	free(u_data);
+	free(v_data);
 	jpeg = ttLibC_Jpeg_make(
 			jpeg,
 			encoder_->inherit_super.width,
