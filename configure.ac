@@ -47,6 +47,7 @@ fdkaac_flag=no
 libyuv_flag=no
 swscale_flag=no
 swresample_flag=no
+libpng_flag=no
 
 # check result
 cute_check=no
@@ -76,6 +77,7 @@ fdkaac_check=no
 libyuv_check=no
 swscale_check=no
 swresample_check=no
+libpng_check=no
 
 AC_ARG_ENABLE(
 	[lgpl],
@@ -154,6 +156,7 @@ AC_ARG_ENABLE(
 		libyuv_flag=$enableval
 		swscale_flag=$enableval
 		swresample_flag=$enableval
+		libpng_flag=$enableval
 	]
 )
 
@@ -305,6 +308,12 @@ AC_ARG_ENABLE(
 	[swresample],
 	AS_HELP_STRING([--enable-swresample/--disable-swresample], [enable/disable swresample(ffmpeg or libav) code.]),
 	[swresample_flag=$enableval]
+)
+
+AC_ARG_ENABLE(
+	[libpng],
+	AS_HELP_STRING([--enable-libpng/--disable-libpng], [enable/disable libpng code.]),
+	[libpng_flag=$enableval]
 )
 
 if test x$opencv_flag = "xyes"; then
@@ -699,6 +708,14 @@ if test x$swresample_flag = "xyes"; then
 		[swresample_check=no]
 	)
 fi
+if test x$libpng_flag = "xyes"; then
+	PKG_CHECK_MODULES(
+		[LIBPNG],
+		[libpng],
+		[libpng_check=yes],
+		[libpng_check=no]
+	)
+fi
 
 AC_MSG_CHECKING(for license)
 if test x$gpl_flag = "xyes"; then
@@ -861,6 +878,11 @@ if test x$swresample_flag$lgpl_flag$swresample_check = "xyesyesyes"; then
 	AC_DEFINE([__ENABLE_SWRESAMPLE__])
 fi
 AM_CONDITIONAL(ENABLE_SWRESAMPLE, test x$swresample_flag$lgpl_flag$swresample_check = "xyesyesyes")
+
+if test x$libpng_flag$libpng_check = "xyesyes"; then
+	AC_DEFINE([__ENABLE_LIBPNG__])
+fi
+AM_CONDITIONAL(ENABLE_LIBPNG, test x$libpng_flag$libpng_check = "xyesyes")
 
 AC_ARG_WITH(pkgconfigdir,
 	AS_HELP_STRING([--with-pkgconfigdir], [Use the specified pkgconfig dir.(default is $libdir/pkgconfig)]),
@@ -1210,4 +1232,13 @@ echo "swresample:       off(under lgpl or gpl only.)"
 	fi
 else
 echo "swresample:       off"
+fi
+if test x$libpng_flag = "xyes"; then
+	if test x$libpng_check = "xyes"; then
+echo "libpng:           on"
+	else
+echo "libpng:           off(libpng library is missing.)"
+	fi
+else
+echo "libpng:           off"
 fi

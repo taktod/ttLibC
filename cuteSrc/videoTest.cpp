@@ -15,8 +15,9 @@
 
 #include <ttLibC/util/hexUtil.h>
 #include <ttLibC/frame/video/bgr.h>
-#include <ttLibC/frame/video/yuv420.h>
 #include <ttLibC/frame/video/h264.h>
+#include <ttLibC/frame/video/png.h>
+#include <ttLibC/frame/video/yuv420.h>
 #include <ttLibC/resampler/imageResampler.h>
 
 #ifdef __ENABLE_OPENCV__
@@ -39,6 +40,13 @@
 #	include <theora/theoradec.h>
 #endif
 
+#ifdef __ENABLE_SWSCALE__
+#	include <ttLibC/resampler/swscaleResampler.h>
+#endif
+
+#ifdef __ENABLE_JPEG__
+#	include <ttLibC/encoder/jpegEncoder.h>
+#endif
 
 #ifdef __ENABLE_DAALA_ENCODE__
 #	include <daala/daalaenc.h>
@@ -47,6 +55,103 @@
 #ifdef __ENABLE_DAALA_DECODE__
 #	include <daala/daaladec.h>
 #endif
+
+#ifdef __ENABLE_LIBPNG__
+#	include <png.h>
+#endif
+
+#if defined(__ENABLE_LIBPNG__) || defined(__ENABLE_SWSCALE__) || defined(__ENABLE_JPEG__)
+typedef struct {
+	uint8_t *buf;
+	size_t buf_size;
+	long offset;
+} libpngTestData_t;
+
+static bool libpngTest_jpegCallback(void *ptr, ttLibC_Jpeg *jpeg) {
+	FILE *fp = fopen("./cuteSrc/libpng_output.jpeg", "wb");
+	if(fp) {
+		fwrite(jpeg->inherit_super.inherit_super.data, 1, jpeg->inherit_super.inherit_super.buffer_size, fp);
+		fclose(fp);
+	}
+	return true;
+}
+static bool libpngTest_yuvCallback(void *ptr, ttLibC_Frame *frame) {
+	ttLibC_Yuv420 *yuv = (ttLibC_Yuv420 *)frame;
+	ttLibC_JpegEncoder *encoder = ttLibC_JpegEncoder_make(yuv->inherit_super.width, yuv->inherit_super.height, 90);
+	ttLibC_JpegEncoder_encode(encoder, yuv, libpngTest_jpegCallback, NULL);
+	ttLibC_JpegEncoder_close(&encoder);
+	return true;
+}
+
+static void libpngTest_memreadFunc(png_structp png_ptr, png_bytep buf, png_size_t size) {
+	libpngTestData_t *testData = (libpngTestData_t *)png_get_io_ptr(png_ptr);
+	LOG_PRINT("reading is requested:%d", size);
+	if(testData->offset + size < testData->buf_size) {
+		memcpy(buf, testData->buf + testData->offset, size);
+		testData->offset += size;
+	}
+	else {
+		ERR_PRINT("failed to read data.");
+	}
+}
+#endif
+
+static void libpngTest() {
+	LOG_PRINT("libpngTest");
+#if defined(__ENABLE_LIBPNG__) || defined(__ENABLE_SWSCALE__) || defined(__ENABLE_JPEG__)
+	FILE *fp = fopen("./cuteSrc/target.png", "rb");
+	if(fp) {
+		fpos_t fsize;
+		fseek(fp,0,SEEK_END);
+		fgetpos(fp,&fsize);
+		uint8_t *buf = new uint8_t[fsize];
+		libpngTestData_t testData;
+		testData.buf = buf;
+		testData.buf_size = fsize;
+		testData.offset = 0;
+		fseek(fp, 0, SEEK_SET);
+		fread(buf, 1, fsize, fp);
+		ttLibC_Png *png = ttLibC_Png_getFrame(NULL, buf, fsize, false, 0, 1000);
+		LOG_PRINT("%d x %d", png->inherit_super.width, png->inherit_super.height);
+
+		png_structp png_ptr;
+		png_infop info_ptr;
+		png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+		info_ptr = png_create_info_struct(png_ptr); 
+
+		png_set_read_fn(png_ptr, (png_voidp)&testData, (png_rw_ptr)libpngTest_memreadFunc);
+
+		png_uint_32 width, height;
+		int bit_depth, color_type, interlace_type;
+		int compression_type, filter_type;
+
+		png_read_info(png_ptr, info_ptr);
+		png_get_IHDR(png_ptr, info_ptr, &width, &height, &bit_depth, &color_type, &interlace_type, &compression_type, &filter_type);
+		LOG_PRINT("%d x %d %d", width, height, png_get_rowbytes(png_ptr, info_ptr));
+		uint32_t row_size = png_get_rowbytes(png_ptr, info_ptr);
+		ttLibC_Bgr *bgr = ttLibC_Bgr_makeEmptyFrame(BgrType_rgba, width, height);
+		uint8_t *rgb_buffer = bgr->data;
+		for(int i = 0;i < height; ++ i) {
+			png_read_row(png_ptr, rgb_buffer + i * bgr->width_stride, NULL);
+		}
+		LOG_PRINT("%d %d %d %d", rgb_buffer[0], rgb_buffer[1], rgb_buffer[2], rgb_buffer[3]);
+		ttLibC_SwscaleResampler *scale = ttLibC_SwscaleResampler_make(
+			bgr->inherit_super.inherit_super.type, bgr->type, width, height,
+			frameType_yuv420, Yuv420Type_planar, width, height, SwscaleResampler_Bilinear);
+		// try to resample: bgr -> yuv -> jpeg -> file.
+		ttLibC_SwscaleResampler_resample(scale, (ttLibC_Frame *)bgr, libpngTest_yuvCallback, NULL);
+
+		ttLibC_SwscaleResampler_close(&scale);
+		ttLibC_Bgr_close(&bgr);
+		png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
+
+		ttLibC_Png_close(&png);
+		delete[] buf;
+		fclose(fp);
+	}
+#endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
 
 static void daalaTest() {
 	LOG_PRINT("daalaTest");
@@ -882,6 +987,7 @@ static void yuvCloneTest() {
  */
 cute::suite videoTests(cute::suite s) {
 	s.clear();
+	s.push_back(CUTE(libpngTest));
 	s.push_back(CUTE(daalaTest));
 	s.push_back(CUTE(theoraTest));
 	s.push_back(CUTE(avcodecTest));

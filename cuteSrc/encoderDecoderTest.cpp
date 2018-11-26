@@ -102,6 +102,10 @@
 #	include <ttLibC/resampler/swresampleResampler.h>
 #endif
 
+#ifdef __ENABLE_LIBPNG__
+#	include <ttLibC/decoder/pngDecoder.h>
+#endif
+
 #include <ttLibC/util/beepUtil.h>
 #include <ttLibC/frame/audio/pcms16.h>
 #include <ttLibC/frame/audio/mp3.h>
@@ -123,6 +127,61 @@
 #include <ttLibC/util/hexUtil.h>
 
 #include <unistd.h>
+
+#if defined(__ENABLE_LIBPNG__) && defined(__ENABLE_JPEG__) && defined(__ENABLE_SWSCALE__)
+
+static bool pngDecodeBinaryTest2_encodeCallback(void *ptr, ttLibC_Jpeg *jpeg) {
+	FILE *fp = fopen("./cuteSrc/output_png2.jpeg", "wb");
+	if(fp) {
+		fwrite(jpeg->inherit_super.inherit_super.data, 1, jpeg->inherit_super.inherit_super.buffer_size, fp);
+		fclose(fp);
+	}
+	return true;
+}
+
+static bool pngDecodeBinaryTest2_scaleCallback(void *ptr, ttLibC_Frame *frame) {
+	ttLibC_Yuv420 *yuv = (ttLibC_Yuv420 *)frame;
+	LOG_PRINT("%d %d %d", yuv->y_stride, yuv->u_stride, yuv->v_stride);
+	ttLibC_JpegEncoder *encoder = ttLibC_JpegEncoder_make(200, 200, 90);
+	ttLibC_JpegEncoder_encode(encoder, yuv, pngDecodeBinaryTest2_encodeCallback, NULL);
+	ttLibC_JpegEncoder_close(&encoder);
+	return true;
+}
+
+static bool pngDecodeBinaryTest2_decodeCallback(void *ptr, ttLibC_Bgr *frame) {
+	ttLibC_Bgr *bgr = frame;
+	ttLibC_SwscaleResampler *resampler = ttLibC_SwscaleResampler_make(bgr->inherit_super.inherit_super.type, bgr->type, bgr->inherit_super.width, bgr->inherit_super.height,
+		frameType_yuv420, Yuv420Type_planar, bgr->inherit_super.width, bgr->inherit_super.height,
+		SwscaleResampler_Bilinear);
+	ttLibC_SwscaleResampler_resample(resampler, (ttLibC_Frame *)frame, pngDecodeBinaryTest2_scaleCallback, NULL);
+	ttLibC_SwscaleResampler_close(&resampler);
+	return true;
+}
+#endif
+
+static void pngDecodeBinaryTest2() {
+	LOG_PRINT("pngDecodeBinaryTest2");
+#if defined(__ENABLE_LIBPNG__) && defined(__ENABLE_JPEG__) && defined(__ENABLE_SWSCALE__)
+	FILE *fp = fopen("./cuteSrc/target.png", "rb");
+	if(fp) {
+		fpos_t fsize;
+		fseek(fp,0,SEEK_END);
+		fgetpos(fp,&fsize);
+		uint8_t *buf = new uint8_t[fsize];
+		fseek(fp,0,SEEK_SET);
+		fread(buf, 1, fsize, fp);
+		ttLibC_Png *png = ttLibC_Png_getFrame(NULL, buf, fsize, false, 0, 1000);
+		ttLibC_PngDecoder *decoder = ttLibC_PngDecoder_make();
+		ttLibC_PngDecoder_decode(decoder, png, pngDecodeBinaryTest2_decodeCallback, NULL);
+		ttLibC_PngDecoder_close(&decoder);
+		ttLibC_Png_close(&png);
+		delete[] buf;
+		fclose(fp);
+	}
+#endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
+
 
 #if defined(__ENABLE_AVCODEC__) && defined(__ENABLE_JPEG__) && defined(__ENABLE_SWSCALE__)
 
@@ -1306,11 +1365,13 @@ static void speexTest() {
 	ASSERT(ttLibC_Allocator_dump() == 0);
 }
 
+#if defined(__ENABLE_SWRESAMPLE__) && defined(__ENABLE_OPENAL__)
 static bool swresampleTestCallback(void *ptr, ttLibC_Frame *pcm) {
 	ttLibC_AlDevice *device = (ttLibC_AlDevice *)ptr;
 	ttLibC_AlDevice_queue(device, (ttLibC_PcmS16 *)pcm);
 	return true;
 }
+#endif
 
 static void swresampleTest() {
 	LOG_PRINT("swresampleTest");
@@ -1798,6 +1859,7 @@ static void imageResamplerTest() {
  */
 cute::suite encoderDecoderTests(cute::suite s) {
 	s.clear();
+	s.push_back(CUTE(pngDecodeBinaryTest2));
 	s.push_back(CUTE(pngDecodeBinaryTest));
 	s.push_back(CUTE(jpegDecodeBinaryTest));
 	s.push_back(CUTE(vtH265Test));

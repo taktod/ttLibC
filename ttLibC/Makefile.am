@@ -42,6 +42,7 @@ libttLibC_a_SOURCES= \
 	decoder/mp3lameDecoder.c \
 	decoder/openh264Decoder.cpp \
 	decoder/opusDecoder.c \
+	decoder/pngDecoder.c \
 	decoder/speexDecoder.c \
 	decoder/theoraDecoder.c \
 	decoder/vorbisDecoder.c \
@@ -178,7 +179,8 @@ libttLibC_a_CFLAGS= \
 	$(FDKAAC_CFLAGS) \
 	$(LIBYUV_CFLAGS) \
 	$(LIBSWSCALE_CFLAGS) \
-	$(LIBSWRESAMPLE_CFLAGS)
+	$(LIBSWRESAMPLE_CFLAGS) \
+	$(LIBPNG_CFLAGS)
 libttLibC_a_CXXFLAGS=-std=c++0x \
 	$(OPENCV_CFLAGS) \
 	$(OPENAL_CFLAGS) \
@@ -204,4 +206,5 @@ libttLibC_a_CXXFLAGS=-std=c++0x \
 	$(FDKAAC_CFLAGS) \
 	$(LIBYUV_CFLAGS) \
 	$(LIBSWSCALE_CFLAGS) \
-	$(LIBSWRESAMPLE_CFLAGS)
+	$(LIBSWRESAMPLE_CFLAGS) \
+	$(LIBPNG_CFLAGS)

@@ -181,6 +181,11 @@ nobase_include_HEADERS += \
 	ttLibC/resampler/swresampleResampler.h
 endif
 
+if ENABLE_LIBPNG
+nobase_include_HEADERS += \
+	ttLibC/decoder/pngDecoder.h
+endif
+
 pkgconfigdir=@pkgconfigdir@
 pkgconfig_DATA=ttLibC.pc
 CLEANFILES=ttLibC.pc
