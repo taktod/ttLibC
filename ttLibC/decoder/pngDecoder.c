@@ -117,9 +117,6 @@ bool ttLibC_PngDecoder_decode(
   // now decode is complete... try to get data.
   uint8_t *data = NULL;
   size_t data_size = height * row_size;
-  // めんどくさいな・・・
-  // もうallocしておきかえるか・・・
-  // そうしよ・・・
   ttLibC_Bgr_close(&decoder_->bgr);
   data = ttLibC_malloc(data_size);
   if(data == NULL) {
@@ -145,13 +142,10 @@ bool ttLibC_PngDecoder_decode(
     return false;
   }
   decoder_->bgr->inherit_super.inherit_super.is_non_copy = false;
-  // メモリーが準備できたので、処理進める
   for(int i = 0;i < height;++ i) {
     png_read_row(png_ptr, data + i * decoder_->bgr->width_stride, NULL);
   }
   png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
-  // メモリーの書き換え終わった。
-  // あとはここでcallbackすればよい。
   if(callback != NULL) {
     if(!callback(ptr, decoder_->bgr)) {
       return false;
