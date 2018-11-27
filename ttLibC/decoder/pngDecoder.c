@@ -13,6 +13,7 @@
 #include "../ttLibC_predef.h"
 #include "../allocator.h"
 #include "../_log.h"
+#include <setjmp.h>
 #include <png.h>
 #include <string.h>
 
