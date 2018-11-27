@@ -21,12 +21,12 @@ extern "C" {
 /**
  * png decoder definition
  */
-typedef struct ttLibC_Decoder_PngDecoder {
+/*typedef struct ttLibC_Decoder_PngDecoder {
 	;
 } ttLibC_Decoder_PngDecoder;
-
+*/
+typedef void* ttLibC_Decoder_PngDecoder;
 typedef ttLibC_Decoder_PngDecoder ttLibC_PngDecoder;
-
 /**
  * callback function for png decoder.
  */
