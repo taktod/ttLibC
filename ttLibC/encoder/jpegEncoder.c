@@ -165,9 +165,9 @@ bool TT_VISIBILITY_DEFAULT ttLibC_JpegEncoder_encode(
 	size_t y_size = yuv->y_stride * yuv->inherit_super.height;
 	size_t u_size = yuv->u_stride * yuv->inherit_super.height / 2;
 	size_t v_size = yuv->v_stride * yuv->inherit_super.height / 2;
-	uint8_t *y_data = malloc(y_size);
-	uint8_t *u_data = malloc(u_size);
-	uint8_t *v_data = malloc(v_size);
+	uint8_t *y_data = ttLibC_malloc(y_size);
+	uint8_t *u_data = ttLibC_malloc(u_size);
+	uint8_t *v_data = ttLibC_malloc(v_size);
 
 	uint8_t *yd = y_data;
 	uint8_t *ys = yuv->y_data;
@@ -226,9 +226,9 @@ bool TT_VISIBILITY_DEFAULT ttLibC_JpegEncoder_encode(
 		jpeg_write_raw_data(&encoder_->cinfo, planes, 16);
 	}
 	jpeg_finish_compress(&encoder_->cinfo);
-	free(y_data);
-	free(u_data);
-	free(v_data);
+	ttLibC_free(y_data);
+	ttLibC_free(u_data);
+	ttLibC_free(v_data);
 	jpeg = ttLibC_Jpeg_make(
 			jpeg,
 			encoder_->inherit_super.width,
