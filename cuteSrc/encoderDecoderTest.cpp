@@ -1813,7 +1813,7 @@ static void imageResizeTest() {
 static void imageResamplerTest() {
 	LOG_PRINT("imageResamplerTest");
 #ifdef __ENABLE_OPENCV__
-	ttLibC_CvCapture *capture = ttLibC_CvCapture_make(0, 360, 240);
+	ttLibC_CvCapture *capture = ttLibC_CvCapture_make(0, 300, 200);
 	ttLibC_CvWindow *window = ttLibC_CvWindow_make("original");
 	ttLibC_CvWindow *resampled_window = ttLibC_CvWindow_make("target");
 	ttLibC_Bgr *bgr = NULL;
@@ -1822,7 +1822,7 @@ static void imageResamplerTest() {
 	while(true) {
 		ttLibC_Bgr *b = ttLibC_CvCapture_queryFrame(capture, bgr);
 		if(b == NULL) {
-			break;
+			continue;
 		}
 		bgr = b;
 		ttLibC_Yuv420 *yuv = ttLibC_ImageResampler_makeYuv420FromBgr(yuv420, Yuv420Type_planar, bgr);

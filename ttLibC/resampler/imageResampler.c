@@ -216,10 +216,10 @@ ttLibC_Yuv420 TT_VISIBILITY_DEFAULT *ttLibC_ImageResampler_makeYuv420FromBgr(
 		if(dst_y_stride_diff > 0) {
 			y_data += dst_y_stride_diff;
 		}
-		if(dst_u_stride_diff > 0) {
+		if(dst_u_stride_diff > 0 && (i & 1) == 0) {
 			u_data += dst_u_stride_diff;
 		}
-		if(dst_v_stride_diff > 0) {
+		if(dst_v_stride_diff > 0 && (i & 1) == 0) {
 			v_data += dst_v_stride_diff;
 		}
 		if(src_width_stride_diff > 0) {
@@ -232,47 +232,47 @@ ttLibC_Yuv420 TT_VISIBILITY_DEFAULT *ttLibC_ImageResampler_makeYuv420FromBgr(
 	default:
 	case Yuv420Type_planar:
 		y_data = data;
-		u_data = data + wh;
-		v_data = data + wh + (wh >> 2);
+		u_data = data + y_size;
+		v_data = data + y_size + u_size;
 		y_step = 1;
 		u_step = 1;
 		v_step = 1;
-		y_stride = width;
-		u_stride = (width >> 1);
-		v_stride = (width >> 1);
+		y_stride = f_stride;
+		u_stride = h_stride;
+		v_stride = h_stride;
 		break;
 	case Yuv420Type_semiPlanar:
 		y_data = data;
-		u_data = data + wh;
-		v_data = data + wh + 1;
+		u_data = data + y_size;
+		v_data = data + y_size + 1;
 		y_step = 1;
 		u_step = 2;
 		v_step = 2;
-		y_stride = width;
-		u_stride = width;
-		v_stride = width;
+		y_stride = f_stride;
+		u_stride = f_stride;
+		v_stride = f_stride;
 		break;
 	case Yvu420Type_planar:
 		y_data = data;
-		u_data = data + wh + (wh >> 2);
-		v_data = data + wh;
+		u_data = data + y_size + v_size;
+		v_data = data + y_size;
 		y_step = 1;
 		u_step = 1;
 		v_step = 1;
-		y_stride = width;
-		u_stride = (width >> 1);
-		v_stride = (width >> 1);
+		y_stride = f_stride;
+		u_stride = h_stride;
+		v_stride = h_stride;
 		break;
 	case Yvu420Type_semiPlanar:
 		y_data = data;
-		u_data = data + wh + 1;
-		v_data = data + wh;
+		u_data = data + y_size + 1;
+		v_data = data + y_size;
 		y_step = 1;
 		u_step = 2;
 		v_step = 2;
-		y_stride = width;
-		u_stride = width;
-		v_stride = width;
+		y_stride = f_stride;
+		u_stride = f_stride;
+		v_stride = f_stride;
 		break;
 	}
 	yuv420 = ttLibC_Yuv420_make(yuv420, type, width, height, data, data_size, y_data, y_stride, u_data, u_stride, v_data, v_stride, true, src_frame->inherit_super.inherit_super.pts, src_frame->inherit_super.inherit_super.timebase);
@@ -342,7 +342,7 @@ ttLibC_Bgr TT_VISIBILITY_DEFAULT *ttLibC_ImageResampler_makeBgrFromYuv420(
 		}
 		bgr->inherit_super.inherit_super.is_non_copy = true;
 	}
-	if(data == NULL) {
+ 	if(data == NULL) {
 		data = ttLibC_malloc(data_size);
 		if(data == NULL) {
 			return NULL;
