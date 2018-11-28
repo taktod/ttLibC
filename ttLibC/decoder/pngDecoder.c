@@ -98,9 +98,15 @@ bool ttLibC_PngDecoder_decode(
   png_read_info(png_ptr, info_ptr);
   png_get_IHDR(png_ptr, info_ptr, &width, &height, &bit_depth, &color_type, &interlace_type, &compression_type, &filter_type);
 
+  if(bit_depth != 8) {
+    ERR_PRINT("bitdepth is not valid for ttLibC:%d", bit_depth);
+    png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
+    return false;
+  }
   ttLibC_Bgr_Type bgrType;
   switch(color_type) {
   case PNG_COLOR_TYPE_RGB:
+  case PNG_COLOR_TYPE_PALETTE:
     bgrType = BgrType_rgb;
     break;
   case PNG_COLOR_TYPE_RGBA:
@@ -116,8 +122,12 @@ bool ttLibC_PngDecoder_decode(
 
 	uint32_t row_size = png_get_rowbytes(png_ptr, info_ptr);
   // now decode is complete... try to get data.
+  uint32_t width_stride = row_size;
+  if(color_type == PNG_COLOR_TYPE_PALETTE) {
+    width_stride = row_size * 3;
+  }
   uint8_t *data = NULL;
-  size_t data_size = height * row_size;
+  size_t data_size = height * width_stride;
   ttLibC_Bgr_close(&decoder_->bgr);
   data = ttLibC_malloc(data_size);
   if(data == NULL) {
@@ -131,7 +141,7 @@ bool ttLibC_PngDecoder_decode(
     bgrType,
     width,
     height,
-    row_size,
+    width_stride,
     data,
     data_size,
     true,
@@ -143,8 +153,32 @@ bool ttLibC_PngDecoder_decode(
     return false;
   }
   decoder_->bgr->inherit_super.inherit_super.is_non_copy = false;
-  for(int i = 0;i < height;++ i) {
-    png_read_row(png_ptr, data + i * decoder_->bgr->width_stride, NULL);
+  if(color_type == PNG_COLOR_TYPE_PALETTE) {
+    // get color palette;
+    int color_num;
+    png_colorp palette_ptr;
+    uint8_t *row_data = ttLibC_malloc(row_size);
+    png_get_PLTE(png_ptr, info_ptr, &palette_ptr, &color_num);
+//    LOG_PRINT("color_num:%d", color_num);
+    for(int i = 0;i < height;++ i) {
+      uint8_t *data_ptr = data + i * decoder_->bgr->width_stride;
+      png_read_row(png_ptr, row_data, NULL);
+      for(int j = 0;j < row_size;++ j) {
+        png_colorp colorp = &palette_ptr[row_data[j]];
+        *data_ptr = colorp->red;
+        ++ data_ptr;
+        *data_ptr = colorp->green;
+        ++ data_ptr;
+        *data_ptr = colorp->blue;
+        ++ data_ptr;
+      }
+    }
+    ttLibC_free(row_data);
+  }
+  else {
+    for(int i = 0;i < height;++ i) {
+      png_read_row(png_ptr, data + i * decoder_->bgr->width_stride, NULL);
+    }
   }
   png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
   if(callback != NULL) {

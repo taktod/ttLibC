@@ -162,7 +162,7 @@ static bool pngDecodeBinaryTest2_decodeCallback(void *ptr, ttLibC_Bgr *frame) {
 static void pngDecodeBinaryTest2() {
 	LOG_PRINT("pngDecodeBinaryTest2");
 #if defined(__ENABLE_LIBPNG__) && defined(__ENABLE_JPEG__) && defined(__ENABLE_SWSCALE__)
-	FILE *fp = fopen("./cuteSrc/target.png", "rb");
+	FILE *fp = fopen("./cuteSrc/target_p.png", "rb");
 	if(fp) {
 		fpos_t fsize;
 		fseek(fp,0,SEEK_END);
@@ -217,7 +217,7 @@ static bool pngDecodeBinaryTest_decodeCallback(void *ptr, ttLibC_Frame *frame) {
 static void pngDecodeBinaryTest() {
 	LOG_PRINT("pngDecodeBinaryTest");
 #if defined(__ENABLE_AVCODEC__) && defined(__ENABLE_JPEG__) && defined(__ENABLE_SWSCALE__)
-	FILE *fp = fopen("./cuteSrc/target.png", "rb");
+	FILE *fp = fopen("./cuteSrc/target_p.png", "rb");
 	if(fp) {
 		fpos_t fsize;
 		fseek(fp,0,SEEK_END);
