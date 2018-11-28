@@ -131,7 +131,6 @@ bool ttLibC_PngDecoder_decode(
   ttLibC_Bgr_close(&decoder_->bgr);
   data = ttLibC_malloc(data_size);
   if(data == NULL) {
-    // この場合はpngを解放しなければならない。
     ERR_PRINT("failed to alloc new bgr memory.");
     png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
     return false;
