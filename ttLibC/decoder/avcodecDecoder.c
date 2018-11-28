@@ -798,7 +798,63 @@ static bool AvcodecDecoder_decodeVideo(
 			}
 		}
 		break;
+	case AV_PIX_FMT_PAL8:
+		{
+			ttLibC_Frame_close(&decoder->frame);
+			uint32_t data_size = decoder->avframe->width * decoder->avframe->height * 4;
+			uint8_t *data = ttLibC_malloc(data_size);
+			if(data == NULL) {
+				ERR_PRINT("failed to allocate data for rgba frame.");
+				return false;
+			}
+			ttLibC_Bgr *bgr = ttLibC_Bgr_make(
+				NULL,
+				BgrType_rgba,
+				decoder->avframe->width,
+				decoder->avframe->height,
+				decoder->avframe->width * 4,
+				data,
+				data_size,
+				true,
+#ifndef FF_API_PKT_PTS
+				decoder->avframe->pkt_pts,
+#else
+				decoder->avframe->pts,
+#endif
+				frame->inherit_super.timebase);
+			if(bgr == NULL) {
+				ERR_PRINT("failed to make bgr frame.");
+				return false;
+			}
+			bgr->inherit_super.inherit_super.is_non_copy = false;
+			decoder->frame = (ttLibC_Frame *)bgr;
 
+			uint32_t *palette = (uint32_t *)decoder->avframe->data[1];
+			for(int i = 0;i < decoder->avframe->height; ++ i) {
+				uint8_t *buf = decoder->avframe->data[0] + decoder->avframe->linesize[0] * i;
+				uint8_t *data_ptr = (uint8_t *)bgr->data + bgr->width_stride * i;
+
+				for(int j = 0;j < decoder->avframe->width;++ j) {
+					uint32_t color = palette[*buf];
+					*data_ptr = (color >> 16) & 0xFF;
+					++ data_ptr;
+					*data_ptr = (color >> 8) & 0xFF;
+					++ data_ptr;
+					*data_ptr = (color) & 0xFF;
+					++ data_ptr;
+					*data_ptr = (color >> 24) & 0xFF;
+					++ data_ptr;
+					++ buf;
+				}
+			}
+			if(callback != NULL) {
+				return callback(ptr, decoder->frame);
+			}
+			else {
+				return true;
+			}
+		}
+		break;
 	case AV_PIX_FMT_NV12:
 	case AV_PIX_FMT_NV21:
 		ERR_PRINT("not make yet.%d %d", decoder->dec->pix_fmt, AV_PIX_FMT_RGB24);
