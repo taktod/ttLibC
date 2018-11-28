@@ -502,7 +502,7 @@ static bool AvcodecDecoder_decodeVideo(
 						(*y_data) = (uint8_t)((((*y_data) * 219 + 383) >> 8) + 16);
 						++ y_data;
 					}
-					for(int i = 0, max = y->u_stride * y->inherit_super.height;i < max;++ i) {
+					for(int i = 0, max = y->u_stride * y->inherit_super.height / 2;i < max;++ i) {
 						(*u_data) = (uint8_t)((((*u_data) * 219 + 383) >> 8) + 16);
 						(*v_data) = (uint8_t)((((*v_data) * 219 + 383) >> 8) + 16);
 						++ u_data;
@@ -644,7 +644,7 @@ static bool AvcodecDecoder_decodeVideo(
 					(*y_data) = (uint8_t)((((*y_data) * 219 + 383) >> 8) + 16);
 					++ y_data;
 				}
-				for(int i = 0, max = y->u_stride * y->inherit_super.height;i < max;++ i) {
+				for(int i = 0, max = y->u_stride * y->inherit_super.height / 2;i < max;++ i) {
 					(*u_data) = (uint8_t)((((*u_data) * 219 + 383) >> 8) + 16);
 					(*v_data) = (uint8_t)((((*v_data) * 219 + 383) >> 8) + 16);
 					++ u_data;
