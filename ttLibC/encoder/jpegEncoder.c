@@ -14,7 +14,15 @@
 #include "../ttLibC_predef.h"
 #include "../_log.h"
 #include "../allocator.h"
+#include "../util/dynamicBufferUtil.h"
 #include <jpeglib.h>
+
+typedef struct {
+	struct jpeg_compress_struct cinfo;
+	ttLibC_DynamicBuffer       *buffer;
+	uint8_t                    *data;
+	size_t                      data_size;
+} JpegEncoder_jpeg_compress_struct;
 
 /*
  * detail definition of jpeg encoder.
@@ -22,7 +30,7 @@
 typedef struct {
 	/** inherit data from ttLibC_JpegEncoder */
 	ttLibC_JpegEncoder          inherit_super;
-	struct jpeg_compress_struct cinfo;
+	JpegEncoder_jpeg_compress_struct cinfo;
 	struct jpeg_error_mgr       jerr;
 	struct jpeg_destination_mgr dmgr;
 	ttLibC_Jpeg *jpeg;
@@ -37,8 +45,11 @@ static void ttLibC_JpegEncoder_init_buffer(j_compress_ptr cinfo) {
 
 // in the case of buffer is full.
 static boolean ttLibC_JpegEncoder_empty_buffer(j_compress_ptr cinfo) {
-	(void)cinfo;
-	ERR_PRINT("need more buffer to make jpeg.");
+	JpegEncoder_jpeg_compress_struct *cinfo_ex = (JpegEncoder_jpeg_compress_struct *)cinfo;
+
+	ttLibC_DynamicBuffer_append(cinfo_ex->buffer, cinfo_ex->data, cinfo_ex->data_size);
+	cinfo->dest->next_output_byte = cinfo_ex->data;
+	cinfo->dest->free_in_buffer = cinfo_ex->data_size;
 	return true;
 }
 
@@ -63,31 +74,46 @@ ttLibC_JpegEncoder TT_VISIBILITY_DEFAULT *ttLibC_JpegEncoder_make(
 		ERR_PRINT("failed to alloc encoder object.");
 		return NULL;
 	}
-	encoder->cinfo.err = jpeg_std_error(&encoder->jerr);
-	jpeg_create_compress(&encoder->cinfo);
-	encoder->cinfo.image_width = width;
-	encoder->cinfo.image_height = height;
-	encoder->cinfo.input_components = 3;
-	jpeg_set_defaults(&encoder->cinfo);
-	encoder->cinfo.dct_method = JDCT_FLOAT;
-	jpeg_set_colorspace(&encoder->cinfo, JCS_YCbCr);
-	encoder->cinfo.raw_data_in = true;
-	encoder->cinfo.comp_info[0].h_samp_factor = 2;
-	encoder->cinfo.comp_info[0].v_samp_factor = 2;
-	encoder->cinfo.comp_info[1].h_samp_factor = 1;
-	encoder->cinfo.comp_info[1].v_samp_factor = 1;
-	encoder->cinfo.comp_info[2].h_samp_factor = 1;
-	encoder->cinfo.comp_info[2].v_samp_factor = 1;
-	encoder->cinfo.optimize_coding = true;
-	jpeg_set_quality(&encoder->cinfo, quality, true);
+	encoder->cinfo.data_size = 216;
+	encoder->cinfo.data = ttLibC_malloc(encoder->cinfo.data_size);
+	if(encoder->cinfo.data == NULL) {
+		ttLibC_free(encoder);
+		ERR_PRINT("failed to alloc memory.");
+		return NULL;
+	}
+	encoder->cinfo.buffer = ttLibC_DynamicBuffer_make();
+	if(encoder->cinfo.buffer == NULL) {
+		ttLibC_free(encoder->cinfo.data);
+		ttLibC_free(encoder);
+		ERR_PRINT("failed to alloc dynamicBuffer.");
+		return NULL;
+	}
+
+	encoder->cinfo.cinfo.err = jpeg_std_error(&encoder->jerr);
+	jpeg_create_compress(&encoder->cinfo.cinfo);
+	encoder->cinfo.cinfo.image_width = width;
+	encoder->cinfo.cinfo.image_height = height;
+	encoder->cinfo.cinfo.input_components = 3;
+	jpeg_set_defaults(&encoder->cinfo.cinfo);
+	encoder->cinfo.cinfo.dct_method = JDCT_FLOAT;
+	jpeg_set_colorspace(&encoder->cinfo.cinfo, JCS_YCbCr);
+	encoder->cinfo.cinfo.raw_data_in = true;
+	encoder->cinfo.cinfo.comp_info[0].h_samp_factor = 2;
+	encoder->cinfo.cinfo.comp_info[0].v_samp_factor = 2;
+	encoder->cinfo.cinfo.comp_info[1].h_samp_factor = 1;
+	encoder->cinfo.cinfo.comp_info[1].v_samp_factor = 1;
+	encoder->cinfo.cinfo.comp_info[2].h_samp_factor = 1;
+	encoder->cinfo.cinfo.comp_info[2].v_samp_factor = 1;
+	encoder->cinfo.cinfo.optimize_coding = true;
+	jpeg_set_quality(&encoder->cinfo.cinfo, quality, true);
 #if JPEG_LIB_VERSION >= 70
-	encoder->cinfo.do_fancy_downsampling = false;
+	encoder->cinfo.cinfo.do_fancy_downsampling = false;
 #endif
 	encoder->dmgr.init_destination    = ttLibC_JpegEncoder_init_buffer;
 	encoder->dmgr.empty_output_buffer = ttLibC_JpegEncoder_empty_buffer;
 	encoder->dmgr.term_destination    = ttLibC_JpegEncoder_term_buffer;
 
-	encoder->cinfo.dest = &encoder->dmgr;
+	encoder->cinfo.cinfo.dest = &encoder->dmgr;
 
 	encoder->jpeg = NULL;
 	encoder->inherit_super.width = width;
@@ -126,41 +152,6 @@ bool TT_VISIBILITY_DEFAULT ttLibC_JpegEncoder_encode(
 	}
 
 	ttLibC_JpegEncoder_ *encoder_ = (ttLibC_JpegEncoder_ *)encoder;
-	// jpeg size expected less than yuv420.
-	size_t wh = yuv->inherit_super.width * yuv->inherit_super.height;
-	uint8_t *data = NULL;
-	size_t data_size = wh + (wh >> 1);
-	bool alloc_flag = false;
-	// check prev data.
-	ttLibC_Jpeg *jpeg = encoder_->jpeg;
-
-	if(jpeg != NULL) {
-		if(!jpeg->inherit_super.inherit_super.is_non_copy) {
-			// buffer can reuse.
-			if(jpeg->inherit_super.inherit_super.data_size >= data_size) {
-				// size is enough.
-				data = jpeg->inherit_super.inherit_super.data;
-				data_size = jpeg->inherit_super.inherit_super.data_size;
-			}
-			else {
-				// size is too small for reuse.
-				ttLibC_free(jpeg->inherit_super.inherit_super.data);
-			}
-		}
-		if(data == NULL) {
-			jpeg->inherit_super.inherit_super.data = NULL;
-			jpeg->inherit_super.inherit_super.data_size = 0;
-		}
-		jpeg->inherit_super.inherit_super.is_non_copy = true;
-	}
-	if(data == NULL) {
-		data = ttLibC_malloc(data_size);
-		if(data == NULL) {
-			ERR_PRINT("failed to allocate data buffer.");
-			return false;
-		}
-		alloc_flag = true;
-	}
 	// 16->235 -> 0-255
 	size_t y_size = yuv->y_stride * yuv->inherit_super.height;
 	size_t u_size = yuv->u_stride * yuv->inherit_super.height / 2;
@@ -194,14 +185,15 @@ bool TT_VISIBILITY_DEFAULT ttLibC_JpegEncoder_encode(
 		++ vs;
 	}
 	// do convert.
-	encoder_->dmgr.next_output_byte = data;
-	encoder_->dmgr.free_in_buffer = data_size;
+	ttLibC_DynamicBuffer_empty(encoder_->cinfo.buffer);
+	encoder_->dmgr.next_output_byte = encoder_->cinfo.data;
+	encoder_->dmgr.free_in_buffer = encoder_->cinfo.data_size;
 	JSAMPROW y[16], cb[16], cr[16];
 	JSAMPARRAY planes[3];
 	planes[0] = y;
 	planes[1] = cb;
 	planes[2] = cr;
-	jpeg_start_compress(&encoder_->cinfo, true);
+	jpeg_start_compress(&encoder_->cinfo.cinfo, true);
 	for(uint32_t j = 0;j < yuv->inherit_super.height;j += 16) {
 		int max = yuv->inherit_super.height - j;
 		if(max >= 16) {
@@ -223,34 +215,35 @@ bool TT_VISIBILITY_DEFAULT ttLibC_JpegEncoder_encode(
 				}
 			}
 		}
-		jpeg_write_raw_data(&encoder_->cinfo, planes, 16);
+		jpeg_write_raw_data(&encoder_->cinfo.cinfo, planes, 16);
 	}
-	jpeg_finish_compress(&encoder_->cinfo);
+	jpeg_finish_compress(&encoder_->cinfo.cinfo);
 	ttLibC_free(y_data);
 	ttLibC_free(u_data);
 	ttLibC_free(v_data);
-	jpeg = ttLibC_Jpeg_make(
-			jpeg,
-			encoder_->inherit_super.width,
-			encoder_->inherit_super.height,
-			data,
-			data_size,
-			true,
-			yuv->inherit_super.inherit_super.pts,
-			yuv->inherit_super.inherit_super.timebase);
+
+	ttLibC_DynamicBuffer_append(encoder_->cinfo.buffer,
+		encoder_->cinfo.data,
+		encoder_->cinfo.cinfo.dest->next_output_byte - encoder_->cinfo.data);
+
+	ttLibC_Jpeg *jpeg = ttLibC_Jpeg_make(
+		encoder_->jpeg,
+		encoder_->inherit_super.width,
+		encoder_->inherit_super.height,
+		ttLibC_DynamicBuffer_refData(encoder_->cinfo.buffer),
+		ttLibC_DynamicBuffer_refSize(encoder_->cinfo.buffer),
+		true,
+		yuv->inherit_super.inherit_super.pts,
+		yuv->inherit_super.inherit_super.timebase);
 	if(jpeg == NULL) {
-		LOG_PRINT("jpeg output is null.");
-		if(alloc_flag) {
-			ttLibC_free(data);
-		}
+		ERR_PRINT("failed to make jpeg data.");
 		return false;
 	}
-	// done.
-	jpeg->inherit_super.inherit_super.buffer_size = encoder_->cinfo.dest->next_output_byte - data;
-	jpeg->inherit_super.inherit_super.is_non_copy = false;
 	encoder_->jpeg = jpeg;
-	if(!callback(ptr, jpeg)) {
-		return false;
+	if(callback != NULL) {
+		if(!callback(ptr, jpeg)) {
+			return false;
+		}
 	}
 	return true;
 }
@@ -268,7 +261,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_JpegEncoder_setQuality(
 		return false;
 	}
 	ttLibC_JpegEncoder_ *encoder_ = (ttLibC_JpegEncoder_ *)encoder;
-	jpeg_set_quality(&encoder_->cinfo, quality, true);
+	jpeg_set_quality(&encoder_->cinfo.cinfo, quality, true);
 	return true;
 }
 
@@ -281,7 +274,11 @@ void TT_VISIBILITY_DEFAULT ttLibC_JpegEncoder_close(ttLibC_JpegEncoder **encoder
 	if(target == NULL) {
 		return;
 	}
-	jpeg_destroy_compress(&target->cinfo);
+	jpeg_destroy_compress(&target->cinfo.cinfo);
+	if(target->cinfo.data) {
+		ttLibC_free(target->cinfo.data);
+	}
+	ttLibC_DynamicBuffer_close(&target->cinfo.buffer);
 	ttLibC_Jpeg_close(&target->jpeg);
 	ttLibC_free(target);
 	*encoder = NULL;
