@@ -74,7 +74,7 @@ ttLibC_JpegEncoder TT_VISIBILITY_DEFAULT *ttLibC_JpegEncoder_make(
 		ERR_PRINT("failed to alloc encoder object.");
 		return NULL;
 	}
-	encoder->cinfo.data_size = 216;
+	encoder->cinfo.data_size = 65536;
 	encoder->cinfo.data = ttLibC_malloc(encoder->cinfo.data_size);
 	if(encoder->cinfo.data == NULL) {
 		ttLibC_free(encoder);
