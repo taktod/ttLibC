@@ -141,7 +141,7 @@ static bool pngDecodeBinaryTest2_encodeCallback(void *ptr, ttLibC_Jpeg *jpeg) {
 
 static bool pngDecodeBinaryTest2_scaleCallback(void *ptr, ttLibC_Frame *frame) {
 	ttLibC_Yuv420 *yuv = (ttLibC_Yuv420 *)frame;
-	ttLibC_JpegEncoder *encoder = ttLibC_JpegEncoder_make(200, 200, 90);
+	ttLibC_JpegEncoder *encoder = ttLibC_JpegEncoder_make(yuv->inherit_super.width, yuv->inherit_super.height, 90);
 	ttLibC_JpegEncoder_encode(encoder, yuv, pngDecodeBinaryTest2_encodeCallback, NULL);
 	ttLibC_JpegEncoder_close(&encoder);
 	return true;
@@ -195,7 +195,7 @@ static bool pngDecodeBinaryTest_encodeCallback(void *ptr, ttLibC_Jpeg *jpeg) {
 
 static bool pngDecodeBinaryTest_scaleCallback(void *ptr, ttLibC_Frame *frame) {
 	ttLibC_Yuv420 *yuv = (ttLibC_Yuv420 *)frame;
-	ttLibC_JpegEncoder *encoder = ttLibC_JpegEncoder_make(200, 200, 90);
+	ttLibC_JpegEncoder *encoder = ttLibC_JpegEncoder_make(yuv->inherit_super.width, yuv->inherit_super.height, 90);
 	ttLibC_JpegEncoder_encode(encoder, yuv, pngDecodeBinaryTest_encodeCallback, NULL);
 	ttLibC_JpegEncoder_close(&encoder);
 	return true;
@@ -249,7 +249,7 @@ static bool jpegDecodeBinaryTest_encodeCallback(void *ptr, ttLibC_Jpeg *jpeg) {
 static bool jpegDecodeBinaryTest_decodeCallback(void *ptr, ttLibC_Frame *frame) {
 	ttLibC_Yuv420 *yuv = (ttLibC_Yuv420 *)frame;
 	LOG_PRINT("%d %d %d", yuv->y_stride, yuv->u_stride, yuv->v_stride);
-	ttLibC_JpegEncoder *encoder = ttLibC_JpegEncoder_make(200, 200, 90);
+	ttLibC_JpegEncoder *encoder = ttLibC_JpegEncoder_make(yuv->inherit_super.width, yuv->inherit_super.height, 90);
 	ttLibC_JpegEncoder_encode(encoder, yuv, jpegDecodeBinaryTest_encodeCallback, NULL);
 	ttLibC_JpegEncoder_close(&encoder);
 	return true;
