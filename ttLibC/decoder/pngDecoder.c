@@ -106,10 +106,10 @@ bool ttLibC_PngDecoder_decode(
   ttLibC_Bgr_Type bgrType;
   switch(color_type) {
   case PNG_COLOR_TYPE_RGB:
-  case PNG_COLOR_TYPE_PALETTE:
     bgrType = BgrType_rgb;
     break;
   case PNG_COLOR_TYPE_RGBA:
+  case PNG_COLOR_TYPE_PALETTE:
     bgrType = BgrType_rgba;
     break;
   default:
@@ -124,7 +124,7 @@ bool ttLibC_PngDecoder_decode(
   // now decode is complete... try to get data.
   uint32_t width_stride = row_size;
   if(color_type == PNG_COLOR_TYPE_PALETTE) {
-    width_stride = row_size * 3;
+    width_stride = row_size * 4;
   }
   uint8_t *data = NULL;
   size_t data_size = height * width_stride;
@@ -153,13 +153,19 @@ bool ttLibC_PngDecoder_decode(
   }
   decoder_->bgr->inherit_super.inherit_super.is_non_copy = false;
   if(color_type == PNG_COLOR_TYPE_PALETTE) {
+    // check transalpha
+    png_bytep trans_alpha = NULL;
+    int num_trans = 0; 
+    png_color_16p trans_color = NULL;
+
+    png_get_tRNS(png_ptr, info_ptr, &trans_alpha, &num_trans, &trans_color);
+
     // get color palette;
     int color_num;
     png_colorp palette_ptr;
     uint8_t *row_data = ttLibC_malloc(row_size);
     png_get_PLTE(png_ptr, info_ptr, &palette_ptr, &color_num);
-//    LOG_PRINT("color_num:%d", color_num);
-    for(int i = 0;i < height;++ i) {
+     for(int i = 0;i < height;++ i) {
       uint8_t *data_ptr = data + i * decoder_->bgr->width_stride;
       png_read_row(png_ptr, row_data, NULL);
       for(int j = 0;j < row_size;++ j) {
@@ -169,6 +175,13 @@ bool ttLibC_PngDecoder_decode(
         *data_ptr = colorp->green;
         ++ data_ptr;
         *data_ptr = colorp->blue;
+         ++ data_ptr;
+        if(num_trans == 0) {
+          *data_ptr = 255;
+        }
+        else {
+          *data_ptr = trans_alpha[row_data[j]];
+        }
         ++ data_ptr;
       }
     }
