@@ -65,7 +65,7 @@ ttLibC_Mp3 TT_VISIBILITY_DEFAULT *ttLibC_Mp3_make(
 		uint64_t pts,
 		uint32_t timebase) {
 	if(prev_frame != NULL && prev_frame->inherit_super.inherit_super.type != frameType_mp3) {
-		ERR_PRINT("reuse with incompative frame.");
+		ERR_PRINT("reuse with incompatible frame.");
 		return NULL;
 	}
 	ttLibC_Mp3_ *mp3 = (ttLibC_Mp3_ *)prev_frame;

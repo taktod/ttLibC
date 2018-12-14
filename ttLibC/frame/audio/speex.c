@@ -46,7 +46,7 @@ ttLibC_Speex TT_VISIBILITY_DEFAULT *ttLibC_Speex_make(
 		uint64_t pts,
 		uint32_t timebase) {
 	if(prev_frame != NULL && prev_frame->inherit_super.inherit_super.type != frameType_speex) {
-		ERR_PRINT("reuse with incompative frame.");
+		ERR_PRINT("reuse with incompatible frame.");
 		return NULL;
 	}
 	ttLibC_Speex_ *speex = (ttLibC_Speex_ *)prev_frame;

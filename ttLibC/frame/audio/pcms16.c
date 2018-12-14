@@ -50,7 +50,7 @@ ttLibC_PcmS16 TT_VISIBILITY_DEFAULT *ttLibC_PcmS16_make(
 		uint64_t pts,
 		uint32_t timebase) {
 	if(prev_frame != NULL && prev_frame->inherit_super.inherit_super.type != frameType_pcmS16) {
-		ERR_PRINT("reuse with incompative frame.");
+		ERR_PRINT("reuse with incompatible frame.");
 		return NULL;
 	}
 	ttLibC_PcmS16 *pcms16 = prev_frame;

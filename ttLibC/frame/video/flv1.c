@@ -39,7 +39,7 @@ ttLibC_Flv1 TT_VISIBILITY_DEFAULT *ttLibC_Flv1_make(
 		uint64_t pts,
 		uint32_t timebase) {
 	if(prev_frame != NULL && prev_frame->inherit_super.inherit_super.type != frameType_flv1) {
-		ERR_PRINT("reuse with incompative frame.");
+		ERR_PRINT("reuse with incompatible frame.");
 		return NULL;
 	}
 	ttLibC_Video_Type video_type = videoType_inner;

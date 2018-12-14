@@ -56,7 +56,7 @@ ttLibC_Audio TT_VISIBILITY_DEFAULT *ttLibC_Audio_make(
 		uint64_t pts,
 		uint32_t timebase) {
 	if(prev_frame != NULL && prev_frame->inherit_super.type != frame_type) {
-		ERR_PRINT("reuse with incompative frame.");
+		ERR_PRINT("reuse with incompatible frame.");
 		return NULL;
 	}
 	ttLibC_Audio *audio = prev_frame;

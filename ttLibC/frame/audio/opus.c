@@ -44,7 +44,7 @@ ttLibC_Opus TT_VISIBILITY_DEFAULT *ttLibC_Opus_make(
 		uint64_t pts,
 		uint32_t timebase) {
 	if(prev_frame != NULL && prev_frame->inherit_super.inherit_super.type != frameType_opus) {
-		ERR_PRINT("reuse with incompative frame.");
+		ERR_PRINT("reuse with incompatible frame.");
 		return NULL;
 	}
 	ttLibC_Opus_ *opus = (ttLibC_Opus_ *)prev_frame;

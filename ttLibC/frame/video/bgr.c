@@ -42,7 +42,7 @@ ttLibC_Bgr TT_VISIBILITY_DEFAULT *ttLibC_Bgr_make(
 		uint64_t pts,
 		uint32_t timebase) {
 	if(prev_frame != NULL && prev_frame->inherit_super.inherit_super.type != frameType_bgr) {
-		ERR_PRINT("reuse with incompative frame.");
+		ERR_PRINT("reuse with incompatible frame.");
 		return NULL;
 	}
 	ttLibC_Bgr *bgr = prev_frame;

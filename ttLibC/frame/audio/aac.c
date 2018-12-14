@@ -86,7 +86,7 @@ ttLibC_Aac TT_VISIBILITY_DEFAULT *ttLibC_Aac_make(
 		uint32_t timebase,
 		uint64_t dsi_info) {
 	if(prev_frame != NULL && prev_frame->inherit_super.inherit_super.type != frameType_aac) {
-		ERR_PRINT("reuse with incompative frame.");
+		ERR_PRINT("reuse with incompatible frame.");
 		return NULL;
 	}
 	ttLibC_Aac_ *aac = (ttLibC_Aac_ *)prev_frame;
