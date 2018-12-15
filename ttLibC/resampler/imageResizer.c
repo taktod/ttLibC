@@ -143,173 +143,51 @@ ttLibC_Yuv420 TT_VISIBILITY_DEFAULT *ttLibC_ImageResizer_resizeYuv420(
 	if(src_frame == NULL) {
 		return NULL;
 	}
-	if(prev_frame != NULL && prev_frame->inherit_super.inherit_super.type != frameType_yuv420) {
-		ttLibC_Frame_close((ttLibC_Frame **)&prev_frame);
-	}
-	uint32_t src_uv_step = 1;
-	switch(src_frame->type) {
-	case Yuv420Type_planar:
-	case Yvu420Type_planar:
-		break;
-	case Yuv420Type_semiPlanar:
-	case Yvu420Type_semiPlanar:
-		src_uv_step = 2;
-		break;
-	default:
-		return false;
-	}
-
-	ttLibC_Yuv420 *yuv = prev_frame;
-	uint32_t f_stride = ((((width - 1) >> 4) + 1) << 4);
-	uint32_t h_stride = (((((width >> 1) - 1) >> 4) + 1) << 4);
-	uint32_t y_size = f_stride * height;
-	uint32_t u_size = h_stride * (height >> 1);
-	uint32_t v_size = h_stride * (height >> 1);
-	uint32_t data_size = y_size + u_size + v_size;
-	bool alloc_flag = false;
-	uint8_t *data = NULL;
-	if(yuv != NULL) {
-		// yuv420->inherit_super.inherit_super.data_size >= data_size;
-		if(!yuv->inherit_super.inherit_super.is_non_copy) {
-			// buffer can reuse.
-			if(yuv->inherit_super.inherit_super.data_size >= data_size) {
-				// size is ok for reuse.
-				data = yuv->inherit_super.inherit_super.data;
-				data_size = yuv->inherit_super.inherit_super.data_size;
-			}
-			else {
-				// size is small for reuse.
-				ttLibC_free(yuv->inherit_super.inherit_super.data);
-			}
-		}
-		if(data == NULL) {
-			yuv->inherit_super.inherit_super.data = NULL;
-			yuv->inherit_super.inherit_super.data_size = 0;
-		}
-		yuv->inherit_super.inherit_super.is_non_copy = true;
-	}
-	if(data == NULL) {
-		data = ttLibC_malloc(data_size);
-		if(data == NULL) {
-			return NULL;
-		}
-		alloc_flag = true;
-	}
-	uint8_t *y_data = NULL;
-	uint8_t *u_data = NULL;
-	uint8_t *v_data = NULL;
-	uint32_t y_step = 1;
-	uint32_t u_step = 1;
-	uint32_t v_step = 1;
-	uint32_t y_stride = f_stride;
-	uint32_t u_stride = h_stride;
-	uint32_t v_stride = h_stride;
-	switch(type) {
-	default:
-	case Yuv420Type_planar:
-		y_data = data;
-		u_data = data + y_size;
-		v_data = data + y_size + u_size;
-		y_step = 1;
-		u_step = 1;
-		v_step = 1;
-		y_stride = f_stride;
-		u_stride = h_stride;
-		v_stride = h_stride;
-		break;
-	case Yuv420Type_semiPlanar:
-		y_data = data;
-		u_data = data + y_size;
-		v_data = data + y_size + 1;
-		y_step = 1;
-		u_step = 2;
-		v_step = 2;
-		y_stride = f_stride;
-		u_stride = f_stride;
-		v_stride = f_stride;
-		break;
-	case Yvu420Type_planar:
-		y_data = data;
-		u_data = data + y_size + v_size;
-		v_data = data + y_size;
-		y_step = 1;
-		u_step = 1;
-		v_step = 1;
-		y_stride = f_stride;
-		u_stride = h_stride;
-		v_stride = h_stride;
-		break;
-	case Yvu420Type_semiPlanar:
-		y_data = data;
-		u_data = data + y_size + 1;
-		v_data = data + y_size;
-		y_step = 1;
-		u_step = 2;
-		v_step = 2;
-		y_stride = f_stride;
-		u_stride = f_stride;
-		v_stride = f_stride;
-		break;
+	ttLibC_Yuv420 *yuv = ttLibC_Yuv420_makeEmptyFrame2(
+			prev_frame,
+			type,
+			width,
+			height);
+	if(yuv == NULL) {
+		ERR_PRINT("failed to make dst frame.");
+		return NULL;
 	}
 	ImageResizer_resizePlane(
-			y_data,
+			yuv->y_data,
 			width,
 			height,
-			y_stride,
-			y_step,
+			yuv->y_stride,
+			yuv->y_step,
 			src_frame->y_data,
 			src_frame->inherit_super.width,
 			src_frame->inherit_super.height,
 			src_frame->y_stride,
-			1,
+			src_frame->y_step,
 			is_quick);
 	ImageResizer_resizePlane(
-			u_data,
-			width >> 1,
-			height >> 1,
-			u_stride,
-			u_step,
+			yuv->u_data,
+			(width + 1) >> 1,
+			(height + 1) >> 1,
+			yuv->u_stride,
+			yuv->u_step,
 			src_frame->u_data,
 			src_frame->inherit_super.width >> 1,
 			src_frame->inherit_super.height >> 1,
 			src_frame->u_stride,
-			src_uv_step,
+			src_frame->u_step,
 			true);
 	ImageResizer_resizePlane(
-			v_data,
-			width >> 1,
-			height >> 1,
-			v_stride,
-			v_step,
+			yuv->v_data,
+			(width + 1) >> 1,
+			(height + 1) >> 1,
+			yuv->v_stride,
+			yuv->v_step,
 			src_frame->v_data,
 			src_frame->inherit_super.width >> 1,
 			src_frame->inherit_super.height >> 1,
 			src_frame->v_stride,
-			src_uv_step,
+			src_frame->v_step,
 			true);
-	yuv = ttLibC_Yuv420_make(
-			yuv,
-			type,
-			width,
-			height,
-			data,
-			data_size,
-			y_data,
-			y_stride,
-			u_data,
-			u_stride,
-			v_data,
-			v_stride,
-			true,
-			src_frame->inherit_super.inherit_super.pts,
-			src_frame->inherit_super.inherit_super.timebase);
-	if(yuv == NULL) {
-		if(alloc_flag) {
-			ttLibC_free(data);
-		}
-		return NULL;
-	}
-	yuv->inherit_super.inherit_super.is_non_copy = false;
 	return yuv;
 }
 
@@ -331,222 +209,174 @@ ttLibC_Bgr TT_VISIBILITY_DEFAULT *ttLibC_ImageResizer_resizeBgr(
 	if(src_frame == NULL) {
 		return NULL;
 	}
-	if(prev_frame != NULL && prev_frame->inherit_super.inherit_super.type != frameType_bgr) {
-		ttLibC_Frame_close((ttLibC_Frame **)&prev_frame);
-	}
-	ttLibC_Bgr *bgr = prev_frame;
-	uint32_t bgr_stride = ((((width - 1) >> 4) + 1) << 4);
-	uint32_t wh = bgr_stride * height;
-	size_t data_size = wh + (wh << 1);
-	bool alloc_flag = false;
-	switch(type) {
-	case BgrType_bgr:
-	case BgrType_rgb:
-		bgr_stride = bgr_stride * 3;
-		break;
-	case BgrType_abgr:
-	case BgrType_bgra:
-	case BgrType_argb:
-	case BgrType_rgba:
-		bgr_stride = bgr_stride * 4;
-		data_size = (wh << 2);
-		break;
-	default:
-		ERR_PRINT("target bgr type is unknown:%d", type);
-		return NULL;
-	}
-	uint8_t *data = NULL;
-	if(bgr != NULL) {
-		if(!bgr->inherit_super.inherit_super.is_non_copy) {
-			// buffer can reuse.
-			if(bgr->inherit_super.inherit_super.data_size >= data_size) {
-				// data size is enough.
-				data = bgr->inherit_super.inherit_super.data;
-				data_size = bgr->inherit_super.inherit_super.data_size;
-			}
-			else {
-				// size is too short.
-				ttLibC_free(bgr->inherit_super.inherit_super.data);
-			}
-		}
-		if(data == NULL) {
-			bgr->inherit_super.inherit_super.data = NULL;
-			bgr->inherit_super.inherit_super.data_size = 0;
-		}
-		bgr->inherit_super.inherit_super.is_non_copy = true;
-	}
-	if(data == NULL) {
-		data = ttLibC_malloc(data_size);
-		if(data == NULL) {
-			return NULL;
-		}
-		alloc_flag = true;
-	}
-	uint8_t *b_data = NULL;
-	uint8_t *g_data = NULL;
-	uint8_t *r_data = NULL;
-	uint8_t *a_data = NULL;
-	uint32_t step = 3;
-	switch(type) {
-	default:
-		if(alloc_flag) {
-			ttLibC_free(data);
-		}
-		return NULL;
-	case BgrType_bgr:
-		b_data = data;
-		g_data = data + 1;
-		r_data = data + 2;
-		break;
-	case BgrType_abgr:
-		a_data = data;
-		b_data = data + 1;
-		g_data = data + 2;
-		r_data = data + 3;
-		step = 4;
-		break;
-	case BgrType_bgra:
-		b_data = data;
-		g_data = data + 1;
-		r_data = data + 2;
-		a_data = data + 3;
-		step = 4;
-		break;
-	case BgrType_rgb:
-		b_data = data + 2;
-		g_data = data + 1;
-		r_data = data;
-		break;
-	case BgrType_argb:
-		a_data = data;
-		b_data = data + 3;
-		g_data = data + 2;
-		r_data = data + 1;
-		step = 4;
-		break;
-	case BgrType_rgba:
-		b_data = data + 2;
-		g_data = data + 1;
-		r_data = data;
-		a_data = data + 3;
-		step = 4;
-		break;
-	}
-	uint8_t *src_b_data = NULL;
-	uint8_t *src_g_data = NULL;
-	uint8_t *src_r_data = NULL;
-	uint8_t *src_a_data = NULL;
-	uint32_t src_step = 3;
-	uint32_t src_stride = src_frame->width_stride;
+	uint8_t *r_src = NULL;
+	uint8_t *g_src = NULL;
+	uint8_t *b_src = NULL;
+	uint8_t *a_src = NULL;
 	switch(src_frame->type) {
-	default:
-		if(alloc_flag) {
-			ttLibC_free(data);
-		}
-		return NULL;
-	case BgrType_bgr:
-		src_b_data = src_frame->data;
-		src_g_data = src_b_data + 1;
-		src_r_data = src_b_data + 2;
-		break;
 	case BgrType_abgr:
-		src_a_data = src_frame->data;
-		src_b_data = src_a_data + 1;
-		src_g_data = src_a_data + 2;
-		src_r_data = src_a_data + 3;
-		src_step = 4;
-		break;
-	case BgrType_bgra:
-		src_b_data = src_frame->data;
-		src_g_data = src_b_data + 1;
-		src_r_data = src_b_data + 2;
-		src_a_data = src_b_data + 3;
-		src_step = 4;
-		break;
-	case BgrType_rgb:
-		src_r_data = src_frame->data;
-		src_g_data = src_r_data + 1;
-		src_b_data = src_r_data + 2;
+		r_src = src_frame->data + 3;
+		g_src = src_frame->data + 2;
+		b_src = src_frame->data + 1;
+		a_src = src_frame->data;
 		break;
 	case BgrType_argb:
-		src_a_data = src_frame->data;
-		src_r_data = src_a_data + 1;
-		src_g_data = src_a_data + 2;
-		src_b_data = src_a_data + 3;
-		src_step = 4;
+		r_src = src_frame->data + 1;
+		g_src = src_frame->data + 2;
+		b_src = src_frame->data + 3;
+		a_src = src_frame->data;
+		break;
+	case BgrType_bgr:
+		r_src = src_frame->data + 2;
+		g_src = src_frame->data + 1;
+		b_src = src_frame->data;
+		break;
+	case BgrType_bgra:
+		r_src = src_frame->data + 2;
+		g_src = src_frame->data + 1;
+		b_src = src_frame->data;
+		a_src = src_frame->data + 3;
+		break;
+	case BgrType_rgb:
+		r_src = src_frame->data;
+		g_src = src_frame->data + 1;
+		b_src = src_frame->data + 2;
 		break;
 	case BgrType_rgba:
-		src_r_data = src_frame->data;
-		src_g_data = src_r_data + 1;
-		src_b_data = src_r_data + 2;
-		src_a_data = src_r_data + 3;
-		src_step = 4;
+		r_src = src_frame->data;
+		g_src = src_frame->data + 1;
+		b_src = src_frame->data + 2;
+		a_src = src_frame->data + 3;
 		break;
+	default:
+		ERR_PRINT("src bgr_type is invalid.:%d", src_frame->type);
+		return NULL;
 	}
-	ImageResizer_resizePlane(
-			b_data,
-			width,
-			height,
-			bgr_stride,
-			step,
-			src_b_data,
-			src_frame->inherit_super.width,
-			src_frame->inherit_super.height,
-			src_stride,
-			src_step,
-			false);
-	ImageResizer_resizePlane(
-			g_data,
-			width,
-			height,
-			bgr_stride,
-			step,
-			src_g_data,
-			src_frame->inherit_super.width,
-			src_frame->inherit_super.height,
-			src_stride,
-			src_step,
-			false);
-	ImageResizer_resizePlane(
-			r_data,
-			width,
-			height,
-			bgr_stride,
-			step,
-			src_r_data,
-			src_frame->inherit_super.width,
-			src_frame->inherit_super.height,
-			src_stride,
-			src_step,
-			false);
-	if(a_data != NULL) {
-		// fill alpha = 255
-		for(uint32_t i = 0;i < height;++ i) {
-			uint8_t *a_buf = a_data;
-			for(uint32_t j = 0;j < width;++ j) {
-				*a_buf = 255;
-				++ a_buf;
-			}
-			a_data += bgr_stride;
-		}
+	switch(type) {
+	case BgrType_abgr:
+	case BgrType_argb:
+	case BgrType_bgr:
+	case BgrType_bgra:
+	case BgrType_rgb:
+	case BgrType_rgba:
+		break;
+	default:
+		ERR_PRINT("bgr type is invalid.:%d", type);
+		return NULL;
 	}
-	bgr = ttLibC_Bgr_make(
-			bgr,
+	ttLibC_Bgr *bgr = ttLibC_Bgr_makeEmptyFrame2(
+			prev_frame,
 			type,
 			width,
-			height,
-			bgr_stride,
-			data,
-			data_size,
-			true,
-			src_frame->inherit_super.inherit_super.pts,
-			src_frame->inherit_super.inherit_super.timebase);
+			height);
 	if(bgr == NULL) {
-		if(alloc_flag) {
-			ttLibC_free(data);
-		}
+		ERR_PRINT("failed to make dst frame.");
 		return NULL;
 	}
-	bgr->inherit_super.inherit_super.is_non_copy = false;
+	uint8_t *r_dst = NULL;
+	uint8_t *g_dst = NULL;
+	uint8_t *b_dst = NULL;
+	uint8_t *a_dst = NULL;
+	switch(bgr->type) {
+	case BgrType_abgr:
+		r_dst = bgr->data + 3;
+		g_dst = bgr->data + 2;
+		b_dst = bgr->data + 1;
+		a_dst = bgr->data;
+		break;
+	case BgrType_argb:
+		r_dst = bgr->data + 1;
+		g_dst = bgr->data + 2;
+		b_dst = bgr->data + 3;
+		a_dst = bgr->data;
+		break;
+	case BgrType_bgr:
+		r_dst = bgr->data + 2;
+		g_dst = bgr->data + 1;
+		b_dst = bgr->data;
+		break;
+	case BgrType_bgra:
+		r_dst = bgr->data + 2;
+		g_dst = bgr->data + 1;
+		b_dst = bgr->data;
+		a_dst = bgr->data + 3;
+		break;
+	case BgrType_rgb:
+		r_dst = bgr->data;
+		g_dst = bgr->data + 1;
+		b_dst = bgr->data + 2;
+		break;
+	case BgrType_rgba:
+		r_dst = bgr->data;
+		g_dst = bgr->data + 1;
+		b_dst = bgr->data + 2;
+		a_dst = bgr->data + 3;
+		break;
+	default:
+		ERR_PRINT("src bgr_type is invalid.:%d", src_frame->type);
+		return NULL;
+	}
+	ImageResizer_resizePlane(
+			b_dst,
+			width,
+			height,
+			bgr->width_stride,
+			bgr->unit_size,
+			b_src,
+			src_frame->inherit_super.width,
+			src_frame->inherit_super.height,
+			src_frame->width_stride,
+			src_frame->unit_size,
+			false);
+	ImageResizer_resizePlane(
+			g_dst,
+			width,
+			height,
+			bgr->width_stride,
+			bgr->unit_size,
+			g_src,
+			src_frame->inherit_super.width,
+			src_frame->inherit_super.height,
+			src_frame->width_stride,
+			src_frame->unit_size,
+			false);
+	ImageResizer_resizePlane(
+			r_dst,
+			width,
+			height,
+			bgr->width_stride,
+			bgr->unit_size,
+			r_src,
+			src_frame->inherit_super.width,
+			src_frame->inherit_super.height,
+			src_frame->width_stride,
+			src_frame->unit_size,
+			false);
+	if(a_dst != NULL) {
+		if(a_src == NULL) {
+			for(int i = 0;i < height; ++ i) {
+				uint8_t *as = a_src;
+				for(int j = 0;j < width;++ j) {
+					*as = 255;
+					as += bgr->unit_size;
+				}
+				a_src += bgr->width_stride;
+			}
+		}
+		else {
+			ImageResizer_resizePlane(
+					a_dst,
+					width,
+					height,
+					bgr->width_stride,
+					bgr->unit_size,
+					a_src,
+					src_frame->inherit_super.width,
+					src_frame->inherit_super.height,
+					src_frame->width_stride,
+					src_frame->unit_size,
+					false);
+		}
+	}
 	return bgr;
 }
