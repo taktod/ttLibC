@@ -33,7 +33,8 @@ typedef struct {
 	JpegEncoder_jpeg_compress_struct cinfo;
 	struct jpeg_error_mgr       jerr;
 	struct jpeg_destination_mgr dmgr;
-	ttLibC_Jpeg *jpeg;
+	ttLibC_Yuv420 *fullrange_yuv;
+	ttLibC_Jpeg   *jpeg;
 } ttLibC_Encoder_JpegEncoder_;
 
 typedef ttLibC_Encoder_JpegEncoder_ ttLibC_JpegEncoder_;
@@ -116,6 +117,7 @@ ttLibC_JpegEncoder TT_VISIBILITY_DEFAULT *ttLibC_JpegEncoder_make(
 	encoder->cinfo.cinfo.dest = &encoder->dmgr;
 
 	encoder->jpeg = NULL;
+	encoder->fullrange_yuv = NULL;
 	encoder->inherit_super.width = width;
 	encoder->inherit_super.height = height;
 	encoder->inherit_super.quality = quality;
@@ -152,37 +154,58 @@ bool TT_VISIBILITY_DEFAULT ttLibC_JpegEncoder_encode(
 	}
 
 	ttLibC_JpegEncoder_ *encoder_ = (ttLibC_JpegEncoder_ *)encoder;
+	int width = encoder_->inherit_super.width;
+	int height = encoder_->inherit_super.height;
+	ttLibC_Yuv420 *fullrange_yuv = ttLibC_Yuv420_makeEmptyFrame2(
+			encoder_->fullrange_yuv,
+			Yuv420Type_planar,
+			width,
+			height);
+	if(fullrange_yuv == NULL) {
+		ERR_PRINT("failed to make full range frame");
+		return false;
+	}
+	encoder_->fullrange_yuv = fullrange_yuv;
 	// 16->235 -> 0-255
-	size_t y_size = yuv->y_stride * yuv->inherit_super.height;
-	size_t u_size = yuv->u_stride * yuv->inherit_super.height / 2;
-	size_t v_size = yuv->v_stride * yuv->inherit_super.height / 2;
-	uint8_t *y_data = ttLibC_malloc(y_size);
-	uint8_t *u_data = ttLibC_malloc(u_size);
-	uint8_t *v_data = ttLibC_malloc(v_size);
-
-	uint8_t *yd = y_data;
-	uint8_t *ys = yuv->y_data;
-	for(int i = 0;i < y_size;++ i) {
-		uint32_t y = (((((*ys) * 1197) >> 6) - 299) >> 4);
-		*yd = y > 255 ? 255 : y;
-		++ yd;
-		++ ys;
+	uint8_t *y_dst = fullrange_yuv->y_data;
+	uint8_t *y_src = yuv->y_data;
+	for(int i = 0;i < height;++ i) {
+		uint8_t *yd = y_dst;
+		uint8_t *ys = y_src;
+		for(int j = 0;j < width;++ j) {
+			uint32_t y = (((((*ys) * 1197) >> 6) - 299) >> 4);
+			*yd = y > 255 ? 255 : y;
+			yd += fullrange_yuv->y_step;
+			ys += yuv->y_step;
+		}
+		y_dst += fullrange_yuv->y_stride;
+		y_src += yuv->y_stride;
 	}
-	uint8_t *ud = u_data;
-	uint8_t *us = yuv->u_data;
-	for(int i = 0;i < u_size;++ i) {
-		uint32_t u = (((((*us) * 1197) >> 6) - 299) >> 4);
-		*ud = u > 255 ? 255 : u;
-		++ ud;
-		++ us;
-	}
-	uint8_t *vd = v_data;
-	uint8_t *vs = yuv->v_data;
-	for(int i = 0;i < v_size;++ i) {
-		uint32_t v = (((((*vs) * 1197) >> 6) - 299) >> 4);
-		*vd = v > 255 ? 255 : v;
-		++ vd;
-		++ vs;
+	uint32_t half_width  = ((width + 1) >> 1);
+	uint32_t half_height = ((height + 1) >> 1);
+	uint8_t *u_dst = fullrange_yuv->u_data;
+	uint8_t *v_dst = fullrange_yuv->v_data;
+	uint8_t *u_src = yuv->u_data;
+	uint8_t *v_src = yuv->v_data;
+	for(int i = 0;i < half_height;++ i) {
+		uint8_t *ud = u_dst;
+		uint8_t *us = u_src;
+		uint8_t *vd = v_dst;
+		uint8_t *vs = v_src;
+		for(int j = 0;j < half_width;++ j) {
+			uint32_t u = (((((*us) * 1197) >> 6) - 299) >> 4);
+			*ud = u > 255 ? 255 : u;
+			uint32_t v = (((((*vs) * 1197) >> 6) - 299) >> 4);
+			*vd = v > 255 ? 255 : v;
+			ud += fullrange_yuv->u_step;
+			us += yuv->u_step;
+			vd += fullrange_yuv->v_step;
+			vs += yuv->v_step;
+		}
+		u_dst += fullrange_yuv->u_stride;
+		u_src += yuv->u_stride;
+		v_dst += fullrange_yuv->v_stride;
+		v_src += yuv->v_stride;
 	}
 	// do convert.
 	ttLibC_DynamicBuffer_empty(encoder_->cinfo.buffer);
@@ -194,34 +217,30 @@ bool TT_VISIBILITY_DEFAULT ttLibC_JpegEncoder_encode(
 	planes[1] = cb;
 	planes[2] = cr;
 	jpeg_start_compress(&encoder_->cinfo.cinfo, true);
-	for(uint32_t j = 0;j < yuv->inherit_super.height;j += 16) {
+	for(uint32_t j = 0;j < height;j += 16) {
 		int max = yuv->inherit_super.height - j;
 		if(max >= 16) {
 			max = 16;
 		}
 		for(int i = 0;i < 16;i ++) {
 			if(i >= max) {
-				y[i] = y_data;
+				y[i] = fullrange_yuv->y_data;
 				if((i & 0x01) == 0) {
-					cb[(i >> 1)] = u_data;
-					cr[(i >> 1)] = v_data;
+					cb[(i >> 1)] = fullrange_yuv->u_data;
+					cr[(i >> 1)] = fullrange_yuv->v_data;
 				}
 			}
 			else {
-				y[i] = y_data + yuv->y_stride * (i + j);
+				y[i] = fullrange_yuv->y_data + fullrange_yuv->y_stride * (i + j);
 				if((i & 0x01) == 0) {
-					cb[(i >> 1)] = u_data + ((yuv->u_stride * (i + j)) >> 1);
-					cr[(i >> 1)] = v_data + ((yuv->v_stride * (i + j)) >> 1);
+					cb[(i >> 1)] = fullrange_yuv->u_data + ((fullrange_yuv->u_stride * (i + j)) >> 1);
+					cr[(i >> 1)] = fullrange_yuv->v_data + ((fullrange_yuv->v_stride * (i + j)) >> 1);
 				}
 			}
 		}
 		jpeg_write_raw_data(&encoder_->cinfo.cinfo, planes, 16);
 	}
 	jpeg_finish_compress(&encoder_->cinfo.cinfo);
-	ttLibC_free(y_data);
-	ttLibC_free(u_data);
-	ttLibC_free(v_data);
-
 	ttLibC_DynamicBuffer_append(encoder_->cinfo.buffer,
 		encoder_->cinfo.data,
 		encoder_->cinfo.cinfo.dest->next_output_byte - encoder_->cinfo.data);
@@ -279,6 +298,7 @@ void TT_VISIBILITY_DEFAULT ttLibC_JpegEncoder_close(ttLibC_JpegEncoder **encoder
 		ttLibC_free(target->cinfo.data);
 	}
 	ttLibC_DynamicBuffer_close(&target->cinfo.buffer);
+	ttLibC_Yuv420_close(&target->fullrange_yuv);
 	ttLibC_Jpeg_close(&target->jpeg);
 	ttLibC_free(target);
 	*encoder = NULL;

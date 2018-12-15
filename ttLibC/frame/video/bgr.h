@@ -106,6 +106,19 @@ ttLibC_Bgr *ttLibC_Bgr_makeEmptyFrame(
 		uint32_t        width,
 		uint32_t        height);
 
+/**
+ * generate empty frame
+ * @param prev_frame reuse frame object.
+ * @param sub_type type of bgr
+ * @param width    width of image
+ * @param height   height of image
+ */
+ttLibC_Bgr *ttLibC_Bgr_makeEmptyFrame2(
+		ttLibC_Bgr     *prev_frame,
+		ttLibC_Bgr_Type sub_type,
+		uint32_t        width,
+		uint32_t        height);
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

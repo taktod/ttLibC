@@ -527,51 +527,34 @@ static bool AvcodecDecoder_decodeVideo(
 			if(decoder->frame != NULL && decoder->frame->type != frameType_yuv420) {
 				ttLibC_Frame_close(&decoder->frame);
 			}
-			uint32_t width  = decoder->avframe->width;
-			uint32_t height = decoder->avframe->height;
-			uint32_t uv_stride = (((((width >> 1) - 1) >> 4) + 1) << 4);
-			uint32_t uv_data_size = uv_stride * height;
-			size_t data_size = uv_data_size;
-			uint8_t *uv_data = NULL;
-			bool is_alloc_flag = false;
-			if(decoder->frame != NULL && !decoder->frame->is_non_copy) {
-				if(decoder->frame->data_size < uv_data_size) {
-					// need to realloc
-					ttLibC_free(decoder->frame->data);
-					decoder->frame->data = NULL;
-				}
-				else {
-					// can reuse prev data.
-					uv_data = decoder->frame->data;
-					data_size = decoder->frame->data_size;
-				}
+			ttLibC_Yuv420 *yuv = ttLibC_Yuv420_makeEmptyFrame2(
+					(ttLibC_Yuv420 *)decoder->frame,
+					Yuv420Type_planar,
+					decoder->avframe->width,
+					decoder->avframe->height);
+			if(yuv == NULL) {
+				ERR_PRINT("failed to make output yuv frame.");
+				return false;
 			}
-			if(uv_data == NULL) {
-				uv_data = ttLibC_malloc(uv_data_size);
-				if(uv_data == NULL) {
-					ERR_PRINT("failed to alloc uv buffer.");
-					return false;
-				}
-				is_alloc_flag = true;
-			}
+			decoder->frame = (ttLibC_Frame *)yuv;
 			// make uv.
-			uint8_t *u_data = uv_data;
-			uint8_t *v_data = uv_data + (uv_data_size >> 1);
-			uint32_t u_stride = uv_stride;
-			uint32_t v_stride = uv_stride;
+			uint8_t *dst_u_data = yuv->u_data;
+			uint8_t *dst_v_data = yuv->v_data;
 			uint8_t *src_u_data = decoder->avframe->data[1];
 			uint8_t *src_v_data = decoder->avframe->data[2];
 			uint32_t src_u_stride = decoder->avframe->linesize[1];
 			uint32_t src_v_stride = decoder->avframe->linesize[2];
+			uint32_t half_width  = ((decoder->avframe->width + 1) >> 1);
+			uint32_t half_height = ((decoder->avframe->height + 1) >> 1);
 			switch(decoder->dec->pix_fmt) {
 			case AV_PIX_FMT_YUV422P:
 			case AV_PIX_FMT_YUVJ422P:
-				for(uint32_t j = 0;j < height;++ j) {
-					if((j & 0x01) == 1) {
-						memcpy(u_data, src_u_data, u_stride);
-						memcpy(v_data, src_v_data, v_stride);
-						u_data += u_stride;
-						v_data += v_stride;
+				for(uint32_t j = 0;j < decoder->avframe->height;++ j) {
+					if((j & 0x01) == 0) {
+						memcpy(dst_u_data, src_u_data, half_width);
+						memcpy(dst_v_data, src_v_data, half_width);
+						dst_u_data += yuv->u_stride;
+						dst_v_data += yuv->v_stride;
 					}
 					src_u_data += src_u_stride;
 					src_v_data += src_v_stride;
@@ -579,20 +562,20 @@ static bool AvcodecDecoder_decodeVideo(
 				break;
 			case AV_PIX_FMT_YUV444P:
 			case AV_PIX_FMT_YUVJ444P:
-				for(uint32_t j = 0;j < height;++ j) {
-					if((j & 0x01) == 1) {
-						uint8_t *u_base_data = u_data;
-						uint8_t *v_base_data = v_data;
-						for(uint32_t i = 0;i < width;++ i) {
+				for(uint32_t j = 0;j < decoder->avframe->height;++ j) {
+					if((j & 0x01) == 0) {
+						uint8_t *ud = dst_u_data;
+						uint8_t *vd = dst_v_data;
+						for(uint32_t i = 0;i < decoder->avframe->width;++ i) {
 							if((i & 0x01) == 0x00) {
-								*u_data = *(src_u_data + i);
-								*v_data = *(src_v_data + i);
-								++ u_data;
-								++ v_data;
+								*ud = *(src_u_data + i);
+								*vd = *(src_v_data + i);
+								ud += yuv->u_step;
+								vd += yuv->v_step;
 							}
 						}
-						u_data = u_base_data + uv_stride;
-						v_data = v_base_data + uv_stride;
+						dst_u_data += yuv->u_stride;
+						dst_v_data += yuv->v_stride;
 					}
 					src_u_data += src_u_stride;
 					src_v_data += src_v_stride;
@@ -602,57 +585,43 @@ static bool AvcodecDecoder_decodeVideo(
 				ERR_PRINT("un-reachable.");
 				return false;
 			}
-			if(decoder->frame != NULL) {
-				decoder->frame->is_non_copy = true;
-			}
-			u_data = uv_data;
-			v_data = uv_data + (uv_data_size >> 1);
-			ttLibC_Yuv420 *y = ttLibC_Yuv420_make(
-					(ttLibC_Yuv420 *)decoder->frame,
-					Yuv420Type_planar,
-					width,
-					height,
-					uv_data,
-					data_size,
-					decoder->avframe->data[0],
-					decoder->avframe->linesize[0],
-					u_data,
-					u_stride,
-					v_data,
-					v_stride,
-					true,
+			// ref the original y_data. 
+			yuv->y_data   = decoder->avframe->data[0];
+			yuv->y_stride = decoder->avframe->linesize[0];
+			yuv->y_step   = 1;
 #ifndef FF_API_PKT_PTS
-					decoder->avframe->pkt_pts,
+			yuv->inherit_super.inherit_super.pts = decoder->avframe->pkt_pts;
 #else
-					decoder->avframe->pts,
+			yuv->inherit_super.inherit_super.pts = decoder->avframe->pts;
 #endif
-					frame->inherit_super.timebase);
-			if(y == NULL) {
-				if(is_alloc_flag) {
-					ttLibC_free(uv_data);
-				}
-				ERR_PRINT("failed to make yuv420 frame object.");
-				return false;
-			}
+			yuv->inherit_super.inherit_super.timebase = frame->inherit_super.timebase;
 			// 0-255 -> 16->235
 			if(decoder->dec->pix_fmt == AV_PIX_FMT_YUVJ422P
 			|| decoder->dec->pix_fmt == AV_PIX_FMT_YUVJ444P) {
-				uint8_t *y_data = y->y_data;
-				uint8_t *u_data = y->u_data;
-				uint8_t *v_data = y->v_data;
-				for(int i = 0, max = y->y_stride * y->inherit_super.height;i < max;++ i) {
-					(*y_data) = (uint8_t)((((*y_data) * 219 + 383) >> 8) + 16);
-					++ y_data;
+				uint8_t *y_data = yuv->y_data;
+				uint8_t *u_data = yuv->u_data;
+				uint8_t *v_data = yuv->v_data;
+				for(int i = 0;i < yuv->inherit_super.height;++ i) {
+					uint8_t *yd = y_data;
+					for(int j = 0;j < yuv->inherit_super.width;++ j) {
+						(*yd) = (uint8_t)((((*yd) * 219 + 383) >> 8) + 16);
+						yd += yuv->y_step;
+					}
+					y_data += yuv->y_stride;
 				}
-				for(int i = 0, max = y->u_stride * y->inherit_super.height / 2;i < max;++ i) {
-					(*u_data) = (uint8_t)((((*u_data) * 219 + 383) >> 8) + 16);
-					(*v_data) = (uint8_t)((((*v_data) * 219 + 383) >> 8) + 16);
-					++ u_data;
-					++ v_data;
+				for(int i = 0;i < half_height;++ i) {
+					uint8_t *ud = u_data;
+					uint8_t *vd = v_data;
+					for(int j = 0;j < half_width;++ j) {
+						(*ud) = (uint8_t)((((*ud) * 219 + 383) >> 8) + 16);
+						(*vd) = (uint8_t)((((*vd) * 219 + 383) >> 8) + 16);
+						ud += yuv->u_step;
+						vd += yuv->v_step;
+					}
+					u_data += yuv->u_stride;
+					v_data += yuv->v_stride;
 				}
 			}
-			decoder->frame = (ttLibC_Frame *)y;
-			decoder->frame->is_non_copy = false;
 			if(callback != NULL) {
 				return callback(ptr, decoder->frame);
 			}
@@ -670,16 +639,16 @@ static bool AvcodecDecoder_decodeVideo(
 				return false;
 			}
 			// use swscale to convert into yuv420.
-			if(decoder->frame == NULL) {
-				decoder->frame = (ttLibC_Frame *)ttLibC_Yuv420_makeEmptyFrame(
+			ttLibC_Yuv420 *yuv = (ttLibC_Yuv420 *)ttLibC_Yuv420_makeEmptyFrame2(
+					(ttLibC_Yuv420 *)decoder->frame,
 					Yuv420Type_planar,
 					decoder->avframe->width,
 					decoder->avframe->height);
-				if(decoder->frame == NULL) {
-					ERR_PRINT("failed to make empty yuvFrame for output.");
-					return false;
-				}
+			if(yuv == NULL) {
+				ERR_PRINT("failed to make empty yuv frame for output.");
+				return false;
 			}
+			decoder->frame = (ttLibC_Frame *)yuv;
 			if(decoder->convertCtx == NULL) {
 				decoder->convertCtx = sws_getContext(
 						decoder->avframe->width,
@@ -698,8 +667,6 @@ static bool AvcodecDecoder_decodeVideo(
 				}
 				decoder->inFormat = decoder->dec->pix_fmt;
 			}
-			ttLibC_Yuv420 *yuv = (ttLibC_Yuv420 *)decoder->frame;
-
 			uint8_t *dst_data[4];
 			uint32_t dst_stride[4];
 			dst_data[0] = yuv->y_data;
@@ -800,52 +767,41 @@ static bool AvcodecDecoder_decodeVideo(
 		break;
 	case AV_PIX_FMT_PAL8:
 		{
-			ttLibC_Frame_close(&decoder->frame);
-			uint32_t data_size = decoder->avframe->width * decoder->avframe->height * 4;
-			uint8_t *data = ttLibC_malloc(data_size);
-			if(data == NULL) {
-				ERR_PRINT("failed to allocate data for rgba frame.");
-				return false;
-			}
-			ttLibC_Bgr *bgr = ttLibC_Bgr_make(
-				NULL,
-				BgrType_rgba,
-				decoder->avframe->width,
-				decoder->avframe->height,
-				decoder->avframe->width * 4,
-				data,
-				data_size,
-				true,
-#ifndef FF_API_PKT_PTS
-				decoder->avframe->pkt_pts,
-#else
-				decoder->avframe->pts,
-#endif
-				frame->inherit_super.timebase);
+			ttLibC_Bgr *bgr = ttLibC_Bgr_makeEmptyFrame2(
+					(ttLibC_Bgr *)decoder->frame,
+					BgrType_rgba,
+					decoder->avframe->width,
+					decoder->avframe->height);
 			if(bgr == NULL) {
 				ERR_PRINT("failed to make bgr frame.");
 				return false;
 			}
-			bgr->inherit_super.inherit_super.is_non_copy = false;
 			decoder->frame = (ttLibC_Frame *)bgr;
+#ifndef FF_API_PKT_PTS
+			decoder->frame->pts = decoder->avframe->pkt_pts,
+#else
+			decoder->frame->pts = decoder->avframe->pts,
+#endif
+			decoder->frame->timebase = frame->inherit_super.timebase;
 
 			uint32_t *palette = (uint32_t *)decoder->avframe->data[1];
+			uint8_t *src = decoder->avframe->data[0];
+			uint8_t *dst = bgr->data;
 			for(int i = 0;i < decoder->avframe->height; ++ i) {
-				uint8_t *buf = decoder->avframe->data[0] + decoder->avframe->linesize[0] * i;
-				uint8_t *data_ptr = (uint8_t *)bgr->data + bgr->width_stride * i;
+				uint8_t *b = src;
+				uint8_t *d = dst;
 
 				for(int j = 0;j < decoder->avframe->width;++ j) {
-					uint32_t color = palette[*buf];
-					*data_ptr = (color >> 16) & 0xFF;
-					++ data_ptr;
-					*data_ptr = (color >> 8) & 0xFF;
-					++ data_ptr;
-					*data_ptr = (color) & 0xFF;
-					++ data_ptr;
-					*data_ptr = (color >> 24) & 0xFF;
-					++ data_ptr;
-					++ buf;
+					uint32_t color = palette[*b];
+					*d     = (color >> 16) & 0xFF;
+					*(d+1) = (color >> 8) & 0xFF;
+					*(d+2) = (color) & 0xFF;
+					*(d+3) = (color >> 24) & 0xFF;
+					d += bgr->unit_size;
+					++ b;
 				}
+				src += decoder->avframe->linesize[0];
+				dst += bgr->width_stride;
 			}
 			if(callback != NULL) {
 				return callback(ptr, decoder->frame);

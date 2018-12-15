@@ -97,19 +97,19 @@ bool TT_VISIBILITY_DEFAULT ttLibC_JpegDecoder_decode(
 #endif
 	jpeg_start_decompress(&decoder_->dinfo);
 
-	// try to make yuv buffer.
-	uint8_t *data = NULL;
-	decoder_->inherit_super.width = decoder_->dinfo.output_width;
-	decoder_->inherit_super.height = decoder_->dinfo.output_height;
-	uint32_t f_stride = ((((decoder_->inherit_super.width - 1) >> 4) + 1) << 4);
-	uint32_t h_stride = (((((decoder_->inherit_super.width >> 1) - 1) >> 4) + 1) << 4);
-	size_t y_size = f_stride * decoder_->inherit_super.height;
-	size_t u_size = h_stride * (decoder_->inherit_super.height >> 1);
-	size_t data_size = y_size + (u_size << 1);
-	bool alloc_flag = false;
+	ttLibC_Yuv420 *yuv = ttLibC_Yuv420_makeEmptyFrame2(
+			decoder_->yuv420,
+			Yuv420Type_planar,
+			jpeg->inherit_super.width,
+			jpeg->inherit_super.height);
+	if(yuv == NULL) {
+		ERR_PRINT("failed to allocate yuv frame.");
+		return false;
+	}
+	decoder_->yuv420 = yuv;
 	// check the size is multiple of 16 or not.
-	if(decoder_->inherit_super.height % 16 > 0) {
-		size_t dummy_size = decoder_->inherit_super.width * 3;
+	if(jpeg->inherit_super.height % 16 > 0) {
+		size_t dummy_size = jpeg->inherit_super.width * 3;
 		if(decoder_->dummy_buffer_size < dummy_size) {
 			if(decoder_->dummy_buffer != NULL) {
 				ttLibC_free(decoder_->dummy_buffer);
@@ -122,37 +122,11 @@ bool TT_VISIBILITY_DEFAULT ttLibC_JpegDecoder_decode(
 			decoder_->dummy_buffer_size = dummy_size;
 		}
 	}
-
-	// check prev yuv data for reuse.
-	ttLibC_Yuv420 *yuv = decoder_->yuv420;
-	if(yuv != NULL) {
-		if(!yuv->inherit_super.inherit_super.is_non_copy) {
-			// buffer can reuse
-			if(yuv->inherit_super.inherit_super.data_size >= data_size) {
-				data = yuv->inherit_super.inherit_super.data;
-				data_size = yuv->inherit_super.inherit_super.data_size;
-			}
-			else {
-				// size is not enough, free and re-alloc.
-				ttLibC_free(yuv->inherit_super.inherit_super.data);
-			}
-		}
-		if(data == NULL) {
-			yuv->inherit_super.inherit_super.data = NULL;
-			yuv->inherit_super.inherit_super.data_size = 0;
-		}
-		yuv->inherit_super.inherit_super.is_non_copy = true;
-	}
-	if(data == NULL) {
-		data = ttLibC_malloc(data_size);
-		alloc_flag = true;
-	}
-
-	uint8_t *y_data = data;
-	uint8_t *u_data = data + y_size;
-	uint8_t *v_data = u_data + u_size;
-	for(uint32_t j = 0;j < decoder_->inherit_super.height;j += 16) {
-		uint32_t max = decoder_->inherit_super.height - j;
+	uint8_t *y_data = yuv->y_data;
+	uint8_t *u_data = yuv->u_data;
+	uint8_t *v_data = yuv->v_data;
+	for(uint32_t j = 0;j < jpeg->inherit_super.height;j += 16) {
+		uint32_t max = jpeg->inherit_super.height - j;
 		if(max >= 16) {
 			max = 16;
 		}
@@ -160,18 +134,18 @@ bool TT_VISIBILITY_DEFAULT ttLibC_JpegDecoder_decode(
 			if(i >= max) {
 				y[i] = decoder_->dummy_buffer;
 				if((i & 0x01) == 0) {
-					cb[(i >> 1)] = decoder_->dummy_buffer + decoder_->inherit_super.width;
-					cr[(i >> 1)] = decoder_->dummy_buffer + decoder_->inherit_super.width * 2;
+					cb[(i >> 1)] = decoder_->dummy_buffer + jpeg->inherit_super.width;
+					cr[(i >> 1)] = decoder_->dummy_buffer + jpeg->inherit_super.width * 2;
 				}
 			}
 			else {
 				y[i] = y_data;
-				y_data += f_stride;
+				y_data += yuv->y_stride;
 				if((i & 0x01) == 0) {
 					cb[(i >> 1)] = u_data;
 					cr[(i >> 1)] = v_data;
-					u_data += h_stride;
-					v_data += h_stride;
+					u_data += yuv->u_stride;
+					v_data += yuv->v_stride;
 				}
 			}
 		}
@@ -183,46 +157,34 @@ bool TT_VISIBILITY_DEFAULT ttLibC_JpegDecoder_decode(
 		fclose(fp);
 	}
 	// 0-255 -> 16->235
-	y_data = data;
-	u_data = data + y_size;
-	v_data = u_data + u_size;
-	for(int i = 0;i < y_size;++ i) {
-		(*y_data) = (uint8_t)((((*y_data) * 219 + 383) >> 8) + 16);
-		++ y_data;
-	}
-	for(int i = 0;i < u_size;++ i) {
-		(*u_data) = (uint8_t)((((*u_data) * 219 + 383) >> 8) + 16);
-		(*v_data) = (uint8_t)((((*v_data) * 219 + 383) >> 8) + 16);
-		++ u_data;
-		++ v_data;
-	}
-	// setup yuv object.
-	yuv = ttLibC_Yuv420_make(
-			yuv,
-			Yuv420Type_planar,
-			decoder_->inherit_super.width,
-			decoder_->inherit_super.height,
-			data,
-			data_size,
-			data,
-			decoder_->inherit_super.width,
-			data + y_size,
-			(decoder_->inherit_super.width >> 1),
-			data + y_size + u_size,
-			(decoder_->inherit_super.width >> 1),
-			true,
-			jpeg->inherit_super.inherit_super.pts,
-			jpeg->inherit_super.inherit_super.timebase);
-	if(yuv == NULL) {
-		ERR_PRINT("yuv is not generated.");
-		if(alloc_flag) {
-			ttLibC_free(data);
+	y_data = yuv->y_data;
+	u_data = yuv->u_data;
+	v_data = yuv->v_data;
+	for(int i = 0;i < yuv->inherit_super.height;++ i) {
+		uint8_t *yd = y_data;
+		for(int j = 0;j < yuv->inherit_super.width;++ j) {
+			(*yd) = (uint8_t)((((*yd) * 219 + 383) >> 8) + 16);
+			yd += yuv->y_step;
 		}
-		return false;
+		y_data += yuv->y_stride;
 	}
-	yuv->inherit_super.inherit_super.is_non_copy = false;
-	yuv->inherit_super.inherit_super.buffer_size = data_size;
-	decoder_->yuv420 = yuv;
+	for(int i = 0,
+			half_height = ((yuv->inherit_super.height + 1) >> 1),
+			half_width  = ((yuv->inherit_super.width + 1) >> 1)
+					;i < half_height;++ i) {
+		uint8_t *ud = u_data;
+		uint8_t *vd = v_data;
+		for(int j = 0;j < half_width;++ j) {
+			(*ud) = (uint8_t)((((*ud) * 219 + 383) >> 8) + 16);
+			(*vd) = (uint8_t)((((*vd) * 219 + 383) >> 8) + 16);
+			ud += yuv->u_step;
+			vd += yuv->v_step;
+		}
+		u_data += yuv->u_stride;
+		v_data += yuv->v_stride;
+	}
+	yuv->inherit_super.inherit_super.pts = jpeg->inherit_super.inherit_super.pts;
+	yuv->inherit_super.inherit_super.timebase = jpeg->inherit_super.inherit_super.timebase;
 	if(!callback(ptr, yuv)) {
 		return false;
 	}

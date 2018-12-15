@@ -220,48 +220,103 @@ ttLibC_Bgr TT_VISIBILITY_DEFAULT *ttLibC_Bgr_makeEmptyFrame(
 		ttLibC_Bgr_Type sub_type,
 		uint32_t        width,
 		uint32_t        height) {
-	uint8_t    *data = NULL;
-	ttLibC_Bgr *bgr  = NULL;
-	uint32_t memory_size = 0;
-	uint32_t stride      = 0;
+	return ttLibC_Bgr_makeEmptyFrame2(NULL, sub_type, width, height);
+}
+
+/**
+ * generate empty frame
+ * @param prev_frame reuse frame object.
+ * @param sub_type type of bgr
+ * @param width    width of image
+ * @param height   height of image
+ */
+ttLibC_Bgr *ttLibC_Bgr_makeEmptyFrame2(
+		ttLibC_Bgr     *prev_frame,
+		ttLibC_Bgr_Type sub_type,
+		uint32_t        width,
+		uint32_t        height) {
+#ifndef  GET_ALIGNED_STRIDE
+#	define GET_ALIGNED_STRIDE(w) (((((w) - 1) >> 4) + 1) << 4)
+	ttLibC_Bgr *bgr = NULL;
+	uint32_t stride = GET_ALIGNED_STRIDE(width * 3);
+	uint32_t buffer_size = stride * height;
 	switch(sub_type) {
 	case BgrType_abgr:
 	case BgrType_bgra:
 	case BgrType_argb:
 	case BgrType_rgba:
-		stride = ((((width - 1) >> 4) + 1) << 4) * 4;
-		memory_size = stride * height;
+		stride = GET_ALIGNED_STRIDE(width * 4);
+		buffer_size = stride * height;
 		break;
 	case BgrType_bgr:
 	case BgrType_rgb:
-		stride = ((((width - 1) >> 4) + 1) << 4) * 3;
-		memory_size = stride * height;
 		break;
 	default:
 		return NULL;
 	}
-	data = ttLibC_malloc(memory_size);
-	if(data == NULL) {
-		return NULL;
+	uint32_t data_size = buffer_size;
+
+	if(prev_frame != NULL && prev_frame->inherit_super.inherit_super.type != frameType_bgr) {
+		ERR_PRINT("prev_frame with incompatible frame.");
+		ttLibC_Frame_close((ttLibC_Frame **)&prev_frame);
 	}
-	memset(data, 0, memory_size);
-	bgr = ttLibC_Bgr_make(
-		NULL,
-		sub_type,
-		width,
-		height,
-		stride,
-		data,
-		memory_size,
-		true,
-		0,
-		1000);
+	bgr = prev_frame;
 	if(bgr == NULL) {
-		ttLibC_free(data);
-		return NULL;
+		bgr = (ttLibC_Bgr *)ttLibC_malloc(sizeof(ttLibC_Bgr));
+		if(bgr == NULL) {
+			ERR_PRINT("failed to allocate memory for bgr frame.");
+			return NULL;
+		}
+		bgr->inherit_super.inherit_super.data = NULL;
 	}
-	bgr->data = data;
+	else {
+		if(!bgr->inherit_super.inherit_super.is_non_copy) {
+			if(bgr->inherit_super.inherit_super.data_size < data_size) {
+				ttLibC_free(bgr->inherit_super.inherit_super.data);
+				bgr->inherit_super.inherit_super.data = NULL;
+			}
+			else {
+				data_size = bgr->inherit_super.inherit_super.data_size;
+			}
+		}
+	}
+	if(bgr->inherit_super.inherit_super.data == NULL) {
+		bgr->inherit_super.inherit_super.data = ttLibC_malloc(data_size);
+		if(bgr->inherit_super.inherit_super.data == NULL) {
+			ERR_PRINT("failed to allocate memory for data.");
+			if(prev_frame == NULL) {
+				ttLibC_free(bgr);
+			}
+			return NULL;
+		}
+	}
+	bgr->data         = bgr->inherit_super.inherit_super.data;
+	bgr->type         = sub_type;
+	bgr->width_stride = stride;
+	switch(sub_type) {
+	case BgrType_abgr:
+	case BgrType_bgra:
+	case BgrType_argb:
+	case BgrType_rgba:
+		bgr->unit_size = 4;
+		break;
+	case BgrType_bgr:
+	case BgrType_rgb:
+		bgr->unit_size = 3;
+		break;
+	}
+	bgr->inherit_super.width  = width;
+	bgr->inherit_super.height = height;
+	bgr->inherit_super.type   = videoType_key;
 	bgr->inherit_super.inherit_super.is_non_copy = false;
+	bgr->inherit_super.inherit_super.pts         = 0;
+	bgr->inherit_super.inherit_super.dts         = 0;
+	bgr->inherit_super.inherit_super.timebase    = 1000;
+	bgr->inherit_super.inherit_super.type        = frameType_bgr;
+	bgr->inherit_super.inherit_super.buffer_size = buffer_size;
+	bgr->inherit_super.inherit_super.data_size   = data_size;
 	return bgr;
+#	undef  GET_ALIGNED_STRIDE
+#endif
 }
 

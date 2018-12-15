@@ -126,32 +126,17 @@ bool ttLibC_PngDecoder_decode(
   if(color_type == PNG_COLOR_TYPE_PALETTE) {
     width_stride = row_size * 4;
   }
-  uint8_t *data = NULL;
-  size_t data_size = height * width_stride;
-  ttLibC_Bgr_close(&decoder_->bgr);
-  data = ttLibC_malloc(data_size);
-  if(data == NULL) {
-    ERR_PRINT("failed to alloc new bgr memory.");
+  ttLibC_Bgr *bgr = ttLibC_Bgr_makeEmptyFrame2(
+      decoder_->bgr,
+      bgrType,
+      width,
+      height);
+  if(bgr == NULL) {
+    ERR_PRINT("failed to make new bgr frame.");
     png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
     return false;
   }
-  decoder_->bgr = ttLibC_Bgr_make(
-    NULL,
-    bgrType,
-    width,
-    height,
-    width_stride,
-    data,
-    data_size,
-    true,
-    png->inherit_super.inherit_super.pts,
-    png->inherit_super.inherit_super.timebase);
-  if(decoder_->bgr == NULL) {
-    ERR_PRINT("failed to make new bgr data.");
-    png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
-    return false;
-  }
-  decoder_->bgr->inherit_super.inherit_super.is_non_copy = false;
+  decoder_->bgr = bgr;
   if(color_type == PNG_COLOR_TYPE_PALETTE) {
     // check transalpha
     png_bytep trans_alpha = NULL;
@@ -165,31 +150,32 @@ bool ttLibC_PngDecoder_decode(
     png_colorp palette_ptr;
     uint8_t *row_data = ttLibC_malloc(row_size);
     png_get_PLTE(png_ptr, info_ptr, &palette_ptr, &color_num);
-     for(int i = 0;i < height;++ i) {
-      uint8_t *data_ptr = data + i * decoder_->bgr->width_stride;
+    uint8_t *dst = bgr->data;
+    for(int i = 0;i < height;++ i) {
+      uint8_t *d = dst;
       png_read_row(png_ptr, row_data, NULL);
       for(int j = 0;j < row_size;++ j) {
         png_colorp colorp = &palette_ptr[row_data[j]];
-        *data_ptr = colorp->red;
-        ++ data_ptr;
-        *data_ptr = colorp->green;
-        ++ data_ptr;
-        *data_ptr = colorp->blue;
-         ++ data_ptr;
+        *d = colorp->red;
+        *(d+1) = colorp->green;
+        *(d+2) = colorp->blue;
         if(num_trans == 0) {
-          *data_ptr = 255;
+          *(d+3) = 255;
         }
         else {
-          *data_ptr = trans_alpha[row_data[j]];
+          *(d+3) = trans_alpha[row_data[j]];
         }
-        ++ data_ptr;
+        d += bgr->unit_size;
       }
+      dst += bgr->width_stride;
     }
     ttLibC_free(row_data);
   }
   else {
+    uint8_t *dst = bgr->data;
     for(int i = 0;i < height;++ i) {
-      png_read_row(png_ptr, data + i * decoder_->bgr->width_stride, NULL);
+      png_read_row(png_ptr, dst, NULL);
+      dst += bgr->width_stride;
     }
   }
   png_destroy_read_struct(&png_ptr, &info_ptr, NULL);

@@ -447,78 +447,129 @@ ttLibC_Yuv420 TT_VISIBILITY_DEFAULT *ttLibC_Yuv420_makeEmptyFrame(
 		ttLibC_Yuv420_Type sub_type,
 		uint32_t           width,
 		uint32_t           height) {
-	uint8_t       *data = NULL;
-	ttLibC_Yuv420 *yuv  = NULL;
-	uint32_t f_stride = ((((width - 1) >> 4) + 1) << 4);
-	uint32_t h_stride = (((((width >> 1) - 1) >> 4) + 1) << 4);
-	uint32_t wh  = f_stride * height;
-	uint32_t hwh = h_stride * height / 2;
-	uint32_t memory_size = wh + (hwh << 1);
-	data = ttLibC_malloc(memory_size);
-	if(data == NULL) {
-		return NULL;
-	}
-	memset(data, 0, memory_size);
-	uint8_t *y_data = NULL;
-	uint8_t *u_data = NULL;
-	uint8_t *v_data = NULL;
-	uint32_t y_stride = 0;
-	uint32_t u_stride = 0;
-	uint32_t v_stride = 0;
-	y_data = data;
+	return ttLibC_Yuv420_makeEmptyFrame2(NULL, sub_type, width, height);
+}
+
+ttLibC_Yuv420 TT_VISIBILITY_DEFAULT *ttLibC_Yuv420_makeEmptyFrame2(
+		ttLibC_Yuv420     *prev_frame,
+		ttLibC_Yuv420_Type sub_type,
+		uint32_t           width,
+		uint32_t           height) {
+#ifndef  GET_ALIGNED_STRIDE
+#	define GET_ALIGNED_STRIDE(w) (((((w) - 1) >> 4) + 1) << 4)
+
+	ttLibC_Yuv420 *yuv420 = NULL;
+	uint32_t full_stride = GET_ALIGNED_STRIDE(width);
+	uint32_t half_stride = GET_ALIGNED_STRIDE((width + 1) >> 1);
+	uint32_t y_step = 1;
+	uint32_t u_step = 1;
+	uint32_t v_step = 1;
+	uint32_t full_wh = full_stride * height;
+	uint32_t half_wh = half_stride * ((height + 1) >> 1);
+	uint32_t buffer_size = full_wh + (half_wh << 1);
 	switch(sub_type) {
 	case Yuv420Type_planar:
-		u_data = y_data + wh;
-		v_data = u_data + hwh;
-		y_stride = f_stride;
-		u_stride = h_stride;
-		v_stride = h_stride;
+	case Yvu420Type_planar:
 		break;
 	case Yuv420Type_semiPlanar:
-		u_data = y_data + wh;
-		v_data = u_data + 1;
-		y_stride = f_stride;
-		u_stride = f_stride;
-		v_stride = f_stride;
-		break;
-	case Yvu420Type_planar:
-		v_data = y_data + wh;
-		u_data = v_data + hwh;
-		y_stride = f_stride;
-		v_stride = h_stride;
-		u_stride = h_stride;
-		break;
 	case Yvu420Type_semiPlanar:
-		v_data = y_data + wh;
-		u_data = v_data + 1;
-		y_stride = f_stride;
-		v_stride = f_stride;
-		u_stride = f_stride;
+		buffer_size = full_wh + full_stride * ((height + 1) >> 1);
 		break;
 	default:
-		ttLibC_free(data);
+		ERR_PRINT("unknown yuv420 type.%d", sub_type);
 		return NULL;
 	}
-	yuv = ttLibC_Yuv420_make(
-		NULL,
-		sub_type,
-		width,
-		height,
-		data,
-		memory_size,
-		y_data,
-		y_stride,
-		u_data,
-		u_stride,
-		v_data,
-		v_stride,
-		true,
-		0,
-		1000);
-	if(yuv == NULL) {
-		ttLibC_free(data);
+	uint32_t data_size = buffer_size;
+
+	if(prev_frame != NULL && prev_frame->inherit_super.inherit_super.type != frameType_yuv420) {
+		ERR_PRINT("prev_frame with incompatible frame.");
+		ttLibC_Frame_close((ttLibC_Frame **)&prev_frame);
+	}
+	yuv420 = prev_frame;
+	if(yuv420 == NULL) {
+		yuv420 = (ttLibC_Yuv420 *)ttLibC_malloc(sizeof(ttLibC_Yuv420));
+		if(yuv420 == NULL) {
+			ERR_PRINT("failed to allocate memory for yuv420 frame.");
+			return NULL;
+		}
+		yuv420->inherit_super.inherit_super.data = NULL;
+	}
+	else {
+		if(!yuv420->inherit_super.inherit_super.is_non_copy) {
+			if(yuv420->inherit_super.inherit_super.data_size < data_size) {
+				// data is short. 
+				ttLibC_free(yuv420->inherit_super.inherit_super.data);
+				yuv420->inherit_super.inherit_super.data = NULL;
+			}
+			else {
+				data_size = yuv420->inherit_super.inherit_super.data_size;
+			}
+		}
+	}
+	if(yuv420->inherit_super.inherit_super.data == NULL) {
+		yuv420->inherit_super.inherit_super.data = ttLibC_malloc(data_size);
+		if(yuv420->inherit_super.inherit_super.data == NULL) {
+			ERR_PRINT("failed to allocate memory for data.");
+			if(prev_frame == NULL) {
+				ttLibC_free(yuv420);
+			}
+			return NULL;
+		}
+	}
+	uint8_t *data = (uint8_t *)yuv420->inherit_super.inherit_super.data;
+	yuv420->type = sub_type;
+	yuv420->y_data = data;
+	yuv420->y_stride = full_stride;
+	yuv420->y_step = y_step;
+	switch(sub_type) {
+	case Yuv420Type_planar:
+		yuv420->u_data = data + full_wh;
+		yuv420->u_stride = half_stride;
+		yuv420->u_step = 1;
+		yuv420->v_data = data + full_wh + half_wh;
+		yuv420->v_stride = half_stride;
+		yuv420->v_step = 1;
+		break;
+	case Yvu420Type_planar:
+		yuv420->u_data = data + full_wh + half_wh;
+		yuv420->u_stride = half_stride;
+		yuv420->u_step = 1;
+		yuv420->v_data = data + full_wh;
+		yuv420->v_stride = half_stride;
+		yuv420->v_step = 1;
+		break;
+	case Yuv420Type_semiPlanar:
+		yuv420->u_data = data + full_wh;
+		yuv420->u_stride = full_stride;
+		yuv420->u_step = 2;
+		yuv420->v_data = data + full_wh + 1;
+		yuv420->v_stride = full_stride;
+		yuv420->v_step = 2;
+		break;
+	case Yvu420Type_semiPlanar:
+		yuv420->u_data = data + full_wh + 1;
+		yuv420->u_stride = full_stride;
+		yuv420->u_step = 2;
+		yuv420->v_data = data + full_wh;
+		yuv420->v_stride = full_stride;
+		yuv420->v_step = 2;
+		break;
+	default:
+		ERR_PRINT("unreachable.");
 		return NULL;
 	}
-	yuv->inherit_super.inherit_super.is_non_copy = false;
-	return yuv;
+	yuv420->inherit_super.type                      = videoType_key;
+	yuv420->inherit_super.width                     = width;
+	yuv420->inherit_super.height                    = height;
+	yuv420->inherit_super.inherit_super.is_non_copy = false;
+	yuv420->inherit_super.inherit_super.pts         = 0;
+	yuv420->inherit_super.inherit_super.dts         = 0;
+	yuv420->inherit_super.inherit_super.timebase    = 1000;
+	yuv420->inherit_super.inherit_super.type        = frameType_yuv420;
+	yuv420->inherit_super.inherit_super.data_size   = data_size;
+	yuv420->inherit_super.inherit_super.buffer_size = buffer_size;
+
+#	undef  GET_ALIGNED_STRIDE
+#endif
+	return yuv420;
 }

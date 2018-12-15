@@ -1,0 +1,5 @@
+<testsuites>
+	<testsuite name="encoderDecoderTests" tests="1">
+		<testcase classname="encoderDecoderTests" name="pngDecodeBinaryTest2"/>
+	</testsuite>
+</testsuites>

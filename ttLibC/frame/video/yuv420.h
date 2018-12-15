@@ -124,6 +124,19 @@ ttLibC_Yuv420 *ttLibC_Yuv420_makeEmptyFrame(
 		uint32_t           width,
 		uint32_t           height);
 
+/**
+ * generate empty frame
+ * @param prev_frame reuse frame
+ * @param sub_type   type of yuv
+ * @param width      width of image
+ * @param height     height of image
+ */
+ttLibC_Yuv420 *ttLibC_Yuv420_makeEmptyFrame2(
+		ttLibC_Yuv420     *prev_frame,
+		ttLibC_Yuv420_Type sub_type,
+		uint32_t           width,
+		uint32_t           height);
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
