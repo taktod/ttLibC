@@ -549,7 +549,7 @@ static bool AvcodecDecoder_decodeVideo(
 			switch(decoder->dec->pix_fmt) {
 			case AV_PIX_FMT_YUV422P:
 			case AV_PIX_FMT_YUVJ422P:
-				for(uint32_t j = 0;j < decoder->avframe->height;++ j) {
+				for(int j = 0;j < decoder->avframe->height;++ j) {
 					if((j & 0x01) == 0) {
 						memcpy(dst_u_data, src_u_data, half_width);
 						memcpy(dst_v_data, src_v_data, half_width);
@@ -562,11 +562,11 @@ static bool AvcodecDecoder_decodeVideo(
 				break;
 			case AV_PIX_FMT_YUV444P:
 			case AV_PIX_FMT_YUVJ444P:
-				for(uint32_t j = 0;j < decoder->avframe->height;++ j) {
+				for(int j = 0;j < decoder->avframe->height;++ j) {
 					if((j & 0x01) == 0) {
 						uint8_t *ud = dst_u_data;
 						uint8_t *vd = dst_v_data;
-						for(uint32_t i = 0;i < decoder->avframe->width;++ i) {
+						for(int i = 0;i < decoder->avframe->width;++ i) {
 							if((i & 0x01) == 0x00) {
 								*ud = *(src_u_data + i);
 								*vd = *(src_v_data + i);
@@ -601,18 +601,18 @@ static bool AvcodecDecoder_decodeVideo(
 				uint8_t *y_data = yuv->y_data;
 				uint8_t *u_data = yuv->u_data;
 				uint8_t *v_data = yuv->v_data;
-				for(int i = 0;i < yuv->inherit_super.height;++ i) {
+				for(uint32_t i = 0;i < yuv->inherit_super.height;++ i) {
 					uint8_t *yd = y_data;
-					for(int j = 0;j < yuv->inherit_super.width;++ j) {
+					for(uint32_t j = 0;j < yuv->inherit_super.width;++ j) {
 						(*yd) = (uint8_t)((((*yd) * 219 + 383) >> 8) + 16);
 						yd += yuv->y_step;
 					}
 					y_data += yuv->y_stride;
 				}
-				for(int i = 0;i < half_height;++ i) {
+				for(uint32_t i = 0;i < half_height;++ i) {
 					uint8_t *ud = u_data;
 					uint8_t *vd = v_data;
-					for(int j = 0;j < half_width;++ j) {
+					for(uint32_t j = 0;j < half_width;++ j) {
 						(*ud) = (uint8_t)((((*ud) * 219 + 383) >> 8) + 16);
 						(*vd) = (uint8_t)((((*vd) * 219 + 383) >> 8) + 16);
 						ud += yuv->u_step;
