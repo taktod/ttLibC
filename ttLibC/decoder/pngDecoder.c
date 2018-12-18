@@ -151,10 +151,10 @@ bool ttLibC_PngDecoder_decode(
     uint8_t *row_data = ttLibC_malloc(row_size);
     png_get_PLTE(png_ptr, info_ptr, &palette_ptr, &color_num);
     uint8_t *dst = bgr->data;
-    for(int i = 0;i < height;++ i) {
+    for(uint32_t i = 0;i < height;++ i) {
       uint8_t *d = dst;
       png_read_row(png_ptr, row_data, NULL);
-      for(int j = 0;j < row_size;++ j) {
+      for(uint32_t j = 0;j < row_size;++ j) {
         png_colorp colorp = &palette_ptr[row_data[j]];
         *d = colorp->red;
         *(d+1) = colorp->green;
@@ -173,7 +173,7 @@ bool ttLibC_PngDecoder_decode(
   }
   else {
     uint8_t *dst = bgr->data;
-    for(int i = 0;i < height;++ i) {
+    for(uint32_t i = 0;i < height;++ i) {
       png_read_row(png_ptr, dst, NULL);
       dst += bgr->width_stride;
     }

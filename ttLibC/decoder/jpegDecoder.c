@@ -160,21 +160,21 @@ bool TT_VISIBILITY_DEFAULT ttLibC_JpegDecoder_decode(
 	y_data = yuv->y_data;
 	u_data = yuv->u_data;
 	v_data = yuv->v_data;
-	for(int i = 0;i < yuv->inherit_super.height;++ i) {
+	for(uint32_t i = 0;i < yuv->inherit_super.height;++ i) {
 		uint8_t *yd = y_data;
-		for(int j = 0;j < yuv->inherit_super.width;++ j) {
+		for(uint32_t j = 0;j < yuv->inherit_super.width;++ j) {
 			(*yd) = (uint8_t)((((*yd) * 219 + 383) >> 8) + 16);
 			yd += yuv->y_step;
 		}
 		y_data += yuv->y_stride;
 	}
-	for(int i = 0,
+	for(uint32_t i = 0,
 			half_height = ((yuv->inherit_super.height + 1) >> 1),
 			half_width  = ((yuv->inherit_super.width + 1) >> 1)
 					;i < half_height;++ i) {
 		uint8_t *ud = u_data;
 		uint8_t *vd = v_data;
-		for(int j = 0;j < half_width;++ j) {
+		for(uint32_t j = 0;j < half_width;++ j) {
 			(*ud) = (uint8_t)((((*ud) * 219 + 383) >> 8) + 16);
 			(*vd) = (uint8_t)((((*vd) * 219 + 383) >> 8) + 16);
 			ud += yuv->u_step;

@@ -154,8 +154,8 @@ bool TT_VISIBILITY_DEFAULT ttLibC_JpegEncoder_encode(
 	}
 
 	ttLibC_JpegEncoder_ *encoder_ = (ttLibC_JpegEncoder_ *)encoder;
-	int width = encoder_->inherit_super.width;
-	int height = encoder_->inherit_super.height;
+	uint32_t width = encoder_->inherit_super.width;
+	uint32_t height = encoder_->inherit_super.height;
 	ttLibC_Yuv420 *fullrange_yuv = ttLibC_Yuv420_makeEmptyFrame2(
 			encoder_->fullrange_yuv,
 			Yuv420Type_planar,
@@ -169,10 +169,10 @@ bool TT_VISIBILITY_DEFAULT ttLibC_JpegEncoder_encode(
 	// 16->235 -> 0-255
 	uint8_t *y_dst = fullrange_yuv->y_data;
 	uint8_t *y_src = yuv->y_data;
-	for(int i = 0;i < height;++ i) {
+	for(uint32_t i = 0;i < height;++ i) {
 		uint8_t *yd = y_dst;
 		uint8_t *ys = y_src;
-		for(int j = 0;j < width;++ j) {
+		for(uint32_t j = 0;j < width;++ j) {
 			uint32_t y = (((((*ys) * 1197) >> 6) - 299) >> 4);
 			*yd = y > 255 ? 255 : y;
 			yd += fullrange_yuv->y_step;
@@ -187,12 +187,12 @@ bool TT_VISIBILITY_DEFAULT ttLibC_JpegEncoder_encode(
 	uint8_t *v_dst = fullrange_yuv->v_data;
 	uint8_t *u_src = yuv->u_data;
 	uint8_t *v_src = yuv->v_data;
-	for(int i = 0;i < half_height;++ i) {
+	for(uint32_t i = 0;i < half_height;++ i) {
 		uint8_t *ud = u_dst;
 		uint8_t *us = u_src;
 		uint8_t *vd = v_dst;
 		uint8_t *vs = v_src;
-		for(int j = 0;j < half_width;++ j) {
+		for(uint32_t j = 0;j < half_width;++ j) {
 			uint32_t u = (((((*us) * 1197) >> 6) - 299) >> 4);
 			*ud = u > 255 ? 255 : u;
 			uint32_t v = (((((*vs) * 1197) >> 6) - 299) >> 4);
