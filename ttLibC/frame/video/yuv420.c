@@ -461,9 +461,6 @@ ttLibC_Yuv420 TT_VISIBILITY_DEFAULT *ttLibC_Yuv420_makeEmptyFrame2(
 	ttLibC_Yuv420 *yuv420 = NULL;
 	uint32_t full_stride = GET_ALIGNED_STRIDE(width);
 	uint32_t half_stride = GET_ALIGNED_STRIDE((width + 1) >> 1);
-	uint32_t y_step = 1;
-	uint32_t u_step = 1;
-	uint32_t v_step = 1;
 	uint32_t full_wh = full_stride * height;
 	uint32_t half_wh = half_stride * ((height + 1) >> 1);
 	uint32_t buffer_size = full_wh + (half_wh << 1);
@@ -520,7 +517,7 @@ ttLibC_Yuv420 TT_VISIBILITY_DEFAULT *ttLibC_Yuv420_makeEmptyFrame2(
 	yuv420->type = sub_type;
 	yuv420->y_data = data;
 	yuv420->y_stride = full_stride;
-	yuv420->y_step = y_step;
+	yuv420->y_step = 1;
 	switch(sub_type) {
 	case Yuv420Type_planar:
 		yuv420->u_data = data + full_wh;

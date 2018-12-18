@@ -70,14 +70,14 @@ ttLibC_Yuv420 TT_VISIBILITY_DEFAULT *ttLibC_ImageResampler_makeYuv420FromBgr(
 	uint8_t *y_dst = yuv->y_data;
 	uint8_t *u_dst = yuv->u_data;
 	uint8_t *v_dst = yuv->v_data;
-	for(int i = 0;i < src_frame->inherit_super.height;++ i) {
+	for(uint32_t i = 0;i < src_frame->inherit_super.height;++ i) {
 		uint8_t *yd = y_dst;
 		uint8_t *ud = u_dst;
 		uint8_t *vd = v_dst;
 		uint8_t *rs = r_src;
 		uint8_t *gs = g_src;
 		uint8_t *bs = b_src;
-		for(int j = 0;j < src_frame->inherit_super.width;++ j) {
+		for(uint32_t j = 0;j < src_frame->inherit_super.width;++ j) {
 			int y = ((66 * (*rs) + 129 * (*gs) + 25 * (*bs)) >> 8) + 16;
 			*yd = y > 235 ? 235 : y < 16 ? 16 : y;
 			if((i & 1) == 0 && (j & 1) == 0) {
@@ -131,7 +131,7 @@ ttLibC_Bgr TT_VISIBILITY_DEFAULT *ttLibC_ImageResampler_makeBgrFromYuv420(
 	case BgrType_rgba:
 		break;
 	default:
-		ERR_PRINT("unknown bgr frame type:%d, type");
+		ERR_PRINT("unknown bgr frame type:%d", type);
 		return NULL;
 	}
 	ttLibC_Bgr *bgr = ttLibC_Bgr_makeEmptyFrame2(
@@ -189,7 +189,7 @@ ttLibC_Bgr TT_VISIBILITY_DEFAULT *ttLibC_ImageResampler_makeBgrFromYuv420(
 		}
 		return NULL;
 	}
-	for(int i = 0;i < src_frame->inherit_super.height;++ i) {
+	for(uint32_t i = 0;i < src_frame->inherit_super.height;++ i) {
 		uint8_t *rd = r_dst;
 		uint8_t *gd = g_dst;
 		uint8_t *bd = b_dst;
@@ -197,7 +197,7 @@ ttLibC_Bgr TT_VISIBILITY_DEFAULT *ttLibC_ImageResampler_makeBgrFromYuv420(
 		uint8_t *ys = y_src;
 		uint8_t *us = u_src;
 		uint8_t *vs = v_src;
-		for(int j = 0;j < src_frame->inherit_super.width;++ j) {
+		for(uint32_t j = 0;j < src_frame->inherit_super.width;++ j) {
 			int y1192 = 1192 * ((*ys) - 16);
 			int u = *us - 128;
 			int v = *vs - 128;

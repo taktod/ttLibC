@@ -354,9 +354,9 @@ ttLibC_Bgr TT_VISIBILITY_DEFAULT *ttLibC_ImageResizer_resizeBgr(
 			false);
 	if(a_dst != NULL) {
 		if(a_src == NULL) {
-			for(int i = 0;i < height; ++ i) {
+			for(uint32_t i = 0;i < height; ++ i) {
 				uint8_t *as = a_src;
-				for(int j = 0;j < width;++ j) {
+				for(uint32_t j = 0;j < width;++ j) {
 					*as = 255;
 					as += bgr->unit_size;
 				}
