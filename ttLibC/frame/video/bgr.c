@@ -57,7 +57,7 @@ ttLibC_Bgr TT_VISIBILITY_DEFAULT *ttLibC_Bgr_make(
 		}
 		uint8_t *data_dst = bgr->data;
 		uint8_t *data_src = (uint8_t *)data;
-		for(int i = 0;i < height;++ i) {
+		for(uint32_t i = 0;i < height;++ i) {
 			memcpy(data_dst, data_src, width * bgr->unit_size);
 			data_dst += bgr->width_stride;
 			data_src += width_stride;

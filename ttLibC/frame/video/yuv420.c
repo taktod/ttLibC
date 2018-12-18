@@ -72,14 +72,14 @@ ttLibC_Yuv420 TT_VISIBILITY_DEFAULT *ttLibC_Yuv420_make(
 		uint8_t *y_src = (uint8_t *)y_data;
 		uint8_t *u_src = (uint8_t *)u_data;
 		uint8_t *v_src = (uint8_t *)v_data;
-		for(int i = 0;i < height;++ i) {
+		for(uint32_t i = 0;i < height;++ i) {
 			uint8_t *yd = y_dst;
 			uint8_t *ud = u_dst;
 			uint8_t *vd = v_dst;
 			uint8_t *ys = y_src;
 			uint8_t *us = u_src;
 			uint8_t *vs = v_src;
-			for(int j = 0;j < width;++ j) {
+			for(uint32_t j = 0;j < width;++ j) {
 				*yd = *ys;
 				yd += yuv->y_step;
 				ys += yuv->y_step;
