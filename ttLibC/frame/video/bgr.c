@@ -45,6 +45,25 @@ ttLibC_Bgr TT_VISIBILITY_DEFAULT *ttLibC_Bgr_make(
 		ERR_PRINT("reuse with incompatible frame.");
 		return NULL;
 	}
+	if(!non_copy_mode) {
+		ttLibC_Bgr *bgr = ttLibC_Bgr_makeEmptyFrame2(
+				prev_frame,
+				type,
+				width,
+				height);
+		if(bgr == NULL) {
+			ERR_PRINT("failed to make empty frame.");
+			return NULL;
+		}
+		uint8_t *data_dst = bgr->data;
+		uint8_t *data_src = (uint8_t *)data;
+		for(int i = 0;i < height;++ i) {
+			memcpy(data_dst, data_src, width * bgr->unit_size);
+			data_dst += bgr->width_stride;
+			data_src += width_stride;
+		}
+		return bgr;
+	}
 	ttLibC_Bgr *bgr = prev_frame;
 	size_t data_size_ = data_size;
 	size_t buffer_size_ = data_size;
@@ -95,22 +114,7 @@ ttLibC_Bgr TT_VISIBILITY_DEFAULT *ttLibC_Bgr_make(
 	bgr->inherit_super.inherit_super.type        = frameType_bgr;
 	bgr->inherit_super.inherit_super.data_size   = data_size_;
 	bgr->inherit_super.inherit_super.buffer_size = buffer_size_;
-	if(non_copy_mode) {
-		bgr->inherit_super.inherit_super.data = data;
-	}
-	else {
-		if(bgr->inherit_super.inherit_super.data == NULL) {
-			bgr->inherit_super.inherit_super.data = ttLibC_malloc(data_size);
-			if(bgr->inherit_super.inherit_super.data == NULL) {
-				ERR_PRINT("failed to allocate memory for data.");
-				if(prev_frame == NULL) {
-					ttLibC_free(bgr);
-				}
-				return NULL;
-			}
-		}
-		memcpy(bgr->inherit_super.inherit_super.data, data, data_size);
-	}
+	bgr->inherit_super.inherit_super.data = data;
 	bgr->data = bgr->inherit_super.inherit_super.data;
 	return bgr;
 }
@@ -121,7 +125,7 @@ ttLibC_Bgr TT_VISIBILITY_DEFAULT *ttLibC_Bgr_make(
  * @param prev_frame reuse frame object.
  * @param src_frame  source of clone.
  */
-ttLibC_Bgr TT_VISIBILITY_DEFAULT *ttLibC_Bgr_clone(
+ttLibC_Bgr TT_VISIBILITY_DEFAULT *ttLibC_Bgr_clone_(
 		ttLibC_Bgr *prev_frame,
 		ttLibC_Bgr *src_frame) {
 	if(src_frame == NULL) {
@@ -196,6 +200,24 @@ ttLibC_Bgr TT_VISIBILITY_DEFAULT *ttLibC_Bgr_clone(
 	return bgr;
 }
 
+ttLibC_Bgr TT_VISIBILITY_DEFAULT *ttLibC_Bgr_clone(
+		ttLibC_Bgr *prev_frame,
+		ttLibC_Bgr *src_frame) {
+	if(src_frame == NULL) {
+		return NULL;
+	}
+	return ttLibC_Bgr_make(
+			prev_frame,
+			src_frame->type,
+			src_frame->inherit_super.width,
+			src_frame->inherit_super.height,
+			src_frame->width_stride,
+			src_frame->data,
+			src_frame->inherit_super.height * src_frame->width_stride,
+			false,
+			src_frame->inherit_super.inherit_super.pts,
+			src_frame->inherit_super.inherit_super.timebase);
+}
 /*
  * close frame
  * @param frame

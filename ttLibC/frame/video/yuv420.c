@@ -55,6 +55,54 @@ ttLibC_Yuv420 TT_VISIBILITY_DEFAULT *ttLibC_Yuv420_make(
 		ERR_PRINT("reuse with incompatible frame.");
 		return NULL;
 	}
+	if(!non_copy_mode) {
+		// make empty frame and copy. 
+		ttLibC_Yuv420 *yuv = ttLibC_Yuv420_makeEmptyFrame2(
+				prev_frame,
+				type,
+				width,
+				height);
+		if(yuv == NULL) {
+			ERR_PRINT("failed to make empty frame.");
+			return NULL;
+		}
+		uint8_t *y_dst = yuv->y_data;
+		uint8_t *u_dst = yuv->u_data;
+		uint8_t *v_dst = yuv->v_data;
+		uint8_t *y_src = (uint8_t *)y_data;
+		uint8_t *u_src = (uint8_t *)u_data;
+		uint8_t *v_src = (uint8_t *)v_data;
+		for(int i = 0;i < height;++ i) {
+			uint8_t *yd = y_dst;
+			uint8_t *ud = u_dst;
+			uint8_t *vd = v_dst;
+			uint8_t *ys = y_src;
+			uint8_t *us = u_src;
+			uint8_t *vs = v_src;
+			for(int j = 0;j < width;++ j) {
+				*yd = *ys;
+				yd += yuv->y_step;
+				ys += yuv->y_step;
+				if((i & 1) == 0 && (j & 1) == 0) {
+					*ud = *us;
+					*vd = *vs;
+					ud += yuv->u_step;
+					us += yuv->u_step;
+					vd += yuv->v_step;
+					vs += yuv->v_step;
+				}
+			}
+			if((i & 1) == 0) {
+				u_dst += yuv->u_stride;
+				v_dst += yuv->v_stride;
+				u_src += u_stride;
+				v_src += v_stride;
+			}
+			y_dst += yuv->y_stride;
+			y_src += y_stride;
+		}
+		return yuv;
+	}
 	ttLibC_Yuv420 *yuv420 = prev_frame;
 	size_t buffer_size_ = data_size;
 	size_t data_size_ = data_size;
@@ -116,35 +164,10 @@ ttLibC_Yuv420 TT_VISIBILITY_DEFAULT *ttLibC_Yuv420_make(
 	yuv420->inherit_super.inherit_super.data_size   = data_size_;
 	yuv420->inherit_super.inherit_super.buffer_size = buffer_size_;
 
-	if(non_copy_mode) {
-		yuv420->inherit_super.inherit_super.data = data;
-	}
-	else {
-		if(yuv420->inherit_super.inherit_super.data == NULL) {
-			yuv420->inherit_super.inherit_super.data = ttLibC_malloc(data_size);
-			if(yuv420->inherit_super.inherit_super.data == NULL) {
-				ERR_PRINT("failed to allocate memory for data.");
-				if(prev_frame == NULL) {
-					ttLibC_free(yuv420);
-				}
-				return NULL;
-			}
-		}
-		memcpy(yuv420->inherit_super.inherit_super.data, data, data_size);
-		// update inner ref to use copyed buffer.
-		if(y_data != NULL) {
-			yuv420->y_data = (uint8_t *)yuv420->inherit_super.inherit_super.data + ((uint8_t *)y_data - (uint8_t *)data);
-		}
-		if(u_data != NULL) {
-			yuv420->u_data = (uint8_t *)yuv420->inherit_super.inherit_super.data + ((uint8_t *)u_data - (uint8_t *)data);
-		}
-		if(v_data != NULL) {
-			yuv420->v_data = (uint8_t *)yuv420->inherit_super.inherit_super.data + ((uint8_t *)v_data - (uint8_t *)data);
-		}
-	}
+	yuv420->inherit_super.inherit_super.data = data;
 	return yuv420;
 }
-
+/*
 static ttLibC_Yuv420 *Yuv420_clonePlanar(
 		ttLibC_Yuv420 *prev_frame,
 		ttLibC_Yuv420 *src_frame) {
@@ -386,8 +409,8 @@ static ttLibC_Yuv420 *Yvu420_cloneSemiPlanar(
  * always make copy buffer on it.
  * @param prev_frame reuse frame object.
  * @param src_frame  source of clone.
- */
-ttLibC_Yuv420 TT_VISIBILITY_DEFAULT *ttLibC_Yuv420_clone(
+ * /
+ttLibC_Yuv420 TT_VISIBILITY_DEFAULT *ttLibC_Yuv420_clone_(
 		ttLibC_Yuv420 *prev_frame,
 		ttLibC_Yuv420 *src_frame) {
 	if(src_frame == NULL) {
@@ -424,6 +447,35 @@ ttLibC_Yuv420 TT_VISIBILITY_DEFAULT *ttLibC_Yuv420_clone(
 	return yuv;
 }
 
+/*
+ * make clone frame.
+ * always make copy buffer on it.
+ * @param prev_frame reuse frame object.
+ * @param src_frame  source of clone.
+ */
+ttLibC_Yuv420 TT_VISIBILITY_DEFAULT *ttLibC_Yuv420_clone(
+		ttLibC_Yuv420 *prev_frame,
+		ttLibC_Yuv420 *src_frame) {
+	if(src_frame == NULL) {
+		return NULL;
+	}
+	return ttLibC_Yuv420_make(
+			prev_frame,
+			src_frame->type,
+			src_frame->inherit_super.width,
+			src_frame->inherit_super.height,
+			NULL,
+			0,
+			src_frame->y_data,
+			src_frame->y_stride,
+			src_frame->u_data,
+			src_frame->u_stride,
+			src_frame->v_data,
+			src_frame->v_stride,
+			false,
+			src_frame->inherit_super.inherit_super.pts,
+			src_frame->inherit_super.inherit_super.timebase);
+}
 /*
  * close frame
  * @param frame
