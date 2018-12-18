@@ -86,8 +86,8 @@ ttLibC_Png TT_VISIBILITY_DEFAULT *ttLibC_Png_getFrame(
   || *(buf + 7) != 0x0A) {
     ERR_PRINT("binary is not png");
     return NULL;
-  } 
-  bool is_find_size = false;
+  }
+//  bool is_find_size = false;
   uint32_t width = 0;
   uint32_t height = 0;
   // あとは、縦横のサイズを取得したい。
