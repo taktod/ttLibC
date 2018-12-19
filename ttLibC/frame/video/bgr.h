@@ -119,6 +119,18 @@ ttLibC_Bgr *ttLibC_Bgr_makeEmptyFrame2(
 		uint32_t        width,
 		uint32_t        height);
 
+/**
+ * get minimum size of binary buffer.
+ * @param bgr      target bgr frame
+ * @param callback binary buffer callback
+ * @param ptr      user def pointer.
+ * @return true / false
+ */
+bool ttLibC_Bgr_getMinimumBinaryBuffer(
+		ttLibC_Bgr *bgr,
+		ttLibC_FrameBinaryFunc callback,
+		void *ptr);
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

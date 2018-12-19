@@ -267,3 +267,56 @@ ttLibC_Bgr *ttLibC_Bgr_makeEmptyFrame2(
 #endif
 }
 
+/*
+ * get minimum size of binary string.
+ * @param bgr      target bgr frame
+ * @param callback binary buffer callback
+ * @param ptr      user def pointer.
+ * @return true / false
+ */
+bool ttLibC_Bgr_getMinimumBinaryBuffer(
+		ttLibC_Bgr *bgr,
+		ttLibC_FrameBinaryFunc callback,
+		void *ptr) {
+	if(bgr == NULL) {
+		return false;
+	}
+	uint8_t *data = NULL;
+	size_t data_size = 0;
+	uint32_t stride = 0;
+	switch(bgr->type) {
+	case BgrType_abgr:
+	case BgrType_argb:
+	case BgrType_bgra:
+	case BgrType_rgba:
+		stride = bgr->inherit_super.width * 4;
+		data_size = stride * bgr->inherit_super.height;
+		break;
+	case BgrType_bgr:
+	case BgrType_rgb:
+		stride = bgr->inherit_super.width * 3;
+		data_size = stride * bgr->inherit_super.height;
+		break;
+	default:
+		ERR_PRINT("unknown bgr type.");
+		return false;
+	}
+	data = ttLibC_malloc(data_size);
+	if(data == NULL) {
+		ERR_PRINT("failed to allocate memory.");
+		return false;
+	}
+	uint8_t *data_src = bgr->data;
+	uint8_t *data_dst = (uint8_t *)data;
+	for(uint32_t i = 0;i < bgr->inherit_super.height;++ i) {
+		memcpy(data_dst, data_src, bgr->inherit_super.width * bgr->unit_size);
+		data_src += bgr->width_stride;
+		data_dst += stride;
+	}
+	bool result = false;
+	if(callback != NULL) {
+		result = callback(ptr, data, data_size);
+	}
+	ttLibC_free(data);
+ 	return result;
+}

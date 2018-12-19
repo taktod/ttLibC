@@ -137,6 +137,18 @@ ttLibC_Yuv420 *ttLibC_Yuv420_makeEmptyFrame2(
 		uint32_t           width,
 		uint32_t           height);
 
+/**
+ * get minimum size of binary buffer.
+ * @param yuv      target yuv frame
+ * @param callback binary buffer callback
+ * @param ptr      user def pointer.
+ * @return true / false
+ */
+bool ttLibC_Yuv420_getMinimumBinaryBuffer(
+		ttLibC_Yuv420 *yuv,
+		ttLibC_FrameBinaryFunc callback,
+		void *ptr);
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

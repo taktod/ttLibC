@@ -120,6 +120,15 @@ typedef struct ttLibC_Frame {
 } ttLibC_Frame;
 
 /**
+ * callback of binary passing function.
+ * @param ptr       user def pointer object.
+ * @param data      data
+ * @param data_size data size
+ * @return true / false
+ */
+typedef bool (* ttLibC_FrameBinaryFunc)(void *ptr, void *data, size_t size);
+
+/**
  * make clone frame.
  * always make copy buffer on it.
  * @param prev_frame reuse frame object.

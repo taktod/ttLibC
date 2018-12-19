@@ -343,3 +343,110 @@ ttLibC_Yuv420 TT_VISIBILITY_DEFAULT *ttLibC_Yuv420_makeEmptyFrame2(
 #endif
 	return yuv420;
 }
+
+/*
+ * get minimum size of binary buffer.
+ * @param yuv      target yuv frame
+ * @param callback binary buffer callback
+ * @param ptr      user def pointer.
+ * @return true / false
+ */
+bool ttLibC_Yuv420_getMinimumBinaryBuffer(
+		ttLibC_Yuv420 *yuv,
+		ttLibC_FrameBinaryFunc callback,
+		void *ptr) {
+	if(yuv == NULL) {
+		return false;
+	}
+	uint32_t half_width  = (yuv->inherit_super.width  + 1) >> 1;
+	uint32_t half_height = (yuv->inherit_super.height + 1) >> 1;
+	uint8_t *data = NULL;
+	size_t data_size = yuv->inherit_super.width * yuv->inherit_super.height + ((half_width * half_height) << 1);
+	data = ttLibC_malloc(data_size);
+	if(data == NULL) {
+		ERR_PRINT("failed to allocate memory.");
+		return false;
+	}
+	uint8_t *y_src = yuv->y_data;
+	uint8_t *u_src = yuv->u_data;
+	uint8_t *v_src = yuv->v_data;
+	uint8_t *y_dst = NULL;
+	uint8_t *u_dst = NULL;
+	uint8_t *v_dst = NULL;
+	uint32_t y_stride = 0;
+	uint32_t u_stride = 0;
+	uint32_t v_stride = 0;
+	switch(yuv->type) {
+	case Yuv420Type_planar:
+		y_dst = data;
+		u_dst = data + yuv->inherit_super.width * yuv->inherit_super.height;
+		v_dst = u_dst + half_width * half_height;
+		y_stride = yuv->inherit_super.width;
+		u_stride = half_width;
+		v_stride = half_width;
+		break;
+	case Yuv420Type_semiPlanar:
+		y_dst = data;
+		u_dst = data + yuv->inherit_super.width * yuv->inherit_super.height;
+		v_dst = u_dst + 1;
+		y_stride = yuv->inherit_super.width;
+		u_stride = (half_width << 1);
+		v_stride = (half_width << 1);
+		break;
+	case Yvu420Type_planar:
+		y_dst = data;
+		v_dst = data + yuv->inherit_super.width * yuv->inherit_super.height;
+		u_dst = v_dst + half_width * half_height;
+		y_stride = yuv->inherit_super.width;
+		u_stride = half_width;
+		v_stride = half_width;
+		break;
+	case Yvu420Type_semiPlanar:
+		y_dst = data;
+		v_dst = data + yuv->inherit_super.width * yuv->inherit_super.height;
+		u_dst = v_dst + 1;
+		y_stride = yuv->inherit_super.width;
+		u_stride = (half_width << 1);
+		v_stride = (half_width << 1);
+		break;
+	default:
+		ERR_PRINT("unknown yuv type.:%d", yuv->type);
+		ttLibC_free(data);
+		return false;
+	}
+	for(uint32_t i = 0;i < yuv->inherit_super.height;++ i) {
+		uint8_t *yd = y_dst;
+		uint8_t *ud = u_dst;
+		uint8_t *vd = v_dst;
+		uint8_t *ys = y_src;
+		uint8_t *us = u_src;
+		uint8_t *vs = v_src;
+		for(uint32_t j = 0;j < yuv->inherit_super.width;++ j) {
+			*yd = *ys;
+			yd += yuv->y_step;
+			ys += yuv->y_step;
+			if((i & 1) == 0 && (j & 1) == 0) {
+				*ud = *us;
+				*vd = *vs;
+				ud += yuv->u_step;
+				us += yuv->u_step;
+				vd += yuv->v_step;
+				vs += yuv->v_step;
+			}
+		}
+		if((i & 1) == 0) {
+			u_dst += u_stride;
+			v_dst += v_stride;
+			u_src += yuv->u_stride;
+			v_src += yuv->v_stride;
+		}
+		y_dst += y_stride;
+		y_src += yuv->y_stride;
+	}
+	bool result = false;
+	if(callback != NULL) {
+		result = callback(ptr, data, data_size);
+	}
+	ttLibC_free(data);
+ 	return result;
+}
