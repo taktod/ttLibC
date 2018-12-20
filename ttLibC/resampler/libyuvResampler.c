@@ -34,6 +34,8 @@ ttLibC_Yuv420 TT_VISIBILITY_DEFAULT *ttLibC_LibyuvResampler_resize(
 		ERR_PRINT("failed to make dst frame.");
 		return NULL;
 	}
+	yuv->inherit_super.inherit_super.pts = src_frame->inherit_super.inherit_super.pts;
+	yuv->inherit_super.inherit_super.timebase = src_frame->inherit_super.inherit_super.timebase;
 	FilterModeEnum filter = kFilterNone;
 	switch(y_mode) {
 	default:
@@ -149,6 +151,8 @@ ttLibC_Yuv420 TT_VISIBILITY_DEFAULT *ttLibC_LibyuvResampler_rotate(
 		ERR_PRINT("failed to make dst frame.");
 		return NULL;
 	}
+	yuv->inherit_super.inherit_super.pts = src_frame->inherit_super.inherit_super.pts;
+	yuv->inherit_super.inherit_super.timebase = src_frame->inherit_super.inherit_super.timebase;
 	I420Rotate(
 			src_frame->y_data,
 			src_frame->y_stride,

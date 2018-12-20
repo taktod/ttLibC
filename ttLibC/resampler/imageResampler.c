@@ -67,6 +67,8 @@ ttLibC_Yuv420 TT_VISIBILITY_DEFAULT *ttLibC_ImageResampler_makeYuv420FromBgr(
 		ERR_PRINT("failed to make dest frame.");
 		return NULL;
 	}
+	yuv->inherit_super.inherit_super.pts = src_frame->inherit_super.inherit_super.pts;
+	yuv->inherit_super.inherit_super.timebase = src_frame->inherit_super.inherit_super.timebase;
 	uint8_t *y_dst = yuv->y_data;
 	uint8_t *u_dst = yuv->u_data;
 	uint8_t *v_dst = yuv->v_data;
@@ -143,6 +145,8 @@ ttLibC_Bgr TT_VISIBILITY_DEFAULT *ttLibC_ImageResampler_makeBgrFromYuv420(
 		ERR_PRINT("failed to make dest frame.");
 		return NULL;
 	}
+	bgr->inherit_super.inherit_super.pts = src_frame->inherit_super.inherit_super.pts;
+	bgr->inherit_super.inherit_super.timebase = src_frame->inherit_super.inherit_super.timebase;
 	uint8_t *r_dst = NULL;
 	uint8_t *g_dst = NULL;
 	uint8_t *b_dst = NULL;

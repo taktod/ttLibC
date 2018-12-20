@@ -152,6 +152,8 @@ ttLibC_Yuv420 TT_VISIBILITY_DEFAULT *ttLibC_ImageResizer_resizeYuv420(
 		ERR_PRINT("failed to make dst frame.");
 		return NULL;
 	}
+	yuv->inherit_super.inherit_super.pts = src_frame->inherit_super.inherit_super.pts;
+	yuv->inherit_super.inherit_super.timebase = src_frame->inherit_super.inherit_super.timebase;
 	ImageResizer_resizePlane(
 			yuv->y_data,
 			width,
@@ -273,6 +275,8 @@ ttLibC_Bgr TT_VISIBILITY_DEFAULT *ttLibC_ImageResizer_resizeBgr(
 		ERR_PRINT("failed to make dst frame.");
 		return NULL;
 	}
+	bgr->inherit_super.inherit_super.pts = src_frame->inherit_super.inherit_super.pts;
+	bgr->inherit_super.inherit_super.timebase = src_frame->inherit_super.inherit_super.timebase;
 	uint8_t *r_dst = NULL;
 	uint8_t *g_dst = NULL;
 	uint8_t *b_dst = NULL;
