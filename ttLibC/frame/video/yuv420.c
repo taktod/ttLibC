@@ -66,6 +66,8 @@ ttLibC_Yuv420 TT_VISIBILITY_DEFAULT *ttLibC_Yuv420_make(
 			ERR_PRINT("failed to make empty frame.");
 			return NULL;
 		}
+		yuv->inherit_super.inherit_super.pts = pts;
+		yuv->inherit_super.inherit_super.timebase = timebase;
 		uint8_t *y_dst = yuv->y_data;
 		uint8_t *u_dst = yuv->u_data;
 		uint8_t *v_dst = yuv->v_data;

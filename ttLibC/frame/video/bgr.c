@@ -62,6 +62,8 @@ ttLibC_Bgr TT_VISIBILITY_DEFAULT *ttLibC_Bgr_make(
 			data_dst += bgr->width_stride;
 			data_src += width_stride;
 		}
+		bgr->inherit_super.inherit_super.pts = pts;
+		bgr->inherit_super.inherit_super.timebase = timebase;
 		return bgr;
 	}
 	ttLibC_Bgr *bgr = prev_frame;
