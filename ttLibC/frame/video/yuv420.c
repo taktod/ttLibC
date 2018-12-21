@@ -16,6 +16,20 @@
 #include "../../_log.h"
 #include "../../allocator.h"
 
+typedef struct {
+	ttLibC_Yuv420 inherit_super;
+	uint32_t width;
+	uint32_t height;
+	uint8_t *y_data;
+	uint32_t y_stride;
+	uint8_t *u_data;
+	uint32_t u_stride;
+	uint8_t *v_data;
+	uint32_t v_stride;
+} ttLibC_Frame_Video_Yuv420_;
+
+typedef ttLibC_Frame_Video_Yuv420_ ttLibC_Yuv420_;
+
 /*
  * make yuv420 frame
  * @param prev_frame    reuse frame object. if NULL, create new one.
@@ -125,7 +139,7 @@ ttLibC_Yuv420 TT_VISIBILITY_DEFAULT *ttLibC_Yuv420_make(
 		return NULL;
 	}
 	if(yuv420 == NULL) {
-		yuv420 = (ttLibC_Yuv420 *)ttLibC_malloc(sizeof(ttLibC_Yuv420));
+		yuv420 = (ttLibC_Yuv420 *)ttLibC_malloc(sizeof(ttLibC_Yuv420_));
 		if(yuv420 == NULL) {
 			ERR_PRINT("failed to allocate memory for yuv420 frame");
 			return NULL;
@@ -167,6 +181,17 @@ ttLibC_Yuv420 TT_VISIBILITY_DEFAULT *ttLibC_Yuv420_make(
 	yuv420->inherit_super.inherit_super.buffer_size = buffer_size_;
 
 	yuv420->inherit_super.inherit_super.data = data;
+
+	ttLibC_Yuv420_ *yuv_ = (ttLibC_Yuv420_ *)yuv420;
+	yuv_->width    = yuv420->inherit_super.width;
+	yuv_->height   = yuv420->inherit_super.height;
+	yuv_->y_data   = yuv420->y_data;
+	yuv_->y_stride = yuv420->y_stride;
+	yuv_->u_data   = yuv420->u_data;
+	yuv_->u_stride = yuv420->u_stride;
+	yuv_->v_data   = yuv420->v_data;
+	yuv_->v_stride = yuv420->v_stride;
+
 	return yuv420;
 }
 
@@ -199,6 +224,7 @@ ttLibC_Yuv420 TT_VISIBILITY_DEFAULT *ttLibC_Yuv420_clone(
 			src_frame->inherit_super.inherit_super.pts,
 			src_frame->inherit_super.inherit_super.timebase);
 }
+
 /*
  * close frame
  * @param frame
@@ -259,7 +285,7 @@ ttLibC_Yuv420 TT_VISIBILITY_DEFAULT *ttLibC_Yuv420_makeEmptyFrame2(
 	}
 	yuv420 = prev_frame;
 	if(yuv420 == NULL) {
-		yuv420 = (ttLibC_Yuv420 *)ttLibC_malloc(sizeof(ttLibC_Yuv420));
+		yuv420 = (ttLibC_Yuv420 *)ttLibC_malloc(sizeof(ttLibC_Yuv420_));
 		if(yuv420 == NULL) {
 			ERR_PRINT("failed to allocate memory for yuv420 frame.");
 			return NULL;
@@ -341,6 +367,15 @@ ttLibC_Yuv420 TT_VISIBILITY_DEFAULT *ttLibC_Yuv420_makeEmptyFrame2(
 	yuv420->inherit_super.inherit_super.data_size   = data_size;
 	yuv420->inherit_super.inherit_super.buffer_size = buffer_size;
 
+	ttLibC_Yuv420_ *yuv_ = (ttLibC_Yuv420_ *)yuv420;
+	yuv_->width    = yuv420->inherit_super.width;
+	yuv_->height   = yuv420->inherit_super.height;
+	yuv_->y_data   = yuv420->y_data;
+	yuv_->y_stride = yuv420->y_stride;
+	yuv_->u_data   = yuv420->u_data;
+	yuv_->u_stride = yuv420->u_stride;
+	yuv_->v_data   = yuv420->v_data;
+	yuv_->v_stride = yuv420->v_stride;
 #	undef  GET_ALIGNED_STRIDE
 #endif
 	return yuv420;
@@ -452,3 +487,23 @@ bool ttLibC_Yuv420_getMinimumBinaryBuffer(
 	ttLibC_free(data);
  	return result;
 }
+
+/*
+ * reset changed data.
+ * @param yuv target bgr frame.
+ */
+void ttLibC_Yuv420_resetData(ttLibC_Yuv420 *yuv) {
+	if(yuv == NULL) {
+		return;
+	}
+	ttLibC_Yuv420_ *yuv_ = (ttLibC_Yuv420_ *)yuv;
+	yuv->inherit_super.width  = yuv_->width;
+	yuv->inherit_super.height = yuv_->height;
+	yuv->y_data   = yuv_->y_data;
+	yuv->y_stride = yuv_->y_stride;
+	yuv->u_data   = yuv_->u_data;
+	yuv->u_stride = yuv_->u_stride;
+	yuv->v_data   = yuv_->v_data;
+	yuv->v_stride = yuv_->v_stride;
+}
+

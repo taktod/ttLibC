@@ -149,6 +149,12 @@ bool ttLibC_Yuv420_getMinimumBinaryBuffer(
 		ttLibC_FrameBinaryFunc callback,
 		void *ptr);
 
+/**
+ * reset changed data.
+ * @param yuv target bgr frame.
+ */
+void ttLibC_Yuv420_resetData(ttLibC_Yuv420 *yuv);
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

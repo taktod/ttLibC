@@ -16,6 +16,16 @@
 #include "../../_log.h"
 #include "../../allocator.h"
 
+typedef struct {
+	ttLibC_Bgr inherit_super;
+	uint32_t width;
+	uint32_t height;
+	uint8_t *data;
+	uint32_t width_stride;
+} ttLibC_Frame_Video_Bgr_;
+
+typedef ttLibC_Frame_Video_Bgr_ ttLibC_Bgr_;
+
 /*
  * make bgr frame
  * @param prev_frame    reuse frame object. if NULL, create new one.
@@ -85,7 +95,7 @@ ttLibC_Bgr TT_VISIBILITY_DEFAULT *ttLibC_Bgr_make(
 		return NULL;
 	}
 	if(bgr == NULL) {
-		bgr = (ttLibC_Bgr *)ttLibC_malloc(sizeof(ttLibC_Bgr));
+		bgr = (ttLibC_Bgr *)ttLibC_malloc(sizeof(ttLibC_Bgr_));
 		if(bgr == NULL) {
 			ERR_PRINT("failed to allocate memory for bgr frame.");
 			return NULL;
@@ -118,6 +128,11 @@ ttLibC_Bgr TT_VISIBILITY_DEFAULT *ttLibC_Bgr_make(
 	bgr->inherit_super.inherit_super.buffer_size = buffer_size_;
 	bgr->inherit_super.inherit_super.data = data;
 	bgr->data = bgr->inherit_super.inherit_super.data;
+	ttLibC_Bgr_ *bgr_ = (ttLibC_Bgr_ *)bgr;
+	bgr_->width        = bgr->inherit_super.width;
+	bgr_->height       = bgr->inherit_super.height;
+	bgr_->data         = bgr->data;
+	bgr_->width_stride = bgr->width_stride;
 	return bgr;
 }
 
@@ -145,6 +160,7 @@ ttLibC_Bgr TT_VISIBILITY_DEFAULT *ttLibC_Bgr_clone(
 			src_frame->inherit_super.inherit_super.pts,
 			src_frame->inherit_super.inherit_super.timebase);
 }
+
 /*
  * close frame
  * @param frame
@@ -211,7 +227,7 @@ ttLibC_Bgr *ttLibC_Bgr_makeEmptyFrame2(
 	}
 	bgr = prev_frame;
 	if(bgr == NULL) {
-		bgr = (ttLibC_Bgr *)ttLibC_malloc(sizeof(ttLibC_Bgr));
+		bgr = (ttLibC_Bgr *)ttLibC_malloc(sizeof(ttLibC_Bgr_));
 		if(bgr == NULL) {
 			ERR_PRINT("failed to allocate memory for bgr frame.");
 			return NULL;
@@ -264,6 +280,11 @@ ttLibC_Bgr *ttLibC_Bgr_makeEmptyFrame2(
 	bgr->inherit_super.inherit_super.type        = frameType_bgr;
 	bgr->inherit_super.inherit_super.buffer_size = buffer_size;
 	bgr->inherit_super.inherit_super.data_size   = data_size;
+	ttLibC_Bgr_ *bgr_ = (ttLibC_Bgr_ *)bgr;
+	bgr_->width        = bgr->inherit_super.width;
+	bgr_->height       = bgr->inherit_super.height;
+	bgr_->data         = bgr->data;
+	bgr_->width_stride = bgr->width_stride;
 	return bgr;
 #	undef  GET_ALIGNED_STRIDE
 #endif
@@ -321,4 +342,19 @@ bool ttLibC_Bgr_getMinimumBinaryBuffer(
 	}
 	ttLibC_free(data);
  	return result;
+}
+
+/*
+ * reset changed data.
+ * @param bgr target bgr frame.
+ */
+void ttLibC_Bgr_resetData(ttLibC_Bgr *bgr) {
+	if(bgr == NULL) {
+		return;
+	}
+	ttLibC_Bgr_ *bgr_ = (ttLibC_Bgr_ *)bgr;
+	bgr->inherit_super.width  = bgr_->width;
+	bgr->inherit_super.height = bgr_->height;
+	bgr->data         = bgr_->data;
+	bgr->width_stride = bgr_->width_stride;
 }

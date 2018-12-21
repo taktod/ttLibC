@@ -131,6 +131,12 @@ bool ttLibC_Bgr_getMinimumBinaryBuffer(
 		ttLibC_FrameBinaryFunc callback,
 		void *ptr);
 
+/**
+ * reset changed data.
+ * @param bgr target bgr frame.
+ */
+void ttLibC_Bgr_resetData(ttLibC_Bgr *bgr);
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
