@@ -14,7 +14,18 @@
 #include "../../allocator.h"
 #include <string.h>
 
-typedef ttLibC_Frame_Audio_PcmF32 ttLibC_PcmF32_;
+typedef struct {
+	ttLibC_PcmF32 inherit_super;
+	uint32_t sample_rate;
+	uint32_t sample_num;
+	uint32_t channel_num;
+	uint8_t *l_data;
+	uint32_t l_stride;
+	uint8_t *r_data;
+	uint32_t r_stride;
+} ttLibC_Frame_Audio_PcmF32_;
+
+typedef ttLibC_Frame_Audio_PcmF32_ ttLibC_PcmF32_;
 
 /*
  * make pcmf32 frame
@@ -66,7 +77,7 @@ ttLibC_PcmF32 TT_VISIBILITY_DEFAULT *ttLibC_PcmF32_make(
 	default:
 		ERR_PRINT("unknown pcmf32 type.%d", type);
 	}
-	ttLibC_PcmF32_ *pcmf32 = (ttLibC_PcmF32_ *)ttLibC_Audio_make(
+	ttLibC_PcmF32 *pcmf32 = (ttLibC_PcmF32 *)ttLibC_Audio_make(
 			(ttLibC_Audio *)prev_frame,
 			sizeof(ttLibC_PcmF32_),
 			frameType_pcmF32,
@@ -97,7 +108,15 @@ ttLibC_PcmF32 TT_VISIBILITY_DEFAULT *ttLibC_PcmF32_make(
 			}
 		}
 	}
-	return (ttLibC_PcmF32 *)pcmf32;
+	ttLibC_PcmF32_ *pcm_ = (ttLibC_PcmF32_ *)pcmf32;
+	pcm_->sample_rate = pcmf32->inherit_super.sample_rate;
+	pcm_->sample_num  = pcmf32->inherit_super.sample_num;
+	pcm_->channel_num = pcmf32->inherit_super.channel_num;
+	pcm_->l_data      = pcmf32->l_data;
+	pcm_->l_stride    = pcmf32->l_stride;
+	pcm_->r_data      = pcmf32->r_data;
+	pcm_->r_stride    = pcmf32->r_stride;
+	return pcmf32;
 }
 
 static ttLibC_PcmF32 *PcmF32_cloneInterleave(
@@ -258,3 +277,20 @@ void TT_VISIBILITY_DEFAULT ttLibC_PcmF32_close(ttLibC_PcmF32 **frame) {
 	ttLibC_Audio_close_((ttLibC_Audio **)frame);
 }
 
+/*
+ * reset changed data.
+ * @param pcm target pcm frame.
+ */
+void ttLibC_PcmF32_resetData(ttLibC_PcmF32 *pcm) {
+	if(pcm == NULL) {
+		return;
+	}
+	ttLibC_PcmF32_ *pcm_ = (ttLibC_PcmF32_ *)pcm;
+	pcm->inherit_super.sample_rate = pcm_->sample_rate;
+	pcm->inherit_super.sample_num  = pcm_->sample_num;
+	pcm->inherit_super.channel_num = pcm_->channel_num;
+	pcm->l_data   = pcm_->l_data;
+	pcm->l_stride = pcm_->l_stride;
+	pcm->r_data   = pcm_->r_data;
+	pcm->r_stride = pcm_->r_stride;
+}

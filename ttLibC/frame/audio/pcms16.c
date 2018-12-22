@@ -16,6 +16,19 @@
 #include "../../_log.h"
 #include "../../allocator.h"
 
+typedef struct {
+	ttLibC_PcmS16 inherit_super;
+	uint32_t sample_rate;
+	uint32_t sample_num;
+	uint32_t channel_num;
+	uint8_t *l_data;
+	uint32_t l_stride;
+	uint8_t *r_data;
+	uint32_t r_stride;
+} ttLibC_Frame_Audio_PcmS16_;
+
+typedef ttLibC_Frame_Audio_PcmS16_ ttLibC_PcmS16_;
+
 /*
  * make pcms16 frame
  * @param prev_frame    reuse frame. if NULL, make new frame object.
@@ -77,7 +90,7 @@ ttLibC_PcmS16 TT_VISIBILITY_DEFAULT *ttLibC_PcmS16_make(
 		return NULL;
 	}
 	if(pcms16 == NULL) {
-		pcms16 = (ttLibC_PcmS16 *)ttLibC_malloc(sizeof(ttLibC_PcmS16));
+		pcms16 = (ttLibC_PcmS16 *)ttLibC_malloc(sizeof(ttLibC_PcmS16_));
 		if(pcms16 == NULL) {
 			ERR_PRINT("failed to allocate memory for pcms16 frame.");
 			return NULL;
@@ -134,6 +147,14 @@ ttLibC_PcmS16 TT_VISIBILITY_DEFAULT *ttLibC_PcmS16_make(
 			pcms16->r_data = (uint8_t *)pcms16->inherit_super.inherit_super.data + ((uint8_t *)r_data - (uint8_t *)data);
 		}
 	}
+	ttLibC_PcmS16_ *pcm_ = (ttLibC_PcmS16_ *)pcms16;
+	pcm_->sample_rate = pcms16->inherit_super.sample_rate;
+	pcm_->sample_num  = pcms16->inherit_super.sample_num;
+	pcm_->channel_num = pcms16->inherit_super.channel_num;
+	pcm_->l_data      = pcms16->l_data;
+	pcm_->l_stride    = pcms16->l_stride;
+	pcm_->r_data      = pcms16->r_data;
+	pcm_->r_stride    = pcms16->r_stride;
 	return pcms16;
 }
 
@@ -330,4 +351,22 @@ void TT_VISIBILITY_DEFAULT ttLibC_PcmS16_close(ttLibC_PcmS16 **frame) {
 	}
 	ttLibC_free(target);
 	*frame = NULL;
+}
+
+/*
+ * reset changed data.
+ * @param pcm target pcm frame.
+ */
+void ttLibC_PcmS16_resetData(ttLibC_PcmS16 *pcm) {
+	if(pcm == NULL) {
+		return;
+	}
+	ttLibC_PcmS16_ *pcm_ = (ttLibC_PcmS16_ *)pcm;
+	pcm->inherit_super.sample_rate = pcm_->sample_rate;
+	pcm->inherit_super.sample_num  = pcm_->sample_num;
+	pcm->inherit_super.channel_num = pcm_->channel_num;
+	pcm->l_data   = pcm_->l_data;
+	pcm->l_stride = pcm_->l_stride;
+	pcm->r_data   = pcm_->r_data;
+	pcm->r_stride = pcm_->r_stride;
 }

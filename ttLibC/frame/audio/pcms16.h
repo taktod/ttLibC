@@ -107,6 +107,12 @@ ttLibC_PcmS16 *ttLibC_PcmS16_clone(
  */
 void ttLibC_PcmS16_close(ttLibC_PcmS16 **frame);
 
+/**
+ * reset changed data.
+ * @param pcm target pcm frame.
+ */
+void ttLibC_PcmS16_resetData(ttLibC_PcmS16 *pcm);
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

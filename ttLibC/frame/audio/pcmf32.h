@@ -101,6 +101,12 @@ ttLibC_PcmF32 *ttLibC_PcmF32_clone(
  */
 void ttLibC_PcmF32_close(ttLibC_PcmF32 **frame);
 
+/**
+ * reset changed data.
+ * @param pcm target pcm frame.
+ */
+void ttLibC_PcmF32_resetData(ttLibC_PcmF32 *pcm);
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
