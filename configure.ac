@@ -150,7 +150,7 @@ AC_ARG_ENABLE(
 		theora_flag=$enableval
 		daala_flag=$enableval
 		vorbis_flag=$enableval
-		webrtc_flag=$enableval
+#		webrtc_flag=$enableval
 		soundtouch_flag=$enableval
 		fdkaac_flag=$enableval
 		libyuv_flag=$enableval
