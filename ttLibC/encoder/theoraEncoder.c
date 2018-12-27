@@ -58,8 +58,10 @@ ttLibC_TheoraEncoder TT_VISIBILITY_DEFAULT *ttLibC_TheoraEncoder_make_ex(
 	th_info ti;
 //	th_comment tc;
 	th_info_init(&ti);
-	ti.frame_width = (width % 16 == 0) ? width : ((int)(width / 16) + 1) * 16;
-	ti.frame_height = (height % 16 == 0) ? height : ((int)(height / 16) + 1) * 16;
+	ti.frame_width  = (((((width)  - 1) >> 4) + 1) << 4);
+	ti.frame_height = (((((height) - 1) >> 4) + 1) << 4);
+//	ti.frame_width = (width % 16 == 0) ? width : ((int)(width / 16) + 1) * 16;
+//	ti.frame_height = (height % 16 == 0) ? height : ((int)(height / 16) + 1) * 16;
 	ti.pic_width = width;
 	ti.pic_height = height;
 	ti.pic_x = 0;
@@ -152,21 +154,23 @@ bool TT_VISIBILITY_DEFAULT ttLibC_TheoraEncoder_encode(
 	}
 	uint32_t width = yuv420->inherit_super.width;
 	uint32_t height = yuv420->inherit_super.height;
-	width = (width % 16 == 0) ? width : ((int)(width / 16) + 1) * 16;
-	height = (height % 16 == 0) ? height : ((int)(height / 16) + 1) * 16;
+	width  = (((((width)  - 1) >> 4) + 1) << 4);
+	height = (((((height) - 1) >> 4) + 1) << 4);
+//	width = (width % 16 == 0) ? width : ((int)(width / 16) + 1) * 16;
+//	height = (height % 16 == 0) ? height : ((int)(height / 16) + 1) * 16;
 	// y
 	encoder_->image_buffer[0].width  = width;
 	encoder_->image_buffer[0].height = height;
 	encoder_->image_buffer[0].stride = yuv420->y_stride;
 	encoder_->image_buffer[0].data   = yuv420->y_data;
 	// cb
-	encoder_->image_buffer[1].width  = width >> 1;
-	encoder_->image_buffer[1].height = height >> 1;
+	encoder_->image_buffer[1].width  = (width  + 1) >> 1;
+	encoder_->image_buffer[1].height = (height + 1) >> 1;
 	encoder_->image_buffer[1].stride = yuv420->u_stride;
 	encoder_->image_buffer[1].data   = yuv420->u_data;
 	// cr
-	encoder_->image_buffer[2].width  = width >> 1;
-	encoder_->image_buffer[2].height = height >> 1;
+	encoder_->image_buffer[2].width  = (width  + 1) >> 1;
+	encoder_->image_buffer[2].height = (height + 1) >> 1;
 	encoder_->image_buffer[2].stride = yuv420->v_stride;
 	encoder_->image_buffer[2].data   = yuv420->v_data;
 
