@@ -540,11 +540,6 @@ static void avcodecTest() {
 					av_free(enc);
 					enc = NULL;
 				}
-				else {
-					picture->linesize[0] = enc->width;
-					picture->linesize[1] = ((enc->width + 1) >> 1);
-					picture->linesize[2] = ((enc->width + 1) >> 1);
-				}
 			}
 		}
 	}
@@ -606,6 +601,9 @@ static void avcodecTest() {
 		picture->data[0] = yuv->y_data;
 		picture->data[1] = yuv->u_data;
 		picture->data[2] = yuv->v_data;
+		picture->linesize[0] = yuv->y_stride;
+		picture->linesize[1] = yuv->u_stride;
+		picture->linesize[2] = yuv->v_stride;
 
 		packet.data = NULL;
 		packet.size = 0;
