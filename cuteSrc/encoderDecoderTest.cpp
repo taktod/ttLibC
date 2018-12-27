@@ -128,6 +128,58 @@
 
 #include <unistd.h>
 
+static void vtJpegDecodeBinaryTest() {
+	LOG_PRINT("vtJpegDecodeBinaryTest");
+#if defined(__ENABLE_AVCODEC__) && defined(__ENABLE_APPLE__)
+	FILE *fp = fopen("./cuteSrc/target.jpeg", "rb");
+	if(fp) {
+		fpos_t fsize;
+		fseek(fp,0,SEEK_END);
+		fgetpos(fp,&fsize);
+		uint8_t *buf = new uint8_t[fsize];
+		fseek(fp,0,SEEK_SET);
+		fread(buf, 1, fsize, fp);
+		ttLibC_Jpeg *jpeg = ttLibC_Jpeg_getFrame(NULL, buf, fsize, false, 0, 1000);
+
+		ttLibC_AvcodecDecoder *decoder = ttLibC_AvcodecVideoDecoder_make(frameType_jpeg, jpeg->inherit_super.width, jpeg->inherit_super.height);
+		ttLibC_AvcodecDecoder_decode(decoder, (ttLibC_Frame *)jpeg, [](void *ptr, ttLibC_Frame *frame){
+			LOG_PRINT("decodeできた。");
+			ttLibC_Yuv420 *yuv = (ttLibC_Yuv420 *)frame;
+			// つぎはjpegにencodeする。
+			ttLibC_VtEncoder *encoder = ttLibC_VtEncoder_make(yuv->inherit_super.width, yuv->inherit_super.height, frameType_jpeg);
+			ttLibC_VtEncoder_encode(encoder, yuv, [](void *ptr, ttLibC_Video *frame) {
+				LOG_PRINT("encodeできた。");
+				FILE *fp = fopen("./cuteSrc/output_vtjpeg.jpeg", "wb");
+				if(fp) {
+					fwrite(frame->inherit_super.data, 1, frame->inherit_super.buffer_size, fp);
+					fclose(fp);
+				}
+				return true;
+			}, nullptr);
+			ttLibC_VtEncoder_close(&encoder);// */
+/*			ttLibC_JpegEncoder *encoder = ttLibC_JpegEncoder_make(yuv->inherit_super.width, yuv->inherit_super.height, 90);
+			ttLibC_JpegEncoder_encode(encoder, yuv, [](void *ptr, ttLibC_Jpeg *frame) {
+				LOG_PRINT("encodeできた。");
+				FILE *fp = fopen("./cuteSrc/output_vjpeg.jpeg", "wb");
+				if(fp) {
+					fwrite(frame->inherit_super.inherit_super.data, 1, frame->inherit_super.inherit_super.buffer_size, fp);
+					fclose(fp);
+				}
+				return true;
+			}, nullptr);
+			ttLibC_JpegEncoder_close(&encoder);// */
+			return true;
+		}, nullptr);
+		ttLibC_AvcodecDecoder_close(&decoder);
+
+		ttLibC_Jpeg_close(&jpeg);
+		delete[] buf;
+		fclose(fp);
+	}
+#endif
+	ASSERT(ttLibC_Allocator_dump() == 0);
+}
+
 #if defined(__ENABLE_LIBPNG__) && defined(__ENABLE_JPEG__) && defined(__ENABLE_SWSCALE__)
 
 static bool pngDecodeBinaryTest2_encodeCallback(void *ptr, ttLibC_Jpeg *jpeg) {
@@ -370,7 +422,6 @@ static bool vtH265AvcodecDecodeTest_decodeCallback(void *ptr, ttLibC_Frame *yuv)
 		return false;
 	}
 	testData->dbgr = b;
-	ttLibC_CvWindow_showBgr(testData->target, testData->dbgr);
 	return true;
 }
 
@@ -414,7 +465,7 @@ static void vtH265AvcodecDecodeTest() {
 	while(true) {
 		b = ttLibC_CvCapture_queryFrame(capture, bgr);
 		if(b == NULL) {
-			break;
+			continue;
 		}
 		bgr = b;
 		ttLibC_CvWindow_showBgr(original, bgr);
@@ -426,6 +477,7 @@ static void vtH265AvcodecDecodeTest() {
 		if(!ttLibC_VtEncoder_encode(encoder, yuv, vtH265AvcodecDecodeTest_encodeCallback, &testData)) {
 			break;
 		}
+		ttLibC_CvWindow_showBgr(testData.target, testData.dbgr);
 		dbgr = testData.dbgr;
 		uint8_t key = ttLibC_CvWindow_waitForKeyInput(66);
 		if(key == Keychar_Esc) {
@@ -437,6 +489,7 @@ static void vtH265AvcodecDecodeTest() {
 	ttLibC_Bgr_close(&dbgr);
 	ttLibC_Yuv420_close(&yuv);
 	ttLibC_AvcodecDecoder_close(&decoder);
+	sleep(1); // we need to wait for videoToolbox ended.
 	ttLibC_VtEncoder_close(&encoder);
 	ttLibC_CvWindow_close(&original);
 	ttLibC_CvWindow_close(&target);
@@ -527,6 +580,7 @@ typedef struct {
 
 static bool vtJpegTest_decodeCallback(void *ptr, ttLibC_Yuv420 *yuv) {
 	vtJpegTest_t *testData = (vtJpegTest_t *)ptr;
+	LOG_DUMP(yuv->y_data, 10, true);
 	ttLibC_Bgr *b = ttLibC_ImageResampler_makeBgrFromYuv420(testData->dbgr, BgrType_bgr, yuv);
 	if(b == NULL) {
 		return false;
@@ -537,9 +591,9 @@ static bool vtJpegTest_decodeCallback(void *ptr, ttLibC_Yuv420 *yuv) {
 	return true;
 }
 
-static bool vtJpegTest_encodeCallback(void *ptr, ttLibC_Video *video) {
+static bool vtJpegTest_encodeCallback(void *ptr, ttLibC_Jpeg *video) {
 	vtJpegTest_t *testData = (vtJpegTest_t *)ptr;
-	return ttLibC_VtDecoder_decode(testData->decoder, video, vtJpegTest_decodeCallback, ptr);
+	return ttLibC_VtDecoder_decode(testData->decoder, (ttLibC_Video *)video, vtJpegTest_decodeCallback, ptr);
 }
 #endif
 
@@ -550,7 +604,8 @@ static void vtJpegTest() {
 	ttLibC_CvCapture *capture = ttLibC_CvCapture_make(0, width, height);
 	ttLibC_CvWindow *original = ttLibC_CvWindow_make("original");
 	ttLibC_CvWindow *target = ttLibC_CvWindow_make("target");
-	ttLibC_VtEncoder *encoder = ttLibC_VtEncoder_make(width, height, frameType_jpeg);
+//	ttLibC_VtEncoder *encoder = ttLibC_VtEncoder_make(width, height, frameType_jpeg);
+	ttLibC_JpegEncoder *encoder = ttLibC_JpegEncoder_make(width, height, 90);
 	ttLibC_VtDecoder *decoder = ttLibC_VtDecoder_make(frameType_jpeg);
 	ttLibC_Bgr *bgr = NULL, *dbgr = NULL, *b;
 	ttLibC_Yuv420 *yuv = NULL, *y;
@@ -571,7 +626,8 @@ static void vtJpegTest() {
 			break;
 		}
 		yuv = y;
-		if(!ttLibC_VtEncoder_encode(encoder, yuv, vtJpegTest_encodeCallback, &testData)) {
+//		if(!ttLibC_VtEncoder_encode(encoder, yuv, vtJpegTest_encodeCallback, &testData)) {
+		if(!ttLibC_JpegEncoder_encode(encoder, yuv, vtJpegTest_encodeCallback, &testData)) {
 			break;
 		}
 		ttLibC_CvWindow_showBgr(testData.target, testData.dbgr);
@@ -586,7 +642,8 @@ static void vtJpegTest() {
 	ttLibC_Bgr_close(&dbgr);
 	ttLibC_Yuv420_close(&yuv);
 	ttLibC_VtDecoder_close(&decoder);
-	ttLibC_VtEncoder_close(&encoder);
+//	ttLibC_VtEncoder_close(&encoder);
+	ttLibC_JpegEncoder_close(&encoder);
 	ttLibC_CvWindow_close(&original);
 	ttLibC_CvWindow_close(&target);
 	ttLibC_CvCapture_close(&capture);
@@ -1860,6 +1917,7 @@ static void imageResamplerTest() {
  */
 cute::suite encoderDecoderTests(cute::suite s) {
 	s.clear();
+	s.push_back(CUTE(vtJpegDecodeBinaryTest));
 	s.push_back(CUTE(pngDecodeBinaryTest2));
 	s.push_back(CUTE(pngDecodeBinaryTest));
 	s.push_back(CUTE(jpegDecodeBinaryTest));
