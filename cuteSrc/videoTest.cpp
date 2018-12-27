@@ -418,12 +418,12 @@ static void theoraTest() {
 			t_imageBuffer[0].height = yuv->inherit_super.height;
 			t_imageBuffer[0].stride = yuv->y_stride;
 			t_imageBuffer[0].data   = yuv->y_data;
-			t_imageBuffer[1].width  = yuv->inherit_super.width >> 1;
-			t_imageBuffer[1].height = yuv->inherit_super.height >> 1;
+			t_imageBuffer[1].width  = (yuv->inherit_super.width  + 1) >> 1;
+			t_imageBuffer[1].height = (yuv->inherit_super.height + 1) >> 1;
 			t_imageBuffer[1].stride = yuv->u_stride;
 			t_imageBuffer[1].data   = yuv->u_data;
-			t_imageBuffer[2].width  = yuv->inherit_super.width >> 1;
-			t_imageBuffer[2].height = yuv->inherit_super.height >> 1;
+			t_imageBuffer[2].width  = (yuv->inherit_super.width  + 1) >> 1;
+			t_imageBuffer[2].height = (yuv->inherit_super.height + 1) >> 1;
 			t_imageBuffer[2].stride = yuv->v_stride;
 			t_imageBuffer[2].data   = yuv->v_data;
 			// register yuv image.
@@ -542,8 +542,8 @@ static void avcodecTest() {
 				}
 				else {
 					picture->linesize[0] = enc->width;
-					picture->linesize[1] = (enc->width >> 1);
-					picture->linesize[2] = (enc->width >> 1);
+					picture->linesize[1] = ((enc->width + 1) >> 1);
+					picture->linesize[2] = ((enc->width + 1) >> 1);
 				}
 			}
 		}
