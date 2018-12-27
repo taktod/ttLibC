@@ -158,8 +158,6 @@ bool TT_VISIBILITY_DEFAULT ttLibC_JpegDecoder_decode(
 	}
 	// 0-255 -> 16->235
 	y_data = yuv->y_data;
-	u_data = yuv->u_data;
-	v_data = yuv->v_data;
 	for(uint32_t i = 0;i < yuv->inherit_super.height;++ i) {
 		uint8_t *yd = y_data;
 		for(uint32_t j = 0;j < yuv->inherit_super.width;++ j) {
@@ -167,21 +165,6 @@ bool TT_VISIBILITY_DEFAULT ttLibC_JpegDecoder_decode(
 			yd += yuv->y_step;
 		}
 		y_data += yuv->y_stride;
-	}
-	for(uint32_t i = 0,
-			half_height = ((yuv->inherit_super.height + 1) >> 1),
-			half_width  = ((yuv->inherit_super.width + 1) >> 1)
-					;i < half_height;++ i) {
-		uint8_t *ud = u_data;
-		uint8_t *vd = v_data;
-		for(uint32_t j = 0;j < half_width;++ j) {
-			(*ud) = (uint8_t)((((*ud) * 219 + 383) >> 8) + 16);
-			(*vd) = (uint8_t)((((*vd) * 219 + 383) >> 8) + 16);
-			ud += yuv->u_step;
-			vd += yuv->v_step;
-		}
-		u_data += yuv->u_stride;
-		v_data += yuv->v_stride;
 	}
 	yuv->inherit_super.inherit_super.pts = jpeg->inherit_super.inherit_super.pts;
 	yuv->inherit_super.inherit_super.timebase = jpeg->inherit_super.inherit_super.timebase;

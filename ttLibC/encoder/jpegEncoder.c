@@ -193,10 +193,8 @@ bool TT_VISIBILITY_DEFAULT ttLibC_JpegEncoder_encode(
 		uint8_t *vd = v_dst;
 		uint8_t *vs = v_src;
 		for(uint32_t j = 0;j < half_width;++ j) {
-			int32_t u = (((((*us) * 1197) >> 6) - 299) >> 4);
-			*ud = u > 255 ? 255 : u < 0 ? 0 : u;
-			int32_t v = (((((*vs) * 1197) >> 6) - 299) >> 4);
-			*vd = v > 255 ? 255 : v < 0 ? 0 : v;
+			*ud = *us;
+			*vd = *vs;
 			ud += fullrange_yuv->u_step;
 			us += yuv->u_step;
 			vd += fullrange_yuv->v_step;

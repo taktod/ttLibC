@@ -496,17 +496,9 @@ static bool AvcodecDecoder_decodeVideo(
 				// 0-255 -> 16->235
 				if(decoder->dec->pix_fmt == AV_PIX_FMT_YUVJ420P) {
 					uint8_t *y_data = y->y_data;
-					uint8_t *u_data = y->u_data;
-					uint8_t *v_data = y->v_data;
 					for(int i = 0, max = y->y_stride * y->inherit_super.height;i < max;++ i) {
 						(*y_data) = (uint8_t)((((*y_data) * 219 + 383) >> 8) + 16);
 						++ y_data;
-					}
-					for(int i = 0, max = y->u_stride * y->inherit_super.height / 2;i < max;++ i) {
-						(*u_data) = (uint8_t)((((*u_data) * 219 + 383) >> 8) + 16);
-						(*v_data) = (uint8_t)((((*v_data) * 219 + 383) >> 8) + 16);
-						++ u_data;
-						++ v_data;
 					}
 				}
 				decoder->frame = (ttLibC_Frame *)y;
@@ -608,18 +600,6 @@ static bool AvcodecDecoder_decodeVideo(
 						yd += yuv->y_step;
 					}
 					y_data += yuv->y_stride;
-				}
-				for(uint32_t i = 0;i < half_height;++ i) {
-					uint8_t *ud = u_data;
-					uint8_t *vd = v_data;
-					for(uint32_t j = 0;j < half_width;++ j) {
-						(*ud) = (uint8_t)((((*ud) * 219 + 383) >> 8) + 16);
-						(*vd) = (uint8_t)((((*vd) * 219 + 383) >> 8) + 16);
-						ud += yuv->u_step;
-						vd += yuv->v_step;
-					}
-					u_data += yuv->u_stride;
-					v_data += yuv->v_stride;
 				}
 			}
 			if(callback != NULL) {
