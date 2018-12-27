@@ -604,16 +604,23 @@ static bool AvcodecEncoder_encode_Yuv420(
 		encoder->avframe->data[0] = yuv420->y_data;
 		encoder->avframe->data[1] = yuv420->u_data;
 		encoder->avframe->data[2] = yuv420->v_data;
+		encoder->avframe->linesize[0] = yuv420->y_stride;
+		encoder->avframe->linesize[1] = yuv420->u_stride;
+		encoder->avframe->linesize[2] = yuv420->v_stride;
 		break;
 	case Yuv420Type_semiPlanar:
 		ERR_PRINT("not check yet1.");
 		encoder->avframe->data[0] = yuv420->y_data;
 		encoder->avframe->data[1] = yuv420->u_data;
+		encoder->avframe->linesize[0] = yuv420->y_stride;
+		encoder->avframe->linesize[1] = yuv420->u_stride;
 		break;
 	case Yvu420Type_semiPlanar:
 		ERR_PRINT("not check yet2.");
 		encoder->avframe->data[0] = yuv420->y_data;
 		encoder->avframe->data[1] = yuv420->v_data;
+		encoder->avframe->linesize[0] = yuv420->y_stride;
+		encoder->avframe->linesize[1] = yuv420->v_stride;
 		break;
 	default:
 	case Yvu420Type_planar: // not supported by ffmpeg.
@@ -1161,53 +1168,40 @@ ttLibC_AvcodecEncoder TT_VISIBILITY_DEFAULT *ttLibC_AvcodecEncoder_makeWithAVCod
 		case AV_PIX_FMT_YUV420P: // yuv420 planar yyyy.... uuuu.... vvvv....
 			encoder->inherit_super.input_frame_type = frameType_yuv420;
 			encoder->inherit_super.input_format_type = Yuv420Type_planar;
-			encoder->avframe->linesize[0] = encoder->enc->width;
-			encoder->avframe->linesize[1] = (encoder->enc->width >> 1);
-			encoder->avframe->linesize[2] = (encoder->enc->width >> 1);
 			break;
 		case AV_PIX_FMT_NV12: // y plane + uv plane yyyy.... uvuvuvuv....
 			encoder->inherit_super.input_frame_type = frameType_yuv420;
 			encoder->inherit_super.input_format_type = Yuv420Type_semiPlanar;
-			encoder->avframe->linesize[0] = encoder->enc->width;
-			encoder->avframe->linesize[1] = encoder->enc->width;
 			break;
 		case AV_PIX_FMT_NV21: // y plane + vu plane yyyy.... vuvuvuvu....
 			encoder->inherit_super.input_frame_type = frameType_yuv420;
 			encoder->inherit_super.input_format_type = Yvu420Type_semiPlanar;
-			encoder->avframe->linesize[0] = encoder->enc->width;
-			encoder->avframe->linesize[1] = encoder->enc->width;
 			break;
 
 			// support with ttLibC_Bgr
 		case AV_PIX_FMT_ABGR: // abgrabgrabgr....
 			encoder->inherit_super.input_frame_type = frameType_bgr;
 			encoder->inherit_super.input_format_type = BgrType_abgr;
-			encoder->avframe->linesize[0] = (encoder->enc->width << 2);
 			break;
 		case AV_PIX_FMT_BGRA: // bgrabgrabgra....
 			encoder->inherit_super.input_frame_type = frameType_bgr;
 			encoder->inherit_super.input_format_type = BgrType_bgra;
-			encoder->avframe->linesize[0] = (encoder->enc->width << 2);
 			break;
 		case AV_PIX_FMT_BGR24: // bgrbgrbgr....
 			encoder->inherit_super.input_frame_type = frameType_bgr;
 			encoder->inherit_super.input_format_type = BgrType_bgr;
-			encoder->avframe->linesize[0] = (encoder->enc->width << 1) + encoder->enc->width;
 			break;
 		case AV_PIX_FMT_ARGB:
 			encoder->inherit_super.input_frame_type = frameType_bgr;
 			encoder->inherit_super.input_format_type = BgrType_argb;
-			encoder->avframe->linesize[0] = (encoder->enc->width << 2);
 			break;
 		case AV_PIX_FMT_RGBA:
 			encoder->inherit_super.input_frame_type = frameType_bgr;
 			encoder->inherit_super.input_format_type = BgrType_rgba;
-			encoder->avframe->linesize[0] = (encoder->enc->width << 2);
 			break;
 		case AV_PIX_FMT_RGB24:
 			encoder->inherit_super.input_frame_type = frameType_bgr;
 			encoder->inherit_super.input_format_type = BgrType_rgb;
-			encoder->avframe->linesize[0] = (encoder->enc->width << 1) + encoder->enc->width;
 			break;
 		default:
 			ERR_PRINT("unsupported picture format.:%d", encoder->enc->pix_fmt);
