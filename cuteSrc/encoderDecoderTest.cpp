@@ -459,7 +459,6 @@ static bool vtH264Test_decodeCallback(void *ptr, ttLibC_Yuv420 *yuv) {
 		return false;
 	}
 	testData->dbgr = b;
-	ttLibC_CvWindow_showBgr(testData->target, testData->dbgr);
 	return true;
 }
 
@@ -487,7 +486,7 @@ static void vtH264Test() {
 	while(true) {
 		b = ttLibC_CvCapture_queryFrame(capture, bgr);
 		if(b == NULL) {
-			break;
+			continue;
 		}
 		bgr = b;
 		ttLibC_CvWindow_showBgr(original, bgr);
@@ -500,6 +499,7 @@ static void vtH264Test() {
 			break;
 		}
 		dbgr = testData.dbgr;
+		ttLibC_CvWindow_showBgr(testData.target, testData.dbgr);
 		uint8_t key = ttLibC_CvWindow_waitForKeyInput(66);
 		if(key == Keychar_Esc) {
 			break;
@@ -532,7 +532,8 @@ static bool vtJpegTest_decodeCallback(void *ptr, ttLibC_Yuv420 *yuv) {
 		return false;
 	}
 	testData->dbgr = b;
-	ttLibC_CvWindow_showBgr(testData->target, testData->dbgr);
+//	ttLibC_CvWindow_showBgr(testData->target, testData->dbgr);
+//	LOG_PRINT("decodeはどうかな。");
 	return true;
 }
 
@@ -560,7 +561,8 @@ static void vtJpegTest() {
 	while(true) {
 		b = ttLibC_CvCapture_queryFrame(capture, bgr);
 		if(b == NULL) {
-			break;
+//			break;
+			continue;
 		}
 		bgr = b;
 		ttLibC_CvWindow_showBgr(original, bgr);
@@ -572,6 +574,7 @@ static void vtJpegTest() {
 		if(!ttLibC_VtEncoder_encode(encoder, yuv, vtJpegTest_encodeCallback, &testData)) {
 			break;
 		}
+		ttLibC_CvWindow_showBgr(testData.target, testData.dbgr);
 		dbgr = testData.dbgr;
 		uint8_t key = ttLibC_CvWindow_waitForKeyInput(66);
 		if(key == Keychar_Esc) {
