@@ -173,8 +173,8 @@ ttLibC_Yuv420 TT_VISIBILITY_DEFAULT *ttLibC_ImageResizer_resizeYuv420(
 			yuv->u_stride,
 			yuv->u_step,
 			src_frame->u_data,
-			src_frame->inherit_super.width >> 1,
-			src_frame->inherit_super.height >> 1,
+			(src_frame->inherit_super.width  + 1) >> 1,
+			(src_frame->inherit_super.height + 1) >> 1,
 			src_frame->u_stride,
 			src_frame->u_step,
 			true);
@@ -185,8 +185,8 @@ ttLibC_Yuv420 TT_VISIBILITY_DEFAULT *ttLibC_ImageResizer_resizeYuv420(
 			yuv->v_stride,
 			yuv->v_step,
 			src_frame->v_data,
-			src_frame->inherit_super.width >> 1,
-			src_frame->inherit_super.height >> 1,
+			(src_frame->inherit_super.width  + 1) >> 1,
+			(src_frame->inherit_super.height + 1) >> 1,
 			src_frame->v_stride,
 			src_frame->v_step,
 			true);
