@@ -467,7 +467,7 @@ static bool VtDecoder_decodeJpeg(
 
 		int val = kCVPixelFormatType_420YpCbCr8Planar;
 		number = CFNumberCreate(NULL, kCFNumberSInt32Type, &val);
-		CFDictionarySetValue(destinationPixelBufferAttributes, kCVPixelBufferPixelFormatTypeKey,number);
+		CFDictionarySetValue(destinationPixelBufferAttributes, kCVPixelBufferPixelFormatTypeKey, number);
 		CFRelease(number);
 
 		VTDecompressionOutputCallbackRecord outputCallback;

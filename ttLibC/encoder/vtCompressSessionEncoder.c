@@ -436,7 +436,7 @@ ttLibC_VtEncoder TT_VISIBILITY_DEFAULT *ttLibC_VtEncoder_make_ex(
 
 	// make compressSession
 	OSStatus err = noErr;
-	int32_t cvPixelFormatTypeValue = kCVPixelFormatType_420YpCbCr8PlanarFullRange;
+	int32_t cvPixelFormatTypeValue = kCVPixelFormatType_420YpCbCr8Planar;
 	{
 		int8_t boolYESValue = 0xFF;
 
@@ -662,12 +662,12 @@ bool TT_VISIBILITY_DEFAULT ttLibC_VtEncoder_encode(
 		}
 	}
 	else {
-		memcpy(y_data, yuv420->y_data, encoder_->luma_size);
+		memcpy(y_data, yuv420->y_data, y_stride * yuv420->inherit_super.height);
 	}
 	void *u_data = CVPixelBufferGetBaseAddressOfPlane(encoder_->image_buffer, 1);
 	uint32_t u_stride = CVPixelBufferGetBytesPerRowOfPlane(encoder_->image_buffer, 1);
-	uint32_t chroma_width = (yuv420->inherit_super.width >> 1);
-	uint32_t chroma_height = (yuv420->inherit_super.height >> 1);
+	uint32_t chroma_width  = ((yuv420->inherit_super.width  + 1) >> 1);
+	uint32_t chroma_height = ((yuv420->inherit_super.height + 1) >> 1);
 	if(yuv420->u_stride != u_stride) {
 		uint8_t *u_buf = u_data;
 		uint8_t *u_org_buf = yuv420->u_data;
@@ -678,7 +678,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_VtEncoder_encode(
 		}
 	}
 	else {
-		memcpy(u_data, yuv420->u_data, encoder_->chroma_size);
+		memcpy(u_data, yuv420->u_data, u_stride * chroma_height);
 	}
 	void *v_data = CVPixelBufferGetBaseAddressOfPlane(encoder_->image_buffer, 2);
 	uint32_t v_stride = CVPixelBufferGetBytesPerRowOfPlane(encoder_->image_buffer, 2);
@@ -692,7 +692,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_VtEncoder_encode(
 		}
 	}
 	else {
-		memcpy(v_data, yuv420->v_data, encoder_->chroma_size);
+		memcpy(v_data, yuv420->v_data, v_stride * chroma_height);
 	}
 	CVPixelBufferUnlockBaseAddress(encoder_->image_buffer, 0);
 	// if we want to force keyframe, do something here...
