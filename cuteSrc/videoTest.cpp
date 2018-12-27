@@ -268,9 +268,9 @@ static void daalaTest() {
 						if(daala_decode_img_out(dec_ctx, &dec_img) == 1) {
 							// get image.
 							y = ttLibC_Yuv420_make(dyuv, Yuv420Type_planar, width, height, NULL, 0,
-									dec_img.planes[0].data, width,
-									dec_img.planes[1].data, width >> 1,
-									dec_img.planes[2].data, width >> 1,
+									dec_img.planes[0].data, dec_img.planes[0].ystride,
+									dec_img.planes[1].data, dec_img.planes[1].ystride,
+									dec_img.planes[2].data, dec_img.planes[2].ystride,
 									true, 0, 1000);
 							if(y == NULL) {
 								break;
