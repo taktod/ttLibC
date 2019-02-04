@@ -470,7 +470,6 @@ static bool AvcodecDecoder_decodeVideo(
 	decoder->inherit_super.height = decoder->avframe->height;
 	switch(decoder->dec->pix_fmt) {
 	case AV_PIX_FMT_YUV420P:
-	case AV_PIX_FMT_YUVJ420P:
 		{
 			if(decoder->frame != NULL && decoder->frame->type != frameType_yuv420) {
 				ttLibC_Frame_close(&decoder->frame);
@@ -493,14 +492,6 @@ static bool AvcodecDecoder_decodeVideo(
 #endif
 					frame->inherit_super.timebase);
 			if(y != NULL) {
-				// 0-255 -> 16->235
-				if(decoder->dec->pix_fmt == AV_PIX_FMT_YUVJ420P) {
-					uint8_t *y_data = y->y_data;
-					for(int i = 0, max = y->y_stride * y->inherit_super.height;i < max;++ i) {
-						(*y_data) = (uint8_t)((((*y_data) * 219 + 383) >> 8) + 16);
-						++ y_data;
-					}
-				}
 				decoder->frame = (ttLibC_Frame *)y;
 				if(callback != NULL) {
 					return callback(ptr, decoder->frame);
@@ -512,9 +503,7 @@ static bool AvcodecDecoder_decodeVideo(
 		}
 		break;
 	case AV_PIX_FMT_YUV422P:
-	case AV_PIX_FMT_YUVJ422P:
 	case AV_PIX_FMT_YUV444P:
-	case AV_PIX_FMT_YUVJ444P:
 		{
 			if(decoder->frame != NULL && decoder->frame->type != frameType_yuv420) {
 				ttLibC_Frame_close(&decoder->frame);
@@ -540,7 +529,6 @@ static bool AvcodecDecoder_decodeVideo(
 			uint32_t half_height = ((decoder->avframe->height + 1) >> 1);
 			switch(decoder->dec->pix_fmt) {
 			case AV_PIX_FMT_YUV422P:
-			case AV_PIX_FMT_YUVJ422P:
 				for(int j = 0;j < decoder->avframe->height;++ j) {
 					if((j & 0x01) == 0) {
 						memcpy(dst_u_data, src_u_data, half_width);
@@ -553,7 +541,6 @@ static bool AvcodecDecoder_decodeVideo(
 				}
 				break;
 			case AV_PIX_FMT_YUV444P:
-			case AV_PIX_FMT_YUVJ444P:
 				for(int j = 0;j < decoder->avframe->height;++ j) {
 					if((j & 0x01) == 0) {
 						uint8_t *ud = dst_u_data;
@@ -587,21 +574,6 @@ static bool AvcodecDecoder_decodeVideo(
 			yuv->inherit_super.inherit_super.pts = decoder->avframe->pts;
 #endif
 			yuv->inherit_super.inherit_super.timebase = frame->inherit_super.timebase;
-			// 0-255 -> 16->235
-			if(decoder->dec->pix_fmt == AV_PIX_FMT_YUVJ422P
-			|| decoder->dec->pix_fmt == AV_PIX_FMT_YUVJ444P) {
-				uint8_t *y_data = yuv->y_data;
-				uint8_t *u_data = yuv->u_data;
-				uint8_t *v_data = yuv->v_data;
-				for(uint32_t i = 0;i < yuv->inherit_super.height;++ i) {
-					uint8_t *yd = y_data;
-					for(uint32_t j = 0;j < yuv->inherit_super.width;++ j) {
-						(*yd) = (uint8_t)((((*yd) * 219 + 383) >> 8) + 16);
-						yd += yuv->y_step;
-					}
-					y_data += yuv->y_stride;
-				}
-			}
 			if(callback != NULL) {
 				return callback(ptr, decoder->frame);
 			}
@@ -611,6 +583,9 @@ static bool AvcodecDecoder_decodeVideo(
 		}
 		break;
 	case AV_PIX_FMT_YUV420P10LE:
+	case AV_PIX_FMT_YUVJ420P:
+	case AV_PIX_FMT_YUVJ422P:
+	case AV_PIX_FMT_YUVJ444P:
 		{
 #ifdef __ENABLE_SWSCALE__
 			if(decoder->inFormat != AV_PIX_FMT_NONE
