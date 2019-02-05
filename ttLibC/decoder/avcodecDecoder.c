@@ -428,7 +428,7 @@ static bool AvcodecDecoder_decodeVideo(
 			}
 		}
 		break;
-	case frameType_jpeg :
+	case frameType_jpeg:
 	case frameType_png:
 		{
 			decoder->packet.flags = AV_PKT_FLAG_KEY;
@@ -518,11 +518,14 @@ static bool AvcodecDecoder_decodeVideo(
 				return false;
 			}
 			decoder->frame = (ttLibC_Frame *)yuv;
-			// make uv.
+			// make yuv.
+			uint8_t *dst_y_data = yuv->y_data;
 			uint8_t *dst_u_data = yuv->u_data;
 			uint8_t *dst_v_data = yuv->v_data;
+			uint8_t *src_y_data = decoder->avframe->data[0];
 			uint8_t *src_u_data = decoder->avframe->data[1];
 			uint8_t *src_v_data = decoder->avframe->data[2];
+			uint32_t src_y_stride = decoder->avframe->linesize[0];
 			uint32_t src_u_stride = decoder->avframe->linesize[1];
 			uint32_t src_v_stride = decoder->avframe->linesize[2];
 			uint32_t half_width  = ((decoder->avframe->width + 1) >> 1);
@@ -530,18 +533,22 @@ static bool AvcodecDecoder_decodeVideo(
 			switch(decoder->dec->pix_fmt) {
 			case AV_PIX_FMT_YUV422P:
 				for(int j = 0;j < decoder->avframe->height;++ j) {
+					memcpy(dst_y_data, src_y_data, decoder->avframe->width);
 					if((j & 0x01) == 0) {
 						memcpy(dst_u_data, src_u_data, half_width);
 						memcpy(dst_v_data, src_v_data, half_width);
 						dst_u_data += yuv->u_stride;
 						dst_v_data += yuv->v_stride;
 					}
+					dst_y_data += yuv->y_stride;
+					src_y_data += src_y_stride;
 					src_u_data += src_u_stride;
 					src_v_data += src_v_stride;
 				}
 				break;
 			case AV_PIX_FMT_YUV444P:
 				for(int j = 0;j < decoder->avframe->height;++ j) {
+					memcpy(dst_y_data, src_y_data, decoder->avframe->width);
 					if((j & 0x01) == 0) {
 						uint8_t *ud = dst_u_data;
 						uint8_t *vd = dst_v_data;
@@ -556,6 +563,8 @@ static bool AvcodecDecoder_decodeVideo(
 						dst_u_data += yuv->u_stride;
 						dst_v_data += yuv->v_stride;
 					}
+					dst_y_data += yuv->y_stride;
+					src_y_data += src_y_stride;
 					src_u_data += src_u_stride;
 					src_v_data += src_v_stride;
 				}
@@ -564,10 +573,6 @@ static bool AvcodecDecoder_decodeVideo(
 				ERR_PRINT("un-reachable.");
 				return false;
 			}
-			// ref the original y_data. 
-			yuv->y_data   = decoder->avframe->data[0];
-			yuv->y_stride = decoder->avframe->linesize[0];
-			yuv->y_step   = 1;
 #ifndef FF_API_PKT_PTS
 			yuv->inherit_super.inherit_super.pts = decoder->avframe->pkt_pts;
 #else
