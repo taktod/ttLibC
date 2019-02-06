@@ -321,7 +321,14 @@ if test x$opencv_flag = "xyes"; then
 		[OPENCV],
 		[opencv],
 		[opencv_check=yes],
-		[opencv_check=no]
+		[
+			PKG_CHECK_MODULES(
+				[OPENCV],
+				[opencv4],
+				[opencv_check=yes],
+				[opencv_check=no]
+			)
+		]
 	)
 fi
 if test x$mp3lame_flag = "xyes"; then
