@@ -172,11 +172,16 @@ bool TT_VISIBILITY_DEFAULT ttLibC_JpegEncoder_encode(
 	for(uint32_t i = 0;i < height;++ i) {
 		uint8_t *yd = y_dst;
 		uint8_t *ys = y_src;
+		int32_t y;
 		for(uint32_t j = 0;j < width;++ j) {
-			int32_t y = (((((*ys) * 1197) >> 6) - 299) >> 4);
+			y = (((((*ys) * 1197) >> 6) - 299) >> 4);
 			*yd = y > 255 ? 255 : y < 0 ? 0 : y;
 			yd += fullrange_yuv->y_step;
 			ys += yuv->y_step;
+		}
+		for(uint32_t j = width;j < fullrange_yuv->y_stride;++ j) {
+			*yd = y > 255 ? 255 : y < 0 ? 0 : y;
+			yd += fullrange_yuv->y_step;
 		}
 		y_dst += fullrange_yuv->y_stride;
 		y_src += yuv->y_stride;
@@ -192,13 +197,24 @@ bool TT_VISIBILITY_DEFAULT ttLibC_JpegEncoder_encode(
 		uint8_t *us = u_src;
 		uint8_t *vd = v_dst;
 		uint8_t *vs = v_src;
+		uint8_t u, v;
 		for(uint32_t j = 0;j < half_width;++ j) {
-			*ud = *us;
-			*vd = *vs;
+			u = *us;
+			v = *vs;
+			*ud = u;
+			*vd = v;
 			ud += fullrange_yuv->u_step;
 			us += yuv->u_step;
 			vd += fullrange_yuv->v_step;
 			vs += yuv->v_step;
+		}
+		for(uint32_t j = half_width;j < fullrange_yuv->u_stride;++ j) {
+			*ud = u;
+			ud += fullrange_yuv->u_step;
+		}
+		for(uint32_t j = half_width;j < fullrange_yuv->v_stride;++ j) {
+			*vd = v;
+			vd += fullrange_yuv->v_step;
 		}
 		u_dst += fullrange_yuv->u_stride;
 		u_src += yuv->u_stride;
