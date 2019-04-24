@@ -38,11 +38,13 @@ ttLibC_FlvWriter TT_VISIBILITY_DEFAULT *ttLibC_FlvWriter_make(
 		// we need to have enough size of queue. or drop some frame.
 		writer->video_track.frame_queue = ttLibC_FrameQueue_make(9, 255);
 		writer->video_track.frame_queue->isBframe_fixed = true;
+		writer->video_track.configData = NULL;
 		break;
 	default:
 		writer->video_track.crc32       = 0;
 		writer->video_track.frame_type  = frameType_unknown;
 		writer->video_track.frame_queue = NULL;
+		writer->video_track.configData = NULL;
 		break;
 	}
 	switch(audio_type) {
@@ -87,9 +89,14 @@ static bool FlvWriter_queueFrame(
 	case frameType_h264:
 		{
 			ttLibC_H264 *h264 = (ttLibC_H264 *)frame;
-			if(h264->type == H264Type_unknown) {
-				// skip h264 unknown data. like aud, or sei.
+			switch(h264->type) {
+			case H264Type_unknown:
 				return true;
+			case H264Type_configData:
+				writer->video_track.configData = ttLibC_Frame_clone(writer->video_track.configData, frame);
+				return true;
+			default:
+				break;
 			}
 		}
 		/* no break */
@@ -149,14 +156,16 @@ static bool FlvWriter_writeFrameVideoOnly(
 		ttLibC_FlvWriter_ *writer,
 		ttLibC_ContainerWriteFunc callback,
 		void *ptr) {
+	uint32_t count = ttLibC_FrameQueue_getReadyFrameCount(writer->video_track.frame_queue);
 	while(true) {
+		if(count == 0) { // no more frame. 
+			break;
+		}
 		ttLibC_Frame *video = ttLibC_FrameQueue_ref_first(writer->video_track.frame_queue);
 		if(video == NULL) {
 			break;
 		}
-		if(video->dts == 0 && video->pts != 0) {
-			break;
-		}
+		count --;
 		video = ttLibC_FrameQueue_dequeue_first(writer->video_track.frame_queue);
 		writer->inherit_super.inherit_super.pts = video->dts;
 		if(!ttLibC_FlvVideoTag_writeTag(writer, video, callback, ptr)) {
@@ -170,13 +179,14 @@ static int FlvWriter_writeFrame(
 		ttLibC_FlvWriter_ *writer,
 		ttLibC_ContainerWriteFunc callback,
 		void *ptr) {
+	uint32_t count = ttLibC_FrameQueue_getReadyFrameCount(writer->video_track.frame_queue);
 	while(true) {
+		if(count == 0) { // no more frame.
+			break;
+		}
 		ttLibC_Frame *video = ttLibC_FrameQueue_ref_first(writer->video_track.frame_queue);
 		ttLibC_Frame *audio = ttLibC_FrameQueue_ref_first(writer->audio_track.frame_queue);
 		if(video == NULL || audio == NULL) {
-			break;
-		}
-		if(video->dts == 0 && video->pts != 0) {
 			break;
 		}
 		if(video->dts > audio->pts) {
@@ -187,8 +197,9 @@ static int FlvWriter_writeFrame(
 			}
 		}
 		else {
+			count --;
 			video = ttLibC_FrameQueue_dequeue_first(writer->video_track.frame_queue);
-			writer->inherit_super.inherit_super.pts = video->pts;
+			writer->inherit_super.inherit_super.pts = video->dts;
 			if(!ttLibC_FlvVideoTag_writeTag(writer, video, callback, ptr)) {
 				return false;
 			}
@@ -254,6 +265,7 @@ void TT_VISIBILITY_DEFAULT ttLibC_FlvWriter_close(ttLibC_FlvWriter **writer) {
 	}
 	ttLibC_FrameQueue_close(&target->video_track.frame_queue);
 	ttLibC_FrameQueue_close(&target->audio_track.frame_queue);
+	ttLibC_Frame_close(&target->video_track.configData);
 	ttLibC_free(target);
 	*writer = NULL;
 }

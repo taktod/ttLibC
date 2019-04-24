@@ -12,6 +12,7 @@
 #include "../ttLibC_predef.h"
 #include "../_log.h"
 #include "../allocator.h"
+#include "containerCommon.h"
 
 #include <stdlib.h>
 
@@ -189,4 +190,27 @@ void TT_VISIBILITY_HIDDEN ttLibC_FrameQueue_close(ttLibC_FrameQueue **queue) {
 	ttLibC_free(target->frame_array);
 	ttLibC_free(target);
 	*queue = NULL;
+}
+
+typedef struct FrameQueue_ReadyFrameCounter {
+	uint32_t count;
+	uint32_t result;
+} FrameQueue_ReadyFrameCounter;
+
+static bool FrameQueue_checkReadyFrameCallback(void *ptr, ttLibC_Frame *frame) {
+	FrameQueue_ReadyFrameCounter *counter = (FrameQueue_ReadyFrameCounter *)ptr;
+	counter->count ++;
+	if(!ttLibC_ContainerWriter_isReadyFrame(frame)) {
+		return true;
+	}
+	counter->result = counter->count;
+	return true;
+}
+
+uint32_t TT_VISIBILITY_HIDDEN ttLibC_FrameQueue_getReadyFrameCount(ttLibC_FrameQueue *queue) {
+	FrameQueue_ReadyFrameCounter counter;
+	counter.count = 0;
+	counter.result = 0;
+	ttLibC_FrameQueue_ref(queue, FrameQueue_checkReadyFrameCallback, &counter);
+	return counter.result;
 }

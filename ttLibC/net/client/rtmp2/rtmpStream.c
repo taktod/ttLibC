@@ -206,14 +206,12 @@ bool TT_VISIBILITY_DEFAULT ttLibC_RtmpStream_addFrame(
 	}
 	if(stream_->audio_type != frameType_unknown) {
 		if(stream_->video_type != frameType_unknown) {
-				// audio + video
+			// audio + video
+			uint32_t count = ttLibC_FrameQueue_getReadyFrameCount(stream_->video_queue);
 			while(true) {
 				ttLibC_Frame *video = ttLibC_FrameQueue_ref_first(stream_->video_queue);
 				ttLibC_Frame *audio = ttLibC_FrameQueue_ref_first(stream_->audio_queue);
-				if(video == NULL || audio == NULL) {
-					break;
-				}
-				if(video->dts == 0 && video->pts != 0) {
+				if(video == NULL || audio == NULL || count == 0) {
 					break;
 				}
 				if(video->dts > audio->pts) {
@@ -234,6 +232,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_RtmpStream_addFrame(
 					}
 				}
 				else {
+					count --;
 					video = ttLibC_FrameQueue_dequeue_first(stream_->video_queue);
 					ttLibC_VideoMessage *videoMessage = ttLibC_VideoMessage_addFrame(stream_->stream_id, (ttLibC_Video *)video);
 					if(videoMessage != NULL) {
@@ -272,14 +271,13 @@ bool TT_VISIBILITY_DEFAULT ttLibC_RtmpStream_addFrame(
 	else {
 		if(stream_->video_type != frameType_unknown) {
 			// video only
+			uint32_t count = ttLibC_FrameQueue_getReadyFrameCount(stream_->video_queue);
 			while(true) {
 				ttLibC_Frame *video = ttLibC_FrameQueue_ref_first(stream_->video_queue);
 				if(video == NULL) {
 					break;
 				}
-				if(video->dts == 0 && video->pts != 0) {
-					break;
-				}
+				count --;
 				video = ttLibC_FrameQueue_dequeue_first(stream_->video_queue);
 				ttLibC_VideoMessage *videoMessage = ttLibC_VideoMessage_addFrame(stream_->stream_id, (ttLibC_Video *)video);
 				ttLibC_Tetty2Bootstrap_write(stream_->conn->bootstrap, videoMessage, sizeof(ttLibC_VideoMessage));

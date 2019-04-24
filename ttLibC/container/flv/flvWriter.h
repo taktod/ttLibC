@@ -26,6 +26,7 @@ typedef struct ttLibC_FlvTrack {
 	ttLibC_FrameQueue *frame_queue;
 	ttLibC_Frame_Type frame_type;
 	uint32_t crc32; // crc32 value for dsi for aac or configData for h264.
+	ttLibC_Frame *configData; // keep sps pps for h264.
 } ttLibC_FlvTrack;
 
 /**

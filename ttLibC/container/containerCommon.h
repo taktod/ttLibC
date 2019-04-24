@@ -185,6 +185,12 @@ ttLibC_ContainerWriter *ttLibC_ContainerWriter_make_(
 
 void ttLibC_ContainerWriter_close_(ttLibC_ContainerWriter_ **writer);
 
+/**
+ * check if the frame is ready to use.
+ * @return true:ready / false:not ready
+ */
+bool ttLibC_ContainerWriter_isReadyFrame(ttLibC_Frame *frame);
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

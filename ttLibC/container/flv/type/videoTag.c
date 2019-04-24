@@ -147,13 +147,16 @@ bool TT_VISIBILITY_HIDDEN ttLibC_FlvVideoTag_writeTag(
 	uint64_t pts = frame->pts;
 	if(frame->type == frameType_h264) {
 		ttLibC_H264 *h264 = (ttLibC_H264 *)frame;
-		if(h264->type == H264Type_configData) {
-			uint32_t crc32_value = ttLibC_H264_getConfigCrc32(h264);
-			if(writer->video_track.crc32 != 0 && writer->video_track.crc32 == crc32_value) {
-				// already send msh data.
-				return true;
+		if(h264->type == H264Type_sliceIDR) {
+			uint32_t crc32_value = ttLibC_H264_getConfigCrc32((ttLibC_H264 *)writer->video_track.configData);
+			if(writer->video_track.crc32 != crc32_value) {
+				writer->video_track.configData->pts = frame->pts;
+				writer->video_track.configData->dts = frame->dts;
+				if(!ttLibC_FlvVideoTag_writeTag(writer, writer->video_track.configData, callback, ptr)) {
+					return false;
+				}
+				writer->video_track.crc32 = crc32_value;
 			}
-			writer->video_track.crc32 = crc32_value;
 		}
 		pts = frame->dts;
 	}

@@ -405,7 +405,7 @@ ttLibC_ContainerWriter_WriteTrack TT_VISIBILITY_HIDDEN *ttLibC_ContainerWriteTra
 	track->h26x_configData = NULL;
 	track->frame_type      = frame_type;
 	track->counter         = 0;
-	track->is_appending    = false;
+	track->is_appending    = frame_type == frameType_unknown;
 	track->enable_mode     = containerWriter_normal;
 	track->use_mode        = containerWriter_normal;
 	return track;
@@ -468,8 +468,7 @@ bool TT_VISIBILITY_HIDDEN ttLibC_ContainerWriter_primaryTrackCheck(void *ptr, tt
 		return false;
 	}
 	else if(ttLibC_Frame_isVideo(frame)) {
-		if(frame->pts != 0 && frame->dts == 0) {
-			// dts is 0, frame is not ready.
+		if(!ttLibC_ContainerWriter_isReadyFrame(frame)) {
 			return true;
 		}
 		ttLibC_Video *video = (ttLibC_Video *)frame;
@@ -1026,4 +1025,16 @@ void TT_VISIBILITY_HIDDEN ttLibC_ContainerWriteTrack_close(ttLibC_ContainerWrite
 	ttLibC_Frame_close(&target->h26x_configData);
 	ttLibC_free(target);
 	*track = NULL;
+}
+
+bool TT_VISIBILITY_HIDDEN ttLibC_ContainerWriter_isReadyFrame(ttLibC_Frame *frame) {
+	if(frame == NULL) {
+		return false;
+	}
+	if(ttLibC_Frame_isVideo(frame)) {
+		if(frame->pts != 0 && frame->dts == 0) {
+			return false;
+		}
+	}
+	return true;
 }

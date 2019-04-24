@@ -17,6 +17,7 @@
 #include "../frame/video/h265.h"
 #include <stdlib.h>
 #include "../util/stlListUtil.h"
+#include "containerCommon.h"
 
 typedef enum {
 	frameStatus_normal,
@@ -537,4 +538,27 @@ void TT_VISIBILITY_HIDDEN ttLibC_FrameQueue_close(ttLibC_FrameQueue **queue) {
 	ttLibC_StlList_forEach(target->frame_list, FrameQueue_frameClose, NULL);
 	ttLibC_StlList_close(&target->frame_list);
 	ttLibC_free(target);
+}
+
+typedef struct FrameQueue_ReadyFrameCounter {
+	uint32_t count;
+	uint32_t result;
+} FrameQueue_ReadyFrameCounter;
+
+static bool FrameQueue_checkReadyFrameCallback(void *ptr, ttLibC_Frame *frame) {
+	FrameQueue_ReadyFrameCounter *counter = (FrameQueue_ReadyFrameCounter *)ptr;
+	counter->count ++;
+	if(!ttLibC_ContainerWriter_isReadyFrame(frame)) {
+		return true;
+	}
+	counter->result = counter->count;
+	return true;
+}
+
+uint32_t TT_VISIBILITY_HIDDEN ttLibC_FrameQueue_getReadyFrameCount(ttLibC_FrameQueue *queue) {
+	FrameQueue_ReadyFrameCounter counter;
+	counter.count = 0;
+	counter.result = 0;
+	ttLibC_FrameQueue_ref(queue, FrameQueue_checkReadyFrameCallback, &counter);
+	return counter.result;
 }

@@ -103,6 +103,13 @@ bool ttLibC_FrameQueue_queue(
  */
 void ttLibC_FrameQueue_close(ttLibC_FrameQueue **queue);
 
+/**
+ * get the count of ready frame in queue.
+ * @param queue
+ * @return count of ready frames.
+ */
+uint32_t ttLibC_FrameQueue_getReadyFrameCount(ttLibC_FrameQueue *queue);
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
