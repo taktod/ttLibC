@@ -5,6 +5,8 @@
  * @date   2017/04/10
  */
 
+#ifdef __ENABLE_SOCKET__
+
 #include "netCommon.h"
 
 #include <string.h>
@@ -102,3 +104,5 @@ int TT_VISIBILITY_DEFAULT ttLibC_Fdset_select(
 	timeout.tv_usec = wait_interval % 1000000;
 	return select(fd_max, read, write, except, &timeout);
 }
+
+#endif
