@@ -47,6 +47,8 @@ typedef enum ttLibC_Mp4_Type {
 						Mp4Type_Stsc = 'stsc',
 						Mp4Type_Stsz = 'stsz',
 						Mp4Type_Stco = 'stco',
+						Mp4Type_Sgpd = 'sgpd',
+						Mp4Type_Sbgp = 'sbgp',
 		Mp4Type_Udta = 'udta',
 		Mp4Type_Mvex = 'mvex',
 			Mp4Type_Mehd = 'mehd',

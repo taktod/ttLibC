@@ -314,6 +314,10 @@ static bool Mp4Reader_readAtom(
 	case Mp4Type_Stsc:
 	case Mp4Type_Stsz:
 	case Mp4Type_Stco:
+
+	case Mp4Type_Sgpd: // newbie from ffmpeg output.
+	case Mp4Type_Sbgp: // newbie from ffmpeg output.
+
 	case Mp4Type_Mvex:
 	case Mp4Type_Mfhd: // for html5 mediaSource, sequence number = 0 is works.
 	case Mp4Type_Ctts:
