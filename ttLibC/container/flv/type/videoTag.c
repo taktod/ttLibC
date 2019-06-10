@@ -187,12 +187,6 @@ bool TT_VISIBILITY_HIDDEN ttLibC_FlvVideoTag_writeTag(
 	data[1]  = (size >> 16) & 0xFF;
 	data[2]  = (size >> 8) & 0xFF;
 	data[3]  = size & 0xFF;
-/*	if(frame->type == frameType_h264) {
-		uint32_t offset = frame->pts - frame->dts;
-		data[13] = (offset >> 16) & 0xFF;
-		data[14] = (offset >> 8) & 0xFF;
-		data[15] = offset & 0xFF;
-	}*/
 	// update size 2.
 	uint32_t endSize = ttLibC_DynamicBuffer_refSize(buffer);
 	uint32_t be_endSize = be_uint32_t(endSize);
