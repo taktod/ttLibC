@@ -69,7 +69,7 @@ uint64_t TT_VISIBILITY_HIDDEN ttLibC_Elst_refCurrentMediatime(ttLibC_Mp4 *mp4) {
 	return elst->mediatime;
 }
 
-bool ttLibC_Elst_refErrorFlag(ttLibC_Mp4 *mp4) {
+bool TT_VISIBILITY_HIDDEN ttLibC_Elst_refErrorFlag(ttLibC_Mp4 *mp4) {
 	ttLibC_Elst *elst = (ttLibC_Elst *)mp4;
 	if(elst == NULL) {
 		return 0;
@@ -77,7 +77,7 @@ bool ttLibC_Elst_refErrorFlag(ttLibC_Mp4 *mp4) {
 	return elst->error_flag;
 }
 
-uint64_t ttLibC_Elst_refStartInterval(ttLibC_Mp4 *mp4, uint32_t timebase) {
+uint64_t TT_VISIBILITY_HIDDEN ttLibC_Elst_refStartInterval(ttLibC_Mp4 *mp4, uint32_t timebase) {
 	ttLibC_Elst *elst = (ttLibC_Elst *)mp4;
 	if(elst == NULL) {
 		return 0;
