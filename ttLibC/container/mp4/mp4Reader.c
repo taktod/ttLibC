@@ -233,7 +233,7 @@ static bool Mp4Reader_readAtom(
 							}
 							break;
 						default:
-							LOG_PRINT("sz:%x tag:%x", in_size, in_tag);
+							ERR_PRINT("sz:%x tag:%x", in_size, in_tag);
 							reader->error_number = 6;
 							ttLibC_ByteReader_skipByte(byte_reader, in_size - 12); // CHECK is this corrent?
 							break;
@@ -673,7 +673,7 @@ static bool Mp4Reader_readAtom(
 			uint32_t name = be_uint32_t(tag);
 			char buf[5] = {0};
 			memcpy(buf, &name, 4);
-			LOG_PRINT("unknown Tag:%s", buf);
+			ERR_PRINT("unknown Tag:%s", buf);
 		}
 		reader->error_number = 1;
 		ttLibC_ByteReader_close(&byte_reader);
