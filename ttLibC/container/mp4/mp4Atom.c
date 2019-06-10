@@ -300,13 +300,14 @@ static bool Mp4Atom_getTrackFrame(
 		for(uint32_t i = 0;i < sample_count;++ i) {
 			uint32_t sample_size = ttLibC_Stsz_refCurrentSampleSize(track->stsz);
 			uint64_t pts = ttLibC_Stts_refCurrentPts(track->stts);
-			ttLibC_Elst_moveNext(track->elst, pts);
 			uint32_t pts_offset = ttLibC_Ctts_refCurrentOffset(track->ctts);
 			// ignore the data which pts < 0.
-			if(pts + pts_offset >= ttLibC_Elst_refCurrentMediatime(track->elst)) {
-				pts = pts + pts_offset - ttLibC_Elst_refCurrentMediatime(track->elst);
+			uint64_t start_interval = ttLibC_Elst_refStartInterval(track->elst, track->timebase);
+			if(start_interval + pts + pts_offset >= ttLibC_Elst_refCurrentMediatime(track->elst)) {
+				pts = start_interval + pts + pts_offset - ttLibC_Elst_refCurrentMediatime(track->elst);
 			}
 			else {
+				LOG_PRINT("find 0 pts frame.");
 				pts = 0;
 			}
 			uint32_t duration = ttLibC_Stts_refCurrentDelta(track->stts);
@@ -373,7 +374,6 @@ static bool Mp4Atom_getFmp4FrameCallback(
 	uint32_t size, duration, pts_offset;
 	do {
 		pts = ttLibC_Trun_refCurrentPts(track->trun);
-		ttLibC_Elst_moveNext(track->elst, pts);
 		pts_offset = ttLibC_Trun_refCurrentTimeOffset(track->trun);
 		duration = ttLibC_Trun_refCurrentDelta(track->trun);
 		pos = ttLibC_Trun_refCurrentPos(track->trun);
@@ -385,10 +385,12 @@ static bool Mp4Atom_getFmp4FrameCallback(
 		else {
 			target_buffer = mdat_buffer + (pos + reader->moof_position - mdatAtom->position);
 		}
-		if(pts + pts_offset >= ttLibC_Elst_refCurrentMediatime(track->elst)) {
-			pts = pts + pts_offset - ttLibC_Elst_refCurrentMediatime(track->elst);
+		uint64_t start_interval = ttLibC_Elst_refStartInterval(track->elst, track->timebase);
+		if(start_interval + pts + pts_offset >= ttLibC_Elst_refCurrentMediatime(track->elst)) {
+			pts = start_interval + pts + pts_offset - ttLibC_Elst_refCurrentMediatime(track->elst);
 		}
 		else {
+			LOG_PRINT("find 0 pts frame.");
 			pts = 0;
 		}
 		if(!Mp4Atom_getFrame(

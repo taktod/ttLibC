@@ -335,8 +335,8 @@ static bool Mp4Reader_readAtom(
 						reader->error_number = 1;
 					}
 					else {
-						reader->track->elst = ttLibC_Elst_make(data, size, reader->track->timebase);
-						if(reader->track->elst == NULL) {
+						reader->track->elst = ttLibC_Elst_make(data, size, reader->timebase);
+						if(reader->track->elst == NULL || ttLibC_Elst_refErrorFlag(reader->track->elst)) {
 							reader->error_number = 1;
 						}
 					}
