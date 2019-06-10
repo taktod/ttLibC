@@ -687,6 +687,8 @@ static bool Mp4Writer_makeTraf(void *ptr, void *key, void *item) {
 				uint32_t frameCountPos = ttLibC_DynamicBuffer_refSize(buffer) - 12;
 				// dop, update later.
 				track->dataOffsetPosForTrun = frameCountPos + 4;
+				// first sample flags, update later.
+				uint32_t firstSampleFlagsPos = frameCountPos + 8;
 				uint32_t frameCount = 0;
 				while(true) {
 					ttLibC_H264 *h264 = (ttLibC_H264 *)ttLibC_FrameQueue_ref_first(track->inherit_super.frame_queue);
@@ -698,6 +700,15 @@ static bool Mp4Writer_makeTraf(void *ptr, void *key, void *item) {
 						if(h264 != h) {
 							ERR_PRINT("ref frame is invalid.");
 							return false;
+						}
+						if (frameCount == 0) {
+							b = ttLibC_DynamicBuffer_refData(buffer);
+							b += firstSampleFlagsPos;
+							if (h264->inherit_super.type == videoType_key) {
+								*((uint32_t *)b) = be_uint32_t(0x2000000); // sample_depends_on=2
+							} else {
+								*((uint32_t *)b) = be_uint32_t(0x10000); // sample_is_non_sync_sample=1
+							}
 						}
 						if(h264->inherit_super.type == videoType_key) {
 							// for keyFrame we need to update sap information
@@ -761,6 +772,7 @@ static bool Mp4Writer_makeTraf(void *ptr, void *key, void *item) {
 				uint32_t frameCountPos = ttLibC_DynamicBuffer_refSize(buffer) - 12;
 				// dop, update later.
 				track->dataOffsetPosForTrun = frameCountPos + 4;
+				uint32_t firstSampleFlagsPos = frameCountPos + 8;
 				uint32_t frameCount = 0;
 				while(true) {
 					ttLibC_H265 *h265 = (ttLibC_H265 *)ttLibC_FrameQueue_ref_first(track->inherit_super.frame_queue);
@@ -772,6 +784,21 @@ static bool Mp4Writer_makeTraf(void *ptr, void *key, void *item) {
 						if(h265 != h) {
 							ERR_PRINT("ref frame is invalid.");
 							return false;
+						}
+						if (frameCount == 0) {
+							b = ttLibC_DynamicBuffer_refData(buffer);
+							b += firstSampleFlagsPos;
+							if (h265->inherit_super.type == videoType_key) {
+								*((uint32_t *)b) = be_uint32_t(0x2000000); // sample_depends_on=2
+							} else {
+								*((uint32_t *)b) = be_uint32_t(0x10000); // sample_is_non_sync_sample=1
+							}
+						}
+						if(h265->inherit_super.type == videoType_key) {
+							// for keyFrame we eed to update sap information.
+							if(writer->current_sap_diff == 0xFFFFFFFF) {
+								writer->current_sap_diff = h265->inherit_super.inherit_super.pts - writer->inherit_super.current_pts_pos;
+							}
 						}
 						// get next frame to get duration of frame.
 						ttLibC_Frame *next_frame = ttLibC_FrameQueue_ref_first(track->inherit_super.frame_queue);
