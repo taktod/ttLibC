@@ -15,8 +15,8 @@
 extern "C" {
 #endif
 
-#include <ttLibC/frame/frame.h>
-#include <ttLibC/frame/audio/pcms16.h>
+#include "../frame/frame.h"
+#include "../frame/audio/pcms16.h"
 
 typedef void * ttLibC_Util_MmAudioLoopback;
 typedef ttLibC_Util_MmAudioLoopback ttLibC_MmAudioLoopback;

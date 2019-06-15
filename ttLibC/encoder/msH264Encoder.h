@@ -15,8 +15,8 @@
 extern "C" {
 #endif
 
-#include <ttLibC/frame/video/h264.h>
-#include <ttLibC/frame/video/yuv420.h>
+#include "../frame/video/h264.h"
+#include "../frame/video/yuv420.h"
 
 typedef struct ttLibC_Encoder_MsH264Encoder {
 	uint32_t width;

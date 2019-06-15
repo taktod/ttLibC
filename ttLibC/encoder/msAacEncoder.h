@@ -15,8 +15,8 @@
 extern "C" {
 #endif
 
-#include <ttLibC/frame/audio/aac.h>
-#include <ttLibC/frame/audio/pcms16.h>
+#include "../frame/audio/aac.h"
+#include "../frame/audio/pcms16.h"
 
 /**
  * msAacEncoder definition.
