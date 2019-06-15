@@ -5,6 +5,8 @@
  *      Author: taktod
  */
 
+#ifdef __ENABLE_SOCKET__
+
 #include "clientObject.h"
 #include "../../../../ttLibC_predef.h"
 #include "../../../../_log.h"
@@ -100,3 +102,5 @@ void TT_VISIBILITY_HIDDEN ttLibC_ClientObject_close(ttLibC_ClientObject **client
 	ttLibC_free(target);
 	*client_object = NULL;
 }
+
+#endif

@@ -5,6 +5,8 @@
  *      Author: taktod
  */
 
+#ifdef __ENABLE_SOCKET__
+
 #include "amf0Command.h"
 #include "../../../../ttLibC_predef.h"
 #include "../../../../_log.h"
@@ -245,3 +247,5 @@ void TT_VISIBILITY_HIDDEN ttLibC_Amf0Command_close(ttLibC_Amf0Command **command)
 	ttLibC_free(target);
 	*command = NULL;
 }
+
+#endif

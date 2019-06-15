@@ -5,6 +5,8 @@
  *      Author: taktod
  */
 
+#ifdef __ENABLE_SOCKET__
+
 #include "rtmpDecoder.h"
 #include "../../../../ttLibC_predef.h"
 #include "../../../../_log.h"
@@ -53,3 +55,4 @@ void TT_VISIBILITY_HIDDEN ttLibC_RtmpDecoder_close(ttLibC_RtmpDecoder **decoder)
 	*decoder = NULL;
 }
 
+#endif

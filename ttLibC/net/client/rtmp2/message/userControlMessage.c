@@ -5,6 +5,8 @@
  *      Author: taktod
  */
 
+#ifdef __ENABLE_SOCKET__
+
 #include "userControlMessage.h"
 #include "../../../../ttLibC_predef.h"
 #include "../../../../_log.h"
@@ -151,3 +153,5 @@ void TT_VISIBILITY_HIDDEN ttLibC_UserControlMessage_close(ttLibC_UserControlMess
 	ttLibC_free(target);
 	*message = NULL;
 }
+
+#endif

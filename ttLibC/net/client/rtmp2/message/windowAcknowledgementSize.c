@@ -5,6 +5,8 @@
  *      Author: taktod
  */
 
+#ifdef __ENABLE_SOCKET__
+
 #include "windowAcknowledgementSize.h"
 #include "../../../../ttLibC_predef.h"
 #include "../../../../_log.h"
@@ -45,3 +47,4 @@ void TT_VISIBILITY_HIDDEN ttLibC_WindowAcknowledgementSize_close(ttLibC_WindowAc
 	*win_ack = NULL;
 }
 
+#endif

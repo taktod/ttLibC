@@ -5,6 +5,8 @@
  *      Author: taktod
  */
 
+#ifdef __ENABLE_SOCKET__
+
 #include "setChunkSize.h"
 #include "../../../../ttLibC_predef.h"
 #include "../../../../_log.h"
@@ -36,3 +38,5 @@ void TT_VISIBILITY_HIDDEN ttLibC_SetChunkSize_close(ttLibC_SetChunkSize **chunk_
 	ttLibC_free(target);
 	*chunk_size = NULL;
 }
+
+#endif

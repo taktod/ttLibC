@@ -5,6 +5,8 @@
  *      Author: taktod
  */
 
+#ifdef __ENABLE_SOCKET__
+
 #include "rtmpClientHandler.h"
 #include "../../../tetty2/tcpBootstrap.h"
 #include "../../../../ttLibC_predef.h"
@@ -193,3 +195,4 @@ void TT_VISIBILITY_HIDDEN ttLibC_RtmpClientHandler_close(ttLibC_RtmpClientHandle
 	*handler = NULL;
 }
 
+#endif

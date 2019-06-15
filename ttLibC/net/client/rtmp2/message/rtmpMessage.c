@@ -5,6 +5,8 @@
  *      Author: taktod
  */
 
+#ifdef __ENABLE_SOCKET__
+
 #include "rtmpMessage.h"
 #include "../../../../ttLibC_predef.h"
 #include "../../../../_log.h"
@@ -226,3 +228,5 @@ void TT_VISIBILITY_HIDDEN ttLibC_RtmpMessage_close(ttLibC_RtmpMessage **message)
 		break;
 	}
 }
+
+#endif

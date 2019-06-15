@@ -5,6 +5,8 @@
  *      Author: taktod
  */
 
+#ifdef __ENABLE_SOCKET__
+
 #include "amf0DataMessage.h"
 #include "../../../../ttLibC_predef.h"
 #include "../../../../_log.h"
@@ -78,3 +80,5 @@ void TT_VISIBILITY_HIDDEN ttLibC_Amf0DataMessage_close(ttLibC_Amf0DataMessage **
 	ttLibC_free(target);
 	*message = NULL;
 }
+
+#endif

@@ -5,6 +5,8 @@
  *      Author: taktod
  */
 
+#ifdef __ENABLE_SOCKET__
+
 #include "setPeerBandwidth.h"
 #include "../../../../ttLibC_predef.h"
 #include "../../../../_log.h"
@@ -39,3 +41,4 @@ void TT_VISIBILITY_HIDDEN ttLibC_SetPeerBandwidth_close(ttLibC_SetPeerBandwidth 
 	*bandwidth = NULL;
 }
 
+#endif

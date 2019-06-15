@@ -5,6 +5,8 @@
  *      Author: taktod
  */
 
+#ifdef __ENABLE_SOCKET__
+
 #include "audioMessage.h"
 #include "../../../../ttLibC_predef.h"
 #include "../../../../_log.h"
@@ -121,3 +123,5 @@ void TT_VISIBILITY_HIDDEN ttLibC_AudioMessage_close(ttLibC_AudioMessage **messag
 	ttLibC_free(target);
 	*message = NULL;
 }
+
+#endif

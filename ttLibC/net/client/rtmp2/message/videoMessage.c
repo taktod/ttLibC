@@ -5,6 +5,8 @@
  *      Author: taktod
  */
 
+#ifdef __ENABLE_SOCKET__
+
 #include "videoMessage.h"
 #include "../../../../ttLibC_predef.h"
 #include "../../../../_log.h"
@@ -124,3 +126,5 @@ void TT_VISIBILITY_HIDDEN ttLibC_VideoMessage_close(ttLibC_VideoMessage **messag
 	ttLibC_free(target);
 	*message = NULL;
 }
+
+#endif

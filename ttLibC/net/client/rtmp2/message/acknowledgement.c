@@ -5,6 +5,8 @@
  *      Author: taktod
  */
 
+#ifdef __ENABLE_SOCKET__
+
 #include "acknowledgement.h"
 #include "../../../../ttLibC_predef.h"
 #include "../../../../_log.h"
@@ -43,3 +45,5 @@ void TT_VISIBILITY_HIDDEN ttLibC_Acknowledgement_close(ttLibC_Acknowledgement **
 	ttLibC_free(target);
 	*ack = NULL;
 }
+
+#endif
