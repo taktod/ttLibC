@@ -21,6 +21,8 @@ extern "C" {
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "ttLibC_predef.h"
+
 /**
  * ttLibC_malloc
  * @param size allocate size
@@ -50,7 +52,7 @@ extern "C" {
  * @param func_name caller func name
  * @return memory pointer
  */
-void *ttLibC_Allocator_malloc(size_t size, const char *file_name, int line, const char *func_name);
+void TT_ATTRIBUTE_API *ttLibC_Allocator_malloc(size_t size, const char *file_name, int line, const char *func_name);
 
 /**
  * calloc with information.
@@ -61,30 +63,30 @@ void *ttLibC_Allocator_malloc(size_t size, const char *file_name, int line, cons
  * @param func_name caller func name
  * @return memory pointer
  */
-void *ttLibC_Allocator_calloc(size_t n, size_t size, const char *file_name, int line, const char *func_name);
+void TT_ATTRIBUTE_API *ttLibC_Allocator_calloc(size_t n, size_t size, const char *file_name, int line, const char *func_name);
 
 /**
  * free with information
  * @param ptr memory pointer
  */
-void ttLibC_Allocator_free(void *ptr);
+void TT_ATTRIBUTE_API ttLibC_Allocator_free(void *ptr);
 
 /**
  * initialize information table.
  * @return true:success false:error(ignore info collecting.)
  */
-bool ttLibC_Allocator_init();
+bool TT_ATTRIBUTE_API ttLibC_Allocator_init();
 
 /**
  * dump current memory information.
  * @return total size of allocate.
  */
-size_t ttLibC_Allocator_dump();
+size_t TT_ATTRIBUTE_API ttLibC_Allocator_dump();
 
 /**
  * close information table.
  */
-void ttLibC_Allocator_close();
+void TT_ATTRIBUTE_API ttLibC_Allocator_close();
 
 #ifdef __cplusplus
 } /* extern "C" */

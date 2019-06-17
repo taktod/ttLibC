@@ -15,12 +15,13 @@
 extern "C" {
 #endif
 
+#include "ttLibC_predef.h" 
 #include "ttLibC.h"
 
 /**
  * setup error.
  */
-Error_e ttLibC_updateError(Error_Target_e target, Error_e error);
+Error_e TT_ATTRIBUTE_INNER ttLibC_updateError(Error_Target_e target, Error_e error);
 
 #ifdef __cplusplus
 } /* extern "C" */
