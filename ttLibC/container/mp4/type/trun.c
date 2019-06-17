@@ -6,6 +6,7 @@
  *
  * @author taktod
  * @date   2016/07/07
+ * @note this object hold the traf data. better to rename?
  */
 
 #include "trun.h"
@@ -84,12 +85,12 @@ bool TT_VISIBILITY_HIDDEN ttLibC_Trun_moveNext(ttLibC_Mp4 *mp4) {
 	uint8_t *buf = trun->data;
 	size_t buf_size = trun->data_size;
 	if(trun->sample_count == 0) {
-		if(buf_size == 0) {
-			// no more data.
-			return false;
-		}
 		// in the case of more data. need to check traf binary.
-		while(buf_size > 0) {
+		while(buf_size >= 0) {
+			if(buf_size == 0) {
+				// no more data.
+				return false;
+			}
 			uint32_t sz = be_uint32_t(*(uint32_t *)buf);
 			buf += 4;
 			buf_size -= 4;
@@ -129,6 +130,9 @@ bool TT_VISIBILITY_HIDDEN ttLibC_Trun_moveNext(ttLibC_Mp4 *mp4) {
 				trun->current_duration = 0;
 				trun->current_flags = 0;
 				trun->current_size = 0;
+				if(trun->sample_count == 0) {
+					continue;
+				}
 				break;
 			}
 			buf += (sz - 4);
