@@ -9,7 +9,8 @@
  */
 
 #ifndef TT_ATTRIBUTE_INNER
-#define TT_ATTRIBUTE_INNER __attribute__ ((visibility("hidden")))
+//#define TT_ATTRIBUTE_INNER __attribute__ ((visibility("hidden")))
+#define TT_ATTRIBUTE_INNER
 #endif
 
 #ifndef TT_ATTRIBUTE_API
