@@ -16,11 +16,3 @@
 #define TT_ATTRIBUTE_API
 #endif
 
-#ifndef TT_VISIBILITY_HIDDEN
-#define TT_VISIBILITY_HIDDEN
-#endif
-
-#ifndef TT_VISIBILITY_DEFAULT
-#define TT_VISIBILITY_DEFAULT
-#endif
-
