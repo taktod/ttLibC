@@ -760,7 +760,9 @@ ${TT_VORBIS_LIBRARIES}
 ${TT_X264_LIBRARIES}
 ${TT_X265_LIBRARIES})
 
-if(WIN32) 
+if(WIN32)
+  add_definitions("-DTT_ATTRIBUTE_INNER=")
+  add_definitions("-DTT_ATTRIBUTE_API=__declspec(dllexport)")
 else()
 #  set_property(TARGET ttLibC
 #    PROPERTY PUBLIC_HEADER
