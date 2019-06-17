@@ -9,14 +9,13 @@
  */
 
 #include "mp3Reader.h"
-#include "../../ttLibC_predef.h"
 #include "../../_log.h"
 #include "../../allocator.h"
 #include "../../frame/audio/mp3.h"
 #include <stdlib.h>
 #include <string.h>
 
-ttLibC_Mp3Reader TT_VISIBILITY_DEFAULT *ttLibC_Mp3Reader_make() {
+ttLibC_Mp3Reader TT_ATTRIBUTE_API *ttLibC_Mp3Reader_make() {
 	ttLibC_Mp3Reader_ *reader = (ttLibC_Mp3Reader_ *)ttLibC_ContainerReader_make(containerType_mp3, sizeof(ttLibC_Mp3Reader_));
 	if(reader == NULL) {
 		ERR_PRINT("failed to allocate memory for reader.");
@@ -32,7 +31,7 @@ ttLibC_Mp3Reader TT_VISIBILITY_DEFAULT *ttLibC_Mp3Reader_make() {
 	return (ttLibC_Mp3Reader *)reader;
 }
 
-bool TT_VISIBILITY_HIDDEN Mp3Reader_updateMp3Frame(
+bool TT_ATTRIBUTE_INNER Mp3Reader_updateMp3Frame(
 		ttLibC_Mp3Reader_ *reader,
 		ttLibC_Mp3 *mp3) {
 	ttLibC_Mp3Frame *mp3_frame = ttLibC_Mp3Frame_make(
@@ -50,7 +49,7 @@ bool TT_VISIBILITY_HIDDEN Mp3Reader_updateMp3Frame(
 	return true;
 }
 
-ttLibC_Mp3 TT_VISIBILITY_HIDDEN *Mp3Reader_readMp3FromBinary(
+ttLibC_Mp3 TT_ATTRIBUTE_INNER *Mp3Reader_readMp3FromBinary(
 		ttLibC_Mp3Reader_ *reader,
 		uint8_t *data,
 		size_t data_size) {
@@ -76,7 +75,7 @@ ttLibC_Mp3 TT_VISIBILITY_HIDDEN *Mp3Reader_readMp3FromBinary(
 	return mp3;
 }
 
-bool TT_VISIBILITY_DEFAULT ttLibC_Mp3Reader_read(
+bool TT_ATTRIBUTE_API ttLibC_Mp3Reader_read(
 		ttLibC_Mp3Reader *reader,
 		void *data,
 		size_t data_size,
@@ -114,7 +113,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_Mp3Reader_read(
 	} while(true);
 }
 
-void TT_VISIBILITY_DEFAULT ttLibC_Mp3Reader_close(ttLibC_Mp3Reader **reader) {
+void TT_ATTRIBUTE_API ttLibC_Mp3Reader_close(ttLibC_Mp3Reader **reader) {
 	ttLibC_Mp3Reader_ *target = (ttLibC_Mp3Reader_ *)*reader;
 	if(target == NULL) {
 		return;

@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../../../ttLibC_predef.h"
 #include "../flvTag.h"
 
 typedef struct ttLibC_Container_Flv_FlvMetaTag {
@@ -24,7 +25,7 @@ typedef struct ttLibC_Container_Flv_FlvMetaTag {
 
 typedef ttLibC_Container_Flv_FlvMetaTag ttLibC_FlvMetaTag;
 
-ttLibC_FlvMetaTag *ttLibC_FlvMetaTag_make(
+ttLibC_FlvMetaTag TT_ATTRIBUTE_INNER *ttLibC_FlvMetaTag_make(
 		ttLibC_FlvTag *prev_tag,
 		void *data,
 		size_t data_size,
@@ -33,7 +34,7 @@ ttLibC_FlvMetaTag *ttLibC_FlvMetaTag_make(
 		uint32_t timebase,
 		uint32_t track_id);
 
-ttLibC_FlvMetaTag *ttLibC_FlvMetaTag_getTag(
+ttLibC_FlvMetaTag TT_ATTRIBUTE_INNER *ttLibC_FlvMetaTag_getTag(
 		ttLibC_FlvTag *prev_tag,
 		uint8_t *data,
 		size_t data_size);

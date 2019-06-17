@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../../../ttLibC_predef.h"
 #include "../flvTag.h"
 #include "../flvWriter.h"
 
@@ -30,7 +31,7 @@ typedef struct ttLibC_Container_Flv_FlvAudioTag {
 
 typedef ttLibC_Container_Flv_FlvAudioTag ttLibC_FlvAudioTag;
 
-ttLibC_FlvAudioTag *ttLibC_FlvAudioTag_make(
+ttLibC_FlvAudioTag TT_ATTRIBUTE_INNER *ttLibC_FlvAudioTag_make(
 		ttLibC_FlvTag *prev_tag,
 		void *data,
 		size_t data_size,
@@ -43,17 +44,17 @@ ttLibC_FlvAudioTag *ttLibC_FlvAudioTag_make(
 		uint8_t bit_count_flag,
 		uint8_t channel_flag);
 
-ttLibC_FlvAudioTag *ttLibC_FlvAudioTag_getTag(
+ttLibC_FlvAudioTag TT_ATTRIBUTE_INNER *ttLibC_FlvAudioTag_getTag(
 		ttLibC_FlvTag *prev_tag,
 		uint8_t *data,
 		size_t data_size) ;
 
-bool ttLibC_FlvAudioTag_getFrame(
+bool TT_ATTRIBUTE_INNER ttLibC_FlvAudioTag_getFrame(
 		ttLibC_FlvAudioTag *audio_tag,
 		ttLibC_getFrameFunc callback,
 		void *ptr);
 
-bool ttLibC_FlvAudioTag_writeTag(
+bool TT_ATTRIBUTE_INNER ttLibC_FlvAudioTag_writeTag(
 		ttLibC_FlvWriter_ *writer,
 		ttLibC_Frame *frame,
 		ttLibC_ContainerWriteFunc callback,

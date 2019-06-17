@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../ttLibC_predef.h"
 #include "container.h"
 
 /**
@@ -142,7 +143,7 @@ typedef ttLibC_Container_Mkv ttLibC_Mkv;
  * @param callback
  * @param ptr
  */
-bool ttLibC_Mkv_getFrame(
+bool TT_ATTRIBUTE_API ttLibC_Mkv_getFrame(
 		ttLibC_Mkv *mkv,
 		ttLibC_getFrameFunc callback,
 		void *ptr);
@@ -170,7 +171,7 @@ typedef bool (* ttLibC_MkvReadFunc)(void *ptr, ttLibC_Mkv *mkv);
 /**
  * make mkv reader object.
  */
-ttLibC_MkvReader *ttLibC_MkvReader_make();
+ttLibC_MkvReader TT_ATTRIBUTE_API *ttLibC_MkvReader_make();
 
 /**
  * read mkv object.
@@ -181,7 +182,7 @@ ttLibC_MkvReader *ttLibC_MkvReader_make();
  * @param ptr
  * @return true:success false:error
  */
-bool ttLibC_MkvReader_read(
+bool TT_ATTRIBUTE_API ttLibC_MkvReader_read(
 		ttLibC_MkvReader *reader,
 		void *data,
 		size_t data_size,
@@ -192,29 +193,29 @@ bool ttLibC_MkvReader_read(
  * close mkv reader
  * @param reader
  */
-void ttLibC_MkvReader_close(ttLibC_MkvReader **reader);
+void TT_ATTRIBUTE_API ttLibC_MkvReader_close(ttLibC_MkvReader **reader);
 
 // -------------------------------------------------------------- //
 // writer
 
 typedef ttLibC_ContainerWriter ttLibC_MkvWriter;
 
-ttLibC_MkvWriter *ttLibC_MkvWriter_make(
+ttLibC_MkvWriter TT_ATTRIBUTE_API *ttLibC_MkvWriter_make(
 		ttLibC_Frame_Type* target_frame_types,
 		uint32_t types_num);
 
-ttLibC_MkvWriter *ttLibC_MkvWriter_make_ex(
+ttLibC_MkvWriter TT_ATTRIBUTE_API *ttLibC_MkvWriter_make_ex(
 		ttLibC_Frame_Type* target_frame_types,
 		uint32_t types_num,
 		uint32_t unit_duration);
 
-bool ttLibC_MkvWriter_write(
+bool TT_ATTRIBUTE_API ttLibC_MkvWriter_write(
 		ttLibC_MkvWriter *writer,
 		ttLibC_Frame *frame,
 		ttLibC_ContainerWriteFunc callback,
 		void *ptr);
 
-void ttLibC_MkvWriter_close(ttLibC_MkvWriter **writer);
+void TT_ATTRIBUTE_API ttLibC_MkvWriter_close(ttLibC_MkvWriter **writer);
 
 #ifdef __cplusplus
 } /* extern "C" */

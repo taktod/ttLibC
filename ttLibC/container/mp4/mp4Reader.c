@@ -11,7 +11,6 @@
 #include "mp4Reader.h"
 #include <string.h>
 
-#include "../../ttLibC_predef.h"
 #include "../../_log.h"
 #include "../../allocator.h"
 #include "../../util/hexUtil.h"
@@ -27,7 +26,7 @@
 
 static bool Mp4Reader_closeTrack(void *ptr, void *key, void *item);
 
-ttLibC_Mp4Reader TT_VISIBILITY_DEFAULT *ttLibC_Mp4Reader_make() {
+ttLibC_Mp4Reader TT_ATTRIBUTE_API *ttLibC_Mp4Reader_make() {
 	ttLibC_Mp4Reader_ *reader = (ttLibC_Mp4Reader_ *)ttLibC_ContainerReader_make(
 			containerType_mp4,
 			sizeof(ttLibC_Mp4Reader_));
@@ -720,7 +719,7 @@ static bool Mp4Reader_readAtom(
 	return true;
 }
 
-bool TT_VISIBILITY_DEFAULT ttLibC_Mp4Reader_read(
+bool TT_ATTRIBUTE_API ttLibC_Mp4Reader_read(
 		ttLibC_Mp4Reader *reader,
 		void *data,
 		size_t data_size,
@@ -761,7 +760,7 @@ static bool Mp4Reader_closeTrack(void *ptr, void *key, void *item) {
 	return true;
 }
 
-void TT_VISIBILITY_DEFAULT ttLibC_Mp4Reader_close(ttLibC_Mp4Reader **reader) {
+void TT_ATTRIBUTE_API ttLibC_Mp4Reader_close(ttLibC_Mp4Reader **reader) {
 	ttLibC_Mp4Reader_ *target = (ttLibC_Mp4Reader_ *)*reader;
 	if(target == NULL) {
 		return;

@@ -13,14 +13,13 @@
 #include "type/audioTag.h"
 #include "type/videoTag.h"
 #include "type/metaTag.h"
-#include "../../ttLibC_predef.h"
 #include "../../_log.h"
 #include "../../allocator.h"
 #include "../../util/hexUtil.h"
 #include "../../frame/video/h264.h"
 #include <stdlib.h>
 
-ttLibC_FlvWriter TT_VISIBILITY_DEFAULT *ttLibC_FlvWriter_make(
+ttLibC_FlvWriter TT_ATTRIBUTE_API *ttLibC_FlvWriter_make(
 		ttLibC_Frame_Type video_type,
 		ttLibC_Frame_Type audio_type) {
 	ttLibC_FlvWriter_ *writer = (ttLibC_FlvWriter_ *)ttLibC_ContainerWriter_make(containerType_flv, sizeof(ttLibC_FlvWriter_), 1000);
@@ -208,7 +207,7 @@ static int FlvWriter_writeFrame(
 	return true;
 }
 
-bool TT_VISIBILITY_DEFAULT ttLibC_FlvWriter_write(
+bool TT_ATTRIBUTE_API ttLibC_FlvWriter_write(
 		ttLibC_FlvWriter *writer,
 		ttLibC_Frame *frame,
 		ttLibC_ContainerWriteFunc callback,
@@ -254,7 +253,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_FlvWriter_write(
 	return true;
 }
 
-void TT_VISIBILITY_DEFAULT ttLibC_FlvWriter_close(ttLibC_FlvWriter **writer) {
+void TT_ATTRIBUTE_API ttLibC_FlvWriter_close(ttLibC_FlvWriter **writer) {
 	ttLibC_FlvWriter_ *target = (ttLibC_FlvWriter_ *)*writer;
 	if(target == NULL) {
 		return;

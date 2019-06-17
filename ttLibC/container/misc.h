@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../ttLibC_predef.h"
 #include "../frame/frame.h"
 
 /**
@@ -42,7 +43,7 @@ typedef bool (* ttLibC_FrameQueueFunc)(void *ptr, ttLibC_Frame *frame);
  * @param max_size max number of holding frame object.
  * @return frame queue object.
  */
-ttLibC_FrameQueue *ttLibC_FrameQueue_make(
+ttLibC_FrameQueue TT_ATTRIBUTE_INNER *ttLibC_FrameQueue_make(
 		uint32_t track_id,
 		uint32_t max_size);
 
@@ -54,7 +55,7 @@ ttLibC_FrameQueue *ttLibC_FrameQueue_make(
  * @param ptr      user def pointer.
  * @return true:call all data. false:stopped.
  */
-bool ttLibC_FrameQueue_ref(
+bool TT_ATTRIBUTE_INNER ttLibC_FrameQueue_ref(
 		ttLibC_FrameQueue *queue,
 		ttLibC_FrameQueueFunc callback,
 		void *ptr);
@@ -64,7 +65,7 @@ bool ttLibC_FrameQueue_ref(
  * @param queue target queue object.
  * @return frame object.
  */
-ttLibC_Frame *ttLibC_FrameQueue_ref_first(ttLibC_FrameQueue *queue);
+ttLibC_Frame TT_ATTRIBUTE_INNER *ttLibC_FrameQueue_ref_first(ttLibC_FrameQueue *queue);
 
 /**
  * same as ref, however, remove called object.
@@ -74,7 +75,7 @@ ttLibC_Frame *ttLibC_FrameQueue_ref_first(ttLibC_FrameQueue *queue);
  * @param ptr      user def pointer.
  * @return
  */
-bool ttLibC_FrameQueue_dequeue(
+bool TT_ATTRIBUTE_INNER ttLibC_FrameQueue_dequeue(
 		ttLibC_FrameQueue *queue,
 		ttLibC_FrameQueueFunc callback,
 		void *ptr);
@@ -85,7 +86,7 @@ bool ttLibC_FrameQueue_dequeue(
  * @param queue target queue object
  * @return frame object.
  */
-ttLibC_Frame *ttLibC_FrameQueue_dequeue_first(ttLibC_FrameQueue *queue);
+ttLibC_Frame TT_ATTRIBUTE_INNER *ttLibC_FrameQueue_dequeue_first(ttLibC_FrameQueue *queue);
 
 /**
  * add frame on queue.
@@ -93,7 +94,7 @@ ttLibC_Frame *ttLibC_FrameQueue_dequeue_first(ttLibC_FrameQueue *queue);
  * @param frame add frame object.
  * @return true:success false:error.
  */
-bool ttLibC_FrameQueue_queue(
+bool TT_ATTRIBUTE_INNER ttLibC_FrameQueue_queue(
 		ttLibC_FrameQueue *queue,
 		ttLibC_Frame *frame);
 
@@ -101,14 +102,14 @@ bool ttLibC_FrameQueue_queue(
  * close queue object
  * @param queue
  */
-void ttLibC_FrameQueue_close(ttLibC_FrameQueue **queue);
+void TT_ATTRIBUTE_INNER ttLibC_FrameQueue_close(ttLibC_FrameQueue **queue);
 
 /**
  * get the count of ready frame in queue.
  * @param queue
  * @return count of ready frames.
  */
-uint32_t ttLibC_FrameQueue_getReadyFrameCount(ttLibC_FrameQueue *queue);
+uint32_t TT_ATTRIBUTE_INNER ttLibC_FrameQueue_getReadyFrameCount(ttLibC_FrameQueue *queue);
 
 #ifdef __cplusplus
 } /* extern "C" */

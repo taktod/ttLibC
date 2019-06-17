@@ -11,7 +11,6 @@
 #include "mkvTag.h"
 #include "type/simpleBlock.h"
 #include "mkvReader.h"
-#include "../../ttLibC_predef.h"
 #include "../../_log.h"
 #include "../../util/hexUtil.h"
 #include "../../allocator.h"
@@ -25,7 +24,7 @@
 #include "../../util/byteUtil.h"
 #include <string.h>
 
-ttLibC_MkvTag TT_VISIBILITY_HIDDEN *ttLibC_MkvTag_make(
+ttLibC_MkvTag TT_ATTRIBUTE_INNER *ttLibC_MkvTag_make(
 		ttLibC_MkvTag *prev_tag,
 		void *data,
 		size_t data_size,
@@ -50,7 +49,7 @@ ttLibC_MkvTag TT_VISIBILITY_HIDDEN *ttLibC_MkvTag_make(
 	return tag;
 }
 
-bool TT_VISIBILITY_DEFAULT ttLibC_Mkv_getFrame(ttLibC_Mkv *mkv, ttLibC_getFrameFunc callback, void *ptr) {
+bool TT_ATTRIBUTE_API ttLibC_Mkv_getFrame(ttLibC_Mkv *mkv, ttLibC_getFrameFunc callback, void *ptr) {
 	switch(mkv->type) {
 	case MkvType_SimpleBlock:
 		// just now, only simpleBlock support to get frame.
@@ -73,7 +72,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_Mkv_getFrame(ttLibC_Mkv *mkv, ttLibC_getFrameF
  * @note in the case of first reply of simple block, we will return private data information.
  * this code will be move to mkvTag.c
  */
-void TT_VISIBILITY_HIDDEN ttLibC_MkvTag_getPrivateDataFrame(
+void TT_ATTRIBUTE_INNER ttLibC_MkvTag_getPrivateDataFrame(
 		ttLibC_MkvReader *reader,
 		ttLibC_MkvTrack *track,
 		ttLibC_getFrameFunc callback,
@@ -398,7 +397,7 @@ void TT_VISIBILITY_HIDDEN ttLibC_MkvTag_getPrivateDataFrame(
 	}
 }
 
-void TT_VISIBILITY_HIDDEN ttLibC_MkvTag_close(ttLibC_MkvTag **tag) {
+void TT_ATTRIBUTE_INNER ttLibC_MkvTag_close(ttLibC_MkvTag **tag) {
 	ttLibC_MkvTag *target = *tag;
 	if(target == NULL) {
 		return;

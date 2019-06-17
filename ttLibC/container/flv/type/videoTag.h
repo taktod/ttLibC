@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../../../ttLibC_predef.h"
 #include "../flvTag.h"
 #include "../flvWriter.h"
 
@@ -27,7 +28,7 @@ typedef struct ttLibC_Container_Flv_FlvVideoTag {
 
 typedef ttLibC_Container_Flv_FlvVideoTag ttLibC_FlvVideoTag;
 
-ttLibC_FlvVideoTag *ttLibC_FlvVideoTag_make(
+ttLibC_FlvVideoTag TT_ATTRIBUTE_INNER *ttLibC_FlvVideoTag_make(
 		ttLibC_FlvTag *prev_tag,
 		void *data,
 		size_t data_size,
@@ -37,17 +38,17 @@ ttLibC_FlvVideoTag *ttLibC_FlvVideoTag_make(
 		uint32_t track_id,
 		uint8_t codec_id);
 
-ttLibC_FlvVideoTag *ttLibC_FlvVideoTag_getTag(
+ttLibC_FlvVideoTag TT_ATTRIBUTE_INNER *ttLibC_FlvVideoTag_getTag(
 		ttLibC_FlvTag *prev_tag,
 		uint8_t *data,
 		size_t data_size);
 
-bool ttLibC_FlvVideoTag_getFrame(
+bool TT_ATTRIBUTE_INNER ttLibC_FlvVideoTag_getFrame(
 		ttLibC_FlvVideoTag *video_tag,
 		ttLibC_getFrameFunc callback,
 		void *ptr);
 
-bool ttLibC_FlvVideoTag_writeTag(
+bool TT_ATTRIBUTE_INNER ttLibC_FlvVideoTag_writeTag(
 		ttLibC_FlvWriter_ *writer,
 		ttLibC_Frame *frame,
 		ttLibC_ContainerWriteFunc callback,

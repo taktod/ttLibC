@@ -10,7 +10,6 @@
 
 #include "simpleBlock.h"
 #include "../mkvReader.h"
-#include "../../../ttLibC_predef.h"
 #include "../../../_log.h"
 #include "../../../util/hexUtil.h"
 #include "../../../util/byteUtil.h"
@@ -467,7 +466,7 @@ static void SimpleBlock_getLace0Frame(
 	}
 }
 
-bool TT_VISIBILITY_HIDDEN ttLibC_SimpleBlock_getFrame(
+bool TT_ATTRIBUTE_INNER ttLibC_SimpleBlock_getFrame(
 		ttLibC_MkvTag *tag,
 		ttLibC_getFrameFunc callback,
 		void *ptr) {

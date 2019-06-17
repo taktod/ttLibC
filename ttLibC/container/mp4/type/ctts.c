@@ -6,11 +6,10 @@
  */
 
 #include "ctts.h"
-#include "../../../ttLibC_predef.h"
 #include "../../../util/ioUtil.h"
 #include "../../../_log.h"
 
-ttLibC_Mp4 TT_VISIBILITY_HIDDEN *ttLibC_Ctts_make(
+ttLibC_Mp4 TT_ATTRIBUTE_INNER *ttLibC_Ctts_make(
 		uint8_t *data,
 		size_t data_size,
 		uint32_t timebase) {
@@ -35,7 +34,7 @@ ttLibC_Mp4 TT_VISIBILITY_HIDDEN *ttLibC_Ctts_make(
 	return (ttLibC_Mp4 *)ctts;
 }
 
-uint32_t TT_VISIBILITY_HIDDEN ttLibC_Ctts_refCurrentOffset(ttLibC_Mp4 *mp4) {
+uint32_t TT_ATTRIBUTE_INNER ttLibC_Ctts_refCurrentOffset(ttLibC_Mp4 *mp4) {
 	ttLibC_Ctts *ctts = (ttLibC_Ctts *)mp4;
 	if(ctts == NULL) {
 		return 0;
@@ -43,7 +42,7 @@ uint32_t TT_VISIBILITY_HIDDEN ttLibC_Ctts_refCurrentOffset(ttLibC_Mp4 *mp4) {
 	return ctts->sample_offset;
 }
 
-void TT_VISIBILITY_HIDDEN ttLibC_Ctts_moveNext(ttLibC_Mp4 *mp4) {
+void TT_ATTRIBUTE_INNER ttLibC_Ctts_moveNext(ttLibC_Mp4 *mp4) {
 	ttLibC_Ctts *ctts = (ttLibC_Ctts *)mp4;
 	if(ctts == NULL) {
 		return;

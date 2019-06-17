@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../../ttLibC_predef.h"
 #include "../mkv.h"
 #include "../containerCommon.h"
 
@@ -51,7 +52,7 @@ typedef struct ttLibC_Container_MkvTag {
 
 typedef ttLibC_Container_MkvTag ttLibC_MkvTag;
 
-ttLibC_MkvTag *ttLibC_MkvTag_make(
+ttLibC_MkvTag TT_ATTRIBUTE_INNER *ttLibC_MkvTag_make(
 		ttLibC_MkvTag *prev_tag,
 		void *data,
 		size_t data_size,
@@ -69,13 +70,13 @@ ttLibC_MkvTag *ttLibC_MkvTag_make(
  * @note in the case of first reply of simple block, we will return private data information.
  * this code will be move to mkvTag.c
  */
-void ttLibC_MkvTag_getPrivateDataFrame(
+void TT_ATTRIBUTE_INNER ttLibC_MkvTag_getPrivateDataFrame(
 		ttLibC_MkvReader *reader,
 		ttLibC_MkvTrack *track,
 		ttLibC_getFrameFunc callback,
 		void *ptr);
 
-void ttLibC_MkvTag_close(ttLibC_MkvTag **tag);
+void TT_ATTRIBUTE_INNER ttLibC_MkvTag_close(ttLibC_MkvTag **tag);
 
 #ifdef __cplusplus
 } /* extern "C" */

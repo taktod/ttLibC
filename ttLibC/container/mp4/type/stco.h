@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../../../ttLibC_predef.h"
 #include "../mp4Atom.h"
 
 typedef struct ttLibC_Container_Mp4_Stco {
@@ -27,14 +28,14 @@ typedef ttLibC_Container_Mp4_Stco ttLibC_Stco;
 
 // for 64bit, there is co64
 
-ttLibC_Mp4 *ttLibC_Stco_make(
+ttLibC_Mp4 TT_ATTRIBUTE_INNER *ttLibC_Stco_make(
 		uint8_t *data,
 		size_t data_size,
 		uint32_t timebase);
 
-uint32_t ttLibC_Stco_refOffset(ttLibC_Mp4 *mp4);
-uint32_t ttLibC_Stco_refNextOffset(ttLibC_Mp4 *mp4);
-void ttLibC_Stco_moveNext(ttLibC_Mp4 *mp4);
+uint32_t TT_ATTRIBUTE_INNER ttLibC_Stco_refOffset(ttLibC_Mp4 *mp4);
+uint32_t TT_ATTRIBUTE_INNER ttLibC_Stco_refNextOffset(ttLibC_Mp4 *mp4);
+void TT_ATTRIBUTE_INNER ttLibC_Stco_moveNext(ttLibC_Mp4 *mp4);
 
 #ifdef __cplusplus
 } /* extern "C" */

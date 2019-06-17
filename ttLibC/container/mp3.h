@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../ttLibC_predef.h"
 #include "container.h"
 
 /**
@@ -30,7 +31,7 @@ typedef struct ttLibC_Container_Mp3 {
  * @param callback callback for getFrame
  * @param ptr      user def value pointer.
  */
-bool ttLibC_Container_Mp3_getFrame(
+bool TT_ATTRIBUTE_API ttLibC_Container_Mp3_getFrame(
 		ttLibC_Container_Mp3 *mp3,
 		ttLibC_getFrameFunc callback,
 		void *ptr);
@@ -39,7 +40,7 @@ bool ttLibC_Container_Mp3_getFrame(
  * close mp3 container.
  * @param mp3
  */
-void ttLibC_Container_Mp3_close(ttLibC_Container_Mp3 **mp3);
+void TT_ATTRIBUTE_API ttLibC_Container_Mp3_close(ttLibC_Container_Mp3 **mp3);
 
 // -------------------------------------------------------------- //
 
@@ -64,7 +65,7 @@ typedef bool (* ttLibC_Mp3ReadFunc)(void *ptr, ttLibC_Container_Mp3 *mp3);
  * make mp3 container reader object.
  * @return mp3 container reader object.
  */
-ttLibC_Mp3Reader *ttLibC_Mp3Reader_make();
+ttLibC_Mp3Reader TT_ATTRIBUTE_API *ttLibC_Mp3Reader_make();
 
 /**
  * read mp3 binary data.
@@ -75,7 +76,7 @@ ttLibC_Mp3Reader *ttLibC_Mp3Reader_make();
  * @param ptr       user def pointer object.
  * @return true: ok false: error.
  */
-bool ttLibC_Mp3Reader_read(
+bool TT_ATTRIBUTE_API ttLibC_Mp3Reader_read(
 		ttLibC_Mp3Reader *reader,
 		void *data,
 		size_t data_size,
@@ -86,7 +87,7 @@ bool ttLibC_Mp3Reader_read(
  * close mp3 container reader object.
  * @reader
  */
-void ttLibC_Mp3Reader_close(ttLibC_Mp3Reader **reader);
+void TT_ATTRIBUTE_API ttLibC_Mp3Reader_close(ttLibC_Mp3Reader **reader);
 
 // -------------------------------------------------------------- //
 
@@ -103,7 +104,7 @@ typedef ttLibC_ContainerWriter_Mp3Writer ttLibC_Mp3Writer;
  * make mp3 writer object.
  * @return mp3Writer object.
  */
-ttLibC_Mp3Writer *ttLibC_Mp3Writer_make();
+ttLibC_Mp3Writer TT_ATTRIBUTE_API *ttLibC_Mp3Writer_make();
 
 /**
  * write mp3 frame data.
@@ -113,7 +114,7 @@ ttLibC_Mp3Writer *ttLibC_Mp3Writer_make();
  * @param ptr      user def data pointer, which will call in callback.
  * @return true:success false:error
  */
-bool ttLibC_Mp3Writer_write(
+bool TT_ATTRIBUTE_API ttLibC_Mp3Writer_write(
 		ttLibC_Mp3Writer *writer,
 		ttLibC_Frame *frame,
 		ttLibC_ContainerWriteFunc callback,
@@ -123,7 +124,7 @@ bool ttLibC_Mp3Writer_write(
  * close mp3Writer.
  * @param writer
  */
-void ttLibC_Mp3Writer_close(ttLibC_Mp3Writer **writer);
+void TT_ATTRIBUTE_API ttLibC_Mp3Writer_close(ttLibC_Mp3Writer **writer);
 
 #ifdef __cplusplus
 } /* extern "C" */

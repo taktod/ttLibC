@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../ttLibC_predef.h"
 #include "container.h"
 #include "../frame/frame.h"
 
@@ -45,7 +46,7 @@ typedef ttLibC_Container_Mpegts ttLibC_Mpegts;
  * @param callback
  * @param ptr
  */
-bool ttLibC_Mpegts_getFrame(
+bool TT_ATTRIBUTE_API ttLibC_Mpegts_getFrame(
 		ttLibC_Mpegts *mpegts,
 		ttLibC_getFrameFunc callback,
 		void *ptr);
@@ -54,7 +55,7 @@ bool ttLibC_Mpegts_getFrame(
  * close mpegts object.
  * @param mpegts
  */
-void ttLibC_Mpegts_close(ttLibC_Mpegts **mpegts);
+void TT_ATTRIBUTE_API ttLibC_Mpegts_close(ttLibC_Mpegts **mpegts);
 
 // -------------------------------------------------------------- //
 
@@ -78,7 +79,7 @@ typedef bool (* ttLibC_MpegtsReadFunc)(void *ptr, ttLibC_Mpegts *mpegts);
  * make mpegts reader object
  * @return mpegts reader object.
  */
-ttLibC_MpegtsReader *ttLibC_MpegtsReader_make();
+ttLibC_MpegtsReader TT_ATTRIBUTE_API *ttLibC_MpegtsReader_make();
 
 /**
  * read mpegts object.
@@ -89,7 +90,7 @@ ttLibC_MpegtsReader *ttLibC_MpegtsReader_make();
  * @param ptr
  * @return true:success false:error
  */
-bool ttLibC_MpegtsReader_read(
+bool TT_ATTRIBUTE_API ttLibC_MpegtsReader_read(
 		ttLibC_MpegtsReader *reader,
 		void *data,
 		size_t data_size,
@@ -100,7 +101,7 @@ bool ttLibC_MpegtsReader_read(
  * close mpegts reader
  * @param reader
  */
-void ttLibC_MpegtsReader_close(ttLibC_MpegtsReader **reader);
+void TT_ATTRIBUTE_API ttLibC_MpegtsReader_close(ttLibC_MpegtsReader **reader);
 
 // -------------------------------------------------------------- //
 
@@ -126,7 +127,7 @@ typedef ttLibC_ContainerWriter ttLibC_MpegtsWriter;
  * @return mpegts writer object.
  * TODO remove types_num instead of using types_num, add frameType_none for end marker of array.
  */
-ttLibC_MpegtsWriter *ttLibC_MpegtsWriter_make(
+ttLibC_MpegtsWriter TT_ATTRIBUTE_API *ttLibC_MpegtsWriter_make(
 		ttLibC_Frame_Type* target_frame_types,
 		uint32_t types_num);
 
@@ -138,7 +139,7 @@ ttLibC_MpegtsWriter *ttLibC_MpegtsWriter_make(
  * @return mpegts writer object.
  * TODO remove types_num instead of using types_num, add frameType_none for end marker of array.
  */
-ttLibC_MpegtsWriter *ttLibC_MpegtsWriter_make_ex(
+ttLibC_MpegtsWriter TT_ATTRIBUTE_API *ttLibC_MpegtsWriter_make_ex(
 		ttLibC_Frame_Type *target_frame_types,
 		uint32_t types_num,
 		uint32_t unit_duration);
@@ -149,7 +150,7 @@ ttLibC_MpegtsWriter *ttLibC_MpegtsWriter_make_ex(
  * @param margin
  * @node default is 20000
  */
-bool ttLibC_MpegtsWriter_updateDtsMargin(
+bool TT_ATTRIBUTE_API ttLibC_MpegtsWriter_updateDtsMargin(
 		ttLibC_MpegtsWriter *writer,
 		uint64_t margin);
 
@@ -174,7 +175,7 @@ bool ttLibC_MpegtsWriter_updateDtsMargin(
 /**
  * write binaries for sdt pat pmt.
  */
-bool ttLibC_MpegtsWriter_writeInfo(
+bool TT_ATTRIBUTE_API ttLibC_MpegtsWriter_writeInfo(
 		ttLibC_MpegtsWriter *writer,
 		ttLibC_ContainerWriteFunc callback,
 		void *ptr);
@@ -182,7 +183,7 @@ bool ttLibC_MpegtsWriter_writeInfo(
 /**
  * write frame on mpegts writer.
  */
-bool ttLibC_MpegtsWriter_write(
+bool TT_ATTRIBUTE_API ttLibC_MpegtsWriter_write(
 		ttLibC_MpegtsWriter *writer,
 		ttLibC_Frame *frame,
 		ttLibC_ContainerWriteFunc callback,
@@ -195,7 +196,7 @@ bool ttLibC_MpegtsWriter_write(
  * @param reduce_mode_flag
  * @return true:success false:error
  */
-bool ttLibC_MpegtsWriter_setReduceMode(
+bool TT_ATTRIBUTE_API ttLibC_MpegtsWriter_setReduceMode(
 		ttLibC_MpegtsWriter *writer,
 		bool reduce_mode_flag);
 
@@ -203,7 +204,7 @@ bool ttLibC_MpegtsWriter_setReduceMode(
  * close mpegts writer
  * @param writer
  */
-void ttLibC_MpegtsWriter_close(ttLibC_MpegtsWriter **writer);
+void TT_ATTRIBUTE_API ttLibC_MpegtsWriter_close(ttLibC_MpegtsWriter **writer);
 
 #ifdef __cplusplus
 } /* extern "C" */

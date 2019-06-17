@@ -15,11 +15,10 @@
 
 #include "flvTag.h"
 #include <stdlib.h>
-#include "../../ttLibC_predef.h"
 #include "../../_log.h"
 #include "../../allocator.h"
 
-ttLibC_FlvTag TT_VISIBILITY_HIDDEN *ttLibC_FlvTag_make(
+ttLibC_FlvTag TT_ATTRIBUTE_INNER *ttLibC_FlvTag_make(
 		ttLibC_FlvTag *prev_tag,
 		void *data,
 		size_t data_size,
@@ -49,7 +48,7 @@ ttLibC_FlvTag TT_VISIBILITY_HIDDEN *ttLibC_FlvTag_make(
 	return tag;
 }
 
-bool TT_VISIBILITY_DEFAULT ttLibC_Flv_getFrame(ttLibC_Flv *flv, ttLibC_getFrameFunc callback, void *ptr) {
+bool TT_ATTRIBUTE_API ttLibC_Flv_getFrame(ttLibC_Flv *flv, ttLibC_getFrameFunc callback, void *ptr) {
 	switch(flv->type) {
 	case FlvType_audio:
 		return ttLibC_FlvAudioTag_getFrame((ttLibC_FlvAudioTag *)flv, callback, ptr);
@@ -63,11 +62,11 @@ bool TT_VISIBILITY_DEFAULT ttLibC_Flv_getFrame(ttLibC_Flv *flv, ttLibC_getFrameF
 	return true;
 }
 
-void TT_VISIBILITY_DEFAULT ttLibC_Flv_close(ttLibC_Flv **flv) {
+void TT_ATTRIBUTE_API ttLibC_Flv_close(ttLibC_Flv **flv) {
 	ttLibC_FlvTag_close((ttLibC_FlvTag **)flv);
 }
 
-void TT_VISIBILITY_HIDDEN ttLibC_FlvTag_close(ttLibC_FlvTag **tag) {
+void TT_ATTRIBUTE_INNER ttLibC_FlvTag_close(ttLibC_FlvTag **tag) {
 	ttLibC_FlvTag *target = *tag;
 	if(target == NULL) {
 		return;

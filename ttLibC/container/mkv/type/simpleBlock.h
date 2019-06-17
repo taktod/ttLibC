@@ -15,12 +15,13 @@
 extern "C" {
 #endif
 
+#include "../../../ttLibC_predef.h"
 #include "../mkvTag.h"
 
 /**
  * get frame from simple block ebml object.
  */
-bool ttLibC_SimpleBlock_getFrame(
+bool TT_ATTRIBUTE_INNER ttLibC_SimpleBlock_getFrame(
 		ttLibC_MkvTag *tag,
 		ttLibC_getFrameFunc callback,
 		void *ptr);

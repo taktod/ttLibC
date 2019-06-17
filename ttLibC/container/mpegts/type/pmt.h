@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../../../ttLibC_predef.h"
 #include "../mpegtsPacket.h"
 #include "../mpegtsWriter.h"
 
@@ -32,7 +33,7 @@ typedef struct ttLibC_Container_Mpegts_Pmt {
 
 typedef ttLibC_Container_Mpegts_Pmt ttLibC_Pmt;
 
-ttLibC_Pmt *ttLibC_Pmt_make(
+ttLibC_Pmt TT_ATTRIBUTE_INNER *ttLibC_Pmt_make(
 		ttLibC_Pmt *prev_pmt,
 		void *data,
 		size_t data_size,
@@ -43,18 +44,18 @@ ttLibC_Pmt *ttLibC_Pmt_make(
 		uint8_t  continuity_counter,
 		uint32_t pes_track_num);
 
-ttLibC_Pmt *ttLibC_Pmt_getPacket(
+ttLibC_Pmt TT_ATTRIBUTE_INNER *ttLibC_Pmt_getPacket(
 		ttLibC_Pmt *prev_pmt,
 		uint8_t *data,
 		size_t data_size,
 		uint16_t pmt_pid);
 
-bool ttLibC_Pmt_makePacket(
+bool TT_ATTRIBUTE_INNER ttLibC_Pmt_makePacket(
 		ttLibC_MpegtsWriter_ *writer,
 		uint8_t *data,
 		size_t data_size);
 
-void ttLibC_Pmt_close(ttLibC_Pmt **pmt);
+void TT_ATTRIBUTE_INNER ttLibC_Pmt_close(ttLibC_Pmt **pmt);
 
 #ifdef __cplusplus
 } /* extern "C" */

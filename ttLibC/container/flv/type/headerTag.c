@@ -10,12 +10,11 @@
 
 #include "headerTag.h"
 
-#include "../../../ttLibC_predef.h"
 #include "../../../_log.h"
 #include "../../../util/ioUtil.h"
 #include "../../../util/hexUtil.h"
 
-ttLibC_FlvHeaderTag TT_VISIBILITY_HIDDEN *ttLibC_FlvHeaderTag_make(
+ttLibC_FlvHeaderTag TT_ATTRIBUTE_INNER *ttLibC_FlvHeaderTag_make(
 		ttLibC_FlvTag *prev_tag,
 		void *data,
 		size_t data_size,
@@ -41,7 +40,7 @@ ttLibC_FlvHeaderTag TT_VISIBILITY_HIDDEN *ttLibC_FlvHeaderTag_make(
 	return headerTag;
 }
 
-ttLibC_FlvHeaderTag TT_VISIBILITY_HIDDEN *ttLibC_FlvHeaderTag_getTag(
+ttLibC_FlvHeaderTag TT_ATTRIBUTE_INNER *ttLibC_FlvHeaderTag_getTag(
 		ttLibC_FlvTag *prev_tag,
 		uint8_t *data,
 		size_t data_size) {
@@ -69,7 +68,7 @@ ttLibC_FlvHeaderTag TT_VISIBILITY_HIDDEN *ttLibC_FlvHeaderTag_getTag(
 	return ttLibC_FlvHeaderTag_make(prev_tag, NULL, 0, true, 0, 1000, 1, has_audio, has_video);
  }
 
-bool TT_VISIBILITY_HIDDEN ttLibC_FlvHeaderTag_writeTag(
+bool TT_ATTRIBUTE_INNER ttLibC_FlvHeaderTag_writeTag(
 		ttLibC_FlvWriter_ *writer,
 		ttLibC_ContainerWriteFunc callback,
 		void *ptr) {

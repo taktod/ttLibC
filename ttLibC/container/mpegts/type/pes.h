@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../../../ttLibC_predef.h"
 #include "../mpegtsPacket.h"
 #include "../mpegtsWriter.h"
 #include "../../../util/dynamicBufferUtil.h"
@@ -30,7 +31,7 @@ typedef struct ttLibC_Container_Mpegts_Pes {
 
 typedef ttLibC_Container_Mpegts_Pes ttLibC_Pes;
 
-ttLibC_Pes *ttLibC_Pes_make(
+ttLibC_Pes TT_ATTRIBUTE_INNER *ttLibC_Pes_make(
 		ttLibC_Pes *prev_pes,
 		void *data,
 		size_t data_size,
@@ -41,19 +42,19 @@ ttLibC_Pes *ttLibC_Pes_make(
 		uint8_t continuity_counter,
 		uint8_t stream_type);
 
-ttLibC_Pes *ttLibC_Pes_getPacket(
+ttLibC_Pes TT_ATTRIBUTE_INNER *ttLibC_Pes_getPacket(
 		ttLibC_Pes *prev_pes,
 		uint8_t *data,
 		size_t data_size,
 		uint8_t stream_type,
 		uint16_t pid);
 
-bool ttLibC_Pes_getFrame(
+bool TT_ATTRIBUTE_INNER ttLibC_Pes_getFrame(
 		ttLibC_Pes *pes,
 		ttLibC_getFrameFunc callback,
 		void *ptr);
 
-bool ttLibC_Pes_writePacket(
+bool TT_ATTRIBUTE_INNER ttLibC_Pes_writePacket(
 		ttLibC_MpegtsWriteTrack *track,
 		bool has_randomAccess,
 		bool has_pcr,
@@ -65,7 +66,7 @@ bool ttLibC_Pes_writePacket(
 		ttLibC_DynamicBuffer *frame_buffer,
 		ttLibC_DynamicBuffer *output_buffer);
 
-void ttLibC_Pes_close(ttLibC_Pes **pes);
+void TT_ATTRIBUTE_INNER ttLibC_Pes_close(ttLibC_Pes **pes);
 
 #ifdef __cplusplus
 } /* extern "C" */

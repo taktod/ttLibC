@@ -11,7 +11,6 @@
 #include "pmt.h"
 #include "../mpegtsPacket.h"
 
-#include "../../../ttLibC_predef.h"
 #include "../../../_log.h"
 #include "../../../allocator.h"
 #include "../../../util/byteUtil.h"
@@ -20,7 +19,7 @@
 #include "../../../util/dynamicBufferUtil.h"
 #include "../../../util/hexUtil.h"
 
-ttLibC_Pmt TT_VISIBILITY_HIDDEN *ttLibC_Pmt_make(
+ttLibC_Pmt TT_ATTRIBUTE_INNER *ttLibC_Pmt_make(
 		ttLibC_Pmt *prev_pmt,
 		void *data,
 		size_t data_size,
@@ -69,7 +68,7 @@ ttLibC_Pmt TT_VISIBILITY_HIDDEN *ttLibC_Pmt_make(
 	return pmt;
 }
 
-ttLibC_Pmt TT_VISIBILITY_HIDDEN *ttLibC_Pmt_getPacket(
+ttLibC_Pmt TT_ATTRIBUTE_INNER *ttLibC_Pmt_getPacket(
 		ttLibC_Pmt *prev_pmt,
 		uint8_t *data,
 		size_t data_size,
@@ -152,7 +151,7 @@ ttLibC_Pmt TT_VISIBILITY_HIDDEN *ttLibC_Pmt_getPacket(
 	return pmt;
 }
 
-bool TT_VISIBILITY_HIDDEN ttLibC_Pmt_makePacket(
+bool TT_ATTRIBUTE_INNER ttLibC_Pmt_makePacket(
 		ttLibC_MpegtsWriter_ *writer,
 		uint8_t *data,
 		size_t data_size) {
@@ -207,7 +206,7 @@ bool TT_VISIBILITY_HIDDEN ttLibC_Pmt_makePacket(
 	return true;
 }
 
-void TT_VISIBILITY_HIDDEN ttLibC_Pmt_close(ttLibC_Pmt **pmt) {
+void TT_ATTRIBUTE_INNER ttLibC_Pmt_close(ttLibC_Pmt **pmt) {
 	ttLibC_Pmt *target = *pmt;
 	if(target == NULL) {
 		return;
