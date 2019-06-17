@@ -1,5 +1,11 @@
 ﻿cmake_minimum_required(VERSION 2.8)
 
+project(ttLibC)
+
+set(PACKAGE ttlibc)
+set(TTLIBC_DESCRIPTION ttLibC library)
+set(VERSION 1.1.0)
+
 set(TT_DEFAULT ON)
 if(WIN32)
   set(TT_DEFAULT OFF)
@@ -749,3 +755,25 @@ ${TT_THEORA_LIBRARIES}
 ${TT_VORBIS_LIBRARIES}
 ${TT_X264_LIBRARIES}
 ${TT_X265_LIBRARIES})
+
+if(WIN32) 
+else()
+#  set_property(TARGET ttLibC
+#    PROPERTY PUBLIC_HEADER
+#    "ttLibC/container/container.h"
+#    "ttLibC/ttLibC.h")
+
+  set(prefix ${CMAKE_INSTALL_PREFIX})
+  set(exec_prefix "\${prefix}")
+  set(libdir "\${exec_prefix}/lib")
+  set(includedir "\${prefix}/include")
+
+  configure_file(ttLibC.pc.in ttLibC.pc @ONLY)
+
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/ttLibC.pc
+    DESTINATION lib/pkgconfig)
+
+  install(TARGETS ttLibC
+    ARCHIVE DESTINATION lib)
+#  install(FILES "ttLibC/container/container.h" DESTINATION include/ttLibC/container)
+endif()
