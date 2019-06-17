@@ -5,6 +5,8 @@
  *      Author: taktod
  */
 
+#ifdef __ENABLE_SOCKET__
+
 #include "rtmpHeader.h"
 #include "../../../../_log.h"
 #include "../../../../allocator.h"
@@ -298,3 +300,4 @@ void TT_ATTRIBUTE_INNER ttLibC_RtmpHeader_close(ttLibC_RtmpHeader **header) {
 	*header = NULL;
 }
 
+#endif

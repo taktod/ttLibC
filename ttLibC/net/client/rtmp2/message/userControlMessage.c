@@ -5,6 +5,8 @@
  *      Author: taktod
  */
 
+#ifdef __ENABLE_SOCKET__
+
 #include "userControlMessage.h"
 #include "../../../../_log.h"
 #include "../../../../allocator.h"
@@ -150,3 +152,5 @@ void TT_ATTRIBUTE_INNER ttLibC_UserControlMessage_close(ttLibC_UserControlMessag
 	ttLibC_free(target);
 	*message = NULL;
 }
+
+#endif

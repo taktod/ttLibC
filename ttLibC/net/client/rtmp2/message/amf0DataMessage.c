@@ -5,6 +5,8 @@
  *      Author: taktod
  */
 
+#ifdef __ENABLE_SOCKET__
+
 #include "amf0DataMessage.h"
 #include "../../../../_log.h"
 #include "../../../../allocator.h"
@@ -77,3 +79,5 @@ void TT_ATTRIBUTE_INNER ttLibC_Amf0DataMessage_close(ttLibC_Amf0DataMessage **me
 	ttLibC_free(target);
 	*message = NULL;
 }
+
+#endif

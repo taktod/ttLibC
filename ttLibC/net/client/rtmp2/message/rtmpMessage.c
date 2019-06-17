@@ -5,6 +5,8 @@
  *      Author: taktod
  */
 
+#ifdef __ENABLE_SOCKET__
+
 #include "rtmpMessage.h"
 #include "../../../../_log.h"
 #include "acknowledgement.h"
@@ -225,3 +227,5 @@ void TT_ATTRIBUTE_INNER ttLibC_RtmpMessage_close(ttLibC_RtmpMessage **message) {
 		break;
 	}
 }
+
+#endif

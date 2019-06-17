@@ -5,6 +5,8 @@
  *      Author: taktod
  */
 
+#ifdef __ENABLE_SOCKET__
+
 #include "clientObject.h"
 #include "../../../../_log.h"
 #include "../../../../allocator.h"
@@ -99,3 +101,5 @@ void TT_ATTRIBUTE_INNER ttLibC_ClientObject_close(ttLibC_ClientObject **client_o
 	ttLibC_free(target);
 	*client_object = NULL;
 }
+
+#endif

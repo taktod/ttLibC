@@ -5,6 +5,8 @@
  *      Author: taktod
  */
 
+#ifdef __ENABLE_SOCKET__
+
 #include "windowAcknowledgementSize.h"
 #include "../../../../_log.h"
 #include "../../../../allocator.h"
@@ -44,3 +46,4 @@ void TT_ATTRIBUTE_INNER ttLibC_WindowAcknowledgementSize_close(ttLibC_WindowAckn
 	*win_ack = NULL;
 }
 
+#endif

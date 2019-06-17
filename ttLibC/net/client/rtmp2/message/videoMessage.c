@@ -5,6 +5,8 @@
  *      Author: taktod
  */
 
+#ifdef __ENABLE_SOCKET__
+
 #include "videoMessage.h"
 #include "../../../../_log.h"
 #include "../../../../allocator.h"
@@ -123,3 +125,5 @@ void TT_ATTRIBUTE_INNER ttLibC_VideoMessage_close(ttLibC_VideoMessage **message)
 	ttLibC_free(target);
 	*message = NULL;
 }
+
+#endif

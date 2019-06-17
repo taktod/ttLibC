@@ -5,6 +5,8 @@
  *      Author: taktod
  */
 
+#ifdef __ENABLE_SOCKET__
+
 #include "rtmpCommandHandler.h"
 #include "../../../../_log.h"
 #include "../../../../allocator.h"
@@ -125,3 +127,4 @@ void TT_ATTRIBUTE_INNER ttLibC_RtmpCommandHandler_close(ttLibC_RtmpCommandHandle
 	*handler = NULL;
 }
 
+#endif

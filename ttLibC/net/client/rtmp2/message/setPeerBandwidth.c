@@ -5,6 +5,8 @@
  *      Author: taktod
  */
 
+#ifdef __ENABLE_SOCKET__
+
 #include "setPeerBandwidth.h"
 #include "../../../../_log.h"
 #include "../../../../allocator.h"
@@ -38,3 +40,4 @@ void TT_ATTRIBUTE_INNER ttLibC_SetPeerBandwidth_close(ttLibC_SetPeerBandwidth **
 	*bandwidth = NULL;
 }
 
+#endif

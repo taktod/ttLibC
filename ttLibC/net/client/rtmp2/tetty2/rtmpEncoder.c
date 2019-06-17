@@ -5,6 +5,8 @@
  *      Author: taktod
  */
 
+#ifdef __ENABLE_SOCKET__
+
 #include "rtmpEncoder.h"
 #include "../../../../_log.h"
 #include "../../../../allocator.h"
@@ -100,3 +102,5 @@ void TT_ATTRIBUTE_INNER ttLibC_RtmpEncoder_close(ttLibC_RtmpEncoder **encoder) {
 	ttLibC_free(target);
 	*encoder = NULL;
 }
+
+#endif

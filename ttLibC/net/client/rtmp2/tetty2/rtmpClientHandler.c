@@ -5,6 +5,8 @@
  *      Author: taktod
  */
 
+#ifdef __ENABLE_SOCKET__
+
 #include "rtmpClientHandler.h"
 #include "../../../tetty2/tcpBootstrap.h"
 #include "../../../../_log.h"
@@ -192,3 +194,4 @@ void TT_ATTRIBUTE_INNER ttLibC_RtmpClientHandler_close(ttLibC_RtmpClientHandler 
 	*handler = NULL;
 }
 
+#endif

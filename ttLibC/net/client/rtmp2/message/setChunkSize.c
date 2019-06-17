@@ -5,6 +5,8 @@
  *      Author: taktod
  */
 
+#ifdef __ENABLE_SOCKET__
+
 #include "setChunkSize.h"
 #include "../../../../_log.h"
 #include "../../../../allocator.h"
@@ -35,3 +37,5 @@ void TT_ATTRIBUTE_INNER ttLibC_SetChunkSize_close(ttLibC_SetChunkSize **chunk_si
 	ttLibC_free(target);
 	*chunk_size = NULL;
 }
+
+#endif

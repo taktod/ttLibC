@@ -5,6 +5,8 @@
  *      Author: taktod
  */
 
+#ifdef __ENABLE_SOCKET__
+
 #include "amf0Command.h"
 #include "../../../../_log.h"
 #include "../../../../allocator.h"
@@ -244,3 +246,5 @@ void TT_ATTRIBUTE_INNER ttLibC_Amf0Command_close(ttLibC_Amf0Command **command) {
 	ttLibC_free(target);
 	*command = NULL;
 }
+
+#endif

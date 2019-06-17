@@ -5,6 +5,8 @@
  *      Author: taktod
  */
 
+#ifdef __ENABLE_SOCKET__
+
 #include "acknowledgement.h"
 #include "../../../../_log.h"
 #include "../../../../allocator.h"
@@ -42,3 +44,5 @@ void TT_ATTRIBUTE_INNER ttLibC_Acknowledgement_close(ttLibC_Acknowledgement **ac
 	ttLibC_free(target);
 	*ack = NULL;
 }
+
+#endif

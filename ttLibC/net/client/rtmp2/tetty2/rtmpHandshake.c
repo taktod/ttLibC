@@ -5,6 +5,8 @@
  *      Author: taktod
  */
 
+#ifdef __ENABLE_SOCKET__
+
 #include "rtmpHandshake.h"
 #include "../data/clientObject.h"
 
@@ -137,3 +139,5 @@ void TT_ATTRIBUTE_INNER ttLibC_RtmpHandshake_close(ttLibC_RtmpHandshake **handsh
 	ttLibC_free(target);
 	*handshake = NULL;
 }
+
+#endif

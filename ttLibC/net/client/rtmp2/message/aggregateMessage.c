@@ -5,6 +5,8 @@
  *      Author: taktod
  */
 
+#ifdef __ENABLE_SOCKET__
+
 #include "aggregateMessage.h"
 #include "../../../../_log.h"
 #include "../../../../allocator.h"
@@ -112,3 +114,5 @@ void TT_ATTRIBUTE_INNER ttLibC_AggregateMessage_close(ttLibC_AggregateMessage **
 	ttLibC_free(target);
 	*message = NULL;
 }
+
+#endif

@@ -5,6 +5,8 @@
  *      Author: taktod
  */
 
+#ifdef __ENABLE_SOCKET__
+
 #include "rtmpDecoder.h"
 #include "../../../../_log.h"
 #include "../../../../allocator.h"
@@ -52,3 +54,4 @@ void TT_ATTRIBUTE_INNER ttLibC_RtmpDecoder_close(ttLibC_RtmpDecoder **decoder) {
 	*decoder = NULL;
 }
 
+#endif

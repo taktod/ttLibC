@@ -5,6 +5,8 @@
  *      Author: taktod
  */
 
+#ifdef __ENABLE_SOCKET__
+
 #include "audioMessage.h"
 #include "../../../../_log.h"
 #include "../../../../allocator.h"
@@ -120,3 +122,5 @@ void TT_ATTRIBUTE_INNER ttLibC_AudioMessage_close(ttLibC_AudioMessage **message)
 	ttLibC_free(target);
 	*message = NULL;
 }
+
+#endif
