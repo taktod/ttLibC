@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file   linkedListUtil.h
  * @brief  linkedList data structure support.
  *
