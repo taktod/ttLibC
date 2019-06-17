@@ -70,6 +70,9 @@ static bool Mp4Atom_getFrame(
 		uint32_t duration,
 		ttLibC_getFrameFunc callback,
 		void *ptr) {
+	if(data_size == 0) {
+		return true;
+	}
 	switch(track->frame_type) {
 	case frameType_h264:
 		{
