@@ -778,6 +778,7 @@ else()
     DESTINATION lib/pkgconfig)
 
   install(TARGETS ttLibC
-    ARCHIVE DESTINATION lib)
+    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION lib)
 #  install(FILES "ttLibC/container/container.h" DESTINATION include/ttLibC/container)
 endif()
