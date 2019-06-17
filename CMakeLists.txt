@@ -86,9 +86,13 @@ endif()
 if(TT_DEBUG)
 message("debug:      on")
   add_compile_definitions(__DEBUG_FLAG__)
+  set(debug_flag 1)
 else()
 message("debug:      off")
+  set(debug_flag 0)
 endif()
+configure_file(ttLibC/log.h.in ${CMAKE_CURRENT_SOURCE_DIR}/ttLibC/log.h @ONLY)
+
 
 # test (unitテスト googletestに書き換える予定) gpl -> any
 if(TT_TEST)
