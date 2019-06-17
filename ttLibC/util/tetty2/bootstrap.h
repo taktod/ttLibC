@@ -12,6 +12,7 @@
 extern "C" {
 #endif
 
+#include "../../ttLibC_predef.h"
 #include "../tetty2.h"
 #include "../stlListUtil.h"
 #include "context.h"
@@ -32,7 +33,7 @@ typedef struct ttLibC_Util_Tetty2Bootstrap_ {
 
 typedef ttLibC_Utill_Tetty2Bootstrap_ ttLibC_Tetty2Bootstrap_;
 
-ttLibC_Tetty2Bootstrap *ttLibC_Tetty2Bootstrap_make(size_t bootstrap_size);
+ttLibC_Tetty2Bootstrap TT_ATTRIBUTE_INNER *ttLibC_Tetty2Bootstrap_make(size_t bootstrap_size);
 
 #ifdef __cplusplus
 } /* extern "C" */

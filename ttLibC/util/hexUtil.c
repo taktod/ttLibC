@@ -11,7 +11,6 @@
 
 #include "hexUtil.h"
 #include "../ttLibC_common.h"
-#include "../ttLibC_predef.h"
 
 #include <ctype.h>
 #include <string.h>
@@ -26,7 +25,7 @@ static char hex_digits[16] = { \
  * @param length         data length
  * @param separator_flag insert space among each byte
  */
-void TT_VISIBILITY_DEFAULT ttLibC_HexUtil_dump(void *ptr, size_t length, bool separator_flag) {
+void TT_ATTRIBUTE_API ttLibC_HexUtil_dump(void *ptr, size_t length, bool separator_flag) {
 	char *cptr = ptr;
 	for(uint32_t i = 0;i < length;++ i) {
 		printf("%c", hex_digits[(cptr[i] & 0xF0) >> 4]);
@@ -45,7 +44,7 @@ void TT_VISIBILITY_DEFAULT ttLibC_HexUtil_dump(void *ptr, size_t length, bool se
  * @param length size of ptr
  * @return size of filled data
  */
-uint32_t TT_VISIBILITY_DEFAULT ttLibC_HexUtil_makeBuffer(const char *target, void *ptr, size_t length) {
+uint32_t TT_ATTRIBUTE_API ttLibC_HexUtil_makeBuffer(const char *target, void *ptr, size_t length) {
 	uint64_t counter;
 	ttLibC_HexUtil_makeBuffer2(target, ptr, (uint64_t)length, &counter);
 	return (uint32_t)counter;
@@ -59,7 +58,7 @@ uint32_t TT_VISIBILITY_DEFAULT ttLibC_HexUtil_makeBuffer(const char *target, voi
  * @param written_size size of written
  * @return ErrorCode
  */
-Error_e TT_VISIBILITY_DEFAULT ttLibC_HexUtil_makeBuffer2(const char *target, void *ptr, size_t length, uint64_t *written_size) {
+Error_e TT_ATTRIBUTE_API ttLibC_HexUtil_makeBuffer2(const char *target, void *ptr, size_t length, uint64_t *written_size) {
 	size_t target_length = strlen(target);
 	uint32_t counter = 0;
 	char *cptr = ptr;

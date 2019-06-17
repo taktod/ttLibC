@@ -10,10 +10,9 @@
 
 #ifdef __ENABLE_WIN32__
 
-#include "../ttLibC_predef.h"
 #include "msGlobalUtil.h"
 
-bool TT_VISIBILITY_DEFAULT ttLibC_MsGlobal_CoInitialize(ttLibC_MsGlobal_CoInitializeType type) {
+bool TT_ATTRIBUTE_API ttLibC_MsGlobal_CoInitialize(ttLibC_MsGlobal_CoInitializeType type) {
 	HRESULT hr = S_OK;
 	switch(type) {
 	case CoInitializeType_normal:
@@ -27,19 +26,19 @@ bool TT_VISIBILITY_DEFAULT ttLibC_MsGlobal_CoInitialize(ttLibC_MsGlobal_CoInitia
 	}
 	return SUCCEEDED(hr);
 }
-void TT_VISIBILITY_DEFAULT ttLibC_MsGlobal_CoUninitialize() {
+void TT_ATTRIBUTE_API ttLibC_MsGlobal_CoUninitialize() {
 	CoUninitialize();
 }
 
-bool TT_VISIBILITY_DEFAULT ttLibC_MsGlobal_MFStartup() {
+bool TT_ATTRIBUTE_API ttLibC_MsGlobal_MFStartup() {
 	HRESULT hr = MFStartup(MF_VERSION);
 	return SUCCEEDED(hr);
 }
-void TT_VISIBILITY_DEFAULT ttLibC_MsGlobal_MFShutdown() {
+void TT_ATTRIBUTE_API ttLibC_MsGlobal_MFShutdown() {
 	MFShutdown();
 }
 
-bool TT_VISIBILITY_DEFAULT ttLibC_MsGlobal_setlocale(const char *language) {
+bool TT_ATTRIBUTE_API ttLibC_MsGlobal_setlocale(const char *language) {
 	char *current = setlocale(LC_ALL, language);
 	return current != NULL;
 }
@@ -58,7 +57,7 @@ static std::string wstringToUtf8string(std::wstring const& src)
 	return converter.to_bytes(src);
 }
 
-std::string TT_VISIBILITY_DEFAULT ttLibC_MsGlobal_wcharToUtf8string(const wchar_t *src) {
+std::string TT_ATTRIBUTE_API ttLibC_MsGlobal_wcharToUtf8string(const wchar_t *src) {
 	char buf[256];
 	size_t size;
 	wcstombs_s(

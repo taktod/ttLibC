@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../ttLibC_predef.h"
 #include "../frame/audio/pcms16.h"
 
 /**
@@ -44,7 +45,7 @@ typedef ttLibC_Util_BeepUtil_BeepGenerator ttLibC_BeepGenerator;
  * @param sample_rate sample_rate for generated beep.
  * @param channel_num channel_num for generated beep. 1:monoral 2:stereo
  */
-ttLibC_BeepGenerator *ttLibC_BeepGenerator_make(
+ttLibC_BeepGenerator TT_ATTRIBUTE_API *ttLibC_BeepGenerator_make(
 		ttLibC_PcmS16_Type type,
 		uint32_t target_Hz,
 		uint32_t sample_rate,
@@ -56,7 +57,7 @@ ttLibC_BeepGenerator *ttLibC_BeepGenerator_make(
  * @param prev_frame reuse frame
  * @param mili_sec   length of pcmframe in mili sec.
  */
-ttLibC_PcmS16 *ttLibC_BeepGenerator_makeBeepByMiliSec(
+ttLibC_PcmS16 TT_ATTRIBUTE_API *ttLibC_BeepGenerator_makeBeepByMiliSec(
 		ttLibC_BeepGenerator *generator,
 		ttLibC_PcmS16 *prev_frame,
 		uint32_t mili_sec);
@@ -67,7 +68,7 @@ ttLibC_PcmS16 *ttLibC_BeepGenerator_makeBeepByMiliSec(
  * @param prev_frame reuse frame.
  * @param sample_num target sample num.
  */
-ttLibC_PcmS16 *ttLibC_BeepGenerator_makeBeepBySampleNum(
+ttLibC_PcmS16 TT_ATTRIBUTE_API *ttLibC_BeepGenerator_makeBeepBySampleNum(
 		ttLibC_BeepGenerator *generator,
 		ttLibC_PcmS16 *prev_frame,
 		uint32_t sample_num);
@@ -76,7 +77,7 @@ ttLibC_PcmS16 *ttLibC_BeepGenerator_makeBeepBySampleNum(
  * close the generator object.
  * @param generator
  */
-void ttLibC_BeepGenerator_close(ttLibC_BeepGenerator **generator);
+void TT_ATTRIBUTE_API ttLibC_BeepGenerator_close(ttLibC_BeepGenerator **generator);
 
 #ifdef __cplusplus
 } /* extern "C" */

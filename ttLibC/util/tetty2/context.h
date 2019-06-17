@@ -12,6 +12,7 @@
 extern "C" {
 #endif
 
+#include "../../ttLibC_predef.h" 
 #include "../tetty2.h"
 #include "../stlListUtil.h"
 #include <stdio.h>
@@ -38,39 +39,40 @@ typedef struct ttLibC_Util_Tetty2Context_ {
 
 typedef ttLibC_Util_Tetty2Context_ ttLibC_Tetty2Context_;
 
-tetty2_errornum ttLibC_Tetty2Context_channelActive_(
+tetty2_errornum TT_ATTRIBUTE_INNER ttLibC_Tetty2Context_channelActive_(
 		ttLibC_Tetty2Bootstrap *bootstrap,
 		ttLibC_Tetty2Info *tetty_info);
 
-tetty2_errornum ttLibC_Tetty2Context_channelInactive_(
+tetty2_errornum TT_ATTRIBUTE_INNER ttLibC_Tetty2Context_channelInactive_(
 		ttLibC_Tetty2Bootstrap *bootstrap,
 		ttLibC_Tetty2Info *tetty_info);
 
-tetty2_errornum ttLibC_Tetty2Context_channelRead_(
+tetty2_errornum TT_ATTRIBUTE_INNER ttLibC_Tetty2Context_channelRead_(
 		ttLibC_Tetty2Bootstrap *bootstrap,
 		ttLibC_Tetty2Info *tetty_info,
 		void *data,
 		size_t data_size);
 
-tetty2_errornum ttLibC_Tetty2Context_write_(
+tetty2_errornum TT_ATTRIBUTE_INNER ttLibC_Tetty2Context_write_(
 		ttLibC_Tetty2Bootstrap *bootstrap,
 		ttLibC_Tetty2Info *tetty_info,
 		void *data,
 		size_t data_size);
 
-tetty2_errornum ttLibC_Tetty2Context_flush_(
+tetty2_errornum TT_ATTRIBUTE_INNER ttLibC_Tetty2Context_flush_(
 		ttLibC_Tetty2Bootstrap *bootstrap,
 		ttLibC_Tetty2Info *tetty_info);
 
-tetty2_errornum ttLibC_Tetty2Context_close_(
+tetty2_errornum TT_ATTRIBUTE_INNER ttLibC_Tetty2Context_close_(
 		ttLibC_Tetty2Bootstrap *bootstrap,
 		ttLibC_Tetty2Info *tetty_info);
 
-tetty2_errornum ttLibC_Tetty2Context_exceptionCaught(
+// no def for this function?
+tetty2_errornum TT_ATTRIBUTE_INNER ttLibC_Tetty2Context_exceptionCaught(
 		ttLibC_Tetty2Bootstrap *bootstrap,
 		tetty2_errornum error_num);
 
-tetty2_errornum ttLibC_Tetty2Context_userEventTriggered_(
+tetty2_errornum TT_ATTRIBUTE_INNER ttLibC_Tetty2Context_userEventTriggered_(
 		ttLibC_Tetty2Bootstrap *bootstrap,
 		ttLibC_Tetty2Info *tetty_info,
 		void *data,

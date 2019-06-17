@@ -12,6 +12,7 @@
 extern "C" {
 #endif
 
+#include "../../ttLibC_predef.h"
 #include "../tetty2.h"
 
 typedef struct ttLibC_Util_Tetty2Promise_ {
@@ -23,7 +24,7 @@ typedef struct ttLibC_Util_Tetty2Promise_ {
 
 typedef ttLibC_Util_Tetty2Promise_ ttLibC_Tetty2Promise_;
 
-ttLibC_Tetty2Promise *ttLibC_Tetty2Promise_make_(ttLibC_Tetty2Bootstrap *bootstrap);
+ttLibC_Tetty2Promise TT_ATTRIBUTE_INNER *ttLibC_Tetty2Promise_make_(ttLibC_Tetty2Bootstrap *bootstrap);
 
 #ifdef __cplusplus
 } /* extern "C" */

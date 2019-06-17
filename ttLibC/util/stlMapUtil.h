@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../ttLibC_predef.h"
 #include <stdio.h>
 #include <stdbool.h>
 
@@ -30,29 +31,29 @@ typedef ttLibC_Util_StlMap ttLibC_StlMap;
 
 typedef bool (* ttLibC_StlMapRefFunc)(void *ptr, void *key, void *item);
 
-ttLibC_StlMap *ttLibC_StlMap_make();
+ttLibC_StlMap TT_ATTRIBUTE_API *ttLibC_StlMap_make();
 
-bool ttLibC_StlMap_put(
+bool TT_ATTRIBUTE_API ttLibC_StlMap_put(
 		ttLibC_StlMap *map,
 		void *key,
 		void *item);
 
-void *ttLibC_StlMap_get(
+void TT_ATTRIBUTE_API *ttLibC_StlMap_get(
 		ttLibC_StlMap *map,
 		void *key);
 
-bool ttLibC_StlMap_remove(
+bool TT_ATTRIBUTE_API ttLibC_StlMap_remove(
 		ttLibC_StlMap *map,
 		void *key);
 
-bool ttLibC_StlMap_removeAll(ttLibC_StlMap *map);
+bool TT_ATTRIBUTE_API ttLibC_StlMap_removeAll(ttLibC_StlMap *map);
 
-bool ttLibC_StlMap_forEach(
+bool TT_ATTRIBUTE_API ttLibC_StlMap_forEach(
 		ttLibC_StlMap *map,
 		ttLibC_StlMapRefFunc callback,
 		void *ptr);
 
-void ttLibC_StlMap_close(ttLibC_StlMap **map);
+void TT_ATTRIBUTE_API ttLibC_StlMap_close(ttLibC_StlMap **map);
 
 #ifdef __cplusplus
 } /* extern "C" */

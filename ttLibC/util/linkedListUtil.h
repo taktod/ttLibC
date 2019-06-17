@@ -1,4 +1,4 @@
-﻿/**
+/**
  * @file   linkedListUtil.h
  * @brief  linkedList data structure support.
  *
@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../ttLibC_predef.h"
 #include <stdbool.h>
 #include <stdio.h>
 
@@ -40,7 +41,7 @@ typedef bool (* ttLibC_LinkedListRefFunc)(void *ptr, void *item, size_t item_siz
  * make linkedList object.
  * @return linkedList object.
  */
-ttLibC_LinkedList *ttLibC_LinkedList_make();
+ttLibC_LinkedList TT_ATTRIBUTE_API *ttLibC_LinkedList_make();
 
 /**
  * add the item object on the top.
@@ -50,7 +51,7 @@ ttLibC_LinkedList *ttLibC_LinkedList_make();
  * @param is_non_copy   if true:hold the data pointer. false: allocate and copy data.
  * @return true:success false:error
  */
-bool ttLibC_LinkedList_addFirst(
+bool TT_ATTRIBUTE_API ttLibC_LinkedList_addFirst(
 		ttLibC_LinkedList *list,
 		void *add_item,
 		size_t add_item_size,
@@ -64,7 +65,7 @@ bool ttLibC_LinkedList_addFirst(
  * @param is_non_copy   if true:hold the data pointer. false: allocate and copy data.
  * @return true:success false:error
  */
-bool ttLibC_LinkedList_addLast(
+bool TT_ATTRIBUTE_API ttLibC_LinkedList_addLast(
 		ttLibC_LinkedList *list,
 		void *add_item,
 		size_t add_item_size,
@@ -92,17 +93,17 @@ bool ttLibC_LinkedList_addBefore(
 */
 
 // この関数はforEachの中でのみ有効なものとする。(forEachで応答するitemのaddressを頼りに削除しようとすると定義する。)
-bool ttLibC_LinkedList_remove(
+bool TT_ATTRIBUTE_API ttLibC_LinkedList_remove(
 		ttLibC_LinkedList *list,
 		void *remove_item);
-bool ttLibC_LinkedList_removeAll(ttLibC_LinkedList *list);
+bool TT_ATTRIBUTE_API ttLibC_LinkedList_removeAll(ttLibC_LinkedList *list);
 // 関数で見つけたものを応答する形にしたい。
-bool ttLibC_LinkedList_forEach(
+bool TT_ATTRIBUTE_API ttLibC_LinkedList_forEach(
 		ttLibC_LinkedList *list,
 		ttLibC_LinkedListRefFunc callback,
 		void *ptr);
 
-void ttLibC_LinkedList_close(ttLibC_LinkedList **list);
+void TT_ATTRIBUTE_API ttLibC_LinkedList_close(ttLibC_LinkedList **list);
 
 #ifdef __cplusplus
 } /* extern "C" */

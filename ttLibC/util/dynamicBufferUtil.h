@@ -39,7 +39,7 @@ typedef ttLibC_Util_DynamicBuffer ttLibC_DynamicBuffer;
  * make buffer
  * @return dynamicBuffer object.
  */
-ttLibC_DynamicBuffer* ttLibC_DynamicBuffer_make();
+ttLibC_DynamicBuffer TT_ATTRIBUTE_API *ttLibC_DynamicBuffer_make();
 
 /**
  * append data on the end of buffer.
@@ -47,7 +47,7 @@ ttLibC_DynamicBuffer* ttLibC_DynamicBuffer_make();
  * @param data      append data.
  * @param data_size append data size
  */
-bool ttLibC_DynamicBuffer_append(
+bool TT_ATTRIBUTE_API ttLibC_DynamicBuffer_append(
 		ttLibC_DynamicBuffer *buffer,
 		uint8_t *data,
 		size_t data_size);
@@ -58,7 +58,7 @@ bool ttLibC_DynamicBuffer_append(
  * @param buffer    target dynamic buffer object.
  * @param read_size size of read.
  */
-bool ttLibC_DynamicBuffer_markAsRead(
+bool TT_ATTRIBUTE_API ttLibC_DynamicBuffer_markAsRead(
 		ttLibC_DynamicBuffer *buffer,
 		size_t read_size);
 
@@ -67,38 +67,38 @@ bool ttLibC_DynamicBuffer_markAsRead(
  * @param buffer target dynamic buffer object.
  * @return data pointer.
  */
-uint8_t *ttLibC_DynamicBuffer_refData(ttLibC_DynamicBuffer *buffer);
+uint8_t TT_ATTRIBUTE_API *ttLibC_DynamicBuffer_refData(ttLibC_DynamicBuffer *buffer);
 
 /**
  * ref the data size.
  * @param buffer target dynamic buffer object.
  * @return data size.
  */
-size_t ttLibC_DynamicBuffer_refSize(ttLibC_DynamicBuffer *buffer);
+size_t TT_ATTRIBUTE_API ttLibC_DynamicBuffer_refSize(ttLibC_DynamicBuffer *buffer);
 
 /**
  * reset the read pointer.
  * @param buffer target dynamic buffer object.
  */
-bool ttLibC_DynamicBuffer_reset(ttLibC_DynamicBuffer *buffer);
+bool TT_ATTRIBUTE_API ttLibC_DynamicBuffer_reset(ttLibC_DynamicBuffer *buffer);
 
 /**
  * clear read size and shift the data.
  * @param buffer target dynamic buffer object.
  */
-bool ttLibC_DynamicBuffer_clear(ttLibC_DynamicBuffer *buffer);
+bool TT_ATTRIBUTE_API ttLibC_DynamicBuffer_clear(ttLibC_DynamicBuffer *buffer);
 
 /**
  * set empty for writing buffer.
  */
-bool ttLibC_DynamicBuffer_empty(ttLibC_DynamicBuffer *buffer);
+bool TT_ATTRIBUTE_API ttLibC_DynamicBuffer_empty(ttLibC_DynamicBuffer *buffer);
 
 /**
  * alloc specific size of memory for dynamic buffer.
  * @param buffer target dynamic buffer object.
  * @param size   target size
  */
-bool ttLibC_DynamicBuffer_alloc(
+bool TT_ATTRIBUTE_API ttLibC_DynamicBuffer_alloc(
 		ttLibC_DynamicBuffer *buffer,
 		size_t size);
 
@@ -110,7 +110,7 @@ bool ttLibC_DynamicBuffer_alloc(
  * @param data      write data.
  * @param data_size write data size.
  */
-bool ttLibC_DynamicBuffer_write(
+bool TT_ATTRIBUTE_API ttLibC_DynamicBuffer_write(
 		ttLibC_DynamicBuffer *buffer,
 		size_t write_pos,
 		uint8_t *data,
@@ -120,7 +120,7 @@ bool ttLibC_DynamicBuffer_write(
  * close and release memory object.
  * @param buffer target dynamic buffer object.
  */
-void ttLibC_DynamicBuffer_close(ttLibC_DynamicBuffer **buffer);
+void TT_ATTRIBUTE_API ttLibC_DynamicBuffer_close(ttLibC_DynamicBuffer **buffer);
 
 #ifdef __cplusplus
 } /* extern "C" */

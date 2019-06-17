@@ -14,6 +14,8 @@
 extern "C" {
 #endif
 
+#include "../ttLibC_predef.h"
+
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -65,14 +67,14 @@ typedef struct ttLibC_Util_Tetty2ChannelHandler {
  * close bootstrap
  * @param bootstrap bootstrap object.
  */
-void ttLibC_Tetty2Bootstrap_close(ttLibC_Tetty2Bootstrap **bootstrap);
+void TT_ATTRIBUTE_API ttLibC_Tetty2Bootstrap_close(ttLibC_Tetty2Bootstrap **bootstrap);
 
 /**
  * add channel handler on pipeline.
  * @param bootstrap
  * @param channel_handler
  */
-void ttLibC_Tetty2Bootstrap_pipeline_addLast(
+void TT_ATTRIBUTE_API ttLibC_Tetty2Bootstrap_pipeline_addLast(
 		ttLibC_Tetty2Bootstrap *bootstrap,
 		void *channel_handler);
 
@@ -81,7 +83,7 @@ void ttLibC_Tetty2Bootstrap_pipeline_addLast(
  * @param bootstrap
  * @param channel_handler
  */
-void ttLibC_Tetty2Bootstrap_pipeline_remove(
+void TT_ATTRIBUTE_API ttLibC_Tetty2Bootstrap_pipeline_remove(
 		ttLibC_Tetty2Bootstrap *bootstrap,
 		void *channel_handler);
 
@@ -92,7 +94,7 @@ void ttLibC_Tetty2Bootstrap_pipeline_remove(
  * @param data_size
  * @return error number 0:noerror
  */
-tetty2_errornum ttLibC_Tetty2Bootstrap_userEventTriggered(
+tetty2_errornum TT_ATTRIBUTE_API ttLibC_Tetty2Bootstrap_userEventTriggered(
 		ttLibC_Tetty2Bootstrap *bootstrap,
 		void *data,
 		size_t data_size);
@@ -103,7 +105,7 @@ tetty2_errornum ttLibC_Tetty2Bootstrap_userEventTriggered(
  * @param data
  * @param data_size
  */
-tetty2_errornum ttLibC_Tetty2Bootstrap_write(
+tetty2_errornum TT_ATTRIBUTE_API ttLibC_Tetty2Bootstrap_write(
 		ttLibC_Tetty2Bootstrap *bootstrap,
 		void *data,
 		size_t data_size);
@@ -112,7 +114,7 @@ tetty2_errornum ttLibC_Tetty2Bootstrap_write(
  * flush write buffer to bootstrap
  * @param bootstrap
  */
-tetty2_errornum ttLibC_Tetty2Bootstrap_flush(ttLibC_Tetty2Bootstrap *bootstrap);
+tetty2_errornum TT_ATTRIBUTE_API ttLibC_Tetty2Bootstrap_flush(ttLibC_Tetty2Bootstrap *bootstrap);
 
 /**
  * write and flush message
@@ -120,7 +122,7 @@ tetty2_errornum ttLibC_Tetty2Bootstrap_flush(ttLibC_Tetty2Bootstrap *bootstrap);
  * @param data
  * @param data_size
  */
-tetty2_errornum ttLibC_Tetty2Bootstrap_writeAndFlush(
+tetty2_errornum TT_ATTRIBUTE_API ttLibC_Tetty2Bootstrap_writeAndFlush(
 		ttLibC_Tetty2Bootstrap *bootstrap,
 		void *data,
 		size_t data_size);
@@ -129,7 +131,7 @@ tetty2_errornum ttLibC_Tetty2Bootstrap_writeAndFlush(
  * make promise
  * @param bootstrap
  */
-ttLibC_Tetty2Promise *ttLibC_Tetty2Bootstrap_makePromise(ttLibC_Tetty2Bootstrap *bootstrap);
+ttLibC_Tetty2Promise TT_ATTRIBUTE_API *ttLibC_Tetty2Bootstrap_makePromise(ttLibC_Tetty2Bootstrap *bootstrap);
 
 // context
 typedef struct ttLibC_Util_Tetty2Context {
@@ -138,36 +140,36 @@ typedef struct ttLibC_Util_Tetty2Context {
 	ttLibC_Tetty2Info *tetty_info;
 } ttLibC_Util_Tetty2Context;
 
-tetty2_errornum ttLibC_Tetty2Context_channel_write(
+tetty2_errornum TT_ATTRIBUTE_API ttLibC_Tetty2Context_channel_write(
 		ttLibC_Tetty2Context *ctx,
 		void *data,
 		size_t data_size);
 
-tetty2_errornum ttLibC_Tetty2Context_channel_flush(ttLibC_Tetty2Context *ctx);
+tetty2_errornum TT_ATTRIBUTE_API ttLibC_Tetty2Context_channel_flush(ttLibC_Tetty2Context *ctx);
 
-tetty2_errornum ttLibC_Tetty2Context_channel_writeAndFlush(
+tetty2_errornum TT_ATTRIBUTE_API ttLibC_Tetty2Context_channel_writeAndFlush(
 		ttLibC_Tetty2Context *ctx,
 		void *data,
 		size_t data_size);
 
-tetty2_errornum ttLibC_Tetty2Context_close(ttLibC_Tetty2Context *ctx);
+tetty2_errornum TT_ATTRIBUTE_API ttLibC_Tetty2Context_close(ttLibC_Tetty2Context *ctx);
 
-tetty2_errornum ttLibC_Tetty2Context_super_channelActive(ttLibC_Tetty2Context *ctx);
-tetty2_errornum ttLibC_Tetty2Context_super_channelInactive(ttLibC_Tetty2Context *ctx);
-tetty2_errornum ttLibC_Tetty2Context_super_channelRead(
+tetty2_errornum TT_ATTRIBUTE_API ttLibC_Tetty2Context_super_channelActive(ttLibC_Tetty2Context *ctx);
+tetty2_errornum TT_ATTRIBUTE_API ttLibC_Tetty2Context_super_channelInactive(ttLibC_Tetty2Context *ctx);
+tetty2_errornum TT_ATTRIBUTE_API ttLibC_Tetty2Context_super_channelRead(
 		ttLibC_Tetty2Context *ctx,
 		void *data,
 		size_t data_size);
-tetty2_errornum ttLibC_Tetty2Context_super_close(ttLibC_Tetty2Context *ctx);
-tetty2_errornum ttLibC_Tetty2Context_super_write(
+tetty2_errornum TT_ATTRIBUTE_API ttLibC_Tetty2Context_super_close(ttLibC_Tetty2Context *ctx);
+tetty2_errornum TT_ATTRIBUTE_API ttLibC_Tetty2Context_super_write(
 		ttLibC_Tetty2Context *ctx,
 		void *data,
 		size_t data_size);
-tetty2_errornum ttLibC_Tetty2Context_super_flush(ttLibC_Tetty2Context *ctx);
-tetty2_errornum ttLibC_Tetty2Context_super_exceptionCaught(
+tetty2_errornum TT_ATTRIBUTE_API ttLibC_Tetty2Context_super_flush(ttLibC_Tetty2Context *ctx);
+tetty2_errornum TT_ATTRIBUTE_API ttLibC_Tetty2Context_super_exceptionCaught(
 		ttLibC_Tetty2Context *ctx,
 		tetty2_errornum error_no);
-tetty2_errornum ttLibC_Tetty2Context_super_userEventTriggered(
+tetty2_errornum TT_ATTRIBUTE_API ttLibC_Tetty2Context_super_userEventTriggered(
 		ttLibC_Tetty2Context *ctx,
 		void *data,
 		size_t data_size);
@@ -182,18 +184,18 @@ typedef struct ttLibC_Util_Tetty2Promise {
 
 typedef void (* ttLibC_Tetty2PromiseListener)(void *ptr, ttLibC_Tetty2Promise *promise);
 
-void ttLibC_Tetty2Promise_addEventListener(
+void TT_ATTRIBUTE_API ttLibC_Tetty2Promise_addEventListener(
 		ttLibC_Tetty2Promise *promise,
 		ttLibC_Tetty2PromiseListener listener,
 		void *ptr);
 
-void ttLibC_Tetty2Promise_setSuccess(
+void TT_ATTRIBUTE_API ttLibC_Tetty2Promise_setSuccess(
 		ttLibC_Tetty2Promise *promise,
 		void *data);
-void ttLibC_Tetty2Promise_setFailure(
+void TT_ATTRIBUTE_API ttLibC_Tetty2Promise_setFailure(
 		ttLibC_Tetty2Promise *promise,
 		void *data);
-void ttLibC_Tetty2Promise_close(ttLibC_Tetty2Promise **promise);
+void TT_ATTRIBUTE_API ttLibC_Tetty2Promise_close(ttLibC_Tetty2Promise **promise);
 
 #ifdef __cplusplus
 } /* extern "C" */

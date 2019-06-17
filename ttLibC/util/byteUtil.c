@@ -14,7 +14,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../ttLibC_predef.h"
 #include "../_log.h"
 #include "../allocator.h"
 #include "../ttLibC_common.h"
@@ -44,7 +43,7 @@ typedef ttLibC_Util_ByteReader_ ttLibC_ByteReader_;
  * @param type      target data type
  * @return byte reader object.
  */
-ttLibC_ByteReader TT_VISIBILITY_DEFAULT *ttLibC_ByteReader_make(
+ttLibC_ByteReader TT_ATTRIBUTE_API *ttLibC_ByteReader_make(
 		void *data,
 		size_t data_size,
 		ttLibC_ByteUtil_Type type) {
@@ -72,7 +71,7 @@ ttLibC_ByteReader TT_VISIBILITY_DEFAULT *ttLibC_ByteReader_make(
  * @param bit_num
  * @return value
  */
-uint64_t TT_VISIBILITY_DEFAULT ttLibC_ByteReader_bit(
+uint64_t TT_ATTRIBUTE_API ttLibC_ByteReader_bit(
 		ttLibC_ByteReader *reader,
 		uint32_t bit_num) {
 	ttLibC_ByteReader_ *reader_ = (ttLibC_ByteReader_ *)reader;
@@ -144,7 +143,7 @@ uint64_t TT_VISIBILITY_DEFAULT ttLibC_ByteReader_bit(
  * @param sign
  * @return value
  */
-int32_t TT_VISIBILITY_DEFAULT ttLibC_ByteReader_expGolomb(
+int32_t TT_ATTRIBUTE_API ttLibC_ByteReader_expGolomb(
 		ttLibC_ByteReader *reader,
 		bool sign) {
 	ttLibC_ByteReader_ *reader_ = (ttLibC_ByteReader_ *)reader;
@@ -230,7 +229,7 @@ int32_t TT_VISIBILITY_DEFAULT ttLibC_ByteReader_expGolomb(
  * @param is_tag
  * @return value
  */
-uint64_t TT_VISIBILITY_DEFAULT ttLibC_ByteReader_ebml(
+uint64_t TT_ATTRIBUTE_API ttLibC_ByteReader_ebml(
 		ttLibC_ByteReader *reader,
 		bool is_tag) {
 	ttLibC_ByteReader_ *reader_ = (ttLibC_ByteReader_ *)reader;
@@ -419,7 +418,7 @@ uint64_t TT_VISIBILITY_DEFAULT ttLibC_ByteReader_ebml(
  * @param target_size
  * @return read size.
  */
-size_t TT_VISIBILITY_DEFAULT ttLibC_ByteReader_string(
+size_t TT_ATTRIBUTE_API ttLibC_ByteReader_string(
 		ttLibC_ByteReader *reader,
 		char *buffer,
 		size_t buffer_size,
@@ -452,7 +451,7 @@ size_t TT_VISIBILITY_DEFAULT ttLibC_ByteReader_string(
  * @param reader
  * @param skip_size size in byte num.
  */
-size_t TT_VISIBILITY_DEFAULT ttLibC_ByteReader_skipByte(
+size_t TT_ATTRIBUTE_API ttLibC_ByteReader_skipByte(
 		ttLibC_ByteReader *reader,
 		size_t skip_size) {
 	ttLibC_ByteReader_ *reader_ = (ttLibC_ByteReader_ *)reader;
@@ -474,7 +473,7 @@ size_t TT_VISIBILITY_DEFAULT ttLibC_ByteReader_skipByte(
  * @param reader
  * @param rewind_size
  */
-size_t TT_VISIBILITY_DEFAULT ttLibC_ByteReader_rewindByte(
+size_t TT_ATTRIBUTE_API ttLibC_ByteReader_rewindByte(
 		ttLibC_ByteReader *reader,
 		size_t rewind_size) {
 	ttLibC_ByteReader_ *reader_ = (ttLibC_ByteReader_ *)reader;
@@ -494,7 +493,7 @@ size_t TT_VISIBILITY_DEFAULT ttLibC_ByteReader_rewindByte(
  * close ByteReader
  * @param reader
  */
-void TT_VISIBILITY_DEFAULT ttLibC_ByteReader_close(ttLibC_ByteReader **reader) {
+void TT_ATTRIBUTE_API ttLibC_ByteReader_close(ttLibC_ByteReader **reader) {
 	ttLibC_ByteReader_ *target = (ttLibC_ByteReader_ *)*reader;
 	if(target == NULL) {
 		return;
@@ -527,7 +526,7 @@ typedef ttLibC_Util_ByteConnector_ ttLibC_ByteConnector_;
  * @param type      work type(now, default only.)
  * @return ByteConnector object.
  */
-ttLibC_ByteConnector TT_VISIBILITY_DEFAULT *ttLibC_ByteConnector_make(
+ttLibC_ByteConnector TT_ATTRIBUTE_API *ttLibC_ByteConnector_make(
 		void *data,
 		size_t data_size,
 		ttLibC_ByteUtil_Type type) {
@@ -552,7 +551,7 @@ ttLibC_ByteConnector TT_VISIBILITY_DEFAULT *ttLibC_ByteConnector_make(
  * @param bit_num
  * @return true:success false:error
  */
-bool TT_VISIBILITY_DEFAULT ttLibC_ByteConnector_bit(
+bool TT_ATTRIBUTE_API ttLibC_ByteConnector_bit(
 		ttLibC_ByteConnector *connector,
 		uint32_t value,
 		uint32_t bit_num) {
@@ -618,7 +617,7 @@ bool ttLibC_ByteConnector_expGolomb(
  * @param value
  * @return true:success false:error
  */
-bool TT_VISIBILITY_DEFAULT ttLibC_ByteConnector_ebml(
+bool TT_ATTRIBUTE_API ttLibC_ByteConnector_ebml(
 		ttLibC_ByteConnector *connector,
 		uint64_t value) {
 	return ttLibC_ByteConnector_ebml2(connector, value, false);
@@ -631,7 +630,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_ByteConnector_ebml(
  * @param is_tag
  * @return true:success false:error
  */
-bool TT_VISIBILITY_DEFAULT ttLibC_ByteConnector_ebml2(
+bool TT_ATTRIBUTE_API ttLibC_ByteConnector_ebml2(
 		ttLibC_ByteConnector *connector,
 		uint64_t value,
 		bool is_tag) {
@@ -856,7 +855,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_ByteConnector_ebml2(
  * @param str_size
  * @return true:success false:error
  */
-bool TT_VISIBILITY_DEFAULT ttLibC_ByteConnector_string(
+bool TT_ATTRIBUTE_API ttLibC_ByteConnector_string(
 		ttLibC_ByteConnector *connector,
 		const char *str,
 		size_t str_size) {
@@ -887,7 +886,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_ByteConnector_string(
  * close ByteConnector object
  * @param connector
  */
-void TT_VISIBILITY_DEFAULT ttLibC_ByteConnector_close(ttLibC_ByteConnector **connector) {
+void TT_ATTRIBUTE_API ttLibC_ByteConnector_close(ttLibC_ByteConnector **connector) {
 	ttLibC_ByteConnector_ *target = (ttLibC_ByteConnector_ *)*connector;
 	if(target == NULL) {
 		return;

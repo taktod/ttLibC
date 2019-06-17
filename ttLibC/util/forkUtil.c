@@ -13,7 +13,6 @@
 #ifdef __ENABLE_FILE__
 
 #include "forkUtil.h"
-#include "../ttLibC_predef.h"
 #include "../_log.h"
 #include <sys/wait.h>
 #include <string.h>
@@ -29,7 +28,7 @@ static void ForkUtil_catch(int sig_type) {
 	}
 }
 
-void TT_VISIBILITY_DEFAULT ttLibC_ForkUtil_setup() {
+void TT_ATTRIBUTE_API ttLibC_ForkUtil_setup() {
 	struct sigaction act;
 	memset(&act, 0, sizeof(act));
 	act.sa_handler = ForkUtil_catch;
@@ -38,7 +37,7 @@ void TT_VISIBILITY_DEFAULT ttLibC_ForkUtil_setup() {
 	sigaction(SIGCHLD, &act, NULL);
 }
 
-pid_t TT_VISIBILITY_DEFAULT ttLibC_ForkUtil_fork() {
+pid_t TT_ATTRIBUTE_API ttLibC_ForkUtil_fork() {
 	return fork();
 }
 
