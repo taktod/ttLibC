@@ -40,7 +40,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "../../ttLibC_predef.h"
 #include "../../_log.h"
 #include "../../allocator.h"
 
@@ -73,7 +72,7 @@ static uint32_t sample_rate_table[] = {
  * @param timebase      timebase number for pts.
  * @return aac object.
  */
-ttLibC_Aac TT_VISIBILITY_DEFAULT *ttLibC_Aac_make(
+ttLibC_Aac TT_ATTRIBUTE_API *ttLibC_Aac_make(
 		ttLibC_Aac *prev_frame,
 		ttLibC_Aac_Type type,
 		uint32_t sample_rate,
@@ -157,7 +156,7 @@ ttLibC_Aac TT_VISIBILITY_DEFAULT *ttLibC_Aac_make(
  * @param prev_frame reuse frame object.
  * @param src_frame  source of clone.
  */
-ttLibC_Aac TT_VISIBILITY_DEFAULT *ttLibC_Aac_clone(
+ttLibC_Aac TT_ATTRIBUTE_API *ttLibC_Aac_clone(
 		ttLibC_Aac *prev_frame,
 		ttLibC_Aac *src_frame) {
 	if(src_frame == NULL) {
@@ -271,7 +270,7 @@ static ttLibC_Aac *Aac_getRawFrame(
  * @param timebase      timebase for pts.
  * @return aac object
  */
-ttLibC_Aac TT_VISIBILITY_DEFAULT *ttLibC_Aac_getFrame(
+ttLibC_Aac TT_ATTRIBUTE_API *ttLibC_Aac_getFrame(
 		ttLibC_Aac *prev_frame,
 		void *data,
 		size_t data_size,
@@ -340,7 +339,7 @@ ttLibC_Aac TT_VISIBILITY_DEFAULT *ttLibC_Aac_getFrame(
  * @param data_size  buffer size
  * @return 0:error others:written size.
  */
-size_t TT_VISIBILITY_DEFAULT ttLibC_Aac_readAdtsHeader(
+size_t TT_ATTRIBUTE_API ttLibC_Aac_readAdtsHeader(
 		ttLibC_Aac *target_aac,
 		void *data,
 		size_t data_size) {
@@ -398,7 +397,7 @@ size_t TT_VISIBILITY_DEFAULT ttLibC_Aac_readAdtsHeader(
  * @param aac target aac object.
  * @return value of crc32. 0 for error.
  */
-uint32_t TT_VISIBILITY_DEFAULT ttLibC_Aac_getConfigCrc32(ttLibC_Aac *aac) {
+uint32_t TT_ATTRIBUTE_API ttLibC_Aac_getConfigCrc32(ttLibC_Aac *aac) {
 	ttLibC_Aac_ *aac_ = (ttLibC_Aac_ *)aac;
 	ttLibC_Crc32 *crc32 = ttLibC_Crc32_make(0);
 	if(crc32 == NULL) {
@@ -440,7 +439,7 @@ uint32_t TT_VISIBILITY_DEFAULT ttLibC_Aac_getConfigCrc32(ttLibC_Aac *aac) {
  * @param data_size
  * @return write size. 0 for error.
  */
-size_t TT_VISIBILITY_DEFAULT ttLibC_Aac_readDsiInfo(
+size_t TT_ATTRIBUTE_API ttLibC_Aac_readDsiInfo(
 		ttLibC_Aac *aac,
 		void *data,
 		size_t data_size) {
@@ -549,7 +548,7 @@ size_t TT_VISIBILITY_DEFAULT ttLibC_Aac_readDsiInfo(
  * @param data_size
  * @return size of generate dsi information.
  */
-size_t TT_VISIBILITY_DEFAULT ttLibC_Aac_getDsiInfo(
+size_t TT_ATTRIBUTE_API ttLibC_Aac_getDsiInfo(
 		ttLibC_Aac_Object object_type,
 		uint32_t sample_rate,
 		uint32_t channel_num,
@@ -603,7 +602,7 @@ size_t TT_VISIBILITY_DEFAULT ttLibC_Aac_getDsiInfo(
  * close frame
  * @param frame
  */
-void TT_VISIBILITY_DEFAULT ttLibC_Aac_close(ttLibC_Aac **frame) {
+void TT_ATTRIBUTE_API ttLibC_Aac_close(ttLibC_Aac **frame) {
 	ttLibC_Aac_ *target = (ttLibC_Aac_ *)*frame;
 	if(target == NULL) {
 		return;

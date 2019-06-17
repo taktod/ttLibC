@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../ttLibC_predef.h"
 #include "../frame/audio/aac.h"
 #include "../frame/audio/pcms16.h"
 
@@ -54,7 +55,7 @@ typedef bool (* ttLibC_FaacEncodeFunc)(void *ptr, ttLibC_Aac *aac);
  * @param bitrate     target bitrate
  * @return faac encoder object.
  */
-ttLibC_FaacEncoder *ttLibC_FaacEncoder_make(
+ttLibC_FaacEncoder TT_ATTRIBUTE_API *ttLibC_FaacEncoder_make(
 		ttLibC_FaacEncoder_Type type,
 		uint32_t sample_rate,
 		uint32_t channel_num,
@@ -64,7 +65,7 @@ ttLibC_FaacEncoder *ttLibC_FaacEncoder_make(
  * setup faacEncConfigration with ttLibC default.
  * @param encConfig faacEncConfiguration
  */
-void ttLibC_FaacEncoder_getDefaultFaacEncConfiguration(void *encConfig);
+void TT_ATTRIBUTE_API ttLibC_FaacEncoder_getDefaultFaacEncConfiguration(void *encConfig);
 
 /**
  * make faac encoder with faacEncConfiguration
@@ -73,7 +74,7 @@ void ttLibC_FaacEncoder_getDefaultFaacEncConfiguration(void *encConfig);
  * @param channel_num target channel_num
  * @return faac encoder object.
  */
-ttLibC_FaacEncoder *ttLibC_FaacEncoder_makeWithFaacEncConfiguration(
+ttLibC_FaacEncoder TT_ATTRIBUTE_API *ttLibC_FaacEncoder_makeWithFaacEncConfiguration(
 		void *encConfig,
 		uint32_t sample_rate,
 		uint32_t channel_num);
@@ -86,7 +87,7 @@ ttLibC_FaacEncoder *ttLibC_FaacEncoder_makeWithFaacEncConfiguration(
  * @param ptr      pointer for user def value, which will call in callback.
  * @return true / false
  */
-bool ttLibC_FaacEncoder_encode(
+bool TT_ATTRIBUTE_API ttLibC_FaacEncoder_encode(
 		ttLibC_FaacEncoder *encoder,
 		ttLibC_PcmS16 *pcm,
 		ttLibC_FaacEncodeFunc callback,
@@ -96,7 +97,7 @@ bool ttLibC_FaacEncoder_encode(
  * close faac encoder.
  * @param encoder
  */
-void ttLibC_FaacEncoder_close(ttLibC_FaacEncoder **encoder);
+void TT_ATTRIBUTE_API ttLibC_FaacEncoder_close(ttLibC_FaacEncoder **encoder);
 
 #ifdef __cplusplus
 } /* extern "C" */

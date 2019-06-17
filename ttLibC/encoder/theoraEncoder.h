@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../ttLibC_predef.h"
 #include "../frame/video/theora.h"
 #include "../frame/video/yuv420.h"
 
@@ -43,7 +44,7 @@ typedef bool (* ttLibC_TheoraEncodeFunc)(void *ptr, ttLibC_Theora *theora);
  * @param height
  * @return theoraEncoder object.
  */
-ttLibC_TheoraEncoder *ttLibC_TheoraEncoder_make(
+ttLibC_TheoraEncoder TT_ATTRIBUTE_API *ttLibC_TheoraEncoder_make(
 		uint32_t width,
 		uint32_t height);
 
@@ -56,7 +57,7 @@ ttLibC_TheoraEncoder *ttLibC_TheoraEncoder_make(
  * @param key_frame_interval 1 - 31
  * @return theoraEncoder object.
  */
-ttLibC_TheoraEncoder *ttLibC_TheoraEncoder_make_ex(
+ttLibC_TheoraEncoder TT_ATTRIBUTE_API *ttLibC_TheoraEncoder_make_ex(
 		uint32_t width,
 		uint32_t height,
 		uint32_t quality,
@@ -68,14 +69,14 @@ ttLibC_TheoraEncoder *ttLibC_TheoraEncoder_make_ex(
  * @param ti theora info object.
  * @return theoraEncoder object.
  */
-ttLibC_TheoraEncoder *ttLibC_TheoraEncoder_makeWithInfo(void *ti);
+ttLibC_TheoraEncoder TT_ATTRIBUTE_API *ttLibC_TheoraEncoder_makeWithInfo(void *ti);
 
 /**
  * ref theora context.
  * @param encoder theoraEncoder object.
  * @return pointer for theora context.(th_enc_ctx)
  */
-void *ttLibC_TheoraEncoder_refNativeEncodeContext(ttLibC_TheoraEncoder *encoder);
+void TT_ATTRIBUTE_API *ttLibC_TheoraEncoder_refNativeEncodeContext(ttLibC_TheoraEncoder *encoder);
 
 /**
  * encode frame.
@@ -85,7 +86,7 @@ void *ttLibC_TheoraEncoder_refNativeEncodeContext(ttLibC_TheoraEncoder *encoder)
  * @param ptr
  * @return true/success false/error
  */
-bool ttLibC_TheoraEncoder_encode(
+bool TT_ATTRIBUTE_API ttLibC_TheoraEncoder_encode(
 		ttLibC_TheoraEncoder *encoder,
 		ttLibC_Yuv420 *yuv420,
 		ttLibC_TheoraEncodeFunc callback,
@@ -95,7 +96,7 @@ bool ttLibC_TheoraEncoder_encode(
  * close theoraEncoder
  * @param encoder
  */
-void ttLibC_TheoraEncoder_close(ttLibC_TheoraEncoder **encoder);
+void TT_ATTRIBUTE_API ttLibC_TheoraEncoder_close(ttLibC_TheoraEncoder **encoder);
 
 #ifdef __cplusplus
 } /* extern "C" */

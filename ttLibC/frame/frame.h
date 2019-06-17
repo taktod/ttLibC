@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../ttLibC_predef.h"
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -134,7 +135,7 @@ typedef bool (* ttLibC_FrameBinaryFunc)(void *ptr, void *data, size_t size);
  * @param prev_frame reuse frame object.
  * @param src_frame  source of clone.
  */
-ttLibC_Frame *ttLibC_Frame_clone(
+ttLibC_Frame TT_ATTRIBUTE_API *ttLibC_Frame_clone(
 		ttLibC_Frame *prev_frame,
 		ttLibC_Frame *src_frame);
 
@@ -143,34 +144,34 @@ ttLibC_Frame *ttLibC_Frame_clone(
  * @param type
  * @return true:audio false:not audio
  */
-bool ttLibC_isAudio(ttLibC_Frame_Type type);
+bool TT_ATTRIBUTE_API ttLibC_isAudio(ttLibC_Frame_Type type);
 
 /**
  * check frame type is video frame.
  * @param type
  * @return true:video false:not video
  */
-bool ttLibC_isVideo(ttLibC_Frame_Type type);
+bool TT_ATTRIBUTE_API ttLibC_isVideo(ttLibC_Frame_Type type);
 
 /**
  * check frame is audio frame.
  * @param frame
  * @return true:audio false:not audio
  */
-bool ttLibC_Frame_isAudio(ttLibC_Frame *frame);
+bool TT_ATTRIBUTE_API ttLibC_Frame_isAudio(ttLibC_Frame *frame);
 
 /**
  * check frame is video frame.
  * @param frame
  * @return true:video false:not video
  */
-bool ttLibC_Frame_isVideo(ttLibC_Frame *frame);
+bool TT_ATTRIBUTE_API ttLibC_Frame_isVideo(ttLibC_Frame *frame);
 
 /**
  * close frame
  * @param frame
  */
-void ttLibC_Frame_close(ttLibC_Frame **frame);
+void TT_ATTRIBUTE_API ttLibC_Frame_close(ttLibC_Frame **frame);
 
 #ifdef __cplusplus
 } /* extern "C" */

@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../ttLibC_predef.h"
 #include "../frame/video/png.h"
 #include "../frame/video/bgr.h"
 
@@ -36,7 +37,7 @@ typedef bool (* ttLibC_PngDecodeFunc)(void *ptr, ttLibC_Bgr *bgr);
  * make png decoder
  * @return pngDecoder object.
  */
-ttLibC_PngDecoder *ttLibC_PngDecoder_make();
+ttLibC_PngDecoder TT_ATTRIBUTE_API *ttLibC_PngDecoder_make();
 
 /**
  * decode frame
@@ -46,7 +47,7 @@ ttLibC_PngDecoder *ttLibC_PngDecoder_make();
  * @param ptr      pointer for use def value, which will call in callback.
  * @return true / false
  */
-bool ttLibC_PngDecoder_decode(
+bool TT_ATTRIBUTE_API ttLibC_PngDecoder_decode(
 		ttLibC_PngDecoder *decoder,
 		ttLibC_Png *png,
 		ttLibC_PngDecodeFunc callback,
@@ -56,7 +57,7 @@ bool ttLibC_PngDecoder_decode(
  * close png decoder
  * @param decoder
  */
-void ttLibC_PngDecoder_close(ttLibC_PngDecoder **decoder);
+void TT_ATTRIBUTE_API ttLibC_PngDecoder_close(ttLibC_PngDecoder **decoder);
 
 #ifdef __cplusplus
 } /* extern "C" */

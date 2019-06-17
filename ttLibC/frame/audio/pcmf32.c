@@ -9,7 +9,6 @@
  */
 
 #include "pcmf32.h"
-#include "../../ttLibC_predef.h"
 #include "../../_log.h"
 #include "../../allocator.h"
 #include <string.h>
@@ -45,7 +44,7 @@ typedef ttLibC_Frame_Audio_PcmF32_ ttLibC_PcmF32_;
  * @param timebase      timebase number for pts.
  * @return pcmf32 object.
  */
-ttLibC_PcmF32 TT_VISIBILITY_DEFAULT *ttLibC_PcmF32_make(
+ttLibC_PcmF32 TT_ATTRIBUTE_API *ttLibC_PcmF32_make(
 		ttLibC_PcmF32 *prev_frame,
 		ttLibC_PcmF32_Type type,
 		uint32_t sample_rate,
@@ -239,7 +238,7 @@ static ttLibC_PcmF32 *PcmF32_clonePlanar(
  * @param prev_frame reuse frame object.
  * @param src_frame  source of clone.
  */
-ttLibC_PcmF32 TT_VISIBILITY_DEFAULT *ttLibC_PcmF32_clone(
+ttLibC_PcmF32 TT_ATTRIBUTE_API *ttLibC_PcmF32_clone(
 		ttLibC_PcmF32 *prev_frame,
 		ttLibC_PcmF32 *src_frame) {
 	if(src_frame == NULL) {
@@ -273,7 +272,7 @@ ttLibC_PcmF32 TT_VISIBILITY_DEFAULT *ttLibC_PcmF32_clone(
  * close frame
  * @param frame
  */
-void TT_VISIBILITY_DEFAULT ttLibC_PcmF32_close(ttLibC_PcmF32 **frame) {
+void TT_ATTRIBUTE_API ttLibC_PcmF32_close(ttLibC_PcmF32 **frame) {
 	ttLibC_Audio_close_((ttLibC_Audio **)frame);
 }
 

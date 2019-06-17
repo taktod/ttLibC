@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../../ttLibC_predef.h"
 #include "video.h"
 
 /**
@@ -67,7 +68,7 @@ typedef ttLibC_Frame_Video_Bgr ttLibC_Bgr;
  * @param timebase      timebase number for pts.
  * @return bgr object.
  */
-ttLibC_Bgr *ttLibC_Bgr_make(
+ttLibC_Bgr TT_ATTRIBUTE_API *ttLibC_Bgr_make(
 		ttLibC_Bgr *prev_frame,
 		ttLibC_Bgr_Type type,
 		uint32_t width,
@@ -85,7 +86,7 @@ ttLibC_Bgr *ttLibC_Bgr_make(
  * @param prev_frame reuse frame object.
  * @param src_frame  source of clone.
  */
-ttLibC_Bgr *ttLibC_Bgr_clone(
+ttLibC_Bgr TT_ATTRIBUTE_API *ttLibC_Bgr_clone(
 		ttLibC_Bgr *prev_frame,
 		ttLibC_Bgr *src_frame);
 
@@ -93,7 +94,7 @@ ttLibC_Bgr *ttLibC_Bgr_clone(
  * close frame
  * @param frame
  */
-void ttLibC_Bgr_close(ttLibC_Bgr **frame);
+void TT_ATTRIBUTE_API ttLibC_Bgr_close(ttLibC_Bgr **frame);
 
 /**
  * generate empty frame
@@ -101,7 +102,7 @@ void ttLibC_Bgr_close(ttLibC_Bgr **frame);
  * @param width    width of image
  * @param height   height of image
  */
-ttLibC_Bgr *ttLibC_Bgr_makeEmptyFrame(
+ttLibC_Bgr TT_ATTRIBUTE_API *ttLibC_Bgr_makeEmptyFrame(
 		ttLibC_Bgr_Type sub_type,
 		uint32_t        width,
 		uint32_t        height);
@@ -113,7 +114,7 @@ ttLibC_Bgr *ttLibC_Bgr_makeEmptyFrame(
  * @param width    width of image
  * @param height   height of image
  */
-ttLibC_Bgr *ttLibC_Bgr_makeEmptyFrame2(
+ttLibC_Bgr TT_ATTRIBUTE_API *ttLibC_Bgr_makeEmptyFrame2(
 		ttLibC_Bgr     *prev_frame,
 		ttLibC_Bgr_Type sub_type,
 		uint32_t        width,
@@ -126,7 +127,7 @@ ttLibC_Bgr *ttLibC_Bgr_makeEmptyFrame2(
  * @param ptr      user def pointer.
  * @return true / false
  */
-bool ttLibC_Bgr_getMinimumBinaryBuffer(
+bool TT_ATTRIBUTE_API ttLibC_Bgr_getMinimumBinaryBuffer(
 		ttLibC_Bgr *bgr,
 		ttLibC_FrameBinaryFunc callback,
 		void *ptr);
@@ -135,7 +136,7 @@ bool ttLibC_Bgr_getMinimumBinaryBuffer(
  * reset changed data.
  * @param bgr target bgr frame.
  */
-void ttLibC_Bgr_resetData(ttLibC_Bgr *bgr);
+void TT_ATTRIBUTE_API ttLibC_Bgr_resetData(ttLibC_Bgr *bgr);
 
 #ifdef __cplusplus
 } /* extern "C" */

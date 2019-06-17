@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../ttLibC_predef.h"
 #include "../frame/video/jpeg.h"
 #include "../frame/video/yuv420.h"
 
@@ -43,7 +44,7 @@ typedef bool (* ttLibC_JpegEncodeFunc)(void *ptr, ttLibC_Jpeg *jpeg);
  * @param quality target quality 0 - 100 100 is best quality.
  * @return jpegEncoder object.
  */
-ttLibC_JpegEncoder *ttLibC_JpegEncoder_make(
+ttLibC_JpegEncoder TT_ATTRIBUTE_API *ttLibC_JpegEncoder_make(
 		uint32_t width,
 		uint32_t height,
 		uint32_t quality);
@@ -55,7 +56,7 @@ ttLibC_JpegEncoder *ttLibC_JpegEncoder_make(
  * @param callback callback func for jpeg encode.
  * @param ptr      pointer for user def value, which will call in callback.
  */
-bool ttLibC_JpegEncoder_encode(
+bool TT_ATTRIBUTE_API ttLibC_JpegEncoder_encode(
 		ttLibC_JpegEncoder *encoder,
 		ttLibC_Yuv420 *yuv,
 		ttLibC_JpegEncodeFunc callback,
@@ -67,7 +68,7 @@ bool ttLibC_JpegEncoder_encode(
  * @param quality ftarget quality 0 - 100
  * @return true:success false:error
  */
-bool ttLibC_JpegEncoder_setQuality(
+bool TT_ATTRIBUTE_API ttLibC_JpegEncoder_setQuality(
 		ttLibC_JpegEncoder *encoder,
 		uint32_t quality);
 
@@ -75,7 +76,7 @@ bool ttLibC_JpegEncoder_setQuality(
  * close jpeg encoder.
  * @param encoder
  */
-void ttLibC_JpegEncoder_close(ttLibC_JpegEncoder **encoder);
+void TT_ATTRIBUTE_API ttLibC_JpegEncoder_close(ttLibC_JpegEncoder **encoder);
 
 #ifdef __cplusplus
 } /* extern "C" */

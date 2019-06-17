@@ -8,7 +8,6 @@
 #ifdef __ENABLE_OPUS__
 
 #include "opusDecoder.h"
-#include "../ttLibC_predef.h"
 #include "../_log.h"
 #include "../allocator.h"
 #include <stdlib.h>
@@ -33,7 +32,7 @@ typedef ttLibC_Decoder_OpusDecoder_ ttLibC_OpusDecoder_;
  * @param channel_num target channel_num
  * @return opus decoder object
  */
-ttLibC_OpusDecoder TT_VISIBILITY_DEFAULT *ttLibC_OpusDecoder_make(
+ttLibC_OpusDecoder TT_ATTRIBUTE_API *ttLibC_OpusDecoder_make(
 		uint32_t sample_rate,
 		uint32_t channel_num) {
 	ttLibC_OpusDecoder_ *decoder = ttLibC_malloc(sizeof(ttLibC_OpusDecoder_));
@@ -73,7 +72,7 @@ ttLibC_OpusDecoder TT_VISIBILITY_DEFAULT *ttLibC_OpusDecoder_make(
  * @param ptr      pointer for user def value.
  * @return true / false
  */
-bool TT_VISIBILITY_DEFAULT ttLibC_OpusDecoder_decode(
+bool TT_ATTRIBUTE_API ttLibC_OpusDecoder_decode(
 		ttLibC_OpusDecoder *decoder,
 		ttLibC_Opus *opus,
 		ttLibC_OpusDecodeFunc callback,
@@ -120,7 +119,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_OpusDecoder_decode(
  * @param decoder opus decoder object.
  * @return OpusDecoder pointer.
  */
-void TT_VISIBILITY_DEFAULT *ttLibC_OpusDecoder_refNativeDecoder(ttLibC_OpusDecoder *decoder) {
+void TT_ATTRIBUTE_API *ttLibC_OpusDecoder_refNativeDecoder(ttLibC_OpusDecoder *decoder) {
 	if(decoder == NULL) {
 		return NULL;
 	}
@@ -131,7 +130,7 @@ void TT_VISIBILITY_DEFAULT *ttLibC_OpusDecoder_refNativeDecoder(ttLibC_OpusDecod
  * close opus decoder.
  * @param decoder
  */
-void TT_VISIBILITY_DEFAULT ttLibC_OpusDecoder_close(ttLibC_OpusDecoder **decoder) {
+void TT_ATTRIBUTE_API ttLibC_OpusDecoder_close(ttLibC_OpusDecoder **decoder) {
 	ttLibC_OpusDecoder_ *target = (ttLibC_OpusDecoder_ *)*decoder;
 	if(target == NULL) {
 		return;

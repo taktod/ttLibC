@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../ttLibC_predef.h"
 #include "../frame/video/h264.h"
 #include "../frame/video/yuv420.h"
 
@@ -39,20 +40,20 @@ typedef bool (* ttLibC_Openh264DecodeFunc)(void *ptr, ttLibC_Yuv420 *yuv420);
  * make openh264 decoder (maybe add more params later.)
  * @return ttLibC_Openh264Decoder object.
  */
-ttLibC_Openh264Decoder *ttLibC_Openh264Decoder_make();
+ttLibC_Openh264Decoder TT_ATTRIBUTE_API *ttLibC_Openh264Decoder_make();
 
 /**
  * setup SDecodingParam with ttLibC default.
  * @param param structore pointer for SDecodingParam on wels/codec_api.h
  */
-void ttLibC_Openh264Decoder_getDefaultSDecodingParam(void *param);
+void TT_ATTRIBUTE_API ttLibC_Openh264Decoder_getDefaultSDecodingParam(void *param);
 
 /**
  * make openh264 decoder with SDecodingParam
  * @param param structore pointer for SDecodingParam on wels/codec_api.h
  * @return ttLibC_Openh264Decoder object.
  */
-ttLibC_Openh264Decoder *ttLibC_Openh264Decoder_makeWithSDecodingParam(void *param);
+ttLibC_Openh264Decoder TT_ATTRIBUTE_API *ttLibC_Openh264Decoder_makeWithSDecodingParam(void *param);
 
 /**
  * decode frame.
@@ -62,7 +63,7 @@ ttLibC_Openh264Decoder *ttLibC_Openh264Decoder_makeWithSDecodingParam(void *para
  * @param ptr      pointer for user def value, which will call in callback.
  * @return true / false
  */
-bool ttLibC_Openh264Decoder_decode(
+bool TT_ATTRIBUTE_API ttLibC_Openh264Decoder_decode(
 		ttLibC_Openh264Decoder *decoder,
 		ttLibC_H264 *h264,
 		ttLibC_Openh264DecodeFunc callback,
@@ -72,7 +73,7 @@ bool ttLibC_Openh264Decoder_decode(
  * close openh264 decoder
  * @param decoder
  */
-void ttLibC_Openh264Decoder_close(ttLibC_Openh264Decoder **decoder);
+void TT_ATTRIBUTE_API ttLibC_Openh264Decoder_close(ttLibC_Openh264Decoder **decoder);
 
 #ifdef __cplusplus
 } /* extern "C" */

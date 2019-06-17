@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../ttLibC_predef.h"
 #include "../frame/video/theora.h"
 #include "../frame/video/yuv420.h"
 
@@ -40,21 +41,21 @@ typedef bool (* ttLibC_TheoraDecodeFunc)(void *ptr, ttLibC_Yuv420 *yuv420);
  * make theoraDecoder
  * @return theoraDecoder object.
  */
-ttLibC_TheoraDecoder *ttLibC_TheoraDecoder_make();
+ttLibC_TheoraDecoder TT_ATTRIBUTE_API *ttLibC_TheoraDecoder_make();
 
 /**
  * make theoraDecoder with th_info
  * @param ti th_info object.
  * @return theoraDecoder object.
  */
-ttLibC_TheoraDecoder *ttLibC_TheoraDecoder_makeWithInfo(void *ti);
+ttLibC_TheoraDecoder TT_ATTRIBUTE_API *ttLibC_TheoraDecoder_makeWithInfo(void *ti);
 
 /**
  * ref th_dec_ctx object.
  * @param decoder
  * @return th_dec_ctx object.
  */
-void *ttLibC_TheoraDecoder_refNativeDecodeContext(ttLibC_TheoraDecoder *decoder);
+void TT_ATTRIBUTE_API *ttLibC_TheoraDecoder_refNativeDecodeContext(ttLibC_TheoraDecoder *decoder);
 
 /**
  * decode frame
@@ -64,7 +65,7 @@ void *ttLibC_TheoraDecoder_refNativeDecodeContext(ttLibC_TheoraDecoder *decoder)
  * @param ptr
  * @return true:sucess / false:error
  */
-bool ttLibC_TheoraDecoder_decode(
+bool TT_ATTRIBUTE_API ttLibC_TheoraDecoder_decode(
 		ttLibC_TheoraDecoder *decoder,
 		ttLibC_Theora *theora,
 		ttLibC_TheoraDecodeFunc callback,
@@ -74,7 +75,7 @@ bool ttLibC_TheoraDecoder_decode(
  * close theora decoder.
  * @param decoder
  */
-void ttLibC_TheoraDecoder_close(ttLibC_TheoraDecoder **decoder);
+void TT_ATTRIBUTE_API ttLibC_TheoraDecoder_close(ttLibC_TheoraDecoder **decoder);
 
 #ifdef __cplusplus
 } /* extern "C" */

@@ -12,6 +12,7 @@
 extern "C" {
 #endif
 
+#include "../ttLibC_predef.h"
 #include "../frame/audio/opus.h"
 #include "../frame/audio/pcms16.h"
 
@@ -38,7 +39,7 @@ typedef bool (* ttLibC_OpusDecodeFunc)(void *ptr, ttLibC_PcmS16 *pcms16);
  * @param channel_num target channel_num
  * @return opus decoder object
  */
-ttLibC_OpusDecoder *ttLibC_OpusDecoder_make(
+ttLibC_OpusDecoder TT_ATTRIBUTE_API *ttLibC_OpusDecoder_make(
 		uint32_t sample_rate,
 		uint32_t channel_num);
 
@@ -50,7 +51,7 @@ ttLibC_OpusDecoder *ttLibC_OpusDecoder_make(
  * @param ptr      pointer for user def value.
  * @return true / false
  */
-bool ttLibC_OpusDecoder_decode(
+bool TT_ATTRIBUTE_API ttLibC_OpusDecoder_decode(
 		ttLibC_OpusDecoder *decoder,
 		ttLibC_Opus *opus,
 		ttLibC_OpusDecodeFunc callback,
@@ -61,13 +62,13 @@ bool ttLibC_OpusDecoder_decode(
  * @param decoder opus decoder object.
  * @return OpusDecoder pointer.
  */
-void *ttLibC_OpusDecoder_refNativeDecoder(ttLibC_OpusDecoder *decoder);
+void TT_ATTRIBUTE_API *ttLibC_OpusDecoder_refNativeDecoder(ttLibC_OpusDecoder *decoder);
 
 /**
  * close opus decoder.
  * @param decoder
  */
-void ttLibC_OpusDecoder_close(ttLibC_OpusDecoder **decoder);
+void TT_ATTRIBUTE_API ttLibC_OpusDecoder_close(ttLibC_OpusDecoder **decoder);
 
 #ifdef __cplusplus
 } /* extern "C" */

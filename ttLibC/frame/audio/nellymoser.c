@@ -15,7 +15,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "../../ttLibC_predef.h"
 #include "../../_log.h"
 
 typedef ttLibC_Frame_Audio_Nellymoser ttLibC_Nellymoser_;
@@ -33,7 +32,7 @@ typedef ttLibC_Frame_Audio_Nellymoser ttLibC_Nellymoser_;
  * @param timebase      timebase number for pts.
  * @return nellymoser object.
  */
-ttLibC_Nellymoser TT_VISIBILITY_DEFAULT *ttLibC_Nellymoser_make(
+ttLibC_Nellymoser TT_ATTRIBUTE_API *ttLibC_Nellymoser_make(
 		ttLibC_Nellymoser *prev_frame,
 		uint32_t sample_rate,
 		uint32_t sample_num,
@@ -63,7 +62,7 @@ ttLibC_Nellymoser TT_VISIBILITY_DEFAULT *ttLibC_Nellymoser_make(
  * @param prev_frame reuse frame object.
  * @param src_frame  source of clone.
  */
-ttLibC_Nellymoser TT_VISIBILITY_DEFAULT *ttLibC_Nellymoser_clone(
+ttLibC_Nellymoser TT_ATTRIBUTE_API *ttLibC_Nellymoser_clone(
 		ttLibC_Nellymoser *prev_frame,
 		ttLibC_Nellymoser *src_frame) {
 	if(src_frame == NULL) {
@@ -97,6 +96,6 @@ ttLibC_Nellymoser TT_VISIBILITY_DEFAULT *ttLibC_Nellymoser_clone(
  * close frame
  * @param frame
  */
-void TT_VISIBILITY_DEFAULT ttLibC_Nellymoser_close(ttLibC_Nellymoser **frame) {
+void TT_ATTRIBUTE_API ttLibC_Nellymoser_close(ttLibC_Nellymoser **frame) {
 	ttLibC_Audio_close_((ttLibC_Audio **)frame);
 }

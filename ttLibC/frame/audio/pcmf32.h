@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../../ttLibC_predef.h"
 #include "audio.h"
 
 /**
@@ -69,7 +70,7 @@ typedef ttLibC_Frame_Audio_PcmF32 ttLibC_PcmF32;
  * @param timebase      timebase number for pts.
  * @return pcmf32 object.
  */
-ttLibC_PcmF32 *ttLibC_PcmF32_make(
+ttLibC_PcmF32 TT_ATTRIBUTE_API *ttLibC_PcmF32_make(
 		ttLibC_PcmF32 *prev_frame,
 		ttLibC_PcmF32_Type type,
 		uint32_t sample_rate,
@@ -91,7 +92,7 @@ ttLibC_PcmF32 *ttLibC_PcmF32_make(
  * @param prev_frame reuse frame object.
  * @param src_frame  source of clone.
  */
-ttLibC_PcmF32 *ttLibC_PcmF32_clone(
+ttLibC_PcmF32 TT_ATTRIBUTE_API *ttLibC_PcmF32_clone(
 		ttLibC_PcmF32 *prev_frame,
 		ttLibC_PcmF32 *src_frame);
 
@@ -99,13 +100,13 @@ ttLibC_PcmF32 *ttLibC_PcmF32_clone(
  * close frame
  * @param frame
  */
-void ttLibC_PcmF32_close(ttLibC_PcmF32 **frame);
+void TT_ATTRIBUTE_API ttLibC_PcmF32_close(ttLibC_PcmF32 **frame);
 
 /**
  * reset changed data.
  * @param pcm target pcm frame.
  */
-void ttLibC_PcmF32_resetData(ttLibC_PcmF32 *pcm);
+void TT_ATTRIBUTE_API ttLibC_PcmF32_resetData(ttLibC_PcmF32 *pcm);
 
 #ifdef __cplusplus
 } /* extern "C" */

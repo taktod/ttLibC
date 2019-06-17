@@ -1,4 +1,4 @@
-﻿/*
+/*
  * @file   png.c
  * @brief  png image frame information
  * 
@@ -9,12 +9,11 @@
  */
 
 #include "png.h"
-#include "../../ttLibC_predef.h"
 #include "../../_log.h"
 
 typedef ttLibC_Frame_Video_Png ttLibC_Png_;
 
-ttLibC_Png TT_VISIBILITY_DEFAULT *ttLibC_Png_make(
+ttLibC_Png TT_ATTRIBUTE_API *ttLibC_Png_make(
     ttLibC_Png *prev_frame,
     uint32_t width,
     uint32_t height,
@@ -37,7 +36,7 @@ ttLibC_Png TT_VISIBILITY_DEFAULT *ttLibC_Png_make(
 			timebase);
 }
 
-ttLibC_Png TT_VISIBILITY_DEFAULT *ttLibC_Png_clone(
+ttLibC_Png TT_ATTRIBUTE_API *ttLibC_Png_clone(
     ttLibC_Png *prev_frame,
     ttLibC_Png *src_frame) {
   if(src_frame == NULL) {
@@ -65,7 +64,7 @@ ttLibC_Png TT_VISIBILITY_DEFAULT *ttLibC_Png_clone(
   return png;
 }
 
-ttLibC_Png TT_VISIBILITY_DEFAULT *ttLibC_Png_getFrame(
+ttLibC_Png TT_ATTRIBUTE_API *ttLibC_Png_getFrame(
     ttLibC_Png *prev_frame,
     uint8_t *data,
     size_t data_size,
@@ -136,6 +135,6 @@ ttLibC_Png TT_VISIBILITY_DEFAULT *ttLibC_Png_getFrame(
     timebase);
 }
 
-void TT_VISIBILITY_DEFAULT ttLibC_Png_close(ttLibC_Png **frame) {
+void TT_ATTRIBUTE_API ttLibC_Png_close(ttLibC_Png **frame) {
   ttLibC_Video_close_((ttLibC_Video **)frame);
 } 

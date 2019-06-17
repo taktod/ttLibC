@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../ttLibC_predef.h"
 #include "../frame/video/h264.h"
 #include "../frame/video/yuv420.h"
 
@@ -61,7 +62,7 @@ typedef bool (* ttLibC_X264EncodeFunc)(void *ptr, ttLibC_H264 *h264);
  * @param height target height
  * @return ttLibC_X264Encoder object.
  */
-ttLibC_X264Encoder *ttLibC_X264Encoder_make(
+ttLibC_X264Encoder TT_ATTRIBUTE_API *ttLibC_X264Encoder_make(
 		uint32_t width,
 		uint32_t height);
 
@@ -74,7 +75,7 @@ ttLibC_X264Encoder *ttLibC_X264Encoder_make(
  * @param bitrate
  * @return ttLibC_X264Encoder object.
  */
-ttLibC_X264Encoder *ttLibC_X264Encoder_make_ex(
+ttLibC_X264Encoder TT_ATTRIBUTE_API *ttLibC_X264Encoder_make_ex(
 		uint32_t width,
 		uint32_t height,
 		uint32_t max_quantizer,
@@ -88,7 +89,7 @@ ttLibC_X264Encoder *ttLibC_X264Encoder_make_ex(
  * @param height  target height
  * @return true:success false:on error.
  */
-bool ttLibC_X264Encoder_getDefaultX264ParamT(
+bool TT_ATTRIBUTE_API ttLibC_X264Encoder_getDefaultX264ParamT(
 		void *param_t,
 		uint32_t width,
 		uint32_t height);
@@ -102,7 +103,7 @@ bool ttLibC_X264Encoder_getDefaultX264ParamT(
  * @param tune
  * @return true:success false:on error.
  */
-bool ttLibC_X264Encoder_getDefaultX264ParamTWithPresetTune(
+bool TT_ATTRIBUTE_API ttLibC_X264Encoder_getDefaultX264ParamTWithPresetTune(
 		void *param_t,
 		uint32_t width,
 		uint32_t height,
@@ -114,12 +115,12 @@ bool ttLibC_X264Encoder_getDefaultX264ParamTWithPresetTune(
  * @param param_t structure pointer for x264_param_t on x264.h
  * @return ttLibC_X264Encoder object.
  */
-ttLibC_X264Encoder *ttLibC_X264Encoder_makeWithX264ParamT(void *param_t);
+ttLibC_X264Encoder TT_ATTRIBUTE_API *ttLibC_X264Encoder_makeWithX264ParamT(void *param_t);
 
 /**
  * force next encode picture will be target frame type.
  */
-bool ttLibC_X264Encoder_forceNextFrameType(
+bool TT_ATTRIBUTE_API ttLibC_X264Encoder_forceNextFrameType(
 		ttLibC_X264Encoder *encoder,
 		ttLibC_X264Encoder_FrameType frame_type);
 
@@ -130,7 +131,7 @@ bool ttLibC_X264Encoder_forceNextFrameType(
  * @param callback callback func for h264 creation.
  * @param ptr      pointer for user def value, which will call in callback.
  */
-bool ttLibC_X264Encoder_encode(
+bool TT_ATTRIBUTE_API ttLibC_X264Encoder_encode(
 		ttLibC_X264Encoder *encoder,
 		ttLibC_Yuv420 *yuv420,
 		ttLibC_X264EncodeFunc callback,
@@ -140,7 +141,7 @@ bool ttLibC_X264Encoder_encode(
  * close x264 encoder
  * @param encoder
  */
-void ttLibC_X264Encoder_close(ttLibC_X264Encoder **encoder);
+void TT_ATTRIBUTE_API ttLibC_X264Encoder_close(ttLibC_X264Encoder **encoder);
 
 #ifdef __cplusplus
 } /* extern "C" */

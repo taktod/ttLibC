@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../../ttLibC_predef.h"
 #include "video.h"
 
 typedef enum ttLibC_Flv1_Type {
@@ -46,7 +47,7 @@ typedef ttLibC_Frame_Video_Flv1 ttLibC_Flv1;
  * @param pts           pts for flv1 data.
  * @param timebase      timebase number for pts.
  */
-ttLibC_Flv1 *ttLibC_Flv1_make(
+ttLibC_Flv1 TT_ATTRIBUTE_API *ttLibC_Flv1_make(
 		ttLibC_Flv1 *prev_frame,
 		ttLibC_Flv1_Type type,
 		uint32_t width,
@@ -63,11 +64,11 @@ ttLibC_Flv1 *ttLibC_Flv1_make(
  * @param prev_frame reuse frame object.
  * @param src_frame  source of clone.
  */
-ttLibC_Flv1 *ttLibC_Flv1_clone(
+ttLibC_Flv1 TT_ATTRIBUTE_API *ttLibC_Flv1_clone(
 		ttLibC_Flv1 *prev_frame,
 		ttLibC_Flv1 *src_frame);
 
-ttLibC_Flv1_Type ttLibC_Flv1_getPictureType(
+ttLibC_Flv1_Type TT_ATTRIBUTE_API ttLibC_Flv1_getPictureType(
 		void *data,
 		size_t data_size);
 
@@ -77,7 +78,7 @@ ttLibC_Flv1_Type ttLibC_Flv1_getPictureType(
  * @param data_size flv1 data size
  * @return true: key frame false:inter frame
  */
-bool ttLibC_Flv1_isKey(void *data, size_t data_size);
+bool TT_ATTRIBUTE_API ttLibC_Flv1_isKey(void *data, size_t data_size);
 
 /**
  * analyze the width.
@@ -85,7 +86,7 @@ bool ttLibC_Flv1_isKey(void *data, size_t data_size);
  * @param data_size flv1 data size
  * @return width  0 for error.
  */
-uint32_t ttLibC_Flv1_getWidth(void *data, size_t data_size);
+uint32_t TT_ATTRIBUTE_API ttLibC_Flv1_getWidth(void *data, size_t data_size);
 
 /**
  * analyze the height.
@@ -93,7 +94,7 @@ uint32_t ttLibC_Flv1_getWidth(void *data, size_t data_size);
  * @param data_size flv1 data size
  * @return height  0 for error.
  */
-uint32_t ttLibC_Flv1_getHeight(void *data, size_t data_size);
+uint32_t TT_ATTRIBUTE_API ttLibC_Flv1_getHeight(void *data, size_t data_size);
 
 /**
  * analyze the frame information from flv1 binary
@@ -105,7 +106,7 @@ uint32_t ttLibC_Flv1_getHeight(void *data, size_t data_size);
  * @param timebase      timebase for pts
  * @return flv1 frame
  */
-ttLibC_Flv1 *ttLibC_Flv1_getFrame(
+ttLibC_Flv1 TT_ATTRIBUTE_API *ttLibC_Flv1_getFrame(
 		ttLibC_Flv1 *prev_frame,
 		uint8_t *data,
 		size_t data_size,
@@ -117,7 +118,7 @@ ttLibC_Flv1 *ttLibC_Flv1_getFrame(
  * close frame
  * @param frame
  */
-void ttLibC_Flv1_close(ttLibC_Flv1 **frame);
+void TT_ATTRIBUTE_API ttLibC_Flv1_close(ttLibC_Flv1 **frame);
 
 #ifdef __cplusplus
 } /* extern "C" */

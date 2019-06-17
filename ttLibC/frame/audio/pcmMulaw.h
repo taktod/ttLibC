@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../../ttLibC_predef.h"
 #include "audio.h"
 
 /**
@@ -40,7 +41,7 @@ typedef ttLibC_Frame_Audio_PcmMulaw ttLibC_PcmMulaw;
  * @param timebase      timebase number for pts.
  * @return pcm_mulaw object.
  */
-ttLibC_PcmMulaw *ttLibC_PcmMulaw_make(
+ttLibC_PcmMulaw TT_ATTRIBUTE_API *ttLibC_PcmMulaw_make(
 		ttLibC_PcmMulaw *prev_frame,
 		uint32_t sample_rate,
 		uint32_t sample_num,
@@ -57,7 +58,7 @@ ttLibC_PcmMulaw *ttLibC_PcmMulaw_make(
  * @param prev_frame reuse frame object.
  * @param src_frame  source of clone.
  */
-ttLibC_PcmMulaw *ttLibC_PcmMulaw_clone(
+ttLibC_PcmMulaw TT_ATTRIBUTE_API *ttLibC_PcmMulaw_clone(
 		ttLibC_PcmMulaw *prev_frame,
 		ttLibC_PcmMulaw *src_frame);
 
@@ -65,7 +66,7 @@ ttLibC_PcmMulaw *ttLibC_PcmMulaw_clone(
  * close frame
  * @param frame
  */
-void ttLibC_PcmMulaw_close(ttLibC_PcmMulaw **frame);
+void TT_ATTRIBUTE_API ttLibC_PcmMulaw_close(ttLibC_PcmMulaw **frame);
 
 #ifdef __cplusplus
 } /* extern "C" */

@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../ttLibC_predef.h"
 #include "../frame/audio/audio.h"
 #include "../frame/audio/vorbis.h"
 
@@ -41,7 +42,7 @@ typedef bool (* ttLibC_VorbisEncodeFunc)(void *ptr, ttLibC_Vorbis *vorbis);
  * @param channel_num
  * @return vorbisEncoder object.
  */
-ttLibC_VorbisEncoder *ttLibC_VorbisEncoder_make(
+ttLibC_VorbisEncoder TT_ATTRIBUTE_API *ttLibC_VorbisEncoder_make(
 		uint32_t sample_rate,
 		uint32_t channel_num);
 
@@ -67,7 +68,7 @@ ttLibC_VorbisEncoder *ttLibC_VorbisEncoder_make(
  * @param ptr
  * @return true:success / false:error
  */
-bool ttLibC_VorbisEncoder_encode(
+bool TT_ATTRIBUTE_API ttLibC_VorbisEncoder_encode(
 		ttLibC_VorbisEncoder *encoder,
 		ttLibC_Audio *pcm,
 		ttLibC_VorbisEncodeFunc callback,
@@ -77,7 +78,7 @@ bool ttLibC_VorbisEncoder_encode(
  * close encoder
  * @param encoder
  */
-void ttLibC_VorbisEncoder_close(ttLibC_VorbisEncoder **encoder);
+void TT_ATTRIBUTE_API ttLibC_VorbisEncoder_close(ttLibC_VorbisEncoder **encoder);
 
 #ifdef __cplusplus
 } /* extern "C" */

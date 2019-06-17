@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../../ttLibC_predef.h"
 #include "video.h"
 #include "../../ttLibC.h"
 
@@ -126,7 +127,7 @@ typedef ttLibC_Frame_Video_H264 ttLibC_H264;
  * @param pts           pts for h264 data.
  * @param timebase      timebase number for pts.
  */
-ttLibC_H264 *ttLibC_H264_make(
+ttLibC_H264 TT_ATTRIBUTE_API *ttLibC_H264_make(
 		ttLibC_H264 *prev_frame,
 		ttLibC_H264_Type type,
 		uint32_t width,
@@ -143,7 +144,7 @@ ttLibC_H264 *ttLibC_H264_make(
  * @param prev_frame reuse frame object.
  * @param src_frame  source of clone.
  */
-ttLibC_H264 *ttLibC_H264_clone(
+ttLibC_H264 TT_ATTRIBUTE_API *ttLibC_H264_clone(
 		ttLibC_H264 *prev_frame,
 		ttLibC_H264 *src_frame);
 
@@ -154,8 +155,8 @@ ttLibC_H264 *ttLibC_H264_clone(
  * @param data_size data size
  * @return true:analyze success
  */
-bool ttLibC_H264_getNalInfo(ttLibC_H264_NalInfo* info, uint8_t *data, size_t data_size);
-Error_e ttLibC_H264_getNalInfo2(ttLibC_H264_NalInfo* info, uint8_t *data, size_t data_size);
+bool TT_ATTRIBUTE_API ttLibC_H264_getNalInfo(ttLibC_H264_NalInfo* info, uint8_t *data, size_t data_size);
+Error_e TT_ATTRIBUTE_API ttLibC_H264_getNalInfo2(ttLibC_H264_NalInfo* info, uint8_t *data, size_t data_size);
 
 /**
  * analyez info of one nal(for avcc data).
@@ -164,18 +165,18 @@ Error_e ttLibC_H264_getNalInfo2(ttLibC_H264_NalInfo* info, uint8_t *data, size_t
  * @param data_size data size
  * @return true:analyze success
  */
-bool ttLibC_H264_getAvccInfo(ttLibC_H264_NalInfo* info, uint8_t *data, size_t data_size);
-bool ttLibC_H264_getAvccInfo_ex(ttLibC_H264_NalInfo *info, uint8_t *data, size_t data_size, uint32_t length_size);
+bool TT_ATTRIBUTE_API ttLibC_H264_getAvccInfo(ttLibC_H264_NalInfo* info, uint8_t *data, size_t data_size);
+bool TT_ATTRIBUTE_API ttLibC_H264_getAvccInfo_ex(ttLibC_H264_NalInfo *info, uint8_t *data, size_t data_size, uint32_t length_size);
 
 /**
  * check data type is nal or not.
  */
-bool ttLibC_H264_isNal(uint8_t *data, size_t data_size);
+bool TT_ATTRIBUTE_API ttLibC_H264_isNal(uint8_t *data, size_t data_size);
 
 /**
  * check data type is avcc or not.
  */
-bool ttLibC_H264_isAvcc(uint8_t *data, size_t data_size);
+bool TT_ATTRIBUTE_API ttLibC_H264_isAvcc(uint8_t *data, size_t data_size);
 
 /**
  * check data which is key or not.
@@ -183,7 +184,7 @@ bool ttLibC_H264_isAvcc(uint8_t *data, size_t data_size);
  * @param data_size target data size
  * @return true: data is key frame. false: not key frame.
  */
-bool ttLibC_H264_isKey(uint8_t *data, size_t data_size);
+bool TT_ATTRIBUTE_API ttLibC_H264_isKey(uint8_t *data, size_t data_size);
 
 /**
  * analyze width from data.
@@ -192,7 +193,7 @@ bool ttLibC_H264_isKey(uint8_t *data, size_t data_size);
  * @param data_size  target data size
  * @return width siz
  */
-uint32_t ttLibC_H264_getWidth(ttLibC_H264 *prev_frame, uint8_t *data, size_t data_size);
+uint32_t TT_ATTRIBUTE_API ttLibC_H264_getWidth(ttLibC_H264 *prev_frame, uint8_t *data, size_t data_size);
 
 /**
  * analyze height from data.
@@ -201,7 +202,7 @@ uint32_t ttLibC_H264_getWidth(ttLibC_H264 *prev_frame, uint8_t *data, size_t dat
  * @param data_size  target data size
  * @return height size
  */
-uint32_t ttLibC_H264_getHeight(ttLibC_H264 *prev_frame, uint8_t *data, size_t data_size);
+uint32_t TT_ATTRIBUTE_API ttLibC_H264_getHeight(ttLibC_H264 *prev_frame, uint8_t *data, size_t data_size);
 
 /**
  * get frame object from data.
@@ -210,7 +211,7 @@ uint32_t ttLibC_H264_getHeight(ttLibC_H264 *prev_frame, uint8_t *data, size_t da
  * @param data_size  target data size
  * @return h264 frame object.
  */
-ttLibC_H264 *ttLibC_H264_getFrame(
+ttLibC_H264 TT_ATTRIBUTE_API *ttLibC_H264_getFrame(
 		ttLibC_H264 *prev_frame,
 		uint8_t *data,
 		size_t data_size,
@@ -225,7 +226,7 @@ ttLibC_H264 *ttLibC_H264_getFrame(
  * @param data_size   data_size
  * @param length_size size of length information on avcc.
  */
-ttLibC_H264 *ttLibC_H264_analyzeAvccTag(
+ttLibC_H264 TT_ATTRIBUTE_API *ttLibC_H264_analyzeAvccTag(
 		ttLibC_H264 *prev_frame,
 		uint8_t *data,
 		size_t data_size,
@@ -236,7 +237,7 @@ ttLibC_H264 *ttLibC_H264_analyzeAvccTag(
  * @param h264 target h264 object
  * @return value of crc32. 0 for error.
  */
-uint32_t ttLibC_H264_getConfigCrc32(ttLibC_H264 *h264);
+uint32_t TT_ATTRIBUTE_API ttLibC_H264_getConfigCrc32(ttLibC_H264 *h264);
 
 /**
  * read avcc buffer for config data.
@@ -245,7 +246,7 @@ uint32_t ttLibC_H264_getConfigCrc32(ttLibC_H264 *h264);
  * @param data_size buffer size.
  * @return write size. 0 for error.
  */
-size_t ttLibC_H264_readAvccTag(
+size_t TT_ATTRIBUTE_API ttLibC_H264_readAvccTag(
 		ttLibC_H264 *h264,
 		void *data,
 		size_t data_size);
@@ -254,7 +255,7 @@ size_t ttLibC_H264_readAvccTag(
  * close frame
  * @param frame
  */
-void ttLibC_H264_close(ttLibC_H264 **frame);
+void TT_ATTRIBUTE_API ttLibC_H264_close(ttLibC_H264 **frame);
 
 #ifdef __cplusplus
 } /* extern "C" */

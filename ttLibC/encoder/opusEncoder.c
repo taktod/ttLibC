@@ -11,7 +11,6 @@
 #ifdef __ENABLE_OPUS__
 
 #include "opusEncoder.h"
-#include "../ttLibC_predef.h"
 #include "../_log.h"
 #include "../allocator.h"
 #include <stdint.h>
@@ -53,7 +52,7 @@ typedef ttLibC_Encoder_OpusEncoder_ ttLibC_OpusEncoder_;
  * @param unit_sample_num sample_num for each opus frame.
  * @return opus encoder object
  */
-ttLibC_OpusEncoder TT_VISIBILITY_DEFAULT *ttLibC_OpusEncoder_make(
+ttLibC_OpusEncoder TT_ATTRIBUTE_API *ttLibC_OpusEncoder_make(
 		uint32_t sample_rate,
 		uint32_t channel_num,
 		uint32_t unit_sample_num) {
@@ -143,7 +142,7 @@ static bool doEncode(ttLibC_OpusEncoder_ *encoder, void *data, ttLibC_OpusEncode
  * @param ptr      pointer for user def value, which will call in callback
  * @return true / false
  */
-bool TT_VISIBILITY_DEFAULT ttLibC_OpusEncoder_encode(
+bool TT_ATTRIBUTE_API ttLibC_OpusEncoder_encode(
 		ttLibC_OpusEncoder *encoder,
 		ttLibC_PcmS16 *pcm,
 		ttLibC_OpusEncodeFunc callback,
@@ -209,7 +208,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_OpusEncoder_encode(
  * @param decoder opus encoder object.
  * @return OpusEncoder pointer.
  */
-void TT_VISIBILITY_DEFAULT *ttLibC_OpusEncoder_refNativeEncoder(ttLibC_OpusEncoder *encoder) {
+void TT_ATTRIBUTE_API *ttLibC_OpusEncoder_refNativeEncoder(ttLibC_OpusEncoder *encoder) {
 	if(encoder == NULL) {
 		return NULL;
 	}
@@ -223,7 +222,7 @@ void TT_VISIBILITY_DEFAULT *ttLibC_OpusEncoder_refNativeEncoder(ttLibC_OpusEncod
  * @return true:success false:error
  * @note you can check real value for bitrate, encoder->bitrate;
  */
-bool TT_VISIBILITY_DEFAULT ttLibC_OpusEncoder_setBitrate(
+bool TT_ATTRIBUTE_API ttLibC_OpusEncoder_setBitrate(
 		ttLibC_OpusEncoder *encoder,
 		uint32_t bitrate) {
 	if(encoder == NULL) {
@@ -249,7 +248,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_OpusEncoder_setBitrate(
  * @return true:success false:error
  * @note you can check real value for complexity, encoder->complexity;
  */
-bool TT_VISIBILITY_DEFAULT ttLibC_OpusEncoder_setComplexity(
+bool TT_ATTRIBUTE_API ttLibC_OpusEncoder_setComplexity(
 		ttLibC_OpusEncoder *encoder,
 		uint32_t complexity) {
 	if(encoder == NULL) {
@@ -272,7 +271,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_OpusEncoder_setComplexity(
  * close opus encoder
  * @param encoder
  */
-void TT_VISIBILITY_DEFAULT ttLibC_OpusEncoder_close(ttLibC_OpusEncoder **encoder) {
+void TT_ATTRIBUTE_API ttLibC_OpusEncoder_close(ttLibC_OpusEncoder **encoder) {
 	ttLibC_OpusEncoder_ *target = (ttLibC_OpusEncoder_ *)*encoder;
 	if(target == NULL) {
 		return;

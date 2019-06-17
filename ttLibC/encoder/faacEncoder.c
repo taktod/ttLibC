@@ -11,7 +11,6 @@
 #ifdef __ENABLE_FAAC_ENCODE__
 
 #include "faacEncoder.h"
-#include "../ttLibC_predef.h"
 #include "../frame/audio/aac.h"
 #include "../_log.h"
 #include "../allocator.h"
@@ -55,7 +54,7 @@ typedef ttLibC_Encoder_FaacEncoder_ ttLibC_FaacEncoder_;
  * @param channel_num
  * @param bitrate
  */
-ttLibC_FaacEncoder TT_VISIBILITY_DEFAULT *ttLibC_FaacEncoder_make(
+ttLibC_FaacEncoder TT_ATTRIBUTE_API *ttLibC_FaacEncoder_make(
 		ttLibC_FaacEncoder_Type type,
 		uint32_t sample_rate,
 		uint32_t channel_num,
@@ -89,7 +88,7 @@ ttLibC_FaacEncoder TT_VISIBILITY_DEFAULT *ttLibC_FaacEncoder_make(
 	return ttLibC_FaacEncoder_makeWithFaacEncConfiguration(&config, sample_rate, channel_num);
 }
 
-void TT_VISIBILITY_DEFAULT ttLibC_FaacEncoder_getDefaultFaacEncConfiguration(void *encConfig) {
+void TT_ATTRIBUTE_API ttLibC_FaacEncoder_getDefaultFaacEncConfiguration(void *encConfig) {
 	faacEncConfigurationPtr config = (faacEncConfigurationPtr)encConfig;
 	if(config == NULL) {
 		return;
@@ -114,7 +113,7 @@ void TT_VISIBILITY_DEFAULT ttLibC_FaacEncoder_getDefaultFaacEncConfiguration(voi
 //	config->version
 }
 
-ttLibC_FaacEncoder TT_VISIBILITY_DEFAULT *ttLibC_FaacEncoder_makeWithFaacEncConfiguration(
+ttLibC_FaacEncoder TT_ATTRIBUTE_API *ttLibC_FaacEncoder_makeWithFaacEncConfiguration(
 		void *encConfig,
 		uint32_t sample_rate,
 		uint32_t channel_num) {
@@ -234,7 +233,7 @@ static bool checkEncodedData(ttLibC_FaacEncoder_ *encoder, uint32_t encode_size,
  * @param callback callback func for aac creation.
  * @param ptr      pointer for user def value, which will call in callback.
  */
-bool TT_VISIBILITY_DEFAULT ttLibC_FaacEncoder_encode(
+bool TT_ATTRIBUTE_API ttLibC_FaacEncoder_encode(
 		ttLibC_FaacEncoder *encoder,
 		ttLibC_PcmS16 *pcm,
 		ttLibC_FaacEncodeFunc callback,
@@ -307,7 +306,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_FaacEncoder_encode(
  * close faac encoder.
  * @param encoder
  */
-void TT_VISIBILITY_DEFAULT ttLibC_FaacEncoder_close(ttLibC_FaacEncoder **encoder) {
+void TT_ATTRIBUTE_API ttLibC_FaacEncoder_close(ttLibC_FaacEncoder **encoder) {
 	if(*encoder == NULL) {
 		return;
 	}

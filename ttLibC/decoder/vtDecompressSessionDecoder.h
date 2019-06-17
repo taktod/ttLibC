@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../ttLibC_predef.h"
 #include "../frame/video/video.h"
 #include "../frame/video/yuv420.h"
 
@@ -55,7 +56,7 @@ typedef bool (* ttLibC_VtDecodeRawFunc)(void *ptr, void *cvImageBuffer, void *cm
  * @param target_frame_type currently support frameType_jpeg and frameType_h264
  * @return vtDecoder object.
  */
-ttLibC_VtDecoder *ttLibC_VtDecoder_make(ttLibC_Frame_Type target_frame_type);
+ttLibC_VtDecoder TT_ATTRIBUTE_API *ttLibC_VtDecoder_make(ttLibC_Frame_Type target_frame_type);
 
 /**
  * decode frame
@@ -65,7 +66,7 @@ ttLibC_VtDecoder *ttLibC_VtDecoder_make(ttLibC_Frame_Type target_frame_type);
  * @param ptr
  * @return true / false
  */
-bool ttLibC_VtDecoder_decode(
+bool TT_ATTRIBUTE_API ttLibC_VtDecoder_decode(
 		ttLibC_VtDecoder *decoder,
 		ttLibC_Video *video,
 		ttLibC_VtDecodeFunc callback,
@@ -79,7 +80,7 @@ bool ttLibC_VtDecoder_decode(
  * @param ptr
  * @return true / false
  */
-bool ttLibC_VtDecoder_rawDecode(
+bool TT_ATTRIBUTE_API ttLibC_VtDecoder_rawDecode(
 		ttLibC_VtDecoder *decoder,
 		ttLibC_Video *video,
 		ttLibC_VtDecodeRawFunc callback,
@@ -89,7 +90,7 @@ bool ttLibC_VtDecoder_rawDecode(
  * close decoder
  * @param decoder
  */
-void ttLibC_VtDecoder_close(ttLibC_VtDecoder **decoder);
+void TT_ATTRIBUTE_API ttLibC_VtDecoder_close(ttLibC_VtDecoder **decoder);
 
 #ifdef __cplusplus
 } /* extern "C" */

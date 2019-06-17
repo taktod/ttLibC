@@ -12,7 +12,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "../../ttLibC_predef.h"
 #include "../../_log.h"
 #include "../../allocator.h"
 #include "../../util/ioUtil.h"
@@ -34,7 +33,7 @@ typedef ttLibC_Frame_Audio_Speex ttLibC_Speex_;
  * @param timebase      timebase number for pts.
  * @return speex object.
  */
-ttLibC_Speex TT_VISIBILITY_DEFAULT *ttLibC_Speex_make(
+ttLibC_Speex TT_ATTRIBUTE_API *ttLibC_Speex_make(
 		ttLibC_Speex *prev_frame,
 		ttLibC_Speex_Type type,
 		uint32_t sample_rate,
@@ -116,7 +115,7 @@ ttLibC_Speex TT_VISIBILITY_DEFAULT *ttLibC_Speex_make(
  * @param prev_frame reuse frame object.
  * @param src_frame  source of clone.
  */
-ttLibC_Speex TT_VISIBILITY_DEFAULT *ttLibC_Speex_clone(
+ttLibC_Speex TT_ATTRIBUTE_API *ttLibC_Speex_clone(
 		ttLibC_Speex *prev_frame,
 		ttLibC_Speex *src_frame) {
 	if(src_frame == NULL) {
@@ -252,7 +251,7 @@ static bool Speex_analyzeFrameBuffer(
  * @param timebase      timebase for speex frame.
  * @return speex object.
  */
-ttLibC_Speex TT_VISIBILITY_DEFAULT *ttLibC_Speex_getFrame(
+ttLibC_Speex TT_ATTRIBUTE_API *ttLibC_Speex_getFrame(
 		ttLibC_Speex *prev_frame,
 		void *data,
 		size_t data_size,
@@ -388,7 +387,7 @@ ttLibC_Speex TT_VISIBILITY_DEFAULT *ttLibC_Speex_getFrame(
  * close frame
  * @param frame
  */
-void TT_VISIBILITY_DEFAULT ttLibC_Speex_close(ttLibC_Speex **frame) {
+void TT_ATTRIBUTE_API ttLibC_Speex_close(ttLibC_Speex **frame) {
 	ttLibC_Speex_ *target = (ttLibC_Speex_ *)*frame;
 	if(target == NULL) {
 		return;

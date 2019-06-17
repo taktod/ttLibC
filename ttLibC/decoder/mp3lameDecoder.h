@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../ttLibC_predef.h"
 #include "../frame/audio/mp3.h"
 #include "../frame/audio/pcms16.h"
 
@@ -47,7 +48,7 @@ typedef bool (* ttLibC_Mp3lameDecodeFunc)(void *ptr, ttLibC_PcmS16 *pcms16);
 /**
  * make mp3lame decoder
  */
-ttLibC_Mp3lameDecoder *ttLibC_Mp3lameDecoder_make();
+ttLibC_Mp3lameDecoder TT_ATTRIBUTE_API *ttLibC_Mp3lameDecoder_make();
 
 /**
  * decode frame.
@@ -57,7 +58,7 @@ ttLibC_Mp3lameDecoder *ttLibC_Mp3lameDecoder_make();
  * @param ptr      pointer for user def value, which willl call in callback.
  * @return true / false
  */
-bool ttLibC_Mp3lameDecoder_decode(
+bool TT_ATTRIBUTE_API ttLibC_Mp3lameDecoder_decode(
 		ttLibC_Mp3lameDecoder *decoder,
 		ttLibC_Mp3 *mp3,
 		ttLibC_Mp3lameDecodeFunc callback,
@@ -67,7 +68,7 @@ bool ttLibC_Mp3lameDecoder_decode(
  * close mp3lame decoder.
  * @param decoder.
  */
-void ttLibC_Mp3lameDecoder_close(ttLibC_Mp3lameDecoder **decoder);
+void TT_ATTRIBUTE_API ttLibC_Mp3lameDecoder_close(ttLibC_Mp3lameDecoder **decoder);
 
 #ifdef __cplusplus
 } /* extern "C" */

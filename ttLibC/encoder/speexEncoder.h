@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../ttLibC_predef.h"
 #include "../frame/audio/speex.h"
 #include "../frame/audio/pcms16.h"
 
@@ -57,7 +58,7 @@ typedef bool (* ttLibC_SpeexEncodeFunc)(void *ptr, ttLibC_Speex *speex);
  * @param quality     target quality
  * @return speex encoder object
  */
-ttLibC_SpeexEncoder *ttLibC_SpeexEncoder_make(
+ttLibC_SpeexEncoder TT_ATTRIBUTE_API *ttLibC_SpeexEncoder_make(
 		uint32_t sample_rate,
 		uint32_t channel_num,
 		uint32_t quality);
@@ -70,7 +71,7 @@ ttLibC_SpeexEncoder *ttLibC_SpeexEncoder_make(
  * @param ptr      pointer for user def value, which will call in callback.
  * @return true / false
  */
-bool ttLibC_SpeexEncoder_encode(
+bool TT_ATTRIBUTE_API ttLibC_SpeexEncoder_encode(
 		ttLibC_SpeexEncoder *encoder,
 		ttLibC_PcmS16 *pcm,
 		ttLibC_SpeexEncodeFunc callback,
@@ -80,7 +81,7 @@ bool ttLibC_SpeexEncoder_encode(
  * close speex encoder.
  * @param encoder
  */
-void ttLibC_SpeexEncoder_close(ttLibC_SpeexEncoder **encoder);
+void TT_ATTRIBUTE_API ttLibC_SpeexEncoder_close(ttLibC_SpeexEncoder **encoder);
 
 #ifdef __cplusplus
 } /* extern "C" */

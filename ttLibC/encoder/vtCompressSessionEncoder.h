@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../ttLibC_predef.h"
 #include "../frame/video/video.h"
 #include "../frame/video/yuv420.h"
 
@@ -46,7 +47,7 @@ typedef bool (* ttLibC_VtEncodeFunc)(void *ptr, ttLibC_Video *video);
  * @param target_frame_type current support frameType_jpeg and frameType_h264.
  * @return ttLibC_VtEncoder object.
  */
-ttLibC_VtEncoder *ttLibC_VtEncoder_make(
+ttLibC_VtEncoder TT_ATTRIBUTE_API *ttLibC_VtEncoder_make(
 		uint32_t width,
 		uint32_t height,
 		ttLibC_Frame_Type target_frame_type);
@@ -60,7 +61,7 @@ ttLibC_VtEncoder *ttLibC_VtEncoder_make(
  * @param is_baseline true:baseline false:main
  * @param target_frame_type
  */
-ttLibC_VtEncoder *ttLibC_VtEncoder_make_ex(
+ttLibC_VtEncoder TT_ATTRIBUTE_API *ttLibC_VtEncoder_make_ex(
 		uint32_t width,
 		uint32_t height,
 		uint32_t fps,
@@ -76,7 +77,7 @@ ttLibC_VtEncoder *ttLibC_VtEncoder_make_ex(
  * @param ptr
  * @return true:success to continue / false:error
  */
-bool ttLibC_VtEncoder_encode(
+bool TT_ATTRIBUTE_API ttLibC_VtEncoder_encode(
 		ttLibC_VtEncoder *encoder,
 		ttLibC_Yuv420 *yuv420,
 		ttLibC_VtEncodeFunc callback,
@@ -86,7 +87,7 @@ bool ttLibC_VtEncoder_encode(
  * close encoder
  * @param encoder
  */
-void ttLibC_VtEncoder_close(ttLibC_VtEncoder **encoder);
+void TT_ATTRIBUTE_API ttLibC_VtEncoder_close(ttLibC_VtEncoder **encoder);
 
 #ifdef __cplusplus
 } /* extern "C" */

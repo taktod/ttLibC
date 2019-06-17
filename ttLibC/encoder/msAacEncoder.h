@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../ttLibC_predef.h"
 #include "../frame/audio/aac.h"
 #include "../frame/audio/pcms16.h"
 
@@ -37,18 +38,18 @@ typedef ttLibC_Encoder_MsAacEncoder ttLibC_MsAacEncoder;
  */
 typedef bool (*ttLibC_MsAacEncodeFunc)(void *ptr, ttLibC_Aac *aac);
 
-ttLibC_MsAacEncoder *ttLibC_MsAacEncoder_make(
+ttLibC_MsAacEncoder TT_ATTRIBUTE_API *ttLibC_MsAacEncoder_make(
 	uint32_t sample_rate,
 	uint32_t channel_num,
 	uint32_t target_bitrate);
 
-bool ttLibC_MsAacEncoder_encode(
+bool TT_ATTRIBUTE_API ttLibC_MsAacEncoder_encode(
 	ttLibC_MsAacEncoder *encoder,
 	ttLibC_PcmS16 *pcm,
 	ttLibC_MsAacEncodeFunc callback,
 	void *ptr);
 
-void ttLibC_MsAacEncoder_close(ttLibC_MsAacEncoder **encoder);
+void TT_ATTRIBUTE_API ttLibC_MsAacEncoder_close(ttLibC_MsAacEncoder **encoder);
 
 #ifdef __cplusplus
 } /* extern "C" */

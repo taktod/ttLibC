@@ -9,7 +9,6 @@
  */
 
 #include "vp8.h"
-#include "../../ttLibC_predef.h"
 #include "../../_log.h"
 
 typedef ttLibC_Frame_Video_Vp8 ttLibC_Vp8_;
@@ -26,7 +25,7 @@ typedef ttLibC_Frame_Video_Vp8 ttLibC_Vp8_;
  * @param pts           pts for vp8 data.
  * @param timebase      timebase number for pts.
  */
-ttLibC_Vp8 TT_VISIBILITY_DEFAULT *ttLibC_Vp8_make(
+ttLibC_Vp8 TT_ATTRIBUTE_API *ttLibC_Vp8_make(
 		ttLibC_Vp8 *prev_frame,
 		ttLibC_Video_Type video_type,
 		uint32_t width,
@@ -56,7 +55,7 @@ ttLibC_Vp8 TT_VISIBILITY_DEFAULT *ttLibC_Vp8_make(
  * @param prev_frame reuse frame object.
  * @param src_frame  source of clone.
  */
-ttLibC_Vp8 TT_VISIBILITY_DEFAULT *ttLibC_Vp8_clone(
+ttLibC_Vp8 TT_ATTRIBUTE_API *ttLibC_Vp8_clone(
 		ttLibC_Vp8 *prev_frame,
 		ttLibC_Vp8 *src_frame) {
 	if(src_frame == NULL) {
@@ -92,7 +91,7 @@ ttLibC_Vp8 TT_VISIBILITY_DEFAULT *ttLibC_Vp8_clone(
  * @param data_size vp8 data size
  * @return true: key frame false:inter frame
  */
-bool TT_VISIBILITY_DEFAULT ttLibC_Vp8_isKey(void *data, size_t data_size) {
+bool TT_ATTRIBUTE_API ttLibC_Vp8_isKey(void *data, size_t data_size) {
 	if(data == NULL) {
 		return false;
 	}
@@ -111,7 +110,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_Vp8_isKey(void *data, size_t data_size) {
  * @param data_size  vp8 data size
  * @return 0:error or width size.
  */
-uint32_t TT_VISIBILITY_DEFAULT ttLibC_Vp8_getWidth(ttLibC_Vp8 *prev_frame, uint8_t *data, size_t data_size) {
+uint32_t TT_ATTRIBUTE_API ttLibC_Vp8_getWidth(ttLibC_Vp8 *prev_frame, uint8_t *data, size_t data_size) {
 	if(data == NULL) {
 		return false;
 	}
@@ -139,7 +138,7 @@ uint32_t TT_VISIBILITY_DEFAULT ttLibC_Vp8_getWidth(ttLibC_Vp8 *prev_frame, uint8
  * @param data_size  vp8 data size
  * @return 0:error or height size.
  */
-uint32_t TT_VISIBILITY_DEFAULT ttLibC_Vp8_getHeight(ttLibC_Vp8 *prev_frame, uint8_t *data, size_t data_size) {
+uint32_t TT_ATTRIBUTE_API ttLibC_Vp8_getHeight(ttLibC_Vp8 *prev_frame, uint8_t *data, size_t data_size) {
 	if(data == NULL) {
 		return false;
 	}
@@ -170,7 +169,7 @@ uint32_t TT_VISIBILITY_DEFAULT ttLibC_Vp8_getHeight(ttLibC_Vp8 *prev_frame, uint
  * @param timebase      timebase for pts.
  * @return vp8 frame
  */
-ttLibC_Vp8 TT_VISIBILITY_DEFAULT *ttLibC_Vp8_getFrame(ttLibC_Vp8 *prev_frame, uint8_t *data, size_t data_size, bool non_copy_mode, uint64_t pts, uint32_t timebase) {
+ttLibC_Vp8 TT_ATTRIBUTE_API *ttLibC_Vp8_getFrame(ttLibC_Vp8 *prev_frame, uint8_t *data, size_t data_size, bool non_copy_mode, uint64_t pts, uint32_t timebase) {
 	if(data_size <= 0x0A) {
 		ERR_PRINT("data size is too small for analyze.");
 		return NULL;
@@ -188,6 +187,6 @@ ttLibC_Vp8 TT_VISIBILITY_DEFAULT *ttLibC_Vp8_getFrame(ttLibC_Vp8 *prev_frame, ui
  * close frame
  * @param frame
  */
-void TT_VISIBILITY_DEFAULT ttLibC_Vp8_close(ttLibC_Vp8 **frame) {
+void TT_ATTRIBUTE_API ttLibC_Vp8_close(ttLibC_Vp8 **frame) {
 	ttLibC_Video_close_((ttLibC_Video **)frame);
 }

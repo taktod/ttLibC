@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../ttLibC_predef.h"
 #include "../frame/audio/opus.h"
 #include "../frame/audio/pcms16.h"
 
@@ -50,7 +51,7 @@ typedef bool (* ttLibC_OpusEncodeFunc)(void *ptr, ttLibC_Opus *opus);
  * @param unit_sample_num sample_num for each opus frame.
  * @return opus encoder object
  */
-ttLibC_OpusEncoder *ttLibC_OpusEncoder_make(
+ttLibC_OpusEncoder TT_ATTRIBUTE_API *ttLibC_OpusEncoder_make(
 		uint32_t sample_rate,
 		uint32_t channel_num,
 		uint32_t unit_sample_num);
@@ -63,7 +64,7 @@ ttLibC_OpusEncoder *ttLibC_OpusEncoder_make(
  * @param ptr      pointer for user def value, which will call in callback
  * @return true / false
  */
-bool ttLibC_OpusEncoder_encode(
+bool TT_ATTRIBUTE_API ttLibC_OpusEncoder_encode(
 		ttLibC_OpusEncoder *encoder,
 		ttLibC_PcmS16 *pcm,
 		ttLibC_OpusEncodeFunc callback,
@@ -74,7 +75,7 @@ bool ttLibC_OpusEncoder_encode(
  * @param encoder opus encoder object.
  * @return OpusEncoder pointer.
  */
-void *ttLibC_OpusEncoder_refNativeEncoder(ttLibC_OpusEncoder *encoder);
+void TT_ATTRIBUTE_API *ttLibC_OpusEncoder_refNativeEncoder(ttLibC_OpusEncoder *encoder);
 
 /**
  * update bitrate for opus encoder.
@@ -83,7 +84,7 @@ void *ttLibC_OpusEncoder_refNativeEncoder(ttLibC_OpusEncoder *encoder);
  * @return true:success false:error
  * @note you can check real value for bitrate, encoder->bitrate;
  */
-bool ttLibC_OpusEncoder_setBitrate(
+bool TT_ATTRIBUTE_API ttLibC_OpusEncoder_setBitrate(
 		ttLibC_OpusEncoder *encoder,
 		uint32_t bitrate);
 
@@ -94,7 +95,7 @@ bool ttLibC_OpusEncoder_setBitrate(
  * @return true:success false:error
  * @note you can check real value for complexity, encoder->complexity;
  */
-bool ttLibC_OpusEncoder_setComplexity(
+bool TT_ATTRIBUTE_API ttLibC_OpusEncoder_setComplexity(
 		ttLibC_OpusEncoder *encoder,
 		uint32_t complexity);
 
@@ -102,7 +103,7 @@ bool ttLibC_OpusEncoder_setComplexity(
  * close opus encoder
  * @param encoder
  */
-void ttLibC_OpusEncoder_close(ttLibC_OpusEncoder **encoder);
+void TT_ATTRIBUTE_API ttLibC_OpusEncoder_close(ttLibC_OpusEncoder **encoder);
 
 #ifdef __cplusplus
 } /* extern "C" */

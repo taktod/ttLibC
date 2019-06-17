@@ -11,7 +11,6 @@
 #ifdef __ENABLE_APPLE__
 
 #include "vtDecompressSessionDecoder.h"
-#include "../ttLibC_predef.h"
 #include "../_log.h"
 #include "../allocator.h"
 #include "../util/dynamicBufferUtil.h"
@@ -125,7 +124,7 @@ static void VtDecoder_decodeCallback(
 	}
 }
 
-ttLibC_VtDecoder TT_VISIBILITY_DEFAULT *ttLibC_VtDecoder_make(ttLibC_Frame_Type target_frame_type) {
+ttLibC_VtDecoder TT_ATTRIBUTE_API *ttLibC_VtDecoder_make(ttLibC_Frame_Type target_frame_type) {
 	ttLibC_VtDecoder_ *decoder = ttLibC_malloc(sizeof(ttLibC_VtDecoder_));
 	if(decoder == NULL) {
 		return NULL;
@@ -570,7 +569,7 @@ static bool VtDecoder_decode(
 	return true;
 }
 
-bool TT_VISIBILITY_DEFAULT ttLibC_VtDecoder_decode(
+bool TT_ATTRIBUTE_API ttLibC_VtDecoder_decode(
 		ttLibC_VtDecoder *decoder,
 		ttLibC_Video *video,
 		ttLibC_VtDecodeFunc callback,
@@ -582,7 +581,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_VtDecoder_decode(
 			ptr);
 }
 
-bool TT_VISIBILITY_DEFAULT ttLibC_VtDecoder_rawDecode(
+bool TT_ATTRIBUTE_API ttLibC_VtDecoder_rawDecode(
 		ttLibC_VtDecoder *decoder,
 		ttLibC_Video *video,
 		ttLibC_VtDecodeRawFunc callback,
@@ -595,7 +594,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_VtDecoder_rawDecode(
 			ptr);
 }
 
-void TT_VISIBILITY_DEFAULT ttLibC_VtDecoder_close(ttLibC_VtDecoder **decoder) {
+void TT_ATTRIBUTE_API ttLibC_VtDecoder_close(ttLibC_VtDecoder **decoder) {
 	ttLibC_VtDecoder_ *target = (ttLibC_VtDecoder_ *)*decoder;
 	if(target == NULL) {
 		return;

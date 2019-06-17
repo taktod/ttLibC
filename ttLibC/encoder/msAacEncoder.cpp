@@ -11,7 +11,6 @@
 #ifdef __ENABLE_WIN32__
 
 #include "msAacEncoder.h"
-#include "../ttLibC_predef.h"
 #include "../_log.h"
 #include "../allocator.h"
 #include "../frame/audio/pcms16.h"
@@ -46,7 +45,7 @@ typedef struct ttLibC_Encoder_MsAacEncoder_ {
 
 typedef ttLibC_Encoder_MsAacEncoder_ ttLibC_MsAacEncoder_;
 
-ttLibC_MsAacEncoder TT_VISIBILITY_DEFAULT *ttLibC_MsAacEncoder_make(
+ttLibC_MsAacEncoder TT_ATTRIBUTE_API *ttLibC_MsAacEncoder_make(
 		uint32_t sample_rate,
 		uint32_t channel_num,
 		uint32_t target_bitrate) {
@@ -112,7 +111,7 @@ ttLibC_MsAacEncoder TT_VISIBILITY_DEFAULT *ttLibC_MsAacEncoder_make(
 	}
 }
 
-bool TT_VISIBILITY_DEFAULT ttLibC_MsAacEncoder_encode(
+bool TT_ATTRIBUTE_API ttLibC_MsAacEncoder_encode(
 		ttLibC_MsAacEncoder *encoder,
 		ttLibC_PcmS16 *pcm,
 		ttLibC_MsAacEncodeFunc callback,
@@ -281,7 +280,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_MsAacEncoder_encode(
 	return SUCCEEDED(hr);
 }
 
-void TT_VISIBILITY_DEFAULT ttLibC_MsAacEncoder_close(ttLibC_MsAacEncoder **encoder) {
+void TT_ATTRIBUTE_API ttLibC_MsAacEncoder_close(ttLibC_MsAacEncoder **encoder) {
 	ttLibC_MsAacEncoder_ *target = (ttLibC_MsAacEncoder_ *)*encoder;
 	if(target == NULL) {
 		return;

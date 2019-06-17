@@ -12,7 +12,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "../../ttLibC_predef.h"
 #include "../../_log.h"
 #include "../../allocator.h"
 
@@ -32,7 +31,7 @@ typedef ttLibC_Frame_Audio_Opus ttLibC_Opus_;
  * @param timebase      timebase number for pts.
  * @return opus object.
  */
-ttLibC_Opus TT_VISIBILITY_DEFAULT *ttLibC_Opus_make(
+ttLibC_Opus TT_ATTRIBUTE_API *ttLibC_Opus_make(
 		ttLibC_Opus *prev_frame,
 		ttLibC_Opus_Type type,
 		uint32_t sample_rate,
@@ -114,7 +113,7 @@ ttLibC_Opus TT_VISIBILITY_DEFAULT *ttLibC_Opus_make(
  * @param prev_frame reuse frame object.
  * @param src_frame  source of clone.
  */
-ttLibC_Opus TT_VISIBILITY_DEFAULT *ttLibC_Opus_clone(
+ttLibC_Opus TT_ATTRIBUTE_API *ttLibC_Opus_clone(
 		ttLibC_Opus *prev_frame,
 		ttLibC_Opus *src_frame) {
 	if(src_frame == NULL) {
@@ -145,7 +144,7 @@ ttLibC_Opus TT_VISIBILITY_DEFAULT *ttLibC_Opus_clone(
 	return opus;
 }
 
-uint32_t TT_VISIBILITY_HIDDEN ttLibC_Opus_getChannelNum(void *data, size_t data_size) {
+uint32_t TT_ATTRIBUTE_INNER ttLibC_Opus_getChannelNum(void *data, size_t data_size) {
 	if(data_size < 1) {
 		ERR_PRINT("invalid opus data.");
 		return 0;
@@ -154,13 +153,13 @@ uint32_t TT_VISIBILITY_HIDDEN ttLibC_Opus_getChannelNum(void *data, size_t data_
 	return (u[0] & 0x04) ? 2 : 1;
 }
 
-uint32_t TT_VISIBILITY_HIDDEN ttLibC_Opus_getSampleRate(void *data, size_t data_size) {
+uint32_t TT_ATTRIBUTE_INNER ttLibC_Opus_getSampleRate(void *data, size_t data_size) {
 	(void)data;
 	(void)data_size;
 	return 48000;
 }
 
-uint32_t TT_VISIBILITY_HIDDEN ttLibC_Opus_getNbFrameCount(void *data, size_t data_size) {
+uint32_t TT_ATTRIBUTE_INNER ttLibC_Opus_getNbFrameCount(void *data, size_t data_size) {
 	if(data_size < 1) {
 		ERR_PRINT("invalid opus data.");
 		return 0;
@@ -180,7 +179,7 @@ uint32_t TT_VISIBILITY_HIDDEN ttLibC_Opus_getNbFrameCount(void *data, size_t dat
 	return u[1] & 0x3F;
 }
 
-uint32_t TT_VISIBILITY_HIDDEN ttLibC_Opus_getSampleNum(void *data, size_t data_size) {
+uint32_t TT_ATTRIBUTE_INNER ttLibC_Opus_getSampleNum(void *data, size_t data_size) {
 	uint32_t nbFrameCount = ttLibC_Opus_getNbFrameCount(data, data_size);
 	if(nbFrameCount == 0) {
 		return 0;
@@ -218,7 +217,7 @@ uint32_t TT_VISIBILITY_HIDDEN ttLibC_Opus_getSampleNum(void *data, size_t data_s
  * @param pts        pts for opus frame.
  * @param timebase   timebase for opus frame.
  */
-ttLibC_Opus TT_VISIBILITY_DEFAULT *ttLibC_Opus_makeFrame(
+ttLibC_Opus TT_ATTRIBUTE_API *ttLibC_Opus_makeFrame(
 		ttLibC_Opus *prev_frame,
 		void *data,
 		size_t data_size,
@@ -252,7 +251,7 @@ ttLibC_Opus TT_VISIBILITY_DEFAULT *ttLibC_Opus_makeFrame(
  * @param pts        pts for opus frame.
  * @param timebase   timebase for opus frame.
  */
-ttLibC_Opus TT_VISIBILITY_DEFAULT *ttLibC_Opus_getFrame(
+ttLibC_Opus TT_ATTRIBUTE_API *ttLibC_Opus_getFrame(
 		ttLibC_Opus *prev_frame,
 		void *data,
 		size_t data_size,
@@ -284,7 +283,7 @@ ttLibC_Opus TT_VISIBILITY_DEFAULT *ttLibC_Opus_getFrame(
  * close frame
  * @param frame
  */
-void TT_VISIBILITY_DEFAULT ttLibC_Opus_close(ttLibC_Opus **frame) {
+void TT_ATTRIBUTE_API ttLibC_Opus_close(ttLibC_Opus **frame) {
 	ttLibC_Opus_ *target = (ttLibC_Opus_ *)*frame;
 	if(target == NULL) {
 		return;

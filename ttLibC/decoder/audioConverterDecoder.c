@@ -11,7 +11,6 @@
 #ifdef __ENABLE_APPLE__
 
 #include "audioConverterDecoder.h"
-#include "../ttLibC_predef.h"
 #include "../_log.h"
 #include "../allocator.h"
 #include "../frame/audio/pcms16.h"
@@ -45,7 +44,7 @@ typedef struct ttLibC_Decoder_AudioConverter_AcDecoder_ {
 
 typedef ttLibC_Decoder_AudioConverter_AcDecoder_ ttLibC_AcDecoder_;
 
-ttLibC_AcDecoder TT_VISIBILITY_DEFAULT *ttLibC_AcDecoder_make(
+ttLibC_AcDecoder TT_ATTRIBUTE_API *ttLibC_AcDecoder_make(
 		uint32_t sample_rate,
 		uint32_t channel_num,
 		ttLibC_Frame_Type target_frame_type) {
@@ -186,7 +185,7 @@ static OSStatus AcDecoder_decodeDataProc(
 	return 0;
 }
 
-bool TT_VISIBILITY_DEFAULT ttLibC_AcDecoder_decode(
+bool TT_ATTRIBUTE_API ttLibC_AcDecoder_decode(
 		ttLibC_AcDecoder *decoder,
 		ttLibC_Audio *audio,
 		ttLibC_AcDecodeFunc callback,
@@ -261,7 +260,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_AcDecoder_decode(
 	return true;
 }
 
-void TT_VISIBILITY_DEFAULT ttLibC_AcDecoder_close(ttLibC_AcDecoder **decoder) {
+void TT_ATTRIBUTE_API ttLibC_AcDecoder_close(ttLibC_AcDecoder **decoder) {
 	ttLibC_AcDecoder_ *target = (ttLibC_AcDecoder_ *)*decoder;
 	if(target == NULL) {
 		return;

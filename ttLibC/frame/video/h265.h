@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../../ttLibC_predef.h"
 #include "video.h"
 
 /**
@@ -143,7 +144,7 @@ typedef struct ttLibC_Frame_Video_H265 {
 
 typedef ttLibC_Frame_Video_H265 ttLibC_H265;
 
-ttLibC_H265 *ttLibC_H265_make(
+ttLibC_H265 TT_ATTRIBUTE_API *ttLibC_H265_make(
 		ttLibC_H265 *prev_frame,
 		ttLibC_H265_Type type,
 		uint32_t width,
@@ -154,29 +155,29 @@ ttLibC_H265 *ttLibC_H265_make(
 		uint64_t pts,
 		uint32_t timebase);
 
-ttLibC_H265 *ttLibC_H265_clone(
+ttLibC_H265 TT_ATTRIBUTE_API *ttLibC_H265_clone(
 		ttLibC_H265 *prev_frame,
 		ttLibC_H265 *src_frame);
 
 // analyze info of one nal.
-bool ttLibC_H265_getNalInfo(ttLibC_H265_NalInfo* info, uint8_t *data, size_t data_size);
+bool TT_ATTRIBUTE_API ttLibC_H265_getNalInfo(ttLibC_H265_NalInfo* info, uint8_t *data, size_t data_size);
 
 // analyze info of one nal for avcc data.
-bool ttLibC_H265_getHvccInfo(ttLibC_H265_NalInfo* info, uint8_t *data, size_t data_size);
-bool ttLibC_H265_getHvccInfo_ex(ttLibC_H265_NalInfo* info, uint8_t *data, size_t data_size, uint32_t length_size);
+bool TT_ATTRIBUTE_API ttLibC_H265_getHvccInfo(ttLibC_H265_NalInfo* info, uint8_t *data, size_t data_size);
+bool TT_ATTRIBUTE_API ttLibC_H265_getHvccInfo_ex(ttLibC_H265_NalInfo* info, uint8_t *data, size_t data_size, uint32_t length_size);
 
 // chec data type is hvcc
-bool ttLibC_H265_isNal(uint8_t *data, size_t data_size);
+bool TT_ATTRIBUTE_API ttLibC_H265_isNal(uint8_t *data, size_t data_size);
 
-bool ttLibC_H265_isHvcc(uint8_t *data, size_t data_size);
+bool TT_ATTRIBUTE_API ttLibC_H265_isHvcc(uint8_t *data, size_t data_size);
 
-bool ttLibC_H265_isKey(uint8_t *data, size_t data_size);
+bool TT_ATTRIBUTE_API ttLibC_H265_isKey(uint8_t *data, size_t data_size);
 
-uint32_t ttLibC_H265_getWidth(ttLibC_H265 *prev_frame, uint8_t *data, size_t data_size);
+uint32_t TT_ATTRIBUTE_API ttLibC_H265_getWidth(ttLibC_H265 *prev_frame, uint8_t *data, size_t data_size);
 
-uint32_t ttLibC_H265_getHeight(ttLibC_H265 *prev_frame, uint8_t *data, size_t data_size);
+uint32_t TT_ATTRIBUTE_API ttLibC_H265_getHeight(ttLibC_H265 *prev_frame, uint8_t *data, size_t data_size);
 
-ttLibC_H265 *ttLibC_H265_getFrame(
+ttLibC_H265 TT_ATTRIBUTE_API *ttLibC_H265_getFrame(
 		ttLibC_H265 *prev_frame,
 		uint8_t *data,
 		size_t data_size,
@@ -185,21 +186,21 @@ ttLibC_H265 *ttLibC_H265_getFrame(
 		uint32_t timebase);
 
 // make h265 from hvcc binary.
-ttLibC_H265 *ttLibC_H265_analyzeHvccTag(
+ttLibC_H265 TT_ATTRIBUTE_API *ttLibC_H265_analyzeHvccTag(
 		ttLibC_H265 *prev_frame,
 		uint8_t *data,
 		size_t data_size,
 		uint32_t *length_size);
 
-uint32_t ttLibC_H265_getConfigCrc32(ttLibC_H265 *h265);
+uint32_t TT_ATTRIBUTE_API ttLibC_H265_getConfigCrc32(ttLibC_H265 *h265);
 
 // make hvcc info from ttLibC_H265_configData
-size_t ttLibC_H265_readHvccTag(
+size_t TT_ATTRIBUTE_API ttLibC_H265_readHvccTag(
 		ttLibC_H265 *h265,
 		void *data,
 		size_t data_size);
 
-void ttLibC_H265_close(ttLibC_H265 **frame);
+void TT_ATTRIBUTE_API ttLibC_H265_close(ttLibC_H265 **frame);
 
 #ifdef __cplusplus
 } /* extern "C" */
