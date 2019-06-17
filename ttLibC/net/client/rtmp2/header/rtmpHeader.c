@@ -5,10 +5,7 @@
  *      Author: taktod
  */
 
-#ifdef __ENABLE_SOCKET__
-
 #include "rtmpHeader.h"
-#include "../../../../ttLibC_predef.h"
 #include "../../../../_log.h"
 #include "../../../../allocator.h"
 #include "../../../../util/byteUtil.h"
@@ -16,7 +13,7 @@
 #include "../../../../util/hexUtil.h"
 #include <string.h>
 
-ttLibC_RtmpHeader TT_VISIBILITY_HIDDEN *ttLibC_RtmpHeader_make(
+ttLibC_RtmpHeader TT_ATTRIBUTE_INNER *ttLibC_RtmpHeader_make(
 		uint32_t cs_id,
 		uint64_t timestamp,
 		ttLibC_RtmpMessage_Type message_type,
@@ -35,7 +32,7 @@ ttLibC_RtmpHeader TT_VISIBILITY_HIDDEN *ttLibC_RtmpHeader_make(
 	return header;
 }
 
-ttLibC_RtmpHeader TT_VISIBILITY_HIDDEN *ttLibC_RtmpHeader_copy(
+ttLibC_RtmpHeader TT_ATTRIBUTE_INNER *ttLibC_RtmpHeader_copy(
 		ttLibC_RtmpHeader *target,
 		ttLibC_RtmpHeader *source) {
 	if(source == NULL) {
@@ -53,7 +50,7 @@ ttLibC_RtmpHeader TT_VISIBILITY_HIDDEN *ttLibC_RtmpHeader_copy(
 	return target;
 }
 
-size_t TT_VISIBILITY_HIDDEN ttLibC_RtmpHeader_getData(
+size_t TT_ATTRIBUTE_INNER ttLibC_RtmpHeader_getData(
 		ttLibC_RtmpHeader *header,
 		void *data,
 		size_t data_size) {
@@ -128,7 +125,7 @@ size_t TT_VISIBILITY_HIDDEN ttLibC_RtmpHeader_getData(
 	return res_size;
 }
 
-ttLibC_RtmpHeader TT_VISIBILITY_HIDDEN *ttLibC_RtmpHeader_readBinary(
+ttLibC_RtmpHeader TT_ATTRIBUTE_INNER *ttLibC_RtmpHeader_readBinary(
 		ttLibC_DynamicBuffer *buffer,
 		ttLibC_ClientObject *client_object) {
 	// binary -> header object
@@ -292,7 +289,7 @@ ttLibC_RtmpHeader TT_VISIBILITY_HIDDEN *ttLibC_RtmpHeader_readBinary(
 	return header;
 }
 
-void TT_VISIBILITY_HIDDEN ttLibC_RtmpHeader_close(ttLibC_RtmpHeader **header) {
+void TT_ATTRIBUTE_INNER ttLibC_RtmpHeader_close(ttLibC_RtmpHeader **header) {
 	ttLibC_RtmpHeader *target = (ttLibC_RtmpHeader *)*header;
 	if(target == NULL) {
 		return;
@@ -301,4 +298,3 @@ void TT_VISIBILITY_HIDDEN ttLibC_RtmpHeader_close(ttLibC_RtmpHeader **header) {
 	*header = NULL;
 }
 
-#endif

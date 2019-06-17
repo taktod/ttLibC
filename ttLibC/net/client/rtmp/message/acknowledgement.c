@@ -10,12 +10,11 @@
 #ifdef __ENABLE_SOCKET__
 
 #include "acknowledgement.h"
-#include "../../../../ttLibC_predef.h"
 #include "../../../../_log.h"
 #include "../../../../allocator.h"
 #include <string.h>
 
-ttLibC_Acknowledgement TT_VISIBILITY_HIDDEN *ttLibC_Acknowledgement_make(uint32_t size) {
+ttLibC_Acknowledgement TT_ATTRIBUTE_INNER *ttLibC_Acknowledgement_make(uint32_t size) {
 	ttLibC_Acknowledgement *ack = ttLibC_malloc(sizeof(ttLibC_Acknowledgement));
 	if(ack == NULL) {
 		return NULL;
@@ -30,7 +29,7 @@ ttLibC_Acknowledgement TT_VISIBILITY_HIDDEN *ttLibC_Acknowledgement_make(uint32_
 	return ack;
 }
 
-bool TT_VISIBILITY_HIDDEN ttLibC_Acknowledgement_getData(
+bool TT_ATTRIBUTE_INNER ttLibC_Acknowledgement_getData(
 		ttLibC_Acknowledgement *acknowledgement,
 		ttLibC_DynamicBuffer *buffer) {
 	uint32_t size = be_uint32_t(acknowledgement->size);
@@ -38,7 +37,7 @@ bool TT_VISIBILITY_HIDDEN ttLibC_Acknowledgement_getData(
 	return true;
 }
 
-void TT_VISIBILITY_HIDDEN ttLibC_Acknowledgement_close(ttLibC_Acknowledgement **ack) {
+void TT_ATTRIBUTE_INNER ttLibC_Acknowledgement_close(ttLibC_Acknowledgement **ack) {
 	ttLibC_Acknowledgement *target = (ttLibC_Acknowledgement *)*ack;
 	if(target == NULL) {
 		return;

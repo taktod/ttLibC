@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../../../../ttLibC_predef.h"
 #include "../data/clientObject.h"
 
 /*
@@ -109,7 +110,7 @@ typedef struct ttLibC_Net_Client_Rtmp_Header_RtmpHeader {
 
 typedef ttLibC_Net_Client_Rtmp_Header_RtmpHeader ttLibC_RtmpHeader;
 
-ttLibC_RtmpHeader *ttLibC_RtmpHeader_make(
+ttLibC_RtmpHeader TT_ATTRIBUTE_INNER *ttLibC_RtmpHeader_make(
 		uint32_t cs_id,
 		uint64_t timestamp,
 		ttLibC_RtmpMessage_Type message_type,
@@ -119,20 +120,20 @@ ttLibC_RtmpHeader *ttLibC_RtmpHeader_make(
  * source -> target copy.
  * in the case of target = NULL, alloc header.
  */
-ttLibC_RtmpHeader *ttLibC_RtmpHeader_copy(
+ttLibC_RtmpHeader TT_ATTRIBUTE_INNER *ttLibC_RtmpHeader_copy(
 		ttLibC_RtmpHeader *target,
 		ttLibC_RtmpHeader *source);
 
-size_t ttLibC_RtmpHeader_getData(
+size_t TT_ATTRIBUTE_INNER ttLibC_RtmpHeader_getData(
 		ttLibC_RtmpHeader *header,
 		void *data,
 		size_t data_size);
 
-ttLibC_RtmpHeader *ttLibC_RtmpHeader_readBinary(
+ttLibC_RtmpHeader TT_ATTRIBUTE_INNER *ttLibC_RtmpHeader_readBinary(
 		ttLibC_DynamicBuffer *buffer,
 		ttLibC_ClientObject *client_object);
 
-void ttLibC_RtmpHeader_close(ttLibC_RtmpHeader **header);
+void TT_ATTRIBUTE_INNER ttLibC_RtmpHeader_close(ttLibC_RtmpHeader **header);
 
 #ifdef __cplusplus
 } /* extern "C" */

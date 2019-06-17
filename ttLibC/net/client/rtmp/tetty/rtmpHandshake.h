@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../../../../ttLibC_predef.h"
 #include "../../rtmp.h"
 #include "../../../tetty.h"
 
@@ -25,11 +26,11 @@ typedef struct ttLibC_Net_Client_Rtmp_Tetty_RtmpHandshake{
 
 typedef ttLibC_Net_Client_Rtmp_Tetty_RtmpHandshake ttLibC_RtmpHandshake;
 
-ttLibC_RtmpHandshake *ttLibC_RtmpHandshake_make();
-ttLibC_TettyPromise *ttLibC_RtmpHandshake_getHandshakePromise(
+ttLibC_RtmpHandshake TT_ATTRIBUTE_INNER *ttLibC_RtmpHandshake_make();
+ttLibC_TettyPromise TT_ATTRIBUTE_INNER *ttLibC_RtmpHandshake_getHandshakePromise(
 		ttLibC_TettyBootstrap *bootstrap,
 		ttLibC_RtmpHandshake *handshake);
-void ttLibC_RtmpHandshake_close(ttLibC_RtmpHandshake **handshake);
+void TT_ATTRIBUTE_INNER ttLibC_RtmpHandshake_close(ttLibC_RtmpHandshake **handshake);
 
 #ifdef __cplusplus
 } /* extern "C" */

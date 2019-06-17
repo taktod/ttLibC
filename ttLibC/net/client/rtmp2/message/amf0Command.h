@@ -12,6 +12,7 @@
 extern "C" {
 #endif
 
+#include "../../../../ttLibC_predef.h"
 #include <stdint.h>
 #include "../../../../util/amfUtil.h"
 #include "rtmpMessage.h"
@@ -37,37 +38,37 @@ typedef struct ttLibC_Net_Client_Rtmp2_Message_Amf0Command {
 
 typedef ttLibC_Net_Client_Rtmp2_Message_Amf0Command ttLibC_Amf0Command;
 
-ttLibC_Amf0Command *ttLibC_Amf0Command_make(const char *command_name);
-ttLibC_Amf0Command *ttLibC_Amf0Command_connect(
+ttLibC_Amf0Command TT_ATTRIBUTE_INNER *ttLibC_Amf0Command_make(const char *command_name);
+ttLibC_Amf0Command TT_ATTRIBUTE_INNER *ttLibC_Amf0Command_connect(
 		const char *tcUrl,
 		const char *app);
-ttLibC_Amf0Command *ttLibC_Amf0Command_createStream();
-ttLibC_Amf0Command *ttLibC_Amf0Command_publish(
+ttLibC_Amf0Command TT_ATTRIBUTE_INNER *ttLibC_Amf0Command_createStream();
+ttLibC_Amf0Command TT_ATTRIBUTE_INNER *ttLibC_Amf0Command_publish(
 		uint32_t stream_id,
 		const char *name);
 
-ttLibC_Amf0Command *ttLibC_Amf0Command_receiveAudio(
+ttLibC_Amf0Command TT_ATTRIBUTE_INNER *ttLibC_Amf0Command_receiveAudio(
 		uint32_t stream_id,
 		bool accept_audio);
-ttLibC_Amf0Command *ttLibC_Amf0Command_receiveVideo(
+ttLibC_Amf0Command TT_ATTRIBUTE_INNER *ttLibC_Amf0Command_receiveVideo(
 		uint32_t stream_id,
 		bool accept_video);
-ttLibC_Amf0Command *ttLibC_Amf0Command_play(
+ttLibC_Amf0Command TT_ATTRIBUTE_INNER *ttLibC_Amf0Command_play(
 		uint32_t stream_id,
 		const char *name);
-ttLibC_Amf0Command *ttLibC_Amf0Command_pause(uint32_t stream_id);
+ttLibC_Amf0Command TT_ATTRIBUTE_INNER *ttLibC_Amf0Command_pause(uint32_t stream_id);
 
-ttLibC_Amf0Command *ttLibC_Amf0Command_closeStream(uint32_t stream_id);
+ttLibC_Amf0Command TT_ATTRIBUTE_INNER *ttLibC_Amf0Command_closeStream(uint32_t stream_id);
 
-ttLibC_Amf0Command *ttLibC_Amf0Command_readBinary(
+ttLibC_Amf0Command TT_ATTRIBUTE_INNER *ttLibC_Amf0Command_readBinary(
 		uint8_t *data,
 		size_t data_size);
 
-bool ttLibC_Amf0Command_getData(
+bool TT_ATTRIBUTE_INNER ttLibC_Amf0Command_getData(
 		ttLibC_Amf0Command *command,
 		ttLibC_DynamicBuffer *buffer);
 
-void ttLibC_Amf0Command_close(ttLibC_Amf0Command **command);
+void TT_ATTRIBUTE_INNER ttLibC_Amf0Command_close(ttLibC_Amf0Command **command);
 
 #ifdef __cplusplus
 } /* extern "C" */

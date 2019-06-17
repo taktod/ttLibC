@@ -5,10 +5,7 @@
  *      Author: taktod
  */
 
-#ifdef __ENABLE_SOCKET__
-
 #include "rtmpMessage.h"
-#include "../../../../ttLibC_predef.h"
 #include "../../../../_log.h"
 #include "acknowledgement.h"
 #include "aggregateMessage.h"
@@ -25,7 +22,7 @@
 #include "../../../../util/ioUtil.h"
 #include "../../../../util/stlMapUtil.h"
 
-bool TT_VISIBILITY_HIDDEN ttLibC_RtmpMessage_getData(
+bool TT_ATTRIBUTE_INNER ttLibC_RtmpMessage_getData(
 		ttLibC_ClientObject *client_object,
 		ttLibC_RtmpMessage *message,
 		ttLibC_DynamicBuffer *buffer) {
@@ -63,7 +60,7 @@ bool TT_VISIBILITY_HIDDEN ttLibC_RtmpMessage_getData(
 	}
 }
 
-ttLibC_RtmpMessage TT_VISIBILITY_HIDDEN *ttLibC_RtmpMessage_readBinary(
+ttLibC_RtmpMessage TT_ATTRIBUTE_INNER *ttLibC_RtmpMessage_readBinary(
 		ttLibC_DynamicBuffer *buffer,
 		ttLibC_ClientObject *client_object) {
 	// binary -> rtmpMessage.
@@ -184,7 +181,7 @@ ttLibC_RtmpMessage TT_VISIBILITY_HIDDEN *ttLibC_RtmpMessage_readBinary(
 	return rtmp_message;
 }
 
-void TT_VISIBILITY_HIDDEN ttLibC_RtmpMessage_close(ttLibC_RtmpMessage **message) {
+void TT_ATTRIBUTE_INNER ttLibC_RtmpMessage_close(ttLibC_RtmpMessage **message) {
 	ttLibC_RtmpMessage *msg = *message;
 	ttLibC_RtmpHeader *header = msg->header;
 	switch(header->message_type) {
@@ -228,5 +225,3 @@ void TT_VISIBILITY_HIDDEN ttLibC_RtmpMessage_close(ttLibC_RtmpMessage **message)
 		break;
 	}
 }
-
-#endif

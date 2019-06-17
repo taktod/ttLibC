@@ -8,7 +8,6 @@
  * @date   2016/9/10
  */
 
-#include "../ttLibC_predef.h"
 #include "../allocator.h"
 #include "../_log.h"
 #include "imageResizer.h"
@@ -133,7 +132,7 @@ static bool ImageResizer_resizePlane(
  * @param src_frame
  * @return scaled yuv image.
  */
-ttLibC_Yuv420 TT_VISIBILITY_DEFAULT *ttLibC_ImageResizer_resizeYuv420(
+ttLibC_Yuv420 TT_ATTRIBUTE_API *ttLibC_ImageResizer_resizeYuv420(
 		ttLibC_Yuv420 *prev_frame,
 		ttLibC_Yuv420_Type type,
 		uint32_t width,
@@ -202,7 +201,7 @@ ttLibC_Yuv420 TT_VISIBILITY_DEFAULT *ttLibC_ImageResizer_resizeYuv420(
  * @param src_frame
  * @return scaled bgr image.
  */
-ttLibC_Bgr TT_VISIBILITY_DEFAULT *ttLibC_ImageResizer_resizeBgr(
+ttLibC_Bgr TT_ATTRIBUTE_API *ttLibC_ImageResizer_resizeBgr(
 		ttLibC_Bgr *prev_frame,
 		ttLibC_Bgr_Type type,
 		uint32_t width,

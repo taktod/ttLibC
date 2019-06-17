@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../../ttLibC_predef.h"
 #include "../tetty.h"
 
 /**
@@ -46,7 +47,7 @@ typedef ttLibC_Net_TettyPromise_ ttLibC_TettyPromise_;
  * @param bootstrap bootstrap object.
  * @return promise object.
  */
-ttLibC_TettyPromise *ttLibC_TettyPromise_make_(ttLibC_TettyBootstrap *bootstrap);
+ttLibC_TettyPromise TT_ATTRIBUTE_INNER *ttLibC_TettyPromise_make_(ttLibC_TettyBootstrap *bootstrap);
 
 #ifdef __cplusplus
 } /* extern "C" */

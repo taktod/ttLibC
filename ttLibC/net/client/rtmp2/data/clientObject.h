@@ -12,6 +12,7 @@
 extern "C" {
 #endif
 
+#include "../../../../ttLibC_predef.h"
 #include "../../rtmp.h"
 #include "../../../../util/tetty2.h"
 #include "../../../../util/dynamicBufferUtil.h"
@@ -69,12 +70,12 @@ typedef ttLibC_Net_Client_Rtmp_Data_ClientObject_PassingObject ttLibC_ClientObje
 /**
  * make client_object obj.
  */
-ttLibC_ClientObject *ttLibC_ClientObject_make();
+ttLibC_ClientObject TT_ATTRIBUTE_INNER *ttLibC_ClientObject_make();
 
 /**
  * close client_object obj.
  */
-void ttLibC_ClientObject_close(ttLibC_ClientObject **client_object);
+void TT_ATTRIBUTE_INNER ttLibC_ClientObject_close(ttLibC_ClientObject **client_object);
 
 #ifdef __cplusplus
 } /* extern "C" */

@@ -8,13 +8,12 @@
 #ifdef __ENABLE_LIBYUV__
 
 #include "libyuvResampler.h"
-#include "../ttLibC_predef.h"
 #include "../allocator.h"
 #include "../_log.h"
 
 #include <libyuv.h>
 
-ttLibC_Yuv420 TT_VISIBILITY_DEFAULT *ttLibC_LibyuvResampler_resize(
+ttLibC_Yuv420 TT_ATTRIBUTE_API *ttLibC_LibyuvResampler_resize(
 		ttLibC_Yuv420 *prev_frame,
 		uint32_t width,
 		uint32_t height,
@@ -114,7 +113,7 @@ ttLibC_Yuv420 TT_VISIBILITY_DEFAULT *ttLibC_LibyuvResampler_resize(
 	return yuv;
 }
 
-ttLibC_Yuv420 TT_VISIBILITY_DEFAULT *ttLibC_LibyuvResampler_rotate(
+ttLibC_Yuv420 TT_ATTRIBUTE_API *ttLibC_LibyuvResampler_rotate(
 		ttLibC_Yuv420 *prev_frame,
 		ttLibC_Yuv420 *src_frame,
 		ttLibC_LibyuvRotate_Mode mode) {

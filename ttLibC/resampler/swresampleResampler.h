@@ -12,6 +12,7 @@
 extern "C" {
 #endif
 
+#include "../ttLibC_predef.h"
 #include "../frame/audio/pcms16.h"
 #include "../frame/audio/pcmf32.h"
 #include "../frame/frame.h"
@@ -27,7 +28,7 @@ typedef ttLibC_Resampler_SwresampleResampler ttLibC_SwresampleResampler;
 
 typedef bool (* ttLibC_getSwresampleFrameFunc)(void *ptr, ttLibC_Frame *frame);
 
-ttLibC_SwresampleResampler *ttLibC_SwresampleResampler_make(
+ttLibC_SwresampleResampler TT_ATTRIBUTE_API *ttLibC_SwresampleResampler_make(
 		ttLibC_Frame_Type input_frame_type,
 		uint32_t          input_sub_type,
 		uint32_t          input_sample_rate,
@@ -37,13 +38,13 @@ ttLibC_SwresampleResampler *ttLibC_SwresampleResampler_make(
 		uint32_t          output_sample_rate,
 		uint32_t          output_channel_num);
 
-bool ttLibC_SwresampleResampler_resample(
+bool TT_ATTRIBUTE_API ttLibC_SwresampleResampler_resample(
 		ttLibC_SwresampleResampler *resampler,
 		ttLibC_Frame *frame,
 		ttLibC_getSwresampleFrameFunc callback,
 		void *ptr);
 
-void ttLibC_SwresampleResampler_close(ttLibC_SwresampleResampler **resampler);
+void TT_ATTRIBUTE_API ttLibC_SwresampleResampler_close(ttLibC_SwresampleResampler **resampler);
 
 #ifdef __cplusplus
 } /* extern "C" */

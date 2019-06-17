@@ -14,7 +14,6 @@
 #include "message/audioMessage.h"
 #include "message/userControlMessage.h"
 #include "data/clientObject.h"
-#include "../../../ttLibC_predef.h"
 #include "../../../_log.h"
 #include "../../../allocator.h"
 #include "../../tetty2/tcpBootstrap.h"
@@ -54,7 +53,7 @@ static void RtmpStream_promiseCallback(void *ptr, ttLibC_Tetty2Promise *promise)
 	}
 }
 
-ttLibC_RtmpStream TT_VISIBILITY_DEFAULT *ttLibC_RtmpStream_make(ttLibC_RtmpConnection *conn) {
+ttLibC_RtmpStream TT_ATTRIBUTE_API *ttLibC_RtmpStream_make(ttLibC_RtmpConnection *conn) {
 	ttLibC_RtmpStream_ *stream = ttLibC_malloc(sizeof(ttLibC_RtmpStream_));
 	if(stream == NULL) {
 		return NULL;
@@ -96,7 +95,7 @@ ttLibC_RtmpStream TT_VISIBILITY_DEFAULT *ttLibC_RtmpStream_make(ttLibC_RtmpConne
 	return (ttLibC_RtmpStream *)stream;
 }
 
-void TT_VISIBILITY_DEFAULT ttLibC_RtmpStream_addEventListener(
+void TT_ATTRIBUTE_API ttLibC_RtmpStream_addEventListener(
 		ttLibC_RtmpStream *stream,
 		ttLibC_RtmpEventFunc callback,
 		void *ptr) {
@@ -114,7 +113,7 @@ void TT_VISIBILITY_DEFAULT ttLibC_RtmpStream_addEventListener(
  * @param callback
  * @@aram ptr
  */
-void TT_VISIBILITY_DEFAULT ttLibC_RtmpStream_addFrameListener(
+void TT_ATTRIBUTE_API ttLibC_RtmpStream_addFrameListener(
 		ttLibC_RtmpStream *stream,
 		ttLibC_RtmpStream_getFrameFunc callback,
 		void *ptr) {
@@ -127,7 +126,7 @@ void TT_VISIBILITY_DEFAULT ttLibC_RtmpStream_addFrameListener(
 }
 
 // do publish.
-void TT_VISIBILITY_DEFAULT ttLibC_RtmpStream_publish(
+void TT_ATTRIBUTE_API ttLibC_RtmpStream_publish(
 		ttLibC_RtmpStream *stream,
 		const char *name) {
 	ttLibC_RtmpStream_ *stream_ = (ttLibC_RtmpStream_ *)stream;
@@ -141,7 +140,7 @@ void TT_VISIBILITY_DEFAULT ttLibC_RtmpStream_publish(
 	return;
 }
 
-bool TT_VISIBILITY_DEFAULT ttLibC_RtmpStream_addFrame(
+bool TT_ATTRIBUTE_API ttLibC_RtmpStream_addFrame(
 		ttLibC_RtmpStream *stream,
 		ttLibC_Frame *frame) {
 	ttLibC_RtmpStream_ *stream_ = (ttLibC_RtmpStream_ *)stream;
@@ -292,7 +291,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_RtmpStream_addFrame(
 /**
  * send buffer length for play.
  */
-void TT_VISIBILITY_DEFAULT ttLibC_RtmpStream_setBufferLength(
+void TT_ATTRIBUTE_API ttLibC_RtmpStream_setBufferLength(
 		ttLibC_RtmpStream *stream,
 		uint32_t buffer_length) {
 	ttLibC_RtmpStream_ *stream_ = (ttLibC_RtmpStream_ *)stream;
@@ -305,7 +304,7 @@ void TT_VISIBILITY_DEFAULT ttLibC_RtmpStream_setBufferLength(
 	ttLibC_UserControlMessage_close(&client_buffer_length);
 }
 
-void TT_VISIBILITY_DEFAULT ttLibC_RtmpStream_play(
+void TT_ATTRIBUTE_API ttLibC_RtmpStream_play(
 		ttLibC_RtmpStream *stream,
 		const char *name,
 		bool accept_video,
@@ -336,7 +335,7 @@ void TT_VISIBILITY_DEFAULT ttLibC_RtmpStream_play(
 	ttLibC_Amf0Command_close(&play);
 }
 
-void TT_VISIBILITY_DEFAULT ttLibC_RtmpStream_pause(ttLibC_RtmpStream *stream) {
+void TT_ATTRIBUTE_API ttLibC_RtmpStream_pause(ttLibC_RtmpStream *stream) {
 	ttLibC_RtmpStream_ *stream_ = (ttLibC_RtmpStream_ *)stream;
 	if(stream_ == NULL) {
 		return;
@@ -349,7 +348,7 @@ void TT_VISIBILITY_DEFAULT ttLibC_RtmpStream_pause(ttLibC_RtmpStream *stream) {
 	ttLibC_Tetty2Bootstrap_flush(stream_->conn->bootstrap);
 }
 
-void TT_VISIBILITY_DEFAULT ttLibC_RtmpStream_close(ttLibC_RtmpStream **stream) {
+void TT_ATTRIBUTE_API ttLibC_RtmpStream_close(ttLibC_RtmpStream **stream) {
 	ttLibC_RtmpStream_ *target = (ttLibC_RtmpStream_ *)*stream;
 	if(target == NULL) {
 		return;

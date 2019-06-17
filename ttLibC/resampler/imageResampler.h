@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../ttLibC_predef.h"
 #include "../frame/video/yuv420.h"
 #include "../frame/video/bgr.h"
 
@@ -24,7 +25,7 @@ extern "C" {
  * @param type       yuv420 type.
  * @param src_frame  src bgr frame.
  */
-ttLibC_Yuv420 *ttLibC_ImageResampler_makeYuv420FromBgr(
+ttLibC_Yuv420 TT_ATTRIBUTE_API *ttLibC_ImageResampler_makeYuv420FromBgr(
 		ttLibC_Yuv420 *prev_frame,
 		ttLibC_Yuv420_Type type,
 		ttLibC_Bgr *src_frame);
@@ -35,7 +36,7 @@ ttLibC_Yuv420 *ttLibC_ImageResampler_makeYuv420FromBgr(
  * @param type       bgr type.
  * @param src_frame  src yuv420 frame.
  */
-ttLibC_Bgr *ttLibC_ImageResampler_makeBgrFromYuv420(
+ttLibC_Bgr TT_ATTRIBUTE_API *ttLibC_ImageResampler_makeBgrFromYuv420(
 		ttLibC_Bgr *prev_frame,
 		ttLibC_Bgr_Type type,
 		ttLibC_Yuv420 *src_frame);

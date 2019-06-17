@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../ttLibC_predef.h"
 #include "../frame/audio/pcms16.h"
 #include "../frame/audio/pcmf32.h"
 
@@ -26,7 +27,7 @@ extern "C" {
  * @param channel_num target frame channel 1:monoral 2:stereo
  * @param src_frame   source frame
  */
-ttLibC_Audio *ttLibC_AudioResampler_convertFormat(
+ttLibC_Audio TT_ATTRIBUTE_API *ttLibC_AudioResampler_convertFormat(
 		ttLibC_Audio *prev_frame,
 		ttLibC_Frame_Type frame_type,
 		uint32_t type,
@@ -39,7 +40,7 @@ ttLibC_Audio *ttLibC_AudioResampler_convertFormat(
  * @param type       pcmf32 type.
  * @param src_frame  src pcms16 frame.
  */
-ttLibC_PcmF32 *ttLibC_AudioResampler_makePcmF32FromPcmS16(
+ttLibC_PcmF32 TT_ATTRIBUTE_API *ttLibC_AudioResampler_makePcmF32FromPcmS16(
 		ttLibC_PcmF32 *prev_frame,
 		ttLibC_PcmF32_Type type,
 		ttLibC_PcmS16 *src_frame);
@@ -50,7 +51,7 @@ ttLibC_PcmF32 *ttLibC_AudioResampler_makePcmF32FromPcmS16(
  * @param type       pcms16 type.
  * @param src_frame  src pcmf32 frame.
  */
-ttLibC_PcmS16 *ttLibC_AudioResampler_makePcmS16FromPcmF32(
+ttLibC_PcmS16 TT_ATTRIBUTE_API *ttLibC_AudioResampler_makePcmS16FromPcmF32(
 		ttLibC_PcmS16 *prev_frame,
 		ttLibC_PcmS16_Type type,
 		ttLibC_PcmF32 *src_frame);

@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../../ttLibC_predef.h"
 #include "../tetty.h"
 #include "../../util/stlListUtil.h"
 #include "context.h"
@@ -57,7 +58,7 @@ typedef ttLibC_Net_TettyBootstrap_ ttLibC_TettyBootstrap_;
  * @param client_info
  * @return true:ok false:error
  */
-bool ttLibC_TettyBootstrap_closeClient_(
+bool TT_ATTRIBUTE_INNER ttLibC_TettyBootstrap_closeClient_(
 		ttLibC_TettyBootstrap *bootstrap,
 		ttLibC_SocketInfo *socket_info);
 

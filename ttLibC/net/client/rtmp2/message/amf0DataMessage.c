@@ -5,16 +5,13 @@
  *      Author: taktod
  */
 
-#ifdef __ENABLE_SOCKET__
-
 #include "amf0DataMessage.h"
-#include "../../../../ttLibC_predef.h"
 #include "../../../../_log.h"
 #include "../../../../allocator.h"
 #include <string.h>
 #include "../../../../util/hexUtil.h"
 
-ttLibC_Amf0DataMessage TT_VISIBILITY_HIDDEN *ttLibC_Amf0DataMessage_make(const char *message_name) {
+ttLibC_Amf0DataMessage TT_ATTRIBUTE_INNER *ttLibC_Amf0DataMessage_make(const char *message_name) {
 	ttLibC_Amf0DataMessage *message = ttLibC_malloc(sizeof(ttLibC_Amf0DataMessage));
 	if(message == NULL) {
 		return NULL;
@@ -54,7 +51,7 @@ static bool Amf0DataMessage_readBinaryObjectCallback(void *ptr, ttLibC_Amf0Objec
 	return true;
 }
 
-ttLibC_Amf0DataMessage TT_VISIBILITY_HIDDEN *ttLibC_Amf0DataMessage_readBinary(
+ttLibC_Amf0DataMessage TT_ATTRIBUTE_INNER *ttLibC_Amf0DataMessage_readBinary(
 		uint8_t *data,
 		size_t data_size) {
 	ttLibC_Amf0DataMessage *message = ttLibC_Amf0DataMessage_make("");
@@ -69,7 +66,7 @@ ttLibC_Amf0DataMessage TT_VISIBILITY_HIDDEN *ttLibC_Amf0DataMessage_readBinary(
 	return message;
 }
 
-void TT_VISIBILITY_HIDDEN ttLibC_Amf0DataMessage_close(ttLibC_Amf0DataMessage **message) {
+void TT_ATTRIBUTE_INNER ttLibC_Amf0DataMessage_close(ttLibC_Amf0DataMessage **message) {
 	ttLibC_Amf0DataMessage *target = (ttLibC_Amf0DataMessage *)*message;
 	if(target == NULL) {
 		return;
@@ -80,5 +77,3 @@ void TT_VISIBILITY_HIDDEN ttLibC_Amf0DataMessage_close(ttLibC_Amf0DataMessage **
 	ttLibC_free(target);
 	*message = NULL;
 }
-
-#endif

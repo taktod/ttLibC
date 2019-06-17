@@ -8,7 +8,6 @@
 #ifdef __ENABLE_SOCKET__
 
 #include "tcpBootstrap.h"
-#include "../../ttLibC_predef.h"
 #include "../../util/tetty2/bootstrap.h"
 #include "../tcp.h"
 #include "../../_log.h"
@@ -163,7 +162,7 @@ static tetty2_errornum TcpBootstrap_write(
 	return 0;
 }
 
-ttLibC_Tetty2Bootstrap TT_VISIBILITY_DEFAULT *ttLibC_TcpBootstrap_make() {
+ttLibC_Tetty2Bootstrap TT_ATTRIBUTE_API *ttLibC_TcpBootstrap_make() {
 	ttLibC_TcpBootstrap *bootstrap = (ttLibC_TcpBootstrap *)ttLibC_Tetty2Bootstrap_make(sizeof(ttLibC_TcpBootstrap));
 	if(bootstrap == NULL) {
 		return NULL;
@@ -186,7 +185,7 @@ ttLibC_Tetty2Bootstrap TT_VISIBILITY_DEFAULT *ttLibC_TcpBootstrap_make() {
 	return (ttLibC_Tetty2Bootstrap *)bootstrap;
 }
 
-bool TT_VISIBILITY_DEFAULT ttLibC_TcpBootstrap_setOption(
+bool TT_ATTRIBUTE_API ttLibC_TcpBootstrap_setOption(
 		ttLibC_Tetty2Bootstrap *bootstrap,
 		ttLibC_Tetty2_TcpOption option) {
 	if(!TcpBootstrap_check(bootstrap)) {
@@ -209,7 +208,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_TcpBootstrap_setOption(
 	return true;
 }
 
-bool TT_VISIBILITY_DEFAULT ttLibC_TcpBootstrap_connect(
+bool TT_ATTRIBUTE_API ttLibC_TcpBootstrap_connect(
 		ttLibC_Tetty2Bootstrap *bootstrap,
 		const char *host,
 		int port) {
@@ -252,7 +251,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_TcpBootstrap_connect(
 	return true;
 }
 
-bool TT_VISIBILITY_DEFAULT ttLibC_TcpBootstrap_bind(
+bool TT_ATTRIBUTE_API ttLibC_TcpBootstrap_bind(
 		ttLibC_Tetty2Bootstrap *bootstrap,
 		int port) {
 	if(!TcpBootstrap_check(bootstrap)) {
@@ -307,7 +306,7 @@ static bool TcpBootstrap_updateEach(void *ptr, void *item) {
 	return true;
 }
 
-bool TT_VISIBILITY_DEFAULT ttLibC_TcpBootstrap_update(
+bool TT_ATTRIBUTE_API ttLibC_TcpBootstrap_update(
 		ttLibC_Tetty2Bootstrap *bootstrap,
 		uint32_t wait_interval) {
 	// return true:do anything false:do nothing
@@ -373,7 +372,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_TcpBootstrap_update(
 	return false;
 }
 
-bool TT_VISIBILITY_DEFAULT ttLibC_TcpBootstrap_isServerContext(ttLibC_Tetty2Context *ctx) {
+bool TT_ATTRIBUTE_API ttLibC_TcpBootstrap_isServerContext(ttLibC_Tetty2Context *ctx) {
 	if(ctx == NULL) {
 		return false;
 	}
@@ -395,7 +394,7 @@ static bool TcpBootstrap_Context_writeAllClientsCallback(void *ptr, void *item) 
 	return true;
 }
 
-tetty2_errornum TT_VISIBILITY_DEFAULT ttLibC_TcpBootstrap_Context_writeAllClients(ttLibC_Tetty2Context *ctx) {
+tetty2_errornum TT_ATTRIBUTE_API ttLibC_TcpBootstrap_Context_writeAllClients(ttLibC_Tetty2Context *ctx) {
 	if(!ttLibC_TcpBootstrap_isServerContext(ctx)) {
 		return 0;
 	}

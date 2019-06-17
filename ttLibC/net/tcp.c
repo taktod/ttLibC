@@ -19,11 +19,10 @@
 #include <errno.h>
 #include <netinet/tcp.h>
 #include <netdb.h>
-#include "../ttLibC_predef.h"
 #include "../allocator.h"
 #include "../_log.h"
 
-ttLibC_TcpServerInfo TT_VISIBILITY_DEFAULT *ttLibC_TcpServer_make(
+ttLibC_TcpServerInfo TT_ATTRIBUTE_API *ttLibC_TcpServer_make(
 		uint64_t ip,
 		uint16_t port) {
 	ttLibC_TcpServerInfo *server_info = (ttLibC_TcpServerInfo *)ttLibC_malloc(sizeof(ttLibC_TcpServerInfo));
@@ -44,7 +43,7 @@ ttLibC_TcpServerInfo TT_VISIBILITY_DEFAULT *ttLibC_TcpServer_make(
 	return server_info;
 }
 
-bool TT_VISIBILITY_DEFAULT ttLibC_TcpServer_open(ttLibC_TcpServerInfo *server_info) {
+bool TT_ATTRIBUTE_API ttLibC_TcpServer_open(ttLibC_TcpServerInfo *server_info) {
 	if(server_info == NULL) {
 		return false;
 	}
@@ -80,7 +79,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_TcpServer_open(ttLibC_TcpServerInfo *server_in
 	return true;
 }
 
-ttLibC_TcpClientInfo TT_VISIBILITY_DEFAULT *ttLibC_TcpServer_wait(
+ttLibC_TcpClientInfo TT_ATTRIBUTE_API *ttLibC_TcpServer_wait(
 		ttLibC_TcpServerInfo *server_info) {
 	ttLibC_TcpClientInfo *client_info = (ttLibC_TcpClientInfo *)ttLibC_malloc(sizeof(ttLibC_TcpClientInfo));
 	if(client_info == NULL) {
@@ -109,7 +108,7 @@ ttLibC_TcpClientInfo TT_VISIBILITY_DEFAULT *ttLibC_TcpServer_wait(
 	return (ttLibC_TcpClientInfo *)client_info;
 }
 
-void TT_VISIBILITY_DEFAULT ttLibC_TcpServer_close(ttLibC_TcpServerInfo **server_info) {
+void TT_ATTRIBUTE_API ttLibC_TcpServer_close(ttLibC_TcpServerInfo **server_info) {
 	ttLibC_TcpServerInfo *target = *server_info;
 	if(target == NULL) {
 		return;
@@ -123,7 +122,7 @@ void TT_VISIBILITY_DEFAULT ttLibC_TcpServer_close(ttLibC_TcpServerInfo **server_
 	*server_info = NULL;
 }
 
-ttLibC_TcpClientInfo TT_VISIBILITY_DEFAULT *ttLibC_TcpClient_make(
+ttLibC_TcpClientInfo TT_ATTRIBUTE_API *ttLibC_TcpClient_make(
 		const char *host,
 		int port) {
 	struct hostent *servhost = NULL;
@@ -151,7 +150,7 @@ ttLibC_TcpClientInfo TT_VISIBILITY_DEFAULT *ttLibC_TcpClient_make(
 	return client_info;
 }
 
-int TT_VISIBILITY_DEFAULT ttLibC_TcpClient_connect(ttLibC_TcpClientInfo *client_info) {
+int TT_ATTRIBUTE_API ttLibC_TcpClient_connect(ttLibC_TcpClientInfo *client_info) {
 	ttLibC_SockaddrIn_ *addr = (ttLibC_SockaddrIn_ *)client_info->inherit_super.addr;
 	return connect(
 			client_info->inherit_super.socket,
@@ -159,14 +158,14 @@ int TT_VISIBILITY_DEFAULT ttLibC_TcpClient_connect(ttLibC_TcpClientInfo *client_
 			sizeof(addr->addr));
 }
 
-int64_t TT_VISIBILITY_DEFAULT ttLibC_TcpClient_read(
+int64_t TT_ATTRIBUTE_API ttLibC_TcpClient_read(
 		ttLibC_TcpClientInfo *client_info,
 		void * data,
 		size_t data_size) {
 	return read(client_info->inherit_super.socket, data, data_size);
 }
 
-bool TT_VISIBILITY_DEFAULT ttLibC_TcpClient_write(
+bool TT_ATTRIBUTE_API ttLibC_TcpClient_write(
 		ttLibC_TcpClientInfo *client_info,
 		void *data,
 		size_t data_size) {
@@ -176,7 +175,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_TcpClient_write(
 	return ttLibC_DynamicBuffer_append(client_info->write_buffer, data, data_size);
 }
 
-bool TT_VISIBILITY_DEFAULT ttLibC_TcpClient_flush(ttLibC_TcpClientInfo *client_info) {
+bool TT_ATTRIBUTE_API ttLibC_TcpClient_flush(ttLibC_TcpClientInfo *client_info) {
 	if(ttLibC_DynamicBuffer_refSize(client_info->write_buffer) == 0) {
 		return true;
 	}
@@ -188,7 +187,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_TcpClient_flush(ttLibC_TcpClientInfo *client_i
 	return true;
 }
 
-int TT_VISIBILITY_DEFAULT ttLibC_TcpClient_setSockOpt(
+int TT_ATTRIBUTE_API ttLibC_TcpClient_setSockOpt(
 		ttLibC_TcpClientInfo *client_info,
 		int target,
 		int option,
@@ -197,7 +196,7 @@ int TT_VISIBILITY_DEFAULT ttLibC_TcpClient_setSockOpt(
 	return setsockopt(client_info->inherit_super.socket, target, option, value, value_size);
 }
 
-void TT_VISIBILITY_DEFAULT ttLibC_TcpClient_close(ttLibC_TcpClientInfo **client_info) {
+void TT_ATTRIBUTE_API ttLibC_TcpClient_close(ttLibC_TcpClientInfo **client_info) {
 	ttLibC_TcpClientInfo *target = (ttLibC_TcpClientInfo *)*client_info;
 	if(target == NULL) {
 		return;

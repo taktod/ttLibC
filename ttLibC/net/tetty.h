@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../ttLibC_predef.h"
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -149,7 +150,7 @@ typedef struct ttLibC_Net_TettyChannelHandler {
  * make bootstrap object.
  * @return bootstrap object.
  */
-ttLibC_TettyBootstrap *ttLibC_TettyBootstrap_make();
+ttLibC_TettyBootstrap TT_ATTRIBUTE_API *ttLibC_TettyBootstrap_make();
 
 /**
  * set thread group.(not support.)
@@ -162,7 +163,7 @@ ttLibC_TettyBootstrap *ttLibC_TettyBootstrap_make();
  * @param channel_type channelType_Tcp or channelType_Udp(udp is not supported yet.)
  * @return true:success false:error
  */
-bool ttLibC_TettyBootstrap_channel(
+bool TT_ATTRIBUTE_API ttLibC_TettyBootstrap_channel(
 		ttLibC_TettyBootstrap *bootstrap,
 		ttLibC_Tetty_ChannelType channel_type);
 
@@ -172,7 +173,7 @@ bool ttLibC_TettyBootstrap_channel(
  * @param option    target option type.
  * @return true:success false:error
  */
-bool ttLibC_TettyBootstrap_option(
+bool TT_ATTRIBUTE_API ttLibC_TettyBootstrap_option(
 		ttLibC_TettyBootstrap *bootstrap,
 		ttLibC_Tetty_Option option);
 
@@ -182,7 +183,7 @@ bool ttLibC_TettyBootstrap_option(
  * @param port      port number for bind.
  * @return true:success false:error
  */
-bool ttLibC_TettyBootstrap_bind(
+bool TT_ATTRIBUTE_API ttLibC_TettyBootstrap_bind(
 		ttLibC_TettyBootstrap *bootstrap,
 		int port);
 
@@ -193,7 +194,7 @@ bool ttLibC_TettyBootstrap_bind(
  * @param port      target port to connect
  * @return true:success false:error
  */
-bool ttLibC_TettyBootstrap_connect(
+bool TT_ATTRIBUTE_API ttLibC_TettyBootstrap_connect(
 		ttLibC_TettyBootstrap *bootstrap,
 		const char *host,
 		int port);
@@ -204,7 +205,7 @@ bool ttLibC_TettyBootstrap_connect(
  * @param wait_interval in micro sec.
  * @return true:new client_connection is established false:usual work.
  */
-bool ttLibC_TettyBootstrap_update(
+bool TT_ATTRIBUTE_API ttLibC_TettyBootstrap_update(
 		ttLibC_TettyBootstrap *bootstrap,
 		uint32_t wait_interval);
 
@@ -212,26 +213,26 @@ bool ttLibC_TettyBootstrap_update(
  * close server socket.
  * @param bootstrap bootstrap object.
  */
-void ttLibC_TettyBootstrap_closeServer(ttLibC_TettyBootstrap *bootstrap);
+void TT_ATTRIBUTE_API ttLibC_TettyBootstrap_closeServer(ttLibC_TettyBootstrap *bootstrap);
 
 /**
  * close all client socket.
  * @param bootstrap bootstrap object.
  */
-void ttLibC_TettyBootstrap_closeClients(ttLibC_TettyBootstrap *bootstrap);
+void TT_ATTRIBUTE_API ttLibC_TettyBootstrap_closeClients(ttLibC_TettyBootstrap *bootstrap);
 
 /**
  * close all
  * @param bootstrap bootstrap object.
  */
-void ttLibC_TettyBootstrap_close(ttLibC_TettyBootstrap **bootstrap);
+void TT_ATTRIBUTE_API ttLibC_TettyBootstrap_close(ttLibC_TettyBootstrap **bootstrap);
 
 /**
  * add channel handler.
  * @param bootstrap       bootstrap object.
  * @param channel_handler use def channel_handler object.
  */
-void ttLibC_TettyBootstrap_pipeline_addLast(
+void TT_ATTRIBUTE_API ttLibC_TettyBootstrap_pipeline_addLast(
 		ttLibC_TettyBootstrap *bootstrap,
 		ttLibC_TettyChannelHandler *channel_handler);
 
@@ -240,7 +241,7 @@ void ttLibC_TettyBootstrap_pipeline_addLast(
  * @param bootstrap       bootstrap object.
  * @param channel_handler use def channel_handler object.
  */
-void ttLibC_TettyBootstrap_pipeline_remove(
+void TT_ATTRIBUTE_API ttLibC_TettyBootstrap_pipeline_remove(
 		ttLibC_TettyBootstrap *bootstrap,
 		ttLibC_TettyChannelHandler *channel_handler);
 
@@ -250,7 +251,7 @@ void ttLibC_TettyBootstrap_pipeline_remove(
  * @param data      passing data
  * @param data_size passing data_size
  */
-tetty_errornum ttLibC_TettyBootstrap_pipeline_fireUserEventTriggered(
+tetty_errornum TT_ATTRIBUTE_API ttLibC_TettyBootstrap_pipeline_fireUserEventTriggered(
 		ttLibC_TettyBootstrap *bootstrap,
 		ttLibC_SocketInfo *socket_info,
 		void *data,
@@ -263,7 +264,7 @@ tetty_errornum ttLibC_TettyBootstrap_pipeline_fireUserEventTriggered(
  * @param data_size
  * @return errornum
  */
-tetty_errornum ttLibC_TettyBootstrap_channels_write(
+tetty_errornum TT_ATTRIBUTE_API ttLibC_TettyBootstrap_channels_write(
 		ttLibC_TettyBootstrap *bootstrap,
 		void *data,
 		size_t data_size);
@@ -282,7 +283,7 @@ ttLibC_TettyFuture *ttLibC_TettyBootstrap_channels_writeFuture(
  * @param data_size
  * @return error_num
  */
-tetty_errornum ttLibC_TettyBootstrap_channelEach_write(
+tetty_errornum TT_ATTRIBUTE_API ttLibC_TettyBootstrap_channelEach_write(
 		ttLibC_TettyBootstrap *bootstrap,
 		void *data,
 		size_t data_size);
@@ -292,7 +293,7 @@ tetty_errornum ttLibC_TettyBootstrap_channelEach_write(
  * @param bootstrap
  * @return error_num
  */
-tetty_errornum ttLibC_TettyBootstrap_channels_flush(ttLibC_TettyBootstrap *bootstrap);
+tetty_errornum TT_ATTRIBUTE_API ttLibC_TettyBootstrap_channels_flush(ttLibC_TettyBootstrap *bootstrap);
 
 /**
  * do write and flush at once
@@ -302,7 +303,7 @@ tetty_errornum ttLibC_TettyBootstrap_channels_flush(ttLibC_TettyBootstrap *boots
  * @param data_size
  * @return error_num
  */
-tetty_errornum ttLibC_TettyBootstrap_channels_writeAndFlush(
+tetty_errornum TT_ATTRIBUTE_API ttLibC_TettyBootstrap_channels_writeAndFlush(
 		ttLibC_TettyBootstrap *bootstrap,
 		void *data,
 		size_t data_size);
@@ -315,7 +316,7 @@ tetty_errornum ttLibC_TettyBootstrap_channels_writeAndFlush(
  * @param data_size
  * @return error_num
  */
-tetty_errornum ttLibC_TettyBootstrap_channelEach_writeAndFlush(
+tetty_errornum TT_ATTRIBUTE_API ttLibC_TettyBootstrap_channelEach_writeAndFlush(
 		ttLibC_TettyBootstrap *bootstrap,
 		void *data,
 		size_t data_size);
@@ -331,14 +332,14 @@ ttLibC_TettyFuture *ttLibC_TettyBootstrap_channelEach_writeFuture(
  * make promise
  * @param bootstrap
  */
-ttLibC_TettyPromise *ttLibC_TettyBootstrap_makePromise(ttLibC_TettyBootstrap *bootstrap);
+ttLibC_TettyPromise TT_ATTRIBUTE_API *ttLibC_TettyBootstrap_makePromise(ttLibC_TettyBootstrap *bootstrap);
 
 /**
  * get the close future.
  * @param bootstrap
  * @return future
  */
-ttLibC_TettyFuture *ttLibC_TettyBootstrap_closeFuture(ttLibC_TettyBootstrap *bootstrap);
+ttLibC_TettyFuture TT_ATTRIBUTE_API *ttLibC_TettyBootstrap_closeFuture(ttLibC_TettyBootstrap *bootstrap);
 
 /**
  * write data for one connection.
@@ -347,7 +348,7 @@ ttLibC_TettyFuture *ttLibC_TettyBootstrap_closeFuture(ttLibC_TettyBootstrap *boo
  * @param data_size data object size.
  * @return error_num
  */
-tetty_errornum ttLibC_TettyContext_channel_write(
+tetty_errornum TT_ATTRIBUTE_API ttLibC_TettyContext_channel_write(
 		ttLibC_TettyContext *ctx,
 		void *data,
 		size_t data_size);
@@ -365,7 +366,7 @@ ttLibC_TettyFuture *ttLibC_TettyContext_channel_writeFuture(
  * @param ctx
  * @return error_num
  */
-tetty_errornum ttLibC_TettyContext_channel_flush(ttLibC_TettyContext *ctx);
+tetty_errornum TT_ATTRIBUTE_API ttLibC_TettyContext_channel_flush(ttLibC_TettyContext *ctx);
 
 /**
  * do write and flush at once for target context.
@@ -374,7 +375,7 @@ tetty_errornum ttLibC_TettyContext_channel_flush(ttLibC_TettyContext *ctx);
  * @param data_sizes
  * @return error_num
  */
-tetty_errornum ttLibC_TettyContext_channel_writeAndFlush(
+tetty_errornum TT_ATTRIBUTE_API ttLibC_TettyContext_channel_writeAndFlush(
 		ttLibC_TettyContext *ctx,
 		void *data,
 		size_t data_size);
@@ -384,21 +385,21 @@ tetty_errornum ttLibC_TettyContext_channel_writeAndFlush(
  * @param ctx target context
  * @return error_num
  */
-tetty_errornum ttLibC_TettyContext_close(ttLibC_TettyContext *ctx);
+tetty_errornum TT_ATTRIBUTE_API ttLibC_TettyContext_close(ttLibC_TettyContext *ctx);
 
 /**
  * call channel active to next channel_handler.
  * @param ctx
  * @return errornum
  */
-tetty_errornum ttLibC_TettyContext_super_channelActive(ttLibC_TettyContext *ctx);
+tetty_errornum TT_ATTRIBUTE_API ttLibC_TettyContext_super_channelActive(ttLibC_TettyContext *ctx);
 
 /**
  * call channel inactive to next channel_handler.
  * @param ctx
  * @return errornum
  */
-tetty_errornum ttLibC_TettyContext_super_channelInactive(ttLibC_TettyContext *ctx);
+tetty_errornum TT_ATTRIBUTE_API ttLibC_TettyContext_super_channelInactive(ttLibC_TettyContext *ctx);
 
 /**
  * call channel read to next channel_handler.
@@ -407,7 +408,7 @@ tetty_errornum ttLibC_TettyContext_super_channelInactive(ttLibC_TettyContext *ct
  * @param data_size
  * @return errornum
  */
-tetty_errornum ttLibC_TettyContext_super_channelRead(
+tetty_errornum TT_ATTRIBUTE_API ttLibC_TettyContext_super_channelRead(
 		ttLibC_TettyContext *ctx,
 		void *data,
 		size_t data_size);
@@ -424,28 +425,28 @@ tetty_errornum ttLibC_TettyContext_super_channelRead(
  * @param ctx
  * @return errornum
  */
-tetty_errornum ttLibC_TettyContext_super_bind(ttLibC_TettyContext *ctx);
+tetty_errornum TT_ATTRIBUTE_API ttLibC_TettyContext_super_bind(ttLibC_TettyContext *ctx);
 
 /**
  * call connect to next channel_handler.
  * @param ctx
  * @return errornum
  */
-tetty_errornum ttLibC_TettyContext_super_connect(ttLibC_TettyContext *ctx);
+tetty_errornum TT_ATTRIBUTE_API ttLibC_TettyContext_super_connect(ttLibC_TettyContext *ctx);
 
 /**
  * call disconnect to next channel_handler.
  * @param ctx
  * @return errornum
  */
-tetty_errornum ttLibC_TettyContext_super_disconnect(ttLibC_TettyContext *ctx);
+tetty_errornum TT_ATTRIBUTE_API ttLibC_TettyContext_super_disconnect(ttLibC_TettyContext *ctx);
 
 /**
  * call close to next channel_handler.
  * @param ctx
  * @return errornum
  */
-tetty_errornum ttLibC_TettyContext_super_close(ttLibC_TettyContext *ctx);
+tetty_errornum TT_ATTRIBUTE_API ttLibC_TettyContext_super_close(ttLibC_TettyContext *ctx);
 
 /**
  * call write to next channel_handler.
@@ -454,7 +455,7 @@ tetty_errornum ttLibC_TettyContext_super_close(ttLibC_TettyContext *ctx);
  * @param data_size
  * @return errornum
  */
-tetty_errornum ttLibC_TettyContext_super_write(
+tetty_errornum TT_ATTRIBUTE_API ttLibC_TettyContext_super_write(
 		ttLibC_TettyContext *ctx,
 		void *data,
 		size_t data_size);
@@ -464,14 +465,14 @@ tetty_errornum ttLibC_TettyContext_super_write(
  * @param ctx
  * @return errornum
  */
-tetty_errornum ttLibC_TettyContext_super_flush(ttLibC_TettyContext *ctx);
+tetty_errornum TT_ATTRIBUTE_API ttLibC_TettyContext_super_flush(ttLibC_TettyContext *ctx);
 
 /**
  * call exceptionCaught to next channel_handler.
  * @param ctx
  * @param error_no
  */
-void ttLibC_TettyContext_super_exceptionCaught(
+void TT_ATTRIBUTE_API ttLibC_TettyContext_super_exceptionCaught(
 		ttLibC_TettyContext *ctx,
 		tetty_errornum error_no);
 
@@ -482,7 +483,7 @@ void ttLibC_TettyContext_super_exceptionCaught(
  * @param data_size
  * @return error_no
  */
-tetty_errornum ttLibC_TettyContext_super_writeEach(
+tetty_errornum TT_ATTRIBUTE_API ttLibC_TettyContext_super_writeEach(
 		ttLibC_TettyContext *ctx,
 		void *data,
 		size_t data_size);
@@ -494,7 +495,7 @@ tetty_errornum ttLibC_TettyContext_super_writeEach(
  * @param data_size
  * @return error_no
  */
-tetty_errornum ttLibC_TettyContext_super_userEventTriggered(
+tetty_errornum TT_ATTRIBUTE_API ttLibC_TettyContext_super_userEventTriggered(
 		ttLibC_TettyContext *ctx,
 		void *data,
 		size_t data_size);
@@ -516,14 +517,14 @@ typedef void (* ttLibC_TettyPromiseListener)(void *ptr, ttLibC_TettyPromise *pro
  * await until promise/future done
  * @param promise target promise/future
  */
-void ttLibC_TettyPromise_await(ttLibC_TettyPromise *promise); // not throw exception.
+void TT_ATTRIBUTE_API ttLibC_TettyPromise_await(ttLibC_TettyPromise *promise); // not throw exception.
 
 /**
  * await util promise/future done or timeout.
  * @param promise         target promise/future.
  * @param timeout_milisec timeout time length in mili sec.
  */
-void ttLibC_TettyPromise_awaitFor(ttLibC_TettyPromise *promise, uint32_t timeout_milisec);
+void TT_ATTRIBUTE_API ttLibC_TettyPromise_awaitFor(ttLibC_TettyPromise *promise, uint32_t timeout_milisec);
 
 /**
  * event listener for promise/future done.
@@ -531,7 +532,7 @@ void ttLibC_TettyPromise_awaitFor(ttLibC_TettyPromise *promise, uint32_t timeout
  * @param listener listener
  * @param ptr      user def data pointer.
  */
-void ttLibC_TettyPromise_addEventListener(
+void TT_ATTRIBUTE_API ttLibC_TettyPromise_addEventListener(
 		ttLibC_TettyPromise *promise,
 		ttLibC_TettyPromiseListener listener,
 		void *ptr);
@@ -542,7 +543,7 @@ void ttLibC_TettyPromise_addEventListener(
  * @param data    sub information.
  * TODO do I need to add is_non_copy?
  */
-void ttLibC_TettyPromise_setSuccess(ttLibC_TettyPromise *promise, void *data);
+void TT_ATTRIBUTE_API ttLibC_TettyPromise_setSuccess(ttLibC_TettyPromise *promise, void *data);
 
 /**
  * notify failed to promise.
@@ -550,13 +551,13 @@ void ttLibC_TettyPromise_setSuccess(ttLibC_TettyPromise *promise, void *data);
  * @param data    sub information.
  * TODO do I need to add is_non_copy?
  */
-void ttLibC_TettyPromise_setFailure(ttLibC_TettyPromise *promise, void *data);
+void TT_ATTRIBUTE_API ttLibC_TettyPromise_setFailure(ttLibC_TettyPromise *promise, void *data);
 
 /**
  * close generated promise
  * @param promise target promise
  */
-void ttLibC_TettyPromise_close(ttLibC_TettyPromise **promise);
+void TT_ATTRIBUTE_API ttLibC_TettyPromise_close(ttLibC_TettyPromise **promise);
 
 #ifdef __cplusplus
 } /* extern "C" */

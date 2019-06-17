@@ -12,7 +12,6 @@
 #include "rtmpHandshake.h"
 #include "../data/clientObject.h"
 
-#include "../../../../ttLibC_predef.h"
 #include "../../../../_log.h"
 #include "../../../../allocator.h"
 #include "../../../../util/hexUtil.h"
@@ -113,7 +112,7 @@ static tetty_errornum RtmpHandshake_close(ttLibC_TettyContext *ctx) {
 	return 0;
 }
 
-ttLibC_RtmpHandshake TT_VISIBILITY_HIDDEN *ttLibC_RtmpHandshake_make() {
+ttLibC_RtmpHandshake TT_ATTRIBUTE_INNER *ttLibC_RtmpHandshake_make() {
 	ttLibC_RtmpHandshake *handshake = ttLibC_malloc(sizeof(ttLibC_RtmpHandshake));
 	if(handshake == NULL) {
 		return NULL;
@@ -125,7 +124,7 @@ ttLibC_RtmpHandshake TT_VISIBILITY_HIDDEN *ttLibC_RtmpHandshake_make() {
 	return handshake;
 }
 
-ttLibC_TettyPromise TT_VISIBILITY_HIDDEN *ttLibC_RtmpHandshake_getHandshakePromise(
+ttLibC_TettyPromise TT_ATTRIBUTE_INNER *ttLibC_RtmpHandshake_getHandshakePromise(
 		ttLibC_TettyBootstrap *bootstrap,
 		ttLibC_RtmpHandshake *handshake) {
 	ttLibC_TettyPromise *promise = ttLibC_TettyBootstrap_makePromise(bootstrap);
@@ -133,7 +132,7 @@ ttLibC_TettyPromise TT_VISIBILITY_HIDDEN *ttLibC_RtmpHandshake_getHandshakePromi
 	return promise;
 }
 
-void TT_VISIBILITY_HIDDEN ttLibC_RtmpHandshake_close(ttLibC_RtmpHandshake **handshake) {
+void TT_ATTRIBUTE_INNER ttLibC_RtmpHandshake_close(ttLibC_RtmpHandshake **handshake) {
 	ttLibC_RtmpHandshake *target = (ttLibC_RtmpHandshake *)*handshake;
 	if(target == NULL) {
 		return;

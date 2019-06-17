@@ -10,7 +10,6 @@
 #include "swresampleResampler.h"
 #include <libswresample/swresample.h>
 #include <libavutil/channel_layout.h>
-#include "../ttLibC_predef.h"
 #include "../allocator.h"
 #include "../_log.h"
 
@@ -131,7 +130,7 @@ static bool SwresampleResampler_setupData(
 	return true;
 }
 
-ttLibC_SwresampleResampler TT_VISIBILITY_DEFAULT *ttLibC_SwresampleResampler_make(
+ttLibC_SwresampleResampler TT_ATTRIBUTE_API *ttLibC_SwresampleResampler_make(
 		ttLibC_Frame_Type input_frame_type,
 		uint32_t          input_sub_type,
 		uint32_t          src_sample_rate,
@@ -175,7 +174,7 @@ ttLibC_SwresampleResampler TT_VISIBILITY_DEFAULT *ttLibC_SwresampleResampler_mak
 	return (ttLibC_SwresampleResampler *)resampler;
 }
 
-bool TT_VISIBILITY_DEFAULT ttLibC_SwresampleResampler_resample(
+bool TT_ATTRIBUTE_API ttLibC_SwresampleResampler_resample(
 		ttLibC_SwresampleResampler *resampler,
 		ttLibC_Frame *frame,
 		ttLibC_getSwresampleFrameFunc callback,
@@ -458,7 +457,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_SwresampleResampler_resample(
 	return true;
 }
 
-void TT_VISIBILITY_DEFAULT ttLibC_SwresampleResampler_close(ttLibC_SwresampleResampler **resampler) {
+void TT_ATTRIBUTE_API ttLibC_SwresampleResampler_close(ttLibC_SwresampleResampler **resampler) {
 	ttLibC_SwresampleResampler_ *target = (ttLibC_SwresampleResampler_ *)*resampler;
 	if(target == NULL) {
 		return;

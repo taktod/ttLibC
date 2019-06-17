@@ -12,6 +12,7 @@
 extern "C" {
 #endif
 
+#include "../../../ttLibC_predef.h"
 #include "../websocket.h"
 #include "handshake.h"
 #include "handler.h"
@@ -43,19 +44,19 @@ typedef ttLibC_Net_Client_WebSocket_ ttLibC_WebSocket_;
  * @param socket
  * @note will receive pong from server.
  */
-void ttLibC_WebSocket_sendPing(ttLibC_WebSocket *socket);
+void TT_ATTRIBUTE_INNER ttLibC_WebSocket_sendPing(ttLibC_WebSocket *socket);
 
 /**
  * send pong to server.
  * @param socket
  */
-void ttLibC_WebSocket_sendPong(ttLibC_WebSocket *socket);
+void TT_ATTRIBUTE_INNER ttLibC_WebSocket_sendPong(ttLibC_WebSocket *socket);
 
 /**
  * send close to server.
  * @param socket
  */
-void ttLibC_WebSocket_sendClose(ttLibC_WebSocket *socket);
+void TT_ATTRIBUTE_INNER ttLibC_WebSocket_sendClose(ttLibC_WebSocket *socket);
 
 /**
  * sendMessage for internal use.
@@ -64,7 +65,7 @@ void ttLibC_WebSocket_sendClose(ttLibC_WebSocket *socket);
  * @param data
  * @param data_size
  */
-void ttLibC_WebSocket__sendMessage(
+void TT_ATTRIBUTE_INNER ttLibC_WebSocket__sendMessage(
 		ttLibC_WebSocket *socket,
 		ttLibC_WebSocketEvent_Opcode opcode,
 		void *data,

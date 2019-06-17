@@ -11,7 +11,6 @@
 #ifdef __ENABLE_WEBRTC__
 
 #include "mediaStream.h"
-#include "../../../ttLibC_predef.h"
 #include "../../../allocator.h"
 #include "../../../_log.h"
 #include "factory.h"
@@ -224,7 +223,7 @@ void MediaStreamWrapper::OnData(
 
 extern "C" {
 
-bool TT_VISIBILITY_HIDDEN ttLibC_WebrtcMediaStream_createNewVideoTrack(
+bool TT_ATTRIBUTE_INNER ttLibC_WebrtcMediaStream_createNewVideoTrack(
 		ttLibC_WebrtcMediaStream *stream,
 		ttLibC_WebrtcConstraint *constraint) {
 	if(stream == NULL) {
@@ -234,7 +233,7 @@ bool TT_VISIBILITY_HIDDEN ttLibC_WebrtcMediaStream_createNewVideoTrack(
 	return stream_->streamWrapper->createNewVideoTrack(constraint);
 }
 
-bool TT_VISIBILITY_HIDDEN ttLibC_WebrtcMediaStream_createNewAudioTrack(
+bool TT_ATTRIBUTE_INNER ttLibC_WebrtcMediaStream_createNewAudioTrack(
 		ttLibC_WebrtcMediaStream *stream,
 		ttLibC_WebrtcConstraint *constraint) {
 	if(stream == NULL) {
@@ -244,7 +243,7 @@ bool TT_VISIBILITY_HIDDEN ttLibC_WebrtcMediaStream_createNewAudioTrack(
 	return stream_->streamWrapper->createNewAudioTrack(constraint);
 }
 
-bool TT_VISIBILITY_HIDDEN ttLibC_WebrtcMediaStream_addFrameListener(
+bool TT_ATTRIBUTE_INNER ttLibC_WebrtcMediaStream_addFrameListener(
 		ttLibC_WebrtcMediaStream *stream,
 		ttLibC_WebrtcMediaStreamFrameFunc callback,
 		void *ptr) {
@@ -256,7 +255,7 @@ bool TT_VISIBILITY_HIDDEN ttLibC_WebrtcMediaStream_addFrameListener(
 }
 
 // indexはframe.idでなんとかすることにする。
-bool TT_VISIBILITY_HIDDEN ttLibC_WebrtcMediaStream_addFrame(
+bool TT_ATTRIBUTE_INNER ttLibC_WebrtcMediaStream_addFrame(
 		ttLibC_WebrtcMediaStream *stream,
 		ttLibC_Frame *frame) {
 	if(stream == NULL) {

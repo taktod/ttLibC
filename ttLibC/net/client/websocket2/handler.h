@@ -12,6 +12,7 @@
 extern "C" {
 #endif
 
+#include "../../../ttLibC_predef.h"
 #include "../websocket.h"
 #include "../../tetty2/tcpBootstrap.h"
 #include "../../../util/dynamicBufferUtil.h"
@@ -40,8 +41,8 @@ typedef struct ttLibC_Net_Client_WebSocket_Handler {
 
 typedef ttLibC_Net_Client_WebSocket_Handler ttLibC_WebSocketHandler;
 
-ttLibC_WebSocketHandler *ttLibC_WebSocketHandler_make();
-void ttLibC_WebSocketHandler_close(ttLibC_WebSocketHandler **handler);
+ttLibC_WebSocketHandler TT_ATTRIBUTE_INNER *ttLibC_WebSocketHandler_make();
+void TT_ATTRIBUTE_INNER ttLibC_WebSocketHandler_close(ttLibC_WebSocketHandler **handler);
 
 #ifdef __cplusplus
 } /* extern "C" */

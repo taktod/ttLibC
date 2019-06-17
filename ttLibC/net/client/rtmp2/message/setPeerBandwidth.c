@@ -5,15 +5,12 @@
  *      Author: taktod
  */
 
-#ifdef __ENABLE_SOCKET__
-
 #include "setPeerBandwidth.h"
-#include "../../../../ttLibC_predef.h"
 #include "../../../../_log.h"
 #include "../../../../allocator.h"
 #include <string.h>
 
-ttLibC_SetPeerBandwidth TT_VISIBILITY_HIDDEN *ttLibC_SetPeerBandwidth_make(
+ttLibC_SetPeerBandwidth TT_ATTRIBUTE_INNER *ttLibC_SetPeerBandwidth_make(
 		uint32_t size,
 		ttLibC_SetPeerBandwidth_LimitType limit_type) {
 	ttLibC_SetPeerBandwidth *bandwidth = ttLibC_malloc(sizeof(ttLibC_SetPeerBandwidth));
@@ -31,7 +28,7 @@ ttLibC_SetPeerBandwidth TT_VISIBILITY_HIDDEN *ttLibC_SetPeerBandwidth_make(
 	return bandwidth;
 }
 
-void TT_VISIBILITY_HIDDEN ttLibC_SetPeerBandwidth_close(ttLibC_SetPeerBandwidth **bandwidth) {
+void TT_ATTRIBUTE_INNER ttLibC_SetPeerBandwidth_close(ttLibC_SetPeerBandwidth **bandwidth) {
 	ttLibC_SetPeerBandwidth *target = (ttLibC_SetPeerBandwidth *)*bandwidth;
 	if(target == NULL) {
 		return;
@@ -41,4 +38,3 @@ void TT_VISIBILITY_HIDDEN ttLibC_SetPeerBandwidth_close(ttLibC_SetPeerBandwidth 
 	*bandwidth = NULL;
 }
 
-#endif

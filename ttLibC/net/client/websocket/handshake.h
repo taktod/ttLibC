@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../../../ttLibC_predef.h"
 #include "../websocket.h"
 #include "../../tetty.h"
 
@@ -25,10 +26,10 @@ typedef struct ttLibC_Net_Client_WebSocket_HandshakeHandler {
 
 typedef ttLibC_Net_Client_WebSocket_HandshakeHandler ttLibC_WebSocketHandshakeHandler;
 
-ttLibC_WebSocketHandshakeHandler *ttLibC_WebSocketHandshakeHandler_make();
-void ttLibC_WebSocketHandshakeHandler_close(ttLibC_WebSocketHandshakeHandler **handler);
+ttLibC_WebSocketHandshakeHandler TT_ATTRIBUTE_INNER *ttLibC_WebSocketHandshakeHandler_make();
+void TT_ATTRIBUTE_INNER ttLibC_WebSocketHandshakeHandler_close(ttLibC_WebSocketHandshakeHandler **handler);
 
-ttLibC_TettyPromise *ttLibC_WebSocketHandshakeHandler_doHandshake(
+ttLibC_TettyPromise TT_ATTRIBUTE_INNER *ttLibC_WebSocketHandshakeHandler_doHandshake(
 		ttLibC_WebSocketHandshakeHandler *handshake,
 		ttLibC_WebSocket *socket);
 

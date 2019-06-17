@@ -17,6 +17,7 @@
 extern "C" {
 #endif
 
+#include "../ttLibC_predef.h"
 #include "net.h"
 #include <stdio.h>
 #include <stdbool.h>
@@ -50,7 +51,7 @@ typedef ttLibC_Net_TcpClientInfo ttLibC_TcpClientInfo;
  * @param port
  * @return ttLibC_TcpServerInfo object
  */
-ttLibC_TcpServerInfo *ttLibC_TcpServer_make(
+ttLibC_TcpServerInfo TT_ATTRIBUTE_API *ttLibC_TcpServer_make(
 		uint64_t ip,
 		uint16_t port);
 
@@ -59,21 +60,21 @@ ttLibC_TcpServerInfo *ttLibC_TcpServer_make(
  * @param server_info
  * @return true / false
  */
-bool ttLibC_TcpServer_open(ttLibC_TcpServerInfo *server_info);
+bool TT_ATTRIBUTE_API ttLibC_TcpServer_open(ttLibC_TcpServerInfo *server_info);
 
 /**
  * accept tcp connection from client.
  * @param server_info
  * @return ttLibC_TcpClientInfo object.
  */
-ttLibC_TcpClientInfo *ttLibC_TcpServer_wait(
+ttLibC_TcpClientInfo TT_ATTRIBUTE_API *ttLibC_TcpServer_wait(
 		ttLibC_TcpServerInfo *server_info);
 
 /**
  * close server socket
  * @param server_info
  */
-void ttLibC_TcpServer_close(ttLibC_TcpServerInfo **server_info);
+void TT_ATTRIBUTE_API ttLibC_TcpServer_close(ttLibC_TcpServerInfo **server_info);
 
 /**
  * make tcp client socket
@@ -81,26 +82,26 @@ void ttLibC_TcpServer_close(ttLibC_TcpServerInfo **server_info);
  * @param por
  * @return ttLibC_TcpClientInfo2 object.
  */
-ttLibC_TcpClientInfo *ttLibC_TcpClient_make(
+ttLibC_TcpClientInfo TT_ATTRIBUTE_API *ttLibC_TcpClient_make(
 		const char *host,
 		int port);
 
-int ttLibC_TcpClient_connect(ttLibC_TcpClientInfo *client_info);
+int TT_ATTRIBUTE_API ttLibC_TcpClient_connect(ttLibC_TcpClientInfo *client_info);
 
-int64_t ttLibC_TcpClient_read(
+int64_t TT_ATTRIBUTE_API ttLibC_TcpClient_read(
 		ttLibC_TcpClientInfo *client_info,
 		void * data,
 		size_t data_size);
 
-bool ttLibC_TcpClient_write(
+bool TT_ATTRIBUTE_API ttLibC_TcpClient_write(
 	ttLibC_TcpClientInfo *client_info,
 	void *data,
 	size_t data_size);
 
 
-bool ttLibC_TcpClient_flush(ttLibC_TcpClientInfo *client_info);
+bool TT_ATTRIBUTE_API ttLibC_TcpClient_flush(ttLibC_TcpClientInfo *client_info);
 
-int ttLibC_TcpClient_setSockOpt(
+int TT_ATTRIBUTE_API ttLibC_TcpClient_setSockOpt(
 		ttLibC_TcpClientInfo *client_info,
 		int target,
 		int option,
@@ -111,7 +112,7 @@ int ttLibC_TcpClient_setSockOpt(
  * close client socket
  * @param client_info
  */
-void ttLibC_TcpClient_close(ttLibC_TcpClientInfo **client_info);
+void TT_ATTRIBUTE_API ttLibC_TcpClient_close(ttLibC_TcpClientInfo **client_info);
 
 #ifdef __cplusplus
 } /* extern "C" */

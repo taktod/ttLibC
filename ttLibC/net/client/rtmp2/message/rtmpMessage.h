@@ -12,6 +12,7 @@
 extern "C" {
 #endif
 
+#include "../../../../ttLibC_predef.h"
 #include "../header/rtmpHeader.h"
 #include "../../../../util/dynamicBufferUtil.h"
 #include "../../../../util/stlMapUtil.h"
@@ -25,16 +26,16 @@ typedef struct ttLibC_Net_Client_Rtmp2_Message_RtmpMessage {
 
 typedef ttLibC_Net_Client_Rtmp2_Message_RtmpMessage ttLibC_RtmpMessage;
 
-bool ttLibC_RtmpMessage_getData(
+bool TT_ATTRIBUTE_INNER ttLibC_RtmpMessage_getData(
 		ttLibC_ClientObject *client_object,
 		ttLibC_RtmpMessage *message,
 		ttLibC_DynamicBuffer *buffer);
 
-ttLibC_RtmpMessage *ttLibC_RtmpMessage_readBinary(
+ttLibC_RtmpMessage TT_ATTRIBUTE_INNER *ttLibC_RtmpMessage_readBinary(
 		ttLibC_DynamicBuffer *buffer,
 		ttLibC_ClientObject *client_object);
 
-void ttLibC_RtmpMessage_close(ttLibC_RtmpMessage **message);
+void TT_ATTRIBUTE_INNER ttLibC_RtmpMessage_close(ttLibC_RtmpMessage **message);
 
 #ifdef __cplusplus
 } /* extern "C" */

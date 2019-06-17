@@ -12,6 +12,7 @@
 extern "C" {
 #endif
 
+#include "../../../../ttLibC_predef.h"
 #include "../../rtmp.h"
 #include "../../../../util/tetty2.h"
 
@@ -21,8 +22,8 @@ typedef struct ttLibC_Net_Client_Rtmp2_Tetty2_RtmpDecoder{
 
 typedef ttLibC_Net_Client_Rtmp2_Tetty2_RtmpDecoder ttLibC_RtmpDecoder;
 
-ttLibC_RtmpDecoder *ttLibC_RtmpDecoder_make();
-void ttLibC_RtmpDecoder_close(ttLibC_RtmpDecoder **decoder);
+ttLibC_RtmpDecoder TT_ATTRIBUTE_INNER *ttLibC_RtmpDecoder_make();
+void TT_ATTRIBUTE_INNER ttLibC_RtmpDecoder_close(ttLibC_RtmpDecoder **decoder);
 
 #ifdef __cplusplus
 } /* extern "C" */

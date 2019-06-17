@@ -11,7 +11,6 @@
 #ifdef __ENABLE_SOCKET__
 
 #include "handshake.h"
-#include "../../../ttLibC_predef.h"
 #include "../../../allocator.h"
 #include "../../../_log.h"
 #include "../../../util/hexUtil.h"
@@ -63,7 +62,7 @@ static tetty_errornum WebSocketHandshakeHandler_channelRead(
 	return 0;
 }
 
-ttLibC_WebSocketHandshakeHandler TT_VISIBILITY_HIDDEN *ttLibC_WebSocketHandshakeHandler_make() {
+ttLibC_WebSocketHandshakeHandler TT_ATTRIBUTE_INNER *ttLibC_WebSocketHandshakeHandler_make() {
 	ttLibC_WebSocketHandshakeHandler *handler = ttLibC_malloc(sizeof(ttLibC_WebSocketHandshakeHandler));
 	if(handler == NULL) {
 		return NULL;
@@ -75,7 +74,7 @@ ttLibC_WebSocketHandshakeHandler TT_VISIBILITY_HIDDEN *ttLibC_WebSocketHandshake
 	return handler;
 }
 
-void TT_VISIBILITY_HIDDEN ttLibC_WebSocketHandshakeHandler_close(ttLibC_WebSocketHandshakeHandler **handler) {
+void TT_ATTRIBUTE_INNER ttLibC_WebSocketHandshakeHandler_close(ttLibC_WebSocketHandshakeHandler **handler) {
 	ttLibC_WebSocketHandshakeHandler *target = (ttLibC_WebSocketHandshakeHandler *)*handler;
 	if(target == NULL) {
 		return;
@@ -84,7 +83,7 @@ void TT_VISIBILITY_HIDDEN ttLibC_WebSocketHandshakeHandler_close(ttLibC_WebSocke
 	*handler = NULL;
 }
 
-ttLibC_TettyPromise TT_VISIBILITY_HIDDEN *ttLibC_WebSocketHandshakeHandler_doHandshake(
+ttLibC_TettyPromise TT_ATTRIBUTE_INNER *ttLibC_WebSocketHandshakeHandler_doHandshake(
 		ttLibC_WebSocketHandshakeHandler *handshake,
 		ttLibC_WebSocket *socket) {
 	ttLibC_WebSocket_ *socket_ = (ttLibC_WebSocket_ *)socket;

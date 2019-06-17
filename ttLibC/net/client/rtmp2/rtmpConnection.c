@@ -8,7 +8,6 @@
 #ifdef __ENABLE_SOCKET__
 
 #include "rtmpConnection.h"
-#include "../../../ttLibC_predef.h"
 #include "../../../_log.h"
 #include "../../../allocator.h"
 #include "../../../util/amfUtil.h"
@@ -18,7 +17,7 @@
 
 #include <string.h>
 
-ttLibC_RtmpConnection TT_VISIBILITY_DEFAULT *ttLibC_RtmpConnection_make() {
+ttLibC_RtmpConnection TT_ATTRIBUTE_API *ttLibC_RtmpConnection_make() {
 	ttLibC_RtmpConnection_ *conn = ttLibC_malloc(sizeof(ttLibC_RtmpConnection_));
 	if(conn == NULL) {
 		return NULL;
@@ -48,7 +47,7 @@ static void RtmpConnection_connectCallback(void *ptr, ttLibC_Tetty2Promise *prom
 	}
 }
 
-void TT_VISIBILITY_DEFAULT ttLibC_RtmpConnection_addEventListener(
+void TT_ATTRIBUTE_API ttLibC_RtmpConnection_addEventListener(
 		ttLibC_RtmpConnection *conn,
 		ttLibC_RtmpEventFunc callback,
 		void *ptr) {
@@ -60,7 +59,7 @@ void TT_VISIBILITY_DEFAULT ttLibC_RtmpConnection_addEventListener(
 	conn_->ptr = ptr;
 }
 
-bool TT_VISIBILITY_DEFAULT ttLibC_RtmpConnection_connect(
+bool TT_ATTRIBUTE_API ttLibC_RtmpConnection_connect(
 		ttLibC_RtmpConnection *conn,
 		const char *address) {
 	ttLibC_RtmpConnection_ *conn_ = (ttLibC_RtmpConnection_ *)conn;
@@ -156,7 +155,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_RtmpConnection_connect(
 	return conn_->bootstrap->error_number == 0;
 }
 
-bool TT_VISIBILITY_DEFAULT ttLibC_RtmpConnection_update(ttLibC_RtmpConnection* conn, uint32_t wait_interval) {
+bool TT_ATTRIBUTE_API ttLibC_RtmpConnection_update(ttLibC_RtmpConnection* conn, uint32_t wait_interval) {
 	ttLibC_RtmpConnection_ *conn_ = (ttLibC_RtmpConnection_ *)conn;
 	if(conn_ == NULL) {
 		return false;
@@ -179,7 +178,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_RtmpConnection_update(ttLibC_RtmpConnection* c
 	return true;
 }
 
-void TT_VISIBILITY_DEFAULT ttLibC_RtmpConnection_close(ttLibC_RtmpConnection **conn) {
+void TT_ATTRIBUTE_API ttLibC_RtmpConnection_close(ttLibC_RtmpConnection **conn) {
 	ttLibC_RtmpConnection_ *target = (ttLibC_RtmpConnection_ *)*conn;
 	if(target == NULL) {
 		return;
