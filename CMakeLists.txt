@@ -20,7 +20,6 @@ option(TT_FILE       "use file feature"   ${TT_DEFAULT})
 option(TT_SOCKET     "use socket feature" ${TT_DEFAULT})
 
 option(TT_FAAC       "enable faac"        ${TT_DEFAULT})
-option(TT_FDKAAC     "enable fdkaac"      ${TT_DEFAULT})
 option(TT_FFMPEG     "enable ffmpeg"      ${TT_DEFAULT})
 option(TT_JPEG       "enable jpeg"        ${TT_DEFAULT})
 option(TT_LIBPNG     "enable libpng"      ${TT_DEFAULT})
@@ -65,7 +64,62 @@ endif()
 
 message("")
 # headers
-
+set(TTLIBC_HEADERS
+  ttLibC/allocator.h
+  ttLibC/log.h
+  ttLibC/ttLibC.h)
+set(TTLIBC_CONTAINER_HEADERS
+  ttLibC/container/container.h
+  ttLibC/container/flv.h
+  ttLibC/container/mkv.h
+  ttLibC/container/mp3.h
+  ttLibC/container/mp4.h
+  ttLibC/container/mpegts.h)
+set(TTLIBC_FRAME_AUDIO_HEADERS
+  ttLibC/frame/audio/aac.h
+  ttLibC/frame/audio/adpcmImaWav.h
+  ttLibC/frame/audio/audio.h
+  ttLibC/frame/audio/mp3.h
+  ttLibC/frame/audio/nellymoser.h
+  ttLibC/frame/audio/opus.h
+  ttLibC/frame/audio/pcmAlaw.h
+  ttLibC/frame/audio/pcmf32.h
+  ttLibC/frame/audio/pcmMulaw.h
+  ttLibC/frame/audio/pcms16.h
+  ttLibC/frame/audio/speex.h
+  ttLibC/frame/audio/vorbis.h)
+set(TTLIBC_FRAME_VIDEO_HEADERS
+  ttLibC/frame/video/bgr.h
+  ttLibC/frame/video/flv1.h
+  ttLibC/frame/video/h264.h
+  ttLibC/frame/video/h265.h
+  ttLibC/frame/video/jpeg.h
+  ttLibC/frame/video/png.h
+  ttLibC/frame/video/theora.h
+  ttLibC/frame/video/video.h
+  ttLibC/frame/video/vp6.h
+  ttLibC/frame/video/vp8.h
+  ttLibC/frame/video/vp9.h
+  ttLibC/frame/video/wmv1.h
+  ttLibC/frame/video/wmv2.h
+  ttLibC/frame/video/yuv420.h)
+set(TTLIBC_FRAME_HEADERS
+  ttLibC/frame/frame.h)
+set(TTLIBC_RESAMPLER_HEADERS
+  ttLibC/resampler/audioResampler.h
+  ttLibC/resampler/imageResampler.h
+  ttLibC/resampler/imageResizer.h)
+set(TTLIBC_UTIL_HEADERS
+  ttLibC/util/amfUtil.h
+  ttLibC/util/beepUtil.h
+  ttLibC/util/byteUtil.h
+  ttLibC/util/crc32Util.h
+  ttLibC/util/dynamicBufferUtil.h
+  ttLibC/util/hexUtil.h
+  ttLibC/util/ioUtil.h
+  ttLibC/util/stlListUtil.h
+  ttLibC/util/stlMapUtil.h
+  ttLibC/util/tetty2.h)
 
 # License (gpl lgpl bsd)
 message("Result ...")
@@ -104,6 +158,9 @@ endif()
 if(TT_FILE)
   message("file:       on")
   add_compile_definitions(__ENABLE_FILE__)
+  set(TTLIBC_UTIL_HEADERS
+    ${TTLIBC_UTIL_HEADERS}
+      ttLibC/util/forkUtil.h)
 else()
   message("file:       off")
 endif()
@@ -111,8 +168,27 @@ endif()
 if(TT_SOCKET)
   message("socket:     on")
   add_compile_definitions(__ENABLE_SOCKET__)
+  set(TTLIBC_NET_HEADERS
+    ${TTLIBC_NET_HEADERS}
+    ttLibC/net/net.h
+    ttLibC/net/tcp.h
+    ttLibC/net/tetty.h
+    ttLibC/net/udp.h)
+  set(TTLIBC_NET_CLIENT_HEADERS
+    ${TTLIBC_NET_CLIENT_HEADERS}
+    ttLibC/net/client/rtmp.h
+    ttLibC/net/client/websocket.h)
+  set(TTLIBC_NET_TETTY2_HEADERS
+    ${TTLIBC_NET_TETTY2_HEADERS}
+    ttLibC/net/tetty2/tcpBootstrap.h)
 else()
   message("socket:     off")
+endif()
+
+if(TT_FILE AND TT_SOCKET)
+  set(TTLIBC_UTIL_HEADERS
+    ${TTLIBC_UTIL_HEADERS}
+      ttLibC/util/httpUtil.h)
 endif()
 
 # apple any for osx or ios
@@ -128,6 +204,17 @@ if(APPLE)
     message("apple:      on")
     set(TT_APPLE_LIBRARIES "-framework AudioToolbox -framework VideoToolbox -framework CoreFoundation -framework AudioUnit -framework CoreMedia -framework CoreVideo -framework CoreAudio")
     add_compile_definitions(__ENABLE_APPLE__)
+    set(TTLIBC_DECODER_HEADERS
+      ${TTLIBC_DECODER_HEADERS}
+      ttLibC/decoder/audioConverterDecoder.h
+      ttLibC/decoder/vtDecompressSessionDecoder.h)
+    set(TTLIBC_ENCODER_HEADERS
+      ${TTLIBC_ENCODER_HEADERS}
+      ttLibC/encoder/audioConverterEncoder.h
+      ttLibC/encoder/vtCompressSessionEncoder.h)
+    set(TTLIBC_UTIL_HEADERS
+      ${TTLIBC_UTIL_HEADERS}
+      ttLibC/util/audioUnitUtil.h)
   else()
     message("apple:      off")
   endif()
@@ -147,6 +234,9 @@ if(TT_FAAC)
         include_directories(${TT_RESULT})
         link_directories(/usr/local/lib)
         set(TT_FAAC_LIBRARIES "faac")
+        set(TTLIBC_ENCODER_HEADERS
+          ${TTLIBC_ENCODER_HEADERS}
+          ttLibC/encoder/faacEncoder.h)
       else()
         message("faac:       off(library is missing)")
       endif()
@@ -156,29 +246,6 @@ if(TT_FAAC)
   endif()
 else()
   message("faac:       off")
-endif()
-
-# fdkaac lgpl
-if(TT_FDKAAC)
-  if(TT_LICENSE STREQUAL "GPL" OR TT_LICENSE STREQUAL "LGPL")
-    if(WIN32)
-      message("fdkaac:     on")
-      add_compile_definitions(__ENABLE_FDKAAC__)
-    else()
-      pkg_check_modules(TT_FDKAAC fdk-aac QUIET)
-      if(TT_FDKAAC_LIBRARIES)
-        message("fdkaac:     on")
-        add_compile_definitions(__ENABLE_FDKAAC__)
-        include_directories(${TT_FDKAAC_INCLUDE_DIRS})
-      else()
-        message("fdkaac:     off(library is missing)")
-      endif()
-    endif()
-  else()
-    message("fdkaac:     off(under lgpl only)")
-  endif()
-else()
-  message("fdkaac:     off")
 endif()
 
 # ffmpeg lgpl
@@ -193,6 +260,16 @@ if(TT_FFMPEG)
         message("ffmpeg:     on")
         include_directories(${TT_FFMPEG_INCLUDE_DIRS})
         add_compile_definitions(__ENABLE_AVCODEC__ __ENABLE_SWSCALE__ __ENABLE_SWRESAMPLE__)
+        set(TTLIBC_DECODER_HEADERS
+          ${TTLIBC_DECODER_HEADERS}
+          ttLibC/decoder/avcodecDecoder.h)
+        set(TTLIBC_ENCODER_HEADERS
+          ${TTLIBC_ENCODER_HEADERS}
+          ttLibC/encoder/avcodecEncoder.h)
+        set(TTLIBC_RESAMPLER_HEADERS
+          ${TTLIBC_RESAMPLER_HEADERS}
+          ttLibC/resampler/swscaleResampler.h
+          ttLibC/resampler/swresampleResampler.h)
       else()
         message("ffmpeg:     off(library is missing)")
       endif()
@@ -217,6 +294,12 @@ if(TT_JPEG)
       add_compile_definitions(__ENABLE_JPEG__)
       link_directories(/usr/local/lib)
       set(TT_JPEG_LIBRARIES "jpeg")
+      set(TTLIBC_ENCODER_HEADERS
+        ${TTLIBC_ENCODER_HEADERS}
+        ttLibC/encoder/jpegEncoder.h)
+      set(TTLIBC_DECODER_HEADERS
+        ${TTLIBC_DECODER_HEADERS}
+        ttLibC/decoder/jpegDecoder.h)
     else()
       message("jpeg:       off(library is missing)")
     endif()
@@ -236,6 +319,9 @@ if(TT_LIBPNG)
       message("libpng:     on")
       add_compile_definitions(__ENABLE_LIBPNG__)
       include_directories(${TT_LIBPNG_INCLUDE_DIRS})
+      set(TTLIBC_DECODER_HEADERS
+        ${TTLIBC_DECODER_HEADERS}
+        ttLibC/decoder/pngDecoder.h)
     else()
       message("libpng:     off(library is missing)")
     endif()
@@ -257,6 +343,9 @@ if(TT_LIBYUV)
       add_compile_definitions(__ENABLE_LIBYUV__)
       link_directories(/usr/local/lib)
       set(TT_LIBYUV_LIBRARIES "yuv")
+      set(TTLIBC_RESAMPLER_HEADERS
+        ${TTLIBC_RESAMPLER_HEADERS}
+        ttLibC/resampler/libyuvResampler.h)
     else()
       message("libyuv:     off(library is missing)")
     endif()
@@ -279,8 +368,14 @@ if(TT_MP3LAME)
       if(TT_RESULT)
         message("mp3lame:    on")
         add_compile_definitions(__ENABLE_MP3LAME__)
+        set(TTLIBC_ENCODER_HEADERS
+          ${TTLIBC_ENCODER_HEADERS}
+          ttLibC/encoder/mp3lameEncoder.h)
         if(TT_LICENSE STREQUAL "GPL")
           add_compile_definitions(__ENABLE_MP3LAME_DECODE__)
+          set(TTLIBC_DECODER_HEADERS
+            ${TTLIBC_DECODER_HEADERS}
+            ttLibC/decoder/mp3lameDecoder.h)
         endif()
         include_directories(${TT_RESULT})
         link_directories(/usr/local/lib)
@@ -305,6 +400,9 @@ if(TT_OPENAL)
         message("openal:     on")
         set(TT_OPENAL_LIBRARIES "-framework OpenAL")
         add_compile_definitions(__ENABLE_OPENAL__)
+        set(TTLIBC_UTIL_HEADERS
+          ${TTLIBC_UTIL_HEADERS}
+          ttLibC/util/openalUtil.h)
       else()
         message("openal:     off(library is missing)")
       endif()
@@ -317,8 +415,11 @@ if(TT_OPENAL)
         message("openal:     on")
         add_compile_definitions(__ENABLE_OPENAL__)
         include_directories(${TT_OPENAL_INCLUDE_DIRS})
+        set(TTLIBC_UTIL_HEADERS
+          ${TTLIBC_UTIL_HEADERS}
+          ttLibC/util/openalUtil.h)
       else()
-        message("libpng:     off(library is missing)")
+        message("openal:     off(library is missing)")
       endif()
     endif()
   else()
@@ -339,12 +440,18 @@ if(TT_OPENCV)
       message("opencv:     on")
       add_compile_definitions(__ENABLE_OPENCV__)
       include_directories(${TT_OPENCV_INCLUDE_DIRS})
+      set(TTLIBC_UTIL_HEADERS
+        ${TTLIBC_UTIL_HEADERS}
+        ttLibC/util/opencvUtil.h)
     else()
       pkg_check_modules(TT_OPENCV opencv4 QUIET)
       if(TT_OPENCV_LIBRARIES)
         message("opencv:     on")
         add_compile_definitions(__ENABLE_OPENCV__)
         include_directories(${TT_OPENCV_INCLUDE_DIRS})
+        set(TTLIBC_UTIL_HEADERS
+          ${TTLIBC_UTIL_HEADERS}
+          ttLibC/util/opencvUtil.h)
       else()
         message("opencv:     off(library is missing)")
       endif()
@@ -365,6 +472,12 @@ if(TT_OPENH264)
       message("openh264:   on")
       add_compile_definitions(__ENABLE_OPENH264__)
       include_directories(${TT_OPENH264_INCLUDE_DIRS})
+      set(TTLIBC_ENCODER_HEADERS
+        ${TTLIBC_ENCODER_HEADERS}
+        ttLibC/encoder/openh264Encoder.h)
+      set(TTLIBC_DECODER_HEADERS
+        ${TTLIBC_DECODER_HEADERS}
+        ttLibC/decoder/openh264Decoder.h)
     else()
       message("openh264:   off(library is missing)")
     endif()
@@ -384,6 +497,12 @@ if(TT_OPUS)
       message("opus:       on")
       add_compile_definitions(__ENABLE_OPUS__)
       include_directories(${TT_OPUS_INCLUDE_DIRS})
+      set(TTLIBC_ENCODER_HEADERS
+        ${TTLIBC_ENCODER_HEADERS}
+        ttLibC/encoder/opusEncoder.h)
+      set(TTLIBC_DECODER_HEADERS
+        ${TTLIBC_DECODER_HEADERS}
+        ttLibC/decoder/opusDecoder.h)
     else()
       message("opus:       off(library is missing)")
     endif()
@@ -404,6 +523,9 @@ if(TT_SOUNDTOUCH)
         message("soundtouch: on")
         add_compile_definitions(__ENABLE_SOUNDTOUCH__)
         include_directories(${TT_SOUNDTOUCH_INCLUDE_DIRS})
+        set(TTLIBC_RESAMPLER_HEADERS
+          ${TTLIBC_RESAMPLER_HEADERS}
+          ttLibC/resampler/soundtouchResampler.h)
       else()
         message("soundtouch: off(library is missing)")
       endif()
@@ -426,6 +548,12 @@ if(TT_SPEEX)
       message("speex:      on")
       add_compile_definitions(__ENABLE_SPEEX__)
       include_directories(${TT_SPEEX_INCLUDE_DIRS})
+      set(TTLIBC_ENCODER_HEADERS
+        ${TTLIBC_ENCODER_HEADERS}
+        ttLibC/encoder/speexEncoder.h)
+      set(TTLIBC_DECODER_HEADERS
+        ${TTLIBC_DECODER_HEADERS}
+        ttLibC/decoder/speexDecoder.h)
     else()
       message("speex:      off(library is missing)")
     endif()
@@ -445,6 +573,9 @@ if(TT_SPEEXDSP)
       message("speexdsp:   on")
       add_compile_definitions(__ENABLE_SPEEXDSP__)
       include_directories(${TT_SPEEXDSP_INCLUDE_DIRS})
+      set(TTLIBC_RESAMPLER_HEADERS
+        ${TTLIBC_RESAMPLER_HEADERS}
+        ttLibC/resampler/speexdspResampler.h)
     else()
       message("speexdsp:   off(library is missing)")
     endif()
@@ -464,6 +595,12 @@ if(TT_THEORA)
       message("theora:     on")
       add_compile_definitions(__ENABLE_THEORA__)
       include_directories(${TT_THEORA_INCLUDE_DIRS})
+      set(TTLIBC_ENCODER_HEADERS
+        ${TTLIBC_ENCODER_HEADERS}
+        ttLibC/encoder/theoraEncoder.h)
+      set(TTLIBC_DECODER_HEADERS
+        ${TTLIBC_DECODER_HEADERS}
+        ttLibC/decoder/theoraDecoder.h)
     else()
       message("theora:     off(library is missing)")
     endif()
@@ -483,6 +620,12 @@ if(TT_VORBIS)
       message("vorbis:     on")
       add_compile_definitions(__ENABLE_VORBIS_DECODE__ __ENABLE_VORBIS_ENCODE__)
       include_directories(${TT_VORBIS_INCLUDE_DIRS})
+      set(TTLIBC_ENCODER_HEADERS
+        ${TTLIBC_ENCODER_HEADERS}
+        ttLibC/encoder/vorbisEncoder.h)
+      set(TTLIBC_DECODER_HEADERS
+        ${TTLIBC_DECODER_HEADERS}
+        ttLibC/decoder/vorbisDecoder.h)
     else()
       message("vorbis:     off(library is missing)")
     endif()
@@ -503,6 +646,9 @@ if(TT_X264)
         message("x264:       on")
         add_compile_definitions(__ENABLE_X264__)
         include_directories(${TT_X264_INCLUDE_DIRS})
+        set(TTLIBC_ENCODER_HEADERS
+          ${TTLIBC_ENCODER_HEADERS}
+          ttLibC/encoder/x264Encoder.h)
       else()
         message("x264:       off(library is missing)")
       endif()
@@ -526,6 +672,9 @@ if(TT_X265)
         message("x265:       on")
         add_compile_definitions(__ENABLE_X265__)
         include_directories(${TT_X265_INCLUDE_DIRS})
+        set(TTLIBC_ENCODER_HEADERS
+          ${TTLIBC_ENCODER_HEADERS}
+          ttLibC/encoder/x265Encoder.h)
       else()
         message("x265:       off(library is missing)")
       endif()
@@ -686,37 +835,30 @@ add_library(ttLibC SHARED
   ttLibC/decoder/openh264Decoder.cpp
   ttLibC/resampler/soundtouchResampler.cpp)
 
-
 target_link_libraries(ttLibC PRIVATE
-${TT_APPLE_LIBRARIES}
-${TT_FAAC_LIBRARIES}
-${TT_FDKAAC_LIBRARIES}
-${TT_FFMPEG_LIBRARIES}
-${TT_JPEG_LIBRARIES}
-${TT_LIBPNG_LIBRARIES}
-${TT_LIBYUV_LIBRARIES}
-${TT_MP3LAME_LIBRARIES}
-${TT_OPENAL_LIBRARIES}
-${TT_OPENCV_LIBRARIES}
-${TT_OPENH264_LIBRARIES}
-${TT_OPUS_LIBRARIES}
-${TT_SOUNDTOUCH_LIBRARIES}
-${TT_SPEEX_LIBRARIES}
-${TT_SPEEXDSP_LIBRARIES}
-${TT_THEORA_LIBRARIES}
-${TT_VORBIS_LIBRARIES}
-${TT_X264_LIBRARIES}
-${TT_X265_LIBRARIES})
+  ${TT_APPLE_LIBRARIES}
+  ${TT_FAAC_LIBRARIES}
+  ${TT_FFMPEG_LIBRARIES}
+  ${TT_JPEG_LIBRARIES}
+  ${TT_LIBPNG_LIBRARIES}
+  ${TT_LIBYUV_LIBRARIES}
+  ${TT_MP3LAME_LIBRARIES}
+  ${TT_OPENAL_LIBRARIES}
+  ${TT_OPENCV_LIBRARIES}
+  ${TT_OPENH264_LIBRARIES}
+  ${TT_OPUS_LIBRARIES}
+  ${TT_SOUNDTOUCH_LIBRARIES}
+  ${TT_SPEEX_LIBRARIES}
+  ${TT_SPEEXDSP_LIBRARIES}
+  ${TT_THEORA_LIBRARIES}
+  ${TT_VORBIS_LIBRARIES}
+  ${TT_X264_LIBRARIES}
+  ${TT_X265_LIBRARIES})
 
 if(WIN32)
   add_definitions("-DTT_ATTRIBUTE_INNER=")
   add_definitions("-DTT_ATTRIBUTE_API=__declspec(dllexport)")
 else()
-#  set_property(TARGET ttLibC
-#    PROPERTY PUBLIC_HEADER
-#    "ttLibC/container/container.h"
-#    "ttLibC/ttLibC.h")
-
   set(prefix ${CMAKE_INSTALL_PREFIX})
   set(exec_prefix "\${prefix}")
   set(libdir "\${exec_prefix}/lib")
@@ -730,5 +872,30 @@ else()
   install(TARGETS ttLibC
     ARCHIVE DESTINATION lib
     LIBRARY DESTINATION lib)
-#  install(FILES "ttLibC/container/container.h" DESTINATION include/ttLibC/container)
+  install(FILES ${TTLIBC_HEADERS}
+    DESTINATION include/ttLibC)
+  install(FILES ${TTLIBC_CONTAINER_HEADERS}
+    DESTINATION include/ttLibC/container)
+  install(FILES ${TTLIBC_DECODER_HEADERS}
+    DESTINATION include/ttLibC/decoder)
+  install(FILES ${TTLIBC_ENCODER_HEADERS}
+    DESTINATION include/ttLibC/encoder)
+  install(FILES ${TTLIBC_FRAME_HEADERS}
+    DESTINATION include/ttLibC/frame)
+  install(FILES ${TTLIBC_FRAME_VIDEO_HEADERS}
+    DESTINATION include/ttLibC/frame/video)
+  install(FILES ${TTLIBC_FRAME_AUDIO_HEADERS}
+    DESTINATION include/ttLibC/frame/audio)
+  install(FILES ${TTLIBC_FRAME_AUDIO_HEADERS}
+    DESTINATION include/ttLibC/frame/audio)
+  install(FILES ${TTLIBC_NET_HEADERS}
+    DESTINATION include/ttLibC/net)
+  install(FILES ${TTLIBC_NET_CLIENT_HEADERS}
+    DESTINATION include/ttLibC/net/client)
+  install(FILES ${TTLIBC_NET_TETTY2_HEADERS}
+    DESTINATION include/ttLibC/net/tetty2)
+  install(FILES ${TTLIBC_RESAMPLER_HEADERS}
+    DESTINATION include/ttLibC/resampler)
+  install(FILES ${TTLIBC_UTIL_HEADERS}
+    DESTINATION include/ttLibC/util)
 endif()
