@@ -42,29 +42,29 @@ typedef ttLibC_Util_OpencvUtil_CvWindow ttLibC_CvWindow;
  * @param name window name
  * @return ttLibC_CvWindow object
  */
-ttLibC_CvWindow *ttLibC_CvWindow_make(const char *name);
+ttLibC_CvWindow TT_ATTRIBUTE_API *ttLibC_CvWindow_make(const char *name);
 /** @deprected */
-ttLibC_CvWindow *ttLibC_CvWindow_makeWindow(const char *name);
+ttLibC_CvWindow TT_ATTRIBUTE_API *ttLibC_CvWindow_makeWindow(const char *name);
 
 /**
  * show bgr image.
  * @param window target window
  * @param bgr    target bgr image.
  */
-void ttLibC_CvWindow_showBgr(ttLibC_CvWindow *window, ttLibC_Bgr *bgr);
+void TT_ATTRIBUTE_API ttLibC_CvWindow_showBgr(ttLibC_CvWindow *window, ttLibC_Bgr *bgr);
 
 /**
  * close cvWindow
  * @param window target window
  */
-void ttLibC_CvWindow_close(ttLibC_CvWindow **window);
+void TT_ATTRIBUTE_API ttLibC_CvWindow_close(ttLibC_CvWindow **window);
 
 /**
  * wait for key Input.
  * @param delay waiting interval in mili sec.
  * @return pressed key code.
  */
-uint8_t ttLibC_CvWindow_waitForKeyInput(int delay);
+uint8_t TT_ATTRIBUTE_API ttLibC_CvWindow_waitForKeyInput(int delay);
 
 /**
  * data for opencv capture object.
@@ -88,12 +88,12 @@ typedef ttLibC_Util_OpencvUtil_CvCapture ttLibC_CvCapture;
  * @param height     capture height
  * @return ttLibC_CvCapture object.
  */
-ttLibC_CvCapture *ttLibC_CvCapture_make(
+ttLibC_CvCapture TT_ATTRIBUTE_API *ttLibC_CvCapture_make(
 		uint32_t camera_num,
 		uint32_t width,
 		uint32_t height);
 /** @deprected */
-ttLibC_CvCapture *ttLibC_CvCapture_makeCapture(
+ttLibC_CvCapture TT_ATTRIBUTE_API *ttLibC_CvCapture_makeCapture(
 		uint32_t camera_num,
 		uint32_t width,
 		uint32_t height);
@@ -103,13 +103,13 @@ ttLibC_CvCapture *ttLibC_CvCapture_makeCapture(
  * @param capture    CvCapture object.
  * @param prev_frame reuse bgr frame.
  */
-ttLibC_Bgr *ttLibC_CvCapture_queryFrame(ttLibC_CvCapture *capture, ttLibC_Bgr *prev_frame);
+ttLibC_Bgr TT_ATTRIBUTE_API *ttLibC_CvCapture_queryFrame(ttLibC_CvCapture *capture, ttLibC_Bgr *prev_frame);
 
 /**
  * close cvCapture
  * @param capture target capture.
  */
-void ttLibC_CvCapture_close(ttLibC_CvCapture **capture);
+void TT_ATTRIBUTE_API ttLibC_CvCapture_close(ttLibC_CvCapture **capture);
 
 #ifdef __cplusplus
 } /* extern "C" */

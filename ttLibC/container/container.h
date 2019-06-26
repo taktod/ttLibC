@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../ttLibC_predef.h"
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -63,7 +64,7 @@ typedef bool (* ttLibC_getFrameFunc)(void *ptr, ttLibC_Frame *frame);
  * @param ptr       user def pointer object.
  * @return true:success false:error
  */
-bool ttLibC_Container_getFrame(
+bool TT_ATTRIBUTE_API ttLibC_Container_getFrame(
 		ttLibC_Container *container,
 		ttLibC_getFrameFunc callback,
 		void *ptr);
@@ -79,7 +80,7 @@ typedef struct ttLibC_ContainerReader {
 
 typedef bool (* ttLibC_ContainerReadFunc)(void *ptr, ttLibC_Container *container);
 
-bool ttLibC_ContainerReader_read(
+bool TT_ATTRIBUTE_API ttLibC_ContainerReader_read(
 		ttLibC_ContainerReader *reader,
 		void  *data,
 		size_t data_size,
@@ -90,7 +91,7 @@ bool ttLibC_ContainerReader_read(
  * close container reader
  * @param reader
  */
-void ttLibC_ContainerReader_close(ttLibC_ContainerReader **reader);
+void TT_ATTRIBUTE_API ttLibC_ContainerReader_close(ttLibC_ContainerReader **reader);
 
 // -------------------------------------------------------------- //
 
@@ -131,7 +132,7 @@ typedef struct ttLibC_ContainerWriter {
  */
 typedef bool (* ttLibC_ContainerWriteFunc)(void *ptr, void *data, size_t size);
 
-bool ttLibC_ContainerWriter_write(
+bool TT_ATTRIBUTE_API ttLibC_ContainerWriter_write(
 		ttLibC_ContainerWriter *writer,
 		ttLibC_Frame *frame,
 		ttLibC_ContainerWriteFunc callback,
@@ -141,7 +142,7 @@ bool ttLibC_ContainerWriter_write(
  * close container writer
  * @param writer
  */
-void ttLibC_ContainerWriter_close(ttLibC_ContainerWriter **writer);
+void TT_ATTRIBUTE_API ttLibC_ContainerWriter_close(ttLibC_ContainerWriter **writer);
 
 #ifdef __cplusplus
 } /* extern "C" */

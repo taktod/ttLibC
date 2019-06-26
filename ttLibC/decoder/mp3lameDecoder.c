@@ -11,7 +11,6 @@
 #ifdef __ENABLE_MP3LAME_DECODE__
 
 #include "mp3lameDecoder.h"
-#include "../ttLibC_predef.h"
 #include "../_log.h"
 #include "../allocator.h"
 #include <stdlib.h>
@@ -44,7 +43,7 @@ typedef ttLibC_Decoder_Mp3lameDecoder_ ttLibC_Mp3lameDecoder_;
 /*
  * make mp3lame decoder
  */
-ttLibC_Mp3lameDecoder TT_VISIBILITY_DEFAULT *ttLibC_Mp3lameDecoder_make() {
+ttLibC_Mp3lameDecoder TT_ATTRIBUTE_API *ttLibC_Mp3lameDecoder_make() {
 	ttLibC_Mp3lameDecoder_ *decoder = ttLibC_malloc(sizeof(ttLibC_Mp3lameDecoder_));
 	if(decoder == NULL) {
 		ERR_PRINT("failed to allocate memory for decoder.");
@@ -81,7 +80,7 @@ ttLibC_Mp3lameDecoder TT_VISIBILITY_DEFAULT *ttLibC_Mp3lameDecoder_make() {
  * @param ptr      pointer for user def value, which willl call in callback.
  * @return true / false
  */
-bool TT_VISIBILITY_DEFAULT ttLibC_Mp3lameDecoder_decode(
+bool TT_ATTRIBUTE_API ttLibC_Mp3lameDecoder_decode(
 		ttLibC_Mp3lameDecoder *decoder,
 		ttLibC_Mp3 *mp3,
 		ttLibC_Mp3lameDecodeFunc callback,
@@ -189,7 +188,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_Mp3lameDecoder_decode(
  * close mp3lame decoder.
  * @param decoder.
  */
-void TT_VISIBILITY_DEFAULT ttLibC_Mp3lameDecoder_close(ttLibC_Mp3lameDecoder **decoder) {
+void TT_ATTRIBUTE_API ttLibC_Mp3lameDecoder_close(ttLibC_Mp3lameDecoder **decoder) {
 	ttLibC_Mp3lameDecoder_ *target = (ttLibC_Mp3lameDecoder_ *)*decoder;
 	if(target == NULL) {
 		return;

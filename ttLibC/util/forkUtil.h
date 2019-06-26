@@ -15,10 +15,11 @@
 extern "C" {
 #endif
 
+#include "../ttLibC_predef.h"
 #include <signal.h>
 
-void ttLibC_ForkUtil_setup();
-pid_t ttLibC_ForkUtil_fork();
+void TT_ATTRIBUTE_API ttLibC_ForkUtil_setup();
+pid_t TT_ATTRIBUTE_API ttLibC_ForkUtil_fork();
 
 #ifdef __cplusplus
 } /* extern "C" */

@@ -6,11 +6,10 @@
  */
 
 #include "promise.h"
-#include "../../ttLibC_predef.h"
 #include "../../allocator.h"
 #include "../../_log.h"
 
-ttLibC_Tetty2Promise TT_VISIBILITY_HIDDEN *ttLibC_Tetty2Promise_make_(ttLibC_Tetty2Bootstrap *bootstrap) {
+ttLibC_Tetty2Promise TT_ATTRIBUTE_INNER *ttLibC_Tetty2Promise_make_(ttLibC_Tetty2Bootstrap *bootstrap) {
 	ttLibC_Tetty2Promise_ *promise = ttLibC_malloc(sizeof(ttLibC_Tetty2Promise_));
 	if(promise == NULL) {
 		return NULL;
@@ -25,7 +24,7 @@ ttLibC_Tetty2Promise TT_VISIBILITY_HIDDEN *ttLibC_Tetty2Promise_make_(ttLibC_Tet
 	return (ttLibC_Tetty2Promise *)promise;
 }
 
-void TT_VISIBILITY_DEFAULT ttLibC_Tetty2Promise_addEventListener(
+void TT_ATTRIBUTE_API ttLibC_Tetty2Promise_addEventListener(
 		ttLibC_Tetty2Promise *promise,
 		ttLibC_Tetty2PromiseListener listener,
 		void *ptr) {
@@ -53,7 +52,7 @@ static void Tetty2Promise_setResult(
 	}
 }
 
-void TT_VISIBILITY_DEFAULT ttLibC_Tetty2Promise_setSuccess(
+void TT_ATTRIBUTE_API ttLibC_Tetty2Promise_setSuccess(
 		ttLibC_Tetty2Promise *promise,
 		void *data) {
 	Tetty2Promise_setResult(
@@ -61,7 +60,7 @@ void TT_VISIBILITY_DEFAULT ttLibC_Tetty2Promise_setSuccess(
 			data,
 			true);
 }
-void TT_VISIBILITY_DEFAULT ttLibC_Tetty2Promise_setFailure(
+void TT_ATTRIBUTE_API ttLibC_Tetty2Promise_setFailure(
 		ttLibC_Tetty2Promise *promise,
 		void *data) {
 	Tetty2Promise_setResult(
@@ -69,7 +68,7 @@ void TT_VISIBILITY_DEFAULT ttLibC_Tetty2Promise_setFailure(
 			data,
 			false);
 }
-void TT_VISIBILITY_DEFAULT ttLibC_Tetty2Promise_close(ttLibC_Tetty2Promise **promise) {
+void TT_ATTRIBUTE_API ttLibC_Tetty2Promise_close(ttLibC_Tetty2Promise **promise) {
 	ttLibC_Tetty2Promise_ *target = (ttLibC_Tetty2Promise_ *)*promise;
 	if(target == NULL) {
 		return;

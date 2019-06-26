@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../ttLibC_predef.h"
 #include "../frame/frame.h"
 #include "../frame/video/video.h"
 #include "../frame/audio/audio.h"
@@ -64,7 +65,7 @@ typedef ttLibC_Util_FlvFrameManager ttLibC_FlvFrameManager;
  * make manager
  * @return ttLibC_FlvFrameManager object.
  */
-ttLibC_FlvFrameManager *ttLibC_FlvFrameManager_make();
+ttLibC_FlvFrameManager TT_ATTRIBUTE_API *ttLibC_FlvFrameManager_make();
 
 /**
  * read video binary data.
@@ -77,7 +78,7 @@ ttLibC_FlvFrameManager *ttLibC_FlvFrameManager_make();
  * @return ture / false
  * TODO need error code?
  */
-bool ttLibC_FlvFrameManager_readVideoBinary(
+bool TT_ATTRIBUTE_API ttLibC_FlvFrameManager_readVideoBinary(
 		ttLibC_FlvFrameManager *manager,
 		void *data,
 		size_t data_size,
@@ -95,7 +96,7 @@ bool ttLibC_FlvFrameManager_readVideoBinary(
  * @param ptr       userdef data pointer.
  * @return ture / false
  */
-bool ttLibC_FlvFrameManager_readAudioBinary(
+bool TT_ATTRIBUTE_API ttLibC_FlvFrameManager_readAudioBinary(
 		ttLibC_FlvFrameManager *manager,
 		void *data,
 		size_t data_size,
@@ -109,7 +110,7 @@ bool ttLibC_FlvFrameManager_readAudioBinary(
  * @param buffer buffer to append.
  * @return true:success false:error
  */
-bool ttLibC_FlvFrameManager_getAacDsiData(
+bool TT_ATTRIBUTE_API ttLibC_FlvFrameManager_getAacDsiData(
 		ttLibC_Frame *frame,
 		ttLibC_DynamicBuffer *buffer);
 
@@ -119,7 +120,7 @@ bool ttLibC_FlvFrameManager_getAacDsiData(
  * @param buffer buffer to append.
  * @return true:success false:error
  */
-bool ttLibC_FlvFrameManager_getData(
+bool TT_ATTRIBUTE_API ttLibC_FlvFrameManager_getData(
 		ttLibC_Frame *frame,
 		ttLibC_DynamicBuffer *buffer);
 
@@ -127,7 +128,7 @@ bool ttLibC_FlvFrameManager_getData(
  * close manager
  * @param manager
  */
-void ttLibC_FlvFrameManager_close(ttLibC_FlvFrameManager **manager);
+void TT_ATTRIBUTE_API ttLibC_FlvFrameManager_close(ttLibC_FlvFrameManager **manager);
 
 #ifdef __cplusplus
 } /* extern "C" */

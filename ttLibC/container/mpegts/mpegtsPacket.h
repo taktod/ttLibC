@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../../ttLibC_predef.h"
 #include "../mpegts.h"
 #include "../containerCommon.h"
 #include "../../util/byteUtil.h"
@@ -95,7 +96,7 @@ typedef ttLibC_Container_MpegtsPacket ttLibC_MpegtsPacket;
  * @param pid
  * @param continuity_counter
  */
-ttLibC_MpegtsPacket *ttLibC_MpegtsPacket_make(
+ttLibC_MpegtsPacket TT_ATTRIBUTE_INNER *ttLibC_MpegtsPacket_make(
 		ttLibC_MpegtsPacket *prev_packet,
 		void *data,
 		size_t data_size,
@@ -112,7 +113,7 @@ ttLibC_MpegtsPacket *ttLibC_MpegtsPacket_make(
  * @param header_info
  * @return true:ok false:error
  */
-bool ttLibC_MpegtsPacket_loadMpegtsPacketHeader(
+bool TT_ATTRIBUTE_INNER ttLibC_MpegtsPacket_loadMpegtsPacketHeader(
 		ttLibC_ByteReader *reader,
 		ttLibC_MpegtsPacket_Header *header_info);
 
@@ -122,7 +123,7 @@ bool ttLibC_MpegtsPacket_loadMpegtsPacketHeader(
  * @param header_info
  * @return true:ok false:error
  */
-bool ttLibC_MpegtsPacket_loadProgramPacketHeader(
+bool TT_ATTRIBUTE_INNER ttLibC_MpegtsPacket_loadProgramPacketHeader(
 		ttLibC_ByteReader *reader,
 		ttLibC_ProgramPacket_Header *header_info);
 
@@ -130,7 +131,7 @@ bool ttLibC_MpegtsPacket_loadProgramPacketHeader(
  * close mpegtsPacket
  * @param packet
  */
-void ttLibC_MpegtsPacket_close(ttLibC_MpegtsPacket **packet);
+void TT_ATTRIBUTE_INNER ttLibC_MpegtsPacket_close(ttLibC_MpegtsPacket **packet);
 
 #ifdef __cplusplus
 } /* extern "C" */

@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../ttLibC_predef.h"
 #include "../frame/video/h264.h"
 #include "../frame/video/yuv420.h"
 
@@ -72,7 +73,7 @@ typedef bool (* ttLibC_Openh264EncodeFunc)(void *ptr, ttLibC_H264 *h264);
  * @param height target height
  * @return ttLibC_Openh264Encoder object.
  */
-ttLibC_Openh264Encoder *ttLibC_Openh264Encoder_make(
+ttLibC_Openh264Encoder TT_ATTRIBUTE_API *ttLibC_Openh264Encoder_make(
 		uint32_t width,
 		uint32_t height);
 
@@ -85,7 +86,7 @@ ttLibC_Openh264Encoder *ttLibC_Openh264Encoder_make(
  * @param bitrate       target bitrate (bit / sec)
  * @return ttLibC_Openh264Encoder object.
  */
-ttLibC_Openh264Encoder *ttLibC_Openh264Encoder_make_ex(
+ttLibC_Openh264Encoder TT_ATTRIBUTE_API *ttLibC_Openh264Encoder_make_ex(
 		uint32_t width,
 		uint32_t height,
 		uint32_t max_quantizer,
@@ -98,7 +99,7 @@ ttLibC_Openh264Encoder *ttLibC_Openh264Encoder_make_ex(
  * @param width    target picture width
  * @param height   target picture height
  */
-void ttLibC_Openh264Encoder_getDefaultSEncParamExt(
+void TT_ATTRIBUTE_API ttLibC_Openh264Encoder_getDefaultSEncParamExt(
 		void *paramExt,
 		uint32_t width,
 		uint32_t height);
@@ -109,7 +110,7 @@ void ttLibC_Openh264Encoder_getDefaultSEncParamExt(
  * @param name     target element name, should be same as structure element.
  * @param value    support int, double, enum name with  c string.
  */
-bool ttLibC_Openh264Encoder_paramParse(void *paramExt, const char *name, const char *value);
+bool TT_ATTRIBUTE_API ttLibC_Openh264Encoder_paramParse(void *paramExt, const char *name, const char *value);
 
 /**
  * parse openh264 spatialLayer info with c string.
@@ -118,14 +119,14 @@ bool ttLibC_Openh264Encoder_paramParse(void *paramExt, const char *name, const c
  * @param name     target element name, should be same as layer element.
  * @param value    support int, double, enum name with  c string.
  */
-bool ttLibC_Openh264Encoder_spatialParamParse(void *paramExt, uint32_t target, const char *name, const char *value);
+bool TT_ATTRIBUTE_API ttLibC_Openh264Encoder_spatialParamParse(void *paramExt, uint32_t target, const char *name, const char *value);
 
 /**
  * make openh264 encoder with SEncParamExt
  * @param paramExt structure pointer for SEncParamExt on wels/codec_api.h
  * @return ttLibC_Openh264Encoder object.
  */
-ttLibC_Openh264Encoder *ttLibC_Openh264Encoder_makeWithSEncParamExt(void *paramExt);
+ttLibC_Openh264Encoder TT_ATTRIBUTE_API *ttLibC_Openh264Encoder_makeWithSEncParamExt(void *paramExt);
 
 /**
  * encode frame.
@@ -134,7 +135,7 @@ ttLibC_Openh264Encoder *ttLibC_Openh264Encoder_makeWithSEncParamExt(void *paramE
  * @param callback callback func for h264 creation.
  * @param ptr      pointer for user def value, which will call in callback.
  */
-bool ttLibC_Openh264Encoder_encode(
+bool TT_ATTRIBUTE_API ttLibC_Openh264Encoder_encode(
 		ttLibC_Openh264Encoder *encoder,
 		ttLibC_Yuv420 *yuv420,
 		ttLibC_Openh264EncodeFunc callback,
@@ -145,7 +146,7 @@ bool ttLibC_Openh264Encoder_encode(
  * @param encoder openh264 encoder object.
  * @return ISVCEncoder pointer.
  */
-void *ttLibC_Openh264Encoder_refNativeEncoder(ttLibC_Openh264Encoder *encoder);
+void TT_ATTRIBUTE_API *ttLibC_Openh264Encoder_refNativeEncoder(ttLibC_Openh264Encoder *encoder);
 
 /**
  * set idr interval
@@ -153,7 +154,7 @@ void *ttLibC_Openh264Encoder_refNativeEncoder(ttLibC_Openh264Encoder *encoder);
  * @param interval -1 means no keyFrame.(first picture is only one keyFrame.)
  * @return true / false
  */
-bool ttLibC_Openh264Encoder_setIDRInterval(
+bool TT_ATTRIBUTE_API ttLibC_Openh264Encoder_setIDRInterval(
 		ttLibC_Openh264Encoder *encoder,
 		int32_t interval);
 
@@ -163,7 +164,7 @@ bool ttLibC_Openh264Encoder_setIDRInterval(
  * @param rcType
  * @return true:success false:error.
  */
-bool ttLibC_Openh264Encoder_setRCMode(
+bool TT_ATTRIBUTE_API ttLibC_Openh264Encoder_setRCMode(
 		ttLibC_Openh264Encoder *encoder,
 		ttLibC_Openh264Encoder_RCType rcType);
 
@@ -172,7 +173,7 @@ bool ttLibC_Openh264Encoder_setRCMode(
  * @param encoder
  * @return true:success false:error.
  */
-bool ttLibC_Openh264Encoder_forceNextKeyFrame(ttLibC_Openh264Encoder *encoder);
+bool TT_ATTRIBUTE_API ttLibC_Openh264Encoder_forceNextKeyFrame(ttLibC_Openh264Encoder *encoder);
 
 /**
  * try to reduce the nal header size. use 3byte.
@@ -180,7 +181,7 @@ bool ttLibC_Openh264Encoder_forceNextKeyFrame(ttLibC_Openh264Encoder *encoder);
  * @param reduce_mode_flag
  * @return true:success false:error
  */
-bool ttLibC_Openh264Encoder_setReduceMode(
+bool TT_ATTRIBUTE_API ttLibC_Openh264Encoder_setReduceMode(
 		ttLibC_Openh264Encoder *encoder,
 		bool reduce_mode_flag);
 
@@ -188,7 +189,7 @@ bool ttLibC_Openh264Encoder_setReduceMode(
  * close openh264 encoder
  * @param encoder
  */
-void ttLibC_Openh264Encoder_close(ttLibC_Openh264Encoder **encoder);
+void TT_ATTRIBUTE_API ttLibC_Openh264Encoder_close(ttLibC_Openh264Encoder **encoder);
 
 #ifdef __cplusplus
 } /* extern "C" */

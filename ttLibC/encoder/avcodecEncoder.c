@@ -13,7 +13,6 @@
 #include "avcodecEncoder.h"
 
 #include <libavcodec/avcodec.h>
-#include "../ttLibC_predef.h"
 #include "../_log.h"
 #include "../allocator.h"
 #include "../util/hexUtil.h"
@@ -919,7 +918,7 @@ static bool AvcodecEncoder_encode_Yuv420(
  * get AVCodecContext for target frameType.
  * @param frame_type target ttLibC_Frame_Type
  */
-void TT_VISIBILITY_DEFAULT *ttLibC_AvcodecEncoder_getAVCodecContext(ttLibC_Frame_Type frame_type) {
+void TT_ATTRIBUTE_API *ttLibC_AvcodecEncoder_getAVCodecContext(ttLibC_Frame_Type frame_type) {
 	AVCodec *codec = NULL;
 	avcodec_register_all();
 	switch(frame_type) {
@@ -1000,7 +999,7 @@ void TT_VISIBILITY_DEFAULT *ttLibC_AvcodecEncoder_getAVCodecContext(ttLibC_Frame
  * make avcodecEncoder with AVCodecContext
  * @param enc_context target AVCodecContext
  */
-ttLibC_AvcodecEncoder TT_VISIBILITY_DEFAULT *ttLibC_AvcodecEncoder_makeWithAVCodecContext(void *enc_context) {
+ttLibC_AvcodecEncoder TT_ATTRIBUTE_API *ttLibC_AvcodecEncoder_makeWithAVCodecContext(void *enc_context) {
 	if(enc_context == NULL) {
 		return NULL;
 	}
@@ -1234,7 +1233,7 @@ ttLibC_AvcodecEncoder TT_VISIBILITY_DEFAULT *ttLibC_AvcodecEncoder_makeWithAVCod
  * @param sample_rate target sample_rate
  * @param channel_num target channel_num
  */
-ttLibC_AvcodecEncoder TT_VISIBILITY_DEFAULT *ttLibC_AvcodecAudioEncoder_make(
+ttLibC_AvcodecEncoder TT_ATTRIBUTE_API *ttLibC_AvcodecAudioEncoder_make(
 		ttLibC_Frame_Type frame_type,
 		uint32_t sample_rate,
 		uint32_t channel_num) {
@@ -1252,7 +1251,7 @@ ttLibC_AvcodecEncoder TT_VISIBILITY_DEFAULT *ttLibC_AvcodecAudioEncoder_make(
  * @param channel_num target channel_num
  * @param bitrate     target bitrate
  */
-ttLibC_AvcodecEncoder TT_VISIBILITY_DEFAULT *ttLibC_AvcodecAudioEncoder_make_ex(
+ttLibC_AvcodecEncoder TT_ATTRIBUTE_API *ttLibC_AvcodecAudioEncoder_make_ex(
 		ttLibC_Frame_Type frame_type,
 		uint32_t sample_rate,
 		uint32_t channel_num,
@@ -1296,7 +1295,7 @@ ttLibC_AvcodecEncoder TT_VISIBILITY_DEFAULT *ttLibC_AvcodecAudioEncoder_make_ex(
  * @param width      width
  * @param height     height
  */
-ttLibC_AvcodecEncoder TT_VISIBILITY_DEFAULT *ttLibC_AvcodecVideoEncoder_make(
+ttLibC_AvcodecEncoder TT_ATTRIBUTE_API *ttLibC_AvcodecVideoEncoder_make(
 		ttLibC_Frame_Type frame_type,
 		uint32_t width,
 		uint32_t height) {
@@ -1318,7 +1317,7 @@ ttLibC_AvcodecEncoder TT_VISIBILITY_DEFAULT *ttLibC_AvcodecVideoEncoder_make(
  * @param bitrate    target bitrate in bit/sec
  * @param timebase   time base
  */
-ttLibC_AvcodecEncoder TT_VISIBILITY_DEFAULT *ttLibC_AvcodecVideoEncoder_make_ex(
+ttLibC_AvcodecEncoder TT_ATTRIBUTE_API *ttLibC_AvcodecVideoEncoder_make_ex(
 		ttLibC_Frame_Type frame_type,
 		uint32_t width,
 		uint32_t height,
@@ -1377,7 +1376,7 @@ ttLibC_AvcodecEncoder TT_VISIBILITY_DEFAULT *ttLibC_AvcodecVideoEncoder_make_ex(
  * @param callback callback func for avcodec encode.
  * @param ptr      pointer for user def value, which will call in callback.
  */
-bool TT_VISIBILITY_DEFAULT ttLibC_AvcodecEncoder_encode(
+bool TT_ATTRIBUTE_API ttLibC_AvcodecEncoder_encode(
 		ttLibC_AvcodecEncoder *encoder,
 		ttLibC_Frame *frame,
 		ttLibC_AvcodecEncodeFunc callback,
@@ -1417,7 +1416,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_AvcodecEncoder_encode(
  * ref the avcodec extra data.
  * @param encoder avcodec encoder object.
  */
-void TT_VISIBILITY_DEFAULT *ttLibC_AvcodecEncoder_getExtraData(ttLibC_AvcodecEncoder *encoder) {
+void TT_ATTRIBUTE_API *ttLibC_AvcodecEncoder_getExtraData(ttLibC_AvcodecEncoder *encoder) {
 	ttLibC_AvcodecEncoder_ *encoder_ = (ttLibC_AvcodecEncoder_ *)encoder;
 	if(encoder_ == NULL) {
 		return NULL;
@@ -1429,7 +1428,7 @@ void TT_VISIBILITY_DEFAULT *ttLibC_AvcodecEncoder_getExtraData(ttLibC_AvcodecEnc
  * ref the avcodec extra data size.
  * @param encoder avcodec encoder object.
  */
-size_t TT_VISIBILITY_DEFAULT ttLibC_AvcodecEncoder_getExtraDataSize(ttLibC_AvcodecEncoder *encoder) {
+size_t TT_ATTRIBUTE_API ttLibC_AvcodecEncoder_getExtraDataSize(ttLibC_AvcodecEncoder *encoder) {
 	ttLibC_AvcodecEncoder_ *encoder_ = (ttLibC_AvcodecEncoder_ *)encoder;
 	if(encoder_ == NULL) {
 		return 0;
@@ -1441,7 +1440,7 @@ size_t TT_VISIBILITY_DEFAULT ttLibC_AvcodecEncoder_getExtraDataSize(ttLibC_Avcod
  * close avcodec encoder.
  * @param encoder
  */
-void TT_VISIBILITY_DEFAULT ttLibC_AvcodecEncoder_close(ttLibC_AvcodecEncoder **encoder) {
+void TT_ATTRIBUTE_API ttLibC_AvcodecEncoder_close(ttLibC_AvcodecEncoder **encoder) {
 	ttLibC_AvcodecEncoder_ *target = (ttLibC_AvcodecEncoder_ *)*encoder;
 	if(target == NULL) {
 		return;

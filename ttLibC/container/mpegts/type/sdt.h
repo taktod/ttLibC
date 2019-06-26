@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../../../ttLibC_predef.h"
 #include "../mpegtsPacket.h"
 
 typedef struct ttLibC_Container_Mpegts_Sdt {
@@ -23,7 +24,7 @@ typedef struct ttLibC_Container_Mpegts_Sdt {
 
 typedef ttLibC_Container_Mpegts_Sdt ttLibC_Sdt;
 
-ttLibC_Sdt *ttLibC_Sdt_make(
+ttLibC_Sdt TT_ATTRIBUTE_INNER *ttLibC_Sdt_make(
 		ttLibC_Sdt *prev_packet,
 		void *data,
 		size_t data_size,
@@ -33,18 +34,18 @@ ttLibC_Sdt *ttLibC_Sdt_make(
 		uint16_t pid,
 		uint8_t continuity_counter);
 
-ttLibC_Sdt *ttLibC_Sdt_getPacket(
+ttLibC_Sdt TT_ATTRIBUTE_INNER *ttLibC_Sdt_getPacket(
 		ttLibC_Sdt *prev_Sdt,
 		uint8_t *data,
 		size_t data_size);
 
-bool ttLibC_Sdt_makePacket(
+bool TT_ATTRIBUTE_INNER ttLibC_Sdt_makePacket(
 		const char *provider,
 		const char *name,
 		uint8_t *data,
 		size_t data_size);
 
-void ttLibC_Sdt_close(ttLibC_Sdt **sdt);
+void TT_ATTRIBUTE_INNER ttLibC_Sdt_close(ttLibC_Sdt **sdt);
 
 #ifdef __cplusplus
 } /* extern "C" */

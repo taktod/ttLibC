@@ -11,7 +11,6 @@
 #ifdef __ENABLE_X264__
 
 #include "x264Encoder.h"
-#include "../ttLibC_predef.h"
 #include "../_log.h"
 #include "../allocator.h"
 #include "../util/hexUtil.h"
@@ -34,7 +33,7 @@ typedef struct ttLibC_Encoder_X264Encoder_ {
 
 typedef ttLibC_Encoder_X264Encoder_ ttLibC_X264Encoder_;
 
-ttLibC_X264Encoder TT_VISIBILITY_DEFAULT *ttLibC_X264Encoder_make(
+ttLibC_X264Encoder TT_ATTRIBUTE_API *ttLibC_X264Encoder_make(
 		uint32_t width,
 		uint32_t height) {
 	x264_param_t param;
@@ -46,7 +45,7 @@ ttLibC_X264Encoder TT_VISIBILITY_DEFAULT *ttLibC_X264Encoder_make(
 	return ttLibC_X264Encoder_makeWithX264ParamT(&param);
 }
 
-ttLibC_X264Encoder TT_VISIBILITY_DEFAULT *ttLibC_X264Encoder_make_ex(
+ttLibC_X264Encoder TT_ATTRIBUTE_API *ttLibC_X264Encoder_make_ex(
 		uint32_t width,
 		uint32_t height,
 		uint32_t max_quantizer,
@@ -64,7 +63,7 @@ ttLibC_X264Encoder TT_VISIBILITY_DEFAULT *ttLibC_X264Encoder_make_ex(
 	return ttLibC_X264Encoder_makeWithX264ParamT(&param);
 }
 
-bool TT_VISIBILITY_DEFAULT ttLibC_X264Encoder_getDefaultX264ParamT(
+bool TT_ATTRIBUTE_API ttLibC_X264Encoder_getDefaultX264ParamT(
 		void *param_t,
 		uint32_t width,
 		uint32_t height) {
@@ -76,7 +75,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_X264Encoder_getDefaultX264ParamT(
 			NULL);
 }
 
-bool TT_VISIBILITY_DEFAULT ttLibC_X264Encoder_getDefaultX264ParamTWithPresetTune(
+bool TT_ATTRIBUTE_API ttLibC_X264Encoder_getDefaultX264ParamTWithPresetTune(
 		void *param_t,
 		uint32_t width,
 		uint32_t height,
@@ -111,7 +110,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_X264Encoder_getDefaultX264ParamTWithPresetTune
 	return true;
 }
 
-ttLibC_X264Encoder TT_VISIBILITY_DEFAULT *ttLibC_X264Encoder_makeWithX264ParamT(void *param_t) {
+ttLibC_X264Encoder TT_ATTRIBUTE_API *ttLibC_X264Encoder_makeWithX264ParamT(void *param_t) {
 	// make memory object.
 	x264_param_t *param = (x264_param_t *)param_t;
 	ttLibC_X264Encoder_ *encoder = (ttLibC_X264Encoder_ *)ttLibC_malloc(sizeof(ttLibC_X264Encoder_));
@@ -156,7 +155,7 @@ ttLibC_X264Encoder TT_VISIBILITY_DEFAULT *ttLibC_X264Encoder_makeWithX264ParamT(
 /*
  * force next encode picture will be target frame type.
  */
-bool TT_VISIBILITY_DEFAULT ttLibC_X264Encoder_forceNextFrameType(
+bool TT_ATTRIBUTE_API ttLibC_X264Encoder_forceNextFrameType(
 		ttLibC_X264Encoder *encoder,
 		ttLibC_X264Encoder_FrameType frame_type) {
 	ttLibC_X264Encoder_ *encoder_ = (ttLibC_X264Encoder_ *)encoder;
@@ -348,7 +347,7 @@ static bool X264Encoder_checkEncodedData(
 	return true;
 }
 
-bool TT_VISIBILITY_DEFAULT ttLibC_X264Encoder_encode(
+bool TT_ATTRIBUTE_API ttLibC_X264Encoder_encode(
 		ttLibC_X264Encoder *encoder,
 		ttLibC_Yuv420 *yuv420,
 		ttLibC_X264EncodeFunc callback,
@@ -425,7 +424,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_X264Encoder_encode(
 	return X264Encoder_checkEncodedData(encoder_, nal, i_nal, frame_size, callback, ptr);
 }
 
-void TT_VISIBILITY_DEFAULT ttLibC_X264Encoder_close(ttLibC_X264Encoder **encoder) {
+void TT_ATTRIBUTE_API ttLibC_X264Encoder_close(ttLibC_X264Encoder **encoder) {
 	ttLibC_X264Encoder_ *target = (ttLibC_X264Encoder_ *)*encoder;
 	if(target == NULL) {
 		return;

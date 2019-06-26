@@ -28,7 +28,7 @@ extern "C" {
  * @param length         data length
  * @param separator_flag insert space among each byte
  */
-void ttLibC_HexUtil_dump(void *ptr, size_t length, bool separator_flag);
+void TT_ATTRIBUTE_API ttLibC_HexUtil_dump(void *ptr, size_t length, bool separator_flag);
 
 /**
  * @deprecated
@@ -38,7 +38,7 @@ void ttLibC_HexUtil_dump(void *ptr, size_t length, bool separator_flag);
  * @param length size of ptr
  * @return size of filled data
  */
-uint32_t ttLibC_HexUtil_makeBuffer(const char *target, void *ptr, size_t length);
+uint32_t TT_ATTRIBUTE_API ttLibC_HexUtil_makeBuffer(const char *target, void *ptr, size_t length);
 
 /**
  * make void* buffer according to hex string
@@ -48,7 +48,7 @@ uint32_t ttLibC_HexUtil_makeBuffer(const char *target, void *ptr, size_t length)
  * @param written_size size of written
  * @return true:finish to make buffer. false:need more buffer for ptr.
  */
-Error_e ttLibC_HexUtil_makeBuffer2(const char *target, void *ptr, size_t length, uint64_t *written_size);
+Error_e TT_ATTRIBUTE_API ttLibC_HexUtil_makeBuffer2(const char *target, void *ptr, size_t length, uint64_t *written_size);
 
 /**
  * dump memory data. only for debug compile

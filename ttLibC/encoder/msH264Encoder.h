@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../ttLibC_predef.h"
 #include "../frame/video/h264.h"
 #include "../frame/video/yuv420.h"
 
@@ -29,23 +30,23 @@ typedef ttLibC_Encoder_MsH264Encoder ttLibC_MsH264Encoder;
 typedef bool (*ttLibC_MsH264EncodeFunc)(void *ptr, ttLibC_H264 *h264);
 typedef bool (*ttLibC_MsH264EncodeNameFunc)(void *ptr, const char *name);
 
-ttLibC_MsH264Encoder *ttLibC_MsH264Encoder_make(
+ttLibC_MsH264Encoder TT_ATTRIBUTE_API *ttLibC_MsH264Encoder_make(
 	const char *target,
 	uint32_t width,
 	uint32_t height,
 	uint32_t bitrate);
 
-bool ttLibC_MsH264Encoder_listEncoders(
+bool TT_ATTRIBUTE_API ttLibC_MsH264Encoder_listEncoders(
 	ttLibC_MsH264EncodeNameFunc callback,
 	void *ptr);
 
-bool ttLibC_MsH264Encoder_encode(
+bool TT_ATTRIBUTE_API ttLibC_MsH264Encoder_encode(
 	ttLibC_MsH264Encoder *encoder,
 	ttLibC_Yuv420 *frame,
 	ttLibC_MsH264EncodeFunc callback,
 	void *ptr);
 
-void ttLibC_MsH264Encoder_close(ttLibC_MsH264Encoder **encoder);
+void TT_ATTRIBUTE_API ttLibC_MsH264Encoder_close(ttLibC_MsH264Encoder **encoder);
 
 #ifdef __cplusplus
 } /* extern "C" */

@@ -12,6 +12,7 @@
 extern "C" {
 #endif
 
+#include "../ttLibC_predef.h"
 #include "../frame/video/yuv420.h"
 
 typedef enum ttLibC_LibyuvFilter_Mode {
@@ -39,7 +40,7 @@ typedef enum ttLibC_LibyuvRotate_Mode {
  * @param v_mode
  * @return scaled yuv image.
  */
-ttLibC_Yuv420 *ttLibC_LibyuvResampler_resize(
+ttLibC_Yuv420 TT_ATTRIBUTE_API *ttLibC_LibyuvResampler_resize(
 		ttLibC_Yuv420 *prev_frame,
 		uint32_t width,
 		uint32_t height,
@@ -55,7 +56,7 @@ ttLibC_Yuv420 *ttLibC_LibyuvResampler_resize(
  * @param mode
  * @return rotate yuv image.
  */
-ttLibC_Yuv420 *ttLibC_LibyuvResampler_rotate(
+ttLibC_Yuv420 TT_ATTRIBUTE_API *ttLibC_LibyuvResampler_rotate(
 		ttLibC_Yuv420 *prev_frame,
 		ttLibC_Yuv420 *src_frame,
 		ttLibC_LibyuvRotate_Mode mode);

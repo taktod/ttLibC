@@ -13,7 +13,6 @@
 #ifdef __ENABLE_OPENAL__
 
 #include "openalUtil.h"
-#include "../ttLibC_predef.h"
 #include "../_log.h"
 #include "../allocator.h"
 #include "../ttLibC_common.h"
@@ -42,7 +41,7 @@ typedef ttLibC_Util_OpenalUtil_AlDevice_ ttLibC_AlDevice_;
  * make openal play device.
  * @param buffer_num number for queue buffers.
  */
-ttLibC_AlDevice TT_VISIBILITY_DEFAULT *ttLibC_AlDevice_make(uint32_t buffer_num) {
+ttLibC_AlDevice TT_ATTRIBUTE_API *ttLibC_AlDevice_make(uint32_t buffer_num) {
 	ttLibC_AlDevice_ *device = ttLibC_malloc(sizeof(ttLibC_AlDevice_));
 	if(device == NULL) {
 		ERR_PRINT("failed to allocate memory for alDevice.");
@@ -86,7 +85,7 @@ ttLibC_AlDevice TT_VISIBILITY_DEFAULT *ttLibC_AlDevice_make(uint32_t buffer_num)
  * @param device openalDevice object.
  * @param pcms16 pcms16 object.
  */
-bool TT_VISIBILITY_DEFAULT ttLibC_AlDevice_queue(ttLibC_AlDevice *device, ttLibC_PcmS16 *pcms16) {
+bool TT_ATTRIBUTE_API ttLibC_AlDevice_queue(ttLibC_AlDevice *device, ttLibC_PcmS16 *pcms16) {
 	if(device == NULL) {
 		return false;
 	}
@@ -156,7 +155,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_AlDevice_queue(ttLibC_AlDevice *device, ttLibC
  * ref the queue count.
  * @param device openalDevice object.
  */
-uint32_t TT_VISIBILITY_DEFAULT ttLibC_AlDevice_getQueueCount(ttLibC_AlDevice *device) {
+uint32_t TT_ATTRIBUTE_API ttLibC_AlDevice_getQueueCount(ttLibC_AlDevice *device) {
 	if(device == NULL) {
 		return 0;
 	}
@@ -172,7 +171,7 @@ uint32_t TT_VISIBILITY_DEFAULT ttLibC_AlDevice_getQueueCount(ttLibC_AlDevice *de
  * @param device
  * @param milisec wait interval in mili sec, if -1, wait until use all buffer.
  */
-void TT_VISIBILITY_DEFAULT ttLibC_AlDevice_proceed(ttLibC_AlDevice *device, int32_t milisec) {
+void TT_ATTRIBUTE_API ttLibC_AlDevice_proceed(ttLibC_AlDevice *device, int32_t milisec) {
 	if(device == NULL) {
 		return;
 	}
@@ -225,7 +224,7 @@ void TT_VISIBILITY_DEFAULT ttLibC_AlDevice_proceed(ttLibC_AlDevice *device, int3
  * close the device.
  * @param device.
  */
-void TT_VISIBILITY_DEFAULT ttLibC_AlDevice_close(ttLibC_AlDevice **device) {
+void TT_ATTRIBUTE_API ttLibC_AlDevice_close(ttLibC_AlDevice **device) {
 	if(*device == NULL) {
 		return;
 	}
@@ -259,7 +258,7 @@ typedef struct ttLibC_Util_Openal_AlPlayer_ {
 
 typedef ttLibC_Util_Openal_AlPlayer_ ttLibC_AlPlayer_;
 
-ttLibC_AlPlayer TT_VISIBILITY_DEFAULT *ttLibC_AlPlayer_make() {
+ttLibC_AlPlayer TT_ATTRIBUTE_API *ttLibC_AlPlayer_make() {
 	ttLibC_AlPlayer_ *player = ttLibC_malloc(sizeof(ttLibC_AlPlayer_));
 	if(player == NULL) {
 		ERR_PRINT("failed to allocate memory for alPlayer.");
@@ -290,7 +289,7 @@ ttLibC_AlPlayer TT_VISIBILITY_DEFAULT *ttLibC_AlPlayer_make() {
 	return (ttLibC_AlPlayer *)player;
 }
 
-bool TT_VISIBILITY_DEFAULT ttLibC_AlPlayer_queue(ttLibC_AlPlayer *player, ttLibC_PcmS16 *pcmS16) {
+bool TT_ATTRIBUTE_API ttLibC_AlPlayer_queue(ttLibC_AlPlayer *player, ttLibC_PcmS16 *pcmS16) {
 	if(player == NULL) {
 		return false;
 	}
@@ -362,7 +361,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_AlPlayer_queue(ttLibC_AlPlayer *player, ttLibC
 	return true;
 }
 
-uint64_t TT_VISIBILITY_DEFAULT ttLibC_AlPlayer_getPts(ttLibC_AlPlayer *player) {
+uint64_t TT_ATTRIBUTE_API ttLibC_AlPlayer_getPts(ttLibC_AlPlayer *player) {
 	ttLibC_AlPlayer_ *player_ = (ttLibC_AlPlayer_ *)player;
 	if(player_ == NULL) {
 		return 0;
@@ -372,7 +371,7 @@ uint64_t TT_VISIBILITY_DEFAULT ttLibC_AlPlayer_getPts(ttLibC_AlPlayer *player) {
 	return (uint64_t)((pos + player_->pts) * player_->timebase);
 }
 
-uint32_t TT_VISIBILITY_DEFAULT ttLibC_AlPlayer_getTimebase(ttLibC_AlPlayer *player) {
+uint32_t TT_ATTRIBUTE_API ttLibC_AlPlayer_getTimebase(ttLibC_AlPlayer *player) {
 	ttLibC_AlPlayer_ *player_ = (ttLibC_AlPlayer_ *)player;
 	if(player_ == NULL) {
 		return 0;
@@ -380,7 +379,7 @@ uint32_t TT_VISIBILITY_DEFAULT ttLibC_AlPlayer_getTimebase(ttLibC_AlPlayer *play
 	return player_->timebase;
 }
 
-void TT_VISIBILITY_DEFAULT ttLibC_AlPlayer_close(ttLibC_AlPlayer **player) {
+void TT_ATTRIBUTE_API ttLibC_AlPlayer_close(ttLibC_AlPlayer **player) {
 	ttLibC_AlPlayer_ *target = (ttLibC_AlPlayer_ *)*player;
 	if(target == NULL) {
 		return;

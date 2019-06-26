@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../../ttLibC_predef.h"
 #include "audio.h"
 
 /**
@@ -52,7 +53,7 @@ typedef ttLibC_Frame_Audio_Opus ttLibC_Opus;
  * @param timebase      timebase number for pts.
  * @return opus object.
  */
-ttLibC_Opus *ttLibC_Opus_make(
+ttLibC_Opus TT_ATTRIBUTE_API *ttLibC_Opus_make(
 		ttLibC_Opus *prev_frame,
 		ttLibC_Opus_Type type,
 		uint32_t sample_rate,
@@ -70,7 +71,7 @@ ttLibC_Opus *ttLibC_Opus_make(
  * @param prev_frame reuse frame object.
  * @param src_frame  source of clone.
  */
-ttLibC_Opus *ttLibC_Opus_clone(
+ttLibC_Opus TT_ATTRIBUTE_API *ttLibC_Opus_clone(
 		ttLibC_Opus *prev_frame,
 		ttLibC_Opus *src_frame);
 
@@ -82,7 +83,7 @@ ttLibC_Opus *ttLibC_Opus_clone(
  * @param pts        pts for opus frame.
  * @param timebase   timebase for opus frame.
  */
-ttLibC_Opus *ttLibC_Opus_makeFrame(
+ttLibC_Opus TT_ATTRIBUTE_API *ttLibC_Opus_makeFrame(
 		ttLibC_Opus *prev_frame,
 		void *data,
 		size_t data_size,
@@ -97,7 +98,7 @@ ttLibC_Opus *ttLibC_Opus_makeFrame(
  * @param pts        pts for opus frame.
  * @param timebase   timebase for opus frame.
  */
-ttLibC_Opus *ttLibC_Opus_getFrame(
+ttLibC_Opus TT_ATTRIBUTE_API *ttLibC_Opus_getFrame(
 		ttLibC_Opus *prev_frame,
 		void *data,
 		size_t data_size,
@@ -109,7 +110,7 @@ ttLibC_Opus *ttLibC_Opus_getFrame(
  * close frame
  * @param frame
  */
-void ttLibC_Opus_close(ttLibC_Opus **frame);
+void TT_ATTRIBUTE_API ttLibC_Opus_close(ttLibC_Opus **frame);
 
 #ifdef __cplusplus
 } /* extern "C" */

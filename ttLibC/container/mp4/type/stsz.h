@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../../../ttLibC_predef.h"
 #include "../mp4Atom.h"
 
 typedef struct ttLibC_Container_Mp4_Stsz {
@@ -26,12 +27,12 @@ typedef struct ttLibC_Container_Mp4_Stsz {
 
 typedef ttLibC_Container_Mp4_Stsz ttLibC_Stsz;
 
-ttLibC_Mp4 *ttLibC_Stsz_make(
+ttLibC_Mp4 TT_ATTRIBUTE_INNER *ttLibC_Stsz_make(
 		uint8_t *data,
 		size_t data_size,
 		uint32_t timebase);
-uint32_t ttLibC_Stsz_refCurrentSampleSize(ttLibC_Mp4 *mp4);
-void ttLibC_Stsz_moveNext(ttLibC_Mp4 *mp4);
+uint32_t TT_ATTRIBUTE_INNER ttLibC_Stsz_refCurrentSampleSize(ttLibC_Mp4 *mp4);
+void TT_ATTRIBUTE_INNER ttLibC_Stsz_moveNext(ttLibC_Mp4 *mp4);
 
 #ifdef __cplusplus
 } /* extern "C" */

@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../../ttLibC_predef.h"
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -71,7 +72,7 @@ typedef struct ttLibC_Net_Client_WebSocket {
  * @param address  target websocket server address. ex:) ws://localhost:8080/test
  * @return ttLibC_WebSocket object.
  */
-ttLibC_WebSocket *ttLibC_WebSocket_make(const char *address);
+ttLibC_WebSocket TT_ATTRIBUTE_API *ttLibC_WebSocket_make(const char *address);
 
 /**
  * update connection event.
@@ -79,7 +80,7 @@ ttLibC_WebSocket *ttLibC_WebSocket_make(const char *address);
  * @param wait_interval interval in micro sec.
  * @return true:success false:error
  */
-bool ttLibC_WebSocket_update(
+bool TT_ATTRIBUTE_API ttLibC_WebSocket_update(
 		ttLibC_WebSocket *socket,
 		uint32_t wait_interval);
 
@@ -88,7 +89,7 @@ bool ttLibC_WebSocket_update(
  * @param socket
  * @param message
  */
-void ttLibC_WebSocket_sendText(
+void TT_ATTRIBUTE_API ttLibC_WebSocket_sendText(
 		ttLibC_WebSocket *socket,
 		const char *message);
 
@@ -98,7 +99,7 @@ void ttLibC_WebSocket_sendText(
  * @param data
  * @param data_size
  */
-void ttLibC_WebSocket_sendBinary(
+void TT_ATTRIBUTE_API ttLibC_WebSocket_sendBinary(
 		ttLibC_WebSocket *socket,
 		void *data,
 		size_t data_size);
@@ -113,7 +114,7 @@ void ttLibC_WebSocket_sendClose(ttLibC_WebSocket *socket);
  * close websocket.
  * @param socket
  */
-void ttLibC_WebSocket_close(ttLibC_WebSocket **socket);
+void TT_ATTRIBUTE_API ttLibC_WebSocket_close(ttLibC_WebSocket **socket);
 
 #ifdef __cplusplus
 } /* extern "C" */

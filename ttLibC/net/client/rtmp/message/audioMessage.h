@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../../../../ttLibC_predef.h"
 #include <stdint.h>
 #include "rtmpMessage.h"
 #include "../../../../frame/audio/audio.h"
@@ -45,15 +46,15 @@ typedef struct ttLibC_Net_Client_Rtmp_Message_AudioMessage {
 
 typedef ttLibC_Net_Client_Rtmp_Message_AudioMessage ttLibC_AudioMessage;
 
-ttLibC_AudioMessage *ttLibC_AudioMessage_make();
+ttLibC_AudioMessage TT_ATTRIBUTE_INNER *ttLibC_AudioMessage_make();
 
 // for receive
 
-ttLibC_AudioMessage *ttLibC_AudioMessage_readBinary(
+ttLibC_AudioMessage TT_ATTRIBUTE_INNER *ttLibC_AudioMessage_readBinary(
 		uint8_t *data,
 		size_t data_size);
 
-tetty_errornum ttLibC_AudioMessage_getFrame(
+tetty_errornum TT_ATTRIBUTE_INNER ttLibC_AudioMessage_getFrame(
 		ttLibC_AudioMessage *message,
 		ttLibC_FlvFrameManager *manager,
 		ttLibC_RtmpStream_getFrameFunc callback,
@@ -61,15 +62,15 @@ tetty_errornum ttLibC_AudioMessage_getFrame(
 
 // for send
 
-ttLibC_AudioMessage *ttLibC_AudioMessage_addFrame(
+ttLibC_AudioMessage TT_ATTRIBUTE_INNER *ttLibC_AudioMessage_addFrame(
 		uint32_t stream_id,
 		ttLibC_Audio *frame);
 
-bool ttLibC_AudioMessage_getData(
+bool TT_ATTRIBUTE_INNER ttLibC_AudioMessage_getData(
 		ttLibC_AudioMessage *message,
 		ttLibC_DynamicBuffer *buffer);
 
-void ttLibC_AudioMessage_close(ttLibC_AudioMessage **message);
+void TT_ATTRIBUTE_INNER ttLibC_AudioMessage_close(ttLibC_AudioMessage **message);
 
 #ifdef __cplusplus
 } /* extern "C" */

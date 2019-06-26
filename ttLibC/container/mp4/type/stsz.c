@@ -9,10 +9,9 @@
  */
 
 #include "stsz.h"
-#include "../../../ttLibC_predef.h"
 #include "../../../util/ioUtil.h"
 
-ttLibC_Mp4 TT_VISIBILITY_HIDDEN *ttLibC_Stsz_make(
+ttLibC_Mp4 TT_ATTRIBUTE_INNER *ttLibC_Stsz_make(
 		uint8_t *data,
 		size_t data_size,
 		uint32_t timebase) {
@@ -34,7 +33,7 @@ ttLibC_Mp4 TT_VISIBILITY_HIDDEN *ttLibC_Stsz_make(
 	stsz->entry_size_data = buf + 2;
 	return (ttLibC_Mp4 *)stsz;
 }
-uint32_t TT_VISIBILITY_HIDDEN ttLibC_Stsz_refCurrentSampleSize(ttLibC_Mp4 *mp4) {
+uint32_t TT_ATTRIBUTE_INNER ttLibC_Stsz_refCurrentSampleSize(ttLibC_Mp4 *mp4) {
 	ttLibC_Stsz *stsz = (ttLibC_Stsz *)mp4;
 	if(stsz->sample_count > 0) {
 		if(stsz->sample_size == 0) {
@@ -48,7 +47,7 @@ uint32_t TT_VISIBILITY_HIDDEN ttLibC_Stsz_refCurrentSampleSize(ttLibC_Mp4 *mp4) 
 		return 0;
 	}
 }
-void TT_VISIBILITY_HIDDEN ttLibC_Stsz_moveNext(ttLibC_Mp4 *mp4) {
+void TT_ATTRIBUTE_INNER ttLibC_Stsz_moveNext(ttLibC_Mp4 *mp4) {
 	ttLibC_Stsz *stsz = (ttLibC_Stsz *)mp4;
 	-- stsz->sample_count;
 	if(stsz->sample_size == 0) {

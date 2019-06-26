@@ -12,7 +12,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "../../ttLibC_predef.h"
 #include "../../_log.h"
 
 typedef ttLibC_Frame_Audio_PcmAlaw ttLibC_PcmAlaw_;
@@ -30,7 +29,7 @@ typedef ttLibC_Frame_Audio_PcmAlaw ttLibC_PcmAlaw_;
  * @param timebase      timebase number for pts.
  * @return pcm_alaw object.
  */
-ttLibC_PcmAlaw TT_VISIBILITY_DEFAULT *ttLibC_PcmAlaw_make(
+ttLibC_PcmAlaw TT_ATTRIBUTE_API *ttLibC_PcmAlaw_make(
 		ttLibC_PcmAlaw *prev_frame,
 		uint32_t sample_rate,
 		uint32_t sample_num,
@@ -60,7 +59,7 @@ ttLibC_PcmAlaw TT_VISIBILITY_DEFAULT *ttLibC_PcmAlaw_make(
  * @param prev_frame reuse frame object.
  * @param src_frame  source of clone.
  */
-ttLibC_PcmAlaw TT_VISIBILITY_DEFAULT *ttLibC_PcmAlaw_clone(
+ttLibC_PcmAlaw TT_ATTRIBUTE_API *ttLibC_PcmAlaw_clone(
 		ttLibC_PcmAlaw *prev_frame,
 		ttLibC_PcmAlaw *src_frame) {
 	if(src_frame == NULL) {
@@ -94,7 +93,7 @@ ttLibC_PcmAlaw TT_VISIBILITY_DEFAULT *ttLibC_PcmAlaw_clone(
  * close frame
  * @param frame
  */
-void TT_VISIBILITY_DEFAULT ttLibC_PcmAlaw_close(ttLibC_PcmAlaw **frame) {
+void TT_ATTRIBUTE_API ttLibC_PcmAlaw_close(ttLibC_PcmAlaw **frame) {
 	ttLibC_Audio_close_((ttLibC_Audio **)frame);
 }
 

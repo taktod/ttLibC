@@ -13,7 +13,6 @@
 #include "avcodecDecoder.h"
 
 #include <libavcodec/avcodec.h>
-#include "../ttLibC_predef.h"
 #include "../_log.h"
 #include "../allocator.h"
 #include "../util/hexUtil.h"
@@ -789,7 +788,7 @@ static bool AvcodecDecoder_decodeVideo(
  * getAVCodecContext for target frameType.
  * @param frame_type target ttLibC_Frame_Type
  */
-void TT_VISIBILITY_DEFAULT *ttLibC_AvcodecDecoder_getAVCodecContext(ttLibC_Frame_Type frame_type) {
+void TT_ATTRIBUTE_API *ttLibC_AvcodecDecoder_getAVCodecContext(ttLibC_Frame_Type frame_type) {
 	avcodec_register_all();
 	AVCodec *codec = NULL;
 	switch(frame_type) {
@@ -876,7 +875,7 @@ void TT_VISIBILITY_DEFAULT *ttLibC_AvcodecDecoder_getAVCodecContext(ttLibC_Frame
  * make avcodecDecoder with AVCodecContext
  * @param dec_context target AVCodecContext
  */
-ttLibC_AvcodecDecoder TT_VISIBILITY_DEFAULT *ttLibC_AvcodecDecoder_makeWithAVCodecContext(void *dec_context) {
+ttLibC_AvcodecDecoder TT_ATTRIBUTE_API *ttLibC_AvcodecDecoder_makeWithAVCodecContext(void *dec_context) {
 	if(dec_context == NULL) {
 		return NULL;
 	}
@@ -1058,7 +1057,7 @@ ttLibC_AvcodecDecoder TT_VISIBILITY_DEFAULT *ttLibC_AvcodecDecoder_makeWithAVCod
  * @param sample_rate target sample_rate
  * @param channel_num target channel_num
  */
-ttLibC_AvcodecDecoder TT_VISIBILITY_DEFAULT *ttLibC_AvcodecAudioDecoder_make(
+ttLibC_AvcodecDecoder TT_ATTRIBUTE_API *ttLibC_AvcodecAudioDecoder_make(
 		ttLibC_Frame_Type frame_type,
 		uint32_t sample_rate,
 		uint32_t channel_num) {
@@ -1078,7 +1077,7 @@ ttLibC_AvcodecDecoder TT_VISIBILITY_DEFAULT *ttLibC_AvcodecAudioDecoder_make(
  * @param extradata      extradata(some codec require these value, like vorbis)
  * @param extradata_size extradata_size
  */
-ttLibC_AvcodecDecoder TT_VISIBILITY_DEFAULT *ttLibC_AvcodecAudioDecoder_make_ex(
+ttLibC_AvcodecDecoder TT_ATTRIBUTE_API *ttLibC_AvcodecAudioDecoder_make_ex(
 		ttLibC_Frame_Type frame_type,
 		uint32_t sample_rate,
 		uint32_t channel_num,
@@ -1102,7 +1101,7 @@ ttLibC_AvcodecDecoder TT_VISIBILITY_DEFAULT *ttLibC_AvcodecAudioDecoder_make_ex(
  * @param width      target width
  * @param height     target height
  */
-ttLibC_AvcodecDecoder TT_VISIBILITY_DEFAULT *ttLibC_AvcodecVideoDecoder_make(
+ttLibC_AvcodecDecoder TT_ATTRIBUTE_API *ttLibC_AvcodecVideoDecoder_make(
 		ttLibC_Frame_Type frame_type,
 		uint32_t width,
 		uint32_t height) {
@@ -1122,7 +1121,7 @@ ttLibC_AvcodecDecoder TT_VISIBILITY_DEFAULT *ttLibC_AvcodecVideoDecoder_make(
  * @param extradata      extradata(some codec require these value.)
  * @param extradata_size extradata_size
  */
-ttLibC_AvcodecDecoder TT_VISIBILITY_DEFAULT *ttLibC_AvcodecVideoDecoder_make_ex(
+ttLibC_AvcodecDecoder TT_ATTRIBUTE_API *ttLibC_AvcodecVideoDecoder_make_ex(
 		ttLibC_Frame_Type frame_type,
 		uint32_t width,
 		uint32_t height,
@@ -1143,7 +1142,7 @@ ttLibC_AvcodecDecoder TT_VISIBILITY_DEFAULT *ttLibC_AvcodecVideoDecoder_make_ex(
  * make decoder
  * @param frame_type target ttLibC_Frame_Type
  */
-ttLibC_AvcodecDecoder TT_VISIBILITY_DEFAULT *ttLibC_AvcodecDecoder_make(
+ttLibC_AvcodecDecoder TT_ATTRIBUTE_API *ttLibC_AvcodecDecoder_make(
 		ttLibC_Frame_Type frame_type) {
 	AVCodecContext *dec = (AVCodecContext *)ttLibC_AvcodecDecoder_getAVCodecContext(frame_type);
 	if(dec == NULL) {
@@ -1159,7 +1158,7 @@ ttLibC_AvcodecDecoder TT_VISIBILITY_DEFAULT *ttLibC_AvcodecDecoder_make(
  * @param callback callback func for avcodec decode.
  * @param ptr      pointer for user def value, which call in callback.
  */
-bool TT_VISIBILITY_DEFAULT ttLibC_AvcodecDecoder_decode(
+bool TT_ATTRIBUTE_API ttLibC_AvcodecDecoder_decode(
 		ttLibC_AvcodecDecoder *decoder,
 		ttLibC_Frame *frame,
 		ttLibC_AvcodecDecodeFunc callback,
@@ -1195,7 +1194,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_AvcodecDecoder_decode(
  * close avcodec decoder.
  * @param decoder.
  */
-void TT_VISIBILITY_DEFAULT ttLibC_AvcodecDecoder_close(ttLibC_AvcodecDecoder **decoder) {
+void TT_ATTRIBUTE_API ttLibC_AvcodecDecoder_close(ttLibC_AvcodecDecoder **decoder) {
 	ttLibC_AvcodecDecoder_ *target = (ttLibC_AvcodecDecoder_*)*decoder;
 	if(target == NULL) {
 		return;

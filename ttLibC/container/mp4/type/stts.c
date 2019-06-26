@@ -9,11 +9,10 @@
  */
 
 #include "stts.h"
-#include "../../../ttLibC_predef.h"
 #include "../../../util/ioUtil.h"
 #include "../../../_log.h"
 
-ttLibC_Mp4 TT_VISIBILITY_HIDDEN *ttLibC_Stts_make(
+ttLibC_Mp4 TT_ATTRIBUTE_INNER *ttLibC_Stts_make(
 		uint8_t *data,
 		size_t data_size,
 		uint32_t timebase) {
@@ -39,16 +38,16 @@ ttLibC_Mp4 TT_VISIBILITY_HIDDEN *ttLibC_Stts_make(
 	return (ttLibC_Mp4 *)stts;
 }
 
-uint32_t TT_VISIBILITY_HIDDEN ttLibC_Stts_refCurrentDelta(ttLibC_Mp4 *mp4) {
+uint32_t TT_ATTRIBUTE_INNER ttLibC_Stts_refCurrentDelta(ttLibC_Mp4 *mp4) {
 	ttLibC_Stts *stts = (ttLibC_Stts *)mp4;
 	return stts->current_delta;
 }
-uint32_t TT_VISIBILITY_HIDDEN ttLibC_Stts_refCurrentPts(ttLibC_Mp4 *mp4) {
+uint32_t TT_ATTRIBUTE_INNER ttLibC_Stts_refCurrentPts(ttLibC_Mp4 *mp4) {
 	ttLibC_Stts *stts = (ttLibC_Stts *)mp4;
 	return stts->current_pts;
 }
 
-void TT_VISIBILITY_HIDDEN ttLibC_Stts_moveNext(ttLibC_Mp4 *mp4) {
+void TT_ATTRIBUTE_INNER ttLibC_Stts_moveNext(ttLibC_Mp4 *mp4) {
 	ttLibC_Stts *stts = (ttLibC_Stts *)mp4;
 	stts->current_pts += ttLibC_Stts_refCurrentDelta(mp4);
 	if(stts->current_count > 1) {

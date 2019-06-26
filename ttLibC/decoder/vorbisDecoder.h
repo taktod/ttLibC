@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../ttLibC_predef.h"
 #include "../frame/audio/vorbis.h"
 #include "../frame/audio/pcmf32.h"
 
@@ -40,7 +41,7 @@ typedef bool (* ttLibC_VorbisDecodeFunc)(void *ptr, ttLibC_PcmF32 *pcm);
  * make vorbisDecoder
  * @return vorbisDecoder object.
  */
-ttLibC_VorbisDecoder *ttLibC_VorbisDecoder_make();
+ttLibC_VorbisDecoder TT_ATTRIBUTE_API *ttLibC_VorbisDecoder_make();
 
 /**
  * make vorbisDecoder with vorbis_info
@@ -57,7 +58,7 @@ ttLibC_VorbisDecoder *ttLibC_VorbisDecoder_make();
  * @param ptr
  * @return true:success / false:error
  */
-bool ttLibC_VorbisDecoder_decode(
+bool TT_ATTRIBUTE_API ttLibC_VorbisDecoder_decode(
 		ttLibC_VorbisDecoder *decoder,
 		ttLibC_Vorbis *vorbis,
 		ttLibC_VorbisDecodeFunc callback,
@@ -67,7 +68,7 @@ bool ttLibC_VorbisDecoder_decode(
  * close decoder
  * @param decoder
  */
-void ttLibC_VorbisDecoder_close(ttLibC_VorbisDecoder **decoder);
+void TT_ATTRIBUTE_API ttLibC_VorbisDecoder_close(ttLibC_VorbisDecoder **decoder);
 
 #ifdef __cplusplus
 } /* extern "C" */

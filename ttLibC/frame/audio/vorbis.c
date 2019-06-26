@@ -12,7 +12,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "../../ttLibC_predef.h"
 #include "../../_log.h"
 #include "../../util/ioUtil.h"
 
@@ -32,7 +31,7 @@ typedef ttLibC_Frame_Audio_Vorbis ttLibC_Vorbis_;
  * @param timebase      timebase number for pts.
  * @return vorbis object.
  */
-ttLibC_Vorbis TT_VISIBILITY_DEFAULT *ttLibC_Vorbis_make(
+ttLibC_Vorbis TT_ATTRIBUTE_API *ttLibC_Vorbis_make(
 		ttLibC_Vorbis *prev_frame,
 		ttLibC_Vorbis_Type type,
 		uint32_t sample_rate,
@@ -70,7 +69,7 @@ ttLibC_Vorbis TT_VISIBILITY_DEFAULT *ttLibC_Vorbis_make(
  * @param prev_frame reuse frame object.
  * @param src_frame  source of clone.
  */
-ttLibC_Vorbis TT_VISIBILITY_DEFAULT *ttLibC_Vorbis_clone(
+ttLibC_Vorbis TT_ATTRIBUTE_API *ttLibC_Vorbis_clone(
 		ttLibC_Vorbis *prev_frame,
 		ttLibC_Vorbis *src_frame) {
 	if(src_frame == NULL) {
@@ -107,7 +106,7 @@ ttLibC_Vorbis TT_VISIBILITY_DEFAULT *ttLibC_Vorbis_clone(
 /**
  * make vorbis frame from byte data.
  */
-ttLibC_Vorbis TT_VISIBILITY_DEFAULT *ttLibC_Vorbis_getFrame(
+ttLibC_Vorbis TT_ATTRIBUTE_API *ttLibC_Vorbis_getFrame(
 		ttLibC_Vorbis *prev_frame,
 		void *data,
 		size_t data_size,
@@ -266,7 +265,7 @@ ttLibC_Vorbis TT_VISIBILITY_DEFAULT *ttLibC_Vorbis_getFrame(
  * close frame
  * @param frame
  */
-void TT_VISIBILITY_DEFAULT ttLibC_Vorbis_close(ttLibC_Vorbis **frame) {
+void TT_ATTRIBUTE_API ttLibC_Vorbis_close(ttLibC_Vorbis **frame) {
 	ttLibC_Audio_close_((ttLibC_Audio **)frame);
 }
 

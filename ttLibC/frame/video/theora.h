@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../../ttLibC_predef.h"
 #include "video.h"
 
 /**
@@ -53,7 +54,7 @@ typedef ttLibC_Frame_Video_Theora ttLibC_Theora;
  * @param pts           pts for theora data.
  * @param timebase      timebase number for pts.
  */
-ttLibC_Theora *ttLibC_Theora_make(
+ttLibC_Theora TT_ATTRIBUTE_API *ttLibC_Theora_make(
 		ttLibC_Theora *prev_frame,
 		ttLibC_Theora_Type type,
 		uint32_t width,
@@ -70,7 +71,7 @@ ttLibC_Theora *ttLibC_Theora_make(
  * @param prev_frame reuse frame object.
  * @param src_frame  source of clone.
  */
-ttLibC_Theora *ttLibC_Theora_clone(
+ttLibC_Theora TT_ATTRIBUTE_API *ttLibC_Theora_clone(
 		ttLibC_Theora *prev_frame,
 		ttLibC_Theora *src_frame);
 
@@ -80,7 +81,7 @@ ttLibC_Theora *ttLibC_Theora_clone(
  * @param data_size theora data size
  * @return true: key frame false:inter frame
  */
-bool ttLibC_Theora_isKey(void *data, size_t data_size);
+bool TT_ATTRIBUTE_API ttLibC_Theora_isKey(void *data, size_t data_size);
 
 /**
  * analyze the width information from theora binary.
@@ -89,7 +90,7 @@ bool ttLibC_Theora_isKey(void *data, size_t data_size);
  * @param data_size  theora data size
  * @return 0:error or width size.
  */
-uint32_t ttLibC_Theora_getWidth(ttLibC_Theora *prev_frame, uint8_t *data, size_t data_size);
+uint32_t TT_ATTRIBUTE_API ttLibC_Theora_getWidth(ttLibC_Theora *prev_frame, uint8_t *data, size_t data_size);
 
 /**
  * analyze the height information from theora binary.
@@ -98,7 +99,7 @@ uint32_t ttLibC_Theora_getWidth(ttLibC_Theora *prev_frame, uint8_t *data, size_t
  * @param data_size  theora data size
  * @return 0:error or height size.
  */
-uint32_t ttLibC_Theora_getHeight(ttLibC_Theora *prev_frame, uint8_t *data, size_t data_size);
+uint32_t TT_ATTRIBUTE_API ttLibC_Theora_getHeight(ttLibC_Theora *prev_frame, uint8_t *data, size_t data_size);
 
 /**
  * make frame object from theora binary data.
@@ -110,7 +111,7 @@ uint32_t ttLibC_Theora_getHeight(ttLibC_Theora *prev_frame, uint8_t *data, size_
  * @param timebase      timebase for pts.
  * @return theora frame
  */
-ttLibC_Theora *ttLibC_Theora_getFrame(
+ttLibC_Theora TT_ATTRIBUTE_API *ttLibC_Theora_getFrame(
 		ttLibC_Theora *prev_frame,
 		uint8_t *data,
 		size_t data_size,
@@ -122,7 +123,7 @@ ttLibC_Theora *ttLibC_Theora_getFrame(
  * close frame
  * @param frame
  */
-void ttLibC_Theora_close(ttLibC_Theora **frame);
+void TT_ATTRIBUTE_API ttLibC_Theora_close(ttLibC_Theora **frame);
 
 #ifdef __cplusplus
 } /* extern "C" */

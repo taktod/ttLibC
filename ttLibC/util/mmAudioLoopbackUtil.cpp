@@ -9,7 +9,6 @@
 
 #include "mmAudioLoopbackUtil.h"
 #include "msGlobalUtil.h"
-#include "../ttLibC_predef.h"
 #include "../allocator.h"
 #include "../_log.h"
 #include "../frame/audio/pcmS16.h"
@@ -481,7 +480,7 @@ static DWORD WINAPI MmAudioLoopback_threadCallback(LPVOID pContext) {
  * ref the all device on this computer.
  * we will use these name for initialize in future.
  */
-bool TT_VISIBILITY_DEFAULT ttLibC_MmAudioLoopback_getDeviceNames(
+bool TT_ATTRIBUTE_API ttLibC_MmAudioLoopback_getDeviceNames(
 		ttLibC_MmAudioLoopbackDeviceNameFunc callback,
 		void *ptr) {
 	// user must setup locale and coInitialize
@@ -548,7 +547,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_MmAudioLoopback_getDeviceNames(
 /**
  * make audioLoopback
  */
-ttLibC_MmAudioLoopback TT_VISIBILITY_DEFAULT *ttLibC_MmAudioLoopback_make(
+ttLibC_MmAudioLoopback TT_ATTRIBUTE_API *ttLibC_MmAudioLoopback_make(
 		const char *locale,
 		const char *deviceName) {
 	ttLibC_MmAudioLoopback_ *loopback = (ttLibC_MmAudioLoopback_ *)ttLibC_malloc(sizeof(ttLibC_MmAudioLoopback_));
@@ -586,7 +585,7 @@ ttLibC_MmAudioLoopback TT_VISIBILITY_DEFAULT *ttLibC_MmAudioLoopback_make(
 /**
  * get capture frame as ttLibC_PcmS16
  */
-bool TT_VISIBILITY_DEFAULT ttLibC_MmAudioLoopback_queryFrame(
+bool TT_ATTRIBUTE_API ttLibC_MmAudioLoopback_queryFrame(
 		ttLibC_MmAudioLoopback *device,
 		ttLibC_MmAudioLoopbackFrameFunc callback,
 		void *ptr) {
@@ -639,7 +638,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_MmAudioLoopback_queryFrame(
 /**
  * close object.
  */
-void TT_VISIBILITY_DEFAULT ttLibC_MmAudioLoopback_close(ttLibC_MmAudioLoopback **device) {
+void TT_ATTRIBUTE_API ttLibC_MmAudioLoopback_close(ttLibC_MmAudioLoopback **device) {
 	ttLibC_MmAudioLoopback_ *target = (ttLibC_MmAudioLoopback_ *)*device;
 	if(target == NULL) {
 		return;

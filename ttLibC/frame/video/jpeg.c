@@ -9,7 +9,6 @@
  */
 
 #include "jpeg.h"
-#include "../../ttLibC_predef.h"
 #include "../../_log.h"
 
 typedef ttLibC_Frame_Video_Jpeg ttLibC_Jpeg_;
@@ -25,7 +24,7 @@ typedef ttLibC_Frame_Video_Jpeg ttLibC_Jpeg_;
  * @param pts           pts for jpeg data.
  * @param timebase      timebase number for pts
  */
-ttLibC_Jpeg TT_VISIBILITY_DEFAULT *ttLibC_Jpeg_make(
+ttLibC_Jpeg TT_ATTRIBUTE_API *ttLibC_Jpeg_make(
 		ttLibC_Jpeg *prev_frame,
 		uint32_t width,
 		uint32_t height,
@@ -54,7 +53,7 @@ ttLibC_Jpeg TT_VISIBILITY_DEFAULT *ttLibC_Jpeg_make(
  * @param prev_frame reuse frame object.
  * @param src_frame  source of clone.
  */
-ttLibC_Jpeg TT_VISIBILITY_DEFAULT *ttLibC_Jpeg_clone(
+ttLibC_Jpeg TT_ATTRIBUTE_API *ttLibC_Jpeg_clone(
 		ttLibC_Jpeg *prev_frame,
 		ttLibC_Jpeg *src_frame) {
 	if(src_frame == NULL) {
@@ -86,7 +85,7 @@ ttLibC_Jpeg TT_VISIBILITY_DEFAULT *ttLibC_Jpeg_clone(
 /**
  * make frame object from jpeg binary data.
  */
-ttLibC_Jpeg TT_VISIBILITY_DEFAULT *ttLibC_Jpeg_getFrame(
+ttLibC_Jpeg TT_ATTRIBUTE_API *ttLibC_Jpeg_getFrame(
 		ttLibC_Jpeg *prev_frame,
 		uint8_t *data,
 		size_t data_size,
@@ -149,6 +148,6 @@ ttLibC_Jpeg TT_VISIBILITY_DEFAULT *ttLibC_Jpeg_getFrame(
  * close frame
  * @param frame
  */
-void TT_VISIBILITY_DEFAULT ttLibC_Jpeg_close(ttLibC_Jpeg **frame) {
+void TT_ATTRIBUTE_API ttLibC_Jpeg_close(ttLibC_Jpeg **frame) {
 	ttLibC_Video_close_((ttLibC_Video **)frame);
 }

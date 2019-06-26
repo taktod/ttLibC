@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../ttLibC_predef.h"
 #include "../frame/frame.h"
 #include "../frame/audio/pcms16.h"
 
@@ -31,20 +32,20 @@ typedef bool (*ttLibC_MmAudioLoopbackDeviceNameFunc)(void *ptr, const char *name
  */
 typedef bool (*ttLibC_MmAudioLoopbackFrameFunc)(void *ptr, ttLibC_PcmS16 *pcm);
 
-bool ttLibC_MmAudioLoopback_getDeviceNames(
+bool TT_ATTRIBUTE_API ttLibC_MmAudioLoopback_getDeviceNames(
 	ttLibC_MmAudioLoopbackDeviceNameFunc callback,
 	void *ptr);
 
-ttLibC_MmAudioLoopback *ttLibC_MmAudioLoopback_make(
+ttLibC_MmAudioLoopback TT_ATTRIBUTE_API *ttLibC_MmAudioLoopback_make(
 	const char *locale,
 	const char *deviceName);
 
-bool ttLibC_MmAudioLoopback_queryFrame(
+bool TT_ATTRIBUTE_API ttLibC_MmAudioLoopback_queryFrame(
 	ttLibC_MmAudioLoopback *device,
 	ttLibC_MmAudioLoopbackFrameFunc callback,
 	void *ptr);
 
-void ttLibC_MmAudioLoopback_close(ttLibC_MmAudioLoopback **device);
+void TT_ATTRIBUTE_API ttLibC_MmAudioLoopback_close(ttLibC_MmAudioLoopback **device);
 
 #ifdef __cplusplus
 } /* extern "C" */

@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../../ttLibC_predef.h"
 #include "../mp4.h"
 #include "../containerCommon.h"
 #include "../../util/dynamicBufferUtil.h"
@@ -76,7 +77,7 @@ typedef struct ttLibC_Container_Mp4Atom {
 
 typedef ttLibC_Container_Mp4Atom ttLibC_Mp4Atom;
 
-ttLibC_Mp4Atom *ttLibC_Mp4Atom_make(
+ttLibC_Mp4Atom TT_ATTRIBUTE_INNER *ttLibC_Mp4Atom_make(
 		ttLibC_Mp4Atom *prev_atom,
 		void *data,
 		size_t data_size,
@@ -85,7 +86,7 @@ ttLibC_Mp4Atom *ttLibC_Mp4Atom_make(
 		uint32_t timebase,
 		ttLibC_Mp4_Type type);
 
-void ttLibC_Mp4Atom_close(ttLibC_Mp4Atom **atom);
+void TT_ATTRIBUTE_INNER ttLibC_Mp4Atom_close(ttLibC_Mp4Atom **atom);
 
 #ifdef __cplusplus
 } /* extern "C" */

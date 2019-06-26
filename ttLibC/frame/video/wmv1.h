@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../../ttLibC_predef.h"
 #include "video.h"
 
 /**
@@ -39,7 +40,7 @@ typedef ttLibC_Frame_Video_Wmv1 ttLibC_Wmv1;
  * @param pts           pts for wmv1 data.
  * @param timebase      timebase number for pts.
  */
-ttLibC_Wmv1 *ttLibC_Wmv1_make(
+ttLibC_Wmv1 TT_ATTRIBUTE_API *ttLibC_Wmv1_make(
 		ttLibC_Wmv1 *prev_frame,
 		ttLibC_Video_Type video_type,
 		uint32_t width,
@@ -56,7 +57,7 @@ ttLibC_Wmv1 *ttLibC_Wmv1_make(
  * @param prev_frame reuse frame object.
  * @param src_frame  source of clone.
  */
-ttLibC_Wmv1 *ttLibC_Wmv1_clone(
+ttLibC_Wmv1 TT_ATTRIBUTE_API *ttLibC_Wmv1_clone(
 		ttLibC_Wmv1 *prev_frame,
 		ttLibC_Wmv1 *src_frame);
 
@@ -64,7 +65,7 @@ ttLibC_Wmv1 *ttLibC_Wmv1_clone(
  * close frame
  * @param frame
  */
-void ttLibC_Wmv1_close(ttLibC_Wmv1 **frame);
+void TT_ATTRIBUTE_API ttLibC_Wmv1_close(ttLibC_Wmv1 **frame);
 
 #ifdef __cplusplus
 } /* extern "C" */

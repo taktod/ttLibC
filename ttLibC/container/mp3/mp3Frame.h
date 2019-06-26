@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../../ttLibC_predef.h"
 #include "../containerCommon.h"
 #include "../mp3.h"
 
@@ -38,7 +39,7 @@ typedef ttLibC_Container_Mp3Frame ttLibC_Mp3Frame;
  * @param timebase      timebase
  * @return mp3frame container object.
  */
-ttLibC_Mp3Frame *ttLibC_Mp3Frame_make(
+ttLibC_Mp3Frame TT_ATTRIBUTE_INNER *ttLibC_Mp3Frame_make(
 		ttLibC_Mp3Frame *prev_frame,
 		void *data,
 		size_t data_size,
@@ -50,7 +51,7 @@ ttLibC_Mp3Frame *ttLibC_Mp3Frame_make(
  * close mp3frame container.
  * @param frame mp3Frame container object.
  */
-void ttLibC_Mp3Frame_close(ttLibC_Mp3Frame **frame);
+void TT_ATTRIBUTE_INNER ttLibC_Mp3Frame_close(ttLibC_Mp3Frame **frame);
 
 #ifdef __cplusplus
 } /* extern "C" */

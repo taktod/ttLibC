@@ -11,7 +11,6 @@
 #ifdef __ENABLE_SPEEX__
 
 #include "speexDecoder.h"
-#include "../ttLibC_predef.h"
 #include "../_log.h"
 #include "../allocator.h"
 #include <stdlib.h>
@@ -47,7 +46,7 @@ typedef ttLibC_Decoder_SpeexDecoder_ ttLibC_SpeexDecoder_;
  * @param channel_num
  * @return speex decoder object.
  */
-ttLibC_SpeexDecoder TT_VISIBILITY_DEFAULT *ttLibC_SpeexDecoder_make(
+ttLibC_SpeexDecoder TT_ATTRIBUTE_API *ttLibC_SpeexDecoder_make(
 		uint32_t sample_rate,
 		uint32_t channel_num) {
 	const SpeexMode *mode;
@@ -96,7 +95,7 @@ ttLibC_SpeexDecoder TT_VISIBILITY_DEFAULT *ttLibC_SpeexDecoder_make(
  * @param ptr      pointer for user def value.
  * @return true / false
  */
-bool TT_VISIBILITY_DEFAULT ttLibC_SpeexDecoder_decode(
+bool TT_ATTRIBUTE_API ttLibC_SpeexDecoder_decode(
 		ttLibC_SpeexDecoder *decoder,
 		ttLibC_Speex *speex,
 		ttLibC_SpeexDecodeFunc callback,
@@ -160,7 +159,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_SpeexDecoder_decode(
  * close speex decoder.
  * @param decoder
  */
-void TT_VISIBILITY_DEFAULT ttLibC_SpeexDecoder_close(ttLibC_SpeexDecoder **decoder) {
+void TT_ATTRIBUTE_API ttLibC_SpeexDecoder_close(ttLibC_SpeexDecoder **decoder) {
 	ttLibC_SpeexDecoder_ *target = (ttLibC_SpeexDecoder_ *)*decoder;
 	if(target == NULL) {
 		return;

@@ -11,7 +11,6 @@
 #include "mkvReader.h"
 #include <string.h>
 
-#include "../../ttLibC_predef.h"
 #include "../../_log.h"
 #include "../../allocator.h"
 #include "../../util/hexUtil.h"
@@ -20,7 +19,7 @@
 
 static bool MkvReader_closeTrack(void *ptr, void *key, void *item);
 
-ttLibC_MkvReader TT_VISIBILITY_DEFAULT *ttLibC_MkvReader_make() {
+ttLibC_MkvReader TT_ATTRIBUTE_API *ttLibC_MkvReader_make() {
 	ttLibC_MkvReader_ *reader = (ttLibC_MkvReader_ *)ttLibC_ContainerReader_make(
 			containerType_mkv,
 			sizeof(ttLibC_MkvReader_));
@@ -388,7 +387,7 @@ static bool MkvReader_readTag(
 	return reader->error_number == 0;
 }
 
-bool TT_VISIBILITY_DEFAULT ttLibC_MkvReader_read(
+bool TT_ATTRIBUTE_API ttLibC_MkvReader_read(
 		ttLibC_MkvReader *reader,
 		void *data,
 		size_t data_size,
@@ -423,7 +422,7 @@ static bool MkvReader_closeTrack(void *ptr, void *key, void *item) {
 	return true;
 }
 
-void TT_VISIBILITY_DEFAULT ttLibC_MkvReader_close(ttLibC_MkvReader **reader) {
+void TT_ATTRIBUTE_API ttLibC_MkvReader_close(ttLibC_MkvReader **reader) {
 	ttLibC_MkvReader_ *target = (ttLibC_MkvReader_ *)*reader;
 	if(target == NULL) {
 		return;

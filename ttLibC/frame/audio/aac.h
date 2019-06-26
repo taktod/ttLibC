@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../../ttLibC_predef.h"
 #include "audio.h"
 
 /**
@@ -72,7 +73,7 @@ typedef ttLibC_Frame_Audio_Aac ttLibC_Aac;
  * @param dsi_info      decoder specific info(global header for low data.)
  * @return aac object.
  */
-ttLibC_Aac *ttLibC_Aac_make(
+ttLibC_Aac TT_ATTRIBUTE_API *ttLibC_Aac_make(
 		ttLibC_Aac *prev_frame,
 		ttLibC_Aac_Type type,
 		uint32_t sample_rate,
@@ -91,7 +92,7 @@ ttLibC_Aac *ttLibC_Aac_make(
  * @param prev_frame reuse frame object.
  * @param src_frame  source of clone.
  */
-ttLibC_Aac *ttLibC_Aac_clone(
+ttLibC_Aac TT_ATTRIBUTE_API *ttLibC_Aac_clone(
 		ttLibC_Aac *prev_frame,
 		ttLibC_Aac *src_frame);
 
@@ -106,7 +107,7 @@ ttLibC_Aac *ttLibC_Aac_clone(
  * @param timebase      timebase for pts.
  * @return aac object
  */
-ttLibC_Aac *ttLibC_Aac_getFrame(
+ttLibC_Aac TT_ATTRIBUTE_API *ttLibC_Aac_getFrame(
 		ttLibC_Aac *prev_frame,
 		void *data,
 		size_t data_size,
@@ -121,7 +122,7 @@ ttLibC_Aac *ttLibC_Aac_getFrame(
  * @param data_size  buffer size
  * @return 0:error others:written size.
  */
-size_t ttLibC_Aac_readAdtsHeader(
+size_t TT_ATTRIBUTE_API ttLibC_Aac_readAdtsHeader(
 		ttLibC_Aac *target_aac,
 		void *data,
 		size_t data_size);
@@ -132,7 +133,7 @@ size_t ttLibC_Aac_readAdtsHeader(
  * @param aac target aac object.
  * @return value of crc32. 0 for error.
  */
-uint32_t ttLibC_Aac_getConfigCrc32(ttLibC_Aac *aac);
+uint32_t TT_ATTRIBUTE_API ttLibC_Aac_getConfigCrc32(ttLibC_Aac *aac);
 
 /**
  * get dsi buffer for aac data.
@@ -141,7 +142,7 @@ uint32_t ttLibC_Aac_getConfigCrc32(ttLibC_Aac *aac);
  * @param data_size
  * @return write size. 0 for error.
  */
-size_t ttLibC_Aac_readDsiInfo(
+size_t TT_ATTRIBUTE_API ttLibC_Aac_readDsiInfo(
 		ttLibC_Aac *aac,
 		void *data,
 		size_t data_size);
@@ -155,7 +156,7 @@ size_t ttLibC_Aac_readDsiInfo(
  * @param data_size
  * @return size of generate dsi information.
  */
-size_t ttLibC_Aac_getDsiInfo(
+size_t TT_ATTRIBUTE_API ttLibC_Aac_getDsiInfo(
 		ttLibC_Aac_Object object_type,
 		uint32_t sample_rate,
 		uint32_t channel_num,
@@ -166,7 +167,7 @@ size_t ttLibC_Aac_getDsiInfo(
  * close frame
  * @param frame
  */
-void ttLibC_Aac_close(ttLibC_Aac **frame);
+void TT_ATTRIBUTE_API ttLibC_Aac_close(ttLibC_Aac **frame);
 
 #ifdef __cplusplus
 } /* extern "C" */

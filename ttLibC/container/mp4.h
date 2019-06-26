@@ -12,6 +12,7 @@
 extern "C" {
 #endif
 
+#include "../ttLibC_predef.h"
 #include "container.h"
 
 /**
@@ -81,7 +82,7 @@ typedef ttLibC_Container_Mp4 ttLibC_Mp4;
  * @param callback callback to get frame.
  * @param ptr      user def data pointer.
  */
-bool ttLibC_Mp4_getFrame(
+bool TT_ATTRIBUTE_API ttLibC_Mp4_getFrame(
 		ttLibC_Mp4 *mp4,
 		ttLibC_getFrameFunc callback,
 		void *ptr);
@@ -99,7 +100,7 @@ typedef bool (* ttLibC_Mp4ReadFunc)(void *ptr, ttLibC_Mp4 *mp4);
 /**
  * make mp4 reader object.
  */
-ttLibC_Mp4Reader *ttLibC_Mp4Reader_make();
+ttLibC_Mp4Reader TT_ATTRIBUTE_API *ttLibC_Mp4Reader_make();
 
 /**
  * read data from binary data.
@@ -110,7 +111,7 @@ ttLibC_Mp4Reader *ttLibC_Mp4Reader_make();
  * @param ptr
  * @return true:success / false:error
  */
-bool ttLibC_Mp4Reader_read(
+bool TT_ATTRIBUTE_API ttLibC_Mp4Reader_read(
 		ttLibC_Mp4Reader *reader,
 		void *data,
 		size_t data_size,
@@ -121,7 +122,7 @@ bool ttLibC_Mp4Reader_read(
  * close reader object.
  * @param reader
  */
-void ttLibC_Mp4Reader_close(ttLibC_Mp4Reader **reader);
+void TT_ATTRIBUTE_API ttLibC_Mp4Reader_close(ttLibC_Mp4Reader **reader);
 
 // -------------------------------------------------------------- //
 // writer
@@ -140,7 +141,7 @@ typedef ttLibC_ContainerWriter ttLibC_Mp4Writer;
  * @param target_frame_types array of use frame type list.
  * @param types_num          number of array.
  */
-ttLibC_Mp4Writer *ttLibC_Mp4Writer_make(
+ttLibC_Mp4Writer TT_ATTRIBUTE_API *ttLibC_Mp4Writer_make(
 		ttLibC_Frame_Type* target_frame_types,
 		uint32_t types_num);
 
@@ -150,7 +151,7 @@ ttLibC_Mp4Writer *ttLibC_Mp4Writer_make(
  * @param types_num          number of array.
  * @param unit_duration  divide mp4 chunk unit with this duration at least(in milisec.)
  */
-ttLibC_Mp4Writer *ttLibC_Mp4Writer_make_ex(
+ttLibC_Mp4Writer TT_ATTRIBUTE_API *ttLibC_Mp4Writer_make_ex(
 		ttLibC_Frame_Type* target_frame_types,
 		uint32_t types_num,
 		uint32_t unit_duration);
@@ -162,7 +163,7 @@ ttLibC_Mp4Writer *ttLibC_Mp4Writer_make_ex(
  * @param callback
  * @param ptr
  */
-bool ttLibC_Mp4Writer_write(
+bool TT_ATTRIBUTE_API ttLibC_Mp4Writer_write(
 		ttLibC_Mp4Writer *writer,
 		ttLibC_Frame *frame,
 		ttLibC_ContainerWriteFunc callback,
@@ -172,7 +173,7 @@ bool ttLibC_Mp4Writer_write(
  * close writer.
  * @param writer
  */
-void ttLibC_Mp4Writer_close(ttLibC_Mp4Writer **writer);
+void TT_ATTRIBUTE_API ttLibC_Mp4Writer_close(ttLibC_Mp4Writer **writer);
 
 #ifdef __cplusplus
 } /* extern "C" */

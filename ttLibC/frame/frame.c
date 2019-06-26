@@ -13,7 +13,6 @@
 #include "frame.h"
 #include "audio/audio.h"
 #include "video/video.h"
-#include "../ttLibC_predef.h"
 #include "../_log.h"
 
 /*
@@ -21,7 +20,7 @@
  * @param type
  * @return true:audio false:not audio
  */
-bool TT_VISIBILITY_DEFAULT ttLibC_isAudio(ttLibC_Frame_Type type) {
+bool TT_ATTRIBUTE_API ttLibC_isAudio(ttLibC_Frame_Type type) {
 	switch(type) {
 	case frameType_aac:
 	case frameType_adpcm_ima_wav:
@@ -45,7 +44,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_isAudio(ttLibC_Frame_Type type) {
  * @param type
  * @return true:video false:not video
  */
-bool TT_VISIBILITY_DEFAULT ttLibC_isVideo(ttLibC_Frame_Type type) {
+bool TT_ATTRIBUTE_API ttLibC_isVideo(ttLibC_Frame_Type type) {
 	switch(type) {
 	case frameType_bgr:
 	case frameType_flv1:
@@ -72,7 +71,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_isVideo(ttLibC_Frame_Type type) {
  * @param prev_frame reuse frame object.
  * @param src_frame  source of clone.
  */
-ttLibC_Frame TT_VISIBILITY_DEFAULT *ttLibC_Frame_clone(
+ttLibC_Frame TT_ATTRIBUTE_API *ttLibC_Frame_clone(
 		ttLibC_Frame *prev_frame,
 		ttLibC_Frame *src_frame) {
 	if(ttLibC_Frame_isAudio(src_frame)) {
@@ -94,7 +93,7 @@ ttLibC_Frame TT_VISIBILITY_DEFAULT *ttLibC_Frame_clone(
  * @param frame
  * @return true:audio false:not audio
  */
-bool TT_VISIBILITY_DEFAULT ttLibC_Frame_isAudio(ttLibC_Frame *frame) {
+bool TT_ATTRIBUTE_API ttLibC_Frame_isAudio(ttLibC_Frame *frame) {
 	if(frame == NULL) {
 		return false;
 	}
@@ -106,7 +105,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_Frame_isAudio(ttLibC_Frame *frame) {
  * @param frame
  * @return true:video false:not video
  */
-bool TT_VISIBILITY_DEFAULT ttLibC_Frame_isVideo(ttLibC_Frame *frame) {
+bool TT_ATTRIBUTE_API ttLibC_Frame_isVideo(ttLibC_Frame *frame) {
 	if(frame == NULL) {
 		return false;
 	}
@@ -117,7 +116,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_Frame_isVideo(ttLibC_Frame *frame) {
  * release frame
  * @param frame
  */
-void TT_VISIBILITY_DEFAULT ttLibC_Frame_close(ttLibC_Frame **frame) {
+void TT_ATTRIBUTE_API ttLibC_Frame_close(ttLibC_Frame **frame) {
 	ttLibC_Frame *target = *frame;
 	if(target == NULL) {
 		return;

@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../../../../ttLibC_predef.h"
 #include <stdint.h>
 #include "rtmpMessage.h"
 
@@ -30,9 +31,9 @@ typedef struct ttLibC_Net_Client_Rtmp_Message_SetChunkSize {
 
 typedef ttLibC_Net_Client_Rtmp_Message_SetChunkSize ttLibC_SetChunkSize;
 
-ttLibC_SetChunkSize *ttLibC_SetChunkSize_make(uint32_t size);
+ttLibC_SetChunkSize TT_ATTRIBUTE_INNER *ttLibC_SetChunkSize_make(uint32_t size);
 
-void ttLibC_SetChunkSize_close(ttLibC_SetChunkSize **chunk_size);
+void TT_ATTRIBUTE_INNER ttLibC_SetChunkSize_close(ttLibC_SetChunkSize **chunk_size);
 
 #ifdef __cplusplus
 } /* extern "C" */

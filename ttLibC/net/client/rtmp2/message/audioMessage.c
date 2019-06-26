@@ -8,7 +8,6 @@
 #ifdef __ENABLE_SOCKET__
 
 #include "audioMessage.h"
-#include "../../../../ttLibC_predef.h"
 #include "../../../../_log.h"
 #include "../../../../allocator.h"
 #include <string.h>
@@ -18,7 +17,7 @@
 #include "../../../../util/ioUtil.h"
 #include "../../../../util/flvFrameUtil.h"
 
-ttLibC_AudioMessage TT_VISIBILITY_HIDDEN *ttLibC_AudioMessage_make() {
+ttLibC_AudioMessage TT_ATTRIBUTE_INNER *ttLibC_AudioMessage_make() {
 	ttLibC_AudioMessage *message = ttLibC_malloc(sizeof(ttLibC_AudioMessage));
 	if(message == NULL) {
 		return NULL;
@@ -34,7 +33,7 @@ ttLibC_AudioMessage TT_VISIBILITY_HIDDEN *ttLibC_AudioMessage_make() {
 	return message;
 }
 
-ttLibC_AudioMessage TT_VISIBILITY_HIDDEN *ttLibC_AudioMessage_readBinary(
+ttLibC_AudioMessage TT_ATTRIBUTE_INNER *ttLibC_AudioMessage_readBinary(
 		uint8_t *data,
 		size_t data_size) {
 	if(data_size <= 1) {
@@ -48,7 +47,7 @@ ttLibC_AudioMessage TT_VISIBILITY_HIDDEN *ttLibC_AudioMessage_readBinary(
 	return message;
 }
 
-tetty2_errornum TT_VISIBILITY_HIDDEN ttLibC_AudioMessage_getFrame(
+tetty2_errornum TT_ATTRIBUTE_INNER ttLibC_AudioMessage_getFrame(
 		ttLibC_AudioMessage *message,
 		ttLibC_FlvFrameManager *manager,
 		ttLibC_RtmpStream_getFrameFunc callback,
@@ -72,7 +71,7 @@ tetty2_errornum TT_VISIBILITY_HIDDEN ttLibC_AudioMessage_getFrame(
 	return 0;
 }
 
-ttLibC_AudioMessage TT_VISIBILITY_HIDDEN *ttLibC_AudioMessage_addFrame(
+ttLibC_AudioMessage TT_ATTRIBUTE_INNER *ttLibC_AudioMessage_addFrame(
 		uint32_t stream_id,
 		ttLibC_Audio *frame) {
 	if(frame == NULL) {
@@ -95,7 +94,7 @@ ttLibC_AudioMessage TT_VISIBILITY_HIDDEN *ttLibC_AudioMessage_addFrame(
 	return message;
 }
 
-bool TT_VISIBILITY_HIDDEN ttLibC_AudioMessage_getData(
+bool TT_ATTRIBUTE_INNER ttLibC_AudioMessage_getData(
 		ttLibC_AudioMessage *message,
 		ttLibC_DynamicBuffer *buffer) {
 	if(message->audio_frame->inherit_super.type == frameType_aac) {
@@ -114,7 +113,7 @@ bool TT_VISIBILITY_HIDDEN ttLibC_AudioMessage_getData(
 			buffer);
 }
 
-void TT_VISIBILITY_HIDDEN ttLibC_AudioMessage_close(ttLibC_AudioMessage **message) {
+void TT_ATTRIBUTE_INNER ttLibC_AudioMessage_close(ttLibC_AudioMessage **message) {
 	ttLibC_AudioMessage *target = (ttLibC_AudioMessage *)*message;
 	if(target == NULL) {
 		return;

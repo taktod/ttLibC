@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../../../../ttLibC_predef.h"
 #include <stdint.h>
 #include "rtmpMessage.h"
 
@@ -36,11 +37,11 @@ typedef struct ttLibC_Net_Client_Rtmp_Message_SetPeerBandwidth {
 
 typedef ttLibC_Net_Client_Rtmp_Message_SetPeerBandwidth ttLibC_SetPeerBandwidth;
 
-ttLibC_SetPeerBandwidth *ttLibC_SetPeerBandwidth_make(
+ttLibC_SetPeerBandwidth TT_ATTRIBUTE_INNER *ttLibC_SetPeerBandwidth_make(
 		uint32_t size,
 		ttLibC_SetPeerBandwidth_LimitType limit_type);
 
-void ttLibC_SetPeerBandwidth_close(ttLibC_SetPeerBandwidth **bandwidth);
+void TT_ATTRIBUTE_INNER ttLibC_SetPeerBandwidth_close(ttLibC_SetPeerBandwidth **bandwidth);
 
 #ifdef __cplusplus
 } /* extern "C" */

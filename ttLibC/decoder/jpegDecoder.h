@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../ttLibC_predef.h"
 #include "../frame/video/yuv420.h"
 #include "../frame/video/jpeg.h"
 
@@ -37,7 +38,7 @@ typedef bool (* ttLibC_JpegDecodeFunc)(void *ptr, ttLibC_Yuv420 *yuv);
  * make jpeg decoder
  * @return jpegDecoder object.
  */
-ttLibC_JpegDecoder *ttLibC_JpegDecoder_make();
+ttLibC_JpegDecoder TT_ATTRIBUTE_API *ttLibC_JpegDecoder_make();
 
 /**
  * decode frame
@@ -47,7 +48,7 @@ ttLibC_JpegDecoder *ttLibC_JpegDecoder_make();
  * @param ptr      pointer for use def value, which will call in callback.
  * @return true / false
  */
-bool ttLibC_JpegDecoder_decode(
+bool TT_ATTRIBUTE_API ttLibC_JpegDecoder_decode(
 		ttLibC_JpegDecoder *decoder,
 		ttLibC_Jpeg *jpeg,
 		ttLibC_JpegDecodeFunc callback,
@@ -57,7 +58,7 @@ bool ttLibC_JpegDecoder_decode(
  * close jpeg decoder
  * @param decoder
  */
-void ttLibC_JpegDecoder_close(ttLibC_JpegDecoder **decoder);
+void TT_ATTRIBUTE_API ttLibC_JpegDecoder_close(ttLibC_JpegDecoder **decoder);
 
 #ifdef __cplusplus
 } /* extern "C" */

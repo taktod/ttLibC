@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../ttLibC_predef.h"
 #include "../frame/audio/mp3.h"
 #include "../frame/audio/pcms16.h"
 
@@ -57,7 +58,7 @@ typedef bool (* ttLibC_Mp3lameEncodeFunc)(void *ptr, ttLibC_Mp3 *mp3);
  * @param quality     target quality from 0 to 10. 2:near best 5:good fast 7:ok,very fast.
  * @return mp3lame encoder object.
  */
-ttLibC_Mp3lameEncoder *ttLibC_Mp3lameEncoder_make(
+ttLibC_Mp3lameEncoder TT_ATTRIBUTE_API *ttLibC_Mp3lameEncoder_make(
 		uint32_t sample_rate,
 		uint32_t channel_num,
 		uint32_t quality);
@@ -75,7 +76,7 @@ ttLibC_Mp3lameEncoder *ttLibC_Mp3lameEncoder_make(
  * @param ptr      pointer for user def value, which will call in callback.
  * @return true / false
  */
-bool ttLibC_Mp3lameEncoder_encode(
+bool TT_ATTRIBUTE_API ttLibC_Mp3lameEncoder_encode(
 		ttLibC_Mp3lameEncoder *encoder,
 		ttLibC_PcmS16 *pcm,
 		ttLibC_Mp3lameEncodeFunc callback,
@@ -85,7 +86,7 @@ bool ttLibC_Mp3lameEncoder_encode(
  * close mp3lame encoder.
  * @param encoder
  */
-void ttLibC_Mp3lameEncoder_close(ttLibC_Mp3lameEncoder **encoder);
+void TT_ATTRIBUTE_API ttLibC_Mp3lameEncoder_close(ttLibC_Mp3lameEncoder **encoder);
 
 #ifdef __cplusplus
 } /* extern "C" */

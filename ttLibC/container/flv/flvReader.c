@@ -10,7 +10,6 @@
 
 #include "flvReader.h"
 
-#include "../../ttLibC_predef.h"
 #include "../../_log.h"
 #include "../../allocator.h"
 #include "../../util/hexUtil.h"
@@ -19,7 +18,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-ttLibC_FlvReader TT_VISIBILITY_DEFAULT *ttLibC_FlvReader_make() {
+ttLibC_FlvReader TT_ATTRIBUTE_API *ttLibC_FlvReader_make() {
 	ttLibC_FlvReader_ *reader = (ttLibC_FlvReader_ *)ttLibC_ContainerReader_make(
 			containerType_flv,
 			sizeof(ttLibC_FlvReader_));
@@ -101,7 +100,7 @@ static bool FlvReader_read(
 	}
 }
 
-bool TT_VISIBILITY_DEFAULT ttLibC_FlvReader_read(
+bool TT_ATTRIBUTE_API ttLibC_FlvReader_read(
 		ttLibC_FlvReader *reader,
 		void *data,
 		size_t data_size,
@@ -146,7 +145,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_FlvReader_read(
 	} while(true);
 }
 
-void TT_VISIBILITY_DEFAULT ttLibC_FlvReader_close(ttLibC_FlvReader **reader) {
+void TT_ATTRIBUTE_API ttLibC_FlvReader_close(ttLibC_FlvReader **reader) {
 	ttLibC_FlvReader_ *target = (ttLibC_FlvReader_ *)*reader;
 	if(target == NULL) {
 		return;

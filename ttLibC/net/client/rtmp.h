@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../../ttLibC_predef.h"
 #include "../../util/amfUtil.h"
 #include "../../frame/frame.h"
 
@@ -39,7 +40,7 @@ typedef bool (* ttLibC_RtmpEventFunc)(void *ptr, ttLibC_Amf0Object *amf0_obj);
 /**
  * make rtmpConnection object.
  */
-ttLibC_RtmpConnection *ttLibC_RtmpConnection_make();
+ttLibC_RtmpConnection TT_ATTRIBUTE_API *ttLibC_RtmpConnection_make();
 
 /**
  * add event listener for rtmpConnection.
@@ -47,7 +48,7 @@ ttLibC_RtmpConnection *ttLibC_RtmpConnection_make();
  * @param callback
  * @param ptr
  */
-void ttLibC_RtmpConnection_addEventListener(
+void TT_ATTRIBUTE_API ttLibC_RtmpConnection_addEventListener(
 		ttLibC_RtmpConnection *conn,
 		ttLibC_RtmpEventFunc callback,
 		void *ptr);
@@ -57,7 +58,7 @@ void ttLibC_RtmpConnection_addEventListener(
  * @param conn    rtmpConnnection object.
  * @param address for example: rtmp://localhost:1935/live
  */
-bool ttLibC_RtmpConnection_connect(
+bool TT_ATTRIBUTE_API ttLibC_RtmpConnection_connect(
 		ttLibC_RtmpConnection *conn,
 		const char *address);
 
@@ -67,7 +68,7 @@ bool ttLibC_RtmpConnection_connect(
  * @param wait_interval interval in micro sec.
  * @return true:success false:error
  */
-bool ttLibC_RtmpConnection_update(
+bool TT_ATTRIBUTE_API ttLibC_RtmpConnection_update(
 		ttLibC_RtmpConnection* conn,
 		uint32_t wait_interval);
 
@@ -75,7 +76,7 @@ bool ttLibC_RtmpConnection_update(
  * close connection object.
  * @param conn
  */
-void ttLibC_RtmpConnection_close(ttLibC_RtmpConnection **conn);
+void TT_ATTRIBUTE_API ttLibC_RtmpConnection_close(ttLibC_RtmpConnection **conn);
 
 /**
  * definition of rtmpStream.
@@ -100,7 +101,7 @@ typedef bool (* ttLibC_RtmpStream_getFrameFunc)(void *ptr, ttLibC_Frame *frame);
  * @param conn rtmpConnection object.
  * @return rtmpStream object.
  */
-ttLibC_RtmpStream *ttLibC_RtmpStream_make(ttLibC_RtmpConnection *conn);
+ttLibC_RtmpStream TT_ATTRIBUTE_API *ttLibC_RtmpStream_make(ttLibC_RtmpConnection *conn);
 
 /**
  * add event listener
@@ -108,7 +109,7 @@ ttLibC_RtmpStream *ttLibC_RtmpStream_make(ttLibC_RtmpConnection *conn);
  * @param callback
  * @param ptr
  */
-void ttLibC_RtmpStream_addEventListener(
+void TT_ATTRIBUTE_API ttLibC_RtmpStream_addEventListener(
 		ttLibC_RtmpStream *stream,
 		ttLibC_RtmpEventFunc callback,
 		void *ptr);
@@ -119,7 +120,7 @@ void ttLibC_RtmpStream_addEventListener(
  * @param callback
  * @@aram ptr
  */
-void ttLibC_RtmpStream_addFrameListener(
+void TT_ATTRIBUTE_API ttLibC_RtmpStream_addFrameListener(
 		ttLibC_RtmpStream *stream,
 		ttLibC_RtmpStream_getFrameFunc callback,
 		void *ptr);
@@ -129,7 +130,7 @@ void ttLibC_RtmpStream_addFrameListener(
  * @param stream target stream
  * @param name   target name
  */
-void ttLibC_RtmpStream_publish(
+void TT_ATTRIBUTE_API ttLibC_RtmpStream_publish(
 		ttLibC_RtmpStream *stream,
 		const char *name);
 
@@ -139,14 +140,14 @@ void ttLibC_RtmpStream_publish(
  * @param frame
  * @return true:success false:error
  */
-bool ttLibC_RtmpStream_addFrame(
+bool TT_ATTRIBUTE_API ttLibC_RtmpStream_addFrame(
 		ttLibC_RtmpStream *stream,
 		ttLibC_Frame *frame);
 
 /**
  * send buffer length for play.
  */
-void ttLibC_RtmpStream_setBufferLength(
+void TT_ATTRIBUTE_API ttLibC_RtmpStream_setBufferLength(
 		ttLibC_RtmpStream *stream,
 		uint32_t buffer_length);
 
@@ -157,7 +158,7 @@ void ttLibC_RtmpStream_setBufferLength(
  * @param accept_video flag for video recv.
  * @param accept_audio flag for audio recv.
  */
-void ttLibC_RtmpStream_play(
+void TT_ATTRIBUTE_API ttLibC_RtmpStream_play(
 		ttLibC_RtmpStream *stream,
 		const char *name,
 		bool accept_video,
@@ -166,13 +167,13 @@ void ttLibC_RtmpStream_play(
 /**
  * pause stream.
  */
-void ttLibC_RtmpStream_pause(ttLibC_RtmpStream *stream);
+void TT_ATTRIBUTE_API ttLibC_RtmpStream_pause(ttLibC_RtmpStream *stream);
 
 /**
  * close rtmpStream
  * @param stream
  */
-void ttLibC_RtmpStream_close(ttLibC_RtmpStream **stream);
+void TT_ATTRIBUTE_API ttLibC_RtmpStream_close(ttLibC_RtmpStream **stream);
 
 #ifdef __cplusplus
 } /* extern "C" */

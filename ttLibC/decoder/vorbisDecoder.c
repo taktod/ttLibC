@@ -11,7 +11,6 @@
 #ifdef __ENABLE_VORBIS_DECODE__
 
 #include "vorbisDecoder.h"
-#include "../ttLibC_predef.h"
 #include "../allocator.h"
 #include "../_log.h"
 #include <vorbis/codec.h>
@@ -31,7 +30,7 @@ typedef struct ttLibC_Decoder_VorbisDecoder_ {
 
 typedef ttLibC_Decoder_VorbisDecoder_ ttLibC_VorbisDecoder_;
 
-ttLibC_VorbisDecoder TT_VISIBILITY_DEFAULT *ttLibC_VorbisDecoder_make() {
+ttLibC_VorbisDecoder TT_ATTRIBUTE_API *ttLibC_VorbisDecoder_make() {
 	ttLibC_VorbisDecoder_ *decoder = ttLibC_malloc(sizeof(ttLibC_VorbisDecoder_));
 	if(decoder == NULL) {
 		return NULL;
@@ -45,12 +44,12 @@ ttLibC_VorbisDecoder TT_VISIBILITY_DEFAULT *ttLibC_VorbisDecoder_make() {
 	return (ttLibC_VorbisDecoder *)decoder;
 }
 
-ttLibC_VorbisDecoder TT_VISIBILITY_HIDDEN *ttLibC_VorbisDecoder_makeWithInfo(void *vi) {
+ttLibC_VorbisDecoder TT_ATTRIBUTE_INNER *ttLibC_VorbisDecoder_makeWithInfo(void *vi) {
 	(void)vi;
 	return NULL;
 }
 
-bool TT_VISIBILITY_DEFAULT ttLibC_VorbisDecoder_decode(
+bool TT_ATTRIBUTE_API ttLibC_VorbisDecoder_decode(
 		ttLibC_VorbisDecoder *decoder,
 		ttLibC_Vorbis *vorbis,
 		ttLibC_VorbisDecodeFunc callback,
@@ -143,7 +142,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_VorbisDecoder_decode(
 	return true;
 }
 
-void TT_VISIBILITY_DEFAULT ttLibC_VorbisDecoder_close(ttLibC_VorbisDecoder **decoder) {
+void TT_ATTRIBUTE_API ttLibC_VorbisDecoder_close(ttLibC_VorbisDecoder **decoder) {
 	ttLibC_VorbisDecoder_ *target = (ttLibC_VorbisDecoder_ *)*decoder;
 	if(target == NULL) {
 		return;

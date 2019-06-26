@@ -8,7 +8,6 @@
 #ifdef __ENABLE_SOCKET__
 
 #include "handler.h"
-#include "../../../ttLibC_predef.h"
 #include "../../../allocator.h"
 #include "../../../_log.h"
 #include "websocket.h"
@@ -200,7 +199,7 @@ static tetty_errornum WebSocketHandler_write(
 	return ttLibC_TettyContext_super_write(ctx, data, data_size);
 }
 
-ttLibC_WebSocketHandler TT_VISIBILITY_HIDDEN *ttLibC_WebSocketHandler_make() {
+ttLibC_WebSocketHandler TT_ATTRIBUTE_INNER *ttLibC_WebSocketHandler_make() {
 	ttLibC_WebSocketHandler *handler = ttLibC_malloc(sizeof(ttLibC_WebSocketHandler));
 	if(handler == NULL) {
 		return NULL;
@@ -220,7 +219,7 @@ ttLibC_WebSocketHandler TT_VISIBILITY_HIDDEN *ttLibC_WebSocketHandler_make() {
 	return handler;
 }
 
-void TT_VISIBILITY_HIDDEN ttLibC_WebSocketHandler_close(ttLibC_WebSocketHandler **handler) {
+void TT_ATTRIBUTE_INNER ttLibC_WebSocketHandler_close(ttLibC_WebSocketHandler **handler) {
 	ttLibC_WebSocketHandler *target = (ttLibC_WebSocketHandler *)*handler;
 	if(target == NULL) {
 		return;

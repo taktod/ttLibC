@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../ttLibC_predef.h"
 #include "container.h"
 
 /**
@@ -44,7 +45,7 @@ typedef ttLibC_Container_Flv ttLibC_Flv;
  * @param ptr      user def pointer object.
  * @param true:success false:error.
  */
-bool ttLibC_Flv_getFrame(
+bool TT_ATTRIBUTE_API ttLibC_Flv_getFrame(
 		ttLibC_Flv *flv,
 		ttLibC_getFrameFunc callback,
 		void *ptr);
@@ -53,7 +54,7 @@ bool ttLibC_Flv_getFrame(
  * close flv object
  * @param flv
  */
-void ttLibC_Flv_close(ttLibC_Flv **flv);
+void TT_ATTRIBUTE_API ttLibC_Flv_close(ttLibC_Flv **flv);
 
 // -------------------------------------------------------------- //
 
@@ -80,7 +81,7 @@ typedef bool (* ttLibC_FlvReadFunc)(void *ptr, ttLibC_Flv *flv);
  * make flv reader.
  * @return flv reader object.
  */
-ttLibC_FlvReader *ttLibC_FlvReader_make();
+ttLibC_FlvReader TT_ATTRIBUTE_API *ttLibC_FlvReader_make();
 
 /**
  * read flv object from binary data.
@@ -91,7 +92,7 @@ ttLibC_FlvReader *ttLibC_FlvReader_make();
  * @param ptr       user def pointer for callback.
  * @return true:success false:error
  */
-bool ttLibC_FlvReader_read(
+bool TT_ATTRIBUTE_API ttLibC_FlvReader_read(
 		ttLibC_FlvReader *reader,
 		void *data,
 		size_t data_size,
@@ -102,7 +103,7 @@ bool ttLibC_FlvReader_read(
  * close flv reader
  * @param reader
  */
-void ttLibC_FlvReader_close(ttLibC_FlvReader **reader);
+void TT_ATTRIBUTE_API ttLibC_FlvReader_close(ttLibC_FlvReader **reader);
 
 // -------------------------------------------------------------- //
 
@@ -121,7 +122,7 @@ typedef ttLibC_ContainerWriter_FlvWriter ttLibC_FlvWriter;
  * @param audio_type target audio frame type.
  * @return flv writer object.
  */
-ttLibC_FlvWriter *ttLibC_FlvWriter_make(
+ttLibC_FlvWriter TT_ATTRIBUTE_API *ttLibC_FlvWriter_make(
 		ttLibC_Frame_Type video_type,
 		ttLibC_Frame_Type audio_type);
 
@@ -133,7 +134,7 @@ ttLibC_FlvWriter *ttLibC_FlvWriter_make(
  * @param ptr
  * @return
  */
-bool ttLibC_FlvWriter_write(
+bool TT_ATTRIBUTE_API ttLibC_FlvWriter_write(
 		ttLibC_FlvWriter *writer,
 		ttLibC_Frame *frame,
 		ttLibC_ContainerWriteFunc callback,
@@ -143,7 +144,7 @@ bool ttLibC_FlvWriter_write(
  * close writer
  * @param writer
  */
-void ttLibC_FlvWriter_close(ttLibC_FlvWriter **writer);
+void TT_ATTRIBUTE_API ttLibC_FlvWriter_close(ttLibC_FlvWriter **writer);
 
 #ifdef __cplusplus
 } /* extern "C" */

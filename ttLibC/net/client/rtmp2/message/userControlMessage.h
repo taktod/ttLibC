@@ -12,6 +12,7 @@
 extern "C" {
 #endif
 
+#include "../../../../ttLibC_predef.h"
 #include <stdint.h>
 #include <stdbool.h>
 #include "rtmpMessage.h"
@@ -69,25 +70,25 @@ typedef struct ttLibC_Net_Client_Rtmp2_Message_UserControlMessage {
 
 typedef ttLibC_Net_Client_Rtmp2_Message_UserControlMessage ttLibC_UserControlMessage;
 
-ttLibC_UserControlMessage *ttLibC_UserControlMessage_make(
+ttLibC_UserControlMessage TT_ATTRIBUTE_INNER *ttLibC_UserControlMessage_make(
 		ttLibC_UserControlMessage_Type type,
 		uint32_t stream_id,
 		uint32_t buffer_length,
 		uint32_t time);
 
-ttLibC_UserControlMessage *ttLibC_UserControlMessage_readBinary(
+ttLibC_UserControlMessage TT_ATTRIBUTE_INNER *ttLibC_UserControlMessage_readBinary(
 		uint8_t *data,
 		size_t data_size);
 
-ttLibC_UserControlMessage *ttLibC_UserControlMessage_ping(uint32_t time);
+ttLibC_UserControlMessage TT_ATTRIBUTE_INNER *ttLibC_UserControlMessage_ping(uint32_t time);
 
-ttLibC_UserControlMessage *ttLibC_UserControlMessage_pong(uint32_t time);
+ttLibC_UserControlMessage TT_ATTRIBUTE_INNER *ttLibC_UserControlMessage_pong(uint32_t time);
 
-bool ttLibC_UserControlMessage_getData(
+bool TT_ATTRIBUTE_INNER ttLibC_UserControlMessage_getData(
 		ttLibC_UserControlMessage *user_control_message,
 		ttLibC_DynamicBuffer *buffer);
 
-void ttLibC_UserControlMessage_close(ttLibC_UserControlMessage **message);
+void TT_ATTRIBUTE_INNER ttLibC_UserControlMessage_close(ttLibC_UserControlMessage **message);
 
 #ifdef __cplusplus
 } /* extern "C" */

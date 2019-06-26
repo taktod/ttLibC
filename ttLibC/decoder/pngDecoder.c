@@ -10,7 +10,6 @@
 
 #ifdef __ENABLE_LIBPNG__
 #include "pngDecoder.h"
-#include "../ttLibC_predef.h"
 #include "../allocator.h"
 #include "../_log.h"
 #include <setjmp.h>

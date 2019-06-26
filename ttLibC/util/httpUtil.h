@@ -15,6 +15,8 @@
 extern "C" {
 #endif
 
+#include "../ttLibC_predef.h"
+
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -54,7 +56,7 @@ typedef bool (* ttLibC_HttpClientFunc)(void *ptr, ttLibC_HttpClient *client, voi
  * @param wait_interval interval for each download.
  * @return http client object.
  */
-ttLibC_HttpClient *ttLibC_HttpClient_make(
+ttLibC_HttpClient TT_ATTRIBUTE_API *ttLibC_HttpClient_make(
 		size_t buffer_size,
 		uint32_t wait_interval);
 
@@ -66,7 +68,7 @@ ttLibC_HttpClient *ttLibC_HttpClient_make(
  * @param callback       callback for download data.
  * @param ptr            user def data pointer.
  */
-void ttLibC_HttpClient_get(
+void TT_ATTRIBUTE_API ttLibC_HttpClient_get(
 		ttLibC_HttpClient *client,
 		const char *target_address,
 		bool is_binary,
@@ -83,7 +85,7 @@ void ttLibC_HttpClient_get(
  * @param callback       callback for download data.
  * @param ptr            user def data pointer.
  */
-void ttLibC_HttpClient_getRange(
+void TT_ATTRIBUTE_API ttLibC_HttpClient_getRange(
 		ttLibC_HttpClient *client,
 		const char *target_address,
 		size_t range_start,
@@ -96,7 +98,7 @@ void ttLibC_HttpClient_getRange(
  * close http client
  * @param client
  */
-void ttLibC_HttpClient_close(ttLibC_HttpClient **client);
+void TT_ATTRIBUTE_API ttLibC_HttpClient_close(ttLibC_HttpClient **client);
 
 #ifdef __cplusplus
 } /* extern "C" */

@@ -8,7 +8,6 @@
 #ifdef __ENABLE_SOUNDTOUCH__
 
 #include "soundtouchResampler.h"
-#include "../ttLibC_predef.h"
 #include "../allocator.h"
 #include "../_log.h"
 #include "audioResampler.h"
@@ -34,7 +33,7 @@ typedef ttLibC_Resampler_Soundtouch_ ttLibC_Soundtouch_;
 
 extern "C" {
 
-ttLibC_Soundtouch TT_VISIBILITY_DEFAULT *ttLibC_Soundtouch_make(
+ttLibC_Soundtouch TT_ATTRIBUTE_API *ttLibC_Soundtouch_make(
 		uint32_t sample_rate,
 		uint32_t channel_num) {
 	ttLibC_Soundtouch_ *soundtouch = (ttLibC_Soundtouch_ *)ttLibC_malloc(sizeof(ttLibC_Soundtouch_));
@@ -56,7 +55,7 @@ ttLibC_Soundtouch TT_VISIBILITY_DEFAULT *ttLibC_Soundtouch_make(
 	return (ttLibC_Soundtouch *)soundtouch;
 }
 
-void TT_VISIBILITY_DEFAULT ttLibC_Soundtouch_setRate(
+void TT_ATTRIBUTE_API ttLibC_Soundtouch_setRate(
 		ttLibC_Soundtouch *soundtouch,
 		double newRate) {
 	ttLibC_Soundtouch_ *soundtouch_ = (ttLibC_Soundtouch_ *)soundtouch;
@@ -69,7 +68,7 @@ void TT_VISIBILITY_DEFAULT ttLibC_Soundtouch_setRate(
 	soundtouch_->soundtouch->setRate(newRate);
 #endif
 }
-void TT_VISIBILITY_DEFAULT ttLibC_Soundtouch_setTempo(
+void TT_ATTRIBUTE_API ttLibC_Soundtouch_setTempo(
 		ttLibC_Soundtouch *soundtouch,
 		double newTempo) {
 	ttLibC_Soundtouch_ *soundtouch_ = (ttLibC_Soundtouch_ *)soundtouch;
@@ -82,7 +81,7 @@ void TT_VISIBILITY_DEFAULT ttLibC_Soundtouch_setTempo(
 	soundtouch_->soundtouch->setTempo(newTempo);
 #endif
 }
-void TT_VISIBILITY_DEFAULT ttLibC_Soundtouch_setRateChange(
+void TT_ATTRIBUTE_API ttLibC_Soundtouch_setRateChange(
 		ttLibC_Soundtouch *soundtouch,
 		double newRate) {
 	ttLibC_Soundtouch_ *soundtouch_ = (ttLibC_Soundtouch_ *)soundtouch;
@@ -95,7 +94,7 @@ void TT_VISIBILITY_DEFAULT ttLibC_Soundtouch_setRateChange(
 	soundtouch_->soundtouch->setRateChange(newRate);
 #endif
 }
-void TT_VISIBILITY_DEFAULT ttLibC_Soundtouch_setTempoChange(
+void TT_ATTRIBUTE_API ttLibC_Soundtouch_setTempoChange(
 		ttLibC_Soundtouch *soundtouch,
 		double newTempo) {
 	ttLibC_Soundtouch_ *soundtouch_ = (ttLibC_Soundtouch_ *)soundtouch;
@@ -108,7 +107,7 @@ void TT_VISIBILITY_DEFAULT ttLibC_Soundtouch_setTempoChange(
 	soundtouch_->soundtouch->setTempoChange(newTempo);
 #endif
 }
-void TT_VISIBILITY_DEFAULT ttLibC_Soundtouch_setPitch(
+void TT_ATTRIBUTE_API ttLibC_Soundtouch_setPitch(
 		ttLibC_Soundtouch *soundtouch,
 		double newPitch) {
 	ttLibC_Soundtouch_ *soundtouch_ = (ttLibC_Soundtouch_ *)soundtouch;
@@ -121,7 +120,7 @@ void TT_VISIBILITY_DEFAULT ttLibC_Soundtouch_setPitch(
 	soundtouch_->soundtouch->setPitch(newPitch);
 #endif
 }
-void TT_VISIBILITY_DEFAULT ttLibC_Soundtouch_setPitchOctaves(
+void TT_ATTRIBUTE_API ttLibC_Soundtouch_setPitchOctaves(
 		ttLibC_Soundtouch *soundtouch,
 		double newPitch) {
 	ttLibC_Soundtouch_ *soundtouch_ = (ttLibC_Soundtouch_ *)soundtouch;
@@ -134,7 +133,7 @@ void TT_VISIBILITY_DEFAULT ttLibC_Soundtouch_setPitchOctaves(
 	soundtouch_->soundtouch->setPitchOctaves(newPitch);
 #endif
 }
-void TT_VISIBILITY_DEFAULT ttLibC_Soundtouch_setPitchSemiTones(
+void TT_ATTRIBUTE_API ttLibC_Soundtouch_setPitchSemiTones(
 		ttLibC_Soundtouch *soundtouch,
 		double newPitch) {
 	ttLibC_Soundtouch_ *soundtouch_ = (ttLibC_Soundtouch_ *)soundtouch;
@@ -148,7 +147,7 @@ void TT_VISIBILITY_DEFAULT ttLibC_Soundtouch_setPitchSemiTones(
 #endif
 }
 
-bool TT_VISIBILITY_DEFAULT ttLibC_Soundtouch_resample(
+bool TT_ATTRIBUTE_API ttLibC_Soundtouch_resample(
 		ttLibC_Soundtouch *soundtouch,
 		ttLibC_Audio *pcm,
 		ttLibC_SoundtouchResampleFunc callback,
@@ -319,7 +318,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_Soundtouch_resample(
 	return true;
 }
 
-void TT_VISIBILITY_DEFAULT ttLibC_Soundtouch_close(ttLibC_Soundtouch **soundtouch) {
+void TT_ATTRIBUTE_API ttLibC_Soundtouch_close(ttLibC_Soundtouch **soundtouch) {
 	ttLibC_Soundtouch_ *target = (ttLibC_Soundtouch_ *)*soundtouch;
 	if(target == NULL) {
 		return;

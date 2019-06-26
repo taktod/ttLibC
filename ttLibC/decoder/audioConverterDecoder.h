@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../ttLibC_predef.h"
 #include "../frame/audio/audio.h"
 #include "../frame/audio/pcms16.h"
 
@@ -44,7 +45,7 @@ typedef bool (*ttLibC_AcDecodeFunc)(void *ptr, ttLibC_PcmS16 *pcm);
  * @param target_frame_type target frame type(currently support frameType_aac or frameType_mp3)
  * @return ttLibC_AcDecoder object.
  */
-ttLibC_AcDecoder *ttLibC_AcDecoder_make(
+ttLibC_AcDecoder TT_ATTRIBUTE_API *ttLibC_AcDecoder_make(
 		uint32_t sample_rate,
 		uint32_t channel_num,
 		ttLibC_Frame_Type target_frame_type);
@@ -57,7 +58,7 @@ ttLibC_AcDecoder *ttLibC_AcDecoder_make(
  * @param ptr      pointer for user def value, which will call in callback.
  * @return true / false
  */
-bool ttLibC_AcDecoder_decode(
+bool TT_ATTRIBUTE_API ttLibC_AcDecoder_decode(
 		ttLibC_AcDecoder *decoder,
 		ttLibC_Audio *audio,
 		ttLibC_AcDecodeFunc callback,
@@ -67,7 +68,7 @@ bool ttLibC_AcDecoder_decode(
  * close acDecoder object.
  * @param decoder
  */
-void ttLibC_AcDecoder_close(ttLibC_AcDecoder **decoder);
+void TT_ATTRIBUTE_API ttLibC_AcDecoder_close(ttLibC_AcDecoder **decoder);
 
 #ifdef __cplusplus
 } /* extern "C" */

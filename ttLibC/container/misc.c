@@ -9,7 +9,6 @@
  */
 
 #include "misc.h"
-#include "../ttLibC_predef.h"
 #include "../_log.h"
 #include "../allocator.h"
 #include "containerCommon.h"
@@ -40,7 +39,7 @@ typedef ttLibC_Container_Misc_FrameQueue_ ttLibC_FrameQueue_;
  * @param max_size max number of holding frame object.
  * @return frame queue object.
  */
-ttLibC_FrameQueue TT_VISIBILITY_HIDDEN *ttLibC_FrameQueue_make(
+ttLibC_FrameQueue TT_ATTRIBUTE_INNER *ttLibC_FrameQueue_make(
 		uint32_t track_id,
 		uint32_t max_size) {
 	ttLibC_FrameQueue_ *queue = ttLibC_malloc(sizeof(ttLibC_FrameQueue_));
@@ -75,7 +74,7 @@ ttLibC_FrameQueue TT_VISIBILITY_HIDDEN *ttLibC_FrameQueue_make(
  * @param ptr      user def pointer.
  * @return true:call all data. false:stopped.
  */
-bool TT_VISIBILITY_HIDDEN ttLibC_FrameQueue_ref(ttLibC_FrameQueue *queue, ttLibC_FrameQueueFunc callback, void *ptr) {
+bool TT_ATTRIBUTE_INNER ttLibC_FrameQueue_ref(ttLibC_FrameQueue *queue, ttLibC_FrameQueueFunc callback, void *ptr) {
 	ttLibC_FrameQueue_ *queue_ = (ttLibC_FrameQueue_ *)queue;
 	if(queue_ == NULL) {
 		return false;
@@ -95,7 +94,7 @@ bool TT_VISIBILITY_HIDDEN ttLibC_FrameQueue_ref(ttLibC_FrameQueue *queue, ttLibC
  * @param queue target queue object.
  * @return frame object.
  */
-ttLibC_Frame TT_VISIBILITY_HIDDEN *ttLibC_FrameQueue_ref_first(ttLibC_FrameQueue *queue) {
+ttLibC_Frame TT_ATTRIBUTE_INNER *ttLibC_FrameQueue_ref_first(ttLibC_FrameQueue *queue) {
 	ttLibC_FrameQueue_ *queue_ = (ttLibC_FrameQueue_ *)queue;
 	if(queue_ == NULL) {
 		return NULL;
@@ -115,7 +114,7 @@ ttLibC_Frame TT_VISIBILITY_HIDDEN *ttLibC_FrameQueue_ref_first(ttLibC_FrameQueue
  * @param ptr      user def pointer.
  * @return
  */
-bool TT_VISIBILITY_HIDDEN ttLibC_FrameQueue_dequeue(ttLibC_FrameQueue *queue, ttLibC_FrameQueueFunc callback, void *ptr) {
+bool TT_ATTRIBUTE_INNER ttLibC_FrameQueue_dequeue(ttLibC_FrameQueue *queue, ttLibC_FrameQueueFunc callback, void *ptr) {
 	ttLibC_FrameQueue_ *queue_ = (ttLibC_FrameQueue_ *)queue;
 	if(queue_ == NULL) {
 		return false;
@@ -135,7 +134,7 @@ bool TT_VISIBILITY_HIDDEN ttLibC_FrameQueue_dequeue(ttLibC_FrameQueue *queue, tt
  * @param queue target queue object
  * @return frame object.
  */
-ttLibC_Frame TT_VISIBILITY_HIDDEN *ttLibC_FrameQueue_dequeue_first(ttLibC_FrameQueue *queue) {
+ttLibC_Frame TT_ATTRIBUTE_INNER *ttLibC_FrameQueue_dequeue_first(ttLibC_FrameQueue *queue) {
 	ttLibC_FrameQueue_ *queue_ = (ttLibC_FrameQueue_ *)queue;
 	if(queue_ == NULL) {
 		return NULL;
@@ -155,7 +154,7 @@ ttLibC_Frame TT_VISIBILITY_HIDDEN *ttLibC_FrameQueue_dequeue_first(ttLibC_FrameQ
  * @param frame add frame object.
  * @return true:success false:error.
  */
-bool TT_VISIBILITY_HIDDEN ttLibC_FrameQueue_queue(ttLibC_FrameQueue *queue, ttLibC_Frame *frame) {
+bool TT_ATTRIBUTE_INNER ttLibC_FrameQueue_queue(ttLibC_FrameQueue *queue, ttLibC_Frame *frame) {
 	ttLibC_FrameQueue_ *queue_ = (ttLibC_FrameQueue_ *)queue;
 	if(queue_ == NULL) {
 		return false;
@@ -179,7 +178,7 @@ bool TT_VISIBILITY_HIDDEN ttLibC_FrameQueue_queue(ttLibC_FrameQueue *queue, ttLi
  * close queue object
  * @param queue
  */
-void TT_VISIBILITY_HIDDEN ttLibC_FrameQueue_close(ttLibC_FrameQueue **queue) {
+void TT_ATTRIBUTE_INNER ttLibC_FrameQueue_close(ttLibC_FrameQueue **queue) {
 	ttLibC_FrameQueue_ *target = (ttLibC_FrameQueue_ *)*queue;
 	if(target == NULL) {
 		return;
@@ -207,7 +206,7 @@ static bool FrameQueue_checkReadyFrameCallback(void *ptr, ttLibC_Frame *frame) {
 	return true;
 }
 
-uint32_t TT_VISIBILITY_HIDDEN ttLibC_FrameQueue_getReadyFrameCount(ttLibC_FrameQueue *queue) {
+uint32_t TT_ATTRIBUTE_INNER ttLibC_FrameQueue_getReadyFrameCount(ttLibC_FrameQueue *queue) {
 	FrameQueue_ReadyFrameCounter counter;
 	counter.count = 0;
 	counter.result = 0;

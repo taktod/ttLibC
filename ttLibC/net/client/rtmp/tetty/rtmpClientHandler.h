@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../../../../ttLibC_predef.h"
 #include "../../rtmp.h"
 #include "../../../tetty.h"
 #include "../../../../util/stlMapUtil.h"
@@ -29,9 +30,9 @@ typedef struct ttLibC_Net_Client_Rtmp_Tetty_RtmpClientHandler{
 
 typedef ttLibC_Net_Client_Rtmp_Tetty_RtmpClientHandler ttLibC_RtmpClientHandler;
 
-ttLibC_RtmpClientHandler *ttLibC_RtmpClientHandler_make();
+ttLibC_RtmpClientHandler TT_ATTRIBUTE_INNER *ttLibC_RtmpClientHandler_make();
 
-void ttLibC_RtmpClientHandler_close(ttLibC_RtmpClientHandler **handler);
+void TT_ATTRIBUTE_INNER ttLibC_RtmpClientHandler_close(ttLibC_RtmpClientHandler **handler);
 
 #ifdef __cplusplus
 } /* extern "C" */

@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../../ttLibC_predef.h"
 #include "audio.h"
 
 /**
@@ -52,7 +53,7 @@ typedef ttLibC_Frame_Audio_Mp3 ttLibC_Mp3;
  * @param timebase      timebase number for pts.
  * @return mp3 object.
  */
-ttLibC_Mp3 *ttLibC_Mp3_make(
+ttLibC_Mp3 TT_ATTRIBUTE_API *ttLibC_Mp3_make(
 		ttLibC_Mp3 *prev_frame,
 		ttLibC_Mp3_Type type,
 		uint32_t sample_rate,
@@ -70,7 +71,7 @@ ttLibC_Mp3 *ttLibC_Mp3_make(
  * @param prev_frame reuse frame object.
  * @param src_frame  source of clone.
  */
-ttLibC_Mp3 *ttLibC_Mp3_clone(
+ttLibC_Mp3 TT_ATTRIBUTE_API *ttLibC_Mp3_clone(
 		ttLibC_Mp3 *prev_frame,
 		ttLibC_Mp3 *src_frame);
 
@@ -80,7 +81,7 @@ ttLibC_Mp3 *ttLibC_Mp3_clone(
  * @param data_size data size.
  * @return Mp3Type value.
  */
-ttLibC_Mp3_Type ttLibC_Mp3_getMp3Type(
+ttLibC_Mp3_Type TT_ATTRIBUTE_API ttLibC_Mp3_getMp3Type(
 		void *data,
 		size_t data_size);
 
@@ -94,7 +95,7 @@ ttLibC_Mp3_Type ttLibC_Mp3_getMp3Type(
  * @param timebase      timebase for mp3 frame.
  * @return mp3 object.
  */
-ttLibC_Mp3 *ttLibC_Mp3_getFrame(
+ttLibC_Mp3 TT_ATTRIBUTE_API *ttLibC_Mp3_getFrame(
 		ttLibC_Mp3 *prev_frame,
 		void *data,
 		size_t data_size,
@@ -106,7 +107,7 @@ ttLibC_Mp3 *ttLibC_Mp3_getFrame(
  * close frame
  * @param frame
  */
-void ttLibC_Mp3_close(ttLibC_Mp3 **frame);
+void TT_ATTRIBUTE_API ttLibC_Mp3_close(ttLibC_Mp3 **frame);
 
 #ifdef __cplusplus
 } /* extern "C" */

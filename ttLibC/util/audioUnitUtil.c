@@ -11,7 +11,6 @@
 #ifdef __ENABLE_APPLE__
 
 #include "audioUnitUtil.h"
-#include "../ttLibC_predef.h"
 #include "../_log.h"
 #include "../allocator.h"
 #include <AudioToolbox/AudioToolbox.h>
@@ -194,7 +193,7 @@ static OSStatus AuPlayer_outputCallback(
  * @param type        device type(kAudioUnitSubType)
  * @return ttLibC_AuPlayer object.
  */
-ttLibC_AuPlayer TT_VISIBILITY_DEFAULT *ttLibC_AuPlayer_make(
+ttLibC_AuPlayer TT_ATTRIBUTE_API *ttLibC_AuPlayer_make(
 		uint32_t sample_rate,
 		uint32_t channel_num,
 		uint32_t type) {
@@ -316,7 +315,7 @@ ttLibC_AuPlayer TT_VISIBILITY_DEFAULT *ttLibC_AuPlayer_make(
  * @param pcmS16 pcmS16 object for play.
  * @return true:success to put queue. false:error to put queue(queue is full, you need to try again later.)
  */
-bool TT_VISIBILITY_DEFAULT ttLibC_AuPlayer_queue(ttLibC_AuPlayer *player, ttLibC_PcmS16 *pcmS16) {
+bool TT_ATTRIBUTE_API ttLibC_AuPlayer_queue(ttLibC_AuPlayer *player, ttLibC_PcmS16 *pcmS16) {
 	if(player == NULL) {
 		return false;
 	}
@@ -407,7 +406,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_AuPlayer_queue(ttLibC_AuPlayer *player, ttLibC
 	return true;
 }
 
-uint64_t TT_VISIBILITY_DEFAULT ttLibC_AuPlayer_getPts(ttLibC_AuPlayer *player) {
+uint64_t TT_ATTRIBUTE_API ttLibC_AuPlayer_getPts(ttLibC_AuPlayer *player) {
 	if(player == NULL) {
 		return false;
 	}
@@ -426,7 +425,7 @@ uint64_t TT_VISIBILITY_DEFAULT ttLibC_AuPlayer_getPts(ttLibC_AuPlayer *player) {
 	return pts;
 }
 
-uint32_t TT_VISIBILITY_DEFAULT ttLibC_AuPlayer_getTimebase(ttLibC_AuPlayer *player) {
+uint32_t TT_ATTRIBUTE_API ttLibC_AuPlayer_getTimebase(ttLibC_AuPlayer *player) {
 	if(player == NULL) {
 		return false;
 	}
@@ -438,7 +437,7 @@ uint32_t TT_VISIBILITY_DEFAULT ttLibC_AuPlayer_getTimebase(ttLibC_AuPlayer *play
  * close player
  * @param player ttLibC_AuPlayer object.
  */
-void TT_VISIBILITY_DEFAULT ttLibC_AuPlayer_close(ttLibC_AuPlayer **player) {
+void TT_ATTRIBUTE_API ttLibC_AuPlayer_close(ttLibC_AuPlayer **player) {
 	ttLibC_AuPlayer_ *target = (ttLibC_AuPlayer_ *)*player;
 	if(target == NULL) {
 		return;
@@ -557,7 +556,7 @@ static OSStatus AuRecorder_inputCallback(
  * @param device_id   device_id
  * @return ttLibC_AuRecorder object.
  */
-ttLibC_AuRecorder TT_VISIBILITY_DEFAULT *ttLibC_AuRecorder_make(
+ttLibC_AuRecorder TT_ATTRIBUTE_API *ttLibC_AuRecorder_make(
 		uint32_t sample_rate,
 		uint32_t channel_num,
 		uint32_t type,
@@ -812,7 +811,7 @@ ttLibC_AuRecorder TT_VISIBILITY_DEFAULT *ttLibC_AuRecorder_make(
  * @param callback set the callback.
  * @param ptr      set the data pointer which will passing in callback.
  */
-bool TT_VISIBILITY_DEFAULT ttLibC_AuRecorder_start(
+bool TT_ATTRIBUTE_API ttLibC_AuRecorder_start(
 		ttLibC_AuRecorder *recorder,
 		ttLibC_AuRecorderFunc callback,
 		void *ptr) {
@@ -838,7 +837,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_AuRecorder_start(
  * stop recorder
  * @param recorder target ttLibC_AuRecorder object.
  */
-bool TT_VISIBILITY_DEFAULT ttLibC_AuRecorder_stop(ttLibC_AuRecorder *recorder) {
+bool TT_ATTRIBUTE_API ttLibC_AuRecorder_stop(ttLibC_AuRecorder *recorder) {
 	ttLibC_AuRecorder_ *recorder_ = (ttLibC_AuRecorder_ *)recorder;
 	if(recorder_ == NULL) {
 		return false;
@@ -858,7 +857,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_AuRecorder_stop(ttLibC_AuRecorder *recorder) {
  * close recorder
  * @param recorder
  */
-void TT_VISIBILITY_DEFAULT ttLibC_AuRecorder_close(ttLibC_AuRecorder **recorder) {
+void TT_ATTRIBUTE_API ttLibC_AuRecorder_close(ttLibC_AuRecorder **recorder) {
 	ttLibC_AuRecorder_ *target = (ttLibC_AuRecorder_ *)*recorder;
 	if(target == NULL) {
 		return;

@@ -9,7 +9,6 @@
  */
 
 #include "vp9.h"
-#include "../../ttLibC_predef.h"
 #include "../../_log.h"
 #include "../../util/byteUtil.h"
 
@@ -27,7 +26,7 @@ typedef ttLibC_Frame_Video_Vp9 ttLibC_Vp9_;
  * @param pts           pts for vp9 data.
  * @param timebase      timebase number for pts.
  */
-ttLibC_Vp9 TT_VISIBILITY_DEFAULT *ttLibC_Vp9_make(
+ttLibC_Vp9 TT_ATTRIBUTE_API *ttLibC_Vp9_make(
 		ttLibC_Vp9 *prev_frame,
 		ttLibC_Video_Type video_type,
 		uint32_t width,
@@ -57,7 +56,7 @@ ttLibC_Vp9 TT_VISIBILITY_DEFAULT *ttLibC_Vp9_make(
  * @param prev_frame reuse frame object.
  * @param src_frame  source of clone.
  */
-ttLibC_Vp9 TT_VISIBILITY_DEFAULT *ttLibC_Vp9_clone(
+ttLibC_Vp9 TT_ATTRIBUTE_API *ttLibC_Vp9_clone(
 		ttLibC_Vp9 *prev_frame,
 		ttLibC_Vp9 *src_frame) {
 	if(src_frame == NULL) {
@@ -93,7 +92,7 @@ ttLibC_Vp9 TT_VISIBILITY_DEFAULT *ttLibC_Vp9_clone(
  * @param data_size vp9 data size
  * @return true: key frame false:inter frame
  */
-bool TT_VISIBILITY_DEFAULT ttLibC_Vp9_isKey(void *data, size_t data_size) {
+bool TT_ATTRIBUTE_API ttLibC_Vp9_isKey(void *data, size_t data_size) {
 	ttLibC_ByteReader *reader = ttLibC_ByteReader_make(data, data_size, ByteUtilType_default);
 	ttLibC_ByteReader_bit(reader, 2);
 	ttLibC_ByteReader_bit(reader, 1);
@@ -115,7 +114,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_Vp9_isKey(void *data, size_t data_size) {
  * @param data_size  vp9 data size
  * @return 0:error or width size.
  */
-uint32_t TT_VISIBILITY_DEFAULT ttLibC_Vp9_getWidth(ttLibC_Vp9 *prev_frame, uint8_t *data, size_t data_size) {
+uint32_t TT_ATTRIBUTE_API ttLibC_Vp9_getWidth(ttLibC_Vp9 *prev_frame, uint8_t *data, size_t data_size) {
 	/*
 	 * 2bit frame marker
 	 * 1bit profile
@@ -186,7 +185,7 @@ uint32_t TT_VISIBILITY_DEFAULT ttLibC_Vp9_getWidth(ttLibC_Vp9 *prev_frame, uint8
  * @param data_size  vp9 data size
  * @return 0:error or height size.
  */
-uint32_t TT_VISIBILITY_DEFAULT ttLibC_Vp9_getHeight(ttLibC_Vp9 *prev_frame, uint8_t *data, size_t data_size) {
+uint32_t TT_ATTRIBUTE_API ttLibC_Vp9_getHeight(ttLibC_Vp9 *prev_frame, uint8_t *data, size_t data_size) {
 	ttLibC_ByteReader *reader = ttLibC_ByteReader_make(data, data_size, ByteUtilType_default);
 	if(reader == NULL) {
 		ERR_PRINT("failed to make byteReader.");
@@ -245,7 +244,7 @@ uint32_t TT_VISIBILITY_DEFAULT ttLibC_Vp9_getHeight(ttLibC_Vp9 *prev_frame, uint
  * @param timebase      timebase for pts.
  * @return vp9 frame
  */
-ttLibC_Vp9 TT_VISIBILITY_DEFAULT *ttLibC_Vp9_getFrame(
+ttLibC_Vp9 TT_ATTRIBUTE_API *ttLibC_Vp9_getFrame(
 		ttLibC_Vp9 *prev_frame,
 		uint8_t *data,
 		size_t data_size,
@@ -277,6 +276,6 @@ ttLibC_Vp9 TT_VISIBILITY_DEFAULT *ttLibC_Vp9_getFrame(
  * close frame
  * @param frame
  */
-void TT_VISIBILITY_DEFAULT ttLibC_Vp9_close(ttLibC_Vp9 **frame) {
+void TT_ATTRIBUTE_API ttLibC_Vp9_close(ttLibC_Vp9 **frame) {
 	ttLibC_Video_close_((ttLibC_Video **)frame);
 }

@@ -12,7 +12,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "../../ttLibC_predef.h"
 #include "../../_log.h"
 #include "../../allocator.h"
 #include "../../ttLibC_common.h"
@@ -42,7 +41,7 @@ typedef struct {
  * @param pts           pts for h264 data.
  * @param timebase      timebase number for pts.
  */
-ttLibC_H264 TT_VISIBILITY_DEFAULT *ttLibC_H264_make(
+ttLibC_H264 TT_ATTRIBUTE_API *ttLibC_H264_make(
 		ttLibC_H264 *prev_frame,
 		ttLibC_H264_Type type,
 		uint32_t width,
@@ -171,7 +170,7 @@ ttLibC_H264 TT_VISIBILITY_DEFAULT *ttLibC_H264_make(
  * @param prev_frame reuse frame object.
  * @param src_frame  source of clone.
  */
-ttLibC_H264 TT_VISIBILITY_DEFAULT *ttLibC_H264_clone(
+ttLibC_H264 TT_ATTRIBUTE_API *ttLibC_H264_clone(
 		ttLibC_H264 *prev_frame,
 		ttLibC_H264 *src_frame) {
 	if(src_frame == NULL) {
@@ -209,7 +208,7 @@ ttLibC_H264 TT_VISIBILITY_DEFAULT *ttLibC_H264_clone(
  * @param data      data for analyze
  * @param data_size data size
  */
-bool TT_VISIBILITY_DEFAULT ttLibC_H264_getNalInfo(ttLibC_H264_NalInfo* info, uint8_t *data, size_t data_size) {
+bool TT_ATTRIBUTE_API ttLibC_H264_getNalInfo(ttLibC_H264_NalInfo* info, uint8_t *data, size_t data_size) {
 	if(info == NULL) {
 		return false;
 	}
@@ -286,7 +285,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_H264_getNalInfo(ttLibC_H264_NalInfo* info, uin
 	return true;
 }
 
-Error_e TT_VISIBILITY_DEFAULT ttLibC_H264_getNalInfo2(ttLibC_H264_NalInfo* info, uint8_t *data, size_t data_size) {
+Error_e TT_ATTRIBUTE_API ttLibC_H264_getNalInfo2(ttLibC_H264_NalInfo* info, uint8_t *data, size_t data_size) {
 	if(info == NULL) {
 		return ttLibC_updateError(Target_On_VideoFrame, Error_MissingParams);
 	}
@@ -374,7 +373,7 @@ Error_e TT_VISIBILITY_DEFAULT ttLibC_H264_getNalInfo2(ttLibC_H264_NalInfo* info,
  * @return true:analyze success
  * @note work with 4byte size length only
  */
-bool TT_VISIBILITY_DEFAULT ttLibC_H264_getAvccInfo(ttLibC_H264_NalInfo* info, uint8_t *data, size_t data_size) {
+bool TT_ATTRIBUTE_API ttLibC_H264_getAvccInfo(ttLibC_H264_NalInfo* info, uint8_t *data, size_t data_size) {
 	if(info == NULL) {
 		return false;
 	}
@@ -400,7 +399,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_H264_getAvccInfo(ttLibC_H264_NalInfo* info, ui
 	return true;
 }
 
-bool TT_VISIBILITY_DEFAULT ttLibC_H264_getAvccInfo_ex(
+bool TT_ATTRIBUTE_API ttLibC_H264_getAvccInfo_ex(
 		ttLibC_H264_NalInfo *info,
 		uint8_t *data,
 		size_t data_size,
@@ -451,7 +450,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_H264_getAvccInfo_ex(
 /**
  * check data type is nal or not.
  */
-bool TT_VISIBILITY_DEFAULT ttLibC_H264_isNal(uint8_t *data, size_t data_size) {
+bool TT_ATTRIBUTE_API ttLibC_H264_isNal(uint8_t *data, size_t data_size) {
 	if(data_size < 4) {
 		return false;
 	}
@@ -480,7 +479,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_H264_isNal(uint8_t *data, size_t data_size) {
  * check data type is avcc or not.
  * @note work with sizelength = 4 only.
  */
-bool TT_VISIBILITY_DEFAULT ttLibC_H264_isAvcc(uint8_t *data, size_t data_size) {
+bool TT_ATTRIBUTE_API ttLibC_H264_isAvcc(uint8_t *data, size_t data_size) {
 	if(data_size < 4) {
 		return false;
 	}
@@ -501,7 +500,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_H264_isAvcc(uint8_t *data, size_t data_size) {
  * @param data_size target data size
  * @return true: data is key frame. false: not key frame.
  */
-bool TT_VISIBILITY_DEFAULT ttLibC_H264_isKey(uint8_t *data, size_t data_size) {
+bool TT_ATTRIBUTE_API ttLibC_H264_isKey(uint8_t *data, size_t data_size) {
 	ttLibC_H264_NalInfo info;
 	if(ttLibC_H264_isAvcc(data, data_size)) {
 		if(!ttLibC_H264_getAvccInfo(&info, data, data_size)) {
@@ -669,7 +668,7 @@ static Error_e H264_analyzeSequenceParameterSet(
  * @param data_size  target data size
  * @return width size
  */
-uint32_t TT_VISIBILITY_DEFAULT ttLibC_H264_getWidth(ttLibC_H264 *prev_frame, uint8_t *data, size_t data_size) {
+uint32_t TT_ATTRIBUTE_API ttLibC_H264_getWidth(ttLibC_H264 *prev_frame, uint8_t *data, size_t data_size) {
 	// for pps aud -> analyze next nal.
 	// for sps -> analyze to get width and height.
 	// for others -> get ref from prev_frame.
@@ -762,7 +761,7 @@ uint32_t TT_VISIBILITY_DEFAULT ttLibC_H264_getWidth(ttLibC_H264 *prev_frame, uin
  * @param data_size  target data size
  * @return height size
  */
-uint32_t TT_VISIBILITY_DEFAULT ttLibC_H264_getHeight(ttLibC_H264 *prev_frame, uint8_t *data, size_t data_size) {
+uint32_t TT_ATTRIBUTE_API ttLibC_H264_getHeight(ttLibC_H264 *prev_frame, uint8_t *data, size_t data_size) {
 	// for pps aud -> analyze next nal.
 	// for sps -> analyze to get width and height.
 	// for others -> get ref from prev_frame.
@@ -858,7 +857,7 @@ uint32_t TT_VISIBILITY_DEFAULT ttLibC_H264_getHeight(ttLibC_H264 *prev_frame, ui
  * @param data_size  target data size
  * @return h264 frame object.
  */
-ttLibC_H264 TT_VISIBILITY_DEFAULT *ttLibC_H264_getFrame(
+ttLibC_H264 TT_ATTRIBUTE_API *ttLibC_H264_getFrame(
 		ttLibC_H264 *prev_frame,
 		uint8_t *data,
 		size_t data_size,
@@ -1014,7 +1013,7 @@ ttLibC_H264 TT_VISIBILITY_DEFAULT *ttLibC_H264_getFrame(
  * @param data_size   data_size
  * @param length_size size of length information on avcc.
  */
-ttLibC_H264 TT_VISIBILITY_DEFAULT *ttLibC_H264_analyzeAvccTag(
+ttLibC_H264 TT_ATTRIBUTE_API *ttLibC_H264_analyzeAvccTag(
 		ttLibC_H264 *prev_frame,
 		uint8_t *data,
 		size_t data_size,
@@ -1184,7 +1183,7 @@ ttLibC_H264 TT_VISIBILITY_DEFAULT *ttLibC_H264_analyzeAvccTag(
  * @param h264 target h264 object
  * @return value of crc32. 0 for error.
  */
-uint32_t TT_VISIBILITY_DEFAULT ttLibC_H264_getConfigCrc32(ttLibC_H264 *h264) {
+uint32_t TT_ATTRIBUTE_API ttLibC_H264_getConfigCrc32(ttLibC_H264 *h264) {
 	if(h264->type != H264Type_configData) {
 		return 0;
 	}
@@ -1206,7 +1205,7 @@ uint32_t TT_VISIBILITY_DEFAULT ttLibC_H264_getConfigCrc32(ttLibC_H264 *h264) {
  * @param data_size buffer size.
  * @return write size. 0 for error.
  */
-size_t TT_VISIBILITY_DEFAULT ttLibC_H264_readAvccTag(
+size_t TT_ATTRIBUTE_API ttLibC_H264_readAvccTag(
 		ttLibC_H264 *h264,
 		void *data,
 		size_t data_size) {
@@ -1332,7 +1331,7 @@ size_t TT_VISIBILITY_DEFAULT ttLibC_H264_readAvccTag(
  * close frame
  * @param frame
  */
-void TT_VISIBILITY_DEFAULT ttLibC_H264_close(ttLibC_H264 **frame) {
+void TT_ATTRIBUTE_API ttLibC_H264_close(ttLibC_H264 **frame) {
 	ttLibC_H264 *target = *frame;
 	if(target == NULL) {
 		return;

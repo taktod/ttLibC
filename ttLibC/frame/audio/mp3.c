@@ -14,7 +14,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "../../ttLibC_predef.h"
 #include "../../_log.h"
 #include "../../allocator.h"
 #include "../../util/byteUtil.h"
@@ -53,7 +52,7 @@ typedef ttLibC_Frame_Audio_Mp3_ ttLibC_Mp3_;
  * @param timebase      timebase number for pts.
  * @return mp3 object.
  */
-ttLibC_Mp3 TT_VISIBILITY_DEFAULT *ttLibC_Mp3_make(
+ttLibC_Mp3 TT_ATTRIBUTE_API *ttLibC_Mp3_make(
 		ttLibC_Mp3 *prev_frame,
 		ttLibC_Mp3_Type type,
 		uint32_t sample_rate,
@@ -135,7 +134,7 @@ ttLibC_Mp3 TT_VISIBILITY_DEFAULT *ttLibC_Mp3_make(
  * @param prev_frame reuse frame object.
  * @param src_frame  source of clone.
  */
-ttLibC_Mp3 TT_VISIBILITY_DEFAULT *ttLibC_Mp3_clone(
+ttLibC_Mp3 TT_ATTRIBUTE_API *ttLibC_Mp3_clone(
 		ttLibC_Mp3 *prev_frame,
 		ttLibC_Mp3 *src_frame) {
 	if(src_frame == NULL) {
@@ -173,7 +172,7 @@ ttLibC_Mp3 TT_VISIBILITY_DEFAULT *ttLibC_Mp3_clone(
  * @param data_size data size.
  * @return Mp3Type value.
  */
-ttLibC_Mp3_Type TT_VISIBILITY_DEFAULT ttLibC_Mp3_getMp3Type(
+ttLibC_Mp3_Type TT_ATTRIBUTE_API ttLibC_Mp3_getMp3Type(
 		void *data,
 		size_t data_size) {
 	if(data_size < 1) {
@@ -474,7 +473,7 @@ static ttLibC_Mp3 *Mp3_makeTagFrame(
  * @param timebase      timebase for mp3 frame.
  * @return mp3 object.
  */
-ttLibC_Mp3 TT_VISIBILITY_DEFAULT *ttLibC_Mp3_getFrame(
+ttLibC_Mp3 TT_ATTRIBUTE_API *ttLibC_Mp3_getFrame(
 		ttLibC_Mp3 *prev_frame,
 		void *data,
 		size_t data_size,
@@ -517,7 +516,7 @@ ttLibC_Mp3 TT_VISIBILITY_DEFAULT *ttLibC_Mp3_getFrame(
  * close frame
  * @param frame
  */
-void TT_VISIBILITY_DEFAULT ttLibC_Mp3_close(ttLibC_Mp3 **frame) {
+void TT_ATTRIBUTE_API ttLibC_Mp3_close(ttLibC_Mp3 **frame) {
 	ttLibC_Mp3_ *target = (ttLibC_Mp3_ *)*frame;
 	if(target == NULL) {
 		return;

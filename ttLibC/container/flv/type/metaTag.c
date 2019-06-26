@@ -10,12 +10,11 @@
 
 #include "metaTag.h"
 #include "../flvTag.h"
-#include "../../../ttLibC_predef.h"
 #include "../../../_log.h"
 #include "../../../util/hexUtil.h"
 #include "../../../util/ioUtil.h"
 
-ttLibC_FlvMetaTag TT_VISIBILITY_HIDDEN *ttLibC_FlvMetaTag_make(
+ttLibC_FlvMetaTag TT_ATTRIBUTE_INNER *ttLibC_FlvMetaTag_make(
 		ttLibC_FlvTag *prev_tag,
 		void *data,
 		size_t data_size,
@@ -38,7 +37,7 @@ ttLibC_FlvMetaTag TT_VISIBILITY_HIDDEN *ttLibC_FlvMetaTag_make(
 }
 
 // if need to get meta information, hold binary data and read the binary.
-ttLibC_FlvMetaTag TT_VISIBILITY_HIDDEN *ttLibC_FlvMetaTag_getTag(
+ttLibC_FlvMetaTag TT_ATTRIBUTE_INNER *ttLibC_FlvMetaTag_getTag(
 		ttLibC_FlvTag *prev_tag,
 		uint8_t *data,
 		size_t data_size) {

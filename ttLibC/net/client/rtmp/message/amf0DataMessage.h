@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../../../../ttLibC_predef.h"
 #include <stdint.h>
 #include "../../../../util/amfUtil.h"
 #include "rtmpMessage.h"
@@ -36,13 +37,13 @@ typedef struct ttLibC_Net_Client_Rtmp_Message_Amf0DataMessage {
 
 typedef ttLibC_Net_Client_Rtmp_Message_Amf0DataMessage ttLibC_Amf0DataMessage;
 
-ttLibC_Amf0DataMessage *ttLibC_Amf0DataMessage_make(const char *message_name);
+ttLibC_Amf0DataMessage TT_ATTRIBUTE_INNER *ttLibC_Amf0DataMessage_make(const char *message_name);
 
-ttLibC_Amf0DataMessage *ttLibC_Amf0DataMessage_readBinary(
+ttLibC_Amf0DataMessage TT_ATTRIBUTE_INNER *ttLibC_Amf0DataMessage_readBinary(
 		uint8_t *data,
 		size_t data_size);
 
-void ttLibC_Amf0DataMessage_close(ttLibC_Amf0DataMessage **message);
+void TT_ATTRIBUTE_INNER ttLibC_Amf0DataMessage_close(ttLibC_Amf0DataMessage **message);
 
 #ifdef __cplusplus
 } /* extern "C" */

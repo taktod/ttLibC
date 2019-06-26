@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../ttLibC_predef.h"
 #include "../frame/video/yuv420.h"
 #include "../frame/video/bgr.h"
 
@@ -28,7 +29,7 @@ extern "C" {
  * @param is_quick
  * @return scaled yuv image.
  */
-ttLibC_Yuv420 *ttLibC_ImageResizer_resizeYuv420(
+ttLibC_Yuv420 TT_ATTRIBUTE_API *ttLibC_ImageResizer_resizeYuv420(
 		ttLibC_Yuv420 *prev_frame,
 		ttLibC_Yuv420_Type type,
 		uint32_t width,
@@ -45,7 +46,7 @@ ttLibC_Yuv420 *ttLibC_ImageResizer_resizeYuv420(
  * @param src_frame
  * @return scaled bgr image.
  */
-ttLibC_Bgr *ttLibC_ImageResizer_resizeBgr(
+ttLibC_Bgr TT_ATTRIBUTE_API *ttLibC_ImageResizer_resizeBgr(
 		ttLibC_Bgr *prev_frame,
 		ttLibC_Bgr_Type type,
 		uint32_t width,

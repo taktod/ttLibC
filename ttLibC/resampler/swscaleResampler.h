@@ -12,6 +12,7 @@
 extern "C" {
 #endif
 
+#include "../ttLibC_predef.h"
 #include "../frame/video/yuv420.h"
 #include "../frame/video/bgr.h"
 #include "../frame/frame.h"
@@ -41,7 +42,7 @@ typedef ttLibC_Resampler_SwscaleResampler ttLibC_SwscaleResampler;
 
 typedef bool (* ttLibC_getSwscaleFrameFunc)(void *ptr, ttLibC_Frame *frame);
 
-ttLibC_SwscaleResampler *ttLibC_SwscaleResampler_make(
+ttLibC_SwscaleResampler TT_ATTRIBUTE_API *ttLibC_SwscaleResampler_make(
 		ttLibC_Frame_Type            input_frame_type,
 		uint32_t                     input_sub_type,
 		uint32_t                     input_width,
@@ -52,13 +53,13 @@ ttLibC_SwscaleResampler *ttLibC_SwscaleResampler_make(
 		uint32_t                     output_height,
 		ttLibC_SwscaleResampler_Mode scale_mode);
 
-bool ttLibC_SwscaleResampler_resample(
+bool TT_ATTRIBUTE_API ttLibC_SwscaleResampler_resample(
 		ttLibC_SwscaleResampler *resampler,
 		ttLibC_Frame *frame,
 		ttLibC_getSwscaleFrameFunc callback,
 		void *ptr);
 
-void ttLibC_SwscaleResampler_close(ttLibC_SwscaleResampler **resampler);
+void TT_ATTRIBUTE_API ttLibC_SwscaleResampler_close(ttLibC_SwscaleResampler **resampler);
 
 #ifdef __cplusplus
 } /* extern "C" */

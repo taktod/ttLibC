@@ -10,11 +10,10 @@
 
 #include "mp3Frame.h"
 #include <stdlib.h>
-#include "../../ttLibC_predef.h"
 #include "../../_log.h"
 #include "../../allocator.h"
 
-ttLibC_Mp3Frame TT_VISIBILITY_HIDDEN *ttLibC_Mp3Frame_make(
+ttLibC_Mp3Frame TT_ATTRIBUTE_INNER *ttLibC_Mp3Frame_make(
 		ttLibC_Mp3Frame *prev_mp3frame,
 		void *data,
 		size_t data_size,
@@ -40,7 +39,7 @@ ttLibC_Mp3Frame TT_VISIBILITY_HIDDEN *ttLibC_Mp3Frame_make(
 	return frame;
 }
 
-bool TT_VISIBILITY_DEFAULT ttLibC_Container_Mp3_getFrame(
+bool TT_ATTRIBUTE_API ttLibC_Container_Mp3_getFrame(
 		ttLibC_Container_Mp3 *mp3,
 		ttLibC_getFrameFunc callback,
 		void *ptr) {
@@ -48,11 +47,11 @@ bool TT_VISIBILITY_DEFAULT ttLibC_Container_Mp3_getFrame(
 	return callback(ptr, (ttLibC_Frame *)mp3frame->frame);
 }
 
-void TT_VISIBILITY_DEFAULT ttLibC_Container_Mp3_close(ttLibC_Container_Mp3 **mp3) {
+void TT_ATTRIBUTE_API ttLibC_Container_Mp3_close(ttLibC_Container_Mp3 **mp3) {
 	ttLibC_Mp3Frame_close((ttLibC_Mp3Frame **)mp3);
 }
 
-void TT_VISIBILITY_HIDDEN ttLibC_Mp3Frame_close(ttLibC_Mp3Frame **frame) {
+void TT_ATTRIBUTE_INNER ttLibC_Mp3Frame_close(ttLibC_Mp3Frame **frame) {
 	ttLibC_Mp3Frame *target = *frame;
 	if(target == NULL) {
 		return;

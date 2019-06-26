@@ -13,6 +13,7 @@
 
 #ifdef __cplusplus
 
+#include "../ttLibC_predef.h"
 #include <windows.h>
 #include <comdef.h>
 #include <mfapi.h>
@@ -60,7 +61,7 @@ private:
 };
 
 // utils for windows.
-std::string ttLibC_MsGlobal_wcharToUtf8string(const wchar_t *src);
+std::string TT_ATTRIBUTE_API ttLibC_MsGlobal_wcharToUtf8string(const wchar_t *src);
 
 extern "C" {
 #endif
@@ -72,13 +73,13 @@ typedef enum ttLibC_MsGlobal_CoInitializeType {
 	CoInitializeType_multiThreaded
 } ttLibC_MsGlobal_CoInitializeType;
 
-bool ttLibC_MsGlobal_CoInitialize(ttLibC_MsGlobal_CoInitializeType type);
-void ttLibC_MsGlobal_CoUninitialize();
+bool TT_ATTRIBUTE_API ttLibC_MsGlobal_CoInitialize(ttLibC_MsGlobal_CoInitializeType type);
+void TT_ATTRIBUTE_API ttLibC_MsGlobal_CoUninitialize();
 
-bool ttLibC_MsGlobal_MFStartup();
-void ttLibC_MsGlobal_MFShutdown();
+bool TT_ATTRIBUTE_API ttLibC_MsGlobal_MFStartup();
+void TT_ATTRIBUTE_API ttLibC_MsGlobal_MFShutdown();
 
-bool ttLibC_MsGlobal_setlocale(const char *language);
+bool TT_ATTRIBUTE_API ttLibC_MsGlobal_setlocale(const char *language);
 
 #ifdef __cplusplus
 } /* extern "C" */

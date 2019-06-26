@@ -8,13 +8,12 @@
 #ifdef __ENABLE_SOCKET__
 
 #include "windowAcknowledgementSize.h"
-#include "../../../../ttLibC_predef.h"
 #include "../../../../_log.h"
 #include "../../../../allocator.h"
 #include "../../../../util/ioUtil.h"
 #include <string.h>
 
-ttLibC_WindowAcknowledgementSize TT_VISIBILITY_HIDDEN *ttLibC_WindowAcknowledgementSize_make(uint32_t size) {
+ttLibC_WindowAcknowledgementSize TT_ATTRIBUTE_INNER *ttLibC_WindowAcknowledgementSize_make(uint32_t size) {
 	ttLibC_WindowAcknowledgementSize *win_ack = ttLibC_malloc(sizeof(ttLibC_WindowAcknowledgementSize));
 	if(win_ack == NULL) {
 		return NULL;
@@ -29,7 +28,7 @@ ttLibC_WindowAcknowledgementSize TT_VISIBILITY_HIDDEN *ttLibC_WindowAcknowledgem
 	return win_ack;
 }
 
-bool TT_VISIBILITY_HIDDEN ttLibC_WindowAcknowledgementSize_getData(
+bool TT_ATTRIBUTE_INNER ttLibC_WindowAcknowledgementSize_getData(
 		ttLibC_WindowAcknowledgementSize *win_ack,
 		ttLibC_DynamicBuffer *buffer) {
 	uint32_t size = be_uint32_t(win_ack->size);
@@ -37,7 +36,7 @@ bool TT_VISIBILITY_HIDDEN ttLibC_WindowAcknowledgementSize_getData(
 	return true;
 }
 
-void TT_VISIBILITY_HIDDEN ttLibC_WindowAcknowledgementSize_close(ttLibC_WindowAcknowledgementSize **win_ack) {
+void TT_ATTRIBUTE_INNER ttLibC_WindowAcknowledgementSize_close(ttLibC_WindowAcknowledgementSize **win_ack) {
 	ttLibC_WindowAcknowledgementSize *target = (ttLibC_WindowAcknowledgementSize *)*win_ack;
 	if(target == NULL) {
 		return;

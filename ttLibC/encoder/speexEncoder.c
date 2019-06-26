@@ -11,7 +11,6 @@
 #ifdef __ENABLE_SPEEX__
 
 #include "speexEncoder.h"
-#include "../ttLibC_predef.h"
 #include "../_log.h"
 #include "../allocator.h"
 #include "../util/hexUtil.h"
@@ -61,7 +60,7 @@ typedef ttLibC_Encoder_SpeexEncoder_ ttLibC_SpeexEncoder_;
  * @param quality     target quality
  * @return speex encoder object
  */
-ttLibC_SpeexEncoder TT_VISIBILITY_DEFAULT *ttLibC_SpeexEncoder_make(
+ttLibC_SpeexEncoder TT_ATTRIBUTE_API *ttLibC_SpeexEncoder_make(
 		uint32_t sample_rate,
 		uint32_t channel_num,
 		uint32_t quality) {
@@ -165,7 +164,7 @@ static bool doEncode(ttLibC_SpeexEncoder_ *encoder, void *data, ttLibC_SpeexEnco
  * @param ptr      pointer for user def value, which will call in callback.
  * @return true / false
  */
-bool TT_VISIBILITY_DEFAULT ttLibC_SpeexEncoder_encode(
+bool TT_ATTRIBUTE_API ttLibC_SpeexEncoder_encode(
 		ttLibC_SpeexEncoder *encoder,
 		ttLibC_PcmS16 *pcm,
 		ttLibC_SpeexEncodeFunc callback,
@@ -254,7 +253,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_SpeexEncoder_encode(
  * close speex encoder.
  * @param encoder
  */
-void TT_VISIBILITY_DEFAULT ttLibC_SpeexEncoder_close(ttLibC_SpeexEncoder **encoder) {
+void TT_ATTRIBUTE_API ttLibC_SpeexEncoder_close(ttLibC_SpeexEncoder **encoder) {
 	ttLibC_SpeexEncoder_ *target = (ttLibC_SpeexEncoder_ *)*encoder;
 	if(target == NULL) {
 		return;

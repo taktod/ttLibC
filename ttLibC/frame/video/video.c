@@ -27,7 +27,6 @@
 #include "wmv1.h"
 #include "wmv2.h"
 #include "yuv420.h"
-#include "../../ttLibC_predef.h"
 #include "../../_log.h"
 #include "../../allocator.h"
 
@@ -46,7 +45,7 @@
  * @param timebase      timebase number for pts.
  * @return video frame object.
  */
-ttLibC_Video TT_VISIBILITY_DEFAULT *ttLibC_Video_make(
+ttLibC_Video TT_ATTRIBUTE_API *ttLibC_Video_make(
 		ttLibC_Video *prev_frame,
 		size_t frame_size,
 		ttLibC_Frame_Type frame_type,
@@ -150,7 +149,7 @@ ttLibC_Video TT_VISIBILITY_DEFAULT *ttLibC_Video_make(
  * @param prev_frame reuse frame object.
  * @param src_frame  source of clone.
  */
-ttLibC_Video TT_VISIBILITY_DEFAULT *ttLibC_Video_clone(
+ttLibC_Video TT_ATTRIBUTE_API *ttLibC_Video_clone(
 		ttLibC_Video *prev_frame,
 		ttLibC_Video *src_frame) {
 	if(src_frame == NULL) {
@@ -219,7 +218,7 @@ ttLibC_Video TT_VISIBILITY_DEFAULT *ttLibC_Video_clone(
  * close frame(use internal)
  * @param frame
  */
-void TT_VISIBILITY_DEFAULT ttLibC_Video_close_(ttLibC_Video **frame) {
+void TT_ATTRIBUTE_API ttLibC_Video_close_(ttLibC_Video **frame) {
 	ttLibC_Video *target = *frame;
 	if(target == NULL) {
 		return;
@@ -235,7 +234,7 @@ void TT_VISIBILITY_DEFAULT ttLibC_Video_close_(ttLibC_Video **frame) {
  * close frame
  * @param frame
  */
-void TT_VISIBILITY_DEFAULT ttLibC_Video_close(ttLibC_Video **frame) {
+void TT_ATTRIBUTE_API ttLibC_Video_close(ttLibC_Video **frame) {
 	ttLibC_Video *target = *frame;
 	if(target == NULL) {
 		return;

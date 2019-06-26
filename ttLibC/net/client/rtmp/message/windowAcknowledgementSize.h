@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../../../../ttLibC_predef.h"
 #include <stdint.h>
 #include "rtmpMessage.h"
 /*
@@ -27,13 +28,13 @@ typedef struct ttLibC_Net_Client_Rtmp_Message_WindowAcknowledgementSize {
 
 typedef ttLibC_Net_Client_Rtmp_Message_WindowAcknowledgementSize ttLibC_WindowAcknowledgementSize;
 
-ttLibC_WindowAcknowledgementSize *ttLibC_WindowAcknowledgementSize_make(uint32_t size);
+ttLibC_WindowAcknowledgementSize TT_ATTRIBUTE_INNER *ttLibC_WindowAcknowledgementSize_make(uint32_t size);
 
-bool ttLibC_WindowAcknowledgementSize_getData(
+bool TT_ATTRIBUTE_INNER ttLibC_WindowAcknowledgementSize_getData(
 		ttLibC_WindowAcknowledgementSize *win_ack,
 		ttLibC_DynamicBuffer *buffer);
 
-void ttLibC_WindowAcknowledgementSize_close(ttLibC_WindowAcknowledgementSize **win_ack);
+void TT_ATTRIBUTE_INNER ttLibC_WindowAcknowledgementSize_close(ttLibC_WindowAcknowledgementSize **win_ack);
 
 #ifdef __cplusplus
 } /* extern "C" */

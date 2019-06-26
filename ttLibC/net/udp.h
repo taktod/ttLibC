@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../ttLibC_predef.h"
 #include "net.h"
 #include <stdio.h>
 #include <stdbool.h>
@@ -41,14 +42,14 @@ typedef ttLibC_Net_DatagramPacket ttLibC_DatagramPacket;
  * @param port
  * @return ttLibC_UdpSocketInfo object.
  */
-ttLibC_UdpSocketInfo *ttLibC_UdpSocket_make(uint16_t port);
+ttLibC_UdpSocketInfo TT_ATTRIBUTE_API *ttLibC_UdpSocket_make(uint16_t port);
 
 /**
  * bind udp socket.
  * @param socket_info
  * @return true / false
  */
-bool ttLibC_UdpSocket_open(ttLibC_UdpSocketInfo *socket_info);
+bool TT_ATTRIBUTE_API ttLibC_UdpSocket_open(ttLibC_UdpSocketInfo *socket_info);
 
 /**
  * write datagram packet for udp socket.
@@ -56,7 +57,7 @@ bool ttLibC_UdpSocket_open(ttLibC_UdpSocketInfo *socket_info);
  * @param packet      target datagram packet.
  * @return true / false
  */
-bool ttLibC_UdpSocket_write(
+bool TT_ATTRIBUTE_API ttLibC_UdpSocket_write(
 		ttLibC_UdpSocketInfo *socket_info,
 		ttLibC_DatagramPacket *packet);
 
@@ -66,7 +67,7 @@ bool ttLibC_UdpSocket_write(
  * @param packet      target datagram packet, this packet will be update.
  * @return size of recv
  */
-int64_t ttLibC_UdpSocket_read(
+int64_t TT_ATTRIBUTE_API ttLibC_UdpSocket_read(
 		ttLibC_UdpSocketInfo *socket_info,
 		ttLibC_DatagramPacket *packet);
 
@@ -74,7 +75,7 @@ int64_t ttLibC_UdpSocket_read(
  * close udp socket.
  * @param socket_info
  */
-void ttLibC_UdpSocket_close(ttLibC_UdpSocketInfo **socket_info);
+void TT_ATTRIBUTE_API ttLibC_UdpSocket_close(ttLibC_UdpSocketInfo **socket_info);
 
 /**
  * make datagram packet.
@@ -82,7 +83,7 @@ void ttLibC_UdpSocket_close(ttLibC_UdpSocketInfo **socket_info);
  * @param data_size
  * @return ttLibC_DatagramPacket
  */
-ttLibC_DatagramPacket *ttLibC_DatagramPacket_make(
+ttLibC_DatagramPacket TT_ATTRIBUTE_API *ttLibC_DatagramPacket_make(
 		void *data,
 		size_t data_size);
 
@@ -94,7 +95,7 @@ ttLibC_DatagramPacket *ttLibC_DatagramPacket_make(
  * @param target_port
  * @return ttLibC_DatagramPacket
  */
-ttLibC_DatagramPacket *ttLibC_DatagramPacket_makeWithTarget(
+ttLibC_DatagramPacket TT_ATTRIBUTE_API *ttLibC_DatagramPacket_makeWithTarget(
 		void *data,
 		size_t data_size,
 		const char *target_address,
@@ -104,7 +105,7 @@ ttLibC_DatagramPacket *ttLibC_DatagramPacket_makeWithTarget(
  * close datagram packet
   * @param packet
  */
-void ttLibC_DatagramPacket_close(ttLibC_DatagramPacket **packet);
+void TT_ATTRIBUTE_API ttLibC_DatagramPacket_close(ttLibC_DatagramPacket **packet);
 
 #ifdef __cplusplus
 } /* extern "C" */

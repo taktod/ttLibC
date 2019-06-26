@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../../ttLibC_predef.h"
 #include "../frame.h"
 
 /**
@@ -47,7 +48,7 @@ typedef ttLibC_Frame_Audio ttLibC_Audio;
  * @param pts           pts for data.
  * @param timebase      timebase for pts.
  */
-ttLibC_Audio *ttLibC_Audio_make(
+ttLibC_Audio TT_ATTRIBUTE_API *ttLibC_Audio_make(
 		ttLibC_Audio *prev_frame,
 		size_t frame_size,
 		ttLibC_Frame_Type frame_type,
@@ -66,7 +67,7 @@ ttLibC_Audio *ttLibC_Audio_make(
  * @param prev_frame reuse frame object.
  * @param src_frame  source of clone.
  */
-ttLibC_Audio *ttLibC_Audio_clone(
+ttLibC_Audio TT_ATTRIBUTE_API *ttLibC_Audio_clone(
 		ttLibC_Audio *prev_frame,
 		ttLibC_Audio *src_frame);
 
@@ -74,13 +75,13 @@ ttLibC_Audio *ttLibC_Audio_clone(
  * close frame(use internal)
  * @param frame
  */
-void ttLibC_Audio_close_(ttLibC_Audio **frame);
+void TT_ATTRIBUTE_API ttLibC_Audio_close_(ttLibC_Audio **frame);
 
 /**
  * close frame
  * @param frame
  */
-void ttLibC_Audio_close(ttLibC_Audio **frame);
+void TT_ATTRIBUTE_API ttLibC_Audio_close(ttLibC_Audio **frame);
 
 #ifdef __cplusplus
 } /* extern "C" */

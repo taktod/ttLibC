@@ -10,7 +10,6 @@
 #ifdef __ENABLE_SOCKET__
 
 #include "videoMessage.h"
-#include "../../../../ttLibC_predef.h"
 #include "../../../../_log.h"
 #include "../../../../allocator.h"
 #include <string.h>
@@ -21,7 +20,7 @@
 #include "../../../../util/ioUtil.h"
 #include "../../../../util/flvFrameUtil.h"
 
-ttLibC_VideoMessage TT_VISIBILITY_HIDDEN *ttLibC_VideoMessage_make() {
+ttLibC_VideoMessage TT_ATTRIBUTE_INNER *ttLibC_VideoMessage_make() {
 	ttLibC_VideoMessage *message = ttLibC_malloc(sizeof(ttLibC_VideoMessage));
 	if(message == NULL) {
 		return NULL;
@@ -36,7 +35,7 @@ ttLibC_VideoMessage TT_VISIBILITY_HIDDEN *ttLibC_VideoMessage_make() {
 	return message;
 }
 
-ttLibC_VideoMessage TT_VISIBILITY_HIDDEN *ttLibC_VideoMessage_readBinary(
+ttLibC_VideoMessage TT_ATTRIBUTE_INNER *ttLibC_VideoMessage_readBinary(
 		uint8_t *data,
 		size_t data_size) {
 	if(data_size <= 1) {
@@ -50,7 +49,7 @@ ttLibC_VideoMessage TT_VISIBILITY_HIDDEN *ttLibC_VideoMessage_readBinary(
 	return message;
 }
 
-tetty_errornum TT_VISIBILITY_HIDDEN ttLibC_VideoMessage_getFrame(
+tetty_errornum TT_ATTRIBUTE_INNER ttLibC_VideoMessage_getFrame(
 		ttLibC_VideoMessage *message,
 		ttLibC_FlvFrameManager *manager,
 		ttLibC_RtmpStream_getFrameFunc callback,
@@ -87,7 +86,7 @@ tetty_errornum TT_VISIBILITY_HIDDEN ttLibC_VideoMessage_getFrame(
 	return 0;
 }
 
-ttLibC_VideoMessage TT_VISIBILITY_HIDDEN *ttLibC_VideoMessage_addFrame(
+ttLibC_VideoMessage TT_ATTRIBUTE_INNER *ttLibC_VideoMessage_addFrame(
 		uint32_t stream_id,
 		ttLibC_Video *frame) {
 	if(frame == NULL) {
@@ -111,7 +110,7 @@ ttLibC_VideoMessage TT_VISIBILITY_HIDDEN *ttLibC_VideoMessage_addFrame(
 	return message;
 }
 
-bool TT_VISIBILITY_HIDDEN ttLibC_VideoMessage_getData(
+bool TT_ATTRIBUTE_INNER ttLibC_VideoMessage_getData(
 		ttLibC_VideoMessage *message,
 		ttLibC_DynamicBuffer *buffer) {
 	return ttLibC_FlvFrameManager_getData(
@@ -119,7 +118,7 @@ bool TT_VISIBILITY_HIDDEN ttLibC_VideoMessage_getData(
 			buffer);
 }
 
-void TT_VISIBILITY_HIDDEN ttLibC_VideoMessage_close(ttLibC_VideoMessage **message) {
+void TT_ATTRIBUTE_INNER ttLibC_VideoMessage_close(ttLibC_VideoMessage **message) {
 	ttLibC_VideoMessage *target = (ttLibC_VideoMessage *)*message;
 	if(target == NULL) {
 		return;

@@ -11,7 +11,6 @@
 #ifdef __ENABLE_MP3LAME_ENCODE__
 
 #include "mp3lameEncoder.h"
-#include "../ttLibC_predef.h"
 #include "../_log.h"
 #include "../allocator.h"
 #include <stdint.h>
@@ -48,7 +47,7 @@ typedef ttLibC_Encoder_Mp3lameEncoder_ ttLibC_Mp3lameEncoder_;
  * @param quality     target quality from 0 to 10. 2:near best 5:good fast 7:ok,very fast.
  * @return mp3lame encoder object.
  */
-ttLibC_Mp3lameEncoder TT_VISIBILITY_DEFAULT *ttLibC_Mp3lameEncoder_make(
+ttLibC_Mp3lameEncoder TT_ATTRIBUTE_API *ttLibC_Mp3lameEncoder_make(
 		uint32_t sample_rate,
 		uint32_t channel_num,
 		uint32_t quality) {
@@ -156,7 +155,7 @@ static bool checkEncodedData(ttLibC_Mp3lameEncoder_ *encoder, uint32_t encode_si
  * @param ptr      pointer for user def value, which will call in callback.
  * @return true / false
  */
-bool TT_VISIBILITY_DEFAULT ttLibC_Mp3lameEncoder_encode(
+bool TT_ATTRIBUTE_API ttLibC_Mp3lameEncoder_encode(
 		ttLibC_Mp3lameEncoder *encoder,
 		ttLibC_PcmS16 *pcm,
 		ttLibC_Mp3lameEncodeFunc callback,
@@ -212,7 +211,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_Mp3lameEncoder_encode(
  * close mp3lame encoder.
  * @param encoder
  */
-void TT_VISIBILITY_DEFAULT ttLibC_Mp3lameEncoder_close(ttLibC_Mp3lameEncoder **encoder) {
+void TT_ATTRIBUTE_API ttLibC_Mp3lameEncoder_close(ttLibC_Mp3lameEncoder **encoder) {
 	if(*encoder == NULL) {
 		return;
 	}

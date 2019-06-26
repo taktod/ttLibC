@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../ttLibC_predef.h"
 #include <stdio.h>
 #include <stdbool.h>
 
@@ -72,41 +73,41 @@ typedef bool (* ttLibC_Amf0ObjectReadFunc)(void *ptr, ttLibC_Amf0Object *amf0_ob
  * @param number
  * @return ttLibC_Amf0Object
  */
-ttLibC_Amf0Object *ttLibC_Amf0_number(double number);
+ttLibC_Amf0Object TT_ATTRIBUTE_API *ttLibC_Amf0_number(double number);
 
 /**
  * make amf0 boolean object.
  * @param flag
  * @return ttLibC_Amf0Object
  */
-ttLibC_Amf0Object *ttLibC_Amf0_boolean(bool flag);
+ttLibC_Amf0Object TT_ATTRIBUTE_API *ttLibC_Amf0_boolean(bool flag);
 
 /**
  * make amf0 string object.
  * @param string
  * @return ttLibC_Amf0Object
  */
-ttLibC_Amf0Object *ttLibC_Amf0_string(const char *string);
+ttLibC_Amf0Object TT_ATTRIBUTE_API *ttLibC_Amf0_string(const char *string);
 
 /**
  * make amf0 map object.
  * @param list amf0Object key -> obj maplist.
  * @return ttLibC_Amf0Object
  */
-ttLibC_Amf0Object *ttLibC_Amf0_map(ttLibC_Amf0MapObject *list);
+ttLibC_Amf0Object TT_ATTRIBUTE_API *ttLibC_Amf0_map(ttLibC_Amf0MapObject *list);
 
 /**
  * make amf0 null object.
  * @return ttLibC_Amf0Object
  */
-ttLibC_Amf0Object *ttLibC_Amf0_null();
+ttLibC_Amf0Object TT_ATTRIBUTE_API *ttLibC_Amf0_null();
 
 /**
  * make amf0 object object.
  * @param list amf0Object key -> obj maplist.
  * @return ttLibC_Amf0Object
  */
-ttLibC_Amf0Object *ttLibC_Amf0_object(ttLibC_Amf0MapObject *list);
+ttLibC_Amf0Object TT_ATTRIBUTE_API *ttLibC_Amf0_object(ttLibC_Amf0MapObject *list);
 
 /**
  * get the amf0object from amf0object or amf0map.
@@ -114,7 +115,7 @@ ttLibC_Amf0Object *ttLibC_Amf0_object(ttLibC_Amf0MapObject *list);
  * @param key
  * @return ttLibC_Amf0Object
  */
-ttLibC_Amf0Object *ttLibC_Amf0_getElement(ttLibC_Amf0Object *amf0_map, const char *key);
+ttLibC_Amf0Object TT_ATTRIBUTE_API *ttLibC_Amf0_getElement(ttLibC_Amf0Object *amf0_map, const char *key);
 
 /**
  * make amf0 clone.
@@ -122,7 +123,7 @@ ttLibC_Amf0Object *ttLibC_Amf0_getElement(ttLibC_Amf0Object *amf0_map, const cha
  * @param number
  * @return ttLibC_Amf0Object
  */
-ttLibC_Amf0Object *ttLibC_Amf0_clone(ttLibC_Amf0Object *src);
+ttLibC_Amf0Object TT_ATTRIBUTE_API *ttLibC_Amf0_clone(ttLibC_Amf0Object *src);
 
 /**
  * read data from binary stream.
@@ -132,7 +133,7 @@ ttLibC_Amf0Object *ttLibC_Amf0_clone(ttLibC_Amf0Object *src);
  * @param ptr       user def value pointer.
  * @return true:success false:abort.
  */
-bool ttLibC_Amf0_read(void *data, size_t data_size, ttLibC_Amf0ObjectReadFunc callback, void *ptr);
+bool TT_ATTRIBUTE_API ttLibC_Amf0_read(void *data, size_t data_size, ttLibC_Amf0ObjectReadFunc callback, void *ptr);
 
 /**
  * write amf0Object as binary data.
@@ -141,13 +142,13 @@ bool ttLibC_Amf0_read(void *data, size_t data_size, ttLibC_Amf0ObjectReadFunc ca
  * @param ptr      user def value pointer.
  * @return true:success false:abort.
  */
-bool ttLibC_Amf0_write(ttLibC_Amf0Object *object, ttLibC_AmfObjectWriteFunc callback, void *ptr);
+bool TT_ATTRIBUTE_API ttLibC_Amf0_write(ttLibC_Amf0Object *object, ttLibC_AmfObjectWriteFunc callback, void *ptr);
 
 /**
  * close amf0Object
  * @param amf0_obj
  */
-void ttLibC_Amf0_close(ttLibC_Amf0Object **amf0_obj);
+void TT_ATTRIBUTE_API ttLibC_Amf0_close(ttLibC_Amf0Object **amf0_obj);
 
 typedef enum ttLibC_Amf3_Type {
 	amf3Type_Undefined    = 0x00,

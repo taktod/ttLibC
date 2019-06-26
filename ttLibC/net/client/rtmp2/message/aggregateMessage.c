@@ -8,14 +8,13 @@
 #ifdef __ENABLE_SOCKET__
 
 #include "aggregateMessage.h"
-#include "../../../../ttLibC_predef.h"
 #include "../../../../_log.h"
 #include "../../../../allocator.h"
 #include <string.h>
 #include "../../../../util/hexUtil.h"
 #include "../../../../util/flvFrameUtil.h"
 
-ttLibC_AggregateMessage TT_VISIBILITY_HIDDEN *ttLibC_AggregateMessage_make() {
+ttLibC_AggregateMessage TT_ATTRIBUTE_INNER *ttLibC_AggregateMessage_make() {
 	ttLibC_AggregateMessage *message = ttLibC_malloc(sizeof(ttLibC_AggregateMessage));
 	if(message == NULL) {
 		return NULL;
@@ -30,7 +29,7 @@ ttLibC_AggregateMessage TT_VISIBILITY_HIDDEN *ttLibC_AggregateMessage_make() {
 	return message;
 }
 
-ttLibC_AggregateMessage TT_VISIBILITY_HIDDEN *ttLibC_AggregateMessage_readBinary(uint8_t *data) {
+ttLibC_AggregateMessage TT_ATTRIBUTE_INNER *ttLibC_AggregateMessage_readBinary(uint8_t *data) {
 	ttLibC_AggregateMessage *message = ttLibC_AggregateMessage_make();
 	if(message == NULL) {
 		return NULL;
@@ -38,7 +37,7 @@ ttLibC_AggregateMessage TT_VISIBILITY_HIDDEN *ttLibC_AggregateMessage_readBinary
 	message->data = data;
 	return message;
 }
-tetty2_errornum TT_VISIBILITY_HIDDEN ttLibC_AggregateMessage_getFrame(
+tetty2_errornum TT_ATTRIBUTE_INNER ttLibC_AggregateMessage_getFrame(
 		ttLibC_AggregateMessage *message,
 		ttLibC_FlvFrameManager *manager,
 		ttLibC_RtmpStream_getFrameFunc callback,
@@ -106,7 +105,7 @@ tetty2_errornum TT_VISIBILITY_HIDDEN ttLibC_AggregateMessage_getFrame(
 	return 0;
 }
 
-void TT_VISIBILITY_HIDDEN ttLibC_AggregateMessage_close(ttLibC_AggregateMessage **message) {
+void TT_ATTRIBUTE_INNER ttLibC_AggregateMessage_close(ttLibC_AggregateMessage **message) {
 	ttLibC_AggregateMessage *target = (ttLibC_AggregateMessage *)*message;
 	if(target == NULL) {
 		return;

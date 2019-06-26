@@ -8,13 +8,12 @@
 #ifdef __ENABLE_SOCKET__
 
 #include "userControlMessage.h"
-#include "../../../../ttLibC_predef.h"
 #include "../../../../_log.h"
 #include "../../../../allocator.h"
 #include <string.h>
 #include "../../../../util/ioUtil.h"
 
-ttLibC_UserControlMessage TT_VISIBILITY_HIDDEN *ttLibC_UserControlMessage_make(
+ttLibC_UserControlMessage TT_ATTRIBUTE_INNER *ttLibC_UserControlMessage_make(
 		ttLibC_UserControlMessage_Type type,
 		uint32_t stream_id,
 		uint32_t buffer_length,
@@ -36,7 +35,7 @@ ttLibC_UserControlMessage TT_VISIBILITY_HIDDEN *ttLibC_UserControlMessage_make(
 	return message;
 }
 
-ttLibC_UserControlMessage TT_VISIBILITY_HIDDEN *ttLibC_UserControlMessage_readBinary(
+ttLibC_UserControlMessage TT_ATTRIBUTE_INNER *ttLibC_UserControlMessage_readBinary(
 		uint8_t *data,
 		size_t data_size) {
 	if(data_size < 2) {
@@ -94,15 +93,15 @@ ttLibC_UserControlMessage TT_VISIBILITY_HIDDEN *ttLibC_UserControlMessage_readBi
 	return NULL;
 }
 
-ttLibC_UserControlMessage TT_VISIBILITY_HIDDEN *ttLibC_UserControlMessage_ping(uint32_t time) {
+ttLibC_UserControlMessage TT_ATTRIBUTE_INNER *ttLibC_UserControlMessage_ping(uint32_t time) {
 	return ttLibC_UserControlMessage_make(Type_Ping, 0, 0, time);
 }
 
-ttLibC_UserControlMessage TT_VISIBILITY_HIDDEN *ttLibC_UserControlMessage_pong(uint32_t time) {
+ttLibC_UserControlMessage TT_ATTRIBUTE_INNER *ttLibC_UserControlMessage_pong(uint32_t time) {
 	return ttLibC_UserControlMessage_make(Type_Pong, 0, 0, time);
 }
 
-bool TT_VISIBILITY_HIDDEN ttLibC_UserControlMessage_getData(
+bool TT_ATTRIBUTE_INNER ttLibC_UserControlMessage_getData(
 		ttLibC_UserControlMessage *user_control_message,
 		ttLibC_DynamicBuffer *buffer) {
 	uint16_t be_type = be_uint16_t(user_control_message->type);
@@ -144,7 +143,7 @@ bool TT_VISIBILITY_HIDDEN ttLibC_UserControlMessage_getData(
 	return true;
 }
 
-void TT_VISIBILITY_HIDDEN ttLibC_UserControlMessage_close(ttLibC_UserControlMessage **message) {
+void TT_ATTRIBUTE_INNER ttLibC_UserControlMessage_close(ttLibC_UserControlMessage **message) {
 	ttLibC_UserControlMessage *target = (ttLibC_UserControlMessage *)*message;
 	if(target == NULL) {
 		return;

@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../../ttLibC_predef.h"
 #include "../flv.h"
 #include "../containerCommon.h"
 #include "../../util/flvFrameUtil.h"
@@ -41,7 +42,7 @@ typedef ttLibC_Container_FlvTag ttLibC_FlvTag;
  * @param type
  * @param track_id
  */
-ttLibC_FlvTag *ttLibC_FlvTag_make(
+ttLibC_FlvTag TT_ATTRIBUTE_INNER *ttLibC_FlvTag_make(
 		ttLibC_FlvTag *prev_tag,
 		void *data,
 		size_t data_size,
@@ -51,7 +52,7 @@ ttLibC_FlvTag *ttLibC_FlvTag_make(
 		ttLibC_Flv_Type type,
 		uint32_t track_id);
 
-void ttLibC_FlvTag_close(ttLibC_FlvTag **tag);
+void TT_ATTRIBUTE_INNER ttLibC_FlvTag_close(ttLibC_FlvTag **tag);
 
 #ifdef __cplusplus
 } /* extern "C" */

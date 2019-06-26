@@ -11,13 +11,12 @@
 #include "pat.h"
 #include "../mpegtsPacket.h"
 
-#include "../../../ttLibC_predef.h"
 #include "../../../_log.h"
 #include "../../../allocator.h"
 #include "../../../util/byteUtil.h"
 #include "../../../util/hexUtil.h"
 
-ttLibC_Pat TT_VISIBILITY_HIDDEN *ttLibC_Pat_make(
+ttLibC_Pat TT_ATTRIBUTE_INNER *ttLibC_Pat_make(
 		ttLibC_Pat *prev_packet,
 		void *data,
 		size_t data_size,
@@ -43,7 +42,7 @@ ttLibC_Pat TT_VISIBILITY_HIDDEN *ttLibC_Pat_make(
 	return pat;
 }
 
-ttLibC_Pat TT_VISIBILITY_HIDDEN *ttLibC_Pat_getPacket(
+ttLibC_Pat TT_ATTRIBUTE_INNER *ttLibC_Pat_getPacket(
 		ttLibC_Pat *prev_pat,
 		uint8_t *data,
 		size_t data_size) {
@@ -76,7 +75,7 @@ ttLibC_Pat TT_VISIBILITY_HIDDEN *ttLibC_Pat_getPacket(
 			pmt_pid);
 }
 
-bool TT_VISIBILITY_HIDDEN ttLibC_Pat_makePacket(
+bool TT_ATTRIBUTE_INNER ttLibC_Pat_makePacket(
 		uint8_t *data,
 		size_t data_size) {
 	// use fixed value.
@@ -90,7 +89,7 @@ bool TT_VISIBILITY_HIDDEN ttLibC_Pat_makePacket(
 	return true;
 }
 
-void TT_VISIBILITY_HIDDEN ttLibC_Pat_close(ttLibC_Pat **pat) {
+void TT_ATTRIBUTE_INNER ttLibC_Pat_close(ttLibC_Pat **pat) {
 	ttLibC_Pat *target = *pat;
 	if(target == NULL) {
 		return;

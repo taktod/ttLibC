@@ -10,7 +10,6 @@
 #ifdef __ENABLE_SOCKET__
 
 #include "rtmpCommandHandler.h"
-#include "../../../../ttLibC_predef.h"
 #include "../../../../_log.h"
 #include "../../../../allocator.h"
 #include "../message/rtmpMessage.h"
@@ -110,7 +109,7 @@ static tetty_errornum RtmpCommandHandler_write(
 	return 0;
 }
 
-ttLibC_RtmpCommandHandler TT_VISIBILITY_HIDDEN *ttLibC_RtmpCommandHandler_make() {
+ttLibC_RtmpCommandHandler TT_ATTRIBUTE_INNER *ttLibC_RtmpCommandHandler_make() {
 	ttLibC_RtmpCommandHandler *handler = ttLibC_malloc(sizeof(ttLibC_RtmpCommandHandler));
 	if(handler == NULL) {
 		return NULL;
@@ -121,7 +120,7 @@ ttLibC_RtmpCommandHandler TT_VISIBILITY_HIDDEN *ttLibC_RtmpCommandHandler_make()
 	return handler;
 }
 
-void TT_VISIBILITY_HIDDEN ttLibC_RtmpCommandHandler_close(ttLibC_RtmpCommandHandler **handler) {
+void TT_ATTRIBUTE_INNER ttLibC_RtmpCommandHandler_close(ttLibC_RtmpCommandHandler **handler) {
 	ttLibC_RtmpCommandHandler *target = (ttLibC_RtmpCommandHandler *)*handler;
 	if(target == NULL) {
 		return;

@@ -11,7 +11,6 @@
 #ifdef __ENABLE_OPENH264__
 
 #include "openh264Decoder.h"
-#include "../ttLibC_predef.h"
 #include "../_log.h"
 #include "../allocator.h"
 
@@ -164,7 +163,7 @@ extern "C" {
 /**
  * call make for c code.
  */
-ttLibC_Openh264Decoder TT_VISIBILITY_DEFAULT *ttLibC_Openh264Decoder_make() {
+ttLibC_Openh264Decoder TT_ATTRIBUTE_API *ttLibC_Openh264Decoder_make() {
 	SDecodingParam pParam;
 	ttLibC_Openh264Decoder_getDefaultSDecodingParam(&pParam);
 	return Openh264Decoder_make(&pParam);
@@ -174,7 +173,7 @@ ttLibC_Openh264Decoder TT_VISIBILITY_DEFAULT *ttLibC_Openh264Decoder_make() {
  * setup SDecodingParam with ttLibC default.
  * @param param structore pointer for SDecodingParam on wels/codec_api.h
  */
-void TT_VISIBILITY_DEFAULT ttLibC_Openh264Decoder_getDefaultSDecodingParam(void *param) {
+void TT_ATTRIBUTE_API ttLibC_Openh264Decoder_getDefaultSDecodingParam(void *param) {
 	SDecodingParam *pParam = (SDecodingParam *)param;
 	memset(pParam, 0, sizeof(SDecodingParam));
 //	pParam->pFileNameRestructed;
@@ -194,14 +193,14 @@ void TT_VISIBILITY_DEFAULT ttLibC_Openh264Decoder_getDefaultSDecodingParam(void 
  * @param param structore pointer for SDecodingParam on wels/codec_api.h
  * @return ttLibC_Openh264Decoder object.
  */
-ttLibC_Openh264Decoder TT_VISIBILITY_DEFAULT *ttLibC_Openh264Decoder_makeWithSDecodingParam(void *param) {
+ttLibC_Openh264Decoder TT_ATTRIBUTE_API *ttLibC_Openh264Decoder_makeWithSDecodingParam(void *param) {
 	return Openh264Decoder_make((SDecodingParam *)param);
 }
 
 /*
  * call decoder for c code.
  */
-bool TT_VISIBILITY_DEFAULT ttLibC_Openh264Decoder_decode(
+bool TT_ATTRIBUTE_API ttLibC_Openh264Decoder_decode(
 		ttLibC_Openh264Decoder *decoder,
 		ttLibC_H264 *h264,
 		ttLibC_Openh264DecodeFunc callback,
@@ -212,7 +211,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_Openh264Decoder_decode(
 /*
  * call close for c code
  */
-void TT_VISIBILITY_DEFAULT ttLibC_Openh264Decoder_close(ttLibC_Openh264Decoder **decoder) {
+void TT_ATTRIBUTE_API ttLibC_Openh264Decoder_close(ttLibC_Openh264Decoder **decoder) {
 	Openh264Decoder_close(decoder);
 }
 

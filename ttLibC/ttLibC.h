@@ -18,6 +18,7 @@ extern "C" {
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "ttLibC_predef.h"
 #include "log.h"
 
 /**
@@ -58,7 +59,7 @@ typedef enum Error_e {
  * @param error_no
  * @deprecated
  */
-const char *ttLibC_getLastError(int error_no);
+const char TT_ATTRIBUTE_API *ttLibC_getLastError(int error_no);
 
 /**
  * print error string on console.
@@ -67,7 +68,7 @@ const char *ttLibC_getLastError(int error_no);
  * @param func
  * @param line
  */
-void ttLibC_printLastError(Error_e error, bool is_errorMessage, const char *func, uint32_t line);
+void TT_ATTRIBUTE_API ttLibC_printLastError(Error_e error, bool is_errorMessage, const char *func, uint32_t line);
 
 #if __DEBUG_FLAG__ == 1
 #	define LOG_ERROR(err) ttLibC_printLastError(err, false, __func__, __LINE__)
@@ -80,7 +81,7 @@ void ttLibC_printLastError(Error_e error, bool is_errorMessage, const char *func
 /**
  * @return version string for ttLibC
  */
-const char *ttLibC_getVersion();
+const char TT_ATTRIBUTE_API *ttLibC_getVersion();
 
 #ifdef __cplusplus
 } /* extern "C" */

@@ -10,7 +10,6 @@
 #ifdef __ENABLE_WIN32__
 
 #include "MSH264Encoder.h"
-#include "../ttLibC_predef.h"
 #include "../_log.h"
 #include "../allocator.h"
 #include "../util/hexUtil.h"
@@ -324,7 +323,7 @@ MaxQp
 ?
 */
 
-bool TT_VISIBILITY_DEFAULT ttLibC_MsH264Encoder_listEncoders(
+bool TT_ATTRIBUTE_API ttLibC_MsH264Encoder_listEncoders(
 		ttLibC_MsH264EncodeNameFunc callback,
 		void *ptr) {
 	HRESULT hr = S_OK;
@@ -362,7 +361,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_MsH264Encoder_listEncoders(
 	return SUCCEEDED(hr);
 }
 
-ttLibC_MsH264Encoder TT_VISIBILITY_DEFAULT *ttLibC_MsH264Encoder_make(
+ttLibC_MsH264Encoder TT_ATTRIBUTE_API *ttLibC_MsH264Encoder_make(
 		const char *target,
 		uint32_t width,
 		uint32_t height,
@@ -501,7 +500,7 @@ ttLibC_MsH264Encoder TT_VISIBILITY_DEFAULT *ttLibC_MsH264Encoder_make(
 	}
 }
 
-bool TT_VISIBILITY_DEFAULT ttLibC_MsH264Encoder_encode(
+bool TT_ATTRIBUTE_API ttLibC_MsH264Encoder_encode(
 		ttLibC_MsH264Encoder *encoder,
 		ttLibC_Yuv420 *frame,
 		ttLibC_MsH264EncodeFunc callback,
@@ -555,7 +554,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_MsH264Encoder_encode(
 	return SUCCEEDED(hr);
 }
 
-void TT_VISIBILITY_DEFAULT ttLibC_MsH264Encoder_close(ttLibC_MsH264Encoder **encoder) {
+void TT_ATTRIBUTE_API ttLibC_MsH264Encoder_close(ttLibC_MsH264Encoder **encoder) {
 	ttLibC_MsH264Encoder_ *target = (ttLibC_MsH264Encoder_ *)*encoder;
 	if(target == NULL) {
 		return;

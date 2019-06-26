@@ -10,7 +10,6 @@
 
 #include "videoTag.h"
 #include "../flvTag.h"
-#include "../../../ttLibC_predef.h"
 #include "../../../_log.h"
 #include "../../../frame/video/h264.h"
 #include "../../../frame/video/flv1.h"
@@ -19,7 +18,7 @@
 #include "../../../util/flvFrameUtil.h"
 #include "../../../util/dynamicBufferUtil.h"
 
-ttLibC_FlvVideoTag TT_VISIBILITY_HIDDEN *ttLibC_FlvVideoTag_make(
+ttLibC_FlvVideoTag TT_ATTRIBUTE_INNER *ttLibC_FlvVideoTag_make(
 		ttLibC_FlvTag *prev_tag,
 		void *data,
 		size_t data_size,
@@ -73,7 +72,7 @@ ttLibC_FlvVideoTag TT_VISIBILITY_HIDDEN *ttLibC_FlvVideoTag_make(
 	return video_tag;
 }
 
-ttLibC_FlvVideoTag TT_VISIBILITY_HIDDEN *ttLibC_FlvVideoTag_getTag(
+ttLibC_FlvVideoTag TT_ATTRIBUTE_INNER *ttLibC_FlvVideoTag_getTag(
 		ttLibC_FlvTag *prev_tag,
 		uint8_t *data,
 		size_t data_size) {
@@ -126,7 +125,7 @@ ttLibC_FlvVideoTag TT_VISIBILITY_HIDDEN *ttLibC_FlvVideoTag_getTag(
 			codec_id);
 }
 
-bool TT_VISIBILITY_HIDDEN ttLibC_FlvVideoTag_getFrame(
+bool TT_ATTRIBUTE_INNER ttLibC_FlvVideoTag_getFrame(
 		ttLibC_FlvVideoTag *video_tag,
 		ttLibC_getFrameFunc callback,
 		void *ptr) {
@@ -139,7 +138,7 @@ bool TT_VISIBILITY_HIDDEN ttLibC_FlvVideoTag_getFrame(
 			ptr);
 }
 
-bool TT_VISIBILITY_HIDDEN ttLibC_FlvVideoTag_writeTag(
+bool TT_ATTRIBUTE_INNER ttLibC_FlvVideoTag_writeTag(
 		ttLibC_FlvWriter_ *writer,
 		ttLibC_Frame *frame,
 		ttLibC_ContainerWriteFunc callback,

@@ -11,7 +11,6 @@
 #include "sdt.h"
 #include "../mpegtsPacket.h"
 
-#include "../../../ttLibC_predef.h"
 #include "../../../_log.h"
 #include "../../../allocator.h"
 #include "../../../util/hexUtil.h"
@@ -19,7 +18,7 @@
 #include "../../../util/ioUtil.h"
 #include <string.h>
 
-ttLibC_Sdt TT_VISIBILITY_HIDDEN *ttLibC_Sdt_make(
+ttLibC_Sdt TT_ATTRIBUTE_INNER *ttLibC_Sdt_make(
 		ttLibC_Sdt *prev_packet,
 		void *data,
 		size_t data_size,
@@ -44,7 +43,7 @@ ttLibC_Sdt TT_VISIBILITY_HIDDEN *ttLibC_Sdt_make(
 	return sdt;
 }
 
-ttLibC_Sdt TT_VISIBILITY_HIDDEN *ttLibC_Sdt_getPacket(
+ttLibC_Sdt TT_ATTRIBUTE_INNER *ttLibC_Sdt_getPacket(
 		ttLibC_Sdt *prev_sdt,
 		uint8_t *data,
 		size_t data_size) {
@@ -65,7 +64,7 @@ ttLibC_Sdt TT_VISIBILITY_HIDDEN *ttLibC_Sdt_getPacket(
 			0);
 }
 
-bool TT_VISIBILITY_HIDDEN ttLibC_Sdt_makePacket(
+bool TT_ATTRIBUTE_INNER ttLibC_Sdt_makePacket(
 		const char *provider,
 		const char *name,
 		uint8_t *data,
@@ -140,7 +139,7 @@ bool TT_VISIBILITY_HIDDEN ttLibC_Sdt_makePacket(
 	return true;
 }
 
-void TT_VISIBILITY_HIDDEN ttLibC_Sdt_close(ttLibC_Sdt **sdt) {
+void TT_ATTRIBUTE_INNER ttLibC_Sdt_close(ttLibC_Sdt **sdt) {
 	ttLibC_Sdt *target = *sdt;
 	if(target == NULL) {
 		return;

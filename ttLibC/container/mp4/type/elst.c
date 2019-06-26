@@ -6,11 +6,10 @@
  */
 
 #include "elst.h"
-#include "../../../ttLibC_predef.h"
 #include "../../../util/ioUtil.h"
 #include "../../../_log.h"
 
-ttLibC_Mp4 TT_VISIBILITY_HIDDEN *ttLibC_Elst_make(
+ttLibC_Mp4 TT_ATTRIBUTE_INNER *ttLibC_Elst_make(
 		uint8_t *data,
 		size_t data_size,
 		uint32_t timebase) {
@@ -61,7 +60,7 @@ ttLibC_Mp4 TT_VISIBILITY_HIDDEN *ttLibC_Elst_make(
 	return (ttLibC_Mp4 *)elst;
 }
 
-uint64_t TT_VISIBILITY_HIDDEN ttLibC_Elst_refCurrentMediatime(ttLibC_Mp4 *mp4) {
+uint64_t TT_ATTRIBUTE_INNER ttLibC_Elst_refCurrentMediatime(ttLibC_Mp4 *mp4) {
 	ttLibC_Elst *elst = (ttLibC_Elst *)mp4;
 	if(elst == NULL) {
 		return 0;
@@ -69,7 +68,7 @@ uint64_t TT_VISIBILITY_HIDDEN ttLibC_Elst_refCurrentMediatime(ttLibC_Mp4 *mp4) {
 	return elst->mediatime;
 }
 
-bool TT_VISIBILITY_HIDDEN ttLibC_Elst_refErrorFlag(ttLibC_Mp4 *mp4) {
+bool TT_ATTRIBUTE_INNER ttLibC_Elst_refErrorFlag(ttLibC_Mp4 *mp4) {
 	ttLibC_Elst *elst = (ttLibC_Elst *)mp4;
 	if(elst == NULL) {
 		return 0;
@@ -77,7 +76,7 @@ bool TT_VISIBILITY_HIDDEN ttLibC_Elst_refErrorFlag(ttLibC_Mp4 *mp4) {
 	return elst->error_flag;
 }
 
-uint64_t TT_VISIBILITY_HIDDEN ttLibC_Elst_refStartInterval(ttLibC_Mp4 *mp4, uint32_t timebase) {
+uint64_t TT_ATTRIBUTE_INNER ttLibC_Elst_refStartInterval(ttLibC_Mp4 *mp4, uint32_t timebase) {
 	ttLibC_Elst *elst = (ttLibC_Elst *)mp4;
 	if(elst == NULL) {
 		return 0;

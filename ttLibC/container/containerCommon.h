@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../ttLibC_predef.h"
 #include "container.h"
 #include "misc.h"
 #include "../util/stlMapUtil.h"
@@ -82,7 +83,7 @@ typedef enum ttLibC_ContainerWriter_Status {
  * @param timebase       timebase for pts.
  * @return container object.
  */
-ttLibC_Container *ttLibC_Container_make(
+ttLibC_Container TT_ATTRIBUTE_INNER *ttLibC_Container_make(
 		ttLibC_Container *prev_container,
 		size_t container_size,
 		ttLibC_Container_Type container_type,
@@ -101,7 +102,7 @@ ttLibC_Container *ttLibC_Container_make(
  * @param reader_size    sizeof object.
  * @return reader object.
  */
-ttLibC_ContainerReader *ttLibC_ContainerReader_make(
+ttLibC_ContainerReader TT_ATTRIBUTE_INNER *ttLibC_ContainerReader_make(
 		ttLibC_Container_Type container_type,
 		size_t reader_size);
 
@@ -113,7 +114,7 @@ ttLibC_ContainerReader *ttLibC_ContainerReader_make(
  * @param timebase       timebase for writer.
  * @return writer object.
  */
-ttLibC_ContainerWriter *ttLibC_ContainerWriter_make(
+ttLibC_ContainerWriter TT_ATTRIBUTE_INNER *ttLibC_ContainerWriter_make(
 		ttLibC_Container_Type container_type,
 		size_t writer_size,
 		uint32_t timebase);
@@ -142,13 +143,13 @@ typedef struct ttLibC_ContainerWriter_ {
 	uint32_t                      unit_duration;
 } ttLibC_ContainerWriter_;
 
-ttLibC_ContainerWriter_WriteTrack *ttLibC_ContainerWriteTrack_make(
+ttLibC_ContainerWriter_WriteTrack TT_ATTRIBUTE_INNER *ttLibC_ContainerWriteTrack_make(
 		size_t            track_size,
 		uint32_t          track_id,
 		ttLibC_Frame_Type frame_type);
 
 // will delete?
-bool ttLibC_ContainerWriteTrack_appendQueue(
+bool TT_ATTRIBUTE_INNER ttLibC_ContainerWriteTrack_appendQueue(
 		ttLibC_ContainerWriter_WriteTrack *track,
 		ttLibC_Frame                      *frame,
 		uint32_t                           timebase,
@@ -161,19 +162,19 @@ bool ttLibC_ContainerWriteTrack_appendQueue(
  * @param ptr
  * @return -1:error 0:done, but should not be continue, 1:all done.
  */
-int ttLibC_ContainerWriter_write_(
+int TT_ATTRIBUTE_INNER ttLibC_ContainerWriter_write_(
 		ttLibC_ContainerWriter_ *writer,
 		ttLibC_Frame *frame,
 		ttLibC_ContainerWriteFunc callback,
 		void *ptr);
 
-bool ttLibC_ContainerWriter_isReadyToStart(ttLibC_ContainerWriter_ *writer);
-bool ttLibC_ContainerWriter_primaryTrackCheck(void *ptr, ttLibC_Frame *frame);
-bool ttLibC_ContainerWriter_isReadyToWrite(ttLibC_ContainerWriter_ *writer);
+bool TT_ATTRIBUTE_INNER ttLibC_ContainerWriter_isReadyToStart(ttLibC_ContainerWriter_ *writer);
+bool TT_ATTRIBUTE_INNER ttLibC_ContainerWriter_primaryTrackCheck(void *ptr, ttLibC_Frame *frame);
+bool TT_ATTRIBUTE_INNER ttLibC_ContainerWriter_isReadyToWrite(ttLibC_ContainerWriter_ *writer);
 
-void ttLibC_ContainerWriteTrack_close(ttLibC_ContainerWriter_WriteTrack **track);
+void TT_ATTRIBUTE_INNER ttLibC_ContainerWriteTrack_close(ttLibC_ContainerWriter_WriteTrack **track);
 
-ttLibC_ContainerWriter *ttLibC_ContainerWriter_make_(
+ttLibC_ContainerWriter TT_ATTRIBUTE_INNER *ttLibC_ContainerWriter_make_(
 		ttLibC_Container_Type container_type,
 		size_t                writer_size,
 		uint32_t              timebase,
@@ -183,13 +184,13 @@ ttLibC_ContainerWriter *ttLibC_ContainerWriter_make_(
 		uint32_t              types_num,
 		uint32_t              unit_duration);
 
-void ttLibC_ContainerWriter_close_(ttLibC_ContainerWriter_ **writer);
+void TT_ATTRIBUTE_INNER ttLibC_ContainerWriter_close_(ttLibC_ContainerWriter_ **writer);
 
 /**
  * check if the frame is ready to use.
  * @return true:ready / false:not ready
  */
-bool ttLibC_ContainerWriter_isReadyFrame(ttLibC_Frame *frame);
+bool TT_ATTRIBUTE_INNER ttLibC_ContainerWriter_isReadyFrame(ttLibC_Frame *frame);
 
 #ifdef __cplusplus
 } /* extern "C" */

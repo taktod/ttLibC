@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../ttLibC_predef.h"
 #include "../frame/video/h265.h"
 #include "../frame/video/yuv420.h"
 
@@ -46,16 +47,16 @@ typedef ttLibC_Encoder_X265Encoder ttLibC_X265Encoder;
  */
 typedef bool (* ttLibC_X265EncodeFunc)(void *ptr, ttLibC_H265 *h265);
 
-ttLibC_X265Encoder *ttLibC_X265Encoder_make(
+ttLibC_X265Encoder TT_ATTRIBUTE_API *ttLibC_X265Encoder_make(
 		uint32_t width,
 		uint32_t height);
 
-ttLibC_X265Encoder *ttLibC_X265Encoder_make_ex(
+ttLibC_X265Encoder TT_ATTRIBUTE_API *ttLibC_X265Encoder_make_ex(
 		uint32_t width,
 		uint32_t height,
 		uint32_t bitrate);
 
-bool ttLibC_X265Encoder_getDefaultX265ApiAndParam(
+bool TT_ATTRIBUTE_API ttLibC_X265Encoder_getDefaultX265ApiAndParam(
 		void **api,
 		void **param,
 		const char *preset,
@@ -63,19 +64,19 @@ bool ttLibC_X265Encoder_getDefaultX265ApiAndParam(
 		uint32_t width,
 		uint32_t height);
 
-ttLibC_X265Encoder *ttLibC_X265Encoder_makeWithX265ApiAndParam(void *api, void *param);
+ttLibC_X265Encoder TT_ATTRIBUTE_API *ttLibC_X265Encoder_makeWithX265ApiAndParam(void *api, void *param);
 
-bool ttLibC_X265Encoder_forceNextFrameType(
+bool TT_ATTRIBUTE_API ttLibC_X265Encoder_forceNextFrameType(
 		ttLibC_X265Encoder *encoder,
 		ttLibC_X265Encoder_FrameType frame_type);
 
-bool ttLibC_X265Encoder_encode(
+bool TT_ATTRIBUTE_API ttLibC_X265Encoder_encode(
 		ttLibC_X265Encoder *encoder,
 		ttLibC_Yuv420 *yuv420,
 		ttLibC_X265EncodeFunc callback,
 		void *ptr);
 
-void ttLibC_X265Encoder_close(ttLibC_X265Encoder **encoder);
+void TT_ATTRIBUTE_API ttLibC_X265Encoder_close(ttLibC_X265Encoder **encoder);
 
 #ifdef __cplusplus
 } /* extern "C" */

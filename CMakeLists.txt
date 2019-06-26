@@ -20,7 +20,6 @@ option(TT_FILE       "use file feature"   ${TT_DEFAULT})
 option(TT_SOCKET     "use socket feature" ${TT_DEFAULT})
 
 option(TT_FAAC       "enable faac"        ${TT_DEFAULT})
-option(TT_FDKAAC     "enable fdkaac"      ${TT_DEFAULT})
 option(TT_FFMPEG     "enable ffmpeg"      ${TT_DEFAULT})
 option(TT_JPEG       "enable jpeg"        ${TT_DEFAULT})
 option(TT_LIBPNG     "enable libpng"      ${TT_DEFAULT})
@@ -39,19 +38,17 @@ option(TT_X264       "enable x264"        ${TT_DEFAULT})
 option(TT_X265       "enable x265"        ${TT_DEFAULT})
 
 if(WIN32)
-  # windowsシステム
-  # とりあえず強制でENABLE付いてたら、フラグをopenしようか・・・
   add_compile_definitions(__ENABLE_WIN32__)
 else()
   set(CMAKE_CXX_FLAGS "-std=c++0x")
   if(APPLE)
-    # rpath対策
+    # for rpath
     set(CMAKE_MACOSX_RPATH 1)
   endif()
-  # package
+  # use pkgconfig
   find_package(PkgConfig QUIET)
-  # includeファイルがあるか確認する動作
-  function(checkHeader TARGET RESULT)
+  # check header file for library
+  function(checkLibraryHeader TARGET RESULT)
     FILE(WRITE "check.c" "#include <${TARGET}> \nint main(){return 0;}")
     execute_process(
       COMMAND gcc -E check.c
@@ -65,58 +62,136 @@ else()
   endfunction()
 endif()
 
-# それぞれのプログラム
-# License (動作ライセンス) gpl lgpl bsd
 message("")
+# headers
+set(TTLIBC_HEADERS
+  ttLibC/allocator.h
+  ttLibC/log.h
+  ttLibC/ttLibC.h)
+set(TTLIBC_CONTAINER_HEADERS
+  ttLibC/container/container.h
+  ttLibC/container/flv.h
+  ttLibC/container/mkv.h
+  ttLibC/container/mp3.h
+  ttLibC/container/mp4.h
+  ttLibC/container/mpegts.h)
+set(TTLIBC_FRAME_AUDIO_HEADERS
+  ttLibC/frame/audio/aac.h
+  ttLibC/frame/audio/adpcmImaWav.h
+  ttLibC/frame/audio/audio.h
+  ttLibC/frame/audio/mp3.h
+  ttLibC/frame/audio/nellymoser.h
+  ttLibC/frame/audio/opus.h
+  ttLibC/frame/audio/pcmAlaw.h
+  ttLibC/frame/audio/pcmf32.h
+  ttLibC/frame/audio/pcmMulaw.h
+  ttLibC/frame/audio/pcms16.h
+  ttLibC/frame/audio/speex.h
+  ttLibC/frame/audio/vorbis.h)
+set(TTLIBC_FRAME_VIDEO_HEADERS
+  ttLibC/frame/video/bgr.h
+  ttLibC/frame/video/flv1.h
+  ttLibC/frame/video/h264.h
+  ttLibC/frame/video/h265.h
+  ttLibC/frame/video/jpeg.h
+  ttLibC/frame/video/png.h
+  ttLibC/frame/video/theora.h
+  ttLibC/frame/video/video.h
+  ttLibC/frame/video/vp6.h
+  ttLibC/frame/video/vp8.h
+  ttLibC/frame/video/vp9.h
+  ttLibC/frame/video/wmv1.h
+  ttLibC/frame/video/wmv2.h
+  ttLibC/frame/video/yuv420.h)
+set(TTLIBC_FRAME_HEADERS
+  ttLibC/frame/frame.h)
+set(TTLIBC_RESAMPLER_HEADERS
+  ttLibC/resampler/audioResampler.h
+  ttLibC/resampler/imageResampler.h
+  ttLibC/resampler/imageResizer.h)
+set(TTLIBC_UTIL_HEADERS
+  ttLibC/util/amfUtil.h
+  ttLibC/util/beepUtil.h
+  ttLibC/util/byteUtil.h
+  ttLibC/util/crc32Util.h
+  ttLibC/util/dynamicBufferUtil.h
+  ttLibC/util/hexUtil.h
+  ttLibC/util/ioUtil.h
+  ttLibC/util/stlListUtil.h
+  ttLibC/util/stlMapUtil.h
+  ttLibC/util/tetty2.h)
+
+# License (gpl lgpl bsd)
 message("Result ...")
 if(TT_LICENSE STREQUAL "GPL")
   configure_file("gpl-3.0.txt" "LICENSE" COPYONLY)
-message("license:    GPLv3")
+  message("license:    GPLv3")
   add_compile_definitions(__ENABLE_GPL__)
 elseif(TT_LICENSE STREQUAL "LGPL")
   configure_file("lgpl-3.0.txt" "LICENSE" COPYONLY)
-message("license:    LGPLv3")
+  message("license:    LGPLv3")
   add_compile_definitions(__ENABLE_LGPL__)
 else()
   configure_file("3causeBSD.txt" "LICENSE" COPYONLY)
-message("license:    The 3-clause BSD")
+  message("license:    The 3-clause BSD")
 endif()
 
 # debug (ログ出力を調整) any
 if(TT_DEBUG)
-message("debug:      on")
+  message("debug:      on")
   add_compile_definitions(__DEBUG_FLAG__)
   set(debug_flag 1)
 else()
-message("debug:      off")
+  message("debug:      off")
   set(debug_flag 0)
 endif()
 configure_file(ttLibC/log.h.in ${CMAKE_CURRENT_SOURCE_DIR}/ttLibC/log.h @ONLY)
 
-
 # test (unitテスト googletestに書き換える予定) gpl -> any
 if(TT_TEST)
-message("test:       on")
+  message("test:       on")
 else()
-message("test:       off")
+  message("test:       off")
 endif()
 
 # file any
 if(TT_FILE)
-message("file:       on")
+  message("file:       on")
   add_compile_definitions(__ENABLE_FILE__)
+  set(TTLIBC_UTIL_HEADERS
+    ${TTLIBC_UTIL_HEADERS}
+      ttLibC/util/forkUtil.h)
 else()
-message("file:       off")
+  message("file:       off")
 endif()
 # socket any
 if(TT_SOCKET)
-message("socket:     on")
+  message("socket:     on")
   add_compile_definitions(__ENABLE_SOCKET__)
+  set(TTLIBC_NET_HEADERS
+    ${TTLIBC_NET_HEADERS}
+    ttLibC/net/net.h
+    ttLibC/net/tcp.h
+    ttLibC/net/tetty.h
+    ttLibC/net/udp.h)
+  set(TTLIBC_NET_CLIENT_HEADERS
+    ${TTLIBC_NET_CLIENT_HEADERS}
+    ttLibC/net/client/rtmp.h
+    ttLibC/net/client/websocket.h)
+  set(TTLIBC_NET_TETTY2_HEADERS
+    ${TTLIBC_NET_TETTY2_HEADERS}
+    ttLibC/net/tetty2/tcpBootstrap.h)
 else()
-message("socket:     off")
+  message("socket:     off")
 endif()
 
-# apple any for apple
+if(TT_FILE AND TT_SOCKET)
+  set(TTLIBC_UTIL_HEADERS
+    ${TTLIBC_UTIL_HEADERS}
+      ttLibC/util/httpUtil.h)
+endif()
+
+# apple any for osx or ios
 if(APPLE)
   find_library(TT_AUDIOTOOLBOX   AudioToolbox)
   find_library(TT_VIDEOTOOLBOX   VideoToolbox)
@@ -126,11 +201,22 @@ if(APPLE)
   find_library(TT_COREVIDEO      CoreVideo)
   find_library(TT_COREAUDIO      CoreAudio)
   if(TT_AUDIOTOOLBOX AND TT_VIDEOTOOLBOX AND TT_COREFOUNDATION AND TT_AUDIOUNIT AND TT_COREMEDIA AND TT_COREVIDEO AND TT_COREAUDIO)
-message("apple:      on")
+    message("apple:      on")
     set(TT_APPLE_LIBRARIES "-framework AudioToolbox -framework VideoToolbox -framework CoreFoundation -framework AudioUnit -framework CoreMedia -framework CoreVideo -framework CoreAudio")
     add_compile_definitions(__ENABLE_APPLE__)
+    set(TTLIBC_DECODER_HEADERS
+      ${TTLIBC_DECODER_HEADERS}
+      ttLibC/decoder/audioConverterDecoder.h
+      ttLibC/decoder/vtDecompressSessionDecoder.h)
+    set(TTLIBC_ENCODER_HEADERS
+      ${TTLIBC_ENCODER_HEADERS}
+      ttLibC/encoder/audioConverterEncoder.h
+      ttLibC/encoder/vtCompressSessionEncoder.h)
+    set(TTLIBC_UTIL_HEADERS
+      ${TTLIBC_UTIL_HEADERS}
+      ttLibC/util/audioUnitUtil.h)
   else()
-message("apple:      off")
+    message("apple:      off")
   endif()
 endif()
 
@@ -138,174 +224,171 @@ endif()
 if(TT_FAAC)
   if(TT_LICENSE STREQUAL "GPL" OR TT_LICENSE STREQUAL "LGPL")
     if(WIN32)
-      #windowsでOKになってる場合は、フラグをONにしてやる
-message("faac:       on")
+      message("faac:       on")
       add_compile_definitions(__ENABLE_FAAC__ __ENABLE_FAAC_ENCODE__)
     else()
-      #widnows以外なら、コンパイル動作やってみて決める？
-      checkHeader(faac.h TT_RESULT)
+      checkLibraryHeader(faac.h TT_RESULT)
       if(TT_RESULT)
-message("faac:       on")
+        message("faac:       on")
         add_compile_definitions(__ENABLE_FAAC__ __ENABLE_FAAC_ENCODE__)
         include_directories(${TT_RESULT})
         link_directories(/usr/local/lib)
         set(TT_FAAC_LIBRARIES "faac")
+        set(TTLIBC_ENCODER_HEADERS
+          ${TTLIBC_ENCODER_HEADERS}
+          ttLibC/encoder/faacEncoder.h)
       else()
-message("faac:       off(library is missing)")
+        message("faac:       off(library is missing)")
       endif()
     endif()
   else()
-message("faac:       off(under lgpl only)")
+    message("faac:       off(under lgpl only)")
   endif()
 else()
-message("faac:       off")
-endif()
-
-# fdkaac lgpl
-if(TT_FDKAAC)
-  if(TT_LICENSE STREQUAL "GPL" OR TT_LICENSE STREQUAL "LGPL")
-    if(WIN32)
-      #windowsでOKになってる場合は、フラグをONにしてやる
-message("fdkaac:     on")
-      add_compile_definitions(__ENABLE_FDKAAC__)
-    else()
-      pkg_check_modules(TT_FDKAAC fdk-aac QUIET)
-      if(TT_FDKAAC_LIBRARIES)
-message("fdkaac:     on")
-        add_compile_definitions(__ENABLE_FDKAAC__)
-        include_directories(${TT_FDKAAC_INCLUDE_DIRS})
-      else()
-message("fdkaac:     off(library is missing)")
-      endif()
-    endif()
-  else()
-message("fdkaac:     off(under lgpl only)")
-  endif()
-else()
-message("fdkaac:     off")
+  message("faac:       off")
 endif()
 
 # ffmpeg lgpl
 if(TT_FFMPEG)
   if(TT_LICENSE STREQUAL "GPL" OR TT_LICENSE STREQUAL "LGPL")
     if(WIN32)
-      #windowsでOKになってる場合は、フラグをONにしてやる
-message("ffmpeg:     on")
+      message("ffmpeg:     on")
       add_compile_definitions(__ENABLE_AVCODEC__ __ENABLE_SWSCALE__ __ENABLE_SWRESAMPLE__)
     else()
       pkg_check_modules(TT_FFMPEG libavcodec libswscale libswresample QUIET)
       if(TT_FFMPEG_LIBRARIES)
-message("ffmpeg:     on")
+        message("ffmpeg:     on")
         include_directories(${TT_FFMPEG_INCLUDE_DIRS})
         add_compile_definitions(__ENABLE_AVCODEC__ __ENABLE_SWSCALE__ __ENABLE_SWRESAMPLE__)
+        set(TTLIBC_DECODER_HEADERS
+          ${TTLIBC_DECODER_HEADERS}
+          ttLibC/decoder/avcodecDecoder.h)
+        set(TTLIBC_ENCODER_HEADERS
+          ${TTLIBC_ENCODER_HEADERS}
+          ttLibC/encoder/avcodecEncoder.h)
+        set(TTLIBC_RESAMPLER_HEADERS
+          ${TTLIBC_RESAMPLER_HEADERS}
+          ttLibC/resampler/swscaleResampler.h
+          ttLibC/resampler/swresampleResampler.h)
       else()
-message("ffmpeg:     off(library is missing)")
+        message("ffmpeg:     off(library is missing)")
       endif()
     endif()
   else()
-message("ffmpeg:     off(under lgpl only)")
+    message("ffmpeg:     off(under lgpl only)")
   endif()
 else()
-message("ffmpeg:     off")
+  message("ffmpeg:     off")
 endif()
 
 # jpeg any
 if(TT_JPEG)
   if(WIN32)
-    #windowsでOKになってる場合は、フラグをONにしてやる
-message("jpeg:       on")
+      message("jpeg:       on")
     add_compile_definitions(__ENABLE_JPEG__)
   else()
-    #widnows以外なら、コンパイル動作やってみて決める？
-    checkHeader(jpeglib.h TT_RESULT)
+    checkLibraryHeader(jpeglib.h TT_RESULT)
     if(TT_RESULT)
-message("jpeg:       on")
+      message("jpeg:       on")
       include_directories(${TT_RESULT})
       add_compile_definitions(__ENABLE_JPEG__)
       link_directories(/usr/local/lib)
       set(TT_JPEG_LIBRARIES "jpeg")
+      set(TTLIBC_ENCODER_HEADERS
+        ${TTLIBC_ENCODER_HEADERS}
+        ttLibC/encoder/jpegEncoder.h)
+      set(TTLIBC_DECODER_HEADERS
+        ${TTLIBC_DECODER_HEADERS}
+        ttLibC/decoder/jpegDecoder.h)
     else()
-message("jpeg:       off(library is missing)")
+      message("jpeg:       off(library is missing)")
     endif()
   endif()
 else()
-message("jpeg:       off")
+  message("jpeg:       off")
 endif()
 
 # libpng any
 if(TT_LIBPNG)
   if(WIN32)
-    #windowsでOKになってる場合は、フラグをONにしてやる
-message("libpng:     on")
+    message("libpng:     on")
     add_compile_definitions(__ENABLE_LIBPNG__)
   else()
     pkg_check_modules(TT_LIBPNG libpng QUIET)
     if(TT_LIBPNG_LIBRARIES)
-message("libpng:     on")
+      message("libpng:     on")
       add_compile_definitions(__ENABLE_LIBPNG__)
       include_directories(${TT_LIBPNG_INCLUDE_DIRS})
+      set(TTLIBC_DECODER_HEADERS
+        ${TTLIBC_DECODER_HEADERS}
+        ttLibC/decoder/pngDecoder.h)
     else()
-message("libpng:     off(library is missing)")
+      message("libpng:     off(library is missing)")
     endif()
   endif()
 else()
-message("libpng:     off")
+  message("libpng:     off")
 endif()
 
 # libyuv any
 if(TT_LIBYUV)
   if(WIN32)
-    #windowsでOKになってる場合は、フラグをONにしてやる
-message("libyuv:     on")
+    message("libyuv:     on")
     add_compile_definitions(__ENABLE_LIBYUV__)
   else()
-    #widnows以外なら、コンパイル動作やってみて決める？
-    checkHeader(libyuv.h TT_RESULT)
+    checkLibraryHeader(libyuv.h TT_RESULT)
     if(TT_RESULT)
-message("libyuv:     on")
+      message("libyuv:     on")
       include_directories(${TT_RESULT})
       add_compile_definitions(__ENABLE_LIBYUV__)
       link_directories(/usr/local/lib)
       set(TT_LIBYUV_LIBRARIES "yuv")
+      set(TTLIBC_RESAMPLER_HEADERS
+        ${TTLIBC_RESAMPLER_HEADERS}
+        ttLibC/resampler/libyuvResampler.h)
     else()
-message("libyuv:     off(library is missing)")
+      message("libyuv:     off(library is missing)")
     endif()
   endif()
 else()
-message("libyuv:     off")
+  message("libyuv:     off")
 endif()
 
 # mp3lame GPL
 if(TT_MP3LAME)
   if(TT_LICENSE STREQUAL "GPL" OR TT_LICENSE STREQUAL "LGPL")
     if(WIN32)
-      #windowsでOKになってる場合は、フラグをONにしてやる
-message("mp3lame:    on")
+      message("mp3lame:    on")
       add_compile_definitions(__ENABLE_MP3LAME__)
       if(TT_LICENSE STREQUAL "GPL")
         add_compile_definitions(__ENABLE_MP3LAME_DECODE__)
       endif()
     else()
-      #widnows以外なら、コンパイル動作やってみて決める？
-      checkHeader(lame/lame.h TT_RESULT)
+      checkLibraryHeader(lame/lame.h TT_RESULT)
       if(TT_RESULT)
-message("mp3lame:    on")
+        message("mp3lame:    on")
         add_compile_definitions(__ENABLE_MP3LAME__)
+        set(TTLIBC_ENCODER_HEADERS
+          ${TTLIBC_ENCODER_HEADERS}
+          ttLibC/encoder/mp3lameEncoder.h)
         if(TT_LICENSE STREQUAL "GPL")
           add_compile_definitions(__ENABLE_MP3LAME_DECODE__)
+          set(TTLIBC_DECODER_HEADERS
+            ${TTLIBC_DECODER_HEADERS}
+            ttLibC/decoder/mp3lameDecoder.h)
         endif()
         include_directories(${TT_RESULT})
         link_directories(/usr/local/lib)
         set(TT_MP3LAME_LIBRARIES "mp3lame")
       else()
-message("mp3lame:    off(library is missing)")
+        message("mp3lame:    off(library is missing)")
       endif()
     endif()
   else()
-message("mp3lame:    off(under lgpl only)")
+    message("mp3lame:    off(under lgpl only)")
   endif()
 else()
-message("mp3lame:    off")
+  message("mp3lame:    off")
 endif()
 
 # openal GPL
@@ -314,280 +397,294 @@ if(TT_OPENAL)
     if(APPLE)
       find_library(TT_OPENAL OpenAL)
       if(TT_OPENAL)
-message("openal:     on")
+        message("openal:     on")
         set(TT_OPENAL_LIBRARIES "-framework OpenAL")
         add_compile_definitions(__ENABLE_OPENAL__)
+        set(TTLIBC_UTIL_HEADERS
+          ${TTLIBC_UTIL_HEADERS}
+          ttLibC/util/openalUtil.h)
       else()
-message("openal:     off(library is missing)")
+        message("openal:     off(library is missing)")
       endif()
     elseif(WIN32)
-message("openal:     on")
+      message("openal:     on")
       add_compile_definitions(__ENABLE_OPENAL__)
     else()
       pkg_check_modules(TT_OPENAL openal QUIET)
       if(TT_OPENAL_LIBRARIES)
-message("openal:     on")
+        message("openal:     on")
         add_compile_definitions(__ENABLE_OPENAL__)
         include_directories(${TT_OPENAL_INCLUDE_DIRS})
+        set(TTLIBC_UTIL_HEADERS
+          ${TTLIBC_UTIL_HEADERS}
+          ttLibC/util/openalUtil.h)
       else()
-message("libpng:     off(library is missing)")
+        message("openal:     off(library is missing)")
       endif()
     endif()
   else()
-message("openal:     off(under gpl only)")
+    message("openal:     off(under gpl only)")
   endif()
 else()
-message("openal:     off")
+  message("openal:     off")
 endif()
 
 # opencv any
 if(TT_OPENCV)
   if(WIN32)
-    #windowsでOKになってる場合は、フラグをONにしてやる
-message("opencv:     on")
+    message("opencv:     on")
     add_compile_definitions(__ENABLE_OPENCV__)
   else()
     pkg_check_modules(TT_OPENCV opencv QUIET)
     if(TT_OPENCV_LIBRARIES)
-message("opencv:     on")
+      message("opencv:     on")
       add_compile_definitions(__ENABLE_OPENCV__)
       include_directories(${TT_OPENCV_INCLUDE_DIRS})
+      set(TTLIBC_UTIL_HEADERS
+        ${TTLIBC_UTIL_HEADERS}
+        ttLibC/util/opencvUtil.h)
     else()
       pkg_check_modules(TT_OPENCV opencv4 QUIET)
       if(TT_OPENCV_LIBRARIES)
-message("opencv:     on")
+        message("opencv:     on")
         add_compile_definitions(__ENABLE_OPENCV__)
         include_directories(${TT_OPENCV_INCLUDE_DIRS})
+        set(TTLIBC_UTIL_HEADERS
+          ${TTLIBC_UTIL_HEADERS}
+          ttLibC/util/opencvUtil.h)
       else()
-message("opencv:     off(library is missing)")
+        message("opencv:     off(library is missing)")
       endif()
     endif()
   endif()
 else()
-message("opencv:     off")
+  message("opencv:     off")
 endif()
 
 # openh264 any
 if(TT_OPENH264)
   if(WIN32)
-    #windowsでOKになってる場合は、フラグをONにしてやる
-message("openh264:   on")
+    message("openh264:   on")
     add_compile_definitions(__ENABLE_OPENH264__)
   else()
     pkg_check_modules(TT_OPENH264 openh264 QUIET)
     if(TT_OPENH264_LIBRARIES)
-message("openh264:   on")
+      message("openh264:   on")
       add_compile_definitions(__ENABLE_OPENH264__)
       include_directories(${TT_OPENH264_INCLUDE_DIRS})
+      set(TTLIBC_ENCODER_HEADERS
+        ${TTLIBC_ENCODER_HEADERS}
+        ttLibC/encoder/openh264Encoder.h)
+      set(TTLIBC_DECODER_HEADERS
+        ${TTLIBC_DECODER_HEADERS}
+        ttLibC/decoder/openh264Decoder.h)
     else()
-message("openh264:   off(library is missing)")
+      message("openh264:   off(library is missing)")
     endif()
   endif()
 else()
-message("openh264:   off")
+  message("openh264:   off")
 endif()
 
 # opus any
 if(TT_OPUS)
   if(WIN32)
-    #windowsでOKになってる場合は、フラグをONにしてやる
-message("opus:       on")
+    message("opus:       on")
     add_compile_definitions(__ENABLE_OPUS__)
   else()
     pkg_check_modules(TT_OPUS opus QUIET)
     if(TT_OPUS_LIBRARIES)
-message("opus:       on")
+      message("opus:       on")
       add_compile_definitions(__ENABLE_OPUS__)
       include_directories(${TT_OPUS_INCLUDE_DIRS})
+      set(TTLIBC_ENCODER_HEADERS
+        ${TTLIBC_ENCODER_HEADERS}
+        ttLibC/encoder/opusEncoder.h)
+      set(TTLIBC_DECODER_HEADERS
+        ${TTLIBC_DECODER_HEADERS}
+        ttLibC/decoder/opusDecoder.h)
     else()
-message("opus:       off(library is missing)")
+      message("opus:       off(library is missing)")
     endif()
   endif()
 else()
-message("opus:       off")
+  message("opus:       off")
 endif()
 
 # soundtouch lgpl
 if(TT_SOUNDTOUCH)
   if(TT_LICENSE STREQUAL "GPL" OR TT_LICENSE STREQUAL "LGPL")
     if(WIN32)
-      #windowsでOKになってる場合は、フラグをONにしてやる
-message("soundtouch: on")
+      message("soundtouch: on")
       add_compile_definitions(__ENABLE_SOUNDTOUCH__)
     else()
       pkg_check_modules(TT_SOUNDTOUCH soundtouch QUIET)
       if(TT_SOUNDTOUCH_LIBRARIES)
-message("soundtouch: on")
+        message("soundtouch: on")
         add_compile_definitions(__ENABLE_SOUNDTOUCH__)
         include_directories(${TT_SOUNDTOUCH_INCLUDE_DIRS})
+        set(TTLIBC_RESAMPLER_HEADERS
+          ${TTLIBC_RESAMPLER_HEADERS}
+          ttLibC/resampler/soundtouchResampler.h)
       else()
-message("soundtouch: off(library is missing)")
+        message("soundtouch: off(library is missing)")
       endif()
     endif()
   else()
-message("soundtouch: off(under lgpl only)")
+    message("soundtouch: off(under lgpl only)")
   endif()
 else()
-message("soundtouch: off")
+  message("soundtouch: off")
 endif()
 
 # speex any
 if(TT_SPEEX)
   if(WIN32)
-    #windowsでOKになってる場合は、フラグをONにしてやる
-message("speex:      on")
+    message("speex:      on")
     add_compile_definitions(__ENABLE_SPEEX__)
   else()
     pkg_check_modules(TT_SPEEX speex QUIET)
     if(TT_SPEEX_LIBRARIES)
-message("speex:      on")
+      message("speex:      on")
       add_compile_definitions(__ENABLE_SPEEX__)
       include_directories(${TT_SPEEX_INCLUDE_DIRS})
+      set(TTLIBC_ENCODER_HEADERS
+        ${TTLIBC_ENCODER_HEADERS}
+        ttLibC/encoder/speexEncoder.h)
+      set(TTLIBC_DECODER_HEADERS
+        ${TTLIBC_DECODER_HEADERS}
+        ttLibC/decoder/speexDecoder.h)
     else()
-message("speex:      off(library is missing)")
+      message("speex:      off(library is missing)")
     endif()
   endif()
 else()
-message("speex:      off")
+  message("speex:      off")
 endif()
 
 # speexdsp any
 if(TT_SPEEXDSP)
   if(WIN32)
-    #windowsでOKになってる場合は、フラグをONにしてやる
-message("speexdsp:   on")
+    message("speexdsp:   on")
     add_compile_definitions(__ENABLE_SPEEXDSP__)
   else()
     pkg_check_modules(TT_SPEEXDSP speexdsp QUIET)
     if(TT_SPEEXDSP_LIBRARIES)
-message("speexdsp:   on")
+      message("speexdsp:   on")
       add_compile_definitions(__ENABLE_SPEEXDSP__)
       include_directories(${TT_SPEEXDSP_INCLUDE_DIRS})
+      set(TTLIBC_RESAMPLER_HEADERS
+        ${TTLIBC_RESAMPLER_HEADERS}
+        ttLibC/resampler/speexdspResampler.h)
     else()
-message("speexdsp:   off(library is missing)")
+      message("speexdsp:   off(library is missing)")
     endif()
   endif()
 else()
-message("speexdsp:   off")
+  message("speexdsp:   off")
 endif()
 
 # theora any
 if(TT_THEORA)
   if(WIN32)
-    #windowsでOKになってる場合は、フラグをONにしてやる
-message("theora:     on")
+    message("theora:     on")
     add_compile_definitions(__ENABLE_THEORA__)
   else()
     pkg_check_modules(TT_THEORA theora QUIET)
     if(TT_THEORA_LIBRARIES)
-message("theora:     on")
+      message("theora:     on")
       add_compile_definitions(__ENABLE_THEORA__)
       include_directories(${TT_THEORA_INCLUDE_DIRS})
+      set(TTLIBC_ENCODER_HEADERS
+        ${TTLIBC_ENCODER_HEADERS}
+        ttLibC/encoder/theoraEncoder.h)
+      set(TTLIBC_DECODER_HEADERS
+        ${TTLIBC_DECODER_HEADERS}
+        ttLibC/decoder/theoraDecoder.h)
     else()
-message("theora:     off(library is missing)")
+      message("theora:     off(library is missing)")
     endif()
   endif()
 else()
-message("theora:     off")
+  message("theora:     off")
 endif()
 
 # vorbis any
 if(TT_VORBIS)
   if(WIN32)
-    #windowsでOKになってる場合は、フラグをONにしてやる
-message("vorbis:     on")
+    message("vorbis:     on")
     add_compile_definitions(__ENABLE_VORBIS_DECODE__ __ENABLE_VORBIS_ENCODE__)
   else()
     pkg_check_modules(TT_VORBIS vorbis vorbisenc QUIET)
     if(TT_VORBIS_LIBRARIES)
-message("vorbis:     on")
+      message("vorbis:     on")
       add_compile_definitions(__ENABLE_VORBIS_DECODE__ __ENABLE_VORBIS_ENCODE__)
       include_directories(${TT_VORBIS_INCLUDE_DIRS})
+      set(TTLIBC_ENCODER_HEADERS
+        ${TTLIBC_ENCODER_HEADERS}
+        ttLibC/encoder/vorbisEncoder.h)
+      set(TTLIBC_DECODER_HEADERS
+        ${TTLIBC_DECODER_HEADERS}
+        ttLibC/decoder/vorbisDecoder.h)
     else()
-message("vorbis:     off(library is missing)")
+      message("vorbis:     off(library is missing)")
     endif()
   endif()
 else()
-message("vorbis:     off")
+  message("vorbis:     off")
 endif()
 
 # x264 GPL
 if(TT_X264)
   if(TT_LICENSE STREQUAL "GPL")
     if(WIN32)
-      #windowsでOKになってる場合は、フラグをONにしてやる
-message("x264:       on")
+      message("x264:       on")
       add_compile_definitions(__ENABLE_X264__)
     else()
       pkg_check_modules(TT_X264 x264 QUIET)
       if(TT_X264_LIBRARIES)
-message("x264:       on")
+        message("x264:       on")
         add_compile_definitions(__ENABLE_X264__)
         include_directories(${TT_X264_INCLUDE_DIRS})
+        set(TTLIBC_ENCODER_HEADERS
+          ${TTLIBC_ENCODER_HEADERS}
+          ttLibC/encoder/x264Encoder.h)
       else()
-message("x264:       off(library is missing)")
+        message("x264:       off(library is missing)")
       endif()
     endif()
   else()
-message("x264:       off(under gpl only)")
+    message("x264:       off(under gpl only)")
   endif()
 else()
-message("x264:       off")
+  message("x264:       off")
 endif()
 
 # x265 GPL
 if(TT_X265)
   if(TT_LICENSE STREQUAL "GPL")
     if(WIN32)
-      #windowsでOKになってる場合は、フラグをONにしてやる
-message("x265:       on")
+      message("x265:       on")
       add_compile_definitions(__ENABLE_X265__)
     else()
       pkg_check_modules(TT_X265 x265 QUIET)
       if(TT_X265_LIBRARIES)
-message("x265:       on")
+        message("x265:       on")
         add_compile_definitions(__ENABLE_X265__)
         include_directories(${TT_X265_INCLUDE_DIRS})
+        set(TTLIBC_ENCODER_HEADERS
+          ${TTLIBC_ENCODER_HEADERS}
+          ttLibC/encoder/x265Encoder.h)
       else()
-message("x265:       off(library is missing)")
+        message("x265:       off(library is missing)")
       endif()
     endif()
   else()
-message("x265:       off(under gpl only)")
+    message("x265:       off(under gpl only)")
   endif()
 else()
-message("x265:       off")
+  message("x265:       off")
 endif()
-
-# __ENABLE_SOCKET__
-# __ENABLE_APPLE__
-# __ENABLE_GPL__
-# __ENABLE_LGPL__
-# __ENABLE_FILE__
-# __ENABLE_SWSCALE__
-# __ENABLE_AVCODEC__
-# __ENABLE_SWRESAMPLE__
-# __ENABLE_WIN32__
-# __ENABLE_JPEG__
-# __ENABLE_LIBPNG__
-# __ENABLE_LIBYUV__
-# __ENABLE_MP3LAME__
-# __ENABLE_MP3LAME_DECODE__
-# __ENABLE_FAAC_ENCODE__
-# __ENABLE_OPENAL__
-# __ENABLE_OPENCV__
-# __ENABLE_OPENH264__
-# __ENABLE_OPUS__
-# __ENABLE_SOUNDTOUCH__
-# __ENABLE_SPEEX__
-# __ENABLE_SPEEXDSP__
-# __ENABLE_THEORA__
-# __ENABLE_VORBIS_DECODE__
-# __ENABLE_VORBIS_ENCODE__
-# __ENABLE_X264__
-# __ENABLE_X265__
-
-# __ENABLE_WEBRTC__
 
 add_library(ttLibC SHARED
   ttLibC/allocator.c
@@ -738,35 +835,30 @@ add_library(ttLibC SHARED
   ttLibC/decoder/openh264Decoder.cpp
   ttLibC/resampler/soundtouchResampler.cpp)
 
-
 target_link_libraries(ttLibC PRIVATE
-${TT_APPLE_LIBRARIES}
-${TT_FAAC_LIBRARIES}
-${TT_FDKAAC_LIBRARIES}
-${TT_FFMPEG_LIBRARIES}
-${TT_JPEG_LIBRARIES}
-${TT_LIBPNG_LIBRARIES}
-${TT_LIBYUV_LIBRARIES}
-${TT_MP3LAME_LIBRARIES}
-${TT_OPENAL_LIBRARIES}
-${TT_OPENCV_LIBRARIES}
-${TT_OPENH264_LIBRARIES}
-${TT_OPUS_LIBRARIES}
-${TT_SOUNDTOUCH_LIBRARIES}
-${TT_SPEEX_LIBRARIES}
-${TT_SPEEXDSP_LIBRARIES}
-${TT_THEORA_LIBRARIES}
-${TT_VORBIS_LIBRARIES}
-${TT_X264_LIBRARIES}
-${TT_X265_LIBRARIES})
+  ${TT_APPLE_LIBRARIES}
+  ${TT_FAAC_LIBRARIES}
+  ${TT_FFMPEG_LIBRARIES}
+  ${TT_JPEG_LIBRARIES}
+  ${TT_LIBPNG_LIBRARIES}
+  ${TT_LIBYUV_LIBRARIES}
+  ${TT_MP3LAME_LIBRARIES}
+  ${TT_OPENAL_LIBRARIES}
+  ${TT_OPENCV_LIBRARIES}
+  ${TT_OPENH264_LIBRARIES}
+  ${TT_OPUS_LIBRARIES}
+  ${TT_SOUNDTOUCH_LIBRARIES}
+  ${TT_SPEEX_LIBRARIES}
+  ${TT_SPEEXDSP_LIBRARIES}
+  ${TT_THEORA_LIBRARIES}
+  ${TT_VORBIS_LIBRARIES}
+  ${TT_X264_LIBRARIES}
+  ${TT_X265_LIBRARIES})
 
-if(WIN32) 
+if(WIN32)
+  add_definitions("-DTT_ATTRIBUTE_INNER=")
+  add_definitions("-DTT_ATTRIBUTE_API=__declspec(dllexport)")
 else()
-#  set_property(TARGET ttLibC
-#    PROPERTY PUBLIC_HEADER
-#    "ttLibC/container/container.h"
-#    "ttLibC/ttLibC.h")
-
   set(prefix ${CMAKE_INSTALL_PREFIX})
   set(exec_prefix "\${prefix}")
   set(libdir "\${exec_prefix}/lib")
@@ -778,6 +870,32 @@ else()
     DESTINATION lib/pkgconfig)
 
   install(TARGETS ttLibC
-    ARCHIVE DESTINATION lib)
-#  install(FILES "ttLibC/container/container.h" DESTINATION include/ttLibC/container)
+    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION lib)
+  install(FILES ${TTLIBC_HEADERS}
+    DESTINATION include/ttLibC)
+  install(FILES ${TTLIBC_CONTAINER_HEADERS}
+    DESTINATION include/ttLibC/container)
+  install(FILES ${TTLIBC_DECODER_HEADERS}
+    DESTINATION include/ttLibC/decoder)
+  install(FILES ${TTLIBC_ENCODER_HEADERS}
+    DESTINATION include/ttLibC/encoder)
+  install(FILES ${TTLIBC_FRAME_HEADERS}
+    DESTINATION include/ttLibC/frame)
+  install(FILES ${TTLIBC_FRAME_VIDEO_HEADERS}
+    DESTINATION include/ttLibC/frame/video)
+  install(FILES ${TTLIBC_FRAME_AUDIO_HEADERS}
+    DESTINATION include/ttLibC/frame/audio)
+  install(FILES ${TTLIBC_FRAME_AUDIO_HEADERS}
+    DESTINATION include/ttLibC/frame/audio)
+  install(FILES ${TTLIBC_NET_HEADERS}
+    DESTINATION include/ttLibC/net)
+  install(FILES ${TTLIBC_NET_CLIENT_HEADERS}
+    DESTINATION include/ttLibC/net/client)
+  install(FILES ${TTLIBC_NET_TETTY2_HEADERS}
+    DESTINATION include/ttLibC/net/tetty2)
+  install(FILES ${TTLIBC_RESAMPLER_HEADERS}
+    DESTINATION include/ttLibC/resampler)
+  install(FILES ${TTLIBC_UTIL_HEADERS}
+    DESTINATION include/ttLibC/util)
 endif()

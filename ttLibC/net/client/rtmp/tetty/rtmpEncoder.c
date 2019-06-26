@@ -10,7 +10,6 @@
 #ifdef __ENABLE_SOCKET__
 
 #include "rtmpEncoder.h"
-#include "../../../../ttLibC_predef.h"
 #include "../../../../_log.h"
 #include "../../../../allocator.h"
 #include <string.h>
@@ -87,7 +86,7 @@ static tetty_errornum RtmpEncoder_write(
 	return 0;
 }
 
-ttLibC_RtmpEncoder TT_VISIBILITY_HIDDEN *ttLibC_RtmpEncoder_make() {
+ttLibC_RtmpEncoder TT_ATTRIBUTE_INNER *ttLibC_RtmpEncoder_make() {
 	ttLibC_RtmpEncoder *encoder = ttLibC_malloc(sizeof(ttLibC_RtmpEncoder));
 	if(encoder == NULL) {
 		return NULL;
@@ -97,7 +96,7 @@ ttLibC_RtmpEncoder TT_VISIBILITY_HIDDEN *ttLibC_RtmpEncoder_make() {
 	return encoder;
 }
 
-void TT_VISIBILITY_HIDDEN ttLibC_RtmpEncoder_close(ttLibC_RtmpEncoder **encoder) {
+void TT_ATTRIBUTE_INNER ttLibC_RtmpEncoder_close(ttLibC_RtmpEncoder **encoder) {
 	ttLibC_RtmpEncoder *target = (ttLibC_RtmpEncoder *)*encoder;
 	if(target == NULL) {
 		return;

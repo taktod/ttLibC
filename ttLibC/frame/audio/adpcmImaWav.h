@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "../../ttLibC_predef.h"
 #include "audio.h"
 
 /**
@@ -40,7 +41,7 @@ typedef ttLibC_Frame_Audio_AdpcmImaWav ttLibC_AdpcmImaWav;
  * @param timebase      timebase number for pts.
  * @return adpcm_ima_wav object.
  */
-ttLibC_AdpcmImaWav *ttLibC_AdpcmImaWav_make(
+ttLibC_AdpcmImaWav TT_ATTRIBUTE_API *ttLibC_AdpcmImaWav_make(
 		ttLibC_AdpcmImaWav *prev_frame,
 		uint32_t sample_rate,
 		uint32_t sample_num,
@@ -58,7 +59,7 @@ ttLibC_AdpcmImaWav *ttLibC_AdpcmImaWav_make(
  * @param src_frame  source of clone.
  * @return cloned frame.
  */
-ttLibC_AdpcmImaWav *ttLibC_AdpcmImaWav_clone(
+ttLibC_AdpcmImaWav TT_ATTRIBUTE_API *ttLibC_AdpcmImaWav_clone(
 		ttLibC_AdpcmImaWav *prev_frame,
 		ttLibC_AdpcmImaWav *src_frame);
 
@@ -66,7 +67,7 @@ ttLibC_AdpcmImaWav *ttLibC_AdpcmImaWav_clone(
  * close frame
  * @param frame
  */
-void ttLibC_AdpcmImaWav_close(ttLibC_AdpcmImaWav **frame);
+void TT_ATTRIBUTE_API ttLibC_AdpcmImaWav_close(ttLibC_AdpcmImaWav **frame);
 
 #ifdef __cplusplus
 } /* extern "C" */
