@@ -8,7 +8,7 @@
  * @date   2015/09/07
  */
 
-#include "log.h"
+#include "_log.h"
 
 #include "allocator.h"
 #include <stdint.h>
