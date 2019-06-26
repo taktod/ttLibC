@@ -9,7 +9,7 @@
  */
 
 #include "ttLibC_predef.h"
-#include "log.h"
+#include "_log.h"
 
 #include "allocator.h"
 #include <stdint.h>
