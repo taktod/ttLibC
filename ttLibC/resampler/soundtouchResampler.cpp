@@ -255,11 +255,13 @@ bool TT_VISIBILITY_DEFAULT ttLibC_Soundtouch_resample(
 				return false;
 			}
 			soundtouch_->resultf32 = f;
+			soundtouch_->resultf32->inherit_super.inherit_super.id = pcm->inherit_super.id;
 			if(callback != NULL) {
 				callback(ptr, (ttLibC_Audio *)soundtouch_->resultf32);
 			}
 		}
 		else {
+			soundtouch_->results16->inherit_super.inherit_super.id = pcm->inherit_super.id;
 			if(callback != NULL) {
 				callback(ptr, (ttLibC_Audio *)soundtouch_->results16);
 			}
@@ -305,11 +307,13 @@ bool TT_VISIBILITY_DEFAULT ttLibC_Soundtouch_resample(
 				return false;
 			}
 			soundtouch_->results16 = s;
+			soundtouch_->results16->inherit_super.inherit_super.id = pcm->inherit_super.id;
 			if(callback != NULL) {
 				callback(ptr, (ttLibC_Audio *)soundtouch_->results16);
 			}
 		}
 		else {
+			soundtouch_->resultf32->inherit_super.inherit_super.id = pcm->inherit_super.id;
 			if(callback != NULL) {
 				callback(ptr, (ttLibC_Audio *)soundtouch_->resultf32);
 			}

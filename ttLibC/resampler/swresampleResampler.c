@@ -450,6 +450,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_SwresampleResampler_resample(
 	default:
 		return false;
 	}
+	resampler_->frame->id = frame->id;
 	if(callback != NULL) {
 		if(!callback(ptr, resampler_->frame)) {
 			return false;

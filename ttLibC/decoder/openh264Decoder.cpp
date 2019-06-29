@@ -135,6 +135,7 @@ static bool Openh264Decoder_decode(
 		return false;
 	}
 	decoder_->yuv420 = yuv;
+	decoder_->yuv420->inherit_super.inherit_super.id = h264->inherit_super.inherit_super.id;
 	if(!callback(ptr, yuv)) {
 		return false;
 	}

@@ -129,6 +129,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_VorbisDecoder_decode(
 		bool is_success = (p != NULL);
 		if(is_success) {
 			decoder_->pcm = p;
+			decoder_->pcm->inherit_super.inherit_super.id = vorbis->inherit_super.inherit_super.id;
 			if(callback != NULL) {
 				if(!callback(ptr, decoder_->pcm)) {
 					is_success = false;

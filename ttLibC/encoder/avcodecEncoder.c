@@ -58,6 +58,7 @@ typedef struct {
 	AVPacket packet;
 	ttLibC_H264 *configData; // for h264 configData.
 	ttLibC_Frame *frame; // reuse frame for output.
+	uint32_t id;
 } ttLibC_Encoder_AvcodecEncoder_;
 
 typedef ttLibC_Encoder_AvcodecEncoder_ ttLibC_AvcodecEncoder_;
@@ -124,6 +125,7 @@ static bool AvcodecEncoder_encode_AudioDetail(
 					0);
 			if(aac != NULL) {
 				encoder->frame = (ttLibC_Frame *)aac;
+				encoder->frame->id = encoder->id;
 				if(callback == NULL) {
 					return true;
 				}
@@ -145,6 +147,7 @@ static bool AvcodecEncoder_encode_AudioDetail(
 					encoder->inherit_super.sample_rate);
 			if(adpcm_ima_wav != NULL) {
 				encoder->frame = (ttLibC_Frame *)adpcm_ima_wav;
+				encoder->frame->id = encoder->id;
 				if(callback == NULL) {
 					return true;
 				}
@@ -169,6 +172,7 @@ static bool AvcodecEncoder_encode_AudioDetail(
 					encoder->inherit_super.sample_rate);
 			if(mp3 != NULL) {
 				encoder->frame = (ttLibC_Frame *)mp3;
+				encoder->frame->id = encoder->id;
 				if(callback == NULL) {
 					return true;
 				}
@@ -191,6 +195,7 @@ static bool AvcodecEncoder_encode_AudioDetail(
 					encoder->inherit_super.sample_rate);
 			if(nellymoser != NULL) {
 				encoder->frame = (ttLibC_Frame *)nellymoser;
+				encoder->frame->id = encoder->id;
 				if(callback == NULL) {
 					return true;
 				}
@@ -213,6 +218,7 @@ static bool AvcodecEncoder_encode_AudioDetail(
 					encoder->inherit_super.sample_rate);
 			if(opus != NULL) {
 				encoder->frame = (ttLibC_Frame *)opus;
+				encoder->frame->id = encoder->id;
 				if(callback == NULL) {
 					return true;
 				}
@@ -234,6 +240,7 @@ static bool AvcodecEncoder_encode_AudioDetail(
 					encoder->inherit_super.sample_rate);
 			if(pcm_alaw != NULL) {
 				encoder->frame = (ttLibC_Frame *)pcm_alaw;
+				encoder->frame->id = encoder->id;
 				if(callback == NULL) {
 					return true;
 				}
@@ -255,6 +262,7 @@ static bool AvcodecEncoder_encode_AudioDetail(
 					encoder->inherit_super.sample_rate);
 			if(pcm_mulaw != NULL) {
 				encoder->frame = (ttLibC_Frame *)pcm_mulaw;
+				encoder->frame->id = encoder->id;
 				if(callback == NULL) {
 					return true;
 				}
@@ -277,6 +285,7 @@ static bool AvcodecEncoder_encode_AudioDetail(
 					encoder->inherit_super.sample_rate);
 			if(speex != NULL) {
 				encoder->frame = (ttLibC_Frame *)speex;
+				encoder->frame->id = encoder->id;
 				if(callback == NULL) {
 					return true;
 				}
@@ -299,6 +308,7 @@ static bool AvcodecEncoder_encode_AudioDetail(
 					encoder->inherit_super.sample_rate);
 			if(vorbis != NULL) {
 				encoder->frame = (ttLibC_Frame *)vorbis;
+				encoder->frame->id = encoder->id;
 				if(callback == NULL) {
 					return true;
 				}
@@ -663,6 +673,7 @@ static bool AvcodecEncoder_encode_Yuv420(
 					yuv420->inherit_super.inherit_super.timebase);
 			if(flv1 != NULL) {
 				encoder->frame = (ttLibC_Frame *)flv1;
+				encoder->frame->id = encoder->id;
 				if(callback == NULL) {
 					return true;
 				}
@@ -845,6 +856,7 @@ static bool AvcodecEncoder_encode_Yuv420(
 					yuv420->inherit_super.inherit_super.timebase);
 			if(vp8 != NULL) {
 				encoder->frame = (ttLibC_Frame *)vp8;
+				encoder->frame->id = encoder->id;
 				if(callback == NULL) {
 					return true;
 				}
@@ -876,6 +888,7 @@ static bool AvcodecEncoder_encode_Yuv420(
 					yuv420->inherit_super.inherit_super.timebase);
 			if(wmv1 != NULL) {
 				encoder->frame = (ttLibC_Frame *)wmv1;
+				encoder->frame->id = encoder->id;
 				if(callback == NULL) {
 					return true;
 				}
@@ -901,6 +914,7 @@ static bool AvcodecEncoder_encode_Yuv420(
 					yuv420->inherit_super.inherit_super.timebase);
 			if(wmv2 != NULL) {
 				encoder->frame = (ttLibC_Frame *)wmv2;
+				encoder->frame->id = encoder->id;
 				if(callback == NULL) {
 					return true;
 				}
@@ -1389,6 +1403,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_AvcodecEncoder_encode(
 		return true;
 	}
 	ttLibC_AvcodecEncoder_ *encoder_ = (ttLibC_AvcodecEncoder_ *)encoder;
+	encoder_->id = frame->id;
 	// check the target data.
 	if(frame->type != encoder_->inherit_super.input_frame_type) {
 		ERR_PRINT("input frame is not supported by avcodec.");

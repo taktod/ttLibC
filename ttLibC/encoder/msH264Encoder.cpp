@@ -130,6 +130,7 @@ typedef struct ttLibC_Encoder_MsH264Encoder_ {
 	bool has_sample;
 	ttLibC_MsH264EncodeFunc callback;
 	void *ptr;
+	uint32_t id;
 } ttLibC_Encoder_MsH264Encoder_;
 
 typedef ttLibC_Encoder_MsH264Encoder_ ttLibC_MsH264Encoder_;
@@ -190,6 +191,7 @@ static void drainH264(ttLibC_MsH264Encoder_ *encoder) {
 			}
 			// ignore about id.
 			encoder->h264 = h264;
+			encoder->h264->inherit_super.inherit_super.id = encoder->id;
 			if(encoder->callback != NULL) {
 				if(!encoder->callback(encoder->ptr, encoder->h264)) {
 					puts("errored with callback.");
@@ -513,6 +515,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_MsH264Encoder_encode(
 	if(frame == NULL) {
 		return true;
 	}
+	encoder_->id = frame->inherit_super.inherit_super.id;
 	// make IMFSample from yuv.
 	uint32_t imageSize;
 	MFCalculateImageSize(

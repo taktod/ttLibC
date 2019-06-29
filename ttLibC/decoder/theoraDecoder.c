@@ -174,6 +174,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_TheoraDecoder_decode(
 		return false;
 	}
 	decoder_->yuv420 = y;
+	decoder_->yuv420->inherit_super.inherit_super.id = theora->inherit_super.inherit_super.id;
 	if(callback != NULL) {
 		if(!callback(ptr, decoder_->yuv420)) {
 			return false;

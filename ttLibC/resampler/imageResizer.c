@@ -190,6 +190,7 @@ ttLibC_Yuv420 TT_VISIBILITY_DEFAULT *ttLibC_ImageResizer_resizeYuv420(
 			src_frame->v_stride,
 			src_frame->v_step,
 			true);
+	yuv->inherit_super.inherit_super.id = src_frame->inherit_super.inherit_super.id;
 	return yuv;
 }
 
@@ -382,5 +383,6 @@ ttLibC_Bgr TT_VISIBILITY_DEFAULT *ttLibC_ImageResizer_resizeBgr(
 					false);
 		}
 	}
+	bgr->inherit_super.inherit_super.id = src_frame->inherit_super.inherit_super.id;
 	return bgr;
 }

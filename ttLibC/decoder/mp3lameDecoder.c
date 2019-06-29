@@ -178,6 +178,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_Mp3lameDecoder_decode(
 		return false;
 	}
 	decoder_->pcms16 = p;
+	decoder_->pcms16->inherit_super.inherit_super.id = mp3->inherit_super.inherit_super.id;
 	// call
 	if(!callback(ptr, decoder_->pcms16)) {
 		return false;

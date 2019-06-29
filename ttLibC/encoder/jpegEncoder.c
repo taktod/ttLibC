@@ -273,6 +273,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_JpegEncoder_encode(
 		return false;
 	}
 	encoder_->jpeg = jpeg;
+	encoder_->jpeg->inherit_super.inherit_super.id = yuv->inherit_super.inherit_super.id;
 	if(callback != NULL) {
 		if(!callback(ptr, jpeg)) {
 			return false;

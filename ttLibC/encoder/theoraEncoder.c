@@ -132,6 +132,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_TheoraEncoder_encode(
 				return false;
 			}
 			encoder_->theora = t;
+			encoder_->theora->inherit_super.inherit_super.id = yuv420->inherit_super.inherit_super.id;
 			if(callback != NULL) {
 				if(!callback(ptr, encoder_->theora)) {
 					return false;
@@ -198,8 +199,11 @@ bool TT_VISIBILITY_DEFAULT ttLibC_TheoraEncoder_encode(
 	// put granule position.
 	theora->granule_pos = op.granulepos;
 	encoder_->theora = theora;
-	if(!callback(ptr, encoder_->theora)) {
-		return false;
+	encoder_->theora->inherit_super.inherit_super.id = yuv420->inherit_super.inherit_super.id;
+	if(callback != NULL) {
+		if(!callback(ptr, encoder_->theora)) {
+			return false;
+		}
 	}
 	return true;
 }

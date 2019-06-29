@@ -107,6 +107,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_JpegDecoder_decode(
 		return false;
 	}
 	decoder_->yuv420 = yuv;
+	decoder_->yuv420->inherit_super.inherit_super.id = jpeg->inherit_super.inherit_super.id;
 	// check the size is multiple of 16 or not.
 	if(jpeg->inherit_super.height % 16 > 0) {
 		size_t dummy_size = jpeg->inherit_super.width * 3;

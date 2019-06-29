@@ -137,6 +137,7 @@ bool ttLibC_PngDecoder_decode(
     return false;
   }
   decoder_->bgr = bgr;
+  decoder_->bgr->inherit_super.inherit_super.id = png->inherit_super.inherit_super.id;
   if(color_type == PNG_COLOR_TYPE_PALETTE) {
     // check transalpha
     png_bytep trans_alpha = NULL;

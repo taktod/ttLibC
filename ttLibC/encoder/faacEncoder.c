@@ -45,6 +45,7 @@ typedef struct {
 	/** pts data for next aac object. */
 	uint64_t pts;
 	bool is_pts_initialized;
+	uint32_t id;
 } ttLibC_Encoder_FaacEncoder_;
 
 typedef ttLibC_Encoder_FaacEncoder_ ttLibC_FaacEncoder_;
@@ -216,6 +217,7 @@ static bool checkEncodedData(ttLibC_FaacEncoder_ *encoder, uint32_t encode_size,
 			0);
 	if(aac != NULL) {
 		encoder->aac = aac;
+		encoder->aac->inherit_super.inherit_super.id = encoder->id;
 		encoder->pts += sample_num;
 		if(!callback(ptr, aac)) {
 			return false;
@@ -246,6 +248,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_FaacEncoder_encode(
 		return true;
 	}
 	ttLibC_FaacEncoder_ *encoder_ = (ttLibC_FaacEncoder_ *)encoder;
+	encoder_->id = pcm->inherit_super.inherit_super.id;
 	if(!encoder_->is_pts_initialized) {
 		encoder_->is_pts_initialized = true;
 		encoder_->pts = pcm->inherit_super.inherit_super.pts * encoder_->inherit_super.sample_rate / pcm->inherit_super.inherit_super.timebase;
