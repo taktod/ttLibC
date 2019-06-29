@@ -214,6 +214,7 @@ static bool AvcodecDecoder_decodeAudio(
 					frame->inherit_super.timebase);
 			if(pcmf32 != NULL) {
 				decoder->frame = (ttLibC_Frame *)pcmf32;
+				decoder->frame->id = frame->inherit_super.id;
 				if(callback == NULL) {
 					return true;
 				}
@@ -247,6 +248,7 @@ static bool AvcodecDecoder_decodeAudio(
 					frame->inherit_super.timebase);
 			if(pcmf32 != NULL) {
 				decoder->frame = (ttLibC_Frame *)pcmf32;
+				decoder->frame->id = frame->inherit_super.id;
 				if(callback == NULL) {
 					return true;
 				}
@@ -280,6 +282,7 @@ static bool AvcodecDecoder_decodeAudio(
 					frame->inherit_super.timebase);
 			if(pcms16 != NULL) {
 				decoder->frame = (ttLibC_Frame *)pcms16;
+				decoder->frame->id = frame->inherit_super.id;
 				if(callback == NULL) {
 					return true;
 				}
@@ -313,6 +316,7 @@ static bool AvcodecDecoder_decodeAudio(
 					frame->inherit_super.timebase);
 			if(pcms16 != NULL) {
 				decoder->frame = (ttLibC_Frame *)pcms16;
+				decoder->frame->id = frame->inherit_super.id;
 				if(callback == NULL) {
 					return true;
 				}
@@ -492,6 +496,7 @@ static bool AvcodecDecoder_decodeVideo(
 					frame->inherit_super.timebase);
 			if(y != NULL) {
 				decoder->frame = (ttLibC_Frame *)y;
+				decoder->frame->id = frame->inherit_super.id;
 				if(callback != NULL) {
 					return callback(ptr, decoder->frame);
 				}
@@ -578,6 +583,7 @@ static bool AvcodecDecoder_decodeVideo(
 			yuv->inherit_super.inherit_super.pts = decoder->avframe->pts;
 #endif
 			yuv->inherit_super.inherit_super.timebase = frame->inherit_super.timebase;
+			decoder->frame->id = frame->inherit_super.id;
 			if(callback != NULL) {
 				return callback(ptr, decoder->frame);
 			}
@@ -653,6 +659,7 @@ static bool AvcodecDecoder_decodeVideo(
 #endif
 			decoder->frame->timebase = frame->inherit_super.timebase;
 			// done.
+			decoder->frame->id = frame->inherit_super.id;
 			if(callback != NULL) {
 				return callback(ptr, decoder->frame);
 			}
@@ -715,6 +722,7 @@ static bool AvcodecDecoder_decodeVideo(
 					frame->inherit_super.timebase);
 			if(b != NULL) {
 				decoder->frame = (ttLibC_Frame *)b;
+				decoder->frame->id = frame->inherit_super.id;
 				if(callback != NULL) {
 					return callback(ptr, decoder->frame);
 				}
@@ -762,6 +770,7 @@ static bool AvcodecDecoder_decodeVideo(
 				src += decoder->avframe->linesize[0];
 				dst += bgr->width_stride;
 			}
+			decoder->frame->id = frame->inherit_super.id;
 			if(callback != NULL) {
 				return callback(ptr, decoder->frame);
 			}

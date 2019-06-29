@@ -435,6 +435,7 @@ ttLibC_Audio TT_ATTRIBUTE_API *ttLibC_AudioResampler_convertFormat(
 				break;
 			}
 			pcms16->inherit_super.inherit_super.is_non_copy = false;
+			pcms16->inherit_super.inherit_super.id = src_frame->inherit_super.id;
 			return (ttLibC_Audio *)pcms16;
 		}
 	case frameType_pcmF32:
@@ -472,6 +473,7 @@ ttLibC_Audio TT_ATTRIBUTE_API *ttLibC_AudioResampler_convertFormat(
 				break;
 			}
 			pcmf32->inherit_super.inherit_super.is_non_copy = false;
+			pcmf32->inherit_super.inherit_super.id = src_frame->inherit_super.id;
 			return (ttLibC_Audio *)pcmf32;
 		}
 	}

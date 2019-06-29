@@ -251,6 +251,7 @@ bool TT_ATTRIBUTE_API ttLibC_AcDecoder_decode(
 		if(p == NULL) {
 			return false;
 		}
+		decoder_->pcms16->inherit_super.inherit_super.id = audio->inherit_super.id;
 		decoder_->pcms16 = p;
 		if(!callback(ptr, decoder_->pcms16)) {
 			return false;

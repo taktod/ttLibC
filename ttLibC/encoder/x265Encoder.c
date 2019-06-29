@@ -28,6 +28,7 @@ typedef struct ttLibC_Encoder_X265Encoder_ {
 	ttLibC_H265 *h265;
 	uint64_t pts;
 	uint32_t timebase;
+	uint32_t id;
 } ttLibC_Encoder_X265Encoder_;
 
 typedef ttLibC_Encoder_X265Encoder_ ttLibC_X265Encoder_;
@@ -172,6 +173,7 @@ static bool X265Encoder_makeH265Frame(
 		return false;
 	}
 	encoder->h265 = h265;
+	h265->inherit_super.inherit_super.id = encoder->id;
 	if(callback != NULL) {
 		return callback(ptr, h265);
 	}
@@ -303,6 +305,7 @@ bool TT_ATTRIBUTE_API ttLibC_X265Encoder_encode(
 		ERR_PRINT("only support planar.");
 		return false;
 	}
+	encoder_->id = yuv420->inherit_super.inherit_super.id;
 	encoder_->timebase = yuv420->inherit_super.inherit_super.timebase;
 	if(encoder_->is_first_frame) {
 		x265_nal *nal;

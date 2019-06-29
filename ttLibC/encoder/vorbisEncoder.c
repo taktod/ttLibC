@@ -98,6 +98,7 @@ bool TT_ATTRIBUTE_API ttLibC_VorbisEncoder_encode(
 			return false;
 		}
 		encoder_->vorbis = v;
+		encoder_->vorbis->inherit_super.inherit_super.id = pcm->inherit_super.id;
 		if(callback != NULL) {
 			if(!callback(ptr, encoder_->vorbis)) {
 				return false;
@@ -114,6 +115,7 @@ bool TT_ATTRIBUTE_API ttLibC_VorbisEncoder_encode(
 			return false;
 		}
 		encoder_->vorbis = v;
+		encoder_->vorbis->inherit_super.inherit_super.id = pcm->inherit_super.id;
 		if(callback != NULL) {
 			if(!callback(ptr, encoder_->vorbis)) {
 				return false;
@@ -130,6 +132,7 @@ bool TT_ATTRIBUTE_API ttLibC_VorbisEncoder_encode(
 			return false;
 		}
 		encoder_->vorbis = v;
+		encoder_->vorbis->inherit_super.inherit_super.id = pcm->inherit_super.id;
 		if(callback != NULL) {
 			if(!callback(ptr, encoder_->vorbis)) {
 				return false;
@@ -262,6 +265,7 @@ bool TT_ATTRIBUTE_API ttLibC_VorbisEncoder_encode(
 				return false;
 			}
 			encoder_->vorbis = v;
+			encoder_->vorbis->inherit_super.inherit_super.id = pcm->inherit_super.id;
 			if(callback != NULL) {
 				if(!callback(ptr, encoder_->vorbis)) {
 					return false;

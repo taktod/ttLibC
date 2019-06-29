@@ -49,6 +49,7 @@ typedef struct {
 	/** pts counter */
 	uint64_t pts;
 	bool is_pts_initialized;
+	uint32_t id;
 } ttLibC_Encoder_SpeexEncoder_;
 
 typedef ttLibC_Encoder_SpeexEncoder_ ttLibC_SpeexEncoder_;
@@ -145,8 +146,11 @@ static bool doEncode(ttLibC_SpeexEncoder_ *encoder, void *data, ttLibC_SpeexEnco
 			encoder->inherit_super.sample_rate);
 	if(speex != NULL) {
 		encoder->speex = speex;
-		if(!callback(ptr, speex)) {
-			return false;
+		encoder->speex->inherit_super.inherit_super.id = encoder->id;
+		if(callback != NULL) {
+			if(!callback(ptr, speex)) {
+				return false;
+			}
 		}
 	}
 	else {
@@ -176,6 +180,7 @@ bool TT_ATTRIBUTE_API ttLibC_SpeexEncoder_encode(
 		return true;
 	}
 	ttLibC_SpeexEncoder_ *encoder_ = (ttLibC_SpeexEncoder_ *)encoder;
+	encoder_->id = pcm->inherit_super.inherit_super.id;
 	if(!encoder_->is_pts_initialized) {
 		encoder_->is_pts_initialized = true;
 		encoder_->pts = pcm->inherit_super.inherit_super.pts * encoder_->inherit_super.sample_rate / pcm->inherit_super.inherit_super.timebase;

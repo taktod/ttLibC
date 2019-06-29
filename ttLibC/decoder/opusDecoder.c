@@ -108,6 +108,7 @@ bool TT_ATTRIBUTE_API ttLibC_OpusDecoder_decode(
 		return false;
 	}
 	decoder_->pcms16 = pcm;
+	decoder_->pcms16->inherit_super.inherit_super.id = opus->inherit_super.inherit_super.id;
 	if(!callback(ptr, decoder_->pcms16)) {
 		return false;
 	}

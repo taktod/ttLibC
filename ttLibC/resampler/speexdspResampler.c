@@ -198,6 +198,7 @@ ttLibC_PcmS16 TT_ATTRIBUTE_API *ttLibC_SpeexdspResampler_resample(ttLibC_Speexds
 	}
 	pcms16->inherit_super.inherit_super.is_non_copy = false;
 	pcms16->inherit_super.inherit_super.buffer_size = pcms16->inherit_super.sample_num * pcms16->inherit_super.channel_num * sizeof(int16_t);
+	pcms16->inherit_super.inherit_super.id = src_pcms16->inherit_super.inherit_super.id;
 	return pcms16;
 }
 

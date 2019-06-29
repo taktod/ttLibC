@@ -41,6 +41,7 @@ typedef struct {
 	/** pts counter */
 	uint64_t pts;
 	bool is_pts_initialized;
+	uint32_t id;
 } ttLibC_Encoder_OpusEncoder_;
 
 typedef ttLibC_Encoder_OpusEncoder_ ttLibC_OpusEncoder_;
@@ -126,8 +127,11 @@ static bool doEncode(ttLibC_OpusEncoder_ *encoder, void *data, ttLibC_OpusEncode
 			encoder->inherit_super.sample_rate);
 	if(opus != NULL) {
 		encoder->opus = opus;
-		if(!callback(ptr, opus)) {
-			return false;
+		encoder->opus->inherit_super.inherit_super.id = encoder->id;
+		if(callback != NULL) {
+			if(!callback(ptr, opus)) {
+				return false;
+			}
 		}
 	}
 	encoder->pts += encoder->inherit_super.unit_sample_num;
@@ -154,6 +158,7 @@ bool TT_ATTRIBUTE_API ttLibC_OpusEncoder_encode(
 		return true;
 	}
 	ttLibC_OpusEncoder_ *encoder_ = (ttLibC_OpusEncoder_ *)encoder;
+	encoder_->id = pcm->inherit_super.inherit_super.id;
 	if(!encoder_->is_pts_initialized) {
 		encoder_->is_pts_initialized = true;
 		encoder_->pts = pcm->inherit_super.inherit_super.pts * encoder_->inherit_super.sample_rate / pcm->inherit_super.inherit_super.timebase;

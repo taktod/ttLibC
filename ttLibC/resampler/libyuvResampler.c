@@ -110,6 +110,7 @@ ttLibC_Yuv420 TT_ATTRIBUTE_API *ttLibC_LibyuvResampler_resize(
 			(width  + 1) >> 1,
 			(height + 1) >> 1,
 			filter);
+	yuv->inherit_super.inherit_super.id = src_frame->inherit_super.inherit_super.id;
 	return yuv;
 }
 
@@ -168,6 +169,7 @@ ttLibC_Yuv420 TT_ATTRIBUTE_API *ttLibC_LibyuvResampler_rotate(
 			src_frame->inherit_super.width,
 			src_frame->inherit_super.height,
 			rotate);
+	yuv->inherit_super.inherit_super.id = src_frame->inherit_super.inherit_super.id;
 	return yuv;
 }
 

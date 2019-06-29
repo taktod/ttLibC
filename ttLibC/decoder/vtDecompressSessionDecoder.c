@@ -35,6 +35,7 @@ typedef struct ttLibC_Decoder_VtDecompressionSession_VtDecoder_ {
 
 	ttLibC_VtDecodeFunc callback;
 	ttLibC_VtDecodeRawFunc raw_callback;
+	uint32_t id;
 	void *ptr;
 } ttLibC_Decoder_VtDecompressionSession_VtDecoder_;
 
@@ -115,6 +116,7 @@ static void VtDecoder_decodeCallback(
 				pts.timescale);
 		if(y != NULL) {
 			decoder->yuv420 = y;
+			decoder->yuv420->inherit_super.inherit_super.id = decoder->id;
 			if(decoder->callback != NULL) {
 				if(!decoder->callback(decoder->ptr, decoder->yuv420)) {
 				}
@@ -544,6 +546,7 @@ static bool VtDecoder_decode(
 		return true;
 	}
 	ttLibC_VtDecoder_ *decoder_ = (ttLibC_VtDecoder_ *)decoder;
+	decoder_->id = video->inherit_super.id;
 	switch(decoder_->inherit_super.frame_type) {
 	case frameType_h264:
 		return VtDecoder_decodeH264(decoder_,

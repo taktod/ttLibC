@@ -36,6 +36,7 @@ typedef struct ttLibC_Encoder_VtCompressSession_VtEncoder_ {
 
 	void *ptr;
 	ttLibC_VtEncodeFunc callback;
+	uint32_t id;
 } ttLibC_Encoder_VtCompressSession_VtEncoder_;
 
 typedef ttLibC_Encoder_VtCompressSession_VtEncoder_ ttLibC_VtEncoder_;
@@ -82,6 +83,7 @@ static bool VtEncoder_makeH264Frame(
 		}
 		encoder->video = (ttLibC_Video *)h264;
 	}
+	h264->inherit_super.inherit_super.id = encoder->id;
 	if(encoder->callback != NULL) {
 		if(!encoder->callback(encoder->ptr, (ttLibC_Video *)h264)) {
 			ttLibC_DynamicBuffer_close(&buffer);
@@ -215,6 +217,7 @@ static bool VtEncoder_makeH265Frame(
 		}
 		encoder->video = (ttLibC_Video *)h265;
 	}
+	h265->inherit_super.inherit_super.id = encoder->id;
 	if(encoder->callback != NULL) {
 		if(!encoder->callback(encoder->ptr, (ttLibC_Video *)h265)) {
 			ttLibC_DynamicBuffer_close(&buffer);
@@ -330,6 +333,7 @@ static void VtEncoder_encodeJpegCallback(ttLibC_VtEncoder_ *encoder, CMSampleBuf
 		return;
 	}
 	encoder->video = (ttLibC_Video *)jpeg;
+	jpeg->inherit_super.inherit_super.id = encoder->id;
 	if(encoder->callback != NULL) {
 		if(!encoder->callback(encoder->ptr, (ttLibC_Video *)jpeg)) {
 			return;
@@ -643,6 +647,7 @@ bool TT_ATTRIBUTE_API ttLibC_VtEncoder_encode(
 	}
 	encoder_->callback = callback;
 	encoder_->ptr = ptr;
+	encoder_->id = yuv420->inherit_super.inherit_super.id;
 	// setup pts
 	CMTime pts = CMTimeMake(yuv420->inherit_super.inherit_super.pts, yuv420->inherit_super.inherit_super.timebase);
 	CMTime dur = CMTimeMake(1, encoder_->fps);

@@ -41,6 +41,7 @@ typedef struct ttLibC_Encoder_AudioConverter_AcEncoder_ {
 	bool is_pts_initialized;
 
 	ttLibC_Audio *audio;
+	uint32_t id;
 } ttLibC_Encoder_AudioConverter_AcEncoder_;
 
 typedef ttLibC_Encoder_AudioConverter_AcEncoder_ ttLibC_AcEncoder_;
@@ -214,6 +215,7 @@ static bool AcEncoder_checkEncodedData(
 			}
 			encoder->pts += encoder->unit_samples;
 			encoder->audio = (ttLibC_Audio *)aac;
+			encoder->audio->inherit_super.id = encoder->id;
 			return callback(ptr, encoder->audio);
 		}
 		break;
@@ -235,6 +237,7 @@ static bool AcEncoder_checkEncodedData(
 			}
 			encoder->pts += data_size;
 			encoder->audio = (ttLibC_Audio *)pcmAlaw;
+			encoder->audio->inherit_super.id = encoder->id;
 			return callback(ptr, encoder->audio);
 		}
 		break;
@@ -256,6 +259,7 @@ static bool AcEncoder_checkEncodedData(
 			}
 			encoder->pts += data_size;
 			encoder->audio = (ttLibC_Audio *)pcmMulaw;
+			encoder->audio->inherit_super.id = encoder->id;
 			return callback(ptr, encoder->audio);
 		}
 		break;
@@ -287,6 +291,7 @@ bool TT_ATTRIBUTE_API ttLibC_AcEncoder_encode(
 		default:
 			break;
 	}
+	encoder_->id = pcm->inherit_super.inherit_super.id;
 	if(!encoder_->is_pts_initialized) {
 		encoder_->is_pts_initialized = true;
 		encoder_->pts = pcm->inherit_super.inherit_super.pts * encoder_->sample_rate / pcm->inherit_super.inherit_super.timebase;

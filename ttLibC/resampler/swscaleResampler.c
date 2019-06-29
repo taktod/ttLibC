@@ -296,6 +296,7 @@ bool TT_ATTRIBUTE_API ttLibC_SwscaleResampler_resample(
 	// update pts.
 	resampler_->frame->pts      = frame->pts;
 	resampler_->frame->timebase = frame->timebase;
+	resampler_->frame->id       = frame->id;
 	if(callback != NULL) {
 		if(!callback(ptr, resampler_->frame)) {
 			return false;

@@ -36,6 +36,7 @@ typedef struct {
 	/** pts data for next mp3 object. */
 	uint64_t pts;
 	bool is_pts_initialized;
+	uint32_t id;
 } ttLibC_Encoder_Mp3lameEncoder_;
 
 typedef ttLibC_Encoder_Mp3lameEncoder_ ttLibC_Mp3lameEncoder_;
@@ -124,6 +125,7 @@ static bool checkEncodedData(ttLibC_Mp3lameEncoder_ *encoder, uint32_t encode_si
 			mp3->inherit_super.inherit_super.timebase = mp3->inherit_super.sample_rate;
 			encoder->pts += mp3->inherit_super.sample_num;
 			encoder->mp3 = mp3;
+			encoder->mp3->inherit_super.inherit_super.id = encoder->id;
 			// call callback with created object.
 			if(!callback(ptr, encoder->mp3)) {
 				return false;
@@ -167,6 +169,7 @@ bool TT_ATTRIBUTE_API ttLibC_Mp3lameEncoder_encode(
 		return true;
 	}
 	ttLibC_Mp3lameEncoder_ *encoder_ = (ttLibC_Mp3lameEncoder_ *)encoder;
+	encoder_->id = pcm->inherit_super.inherit_super.id;
 	if(!encoder_->is_pts_initialized) {
 		encoder_->is_pts_initialized = true;
 		encoder_->pts = pcm->inherit_super.inherit_super.pts * encoder_->inherit_super.sample_rate / pcm->inherit_super.inherit_super.timebase;

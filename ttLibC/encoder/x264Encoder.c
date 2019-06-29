@@ -29,6 +29,7 @@ typedef struct ttLibC_Encoder_X264Encoder_ {
 	uint32_t chroma_size;
 	uint64_t pts;
 	uint32_t timebase;
+	uint32_t id;
 } ttLibC_Encoder_X264Encoder_;
 
 typedef ttLibC_Encoder_X264Encoder_ ttLibC_X264Encoder_;
@@ -233,6 +234,7 @@ static bool X264Encoder_makeH264Frame(
 		}
 		encoder->h264 = h264;
 	}
+	h264->inherit_super.inherit_super.id = encoder->id;
 	if(!callback(ptr, h264)) {
 		ttLibC_DynamicBuffer_close(&buffer);
 		return false;
@@ -368,6 +370,7 @@ bool TT_ATTRIBUTE_API ttLibC_X264Encoder_encode(
 		ERR_PRINT("only support planar.");
 		return false;
 	}
+	encoder_->id = yuv420->inherit_super.inherit_super.id;
 	// copy yuv data to pic.
 	// check: can I use ref copy?
 //	memcpy(encoder_->pic.img.plane[0], yuv420->y_data, encoder_->luma_size);

@@ -144,6 +144,7 @@ bool TT_ATTRIBUTE_API ttLibC_SpeexDecoder_decode(
 				return false;
 			}
 			decoder_->pcms16 = p;
+			decoder_->pcms16->inherit_super.inherit_super.id = speex->inherit_super.inherit_super.id;
 			if(callback != NULL) {
 				if(!callback(ptr, decoder_->pcms16)) {
 					return false;

@@ -103,6 +103,7 @@ ttLibC_Yuv420 TT_ATTRIBUTE_API *ttLibC_ImageResampler_makeYuv420FromBgr(
 		g_src += src_frame->width_stride;
 		b_src += src_frame->width_stride;
 	}
+	yuv->inherit_super.inherit_super.id = src_frame->inherit_super.inherit_super.id;
 	return yuv;
 }
 
@@ -240,6 +241,7 @@ ttLibC_Bgr TT_ATTRIBUTE_API *ttLibC_ImageResampler_makeBgrFromYuv420(
 			a_dst += bgr->width_stride;
 		}
 	}
+	bgr->inherit_super.inherit_super.id = src_frame->inherit_super.inherit_super.id;
 	return bgr;
 }
 

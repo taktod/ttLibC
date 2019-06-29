@@ -43,6 +43,7 @@ typedef struct ttLibC_Encoder_Openh264Encoder_ {
 	int32_t idr_interval_count;
 	/** reduce_mode */
 	bool is_reduce_mode;
+	uint32_t id;
 } ttLibC_Encoder_Openh264Encoder_;
 
 typedef ttLibC_Encoder_Openh264Encoder_ ttLibC_Openh264Encoder_;
@@ -239,6 +240,7 @@ static bool Openh264Encoder_makeH264Frame(
 		}
 		encoder->h264 = h264;
 	}
+	h264->inherit_super.inherit_super.id = encoder->id;
 	if(!callback(ptr, h264)) {
 		ttLibC_DynamicBuffer_close(&buffer);
 		return false;
@@ -405,6 +407,7 @@ static bool Openh264Encoder_encode(
 		return false;
 	}
 	ttLibC_Openh264Encoder_ *encoder_ = (ttLibC_Openh264Encoder_ *)encoder;
+	encoder_->id = yuv->inherit_super.inherit_super.id;
 	encoder_->picture.iPicWidth    = yuv->inherit_super.width;
 	encoder_->picture.iPicHeight   = yuv->inherit_super.height;
 	encoder_->picture.iColorFormat = videoFormatI420;
