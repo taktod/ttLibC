@@ -134,7 +134,7 @@ typedef struct ttLibC_Encoder_MsH264Encoder_ {
 
 typedef ttLibC_Encoder_MsH264Encoder_ ttLibC_MsH264Encoder_;
 
-static void drainH264(ttLibC_MsH264Encoder_ *encoder) {
+static void MsH264Encoder_drainH264(ttLibC_MsH264Encoder_ *encoder) {
 	HRESULT hr = S_OK;
 	MFT_OUTPUT_DATA_BUFFER outDataBuffer;
 	MFT_OUTPUT_STREAM_INFO outputInfo = { 0 };
@@ -290,7 +290,7 @@ public:
 			case METransformHaveOutput:
 				{
 					// we need to make callback. make later.
-					drainH264(encoder_);
+					MsH264Encoder_drainH264(encoder_);
 				}
 				break;
 			case MF_E_TRANSFORM_STREAM_CHANGE:
@@ -552,7 +552,7 @@ bool TT_ATTRIBUTE_API ttLibC_MsH264Encoder_encode(
 		ReleaseOnExit roeSample(sample);
 		ReleaseOnExit roeBuffer(buffer);
 
-		drainH264(encoder_);
+		MsH264Encoder_drainH264(encoder_);
 	}
 	return SUCCEEDED(hr);
 }

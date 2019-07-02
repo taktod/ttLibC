@@ -43,7 +43,7 @@ bool TT_ATTRIBUTE_API ttLibC_MsGlobal_setlocale(const char *language) {
 	return current != NULL;
 }
 
-static std::wstring stringToWstring(std::string const& src)
+static std::wstring MsGlobal_stringToWstring(std::string const& src)
 {
 	std::size_t converted{};
 	std::vector<wchar_t> dest(src.size(), L'\0');
@@ -51,7 +51,7 @@ static std::wstring stringToWstring(std::string const& src)
 	return std::wstring(dest.begin(), dest.end());
 }
 
-static std::string wstringToUtf8string(std::wstring const& src)
+static std::string MsGlobal_wstringToUtf8string(std::wstring const& src)
 {
 	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 	return converter.to_bytes(src);
@@ -66,7 +66,7 @@ std::string TT_ATTRIBUTE_API ttLibC_MsGlobal_wcharToUtf8string(const wchar_t *sr
 			(wcslen(src) + 1) * sizeof(wchar_t),
 			src,
 			(wcslen(src) + 1) * sizeof(wchar_t));
-	return wstringToUtf8string(stringToWstring(std::string(buf)));
+	return MsGlobal_wstringToUtf8string(MsGlobal_stringToWstring(std::string(buf)));
 }
 
 #endif
