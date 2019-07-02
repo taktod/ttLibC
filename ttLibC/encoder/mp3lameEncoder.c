@@ -115,7 +115,7 @@ ttLibC_Mp3lameEncoder TT_VISIBILITY_DEFAULT *ttLibC_Mp3lameEncoder_make(
  * @param ptr         user def data pointer.
  * @return true / false
  */
-static bool checkEncodedData(ttLibC_Mp3lameEncoder_ *encoder, uint32_t encode_size, ttLibC_Mp3lameEncodeFunc callback, void *ptr) {
+static bool Mp3lameEncoder_checkEncodedData(ttLibC_Mp3lameEncoder_ *encoder, uint32_t encode_size, ttLibC_Mp3lameEncodeFunc callback, void *ptr) {
 	uint8_t *data = encoder->data;
 	ttLibC_Mp3 *mp3 = NULL;
 	do {
@@ -184,13 +184,13 @@ bool TT_VISIBILITY_DEFAULT ttLibC_Mp3lameEncoder_encode(
 		{
 			if(encoder_->inherit_super.channel_num == 1) {
 				uint32_t size = lame_encode_buffer(encoder_->gflags, (const short*)pcm->l_data, NULL, pcm->inherit_super.sample_num, encoder_->data + encoder_->data_start_pos, encoder_->data_size - encoder_->data_start_pos);
-				if(!checkEncodedData(encoder_, size + encoder_->data_start_pos, callback, ptr)) {
+				if(!Mp3lameEncoder_checkEncodedData(encoder_, size + encoder_->data_start_pos, callback, ptr)) {
 					return false;
 				}
 			}
 			else {
 				uint32_t size = lame_encode_buffer_interleaved(encoder_->gflags, (short*)pcm->l_data, pcm->inherit_super.sample_num, encoder_->data + encoder_->data_start_pos, encoder_->data_size - encoder_->data_start_pos);
-				if(!checkEncodedData(encoder_, size + encoder_->data_start_pos, callback, ptr)) {
+				if(!Mp3lameEncoder_checkEncodedData(encoder_, size + encoder_->data_start_pos, callback, ptr)) {
 					return false;
 				}
 			}
@@ -199,7 +199,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_Mp3lameEncoder_encode(
 	case PcmS16Type_littleEndian_planar:
 		{
 			uint32_t size = lame_encode_buffer(encoder_->gflags, (const short*)pcm->l_data, (const short*)pcm->r_data, pcm->inherit_super.sample_num, encoder_->data + encoder_->data_start_pos, encoder_->data_size - encoder_->data_start_pos);
-			if(!checkEncodedData(encoder_, size + encoder_->data_start_pos, callback, ptr)) {
+			if(!Mp3lameEncoder_checkEncodedData(encoder_, size + encoder_->data_start_pos, callback, ptr)) {
 				return false;
 			}
 		}

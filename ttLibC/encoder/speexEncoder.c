@@ -127,7 +127,7 @@ ttLibC_SpeexEncoder TT_VISIBILITY_DEFAULT *ttLibC_SpeexEncoder_make(
  * @param ptr      user def data pointer.
  * @return true / false
  */
-static bool doEncode(ttLibC_SpeexEncoder_ *encoder, void *data, ttLibC_SpeexEncodeFunc callback, void *ptr) {
+static bool SpeexEncoder_doEncode(ttLibC_SpeexEncoder_ *encoder, void *data, ttLibC_SpeexEncodeFunc callback, void *ptr) {
 	speex_bits_reset(&encoder->bits);
 	// encode
 	speex_encode_int(encoder->enc_state, (int16_t *)data, &encoder->bits);
@@ -233,7 +233,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_SpeexEncoder_encode(
 		memcpy(encoder_->pcm_buffer + encoder_->pcm_buffer_next_pos, data, encoder_->pcm_buffer_size - encoder_->pcm_buffer_next_pos);
 		data += encoder_->pcm_buffer_size - encoder_->pcm_buffer_next_pos;
 		left_size -= encoder_->pcm_buffer_size - encoder_->pcm_buffer_next_pos;
-		if(!doEncode(encoder_, encoder_->pcm_buffer, callback, ptr)) {
+		if(!SpeexEncoder_doEncode(encoder_, encoder_->pcm_buffer, callback, ptr)) {
 			return false;
 		}
 		encoder_->pcm_buffer_next_pos = 0;
@@ -246,7 +246,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_SpeexEncoder_encode(
 			}
 			break;
 		}
-		if(!doEncode(encoder_, data, callback, ptr)) {
+		if(!SpeexEncoder_doEncode(encoder_, data, callback, ptr)) {
 			return false;
 		}
 		data += encoder_->pcm_buffer_size;

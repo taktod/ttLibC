@@ -197,7 +197,7 @@ ttLibC_FaacEncoder TT_VISIBILITY_DEFAULT *ttLibC_FaacEncoder_makeWithFaacEncConf
  * @param callback    callback func
  * @param ptr         user def data pointer.
  */
-static bool checkEncodedData(ttLibC_FaacEncoder_ *encoder, uint32_t encode_size, ttLibC_FaacEncodeFunc callback, void *ptr) {
+static bool FaacEncoder_checkEncodedData(ttLibC_FaacEncoder_ *encoder, uint32_t encode_size, ttLibC_FaacEncodeFunc callback, void *ptr) {
 	// detail data from encoder.
 	// this func is called for each aac frame.
 	// calcurate sample_num from encoder->samples_put. 1024 fixed?
@@ -278,7 +278,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_FaacEncoder_encode(
 		left_size -= encoder_->samples_length - encoder_->pcm_buffer_next_pos;
 		size_t encode_size = faacEncEncode(encoder_->handle, (int32_t *)encoder_->pcm_buffer, encoder_->samples_input, encoder_->data, encoder_->data_size);
 		if(encode_size > 0) {
-			if(!checkEncodedData(encoder_, encode_size, callback, ptr)) {
+			if(!FaacEncoder_checkEncodedData(encoder_, encode_size, callback, ptr)) {
 				return false;
 			}
 		}
@@ -297,7 +297,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_FaacEncoder_encode(
 		// data have enough size.
 		size_t encode_size = faacEncEncode(encoder_->handle, (int32_t *)data, encoder_->samples_input, encoder_->data, encoder_->data_size);
 		if(encode_size > 0) {
-			if(!checkEncodedData(encoder_, encode_size, callback, ptr)) {
+			if(!FaacEncoder_checkEncodedData(encoder_, encode_size, callback, ptr)) {
 				return false;
 			}
 		}

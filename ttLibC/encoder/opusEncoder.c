@@ -109,7 +109,7 @@ ttLibC_OpusEncoder TT_VISIBILITY_DEFAULT *ttLibC_OpusEncoder_make(
  * @param callback callback func
  * @param ptr      user def data pointer.
  */
-static bool doEncode(ttLibC_OpusEncoder_ *encoder, void *data, ttLibC_OpusEncodeFunc callback, void *ptr) {
+static bool OpusEncoder_doEncode(ttLibC_OpusEncoder_ *encoder, void *data, ttLibC_OpusEncodeFunc callback, void *ptr) {
 	int size = opus_encode(encoder->encoder, (int16_t *)data, encoder->inherit_super.unit_sample_num, encoder->data, encoder->data_size);
 	if(size == 0) {
 		ERR_PRINT("failed to make opus.");
@@ -187,7 +187,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_OpusEncoder_encode(
 		memcpy(encoder_->pcm_buffer + encoder_->pcm_buffer_next_pos, data, encoder_->pcm_buffer_size - encoder_->pcm_buffer_next_pos);
 		data += encoder_->pcm_buffer_size - encoder_->pcm_buffer_next_pos;
 		left_size -= encoder_->pcm_buffer_size - encoder_->pcm_buffer_next_pos;
-		if(!doEncode(encoder_, encoder_->pcm_buffer, callback, ptr)) {
+		if(!OpusEncoder_doEncode(encoder_, encoder_->pcm_buffer, callback, ptr)) {
 			return false;
 		}
 		encoder_->pcm_buffer_next_pos = 0;
@@ -200,7 +200,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_OpusEncoder_encode(
 			}
 			break;
 		}
-		if(!doEncode(encoder_, data, callback, ptr)) {
+		if(!OpusEncoder_doEncode(encoder_, data, callback, ptr)) {
 			return false;
 		}
 		data += encoder_->pcm_buffer_size;
