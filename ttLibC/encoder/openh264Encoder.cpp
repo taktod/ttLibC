@@ -1055,7 +1055,7 @@ bool TT_ATTRIBUTE_API ttLibC_Openh264Encoder_spatialParamParse(void *paramExt, u
 		ENUM("SM_RESERVED")
 			mode = SM_RESERVED;
 		else return false;
-		layer.sSliceCfg.uiSliceMode = mode;
+		pExt->sSpatialLayers[id].sSliceCfg.uiSliceMode = mode;
 	}
 /*	OPT("sSliceCfg.sSliceArgument.uiSliceMbNum")
 	{
