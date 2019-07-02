@@ -622,6 +622,10 @@ int TT_ATTRIBUTE_INNER ttLibC_ContainerWriter_write_(
 		ERR_PRINT("failed to get correspond track. %d", frame->id);
 		return -1;
 	}
+	if(frame->type != track->frame_type) {
+		ERR_PRINT("input frame type(%d) is different from track frame type(%d).", frame->type, track->frame_type);
+		return -1;
+	}
 	uint64_t pts = (uint64_t)(1.0 * frame->pts * writer->inherit_super.timebase / frame->timebase);
 	uint64_t dts = (uint64_t)(1.0 * frame->dts * writer->inherit_super.timebase / frame->timebase);
 	if(frame->timebase == writer->inherit_super.timebase) {
