@@ -1056,7 +1056,7 @@ bool TT_VISIBILITY_DEFAULT ttLibC_Openh264Encoder_spatialParamParse(void *paramE
 		ENUM("SM_RESERVED")
 			mode = SM_RESERVED;
 		else return false;
-		layer.sSliceCfg.uiSliceMode = mode;
+		pExt->sSpatialLayers[id].sSliceCfg.uiSliceMode = mode;
 	}
 /*	OPT("sSliceCfg.sSliceArgument.uiSliceMbNum")
 	{
