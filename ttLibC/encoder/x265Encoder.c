@@ -234,6 +234,7 @@ static bool X265Encoder_checkEncodedData(
 			break;
 		case H265NalType_craNut:
 		case H265NalType_idrWRadl:
+		case H265NalType_idrNLp:
 			if(target_type != H265Type_sliceIDR) {
 				if(target_type != H265Type_unknown) {
 					// save prev information.
