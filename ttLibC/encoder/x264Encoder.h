@@ -138,6 +138,18 @@ bool TT_ATTRIBUTE_API ttLibC_X264Encoder_encode(
 		void *ptr);
 
 /**
+ * parse params
+ * @param param_t structure pointer for x264_param_t on x264.h
+ * @param key     key
+ * @param value   value
+ * @return int
+ */
+int TT_ATTRIBUTE_API ttLibC_X264Encoder_paramParse(
+		void *param_t,
+		const char *key,
+		const char *value);
+
+/**
  * close x264 encoder
  * @param encoder
  */

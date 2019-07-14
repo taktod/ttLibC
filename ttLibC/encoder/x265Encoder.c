@@ -365,6 +365,14 @@ bool TT_ATTRIBUTE_API ttLibC_X265Encoder_encode(
 	return X265Encoder_checkEncodedData(encoder_, nal, i_nal, output_flag, callback, ptr);
 }
 
+int TT_ATTRIBUTE_API ttLibC_X265Encoder_paramParse(
+		void *param,
+		const char *key,
+		const char *value) {
+	return x265_param_parse((x265_param *)param, key, value);
+}
+
+
 void TT_ATTRIBUTE_API ttLibC_X265Encoder_close(ttLibC_X265Encoder **encoder) {
 	ttLibC_X265Encoder_ *target = (ttLibC_X265Encoder_ *)*encoder;
 	if(target == NULL) {

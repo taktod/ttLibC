@@ -65,6 +65,15 @@ bool TT_ATTRIBUTE_API ttLibC_OpusDecoder_decode(
 void TT_ATTRIBUTE_API *ttLibC_OpusDecoder_refNativeDecoder(ttLibC_OpusDecoder *decoder);
 
 /**
+ * call codecControl
+ * @param decoder opus decoder object
+ * @param control control name
+ * @param value   target value
+ * @return api result.
+ */
+int TT_ATTRIBUTE_API ttLibC_OpusDecoder_codecControl(ttLibC_OpusDecoder *decoder, const char *control, int value);
+
+/**
  * close opus decoder.
  * @param decoder
  */
