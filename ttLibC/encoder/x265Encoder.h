@@ -75,6 +75,11 @@ bool ttLibC_X265Encoder_encode(
 		ttLibC_X265EncodeFunc callback,
 		void *ptr);
 
+int ttLibC_X265Encoder_paramParse(
+		void *param,
+		const char *key,
+		const char *value);
+
 void ttLibC_X265Encoder_close(ttLibC_X265Encoder **encoder);
 
 #ifdef __cplusplus

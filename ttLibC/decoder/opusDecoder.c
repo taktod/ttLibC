@@ -12,6 +12,7 @@
 #include "../_log.h"
 #include "../allocator.h"
 #include <stdlib.h>
+#include <string.h>
 #include <opus/opus.h>
 
 /*
@@ -146,6 +147,53 @@ void TT_VISIBILITY_DEFAULT ttLibC_OpusDecoder_close(ttLibC_OpusDecoder **decoder
 	}
 	ttLibC_free(target);
 	*decoder = NULL;
+}
+
+/*
+ * call codecControl
+ * @param control control name
+ * @param value   target value
+ * @return api result.
+ */
+int TT_ATTRIBUTE_API ttLibC_OpusDecoder_codecControl(ttLibC_OpusDecoder *decoder, const char *control, int value) {
+	if(decoder == NULL) {
+		return -1;
+	}
+	OpusDecoder *nativeDecoder = ((ttLibC_OpusDecoder_ *)decoder)->decoder;
+#define OpusSetCtl(a, b) if(strcmp(control, #a) == 0) { \
+    return opus_decoder_ctl(nativeDecoder, a(b));\
+  }
+#define OpusCtl(a) if(strcmp(control, #a) == 0) { \
+    return opus_decoder_ctl(nativeDecoder, a);\
+  }
+#define OpusGetCtl(a) if(strcmp(control, #a) == 0) { \
+    int result, res; \
+    res = opus_decoder_ctl(nativeDecoder, a(&result)); \
+    if(res != OPUS_OK) {return res;} \
+    return result; \
+  }
+#define OpusGetUCtl(a) if(strcmp(control, #a) == 0) { \
+    uint32_t result; \
+    int res; \
+    res = opus_decoder_ctl(nativeDecoder, a(&result)); \
+    if(res != OPUS_OK) {return res;} \
+    return result; \
+  }
+  OpusCtl(OPUS_RESET_STATE)
+  OpusGetUCtl(OPUS_GET_FINAL_RANGE)
+  OpusGetCtl(OPUS_GET_BANDWIDTH)
+  OpusGetCtl(OPUS_GET_SAMPLE_RATE)
+  OpusSetCtl(OPUS_SET_PHASE_INVERSION_DISABLED, value)
+  OpusGetCtl(OPUS_GET_PHASE_INVERSION_DISABLED)
+  OpusSetCtl(OPUS_SET_GAIN, value)
+  OpusGetCtl(OPUS_GET_GAIN)
+  OpusGetCtl(OPUS_GET_LAST_PACKET_DURATION)
+  OpusGetCtl(OPUS_GET_PITCH)
+#undef OpusSetCtl
+#undef OpusCtl
+#undef OpusGetCtl
+#undef OpusGetUCtl
+  return OPUS_OK;
 }
 
 #endif

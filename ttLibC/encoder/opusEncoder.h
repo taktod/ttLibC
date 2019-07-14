@@ -99,6 +99,15 @@ bool ttLibC_OpusEncoder_setComplexity(
 		uint32_t complexity);
 
 /**
+ * call codecControl
+ * @param encoder opus encoder object
+ * @param control control name
+ * @param value   target value
+ * @return api result.
+ */
+int TT_ATTRIBUTE_API ttLibC_OpusEncoder_codecControl(ttLibC_OpusEncoder *encoder, const char *control, int value);
+
+/**
  * close opus encoder
  * @param encoder
  */
