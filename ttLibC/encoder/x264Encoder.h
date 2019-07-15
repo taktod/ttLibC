@@ -150,6 +150,16 @@ int TT_ATTRIBUTE_API ttLibC_X264Encoder_paramParse(
 		const char *value);
 
 /**
+ * apply profile
+ * @param param_t structure pointer for x264_param_t on x264.h
+ * @param profile profile
+ * @return int
+ */
+int TT_ATTRIBUTE_API ttLibC_X264Encoder_paramApplyProfile(
+	void * param_t,
+	const char *profile);
+
+/**
  * close x264 encoder
  * @param encoder
  */

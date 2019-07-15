@@ -81,6 +81,10 @@ int TT_ATTRIBUTE_API ttLibC_X265Encoder_paramParse(
 		const char *key,
 		const char *value);
 
+int TT_ATTRIBUTE_API ttLibC_X265Encoder_paramApplyProfile(
+		void *param,
+		const char *profile);
+
 void TT_ATTRIBUTE_API ttLibC_X265Encoder_close(ttLibC_X265Encoder **encoder);
 
 #ifdef __cplusplus

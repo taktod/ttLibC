@@ -441,6 +441,18 @@ int TT_ATTRIBUTE_API ttLibC_X264Encoder_paramParse(
 	return x264_param_parse((x264_param_t *)param_t, key, value);
 }
 
+/**
+ * apply profile
+ * @param param_t structure pointer for x264_param_t on x264.h
+ * @param profile profile
+ * @return int
+ */
+int TT_ATTRIBUTE_API ttLibC_X264Encoder_paramApplyProfile(
+	void * param_t,
+	const char *profile) {
+	return x264_param_apply_profile((x264_param_t *)param_t, profile);
+}
+
 void TT_ATTRIBUTE_API ttLibC_X264Encoder_close(ttLibC_X264Encoder **encoder) {
 	ttLibC_X264Encoder_ *target = (ttLibC_X264Encoder_ *)*encoder;
 	if(target == NULL) {
