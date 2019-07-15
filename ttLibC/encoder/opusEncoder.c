@@ -305,7 +305,7 @@ void TT_VISIBILITY_DEFAULT ttLibC_OpusEncoder_close(ttLibC_OpusEncoder **encoder
  * @param value   target value
  * @return api result.
  */
-int TT_ATTRIBUTE_API ttLibC_OpusEncoder_codecControl(ttLibC_OpusEncoder *encoder, const char *control, int value) {
+int TT_VISIBILITY_DEFAULT ttLibC_OpusEncoder_codecControl(ttLibC_OpusEncoder *encoder, const char *control, int value) {
 	if(encoder == NULL) {
 		return -1;
 	}	

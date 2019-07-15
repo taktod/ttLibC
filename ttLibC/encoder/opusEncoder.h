@@ -105,7 +105,7 @@ bool ttLibC_OpusEncoder_setComplexity(
  * @param value   target value
  * @return api result.
  */
-int TT_ATTRIBUTE_API ttLibC_OpusEncoder_codecControl(ttLibC_OpusEncoder *encoder, const char *control, int value);
+int ttLibC_OpusEncoder_codecControl(ttLibC_OpusEncoder *encoder, const char *control, int value);
 
 /**
  * close opus encoder

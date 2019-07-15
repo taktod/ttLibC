@@ -155,7 +155,7 @@ void TT_VISIBILITY_DEFAULT ttLibC_OpusDecoder_close(ttLibC_OpusDecoder **decoder
  * @param value   target value
  * @return api result.
  */
-int TT_ATTRIBUTE_API ttLibC_OpusDecoder_codecControl(ttLibC_OpusDecoder *decoder, const char *control, int value) {
+int TT_VISIBILITY_DEFAULT ttLibC_OpusDecoder_codecControl(ttLibC_OpusDecoder *decoder, const char *control, int value) {
 	if(decoder == NULL) {
 		return -1;
 	}

@@ -373,6 +373,11 @@ int TT_VISIBILITY_DEFAULT ttLibC_X265Encoder_paramParse(
 	return x265_param_parse((x265_param *)param, key, value);
 }
 
+int TT_VISIBILITY_DEFAULT ttLibC_X265Encoder_paramApplyProfile(
+		void *param,
+		const char *profile) {
+	return x265_param_apply_profile((x265_param *)param, profile);
+}
 
 void TT_VISIBILITY_DEFAULT ttLibC_X265Encoder_close(ttLibC_X265Encoder **encoder) {
 	ttLibC_X265Encoder_ *target = (ttLibC_X265Encoder_ *)*encoder;
