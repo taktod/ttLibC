@@ -42,6 +42,14 @@ file(WRITE ${CMAKE_BINARY_DIR}/ttLibC_def.h "")
 if(WIN32)
   file(APPEND ${CMAKE_BINARY_DIR}/ttLibC_def.h "#define __ENABLE_WIN32__\n")
   add_definitions(-D__ENABLE_WIN32__)
+  set(TTLIBC_ENCODER_HEADERS
+    ${TTLIBC_ENCODER_HEADERS}
+    ttLibC/encoder/msAacEncoder.h
+    ttLibC/encoder/msH264Encoders.h)
+  set(TTLIBC_UTIL_HEADERS
+    ${TTLIBC_UTIL_HEADERS}
+    ttLibC/util/mmAudioLoopbackUtil.h
+    ttLibC/util/msGlobalUtil.h)
 else()
   set(CMAKE_CXX_FLAGS "-std=c++0x")
   if(APPLE)
@@ -117,6 +125,7 @@ set(TTLIBC_RESAMPLER_HEADERS
   ttLibC/resampler/imageResampler.h
   ttLibC/resampler/imageResizer.h)
 set(TTLIBC_UTIL_HEADERS
+  ${TTLIBC_UTIL_HEADERS}
   ttLibC/util/amfUtil.h
   ttLibC/util/beepUtil.h
   ttLibC/util/byteUtil.h
