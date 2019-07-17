@@ -1,4 +1,4 @@
-﻿cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.8)
 
 project(ttLibC)
 
@@ -154,7 +154,7 @@ else()
   message("license:    The 3-clause BSD")
 endif()
 
-# debug (ログ出力を調整) any
+# debug any
 if(TT_DEBUG)
   message("debug:      on")
   add_definitions(-D__DEBUG_FLAG__)
@@ -165,7 +165,7 @@ else()
 endif()
 configure_file(ttLibC/log.h.in ${CMAKE_CURRENT_SOURCE_DIR}/ttLibC/log.h @ONLY)
 
-# test (unitテスト googletestに書き換える予定) gpl -> any
+# test(i wanna use gtest...) gpl -> any
 if(TT_TEST)
   message("test:       on")
 else()
