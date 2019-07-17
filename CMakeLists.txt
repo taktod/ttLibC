@@ -20,6 +20,7 @@ option(TT_FILE       "use file feature"   ${TT_DEFAULT})
 option(TT_SOCKET     "use socket feature" ${TT_DEFAULT})
 
 option(TT_FAAC       "enable faac"        ${TT_DEFAULT})
+option(TT_FDKAAC     "enable fdkaac"      ${TT_DEFAULT})
 option(TT_FFMPEG     "enable ffmpeg"      ${TT_DEFAULT})
 option(TT_JPEG       "enable jpeg"        ${TT_DEFAULT})
 option(TT_LIBPNG     "enable libpng"      ${TT_DEFAULT})
@@ -236,12 +237,14 @@ if(TT_FAAC)
   if(TT_LICENSE STREQUAL "GPL" OR TT_LICENSE STREQUAL "LGPL")
     if(WIN32)
       message("faac:       on")
+      file(APPEND ${CMAKE_BINARY_DIR}/ttLibC_def.h "#define __ENABLE_FAAC__\n")
       file(APPEND ${CMAKE_BINARY_DIR}/ttLibC_def.h "#define __ENABLE_FAAC_ENCODE__\n")
       add_definitions(-D__ENABLE_FAAC__ -D__ENABLE_FAAC_ENCODE__)
     else()
       checkLibraryHeader(faac.h TT_RESULT)
       if(TT_RESULT)
         message("faac:       on")
+        file(APPEND ${CMAKE_BINARY_DIR}/ttLibC_def.h "#define __ENABLE_FAAC__\n")
         file(APPEND ${CMAKE_BINARY_DIR}/ttLibC_def.h "#define __ENABLE_FAAC_ENCODE__\n")
         add_definitions(-D__ENABLE_FAAC__ -D__ENABLE_FAAC_ENCODE__)
         include_directories(${TT_RESULT})
@@ -259,6 +262,33 @@ if(TT_FAAC)
   endif()
 else()
   message("faac:       off")
+endif()
+
+if(TT_FDKAAC)
+  if(TT_LICENSE STREQUAL "GPL" OR TT_LICENSE STREQUAL "LGPL")
+    if(WIN32)
+      message("fdkaac:     on")
+      file(APPEND ${CMAKE_BINARY_DIR}/ttLibC_def.h "#define __ENABLE_FDKAAC__\n")
+      add_definitions(-D__ENABLE_FDKAAC__)
+    else()
+      pkg_check_modules(TT_FDKAAC fdk-aac QUIET)
+      if(TT_FDKAAC_LIBRARIES)
+        message("fdkaac:     on")
+        file(APPEND ${CMAKE_BINARY_DIR}/ttLibC_def.h "#define __ENABLE_FDKAAC__\n")
+        add_definitions(-D__ENABLE_FDKAAC__)
+        include_directories(${TT_FDKAAC_INCLUDE_DIRS})
+        set(TTLIBC_ENCODER_HEADERS
+          ${TTLIBC_ENCODER_HEADERS}
+          ttLibC/encoder/fdkaacEncoder.h)
+      else()
+        message("fdkaac:     off(library is missing)")
+      endif()
+    endif()
+  else()
+    message("fdkaac:     off(under lgpl only)")
+  endif()
+else()
+  message("fdkaac:     off")
 endif()
 
 # ffmpeg lgpl
@@ -794,6 +824,7 @@ add_library(ttLibC SHARED
   ttLibC/encoder/x265Encoder.c
   ttLibC/encoder/jpegEncoder.c
   ttLibC/encoder/faacEncoder.c
+  ttLibC/encoder/fdkaacEncoder.c
   ttLibC/encoder/mp3lameEncoder.c
   ttLibC/encoder/speexEncoder.c
   ttLibC/encoder/avcodecEncoder.c
@@ -893,6 +924,7 @@ add_library(ttLibC SHARED
 target_link_libraries(ttLibC PRIVATE
   ${TT_APPLE_LIBRARIES}
   ${TT_FAAC_LIBRARIES}
+  ${TT_FDKAAC_LIBRARIES}
   ${TT_FFMPEG_LIBRARIES}
   ${TT_JPEG_LIBRARIES}
   ${TT_LIBPNG_LIBRARIES}
