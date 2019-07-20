@@ -13,6 +13,7 @@ extern "C" {
 #endif
 
 #include "../frame/video/yuv420.h"
+#include "../frame/video/bgr.h"
 
 typedef enum ttLibC_LibyuvFilter_Mode {
 	LibyuvFilter_None,
@@ -59,6 +60,30 @@ ttLibC_Yuv420 *ttLibC_LibyuvResampler_rotate(
 		ttLibC_Yuv420 *prev_frame,
 		ttLibC_Yuv420 *src_frame,
 		ttLibC_LibyuvRotate_Mode mode);
+
+/**
+ * convert from yuv to bgr
+ * @param prev_frame
+ * @param src_frame
+ * @param bgr_type
+ * @return new bgr frame.
+ */
+ttLibC_Bgr TT_ATTRIBUTE_API *ttLibC_LibyuvResampler_ToBgr(
+		ttLibC_Bgr *prev_frame,
+		ttLibC_Yuv420 *src_frame,
+		ttLibC_Bgr_Type bgr_type);
+
+/**
+ * convert from yuv to bgr
+ * @param prev_frame
+ * @param src_frame
+ * @param bgr_type
+ * @return new bgr frame.
+ */
+ttLibC_Yuv420 TT_ATTRIBUTE_API *ttLibC_LibyuvResampler_ToYuv420(
+		ttLibC_Yuv420 *prev_frame,
+		ttLibC_Bgr *src_frame,
+		ttLibC_Yuv420_Type yuv420_type);
 
 #ifdef __cplusplus
 } /* extern "C" */
