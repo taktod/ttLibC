@@ -68,7 +68,7 @@ ttLibC_Yuv420 *ttLibC_LibyuvResampler_rotate(
  * @param bgr_type
  * @return new bgr frame.
  */
-ttLibC_Bgr TT_ATTRIBUTE_API *ttLibC_LibyuvResampler_ToBgr(
+ttLibC_Bgr *ttLibC_LibyuvResampler_ToBgr(
 		ttLibC_Bgr *prev_frame,
 		ttLibC_Yuv420 *src_frame,
 		ttLibC_Bgr_Type bgr_type);
@@ -80,7 +80,7 @@ ttLibC_Bgr TT_ATTRIBUTE_API *ttLibC_LibyuvResampler_ToBgr(
  * @param bgr_type
  * @return new bgr frame.
  */
-ttLibC_Yuv420 TT_ATTRIBUTE_API *ttLibC_LibyuvResampler_ToYuv420(
+ttLibC_Yuv420 *ttLibC_LibyuvResampler_ToYuv420(
 		ttLibC_Yuv420 *prev_frame,
 		ttLibC_Bgr *src_frame,
 		ttLibC_Yuv420_Type yuv420_type);
