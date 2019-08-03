@@ -1,5 +1,7 @@
 #include "gtest/gtest.h"
- 
+#include <ttLibC/ttLibC.h>
+
 TEST(hoge, base) {
-  EXPECT_EQ(1,1);
+  puts(ttLibC_getVersion());
+  EXPECT_EQ(1,0);
 }
