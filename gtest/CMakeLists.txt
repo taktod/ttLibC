@@ -11,5 +11,11 @@ if(WIN32)
 endif(WIN32)
 
 include_directories("..")
-add_executable(ttLibC-test test.cpp)
-target_link_libraries(ttLibC-test gtest_main ttLibC)
+add_executable(ttLibC-test
+  test.cpp
+  frame.cpp
+  resampler.cpp
+  util.cpp)
+target_link_libraries(ttLibC-test
+  gtest_main
+  ttLibC)
