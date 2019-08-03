@@ -155,7 +155,7 @@ else()
 endif()
 
 # debug any
-if(TT_DEBUG)
+if(TT_DEBUG OR TT_TEST)
   message("debug:      on")
   add_definitions(-D__DEBUG_FLAG__)
   set(debug_flag 1)
@@ -168,9 +168,6 @@ configure_file(ttLibC/log.h.in ${CMAKE_CURRENT_SOURCE_DIR}/ttLibC/log.h @ONLY)
 # test(i wanna use gtest...) gpl -> any
 if(TT_TEST)
   message("test:       on")
-  add_subdirectory(gtest)
-  enable_testing()
-  add_test(NAME hoge COMMAND gtest/ttLibC-test --gtest_filter=hoge*)
 else()
   message("test:       off")
 endif()
@@ -781,6 +778,14 @@ if(TT_X265)
   endif()
 else()
   message("x265:       off")
+endif()
+
+if(TT_TEST)
+  add_subdirectory(gtest)
+  enable_testing()
+  add_test(NAME frame COMMAND gtest/ttLibC-test --gtest_filter=frame.*)
+  add_test(NAME resampler COMMAND gtest/ttLibC-test --gtest_filter=resampler*)
+  add_test(NAME util COMMAND gtest/ttLibC-test --gtest_filter=Util*)
 endif()
 
 add_library(ttLibC SHARED
