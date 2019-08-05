@@ -1731,17 +1731,22 @@ static void libyuvImageConvertTest() {
 			break;
 		}
 		bgr = b;
-		y = ttLibC_LibyuvResampler_ToYuv420(yuv, bgr, Yuv420Type_planar);
-//		y = ttLibC_ImageResampler_makeYuv420FromBgr(yuv, Yvu420Type_semiPlanar, bgr);
+		y = ttLibC_Yuv420_makeEmptyFrame2(yuv, Yuv420Type_planar, bgr->inherit_super.width, bgr->inherit_super.height);
 		if(y == NULL) {
 			break;
 		}
 		yuv = y;
-		b = ttLibC_LibyuvResampler_ToBgr(rbgr, yuv, BgrType_bgra);
+		if(!ttLibC_LibyuvResampler_ToYuv420(yuv, (ttLibC_Video *)bgr)) {
+			break;
+		}
+		b = ttLibC_Bgr_makeEmptyFrame2(rbgr, BgrType_bgra, yuv->inherit_super.width, yuv->inherit_super.height);
 		if(b == NULL) {
 			break;
 		}
 		rbgr = b;
+		if(!ttLibC_LibyuvResampler_ToBgr(rbgr, (ttLibC_Video *)yuv)) {
+			break;
+		}
 		ttLibC_CvWindow_showBgr(window, bgr);
 		ttLibC_CvWindow_showBgr(resampled_window, rbgr);
 		uint8_t key = ttLibC_CvWindow_waitForKeyInput(10);
@@ -1779,11 +1784,14 @@ static void libyuvImageRotateTest() {
 			break;
 		}
 		yuv = y;
-		y = ttLibC_LibyuvResampler_rotate(ryuv, yuv, LibyuvRotate_270);
+		y = ttLibC_Yuv420_makeEmptyFrame2(ryuv, Yuv420Type_planar, bgr->inherit_super.height, bgr->inherit_super.width);
 		if(y == NULL) {
 			break;
 		}
 		ryuv = y;
+		if(!ttLibC_LibyuvResampler_rotate((ttLibC_Video *)ryuv, (ttLibC_Video *)yuv, LibyuvRotate_270)) {
+			break;
+		}
 		b = ttLibC_ImageResampler_makeBgrFromYuv420(rbgr, BgrType_abgr, ryuv);
 		if(b == NULL) {
 			break;
@@ -1826,11 +1834,14 @@ static void libyuvImageResizeTest() {
 			break;
 		}
 		yuv = y;
-		y = ttLibC_LibyuvResampler_resize(ryuv, 480, 360, yuv, LibyuvFilter_Bilinear, LibyuvFilter_Bilinear, LibyuvFilter_Bilinear);
+		y = ttLibC_Yuv420_makeEmptyFrame2(ryuv, Yuv420Type_planar, 480, 360);
 		if(y == NULL) {
 			break;
 		}
 		ryuv = y;
+		if(!ttLibC_LibyuvResampler_resize((ttLibC_Video *)ryuv, (ttLibC_Video *)yuv, LibyuvFilter_Bilinear, LibyuvFilter_Bilinear)) {
+			break;
+		}
 		b = ttLibC_ImageResampler_makeBgrFromYuv420(rbgr, BgrType_abgr, ryuv);
 		if(b == NULL) {
 			break;

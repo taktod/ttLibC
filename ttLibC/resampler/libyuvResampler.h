@@ -31,60 +31,50 @@ typedef enum ttLibC_LibyuvRotate_Mode {
 } ttLibC_LibyuvRotate_Mode;
 
 /**
- * resize yuv image with libyuv
- * @param prev_frame
- * @param width
- * @param height
+ * resize image with libyuv
+ * @param dest_frame
  * @param src_frame
- * @param y_mode
- * @param u_mode
- * @param v_mode
- * @return scaled yuv image.
+ * @param mode
+ * @param sub_mode
+ * @return bool.
  */
-ttLibC_Yuv420 TT_ATTRIBUTE_API *ttLibC_LibyuvResampler_resize(
-		ttLibC_Yuv420 *prev_frame,
-		uint32_t width,
-		uint32_t height,
-		ttLibC_Yuv420 *src_frame,
-		ttLibC_LibyuvFilter_Mode y_mode,
-		ttLibC_LibyuvFilter_Mode u_mode,
-		ttLibC_LibyuvFilter_Mode v_mode);
+bool TT_ATTRIBUTE_API ttLibC_LibyuvResampler_resize(
+		ttLibC_Video *dest_frame,
+		ttLibC_Video *src_frame,
+		ttLibC_LibyuvFilter_Mode mode,
+		ttLibC_LibyuvFilter_Mode sub_mode);
 
 /**
  * rotate yuv image with libyuv
  * @param prev_frame
  * @param src_frame
  * @param mode
- * @return rotate yuv image.
+ * @return bool.
  */
-ttLibC_Yuv420 TT_ATTRIBUTE_API *ttLibC_LibyuvResampler_rotate(
-		ttLibC_Yuv420 *prev_frame,
-		ttLibC_Yuv420 *src_frame,
+bool TT_ATTRIBUTE_API ttLibC_LibyuvResampler_rotate(
+		ttLibC_Video *dest_frame,
+		ttLibC_Video *src_frame,
 		ttLibC_LibyuvRotate_Mode mode);
 
 /**
- * convert from yuv to bgr
- * @param prev_frame
+ * convert to bgr
+ * @param dest_frame
  * @param src_frame
- * @param bgr_type
- * @return new bgr frame.
+ * @return bool.
  */
-ttLibC_Bgr TT_ATTRIBUTE_API *ttLibC_LibyuvResampler_ToBgr(
-		ttLibC_Bgr *prev_frame,
-		ttLibC_Yuv420 *src_frame,
-		ttLibC_Bgr_Type bgr_type);
+bool TT_ATTRIBUTE_API ttLibC_LibyuvResampler_ToBgr(
+		ttLibC_Bgr   *dest_frame,
+		ttLibC_Video *src_frame);
 
 /**
- * convert from yuv to bgr
- * @param prev_frame
+ * convert to yuv
+ * @param dest_frame
  * @param src_frame
- * @param bgr_type
- * @return new bgr frame.
+ * @return bool.
  */
-ttLibC_Yuv420 TT_ATTRIBUTE_API *ttLibC_LibyuvResampler_ToYuv420(
-		ttLibC_Yuv420 *prev_frame,
-		ttLibC_Bgr *src_frame,
-		ttLibC_Yuv420_Type yuv420_type);
+bool TT_ATTRIBUTE_API ttLibC_LibyuvResampler_ToYuv420(
+		ttLibC_Yuv420 *dest_frame,
+		ttLibC_Video  *src_frame);
 
 #ifdef __cplusplus
 } /* extern "C" */
