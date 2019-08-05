@@ -194,7 +194,7 @@ ttLibC_Bgr TT_ATTRIBUTE_API *ttLibC_Bgr_makeEmptyFrame(
  * @param width    width of image
  * @param height   height of image
  */
-ttLibC_Bgr *ttLibC_Bgr_makeEmptyFrame2(
+ttLibC_Bgr TT_ATTRIBUTE_API *ttLibC_Bgr_makeEmptyFrame2(
 		ttLibC_Bgr     *prev_frame,
 		ttLibC_Bgr_Type sub_type,
 		uint32_t        width,
@@ -296,7 +296,7 @@ ttLibC_Bgr *ttLibC_Bgr_makeEmptyFrame2(
  * @param ptr      user def pointer.
  * @return true / false
  */
-bool ttLibC_Bgr_getMinimumBinaryBuffer(
+bool TT_ATTRIBUTE_API ttLibC_Bgr_getMinimumBinaryBuffer(
 		ttLibC_Bgr *bgr,
 		ttLibC_FrameBinaryFunc callback,
 		void *ptr) {
@@ -347,7 +347,7 @@ bool ttLibC_Bgr_getMinimumBinaryBuffer(
  * reset changed data.
  * @param bgr target bgr frame.
  */
-void ttLibC_Bgr_resetData(ttLibC_Bgr *bgr) {
+void TT_ATTRIBUTE_API ttLibC_Bgr_resetData(ttLibC_Bgr *bgr) {
 	if(bgr == NULL) {
 		return;
 	}
