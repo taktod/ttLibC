@@ -78,6 +78,32 @@ public:
     }
     return bgr;
   }
+  void binaryEq(string hex, ttLibC_Video *video) {
+    uint32_t length = hex.length() / 3;
+    uint8_t *buffer = static_cast<uint8_t*>(ttLibC_malloc(length));
+    ttLibC_HexUtil_makeBuffer(hex.c_str(), buffer, length);
+    bool result = true;
+    uint8_t *buf = static_cast<uint8_t*>(video->inherit_super.data);
+    if(length > video->inherit_super.buffer_size) {
+      length = video->inherit_super.buffer_size;
+    }
+    for(int i = 0;i < length;++ i) {
+      if(abs(buffer[i] - buf[i]) > 3) {
+        result = false;
+      }
+    }
+    if(!result) {
+      LOG_DUMP(buf, length, true);
+    }
+    EXPECT_TRUE(result);
+    ttLibC_free(buffer);
+  }
+  void binaryEq(string hex, ttLibC_Yuv420 *yuv) {
+    binaryEq(hex, (ttLibC_Video *)yuv);
+  }
+  void binaryEq(string hex, ttLibC_Bgr *bgr) {
+    binaryEq(hex, (ttLibC_Video *)bgr);
+  }
 };
 
 // test for resamplers.
@@ -113,8 +139,7 @@ LIBYUV(RotateYuvPlanarToYuvPlanar, [this](){
   if(!ttLibC_LibyuvResampler_rotate((ttLibC_Video *)dest, (ttLibC_Video *)src, LibyuvRotate_90)) {
     FAIL();
   }
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "00 00 "
       "00 00 "
       "40 80 "
@@ -122,8 +147,7 @@ LIBYUV(RotateYuvPlanarToYuvPlanar, [this](){
       "FF "
       "FF "
       "80 "
-      "F0 ", buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      "F0 ", dest);
   ttLibC_Yuv420_close(&src);
   ttLibC_Yuv420_close(&dest);
 });
@@ -168,8 +192,7 @@ LIBYUV(RotateClip, [this]() {
     FAIL();
   }
   ttLibC_Yuv420_resetData(dest);
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "FF FF FF FF FF FF "
       "FF FF FF FF FF FF "
       "FF FF 00 00 FF FF "
@@ -186,8 +209,7 @@ LIBYUV(RotateClip, [this]() {
       "FF 80 FF "
       "FF F0 FF "
       "FF FF FF ",
-      buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      dest);
   ttLibC_Yuv420_close(&src);
   ttLibC_Yuv420_close(&dest);
 });
@@ -218,8 +240,7 @@ LIBYUV(RotateYuvPlanarToYvuPlanar, [this](){
   if(!ttLibC_LibyuvResampler_rotate((ttLibC_Video *)dest, (ttLibC_Video *)src, LibyuvRotate_90)) {
     FAIL();
   }
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "00 00 "
       "00 00 "
       "40 80 "
@@ -227,8 +248,7 @@ LIBYUV(RotateYuvPlanarToYvuPlanar, [this](){
       "80 "
       "F0 "
       "FF "
-      "FF ", buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      "FF ", dest);
   ttLibC_Yuv420_close(&src);
   ttLibC_Yuv420_close(&dest);
 });
@@ -259,8 +279,7 @@ LIBYUV(RotateYvuPlanarToYvuPlanar, [this](){
   if(!ttLibC_LibyuvResampler_rotate((ttLibC_Video *)dest, (ttLibC_Video *)src, LibyuvRotate_90)) {
     FAIL();
   }
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "00 00 "
       "00 00 "
       "40 80 "
@@ -268,8 +287,7 @@ LIBYUV(RotateYvuPlanarToYvuPlanar, [this](){
       "FF "
       "FF "
       "80 "
-      "F0 ", buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      "F0 ", dest);
   ttLibC_Yuv420_close(&src);
   ttLibC_Yuv420_close(&dest);
 });
@@ -300,8 +318,7 @@ LIBYUV(RotateYvuPlanarToYuvPlanar, [this](){
   if(!ttLibC_LibyuvResampler_rotate((ttLibC_Video *)dest, (ttLibC_Video *)src, LibyuvRotate_90)) {
     FAIL();
   }
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "00 00 "
       "00 00 "
       "40 80 "
@@ -309,8 +326,7 @@ LIBYUV(RotateYvuPlanarToYuvPlanar, [this](){
       "80 "
       "F0 "
       "FF "
-      "FF ", buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      "FF ", dest);
   ttLibC_Yuv420_close(&src);
   ttLibC_Yuv420_close(&dest);
 });
@@ -341,8 +357,7 @@ LIBYUV(RotateYuvSemiPlanarToYuvPlanar, [this](){
   if(!ttLibC_LibyuvResampler_rotate((ttLibC_Video *)dest, (ttLibC_Video *)src, LibyuvRotate_90)) {
     FAIL();
   }
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "00 00 "
       "00 00 "
       "40 80 "
@@ -350,8 +365,7 @@ LIBYUV(RotateYuvSemiPlanarToYuvPlanar, [this](){
       "FF "
       "80 "
       "FF "
-      "F0 ", buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      "F0 ", dest);
   ttLibC_Yuv420_close(&src);
   ttLibC_Yuv420_close(&dest);
 });
@@ -382,8 +396,7 @@ LIBYUV(RotateYuvSemiPlanarToYvuPlanar, [this](){
   if(!ttLibC_LibyuvResampler_rotate((ttLibC_Video *)dest, (ttLibC_Video *)src, LibyuvRotate_90)) {
     FAIL();
   }
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "00 00 "
       "00 00 "
       "40 80 "
@@ -391,8 +404,7 @@ LIBYUV(RotateYuvSemiPlanarToYvuPlanar, [this](){
       "FF "
       "F0 "
       "FF "
-      "80 ", buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      "80 ", dest);
   ttLibC_Yuv420_close(&src);
   ttLibC_Yuv420_close(&dest);
 });
@@ -415,14 +427,12 @@ LIBYUV(RotateBgraToBgra, [this](){
   if(!ttLibC_LibyuvResampler_rotate((ttLibC_Video *)dest, (ttLibC_Video *)src, LibyuvRotate_90)) {
     FAIL();
   }
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "14 24 34 44 10 20 30 40 "
       "15 25 35 45 11 21 31 41 "
       "16 26 36 46 12 22 32 42 "
       "17 27 37 47 13 23 33 43 ",
-      buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      dest);
   ttLibC_Bgr_close(&src);
   ttLibC_Bgr_close(&dest);
 });
@@ -445,14 +455,12 @@ LIBYUV(RotateAbgrToAbgr, [this](){
   if(!ttLibC_LibyuvResampler_rotate((ttLibC_Video *)dest, (ttLibC_Video *)src, LibyuvRotate_90)) {
     FAIL();
   }
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "14 24 34 44 10 20 30 40 "
       "15 25 35 45 11 21 31 41 "
       "16 26 36 46 12 22 32 42 "
       "17 27 37 47 13 23 33 43 ",
-      buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      dest);
   ttLibC_Bgr_close(&src);
   ttLibC_Bgr_close(&dest);
 });
@@ -475,14 +483,12 @@ LIBYUV(RotateRgbaToRgba, [this](){
   if(!ttLibC_LibyuvResampler_rotate((ttLibC_Video *)dest, (ttLibC_Video *)src, LibyuvRotate_90)) {
     FAIL();
   }
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "14 24 34 44 10 20 30 40 "
       "15 25 35 45 11 21 31 41 "
       "16 26 36 46 12 22 32 42 "
       "17 27 37 47 13 23 33 43 ",
-      buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      dest);
   ttLibC_Bgr_close(&src);
   ttLibC_Bgr_close(&dest);
 });
@@ -505,14 +511,12 @@ LIBYUV(RotateArgbToArgb, [this](){
   if(!ttLibC_LibyuvResampler_rotate((ttLibC_Video *)dest, (ttLibC_Video *)src, LibyuvRotate_90)) {
     FAIL();
   }
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "14 24 34 44 10 20 30 40 "
       "15 25 35 45 11 21 31 41 "
       "16 26 36 46 12 22 32 42 "
       "17 27 37 47 13 23 33 43 ",
-      buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      dest);
   ttLibC_Bgr_close(&src);
   ttLibC_Bgr_close(&dest);
 });
@@ -539,14 +543,12 @@ LIBYUV(ScaleYuvPlanar, [this](){
   if(!ttLibC_LibyuvResampler_resize((ttLibC_Video *)dest, (ttLibC_Video *)src, LibyuvFilter_None, LibyuvFilter_None)) {
     FAIL();
   }
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "00 00 00 00 80 80 80 80 "
       "00 00 00 00 40 40 20 20 "
       "FF FF FF FF "
       "80 80 F0 F0 ",
-      buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      dest);
   ttLibC_Yuv420_close(&src);
   ttLibC_Yuv420_close(&dest);
 });
@@ -573,14 +575,12 @@ LIBYUV(ScaleYuvPlanarToYvuPlanar, [this](){
   if(!ttLibC_LibyuvResampler_resize((ttLibC_Video *)dest, (ttLibC_Video *)src, LibyuvFilter_None, LibyuvFilter_None)) {
     FAIL();
   }
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "00 00 00 00 80 80 80 80 "
       "00 00 00 00 40 40 20 20 "
       "80 80 F0 F0 "
       "FF FF FF FF ",
-      buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      dest);
   ttLibC_Yuv420_close(&src);
   ttLibC_Yuv420_close(&dest);
 });
@@ -607,14 +607,12 @@ LIBYUV(ScaleYuvSemiPlanar, [this](){
   if(!ttLibC_LibyuvResampler_resize((ttLibC_Video *)dest, (ttLibC_Video *)src, LibyuvFilter_None, LibyuvFilter_None)) {
     FAIL();
   }
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "00 00 00 00 80 80 80 80 "
       "00 00 00 00 40 40 20 20 "
       "FF FF FF FF "
       "80 F0 80 F0 ",
-      buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      dest);
   ttLibC_Yuv420_close(&src);
   ttLibC_Yuv420_close(&dest);
 });
@@ -641,14 +639,12 @@ LIBYUV(ScaleYvuSemiPlanar, [this](){
   if(!ttLibC_LibyuvResampler_resize((ttLibC_Video *)dest, (ttLibC_Video *)src, LibyuvFilter_None, LibyuvFilter_None)) {
     FAIL();
   }
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "00 00 00 00 80 80 80 80 "
       "00 00 00 00 40 40 20 20 "
       "FF FF FF FF "
       "80 F0 80 F0 ",
-      buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      dest);
   ttLibC_Yuv420_close(&src);
   ttLibC_Yuv420_close(&dest);
 });
@@ -671,14 +667,12 @@ LIBYUV(ScaleBgra, [this](){
   if(!ttLibC_LibyuvResampler_resize((ttLibC_Video *)dest, (ttLibC_Video *)src, LibyuvFilter_None, LibyuvFilter_None)) {
     FAIL();
   }
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "10 20 30 40 10 20 30 40 11 21 31 41 11 21 31 41 12 22 32 42 12 22 32 42 13 23 33 43 13 23 33 43 "
       "10 20 30 40 10 20 30 40 11 21 31 41 11 21 31 41 12 22 32 42 12 22 32 42 13 23 33 43 13 23 33 43 "
       "14 24 34 44 14 24 34 44 15 25 35 45 15 25 35 45 16 26 36 46 16 26 36 46 17 27 37 47 17 27 37 47 "
       "14 24 34 44 14 24 34 44 15 25 35 45 15 25 35 45 16 26 36 46 16 26 36 46 17 27 37 47 17 27 37 47 ",
-      buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      dest);
   ttLibC_Bgr_close(&src);
   ttLibC_Bgr_close(&dest);
 });
@@ -700,12 +694,10 @@ LIBYUV(YuvPlanarToBgra, [this]() {
   if(!ttLibC_LibyuvResampler_ToBgr(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "EB 00 00 FF EB 00 00 FF FF 00 FF FF FF 00 FF FF "
       "EB 00 00 FF EB 00 00 FF FF 00 EA FF FF 00 C5 FF ",
-      buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      dest);
   ttLibC_Yuv420_close(&src);
   ttLibC_Bgr_close(&dest);
 });
@@ -727,12 +719,10 @@ LIBYUV(YuvPlanarToAbgr, [this]() {
   if(!ttLibC_LibyuvResampler_ToBgr(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "FF EB 00 00 FF EB 00 00 FF FF 00 FF FF FF 00 FF "
       "FF EB 00 00 FF EB 00 00 FF FF 00 EA FF FF 00 C5 ",
-      buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      dest);
   ttLibC_Yuv420_close(&src);
   ttLibC_Bgr_close(&dest);
 });
@@ -754,12 +744,10 @@ LIBYUV(YuvPlanarToRgba, [this]() {
   if(!ttLibC_LibyuvResampler_ToBgr(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "00 00 EB FF 00 00 EB FF FF 00 FF FF FF 00 FF FF "
       "00 00 EB FF 00 00 EB FF EA 00 FF FF C5 00 FF FF ",
-      buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      dest);
   ttLibC_Yuv420_close(&src);
   ttLibC_Bgr_close(&dest);
 });
@@ -781,12 +769,10 @@ LIBYUV(YuvPlanarToArgb, [this]() {
   if(!ttLibC_LibyuvResampler_ToBgr(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "FF 00 00 EB FF 00 00 EB FF FF 00 FF FF FF 00 FF "
       "FF 00 00 EB FF 00 00 EB FF EA 00 FF FF C5 00 FF ",
-      buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      dest);
   ttLibC_Yuv420_close(&src);
   ttLibC_Bgr_close(&dest);
 });
@@ -808,12 +794,10 @@ LIBYUV(YuvPlanarToBgr, [this]() {
   if(!ttLibC_LibyuvResampler_ToBgr(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "EB 00 00 EB 00 00 FF 00 FF FF 00 FF "
       "EB 00 00 EB 00 00 FF 00 EA FF 00 C5 ",
-      buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      dest);
   ttLibC_Yuv420_close(&src);
   ttLibC_Bgr_close(&dest);
 });
@@ -836,12 +820,10 @@ LIBYUV(YuvSemiPlanarToBgra, [this]() {
   if(!ttLibC_LibyuvResampler_ToBgr(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "00 00 B8 FF 00 00 B8 FF FF BF 00 FF FF BF 00 FF "
       "00 00 B8 FF 00 00 B8 FF FF 74 00 FF F3 4F 00 FF ",
-      buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      dest);
   ttLibC_Yuv420_close(&src);
   ttLibC_Bgr_close(&dest);
 });
@@ -864,12 +846,10 @@ LIBYUV(YuvSemiPlanarToRgba, [this]() {
   if(!ttLibC_LibyuvResampler_ToBgr(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "B8 00 00 FF B8 00 00 FF 00 BF FF FF 00 BF FF FF "
       "B8 00 00 FF B8 00 00 FF 00 74 FF FF 00 4F F3 FF ",
-      buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      dest);
   ttLibC_Yuv420_close(&src);
   ttLibC_Bgr_close(&dest);
 });
@@ -890,12 +870,10 @@ LIBYUV(YvuSemiPlanarToBgra, [this]() {
   if(!ttLibC_LibyuvResampler_ToBgr(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "00 00 B8 FF 00 00 B8 FF FF 00 FF FF FF 00 FF FF "
       "00 00 B8 FF 00 00 B8 FF FF 00 FF FF F3 00 DD FF ",
-      buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      dest);
   ttLibC_Yuv420_close(&src);
   ttLibC_Bgr_close(&dest);
 });
@@ -916,12 +894,10 @@ LIBYUV(YvuSemiPlanarToRgba, [this]() {
   if(!ttLibC_LibyuvResampler_ToBgr(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "B8 00 00 FF B8 00 00 FF FF 00 FF FF FF 00 FF FF "
       "B8 00 00 FF B8 00 00 FF FF 00 FF FF DD 00 F3 FF ",
-      buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      dest);
   ttLibC_Yuv420_close(&src);
   ttLibC_Bgr_close(&dest);
 });
@@ -942,12 +918,10 @@ LIBYUV(BgraToBgra, [this](){
   if(!ttLibC_LibyuvResampler_ToBgr(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "10 20 30 40 11 21 31 41 12 22 32 42 13 23 33 43 "
       "14 24 34 44 15 25 35 45 16 26 36 46 17 27 37 47 ",
-      buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      dest);
   ttLibC_Bgr_close(&src);
   ttLibC_Bgr_close(&dest);
 });
@@ -968,12 +942,10 @@ LIBYUV(BgraToArgb, [this](){
   if(!ttLibC_LibyuvResampler_ToBgr(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "40 30 20 10 41 31 21 11 42 32 22 12 43 33 23 13 "
       "44 34 24 14 45 35 25 15 46 36 26 16 47 37 27 17 ",
-      buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      dest);
   ttLibC_Bgr_close(&src);
   ttLibC_Bgr_close(&dest);
 });
@@ -994,12 +966,10 @@ LIBYUV(BgraToRgba, [this](){
   if(!ttLibC_LibyuvResampler_ToBgr(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "30 20 10 40 31 21 11 41 32 22 12 42 33 23 13 43 "
       "34 24 14 44 35 25 15 45 36 26 16 46 37 27 17 47 ",
-      buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      dest);
   ttLibC_Bgr_close(&src);
   ttLibC_Bgr_close(&dest);
 });
@@ -1020,12 +990,10 @@ LIBYUV(BgraToAbgr, [this](){
   if(!ttLibC_LibyuvResampler_ToBgr(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "40 10 20 30 41 11 21 31 42 12 22 32 43 13 23 33 "
       "44 14 24 34 45 15 25 35 46 16 26 36 47 17 27 37 ",
-      buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      dest);
   ttLibC_Bgr_close(&src);
   ttLibC_Bgr_close(&dest);
 });
@@ -1046,12 +1014,10 @@ LIBYUV(BgraToBgr, [this](){
   if(!ttLibC_LibyuvResampler_ToBgr(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "10 20 30 11 21 31 12 22 32 13 23 33 "
       "14 24 34 15 25 35 16 26 36 17 27 37 ",
-      buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      dest);
   ttLibC_Bgr_close(&src);
   ttLibC_Bgr_close(&dest);
 });
@@ -1072,12 +1038,10 @@ LIBYUV(ArgbToBgra, [this](){
   if(!ttLibC_LibyuvResampler_ToBgr(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "40 30 20 10 41 31 21 11 42 32 22 12 43 33 23 13 "
       "44 34 24 14 45 35 25 15 46 36 26 16 47 37 27 17 ",
-      buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      dest);
   ttLibC_Bgr_close(&src);
   ttLibC_Bgr_close(&dest);
 });
@@ -1098,12 +1062,10 @@ LIBYUV(RgbaToBgra, [this](){
   if(!ttLibC_LibyuvResampler_ToBgr(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "30 20 10 40 31 21 11 41 32 22 12 42 33 23 13 43 "
       "34 24 14 44 35 25 15 45 36 26 16 46 37 27 17 47 ",
-      buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      dest);
   ttLibC_Bgr_close(&src);
   ttLibC_Bgr_close(&dest);
 });
@@ -1124,12 +1086,10 @@ LIBYUV(AbgrToBgra, [this](){
   if(!ttLibC_LibyuvResampler_ToBgr(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "20 30 40 10 21 31 41 11 22 32 42 12 23 33 43 13 "
       "24 34 44 14 25 35 45 15 26 36 46 16 27 37 47 17 ",
-      buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      dest);
   ttLibC_Bgr_close(&src);
   ttLibC_Bgr_close(&dest);
 });
@@ -1150,12 +1110,10 @@ LIBYUV(BgrToBgra, [this](){
   if(!ttLibC_LibyuvResampler_ToBgr(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "10 20 30 FF 11 21 31 FF 12 22 32 FF 13 23 33 FF "
       "14 24 34 FF 15 25 35 FF 16 26 36 FF 17 27 37 FF ",
-      buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      dest);
   ttLibC_Bgr_close(&src);
   ttLibC_Bgr_close(&dest);
 });
@@ -1182,15 +1140,12 @@ LIBYUV(YuvPlanarToYuvPlanar, [this](){
   if(!ttLibC_LibyuvResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
-  LOG_DUMP(dest->inherit_super.inherit_super.data, dest->inherit_super.inherit_super.buffer_size, true);
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "10 20 30 40 "
       "11 22 33 44 "
       "A0 B0"
       "A1 B1",
-      buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      dest);
   ttLibC_Yuv420_close(&src);
   ttLibC_Yuv420_close(&dest);
 });
@@ -1217,15 +1172,12 @@ LIBYUV(YuvPlanarToYvuPlanar, [this](){
   if(!ttLibC_LibyuvResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
-  LOG_DUMP(dest->inherit_super.inherit_super.data, dest->inherit_super.inherit_super.buffer_size, true);
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "10 20 30 40 "
       "11 22 33 44 "
       "A1 B1 "
       "A0 B0 ",
-      buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      dest);
   ttLibC_Yuv420_close(&src);
   ttLibC_Yuv420_close(&dest);
 });
@@ -1251,14 +1203,11 @@ LIBYUV(YuvPlanarToYuvSemiPlanar, [this](){
   if(!ttLibC_LibyuvResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
-  LOG_DUMP(dest->inherit_super.inherit_super.data, dest->inherit_super.inherit_super.buffer_size, true);
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "10 20 30 40 "
       "11 22 33 44 "
       "A0 A1 B0 B1 ",
-      buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      dest);
   ttLibC_Yuv420_close(&src);
   ttLibC_Yuv420_close(&dest);
 });
@@ -1284,14 +1233,11 @@ LIBYUV(YuvPlanarToYvuSemiPlanar, [this](){
   if(!ttLibC_LibyuvResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
-  LOG_DUMP(dest->inherit_super.inherit_super.data, dest->inherit_super.inherit_super.buffer_size, true);
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "10 20 30 40 "
       "11 22 33 44 "
       "A1 A0 B1 B0 ",
-      buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      dest);
   ttLibC_Yuv420_close(&src);
   ttLibC_Yuv420_close(&dest);
 });
@@ -1318,15 +1264,12 @@ LIBYUV(YvuPlanarToYuvPlanar, [this](){
   if(!ttLibC_LibyuvResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
-  LOG_DUMP(dest->inherit_super.inherit_super.data, dest->inherit_super.inherit_super.buffer_size, true);
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "10 20 30 40 "
       "11 22 33 44 "
       "A1 B1 "
       "A0 B0 ",
-      buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      dest);
   ttLibC_Yuv420_close(&src);
   ttLibC_Yuv420_close(&dest);
 });
@@ -1353,15 +1296,12 @@ LIBYUV(YvuPlanarToYvuPlanar, [this](){
   if(!ttLibC_LibyuvResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
-  LOG_DUMP(dest->inherit_super.inherit_super.data, dest->inherit_super.inherit_super.buffer_size, true);
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "10 20 30 40 "
       "11 22 33 44 "
       "A0 B0 "
       "A1 B1 ",
-      buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      dest);
   ttLibC_Yuv420_close(&src);
   ttLibC_Yuv420_close(&dest);
 });
@@ -1387,14 +1327,11 @@ LIBYUV(YvuPlanarToYuvSemiPlanar, [this](){
   if(!ttLibC_LibyuvResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
-  LOG_DUMP(dest->inherit_super.inherit_super.data, dest->inherit_super.inherit_super.buffer_size, true);
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "10 20 30 40 "
       "11 22 33 44 "
       "A1 A0 B1 B0 ",
-      buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      dest);
   ttLibC_Yuv420_close(&src);
   ttLibC_Yuv420_close(&dest);
 });
@@ -1420,14 +1357,11 @@ LIBYUV(YvuPlanarToYvuSemiPlanar, [this](){
   if(!ttLibC_LibyuvResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
-  LOG_DUMP(dest->inherit_super.inherit_super.data, dest->inherit_super.inherit_super.buffer_size, true);
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "10 20 30 40 "
       "11 22 33 44 "
       "A0 A1 B0 B1 ",
-      buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      dest);
   ttLibC_Yuv420_close(&src);
   ttLibC_Yuv420_close(&dest);
 });
@@ -1453,14 +1387,11 @@ LIBYUV(YuvSemiPlanarToYuvPlanar, [this](){
   if(!ttLibC_LibyuvResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
-  LOG_DUMP(dest->inherit_super.inherit_super.data, dest->inherit_super.inherit_super.buffer_size, true);
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "10 20 30 40 "
       "11 22 33 44 "
       "A0 A1 B0 B1 ",
-      buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      dest);
   ttLibC_Yuv420_close(&src);
   ttLibC_Yuv420_close(&dest);
 });
@@ -1486,14 +1417,11 @@ LIBYUV(YuvSemiPlanarToYvuPlanar, [this](){
   if(!ttLibC_LibyuvResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
-  LOG_DUMP(dest->inherit_super.inherit_super.data, dest->inherit_super.inherit_super.buffer_size, true);
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "10 20 30 40 "
       "11 22 33 44 "
       "B0 B1 A0 A1 ",
-      buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      dest);
   ttLibC_Yuv420_close(&src);
   ttLibC_Yuv420_close(&dest);
 });
@@ -1519,14 +1447,11 @@ LIBYUV(YvuSemiPlanarToYuvPlanar, [this](){
   if(!ttLibC_LibyuvResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
-  LOG_DUMP(dest->inherit_super.inherit_super.data, dest->inherit_super.inherit_super.buffer_size, true);
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "10 20 30 40 "
       "11 22 33 44 "
       "B0 B1 A0 A1 ",
-      buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      dest);
   ttLibC_Yuv420_close(&src);
   ttLibC_Yuv420_close(&dest);
 });
@@ -1552,14 +1477,11 @@ LIBYUV(YvuSemiPlanarToYvuPlanar, [this](){
   if(!ttLibC_LibyuvResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
-  LOG_DUMP(dest->inherit_super.inherit_super.data, dest->inherit_super.inherit_super.buffer_size, true);
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "10 20 30 40 "
       "11 22 33 44 "
       "A0 A1 B0 B1 ",
-      buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      dest);
   ttLibC_Yuv420_close(&src);
   ttLibC_Yuv420_close(&dest);
 });
@@ -1583,15 +1505,12 @@ LIBYUV(BgraToYuvPlanar, [this](){
   if(!ttLibC_LibyuvResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
-  LOG_DUMP(dest->inherit_super.inherit_super.data, dest->inherit_super.inherit_super.buffer_size, true);
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "2E 2F 2F 30 "
       "31 32 33 34 "
       "76 76 "
       "88 88 ",
-      buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      dest);
   ttLibC_Bgr_close(&src);
   ttLibC_Yuv420_close(&dest);
 });
@@ -1615,15 +1534,12 @@ LIBYUV(BgraToYvuPlanar, [this](){
   if(!ttLibC_LibyuvResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
-  LOG_DUMP(dest->inherit_super.inherit_super.data, dest->inherit_super.inherit_super.buffer_size, true);
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "2E 2F 2F 30 "
       "31 32 33 34 "
       "88 88 "
       "76 76 ",
-      buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      dest);
   ttLibC_Bgr_close(&src);
   ttLibC_Yuv420_close(&dest);
 });
@@ -1646,14 +1562,11 @@ LIBYUV(BgraToYuvSemiPlanar, [this](){
   if(!ttLibC_LibyuvResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
-  LOG_DUMP(dest->inherit_super.inherit_super.data, dest->inherit_super.inherit_super.buffer_size, true);
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "2E 2F 2F 30 "
       "31 32 33 34 "
       "76 88 76 88 ",
-      buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      dest);
   ttLibC_Bgr_close(&src);
   ttLibC_Yuv420_close(&dest);
 });
@@ -1676,14 +1589,11 @@ LIBYUV(BgraToYvuSemiPlanar, [this](){
   if(!ttLibC_LibyuvResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
-  LOG_DUMP(dest->inherit_super.inherit_super.data, dest->inherit_super.inherit_super.buffer_size, true);
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "2E 2F 2F 30 "
       "31 32 33 34 "
       "88 76 88 76 ",
-      buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      dest);
   ttLibC_Bgr_close(&src);
   ttLibC_Yuv420_close(&dest);
 });
@@ -1707,19 +1617,16 @@ LIBYUV(ArgbToYuvPlanar, [this](){
   if(!ttLibC_LibyuvResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
-  LOG_DUMP(dest->inherit_super.inherit_super.data, dest->inherit_super.inherit_super.buffer_size, true);
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "37 37 38 39 "
       "3A 3B 3C 3D "
       "89 89 "
       "77 77 ",
-      buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      dest);
   ttLibC_Bgr_close(&src);
   ttLibC_Yuv420_close(&dest);
 });
-// 以上まで処置終わってる。
+
 LIBYUV(ArgbToYvuPlanar, [this](){
   // original
   auto src = makeBgr(
@@ -1739,15 +1646,12 @@ LIBYUV(ArgbToYvuPlanar, [this](){
   if(!ttLibC_LibyuvResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
-  LOG_DUMP(dest->inherit_super.inherit_super.data, dest->inherit_super.inherit_super.buffer_size, true);
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "37 37 38 39 "
       "3A 3B 3C 3D "
       "77 77 "
       "89 89 ",
-      buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      dest);
   ttLibC_Bgr_close(&src);
   ttLibC_Yuv420_close(&dest);
 });
@@ -1770,15 +1674,12 @@ LIBYUV(RgbaToYuvPlanar, [this](){
   if(!ttLibC_LibyuvResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
-  LOG_DUMP(dest->inherit_super.inherit_super.data, dest->inherit_super.inherit_super.buffer_size, true);
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "29 2A 2A 2B "
       "2C 2D 2E 2F "
       "89 89 "
       "77 77 ",
-      buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      dest);
   ttLibC_Bgr_close(&src);
   ttLibC_Yuv420_close(&dest);
 });
@@ -1802,15 +1703,12 @@ LIBYUV(RgbaToYvuPlanar, [this](){
   if(!ttLibC_LibyuvResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
-  LOG_DUMP(dest->inherit_super.inherit_super.data, dest->inherit_super.inherit_super.buffer_size, true);
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "29 2A 2A 2B "
       "2C 2D 2E 2F "
       "77 77 "
       "89 89 ",
-      buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      dest);
   ttLibC_Bgr_close(&src);
   ttLibC_Yuv420_close(&dest);
 });
@@ -1834,15 +1732,12 @@ LIBYUV(AbgrToYuvPlanar, [this](){
   if(!ttLibC_LibyuvResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
-  LOG_DUMP(dest->inherit_super.inherit_super.data, dest->inherit_super.inherit_super.buffer_size, true);
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "3C 3C 3D 3E "
       "3F 40 41 42 "
       "76 76 "
       "88 88 ",
-      buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      dest);
   ttLibC_Bgr_close(&src);
   ttLibC_Yuv420_close(&dest);
 });
@@ -1865,15 +1760,12 @@ LIBYUV(AbgrToYvuPlanar, [this](){
   if(!ttLibC_LibyuvResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
-  LOG_DUMP(dest->inherit_super.inherit_super.data, dest->inherit_super.inherit_super.buffer_size, true);
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "3C 3C 3D 3E "
       "3F 40 41 42 "
       "88 88 "
       "76 76 ",
-      buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      dest);
   ttLibC_Bgr_close(&src);
   ttLibC_Yuv420_close(&dest);
 });
@@ -1896,15 +1788,12 @@ LIBYUV(BgrToYuvPlanar, [this](){
   if(!ttLibC_LibyuvResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
-  LOG_DUMP(dest->inherit_super.inherit_super.data, dest->inherit_super.inherit_super.buffer_size, true);
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "2E 2F 2F 30 "
       "31 32 33 34 "
       "76 76 "
       "88 88 ",
-      buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      dest);
   ttLibC_Bgr_close(&src);
   ttLibC_Yuv420_close(&dest);
 });
@@ -1927,15 +1816,12 @@ LIBYUV(BgrToYvuPlanar, [this](){
   if(!ttLibC_LibyuvResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
-  LOG_DUMP(dest->inherit_super.inherit_super.data, dest->inherit_super.inherit_super.buffer_size, true);
-  uint8_t buffer[256];
-  uint32_t length = ttLibC_HexUtil_makeBuffer(
+  binaryEq(
       "2E 2F 2F 30 "
       "31 32 33 34 "
       "88 88 "
       "76 76 ",
-      buffer, 256);
-  EXPECT_EQ(std::memcmp((const char *)dest->inherit_super.inherit_super.data, (const char *)buffer, length), 0);
+      dest);
   ttLibC_Bgr_close(&src);
   ttLibC_Yuv420_close(&dest);
 });
