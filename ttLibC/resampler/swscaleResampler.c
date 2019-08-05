@@ -17,9 +17,12 @@ typedef struct {
 	struct SwsContext      *convertCtx;
 	ttLibC_Frame_Type       input_type;
 	uint32_t                input_sub_type;
+	uint32_t								input_width;
+	uint32_t								input_height;
 	ttLibC_Frame_Type       output_type;
 	uint32_t                output_sub_type;
-	ttLibC_Frame           *frame;
+	uint32_t 								output_width;
+	uint32_t								output_height;
 } ttLibC_Resampler_SwscaleResampler_;
 
 typedef ttLibC_Resampler_SwscaleResampler_ ttLibC_SwscaleResampler_;
@@ -74,11 +77,11 @@ static enum AVPixelFormat SwscaleResampler_getPixFormat(
 static bool SwscaleResampler_setupDataStride(
 		uint8_t     **data,
 		uint32_t     *strides,
-		ttLibC_Frame *frame) {
-	switch(frame->type) {
+		ttLibC_Video *video) {
+	switch(video->inherit_super.type) {
 	case frameType_bgr:
 		{
-			ttLibC_Bgr *bgr = (ttLibC_Bgr *)frame;
+			ttLibC_Bgr *bgr = (ttLibC_Bgr *)video;
 			data[0]    = bgr->data;
 			data[1]    = NULL;
 			data[2]    = NULL;
@@ -91,7 +94,7 @@ static bool SwscaleResampler_setupDataStride(
 		break;
 	case frameType_yuv420:
 		{
-			ttLibC_Yuv420 *yuv = (ttLibC_Yuv420 *)frame;
+			ttLibC_Yuv420 *yuv = (ttLibC_Yuv420 *)video;
 			switch(yuv->type) {
 			case Yuv420Type_planar:
 			case Yvu420Type_planar:
@@ -159,43 +162,12 @@ ttLibC_SwscaleResampler TT_ATTRIBUTE_API *ttLibC_SwscaleResampler_make(
 	resampler->inherit_super.height = output_height;
 	resampler->input_type      = input_frame_type;
 	resampler->input_sub_type  = input_sub_type;
+	resampler->input_width     = input_width;
+	resampler->input_height    = input_height;
 	resampler->output_type     = output_frame_type;
 	resampler->output_sub_type = output_sub_type;
-	resampler->frame           = NULL;
-	switch(output_frame_type) {
-	case frameType_bgr:
-		{
-			ttLibC_Bgr *bgr = ttLibC_Bgr_makeEmptyFrame(
-				output_sub_type,
-				output_width,
-				output_height);
-			if(bgr == NULL) {
-				ttLibC_free(resampler);
-				return NULL;
-			}
-			resampler->frame = (ttLibC_Frame *)bgr;
-		}
-		break;
-	case frameType_yuv420:
-		{
-			ttLibC_Yuv420 *yuv = ttLibC_Yuv420_makeEmptyFrame(
-				output_sub_type,
-				output_width,
-				output_height);
-			if(yuv == NULL) {
-				ttLibC_free(resampler);
-				return NULL;
-			}
-			resampler->frame = (ttLibC_Frame *)yuv;
-		}
-		break;
-	default:
-		{
-			ERR_PRINT("unexpected format");
-			ttLibC_free(resampler);
-		}
-		return NULL;
-	}
+	resampler->output_width    = output_width;
+	resampler->output_height   = output_height;
 
 	enum AVPixelFormat in_format  = SwscaleResampler_getPixFormat(input_frame_type, input_sub_type);
 	enum AVPixelFormat out_format = SwscaleResampler_getPixFormat(output_frame_type, output_sub_type);
@@ -254,18 +226,40 @@ ttLibC_SwscaleResampler TT_ATTRIBUTE_API *ttLibC_SwscaleResampler_make(
 
 bool TT_ATTRIBUTE_API ttLibC_SwscaleResampler_resample(
 		ttLibC_SwscaleResampler *resampler,
-		ttLibC_Frame *frame,
-		ttLibC_getSwscaleFrameFunc callback,
-		void *ptr) {
+		ttLibC_Video *dest_frame,
+		ttLibC_Video *src_frame) {
 	ttLibC_SwscaleResampler_ *resampler_ = (ttLibC_SwscaleResampler_ *)resampler;
 	if(resampler_ == NULL) {
 		return false;
 	}
-	if(frame == NULL) {
-		return true;
+	if(dest_frame == NULL) {
+		return false;
 	}
-	if(frame->type != resampler_->input_type) {
-		ERR_PRINT("frame type is different from setting.");
+	if(src_frame == NULL) {
+		return false;
+	}
+	if(src_frame->inherit_super.type  != resampler_->input_type
+	|| dest_frame->inherit_super.type != resampler_->output_type) {
+		return false;
+	}
+	uint32_t src_subtype;
+	uint32_t dest_subtype;
+	if(src_frame->inherit_super.type == frameType_bgr) {
+		src_subtype = ((ttLibC_Bgr *)src_frame)->type;
+	}
+	else if(src_frame->inherit_super.type == frameType_yuv420) {
+		src_subtype = ((ttLibC_Yuv420 *)src_frame)->type;
+	}
+	else {
+		return false;
+	}
+	if(dest_frame->inherit_super.type == frameType_bgr) {
+		dest_subtype = ((ttLibC_Bgr *)dest_frame)->type;
+	}
+	else if(dest_frame->inherit_super.type == frameType_yuv420) {
+		dest_subtype = ((ttLibC_Yuv420 *)dest_frame)->type;
+	}
+	else {
 		return false;
 	}
 	uint8_t *src_data[4];
@@ -275,33 +269,23 @@ bool TT_ATTRIBUTE_API ttLibC_SwscaleResampler_resample(
 	if(!SwscaleResampler_setupDataStride(
 			src_data,
 			src_stride,
-			frame)) {
+			src_frame)) {
 		return false;
 	}
 	if(!SwscaleResampler_setupDataStride(
 			dst_data,
 			dst_stride,
-			resampler_->frame)) {
+			dest_frame)) {
 		return false;
 	}
-	ttLibC_Video *video = (ttLibC_Video *)frame;
 	sws_scale(
 			resampler_->convertCtx,
 			(const uint8_t *const *)src_data,
 			(const int *)src_stride,
 			0,
-			video->height,
+			src_frame->height,
 			(uint8_t *const *)dst_data,
 			(const int *)dst_stride);
-	// update pts.
-	resampler_->frame->pts      = frame->pts;
-	resampler_->frame->timebase = frame->timebase;
-	resampler_->frame->id       = frame->id;
-	if(callback != NULL) {
-		if(!callback(ptr, resampler_->frame)) {
-			return false;
-		}
-	}
 	return true;
 }
 
@@ -311,7 +295,6 @@ void TT_ATTRIBUTE_API ttLibC_SwscaleResampler_close(ttLibC_SwscaleResampler **re
 		return;
 	}
 	sws_freeContext(target->convertCtx);
-	ttLibC_Frame_close(&target->frame);
 	ttLibC_free(target);
 	*resampler = NULL;
 }

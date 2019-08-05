@@ -139,9 +139,12 @@ static void libpngTest() {
 			bgr->inherit_super.inherit_super.type, bgr->type, width, height,
 			frameType_yuv420, Yuv420Type_planar, width, height, SwscaleResampler_Bilinear);
 		// try to resample: bgr -> yuv -> jpeg -> file.
-		ttLibC_SwscaleResampler_resample(scale, (ttLibC_Frame *)bgr, libpngTest_yuvCallback, NULL);
+		ttLibC_Yuv420 *yuv = ttLibC_Yuv420_makeEmptyFrame(Yuv420Type_planar, width, height);
+		ttLibC_SwscaleResampler_resample(scale, (ttLibC_Video *)yuv, (ttLibC_Video *)bgr);
+		libpngTest_yuvCallback(NULL, (ttLibC_Frame *)yuv);
 
 		ttLibC_SwscaleResampler_close(&scale);
+		ttLibC_Yuv420_close(&yuv);
 		ttLibC_Bgr_close(&bgr);
 		png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
 

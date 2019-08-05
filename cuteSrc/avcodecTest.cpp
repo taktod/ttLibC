@@ -43,6 +43,7 @@ extern "C" {
 #include <ttLibC/frame/audio/pcms16.h>
 #include <ttLibC/frame/audio/pcmf32.h>
 #include <ttLibC/frame/audio/audio.h>
+#include <ttLibC/frame/video/yuv420.h>
 #include <ttLibC/frame/frame.h>
 
 #include <ttLibC/container/flv.h>
@@ -53,6 +54,7 @@ typedef struct pngDecodeTest_t {
 	ttLibC_AvcodecDecoder *decoder;
 	ttLibC_ContainerReader *reader;
 	ttLibC_SwscaleResampler *resampler;
+	ttLibC_Yuv420 *resampled_yuv;
 	ttLibC_JpegEncoder *encoder;
 	FILE *fp_in;
 } pngDecodeTest_t;
@@ -75,7 +77,10 @@ static bool pngDecoderTest_resamplerCallback(void *ptr, ttLibC_Frame *frame) {
 
 static bool pngDecoderTest_pngDecodeCallback(void *ptr, ttLibC_Frame *frame) {
 	pngDecodeTest_t *testData = (pngDecodeTest_t *)ptr;
-	return ttLibC_SwscaleResampler_resample(testData->resampler, frame, pngDecoderTest_resamplerCallback, ptr);
+	if(!ttLibC_SwscaleResampler_resample(testData->resampler, (ttLibC_Video *)testData->resampled_yuv, (ttLibC_Video *)frame)) {
+		return false;
+	}
+	return pngDecoderTest_resamplerCallback(ptr, (ttLibC_Frame *)testData->resampled_yuv);
 }
 
 static bool pngDecoderTest_pngFrameCallback(void *ptr, ttLibC_Frame *frame) {
@@ -100,6 +105,7 @@ static void pngDecodeTest() {
 	testData.reader = (ttLibC_ContainerReader *)ttLibC_MkvReader_make();
 	testData.decoder = ttLibC_AvcodecVideoDecoder_make(frameType_png, 640, 360);
 	testData.resampler = ttLibC_SwscaleResampler_make(frameType_bgr, BgrType_rgb, 640, 360, frameType_yuv420, Yuv420Type_planar, 320, 180, SwscaleResampler_Bilinear);
+	testData.resampled_yuv = ttLibC_Yuv420_makeEmptyFrame(Yuv420Type_planar, 320, 180);
 	testData.encoder = ttLibC_JpegEncoder_make(320, 180, 90);
 	sprintf(file, "%s/tools/data/source/test.png.mkv", getenv("HOME"));
 //	sprintf(file, "%s/tools/data/source/out.mkv", getenv("HOME"));
@@ -118,6 +124,7 @@ static void pngDecodeTest() {
 	ttLibC_AvcodecDecoder_close(&testData.decoder);
 	ttLibC_ContainerReader_close(&testData.reader);
 	ttLibC_SwscaleResampler_close(&testData.resampler);
+	ttLibC_Yuv420_close(&testData.resampled_yuv);
 	ttLibC_JpegEncoder_close(&testData.encoder);
 	if(testData.fp_in)  {fclose(testData.fp_in); testData.fp_in  = NULL;}
 #endif

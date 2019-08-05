@@ -201,11 +201,14 @@ static bool pngDecodeBinaryTest2_scaleCallback(void *ptr, ttLibC_Frame *frame) {
 
 static bool pngDecodeBinaryTest2_decodeCallback(void *ptr, ttLibC_Bgr *frame) {
 	ttLibC_Bgr *bgr = frame;
+	ttLibC_Yuv420 *yuv = ttLibC_Yuv420_makeEmptyFrame(Yuv420Type_planar, bgr->inherit_super.width, bgr->inherit_super.height);
 	ttLibC_SwscaleResampler *resampler = ttLibC_SwscaleResampler_make(bgr->inherit_super.inherit_super.type, bgr->type, bgr->inherit_super.width, bgr->inherit_super.height,
 		frameType_yuv420, Yuv420Type_planar, bgr->inherit_super.width, bgr->inherit_super.height,
 		SwscaleResampler_Bilinear);
-	ttLibC_SwscaleResampler_resample(resampler, (ttLibC_Frame *)frame, pngDecodeBinaryTest2_scaleCallback, NULL);
+	ttLibC_SwscaleResampler_resample(resampler, (ttLibC_Video *)yuv, (ttLibC_Video *)frame);
+	pngDecodeBinaryTest2_scaleCallback(NULL, (ttLibC_Frame *)yuv);
 	ttLibC_SwscaleResampler_close(&resampler);
+	ttLibC_Yuv420_close(&yuv);
 	return true;
 }
 #endif
@@ -255,11 +258,14 @@ static bool pngDecodeBinaryTest_scaleCallback(void *ptr, ttLibC_Frame *frame) {
 
 static bool pngDecodeBinaryTest_decodeCallback(void *ptr, ttLibC_Frame *frame) {
 	ttLibC_Bgr *bgr = (ttLibC_Bgr *)frame;
+	ttLibC_Yuv420 *yuv = ttLibC_Yuv420_makeEmptyFrame(Yuv420Type_planar, bgr->inherit_super.width, bgr->inherit_super.height);
 	ttLibC_SwscaleResampler *resampler = ttLibC_SwscaleResampler_make(bgr->inherit_super.inherit_super.type, bgr->type, bgr->inherit_super.width, bgr->inherit_super.height,
 		frameType_yuv420, Yuv420Type_planar, bgr->inherit_super.width, bgr->inherit_super.height,
 		SwscaleResampler_Bilinear);
-	ttLibC_SwscaleResampler_resample(resampler, frame, pngDecodeBinaryTest_scaleCallback, NULL);
+	ttLibC_SwscaleResampler_resample(resampler, (ttLibC_Video *)yuv, (ttLibC_Video *)frame);
+	pngDecodeBinaryTest_scaleCallback(NULL, (ttLibC_Frame *)yuv);
 	ttLibC_SwscaleResampler_close(&resampler);
+	ttLibC_Yuv420_close(&yuv);
 	return true;
 }
 #endif
@@ -1693,7 +1699,7 @@ static void swscaleTest() {
 			BgrType_bgr,
 			400, 300,
 			SwscaleResampler_Bicubic);
-	ttLibC_Bgr *bgr = NULL, *b, *rbgr = NULL;
+	ttLibC_Bgr *bgr = NULL, *b, *rbgr = ttLibC_Bgr_makeEmptyFrame(BgrType_bgr, 400, 300);
 	while(true) {
 		b = ttLibC_CvCapture_queryFrame(capture, bgr);
 		if(b == NULL) {
@@ -1701,7 +1707,8 @@ static void swscaleTest() {
 		}
 		bgr = b;
 		ttLibC_CvWindow_showBgr(window, bgr);
-		ttLibC_SwscaleResampler_resample(resampler, (ttLibC_Frame *)bgr, swscaleCallback, resampled_window);
+		ttLibC_SwscaleResampler_resample(resampler, (ttLibC_Video *)rbgr, (ttLibC_Video *)bgr);
+		swscaleCallback(resampled_window, (ttLibC_Frame *)rbgr);
 		uint8_t key = ttLibC_CvWindow_waitForKeyInput(10);
 		if(key == Keychar_Esc) {
 			break;

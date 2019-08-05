@@ -40,8 +40,6 @@ typedef struct ttLibC_Resampler_SwscaleResampler {
 
 typedef ttLibC_Resampler_SwscaleResampler ttLibC_SwscaleResampler;
 
-typedef bool (* ttLibC_getSwscaleFrameFunc)(void *ptr, ttLibC_Frame *frame);
-
 ttLibC_SwscaleResampler TT_ATTRIBUTE_API *ttLibC_SwscaleResampler_make(
 		ttLibC_Frame_Type            input_frame_type,
 		uint32_t                     input_sub_type,
@@ -55,9 +53,8 @@ ttLibC_SwscaleResampler TT_ATTRIBUTE_API *ttLibC_SwscaleResampler_make(
 
 bool TT_ATTRIBUTE_API ttLibC_SwscaleResampler_resample(
 		ttLibC_SwscaleResampler *resampler,
-		ttLibC_Frame *frame,
-		ttLibC_getSwscaleFrameFunc callback,
-		void *ptr);
+		ttLibC_Video *dest_frame,
+		ttLibC_Video *src_frame);
 
 void TT_ATTRIBUTE_API ttLibC_SwscaleResampler_close(ttLibC_SwscaleResampler **resampler);
 
