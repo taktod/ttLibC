@@ -584,6 +584,3 @@ ttLibC_Bgr TT_ATTRIBUTE_API *ttLibC_ImageResampler_makeBgrFromYuv420(
 	bgr->inherit_super.inherit_super.id = src_frame->inherit_super.inherit_super.id;
 	return bgr;
 }
-
-
-
