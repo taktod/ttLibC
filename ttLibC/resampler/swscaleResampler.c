@@ -294,7 +294,7 @@ void TT_ATTRIBUTE_API ttLibC_SwscaleResampler_close(ttLibC_SwscaleResampler **re
 	if(target == NULL) {
 		return;
 	}
-	sws_freeContext(target->convertCtx);
+//	sws_freeContext(target->convertCtx);
 	ttLibC_free(target);
 	*resampler = NULL;
 }

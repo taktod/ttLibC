@@ -15,6 +15,7 @@ add_executable(ttLibC-test
   test.cpp
   frame.cpp
   resampler.cpp
+  resampler/image.cpp
   resampler/libyuv.cpp
   resampler/swscale.cpp
   util.cpp)

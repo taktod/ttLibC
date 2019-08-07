@@ -1,557 +1,10 @@
 #include "../resampler.hpp"
-#include <ttLibC/resampler/libyuvResampler.h>
+#include <ttLibC/resampler/imageResampler.h>
 
-using namespace std;
 
-#ifdef __ENABLE_LIBYUV__
-#define LIBYUV(A, B) TEST_F(ResamplerTest, Libyuv##A){B();}
-#else
-#define LIBYUV(A, B) TEST_F(ResamplerTest, DISABLED_Libyuv##A){}
-#endif
+#define IMAGE(A, B) TEST_F(ResamplerTest, Image##A){B();}
 
-LIBYUV(RotateYuvPlanarToYuvPlanar, [this](){
-  // original
-  auto src = makeYuv(
-      "00 00 80 80 "
-      "00 00 40 20 "
-      "FF FF "
-      "80 F0 ",
-      Yuv420Type_planar,
-      4, 2);
-  // target
-  auto dest = makeYuv(
-      "00 00 "
-      "00 00 "
-      "00 00 "
-      "00 00 "
-      "00 "
-      "00 "
-      "00 "
-      "00 ",
-      Yuv420Type_planar,
-      2, 4);
-  if(!ttLibC_LibyuvResampler_rotate((ttLibC_Video *)dest, (ttLibC_Video *)src, LibyuvRotate_90)) {
-    FAIL();
-  }
-  binaryEq(
-      "00 00 "
-      "00 00 "
-      "40 80 "
-      "20 80 "
-      "FF "
-      "FF "
-      "80 "
-      "F0 ", dest);
-  ttLibC_Yuv420_close(&src);
-  ttLibC_Yuv420_close(&dest);
-});
-
-LIBYUV(RotateClip, [this]() {
-  // original
-  auto src = makeYuv(
-      "00 00 80 80 "
-      "00 00 40 20 "
-      "F0 E0 "
-      "80 F0 ",
-      Yuv420Type_planar,
-      4, 2);
-  // target
-  auto dest = makeYuv(
-      "FF FF FF FF FF FF "
-      "FF FF FF FF FF FF "
-      "FF FF FF FF FF FF "
-      "FF FF FF FF FF FF "
-      "FF FF FF FF FF FF "
-      "FF FF FF FF FF FF "
-      "FF FF FF FF FF FF "
-      "FF FF FF FF FF FF "
-      "FF FF FF "
-      "FF FF FF "
-      "FF FF FF "
-      "FF FF FF "
-      "FF FF FF "
-      "FF FF FF "
-      "FF FF FF "
-      "FF FF FF ",
-      Yuv420Type_planar,
-      6, 8);
-  dest->inherit_super.width = 2;
-  dest->inherit_super.height = 4;
-  dest->y_data += 14;
-  dest->u_data += 4;
-  dest->v_data += 4;
-  if(!ttLibC_LibyuvResampler_rotate((ttLibC_Video *)dest, (ttLibC_Video *)src, LibyuvRotate_90)) {
-    FAIL();
-  }
-  ttLibC_Yuv420_resetData(dest);
-  binaryEq(
-      "FF FF FF FF FF FF "
-      "FF FF FF FF FF FF "
-      "FF FF 00 00 FF FF "
-      "FF FF 00 00 FF FF "
-      "FF FF 40 80 FF FF "
-      "FF FF 20 80 FF FF "
-      "FF FF FF FF FF FF "
-      "FF FF FF FF FF FF "
-      "FF FF FF "
-      "FF F0 FF "
-      "FF E0 FF "
-      "FF FF FF "
-      "FF FF FF "
-      "FF 80 FF "
-      "FF F0 FF "
-      "FF FF FF ",
-      dest);
-  ttLibC_Yuv420_close(&src);
-  ttLibC_Yuv420_close(&dest);
-});
-
-LIBYUV(RotateYuvPlanarToYvuPlanar, [this](){
-  // original
-  auto src = makeYuv(
-      "00 00 80 80 "
-      "00 00 40 20 "
-      "FF FF "
-      "80 F0 ",
-      Yuv420Type_planar,
-      4, 2);
-  // target
-  auto dest = makeYuv(
-      "01 02 "
-      "03 04 "
-      "05 06 "
-      "07 08 "
-      "09 "
-      "0A "
-      "0B "
-      "0C ",
-      Yvu420Type_planar,
-      2, 4);
-  if(!ttLibC_LibyuvResampler_rotate((ttLibC_Video *)dest, (ttLibC_Video *)src, LibyuvRotate_90)) {
-    FAIL();
-  }
-  binaryEq(
-      "00 00 "
-      "00 00 "
-      "40 80 "
-      "20 80 "
-      "80 "
-      "F0 "
-      "FF "
-      "FF ", dest);
-  ttLibC_Yuv420_close(&src);
-  ttLibC_Yuv420_close(&dest);
-});
-
-LIBYUV(RotateYvuPlanarToYvuPlanar, [this](){
-  // original
-  auto src = makeYuv(
-      "00 00 80 80 "
-      "00 00 40 20 "
-      "FF FF "
-      "80 F0 ",
-      Yvu420Type_planar,
-      4, 2);
-  // target
-  auto dest = makeYuv(
-      "01 02 "
-      "03 04 "
-      "05 06 "
-      "07 08 "
-      "09 "
-      "0A "
-      "0B "
-      "0C ",
-      Yvu420Type_planar,
-      2, 4);
-  if(!ttLibC_LibyuvResampler_rotate((ttLibC_Video *)dest, (ttLibC_Video *)src, LibyuvRotate_90)) {
-    FAIL();
-  }
-  binaryEq(
-      "00 00 "
-      "00 00 "
-      "40 80 "
-      "20 80 "
-      "FF "
-      "FF "
-      "80 "
-      "F0 ", dest);
-  ttLibC_Yuv420_close(&src);
-  ttLibC_Yuv420_close(&dest);
-});
-
-LIBYUV(RotateYvuPlanarToYuvPlanar, [this](){
-  // original
-  auto src = makeYuv(
-      "00 00 80 80 "
-      "00 00 40 20 "
-      "FF FF "
-      "80 F0 ",
-      Yvu420Type_planar,
-      4, 2);
-  // target
-  auto dest = makeYuv(
-      "01 02 "
-      "03 04 "
-      "05 06 "
-      "07 08 "
-      "09 "
-      "0A "
-      "0B "
-      "0C ",
-      Yuv420Type_planar,
-      2, 4);
-  if(!ttLibC_LibyuvResampler_rotate((ttLibC_Video *)dest, (ttLibC_Video *)src, LibyuvRotate_90)) {
-    FAIL();
-  }
-  binaryEq(
-      "00 00 "
-      "00 00 "
-      "40 80 "
-      "20 80 "
-      "80 "
-      "F0 "
-      "FF "
-      "FF ", dest);
-  ttLibC_Yuv420_close(&src);
-  ttLibC_Yuv420_close(&dest);
-});
-
-LIBYUV(RotateYuvSemiPlanarToYuvPlanar, [this](){
-  // original
-  auto src = makeYuv(
-      "00 00 80 80 "
-      "00 00 40 20 "
-      "FF FF "
-      "80 F0 ",
-      Yuv420Type_semiPlanar,
-      4, 2);
-  // target
-  auto dest = makeYuv(
-      "01 02 "
-      "03 04 "
-      "05 06 "
-      "07 08 "
-      "09 "
-      "0A "
-      "0B "
-      "0C ",
-      Yuv420Type_planar,
-      2, 4);
-  if(!ttLibC_LibyuvResampler_rotate((ttLibC_Video *)dest, (ttLibC_Video *)src, LibyuvRotate_90)) {
-    FAIL();
-  }
-  binaryEq(
-      "00 00 "
-      "00 00 "
-      "40 80 "
-      "20 80 "
-      "FF "
-      "80 "
-      "FF "
-      "F0 ", dest);
-  ttLibC_Yuv420_close(&src);
-  ttLibC_Yuv420_close(&dest);
-});
-
-LIBYUV(RotateYuvSemiPlanarToYvuPlanar, [this](){
-  // original
-  auto src = makeYuv(
-      "00 00 80 80 "
-      "00 00 40 20 "
-      "FF FF "
-      "80 F0 ",
-      Yuv420Type_semiPlanar,
-      4, 2);
-  // target
-  auto dest = makeYuv(
-      "01 02 "
-      "03 04 "
-      "05 06 "
-      "07 08 "
-      "09 "
-      "0A "
-      "0B "
-      "0C ",
-      Yvu420Type_planar,
-      2, 4);
-  if(!ttLibC_LibyuvResampler_rotate((ttLibC_Video *)dest, (ttLibC_Video *)src, LibyuvRotate_90)) {
-    FAIL();
-  }
-  binaryEq(
-      "00 00 "
-      "00 00 "
-      "40 80 "
-      "20 80 "
-      "FF "
-      "F0 "
-      "FF "
-      "80 ", dest);
-  ttLibC_Yuv420_close(&src);
-  ttLibC_Yuv420_close(&dest);
-});
-
-LIBYUV(RotateBgraToBgra, [this](){
-  // original
-  auto src = makeBgr(
-      "10 20 30 40 11 21 31 41 12 22 32 42 13 23 33 43 "
-      "14 24 34 44 15 25 35 45 16 26 36 46 17 27 37 47 ",
-      BgrType_bgra,
-      4, 2);
-  // target
-  auto dest = makeBgr(
-      "00 00 00 00 00 00 00 00 "
-      "00 00 00 00 00 00 00 00 "
-      "00 00 00 00 00 00 00 00 "
-      "00 00 00 00 00 00 00 00 ",
-      BgrType_bgra,
-      2, 4);
-  if(!ttLibC_LibyuvResampler_rotate((ttLibC_Video *)dest, (ttLibC_Video *)src, LibyuvRotate_90)) {
-    FAIL();
-  }
-  binaryEq(
-      "14 24 34 44 10 20 30 40 "
-      "15 25 35 45 11 21 31 41 "
-      "16 26 36 46 12 22 32 42 "
-      "17 27 37 47 13 23 33 43 ",
-      dest);
-  ttLibC_Bgr_close(&src);
-  ttLibC_Bgr_close(&dest);
-});
-
-LIBYUV(RotateAbgrToAbgr, [this](){
-  // original
-  auto src = makeBgr(
-      "10 20 30 40 11 21 31 41 12 22 32 42 13 23 33 43 "
-      "14 24 34 44 15 25 35 45 16 26 36 46 17 27 37 47 ",
-      BgrType_abgr,
-      4, 2);
-  // target
-  auto dest = makeBgr(
-      "00 00 00 00 00 00 00 00 "
-      "00 00 00 00 00 00 00 00 "
-      "00 00 00 00 00 00 00 00 "
-      "00 00 00 00 00 00 00 00 ",
-      BgrType_abgr,
-      2, 4);
-  if(!ttLibC_LibyuvResampler_rotate((ttLibC_Video *)dest, (ttLibC_Video *)src, LibyuvRotate_90)) {
-    FAIL();
-  }
-  binaryEq(
-      "14 24 34 44 10 20 30 40 "
-      "15 25 35 45 11 21 31 41 "
-      "16 26 36 46 12 22 32 42 "
-      "17 27 37 47 13 23 33 43 ",
-      dest);
-  ttLibC_Bgr_close(&src);
-  ttLibC_Bgr_close(&dest);
-});
-
-LIBYUV(RotateRgbaToRgba, [this](){
-  // original
-  auto src = makeBgr(
-      "10 20 30 40 11 21 31 41 12 22 32 42 13 23 33 43 "
-      "14 24 34 44 15 25 35 45 16 26 36 46 17 27 37 47 ",
-      BgrType_rgba,
-      4, 2);
-  // target
-  auto dest = makeBgr(
-      "00 00 00 00 00 00 00 00 "
-      "00 00 00 00 00 00 00 00 "
-      "00 00 00 00 00 00 00 00 "
-      "00 00 00 00 00 00 00 00 ",
-      BgrType_rgba,
-      2, 4);
-  if(!ttLibC_LibyuvResampler_rotate((ttLibC_Video *)dest, (ttLibC_Video *)src, LibyuvRotate_90)) {
-    FAIL();
-  }
-  binaryEq(
-      "14 24 34 44 10 20 30 40 "
-      "15 25 35 45 11 21 31 41 "
-      "16 26 36 46 12 22 32 42 "
-      "17 27 37 47 13 23 33 43 ",
-      dest);
-  ttLibC_Bgr_close(&src);
-  ttLibC_Bgr_close(&dest);
-});
-
-LIBYUV(RotateArgbToArgb, [this](){
-  // original
-  auto src = makeBgr(
-      "10 20 30 40 11 21 31 41 12 22 32 42 13 23 33 43 "
-      "14 24 34 44 15 25 35 45 16 26 36 46 17 27 37 47 ",
-      BgrType_argb,
-      4, 2);
-  // target
-  auto dest = makeBgr(
-      "00 00 00 00 00 00 00 00 "
-      "00 00 00 00 00 00 00 00 "
-      "00 00 00 00 00 00 00 00 "
-      "00 00 00 00 00 00 00 00 ",
-      BgrType_argb,
-      2, 4);
-  if(!ttLibC_LibyuvResampler_rotate((ttLibC_Video *)dest, (ttLibC_Video *)src, LibyuvRotate_90)) {
-    FAIL();
-  }
-  binaryEq(
-      "14 24 34 44 10 20 30 40 "
-      "15 25 35 45 11 21 31 41 "
-      "16 26 36 46 12 22 32 42 "
-      "17 27 37 47 13 23 33 43 ",
-      dest);
-  ttLibC_Bgr_close(&src);
-  ttLibC_Bgr_close(&dest);
-});
-
-LIBYUV(ScaleYuvPlanar, [this](){
-  // original
-  auto src = makeYuv(
-      "00 00 80 80 "
-      "00 00 40 20 "
-      "FF FF "
-      "80 F0 ",
-      Yuv420Type_planar,
-      4, 2);
-  // target
-  auto dest = makeYuv(
-      "00 00 00 00 00 00 00 00 "
-      "00 00 00 00 00 00 00 00 "
-      "00 00 00 00 "
-      "00 00 00 00 ",
-      Yuv420Type_planar,
-      8, 2);
-  if(!ttLibC_LibyuvResampler_resize((ttLibC_Video *)dest, (ttLibC_Video *)src, LibyuvFilter_None, LibyuvFilter_None)) {
-    FAIL();
-  }
-  binaryEq(
-      "00 00 00 00 80 80 80 80 "
-      "00 00 00 00 40 40 20 20 "
-      "FF FF FF FF "
-      "80 80 F0 F0 ",
-      dest);
-  ttLibC_Yuv420_close(&src);
-  ttLibC_Yuv420_close(&dest);
-});
-
-LIBYUV(ScaleYuvPlanarToYvuPlanar, [this](){
-  // original
-  auto src = makeYuv(
-      "00 00 80 80 "
-      "00 00 40 20 "
-      "FF FF "
-      "80 F0 ",
-      Yuv420Type_planar,
-      4, 2);
-  // target
-  auto dest = makeYuv(
-      "00 00 00 00 00 00 00 00 "
-      "00 00 00 00 00 00 00 00 "
-      "00 00 00 00 "
-      "00 00 00 00 ",
-      Yvu420Type_planar,
-      8, 2);
-  if(!ttLibC_LibyuvResampler_resize((ttLibC_Video *)dest, (ttLibC_Video *)src, LibyuvFilter_None, LibyuvFilter_None)) {
-    FAIL();
-  }
-  binaryEq(
-      "00 00 00 00 80 80 80 80 "
-      "00 00 00 00 40 40 20 20 "
-      "80 80 F0 F0 "
-      "FF FF FF FF ",
-      dest);
-  ttLibC_Yuv420_close(&src);
-  ttLibC_Yuv420_close(&dest);
-});
-
-LIBYUV(ScaleYuvSemiPlanar, [this](){
-  // original
-  auto src = makeYuv(
-      "00 00 80 80 "
-      "00 00 40 20 "
-      "FF FF "
-      "80 F0 ",
-      Yuv420Type_semiPlanar,
-      4, 2);
-  // target
-  auto dest = makeYuv(
-      "00 00 00 00 00 00 00 00 "
-      "00 00 00 00 00 00 00 00 "
-      "00 00 00 00 "
-      "00 00 00 00 ",
-      Yuv420Type_semiPlanar,
-      8, 2);
-  if(!ttLibC_LibyuvResampler_resize((ttLibC_Video *)dest, (ttLibC_Video *)src, LibyuvFilter_None, LibyuvFilter_None)) {
-    FAIL();
-  }
-  binaryEq(
-      "00 00 00 00 80 80 80 80 "
-      "00 00 00 00 40 40 20 20 "
-      "FF FF FF FF "
-      "80 F0 80 F0 ",
-      dest);
-  ttLibC_Yuv420_close(&src);
-  ttLibC_Yuv420_close(&dest);
-});
-
-LIBYUV(ScaleYvuSemiPlanar, [this](){
-  // original
-  auto src = makeYuv(
-      "00 00 80 80 "
-      "00 00 40 20 "
-      "FF FF "
-      "80 F0 ",
-      Yvu420Type_semiPlanar,
-      4, 2);
-  // target
-  auto dest = makeYuv(
-      "00 00 00 00 00 00 00 00 "
-      "00 00 00 00 00 00 00 00 "
-      "00 00 00 00 "
-      "00 00 00 00 ",
-      Yvu420Type_semiPlanar,
-      8, 2);
-  if(!ttLibC_LibyuvResampler_resize((ttLibC_Video *)dest, (ttLibC_Video *)src, LibyuvFilter_None, LibyuvFilter_None)) {
-    FAIL();
-  }
-  binaryEq(
-      "00 00 00 00 80 80 80 80 "
-      "00 00 00 00 40 40 20 20 "
-      "FF FF FF FF "
-      "80 F0 80 F0 ",
-      dest);
-  ttLibC_Yuv420_close(&src);
-  ttLibC_Yuv420_close(&dest);
-});
-
-LIBYUV(ScaleBgra, [this](){
-  // original
-  auto src = makeBgr(
-      "10 20 30 40 11 21 31 41 12 22 32 42 13 23 33 43 "
-      "14 24 34 44 15 25 35 45 16 26 36 46 17 27 37 47 ",
-      BgrType_bgra,
-      4, 2);
-  // target
-  auto dest = makeBgr(
-      "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 "
-      "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 "
-      "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 "
-      "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ",
-      BgrType_bgra,
-      8, 4);
-  if(!ttLibC_LibyuvResampler_resize((ttLibC_Video *)dest, (ttLibC_Video *)src, LibyuvFilter_None, LibyuvFilter_None)) {
-    FAIL();
-  }
-  binaryEq(
-      "10 20 30 40 10 20 30 40 11 21 31 41 11 21 31 41 12 22 32 42 12 22 32 42 13 23 33 43 13 23 33 43 "
-      "10 20 30 40 10 20 30 40 11 21 31 41 11 21 31 41 12 22 32 42 12 22 32 42 13 23 33 43 13 23 33 43 "
-      "14 24 34 44 14 24 34 44 15 25 35 45 15 25 35 45 16 26 36 46 16 26 36 46 17 27 37 47 17 27 37 47 "
-      "14 24 34 44 14 24 34 44 15 25 35 45 15 25 35 45 16 26 36 46 16 26 36 46 17 27 37 47 17 27 37 47 ",
-      dest);
-  ttLibC_Bgr_close(&src);
-  ttLibC_Bgr_close(&dest);
-});
-
-LIBYUV(YuvPlanarToBgra, [this]() {
+IMAGE(YuvPlanarToBgra, [this]() {
   auto src = makeYuv(
     "00 00 80 80 "
     "00 00 40 20 "
@@ -564,7 +17,7 @@ LIBYUV(YuvPlanarToBgra, [this]() {
     "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ",
     BgrType_bgra,
     4, 2);
-  if(!ttLibC_LibyuvResampler_ToBgr(dest, (ttLibC_Video *)src)) {
+  if(!ttLibC_ImageResampler_ToBgr(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
   binaryEq(
@@ -575,7 +28,7 @@ LIBYUV(YuvPlanarToBgra, [this]() {
   ttLibC_Bgr_close(&dest);
 });
 
-LIBYUV(YuvPlanarToAbgr, [this]() {
+IMAGE(YuvPlanarToAbgr, [this]() {
   auto src = makeYuv(
     "00 00 80 80 "
     "00 00 40 20 "
@@ -588,7 +41,7 @@ LIBYUV(YuvPlanarToAbgr, [this]() {
     "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ",
     BgrType_abgr,
     4, 2);
-  if(!ttLibC_LibyuvResampler_ToBgr(dest, (ttLibC_Video *)src)) {
+  if(!ttLibC_ImageResampler_ToBgr(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
   binaryEq(
@@ -599,7 +52,7 @@ LIBYUV(YuvPlanarToAbgr, [this]() {
   ttLibC_Bgr_close(&dest);
 });
 
-LIBYUV(YuvPlanarToRgba, [this]() {
+IMAGE(YuvPlanarToRgba, [this]() {
   auto src = makeYuv(
     "00 00 80 80 "
     "00 00 40 20 "
@@ -612,7 +65,7 @@ LIBYUV(YuvPlanarToRgba, [this]() {
     "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ",
     BgrType_rgba,
     4, 2);
-  if(!ttLibC_LibyuvResampler_ToBgr(dest, (ttLibC_Video *)src)) {
+  if(!ttLibC_ImageResampler_ToBgr(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
   binaryEq(
@@ -623,7 +76,7 @@ LIBYUV(YuvPlanarToRgba, [this]() {
   ttLibC_Bgr_close(&dest);
 });
 
-LIBYUV(YuvPlanarToArgb, [this]() {
+IMAGE(YuvPlanarToArgb, [this]() {
   auto src = makeYuv(
     "00 00 80 80 "
     "00 00 40 20 "
@@ -636,7 +89,7 @@ LIBYUV(YuvPlanarToArgb, [this]() {
     "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ",
     BgrType_argb,
     4, 2);
-  if(!ttLibC_LibyuvResampler_ToBgr(dest, (ttLibC_Video *)src)) {
+  if(!ttLibC_ImageResampler_ToBgr(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
   binaryEq(
@@ -647,7 +100,7 @@ LIBYUV(YuvPlanarToArgb, [this]() {
   ttLibC_Bgr_close(&dest);
 });
 
-LIBYUV(YuvPlanarToBgr, [this]() {
+IMAGE(YuvPlanarToBgr, [this]() {
   auto src = makeYuv(
     "00 00 80 80 "
     "00 00 40 20 "
@@ -660,7 +113,7 @@ LIBYUV(YuvPlanarToBgr, [this]() {
     "00 00 00 00 00 00 00 00 00 00 00 00 ",
     BgrType_bgr,
     4, 2);
-  if(!ttLibC_LibyuvResampler_ToBgr(dest, (ttLibC_Video *)src)) {
+  if(!ttLibC_ImageResampler_ToBgr(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
   binaryEq(
@@ -671,7 +124,7 @@ LIBYUV(YuvPlanarToBgr, [this]() {
   ttLibC_Bgr_close(&dest);
 });
 
-LIBYUV(YuvSemiPlanarToBgra, [this]() {
+IMAGE(YuvSemiPlanarToBgra, [this]() {
   auto src = makeYuv(
     "00 00 80 80 "
     "00 00 40 20 "
@@ -683,7 +136,7 @@ LIBYUV(YuvSemiPlanarToBgra, [this]() {
     "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ",
     BgrType_bgra,
     4, 2);
-  if(!ttLibC_LibyuvResampler_ToBgr(dest, (ttLibC_Video *)src)) {
+  if(!ttLibC_ImageResampler_ToBgr(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
   binaryEq(
@@ -694,7 +147,7 @@ LIBYUV(YuvSemiPlanarToBgra, [this]() {
   ttLibC_Bgr_close(&dest);
 });
 
-LIBYUV(YuvSemiPlanarToRgba, [this]() {
+IMAGE(YuvSemiPlanarToRgba, [this]() {
   auto src = makeYuv(
     "00 00 80 80 "
     "00 00 40 20 "
@@ -706,7 +159,7 @@ LIBYUV(YuvSemiPlanarToRgba, [this]() {
     "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ",
     BgrType_rgba,
     4, 2);
-  if(!ttLibC_LibyuvResampler_ToBgr(dest, (ttLibC_Video *)src)) {
+  if(!ttLibC_ImageResampler_ToBgr(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
   binaryEq(
@@ -717,7 +170,8 @@ LIBYUV(YuvSemiPlanarToRgba, [this]() {
   ttLibC_Bgr_close(&dest);
 });
 
-LIBYUV(YvuSemiPlanarToBgra, [this]() {
+
+IMAGE(YvuSemiPlanarToBgra, [this]() {
   auto src = makeYuv(
     "00 00 80 80 "
     "00 00 40 20 "
@@ -729,7 +183,7 @@ LIBYUV(YvuSemiPlanarToBgra, [this]() {
     "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ",
     BgrType_bgra,
     4, 2);
-  if(!ttLibC_LibyuvResampler_ToBgr(dest, (ttLibC_Video *)src)) {
+  if(!ttLibC_ImageResampler_ToBgr(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
   binaryEq(
@@ -740,7 +194,7 @@ LIBYUV(YvuSemiPlanarToBgra, [this]() {
   ttLibC_Bgr_close(&dest);
 });
 
-LIBYUV(YvuSemiPlanarToRgba, [this]() {
+IMAGE(YvuSemiPlanarToRgba, [this]() {
   auto src = makeYuv(
     "00 00 80 80 "
     "00 00 40 20 "
@@ -752,7 +206,7 @@ LIBYUV(YvuSemiPlanarToRgba, [this]() {
     "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ",
     BgrType_rgba,
     4, 2);
-  if(!ttLibC_LibyuvResampler_ToBgr(dest, (ttLibC_Video *)src)) {
+  if(!ttLibC_ImageResampler_ToBgr(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
   binaryEq(
@@ -763,7 +217,7 @@ LIBYUV(YvuSemiPlanarToRgba, [this]() {
   ttLibC_Bgr_close(&dest);
 });
 
-LIBYUV(BgraToBgra, [this](){
+IMAGE(BgraToBgra, [this](){
   // original
   auto src = makeBgr(
       "10 20 30 40 11 21 31 41 12 22 32 42 13 23 33 43 "
@@ -776,7 +230,7 @@ LIBYUV(BgraToBgra, [this](){
       "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ",
       BgrType_bgra,
       4, 2);
-  if(!ttLibC_LibyuvResampler_ToBgr(dest, (ttLibC_Video *)src)) {
+  if(!ttLibC_ImageResampler_ToBgr(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
   binaryEq(
@@ -787,7 +241,7 @@ LIBYUV(BgraToBgra, [this](){
   ttLibC_Bgr_close(&dest);
 });
 
-LIBYUV(BgraToArgb, [this](){
+IMAGE(BgraToArgb, [this](){
   // original
   auto src = makeBgr(
       "10 20 30 40 11 21 31 41 12 22 32 42 13 23 33 43 "
@@ -800,7 +254,7 @@ LIBYUV(BgraToArgb, [this](){
       "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ",
       BgrType_argb,
       4, 2);
-  if(!ttLibC_LibyuvResampler_ToBgr(dest, (ttLibC_Video *)src)) {
+  if(!ttLibC_ImageResampler_ToBgr(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
   binaryEq(
@@ -811,7 +265,7 @@ LIBYUV(BgraToArgb, [this](){
   ttLibC_Bgr_close(&dest);
 });
 
-LIBYUV(BgraToRgba, [this](){
+IMAGE(BgraToRgba, [this](){
   // original
   auto src = makeBgr(
       "10 20 30 40 11 21 31 41 12 22 32 42 13 23 33 43 "
@@ -824,7 +278,7 @@ LIBYUV(BgraToRgba, [this](){
       "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ",
       BgrType_rgba,
       4, 2);
-  if(!ttLibC_LibyuvResampler_ToBgr(dest, (ttLibC_Video *)src)) {
+  if(!ttLibC_ImageResampler_ToBgr(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
   binaryEq(
@@ -835,7 +289,7 @@ LIBYUV(BgraToRgba, [this](){
   ttLibC_Bgr_close(&dest);
 });
 
-LIBYUV(BgraToAbgr, [this](){
+IMAGE(BgraToAbgr, [this](){
   // original
   auto src = makeBgr(
       "10 20 30 40 11 21 31 41 12 22 32 42 13 23 33 43 "
@@ -848,7 +302,7 @@ LIBYUV(BgraToAbgr, [this](){
       "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ",
       BgrType_abgr,
       4, 2);
-  if(!ttLibC_LibyuvResampler_ToBgr(dest, (ttLibC_Video *)src)) {
+  if(!ttLibC_ImageResampler_ToBgr(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
   binaryEq(
@@ -859,7 +313,7 @@ LIBYUV(BgraToAbgr, [this](){
   ttLibC_Bgr_close(&dest);
 });
 
-LIBYUV(BgraToBgr, [this](){
+IMAGE(BgraToBgr, [this](){
   // original
   auto src = makeBgr(
       "10 20 30 40 11 21 31 41 12 22 32 42 13 23 33 43 "
@@ -872,7 +326,7 @@ LIBYUV(BgraToBgr, [this](){
       "00 00 00 00 00 00 00 00 00 00 00 00 ",
       BgrType_bgr,
       4, 2);
-  if(!ttLibC_LibyuvResampler_ToBgr(dest, (ttLibC_Video *)src)) {
+  if(!ttLibC_ImageResampler_ToBgr(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
   binaryEq(
@@ -883,7 +337,7 @@ LIBYUV(BgraToBgr, [this](){
   ttLibC_Bgr_close(&dest);
 });
 
-LIBYUV(ArgbToBgra, [this](){
+IMAGE(ArgbToBgra, [this](){
   // original
   auto src = makeBgr(
       "10 20 30 40 11 21 31 41 12 22 32 42 13 23 33 43 "
@@ -896,7 +350,7 @@ LIBYUV(ArgbToBgra, [this](){
       "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ",
       BgrType_bgra,
       4, 2);
-  if(!ttLibC_LibyuvResampler_ToBgr(dest, (ttLibC_Video *)src)) {
+  if(!ttLibC_ImageResampler_ToBgr(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
   binaryEq(
@@ -907,7 +361,7 @@ LIBYUV(ArgbToBgra, [this](){
   ttLibC_Bgr_close(&dest);
 });
 
-LIBYUV(RgbaToBgra, [this](){
+IMAGE(RgbaToBgra, [this](){
   // original
   auto src = makeBgr(
       "10 20 30 40 11 21 31 41 12 22 32 42 13 23 33 43 "
@@ -920,7 +374,7 @@ LIBYUV(RgbaToBgra, [this](){
       "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ",
       BgrType_bgra,
       4, 2);
-  if(!ttLibC_LibyuvResampler_ToBgr(dest, (ttLibC_Video *)src)) {
+  if(!ttLibC_ImageResampler_ToBgr(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
   binaryEq(
@@ -931,7 +385,7 @@ LIBYUV(RgbaToBgra, [this](){
   ttLibC_Bgr_close(&dest);
 });
 
-LIBYUV(AbgrToBgra, [this](){
+IMAGE(AbgrToBgra, [this](){
   // original
   auto src = makeBgr(
       "10 20 30 40 11 21 31 41 12 22 32 42 13 23 33 43 "
@@ -944,7 +398,7 @@ LIBYUV(AbgrToBgra, [this](){
       "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ",
       BgrType_bgra,
       4, 2);
-  if(!ttLibC_LibyuvResampler_ToBgr(dest, (ttLibC_Video *)src)) {
+  if(!ttLibC_ImageResampler_ToBgr(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
   binaryEq(
@@ -955,7 +409,7 @@ LIBYUV(AbgrToBgra, [this](){
   ttLibC_Bgr_close(&dest);
 });
 
-LIBYUV(BgrToBgra, [this](){
+IMAGE(BgrToBgra, [this](){
   // original
   auto src = makeBgr(
       "10 20 30 11 21 31 12 22 32 13 23 33 "
@@ -968,7 +422,7 @@ LIBYUV(BgrToBgra, [this](){
       "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ",
       BgrType_bgra,
       4, 2);
-  if(!ttLibC_LibyuvResampler_ToBgr(dest, (ttLibC_Video *)src)) {
+  if(!ttLibC_ImageResampler_ToBgr(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
   binaryEq(
@@ -979,7 +433,7 @@ LIBYUV(BgrToBgra, [this](){
   ttLibC_Bgr_close(&dest);
 });
 
-LIBYUV(YuvPlanarToYuvPlanar, [this](){
+IMAGE(YuvPlanarToYuvPlanar, [this](){
   // original
   auto src = makeYuv(
       "10 20 30 40 "
@@ -996,7 +450,7 @@ LIBYUV(YuvPlanarToYuvPlanar, [this](){
       "00 00 ",
       Yuv420Type_planar,
       4, 2);
-  if(!ttLibC_LibyuvResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
+  if(!ttLibC_ImageResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
   binaryEq(
@@ -1009,7 +463,7 @@ LIBYUV(YuvPlanarToYuvPlanar, [this](){
   ttLibC_Yuv420_close(&dest);
 });
 
-LIBYUV(YuvPlanarToYvuPlanar, [this](){
+IMAGE(YuvPlanarToYvuPlanar, [this](){
   // original
   auto src = makeYuv(
       "10 20 30 40 "
@@ -1026,7 +480,7 @@ LIBYUV(YuvPlanarToYvuPlanar, [this](){
       "00 00 ",
       Yvu420Type_planar,
       4, 2);
-  if(!ttLibC_LibyuvResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
+  if(!ttLibC_ImageResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
   binaryEq(
@@ -1039,7 +493,7 @@ LIBYUV(YuvPlanarToYvuPlanar, [this](){
   ttLibC_Yuv420_close(&dest);
 });
 
-LIBYUV(YuvPlanarToYuvSemiPlanar, [this](){
+IMAGE(YuvPlanarToYuvSemiPlanar, [this](){
   // original
   auto src = makeYuv(
       "10 20 30 40 "
@@ -1055,7 +509,7 @@ LIBYUV(YuvPlanarToYuvSemiPlanar, [this](){
       "00 00 00 00 ",
       Yuv420Type_semiPlanar,
       4, 2);
-  if(!ttLibC_LibyuvResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
+  if(!ttLibC_ImageResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
   binaryEq(
@@ -1067,7 +521,7 @@ LIBYUV(YuvPlanarToYuvSemiPlanar, [this](){
   ttLibC_Yuv420_close(&dest);
 });
 
-LIBYUV(YuvPlanarToYvuSemiPlanar, [this](){
+IMAGE(YuvPlanarToYvuSemiPlanar, [this](){
   // original
   auto src = makeYuv(
       "10 20 30 40 "
@@ -1083,7 +537,7 @@ LIBYUV(YuvPlanarToYvuSemiPlanar, [this](){
       "00 00 00 00 ",
       Yvu420Type_semiPlanar,
       4, 2);
-  if(!ttLibC_LibyuvResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
+  if(!ttLibC_ImageResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
   binaryEq(
@@ -1095,7 +549,7 @@ LIBYUV(YuvPlanarToYvuSemiPlanar, [this](){
   ttLibC_Yuv420_close(&dest);
 });
 
-LIBYUV(YvuPlanarToYuvPlanar, [this](){
+IMAGE(YvuPlanarToYuvPlanar, [this](){
   // original
   auto src = makeYuv(
       "10 20 30 40 "
@@ -1112,7 +566,7 @@ LIBYUV(YvuPlanarToYuvPlanar, [this](){
       "00 00 ",
       Yuv420Type_planar,
       4, 2);
-  if(!ttLibC_LibyuvResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
+  if(!ttLibC_ImageResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
   binaryEq(
@@ -1125,7 +579,7 @@ LIBYUV(YvuPlanarToYuvPlanar, [this](){
   ttLibC_Yuv420_close(&dest);
 });
 
-LIBYUV(YvuPlanarToYvuPlanar, [this](){
+IMAGE(YvuPlanarToYvuPlanar, [this](){
   // original
   auto src = makeYuv(
       "10 20 30 40 "
@@ -1142,7 +596,7 @@ LIBYUV(YvuPlanarToYvuPlanar, [this](){
       "00 00 ",
       Yvu420Type_planar,
       4, 2);
-  if(!ttLibC_LibyuvResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
+  if(!ttLibC_ImageResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
   binaryEq(
@@ -1155,7 +609,7 @@ LIBYUV(YvuPlanarToYvuPlanar, [this](){
   ttLibC_Yuv420_close(&dest);
 });
 
-LIBYUV(YvuPlanarToYuvSemiPlanar, [this](){
+IMAGE(YvuPlanarToYuvSemiPlanar, [this](){
   // original
   auto src = makeYuv(
       "10 20 30 40 "
@@ -1171,7 +625,7 @@ LIBYUV(YvuPlanarToYuvSemiPlanar, [this](){
       "00 00 00 00 ",
       Yuv420Type_semiPlanar,
       4, 2);
-  if(!ttLibC_LibyuvResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
+  if(!ttLibC_ImageResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
   binaryEq(
@@ -1183,7 +637,7 @@ LIBYUV(YvuPlanarToYuvSemiPlanar, [this](){
   ttLibC_Yuv420_close(&dest);
 });
 
-LIBYUV(YvuPlanarToYvuSemiPlanar, [this](){
+IMAGE(YvuPlanarToYvuSemiPlanar, [this](){
   // original
   auto src = makeYuv(
       "10 20 30 40 "
@@ -1199,7 +653,7 @@ LIBYUV(YvuPlanarToYvuSemiPlanar, [this](){
       "00 00 00 00 ",
       Yvu420Type_semiPlanar,
       4, 2);
-  if(!ttLibC_LibyuvResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
+  if(!ttLibC_ImageResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
   binaryEq(
@@ -1211,7 +665,7 @@ LIBYUV(YvuPlanarToYvuSemiPlanar, [this](){
   ttLibC_Yuv420_close(&dest);
 });
 
-LIBYUV(YuvSemiPlanarToYuvPlanar, [this](){
+IMAGE(YuvSemiPlanarToYuvPlanar, [this](){
   // original
   auto src = makeYuv(
       "10 20 30 40 "
@@ -1227,7 +681,7 @@ LIBYUV(YuvSemiPlanarToYuvPlanar, [this](){
       "00 00 ",
       Yuv420Type_planar,
       4, 2);
-  if(!ttLibC_LibyuvResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
+  if(!ttLibC_ImageResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
   binaryEq(
@@ -1239,7 +693,7 @@ LIBYUV(YuvSemiPlanarToYuvPlanar, [this](){
   ttLibC_Yuv420_close(&dest);
 });
 
-LIBYUV(YuvSemiPlanarToYvuPlanar, [this](){
+IMAGE(YuvSemiPlanarToYvuPlanar, [this](){
   // original
   auto src = makeYuv(
       "10 20 30 40 "
@@ -1255,7 +709,7 @@ LIBYUV(YuvSemiPlanarToYvuPlanar, [this](){
       "00 00 ",
       Yvu420Type_planar,
       4, 2);
-  if(!ttLibC_LibyuvResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
+  if(!ttLibC_ImageResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
   binaryEq(
@@ -1267,7 +721,7 @@ LIBYUV(YuvSemiPlanarToYvuPlanar, [this](){
   ttLibC_Yuv420_close(&dest);
 });
 
-LIBYUV(YvuSemiPlanarToYuvPlanar, [this](){
+IMAGE(YvuSemiPlanarToYuvPlanar, [this](){
   // original
   auto src = makeYuv(
       "10 20 30 40 "
@@ -1283,7 +737,7 @@ LIBYUV(YvuSemiPlanarToYuvPlanar, [this](){
       "00 00 ",
       Yuv420Type_planar,
       4, 2);
-  if(!ttLibC_LibyuvResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
+  if(!ttLibC_ImageResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
   binaryEq(
@@ -1295,7 +749,7 @@ LIBYUV(YvuSemiPlanarToYuvPlanar, [this](){
   ttLibC_Yuv420_close(&dest);
 });
 
-LIBYUV(YvuSemiPlanarToYvuPlanar, [this](){
+IMAGE(YvuSemiPlanarToYvuPlanar, [this](){
   // original
   auto src = makeYuv(
       "10 20 30 40 "
@@ -1311,7 +765,7 @@ LIBYUV(YvuSemiPlanarToYvuPlanar, [this](){
       "00 00 ",
       Yvu420Type_planar,
       4, 2);
-  if(!ttLibC_LibyuvResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
+  if(!ttLibC_ImageResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
   binaryEq(
@@ -1323,7 +777,7 @@ LIBYUV(YvuSemiPlanarToYvuPlanar, [this](){
   ttLibC_Yuv420_close(&dest);
 });
 
-LIBYUV(BgraToYuvPlanar, [this](){
+IMAGE(BgraToYuvPlanar, [this](){
   // original
   auto src = makeBgr(
       "10 20 30 40 11 21 31 41 12 22 32 42 13 23 33 43 "
@@ -1338,7 +792,7 @@ LIBYUV(BgraToYuvPlanar, [this](){
       "00 00 ",
       Yuv420Type_planar,
       4, 2);
-  if(!ttLibC_LibyuvResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
+  if(!ttLibC_ImageResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
   binaryEq(
@@ -1351,7 +805,7 @@ LIBYUV(BgraToYuvPlanar, [this](){
   ttLibC_Yuv420_close(&dest);
 });
 
-LIBYUV(BgraToYvuPlanar, [this](){
+IMAGE(BgraToYvuPlanar, [this](){
   // original
   auto src = makeBgr(
       "10 20 30 40 11 21 31 41 12 22 32 42 13 23 33 43 "
@@ -1366,7 +820,7 @@ LIBYUV(BgraToYvuPlanar, [this](){
       "00 00 ",
       Yvu420Type_planar,
       4, 2);
-  if(!ttLibC_LibyuvResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
+  if(!ttLibC_ImageResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
   binaryEq(
@@ -1379,7 +833,7 @@ LIBYUV(BgraToYvuPlanar, [this](){
   ttLibC_Yuv420_close(&dest);
 });
 
-LIBYUV(BgraToYuvSemiPlanar, [this](){
+IMAGE(BgraToYuvSemiPlanar, [this](){
   // original
   auto src = makeBgr(
       "10 20 30 40 11 21 31 41 12 22 32 42 13 23 33 43 "
@@ -1393,7 +847,7 @@ LIBYUV(BgraToYuvSemiPlanar, [this](){
       "00 00 00 00 ",
       Yuv420Type_semiPlanar,
       4, 2);
-  if(!ttLibC_LibyuvResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
+  if(!ttLibC_ImageResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
   binaryEq(
@@ -1405,7 +859,7 @@ LIBYUV(BgraToYuvSemiPlanar, [this](){
   ttLibC_Yuv420_close(&dest);
 });
 
-LIBYUV(BgraToYvuSemiPlanar, [this](){
+IMAGE(BgraToYvuSemiPlanar, [this](){
   // original
   auto src = makeBgr(
       "10 20 30 40 11 21 31 41 12 22 32 42 13 23 33 43 "
@@ -1419,7 +873,7 @@ LIBYUV(BgraToYvuSemiPlanar, [this](){
       "00 00 00 00 ",
       Yvu420Type_semiPlanar,
       4, 2);
-  if(!ttLibC_LibyuvResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
+  if(!ttLibC_ImageResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
   binaryEq(
@@ -1431,7 +885,7 @@ LIBYUV(BgraToYvuSemiPlanar, [this](){
   ttLibC_Yuv420_close(&dest);
 });
 
-LIBYUV(ArgbToYuvPlanar, [this](){
+IMAGE(ArgbToYuvPlanar, [this](){
   // original
   auto src = makeBgr(
       "10 20 30 40 11 21 31 41 12 22 32 42 13 23 33 43 "
@@ -1446,7 +900,7 @@ LIBYUV(ArgbToYuvPlanar, [this](){
       "00 00 ",
       Yuv420Type_planar,
       4, 2);
-  if(!ttLibC_LibyuvResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
+  if(!ttLibC_ImageResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
   binaryEq(
@@ -1459,7 +913,7 @@ LIBYUV(ArgbToYuvPlanar, [this](){
   ttLibC_Yuv420_close(&dest);
 });
 
-LIBYUV(ArgbToYvuPlanar, [this](){
+IMAGE(ArgbToYvuPlanar, [this](){
   // original
   auto src = makeBgr(
       "10 20 30 40 11 21 31 41 12 22 32 42 13 23 33 43 "
@@ -1474,7 +928,7 @@ LIBYUV(ArgbToYvuPlanar, [this](){
       "00 00 ",
       Yvu420Type_planar,
       4, 2);
-  if(!ttLibC_LibyuvResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
+  if(!ttLibC_ImageResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
   binaryEq(
@@ -1486,7 +940,7 @@ LIBYUV(ArgbToYvuPlanar, [this](){
   ttLibC_Bgr_close(&src);
   ttLibC_Yuv420_close(&dest);
 });
-LIBYUV(RgbaToYuvPlanar, [this](){
+IMAGE(RgbaToYuvPlanar, [this](){
   // original
   auto src = makeBgr(
       "10 20 30 40 11 21 31 41 12 22 32 42 13 23 33 43 "
@@ -1501,7 +955,7 @@ LIBYUV(RgbaToYuvPlanar, [this](){
       "00 00 ",
       Yuv420Type_planar,
       4, 2);
-  if(!ttLibC_LibyuvResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
+  if(!ttLibC_ImageResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
   binaryEq(
@@ -1514,7 +968,7 @@ LIBYUV(RgbaToYuvPlanar, [this](){
   ttLibC_Yuv420_close(&dest);
 });
 
-LIBYUV(RgbaToYvuPlanar, [this](){
+IMAGE(RgbaToYvuPlanar, [this](){
   // original
   auto src = makeBgr(
       "10 20 30 40 11 21 31 41 12 22 32 42 13 23 33 43 "
@@ -1529,7 +983,7 @@ LIBYUV(RgbaToYvuPlanar, [this](){
       "00 00 ",
       Yvu420Type_planar,
       4, 2);
-  if(!ttLibC_LibyuvResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
+  if(!ttLibC_ImageResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
   binaryEq(
@@ -1542,7 +996,7 @@ LIBYUV(RgbaToYvuPlanar, [this](){
   ttLibC_Yuv420_close(&dest);
 });
 
-LIBYUV(AbgrToYuvPlanar, [this](){
+IMAGE(AbgrToYuvPlanar, [this](){
   // original
   auto src = makeBgr(
       "10 20 30 40 11 21 31 41 12 22 32 42 13 23 33 43 "
@@ -1557,7 +1011,7 @@ LIBYUV(AbgrToYuvPlanar, [this](){
       "00 00 ",
       Yuv420Type_planar,
       4, 2);
-  if(!ttLibC_LibyuvResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
+  if(!ttLibC_ImageResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
   binaryEq(
@@ -1569,7 +1023,7 @@ LIBYUV(AbgrToYuvPlanar, [this](){
   ttLibC_Bgr_close(&src);
   ttLibC_Yuv420_close(&dest);
 });
-LIBYUV(AbgrToYvuPlanar, [this](){
+IMAGE(AbgrToYvuPlanar, [this](){
   // original
   auto src = makeBgr(
       "10 20 30 40 11 21 31 41 12 22 32 42 13 23 33 43 "
@@ -1584,7 +1038,7 @@ LIBYUV(AbgrToYvuPlanar, [this](){
       "00 00 ",
       Yvu420Type_planar,
       4, 2);
-  if(!ttLibC_LibyuvResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
+  if(!ttLibC_ImageResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
   binaryEq(
@@ -1596,7 +1050,7 @@ LIBYUV(AbgrToYvuPlanar, [this](){
   ttLibC_Bgr_close(&src);
   ttLibC_Yuv420_close(&dest);
 });
-LIBYUV(BgrToYuvPlanar, [this](){
+IMAGE(BgrToYuvPlanar, [this](){
   // original
   auto src = makeBgr(
       "10 20 30 11 21 31 12 22 32 13 23 33 "
@@ -1611,7 +1065,7 @@ LIBYUV(BgrToYuvPlanar, [this](){
       "00 00 ",
       Yuv420Type_planar,
       4, 2);
-  if(!ttLibC_LibyuvResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
+  if(!ttLibC_ImageResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
   binaryEq(
@@ -1623,7 +1077,7 @@ LIBYUV(BgrToYuvPlanar, [this](){
   ttLibC_Bgr_close(&src);
   ttLibC_Yuv420_close(&dest);
 });
-LIBYUV(BgrToYvuPlanar, [this](){
+IMAGE(BgrToYvuPlanar, [this](){
   // original
   auto src = makeBgr(
       "10 20 30 11 21 31 12 22 32 13 23 33 "
@@ -1638,7 +1092,7 @@ LIBYUV(BgrToYvuPlanar, [this](){
       "00 00 ",
       Yvu420Type_planar,
       4, 2);
-  if(!ttLibC_LibyuvResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
+  if(!ttLibC_ImageResampler_ToYuv420(dest, (ttLibC_Video *)src)) {
     FAIL();
   }
   binaryEq(
