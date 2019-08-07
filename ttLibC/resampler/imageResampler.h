@@ -20,6 +20,26 @@ extern "C" {
 #include "../frame/video/bgr.h"
 
 /**
+ * convert bgr or yuv to bgr.
+ * @param dest_frame override with resampled data.
+ * @param src_frame  resample target.
+ * @return bool
+ */
+bool TT_ATTRIBUTE_API ttLibC_ImageResampler_ToBgr(
+		ttLibC_Bgr   *dest_frame,
+		ttLibC_Video *src_frame);
+
+/**
+ * convert bgr or yuv to yuv420
+ * @param dest_frame override with resampled data.
+ * @param src_frame  resample target.
+ * @return bool
+ */
+bool TT_ATTRIBUTE_API ttLibC_ImageResampler_ToYuv420(
+		ttLibC_Yuv420 *dest_frame,
+		ttLibC_Video  *src_frame);
+
+/**
  * make yuv420 frame from bgr frame.
  * @param prev_frame reuse frame.
  * @param type       yuv420 type.
