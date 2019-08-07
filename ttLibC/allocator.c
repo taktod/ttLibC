@@ -41,7 +41,7 @@ void TT_ATTRIBUTE_API *ttLibC_Allocator_malloc(size_t size, const char *file_nam
 		if(ttLibC_Allocator_Table != NULL) {
 			ttLibC_Allocator_Info *info = malloc(sizeof(ttLibC_Allocator_Info));
 			info->alloc_size = size;
-			sprintf(info->alloc_info, "%s(%d) %s sz:%lu %x", file_name, line, func_name, size, (int)ptr);
+			sprintf(info->alloc_info, "%s(%d) %s sz:%lu %p", file_name, line, func_name, size, ptr);
 			khiter_t it = kh_put(ttLibC_Allocator, ttLibC_Allocator_Table, (uint64_t)ptr, &ret);
 			kh_value(ttLibC_Allocator_Table, it) = info;
 		}
@@ -67,7 +67,7 @@ void TT_ATTRIBUTE_API *ttLibC_Allocator_calloc(size_t n, size_t size, const char
 		if(ttLibC_Allocator_Table != NULL) {
 			ttLibC_Allocator_Info *info = malloc(sizeof(ttLibC_Allocator_Info));
 			info->alloc_size = n * size;
-			sprintf(info->alloc_info, "%s(%d) %s sz:%lu %x", file_name, line, func_name, size, (int)ptr);
+			sprintf(info->alloc_info, "%s(%d) %s sz:%lu %p", file_name, line, func_name, size, ptr);
 			khiter_t it = kh_put(ttLibC_Allocator, ttLibC_Allocator_Table, (uint64_t)ptr, &ret);
 			kh_value(ttLibC_Allocator_Table, it) = info;
 		}
