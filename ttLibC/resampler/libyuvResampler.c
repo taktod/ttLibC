@@ -478,8 +478,8 @@ bool TT_ATTRIBUTE_API ttLibC_LibyuvResampler_ToBgr(
 				NV12ToARGB(
 					src_->y_data,
 					src_->y_stride,
-					src_->v_data,
-					src_->v_stride,
+					src_->u_data,
+					src_->u_stride,
 					dest->data,
 					dest->width_stride,
 					src->width,
@@ -489,8 +489,8 @@ bool TT_ATTRIBUTE_API ttLibC_LibyuvResampler_ToBgr(
 				NV12ToABGR(
 					src_->y_data,
 					src_->y_stride,
-					src_->v_data,
-					src_->v_stride,
+					src_->u_data,
+					src_->u_stride,
 					dest->data,
 					dest->width_stride,
 					src->width,
