@@ -20,6 +20,18 @@ extern "C" {
 #include "../frame/video/bgr.h"
 
 /**
+ * resize image
+ * @param dest_frame
+ * @param src_frame
+ * @param is_quick   pickup left top point instead to calculate average weight.
+ * @return bool true:success false:error.
+ */
+bool TT_ATTRIBUTE_API ttLibC_ImageResizer_resize(
+		ttLibC_Video *dest_frame,
+		ttLibC_Video *src_frame,
+		bool is_quick);
+
+/**
  * resize yuv image.
  * @param prev_frame reuse image object
  * @param type       target yuv420 image type.

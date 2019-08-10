@@ -123,6 +123,216 @@ static bool ImageResizer_resizePlane(
 	return true;
 }
 
+bool TT_ATTRIBUTE_API ttLibC_ImageResizer_resize(
+		ttLibC_Video *dest,
+		ttLibC_Video *src,
+		bool is_quick) {
+	if(dest == NULL
+	|| src  == NULL) {
+		return false;
+	}
+	if(src->inherit_super.type != dest->inherit_super.type) {
+		return false;
+	}
+	if(src->inherit_super.type == frameType_yuv420) {
+		ttLibC_Yuv420 *src_  = (ttLibC_Yuv420 *)src;
+		ttLibC_Yuv420 *dest_ = (ttLibC_Yuv420 *)dest;
+		ImageResizer_resizePlane(
+			dest_->y_data,
+			dest_->inherit_super.width,
+			dest_->inherit_super.height,
+			dest_->y_stride,
+			dest_->y_step,
+			src_->y_data,
+			src_->inherit_super.width,
+			src_->inherit_super.height,
+			src_->y_stride,
+			src_->y_step,
+			is_quick);
+		ImageResizer_resizePlane(
+			dest_->u_data,
+			(dest_->inherit_super.width + 1) >> 1,
+			(dest_->inherit_super.height + 1) >> 1,
+			dest_->u_stride,
+			dest_->u_step,
+			src_->u_data,
+			(src_->inherit_super.width + 1) >> 1,
+			(src_->inherit_super.height + 1) >> 1,
+			src_->u_stride,
+			src_->u_step,
+			true);
+		ImageResizer_resizePlane(
+			dest_->v_data,
+			(dest_->inherit_super.width + 1) >> 1,
+			(dest_->inherit_super.height + 1) >> 1,
+			dest_->v_stride,
+			dest_->v_step,
+			src_->v_data,
+			(src_->inherit_super.width + 1) >> 1,
+			(src_->inherit_super.height + 1) >> 1,
+			src_->v_stride,
+			src_->v_step,
+			true);
+		return true;
+	}
+	else if(src->inherit_super.type == frameType_bgr) {
+		ttLibC_Bgr *src_ = (ttLibC_Bgr *)src;
+		ttLibC_Bgr *dest_ = (ttLibC_Bgr *)dest;
+
+		uint8_t *bs_ = NULL;
+		uint8_t *gs_ = NULL;
+		uint8_t *rs_ = NULL;
+		uint8_t *as_ = NULL;
+
+		uint8_t *bd_ = NULL;
+		uint8_t *gd_ = NULL;
+		uint8_t *rd_ = NULL;
+		uint8_t *ad_ = NULL;
+
+		switch(src_->type) {
+		case BgrType_bgr:
+			bs_ = src_->data;
+			gs_ = src_->data + 1;
+			rs_ = src_->data + 2;
+			break;
+		case BgrType_bgra:
+			bs_ = src_->data;
+			gs_ = src_->data + 1;
+			rs_ = src_->data + 2;
+			as_ = src_->data + 3;
+			break;
+		case BgrType_abgr:
+			as_ = src_->data;
+			bs_ = src_->data + 1;
+			gs_ = src_->data + 2;
+			rs_ = src_->data + 3;
+			break;
+		case BgrType_rgb:
+			rs_ = src_->data;
+			gs_ = src_->data + 1;
+			bs_ = src_->data + 2;
+			break;
+		case BgrType_rgba:
+			rs_ = src_->data;
+			gs_ = src_->data + 1;
+			bs_ = src_->data + 2;
+			as_ = src_->data + 3;
+			break;
+		case BgrType_argb:
+			as_ = src_->data;
+			rs_ = src_->data + 1;
+			gs_ = src_->data + 2;
+			bs_ = src_->data + 3;
+			break;
+		default:
+			return false;
+		}
+		switch(dest_->type) {
+		case BgrType_bgr:
+			bd_ = dest_->data;
+			gd_ = dest_->data + 1;
+			rd_ = dest_->data + 2;
+			break;
+		case BgrType_bgra:
+			bd_ = dest_->data;
+			gd_ = dest_->data + 1;
+			rd_ = dest_->data + 2;
+			ad_ = dest_->data + 3;
+			break;
+		case BgrType_abgr:
+			ad_ = dest_->data;
+			bd_ = dest_->data + 1;
+			gd_ = dest_->data + 2;
+			rd_ = dest_->data + 3;
+			break;
+		case BgrType_rgb:
+			rd_ = dest_->data;
+			gd_ = dest_->data + 1;
+			bd_ = dest_->data + 2;
+			break;
+		case BgrType_rgba:
+			rd_ = dest_->data;
+			gd_ = dest_->data + 1;
+			bd_ = dest_->data + 2;
+			ad_ = dest_->data + 3;
+			break;
+		case BgrType_argb:
+			ad_ = dest_->data;
+			rd_ = dest_->data + 1;
+			gd_ = dest_->data + 2;
+			bd_ = dest_->data + 3;
+			break;
+		default:
+			return false;
+		}
+		// then copy.
+		ImageResizer_resizePlane(
+			bd_,
+			dest_->inherit_super.width,
+			dest_->inherit_super.height,
+			dest_->width_stride,
+			dest_->unit_size,
+			bs_,
+			src_->inherit_super.width,
+			src_->inherit_super.height,
+			src_->width_stride,
+			src_->unit_size,
+			is_quick);
+		ImageResizer_resizePlane(
+			gd_,
+			dest_->inherit_super.width,
+			dest_->inherit_super.height,
+			dest_->width_stride,
+			dest_->unit_size,
+			gs_,
+			src_->inherit_super.width,
+			src_->inherit_super.height,
+			src_->width_stride,
+			src_->unit_size,
+			is_quick);
+		ImageResizer_resizePlane(
+			rd_,
+			dest_->inherit_super.width,
+			dest_->inherit_super.height,
+			dest_->width_stride,
+			dest_->unit_size,
+			rs_,
+			src_->inherit_super.width,
+			src_->inherit_super.height,
+			src_->width_stride,
+			src_->unit_size,
+			is_quick);
+		if(ad_ != NULL) {
+			if(as_ == NULL) {
+				for(int i = 0;i < dest_->inherit_super.height;++ i) {
+					uint8_t *ad__ = ad_;
+					for(int j = 0;j < dest_->inherit_super.width;++ j) {
+						*ad__ = 0xFF;
+						ad__ += dest_->unit_size;
+					}
+					ad_ += dest_->width_stride;
+				}
+			}
+			else {
+				ImageResizer_resizePlane(
+					ad_,
+					dest_->inherit_super.width,
+					dest_->inherit_super.height,
+					dest_->width_stride,
+					dest_->unit_size,
+					as_,
+					src_->inherit_super.width,
+					src_->inherit_super.height,
+					src_->width_stride,
+					src_->unit_size,
+					is_quick);
+			}
+		}
+		return true;
+	}
+	return false;
+}
+
 /**
  * resize yuv image.
  * @param prev_frame reuse image object
