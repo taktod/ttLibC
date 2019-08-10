@@ -783,6 +783,7 @@ endif()
 
 if(TT_TEST)
   add_subdirectory(gtest)
+  enable_testing()
 endif()
 
 add_library(ttLibC SHARED
