@@ -23,3 +23,8 @@ add_executable(ttLibC-test
 target_link_libraries(ttLibC-test
   gtest_main
   ttLibC)
+
+enable_testing()
+add_test(NAME frame COMMAND gtest/ttLibC-test --gtest_filter=FrameTest.*)
+add_test(NAME resampler COMMAND gtest/ttLibC-test --gtest_filter=ResamplerTest.*)
+add_test(NAME util COMMAND gtest/ttLibC-test --gtest_filter=UtilTest.*)
