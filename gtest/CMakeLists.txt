@@ -13,6 +13,10 @@ endif(WIN32)
 include_directories("..")
 add_executable(ttLibC-test
   test.cpp
+  encoder.cpp
+  encoder/openh264.cpp
+  encoder/x264.cpp
+  encoder/x265.cpp
   frame.cpp
   resampler.cpp
   resampler/image.cpp
@@ -25,6 +29,7 @@ target_link_libraries(ttLibC-test
   ttLibC)
 
 enable_testing()
-add_test(NAME frame COMMAND ttLibC-test --gtest_filter=FrameTest.*)
+add_test(NAME encoder   COMMAND ttLibC-test --gtest_filter=EncoderTest.*)
+add_test(NAME frame     COMMAND ttLibC-test --gtest_filter=FrameTest.*)
 add_test(NAME resampler COMMAND ttLibC-test --gtest_filter=ResamplerTest.*)
-add_test(NAME util COMMAND ttLibC-test --gtest_filter=UtilTest.*)
+add_test(NAME util      COMMAND ttLibC-test --gtest_filter=UtilTest.*)
