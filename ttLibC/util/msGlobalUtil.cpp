@@ -10,7 +10,7 @@
 
 #ifdef __ENABLE_WIN32__
 
-#include "msGlobalUtil.h"
+#include "msGlobalUtilCommon.h"
 
 bool TT_ATTRIBUTE_API ttLibC_MsGlobal_CoInitialize(ttLibC_MsGlobal_CoInitializeType type) {
 	HRESULT hr = S_OK;

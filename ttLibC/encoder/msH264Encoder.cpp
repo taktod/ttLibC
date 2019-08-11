@@ -28,7 +28,7 @@
 #include <mutex>
 #include <vector>
 
-#include "../util/msGlobalUtil.h"
+#include "../util/msGlobalUtilCommon.h"
 
 #pragma comment(lib, "mf")
 #pragma comment(lib, "mfuuid")

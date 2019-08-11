@@ -24,7 +24,7 @@
 #include <mftransform.h>
 #include <wmcodecdsp.h>
 
-#include "../util/msGlobalUtil.h"
+#include "../util/msGlobalUtilCommon.h"
 
 #pragma comment(lib, "mfplat")
 #pragma comment(lib, "mf")

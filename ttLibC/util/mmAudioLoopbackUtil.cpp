@@ -8,7 +8,7 @@
 #ifdef __ENABLE_WIN32__
 
 #include "mmAudioLoopbackUtil.h"
-#include "msGlobalUtil.h"
+#include "msGlobalUtilCommon.h"
 #include "../allocator.h"
 #include "../_log.h"
 #include "../frame/audio/pcmS16.h"
