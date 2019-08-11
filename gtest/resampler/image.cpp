@@ -1,7 +1,6 @@
 #include "../resampler.hpp"
 #include <ttLibC/resampler/imageResampler.h>
 
-
 #define IMAGE(A, B) TEST_F(ResamplerTest, Image##A){B();}
 
 IMAGE(YuvPlanarToBgra, [this]() {
@@ -1104,3 +1103,5 @@ IMAGE(BgrToYvuPlanar, [this](){
   ttLibC_Bgr_close(&src);
   ttLibC_Yuv420_close(&dest);
 });
+
+#undef IMAGE

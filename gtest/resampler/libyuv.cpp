@@ -1650,3 +1650,5 @@ LIBYUV(BgrToYvuPlanar, [this](){
   ttLibC_Bgr_close(&src);
   ttLibC_Yuv420_close(&dest);
 });
+
+#undef LIBYUV

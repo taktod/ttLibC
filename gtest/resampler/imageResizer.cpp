@@ -151,3 +151,4 @@ IMAGERESIZER(ScaleBgra, [this](){
   ttLibC_Bgr_close(&dest);
 });
 
+#undef IMAGERESIZER
