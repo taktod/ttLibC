@@ -75,9 +75,6 @@ public:
 		}
 		delete[] samples_;
 	}
-	// QÆµÄ«o·ÌÆAQÆµÄÇÝÞ
-	// ÅAÌf[^ÉÚ®·éÌªÙµ¢í¯©EEE
-	// «oµæ€Ì|C^ÆAÇÝÝpÌ|C^ª éKvª éEEEÆ
 	IMFSample* refNextSample() {
 		mutex_.lock();
 		IMFSample* sample = samples_[setPtr_];
@@ -302,7 +299,7 @@ public:
 	}
 private:
 	ttLibC_MsH264Encoder_ *encoder_;
-	long ref_count; // ±êÍú»µÄÍ¢¯È¢çµ¢B
+	long ref_count;
 };
 
 bool TT_ATTRIBUTE_API ttLibC_MsH264Encoder_listEncoders(
@@ -498,7 +495,6 @@ ttLibC_MsH264Encoder TT_ATTRIBUTE_API *ttLibC_MsH264Encoder_make(
 	}
 }
 
-// h264EncoderðparamÌlÉµœªÁÄú»³¹éB
 ttLibC_MsH264Encoder TT_ATTRIBUTE_API *ttLibC_MsH264Encoder_makeWithParam(
 	const char *target,
 	ttLibC_MsH264Encoder_param *param) {
@@ -517,7 +513,6 @@ ttLibC_MsH264Encoder TT_ATTRIBUTE_API *ttLibC_MsH264Encoder_makeWithParam(
 	encoder->is_first  = true;
 	HRESULT hr = S_OK;
 
-	// ÜžÍencoderð©Â¯éB
 	if(SUCCEEDED(hr)) {
 		uint32_t count = 0;
 		IMFActivate **ppActivate = NULL;
@@ -552,7 +547,6 @@ ttLibC_MsH264Encoder TT_ATTRIBUTE_API *ttLibC_MsH264Encoder_makeWithParam(
 			hr = E_ABORT;
 		}
 	}
-	// Éasync®ìÅ é©»èµÄš­
 	if(SUCCEEDED(hr)) {
 		IMFAttributes *pAttributes;
 		uint32_t isAsync = 0;
@@ -566,7 +560,6 @@ ttLibC_MsH264Encoder TT_ATTRIBUTE_API *ttLibC_MsH264Encoder_makeWithParam(
 			hr = pAttributes->SetUINT32(MF_TRANSFORM_ASYNC_UNLOCK, TRUE);
 		}
 	}
-	// oÍf[^ðÝè
 	if(SUCCEEDED(hr)) {
 		IMFMediaType *outputType;
 		hr = MFCreateMediaType(&outputType);
@@ -599,7 +592,6 @@ ttLibC_MsH264Encoder TT_ATTRIBUTE_API *ttLibC_MsH264Encoder_makeWithParam(
 			hr = encoder->transform->SetOutputType(0, outputType, 0);
 		}
 	}
-	// üÍf[^ðÝè Æè Šžyuv420SemiPlanarÅ
 	if(SUCCEEDED(hr)) {
 		IMFMediaType *inputType;
 		hr = MFCreateMediaType(&inputType);
@@ -614,7 +606,6 @@ ttLibC_MsH264Encoder TT_ATTRIBUTE_API *ttLibC_MsH264Encoder_makeWithParam(
 			hr = encoder->transform->SetInputType(0, inputType, 0);
 		}
 	}
-	// eventGeneratorõ
 	if(SUCCEEDED(hr)) {
 		if(encoder->is_async) {
 			encoder->ringBuffer = new MsH264Encoder_RingBuffer(param->width, param->height);
