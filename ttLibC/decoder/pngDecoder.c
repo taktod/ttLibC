@@ -162,7 +162,7 @@ bool ttLibC_PngDecoder_decode(
         *d = colorp->red;
         *(d+1) = colorp->green;
         *(d+2) = colorp->blue;
-        if(num_trans == 0) {
+        if(row_data[j] > num_trans) {
           *(d+3) = 255;
         }
         else {
