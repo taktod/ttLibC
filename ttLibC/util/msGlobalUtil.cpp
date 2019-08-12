@@ -69,4 +69,8 @@ std::string TT_ATTRIBUTE_API ttLibC_MsGlobal_wcharToUtf8string(const wchar_t *sr
 	return MsGlobal_wstringToUtf8string(MsGlobal_stringToWstring(std::string(buf)));
 }
 
+void TT_ATTRIBUTE_API ttLibC_MsGlobal_sleep(long time) {
+	Sleep(time);
+}
+
 #endif

@@ -31,6 +31,8 @@ void TT_ATTRIBUTE_API ttLibC_MsGlobal_MFShutdown();
 
 bool TT_ATTRIBUTE_API ttLibC_MsGlobal_setlocale(const char *language);
 
+void TT_ATTRIBUTE_API ttLibC_MsGlobal_sleep(long time);
+
 #ifdef __cplusplus
 }
 #endif
