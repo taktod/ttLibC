@@ -10,6 +10,21 @@ using namespace std;
 #define MSH264(A, B) TEST_F(EncoderTest, DISABLED_MsH264##A){}
 #endif
 
+MSH264(Listup, [this](){
+  ttLibC_MsGlobal_CoInitialize(CoInitializeType_normal);
+  ttLibC_MsGlobal_MFStartup();
+  int counter = 0;
+  ttLibC_MsH264Encoder_listEncoders([](void *ptr, const char *name){
+    cout << name << endl;
+    int *counter = reinterpret_cast<int *>(ptr);
+    *counter += 1;
+    return true;
+  }, &counter);
+  EXPECT_GT(counter, 0);
+  ttLibC_MsGlobal_MFShutdown();
+  ttLibC_MsGlobal_CoUninitialize();
+});
+
 MSH264(EncodeTest, [this](){
   ttLibC_MsGlobal_CoInitialize(CoInitializeType_normal);
   ttLibC_MsGlobal_MFStartup();
