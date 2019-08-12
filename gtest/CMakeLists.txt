@@ -24,7 +24,9 @@ add_executable(ttLibC-test
   resampler/imageResizer.cpp
   resampler/libyuv.cpp
   resampler/swscale.cpp
-  util.cpp)
+  util.cpp
+  util/crc32.cpp
+  util/hex.cpp)
 target_link_libraries(ttLibC-test
   gtest_main
   ttLibC)
