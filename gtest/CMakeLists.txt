@@ -26,7 +26,8 @@ add_executable(ttLibC-test
   resampler/swscale.cpp
   util.cpp
   util/crc32.cpp
-  util/hex.cpp)
+  util/hex.cpp
+  util/msGlobal.cpp)
 target_link_libraries(ttLibC-test
   gtest_main
   ttLibC)

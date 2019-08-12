@@ -18,6 +18,8 @@ extern "C" {
 #include "../ttLibC_predef.h"
 #include <stdbool.h>
 
+#include "../frame/video/bgr.h"
+
 typedef enum ttLibC_MsGlobal_CoInitializeType {
 	CoInitializeType_normal,
 	CoInitializeType_multiThreaded
@@ -32,6 +34,8 @@ void TT_ATTRIBUTE_API ttLibC_MsGlobal_MFShutdown();
 bool TT_ATTRIBUTE_API ttLibC_MsGlobal_setlocale(const char *language);
 
 void TT_ATTRIBUTE_API ttLibC_MsGlobal_sleep(long time);
+
+void TT_ATTRIBUTE_API ttLibC_MsGlobal_WriteBitmap(const char *name, ttLibC_Bgr *bgr);
 
 #ifdef __cplusplus
 }

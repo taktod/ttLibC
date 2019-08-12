@@ -73,4 +73,56 @@ void TT_ATTRIBUTE_API ttLibC_MsGlobal_sleep(long time) {
 	Sleep(time);
 }
 
+void TT_ATTRIBUTE_API ttLibC_MsGlobal_WriteBitmap(const char *name, ttLibC_Bgr *bgr) {
+	if(bgr == nullptr) {
+		return;
+	}
+	switch(bgr->type) {
+	case BgrType_bgr:
+		{
+			// try to write bitmap
+			HANDLE file;
+			BITMAPFILEHEADER fileHeader;
+			BITMAPINFOHEADER fileInfo;
+			DWORD write = 0;
+
+			file = CreateFile(
+				name,
+				GENERIC_WRITE,
+				0,
+				nullptr,
+				CREATE_ALWAYS,
+				FILE_ATTRIBUTE_NORMAL,
+				nullptr);
+
+			fileHeader.bfType = 19778;
+			fileHeader.bfSize = sizeof(fileHeader.bfOffBits) + sizeof(RGBTRIPLE);
+			fileHeader.bfReserved1 = 0;
+			fileHeader.bfReserved2 = 0;
+			fileHeader.bfOffBits = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
+
+			fileInfo.biSize = sizeof(BITMAPINFOHEADER);
+			fileInfo.biWidth = bgr->inherit_super.width;
+			fileInfo.biHeight = bgr->inherit_super.height;
+			fileInfo.biPlanes = 1;
+			fileInfo.biBitCount = 24;
+			fileInfo.biCompression = BI_RGB;
+			fileInfo.biSizeImage = bgr->inherit_super.width * bgr->inherit_super.height * (24/8);
+			fileInfo.biXPelsPerMeter = 2400;
+			fileInfo.biYPelsPerMeter = 2400;
+			fileInfo.biClrImportant = 0;
+			fileInfo.biClrUsed = 0;
+
+			WriteFile(file,&fileHeader,sizeof(fileHeader),&write,NULL);
+			WriteFile(file,&fileInfo,sizeof(fileInfo),&write,NULL);
+			WriteFile(file, (BYTE *)bgr->data, fileInfo.biSizeImage, &write, NULL);
+
+			CloseHandle(file);
+		}
+		break;
+	default:
+		return;
+	}
+}
+
 #endif
