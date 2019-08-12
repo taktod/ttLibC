@@ -46,7 +46,7 @@ bool TT_ATTRIBUTE_API ttLibC_MsGlobal_setlocale(const char *language) {
 static std::wstring MsGlobal_stringToWstring(std::string const& src)
 {
 	std::size_t converted{};
-	std::vector<wchar_t> dest(src.size(), L'\0');
+	std::vector<wchar_t> dest(src.size() + 1, L'\0');
 	::mbstowcs_s(&converted, dest.data(), dest.size(), src.data(), -1);
 	return std::wstring(dest.begin(), dest.end());
 }
