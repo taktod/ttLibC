@@ -49,7 +49,8 @@ if(WIN32)
   set(TTLIBC_UTIL_HEADERS
     ${TTLIBC_UTIL_HEADERS}
     ttLibC/util/mmAudioLoopbackUtil.h
-    ttLibC/util/msGlobalUtil.h)
+    ttLibC/util/msGlobalUtil.h
+    ttLibC/util/msVideoCapturer.h)
 else()
   set(CMAKE_CXX_FLAGS "-std=c++0x")
   if(APPLE)
@@ -926,9 +927,10 @@ add_library(ttLibC SHARED
   ttLibC/container/mp4/mp4Writer.c
   ttLibC/container/container.c
   ttLibC/util/mmAudioLoopbackUtil.cpp
-  ttLibC/util/stlListUtil.cpp
   ttLibC/util/msGlobalUtil.cpp
+  ttLibC/util/msVideoCapturerUtil.cpp
   ttLibC/util/opencvUtil.cpp
+  ttLibC/util/stlListUtil.cpp
   ttLibC/util/stlMapUtil.cpp
   ttLibC/encoder/msAacEncoder.cpp
   ttLibC/encoder/msH264Encoder.cpp

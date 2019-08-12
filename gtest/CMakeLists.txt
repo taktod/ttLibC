@@ -27,7 +27,8 @@ add_executable(ttLibC-test
   util.cpp
   util/crc32.cpp
   util/hex.cpp
-  util/msGlobal.cpp)
+  util/msGlobal.cpp
+  util/msVideoCapturer.cpp)
 target_link_libraries(ttLibC-test
   gtest_main
   ttLibC)
