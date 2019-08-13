@@ -1,6 +1,8 @@
 #include "../util.hpp"
 #include <ttLibC/util/msVideoCapturerUtil.h>
 #include <ttLibC/util/msGlobalUtil.h>
+#include <ttLibC/frame/video/bgr.h>
+#include <ttLibC/resampler/imageResampler.h>
 
 using namespace std;
 
@@ -33,12 +35,23 @@ MSVIDEOCAPTURER(Capture, [this](){
   cout << name << endl;
   auto capturer = ttLibC_MsVideoCapturer_make(name.c_str(), 320, 240);
   if(capturer != nullptr) {
-    ttLibC_MsVideoCapturer_requestFrame(capturer, [](void *ptr, ttLibC_Video *video){
-    cout << "capturer image" << endl;
-    return true;
-    }, nullptr);
-  ttLibC_MsVideoCapturer_close(&capturer);
-  ttLibC_MsGlobal_MFShutdown();
-	ttLibC_MsGlobal_CoUninitialize();
+    for(int i = 0;i < 5;++ i) {
+      ttLibC_MsVideoCapturer_requestFrame(capturer, [](void *ptr, ttLibC_Video *video){
+  		  // capturer ok.
+	  	  // try to convert yuv -> bgr, and save it as bitmap.
+  		  auto bgr = ttLibC_Bgr_makeEmptyFrame(BgrType_bgr, video->width, video->height);
+	  	  if (bgr != nullptr) {
+		  	  if (ttLibC_ImageResampler_ToBgr(bgr, video)) {
+			    	ttLibC_MsGlobal_WriteBitmap("out.bmp", bgr);
+			    }
+			    ttLibC_Bgr_close(&bgr);
+	  	  }
+        return true;
+      }, nullptr);
+      ttLibC_MsGlobal_sleep(10);
+    }
+    ttLibC_MsVideoCapturer_close(&capturer);
+    ttLibC_MsGlobal_MFShutdown();
+    ttLibC_MsGlobal_CoUninitialize();
   }
 });
