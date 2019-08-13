@@ -9,3 +9,15 @@ void TTTest::TearDown() {
   EXPECT_EQ(value, 0);
   ttLibC_Allocator_close();
 }
+
+#pragma warning(disable: 4996)
+
+TEST(System, fopen) {
+  FILE *fp = fopen("test.txt", "w");
+  if(fp) {
+    fwrite("hello", 1, 5, fp);
+    fclose(fp);
+    return;
+  }
+  FAIL();
+}
