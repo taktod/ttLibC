@@ -49,7 +49,7 @@ MSH264(EncodeTest, [this](){
       return true;
     }, &counter);
   }
-  ttLibC_MsGlobal_sleep(10);
+  ttLibC_MsGlobal_sleep(100);
   ttLibC_MsH264Encoder_close(&encoder);
   ttLibC_Yuv420_close(&yuv);
   // anyway get some frames -> ok.
