@@ -10,7 +10,7 @@ using namespace std;
 #define MSGLOBAL(A, B) TEST_F(UtilTest, DISABLED_MsGlobal##A){}
 #endif
 
-MSGLOBAL(BmpSave, [this](){
+MSGLOBAL(Bmp24Save, [this](){
 auto bgr = ttLibC_Bgr_makeEmptyFrame(BgrType_bgr, 640, 360);
   if(bgr == nullptr) {
     FAIL();
@@ -27,6 +27,29 @@ auto bgr = ttLibC_Bgr_makeEmptyFrame(BgrType_bgr, 640, 360);
     }
     ps += bgr->width_stride;
   }
-  ttLibC_MsGlobal_WriteBitmap("test.bmp", bgr);
+  ttLibC_MsGlobal_WriteBitmap("test24.bmp", bgr);
   ttLibC_Bgr_close(&bgr);
 });
+
+MSGLOBAL(Bmp32Save, [this](){
+auto bgr = ttLibC_Bgr_makeEmptyFrame(BgrType_bgra, 640, 360);
+  if(bgr == nullptr) {
+    FAIL();
+    return;
+  }
+  uint8_t *ps = bgr->data;
+  for(int i = 0;i < bgr->inherit_super.height;++ i) {
+    uint8_t *p = ps;
+    for(int j = 0;j < bgr->inherit_super.width;++ j) {
+      *p = (uint8_t)(j & 0xFF);
+      *(p + 1) = (uint8_t)(j & 0xFF);
+      *(p + 2) = (uint8_t)(0xFF);
+      *(p + 3) = (uint8_t)(0xFF);
+      p += bgr->unit_size;
+    }
+    ps += bgr->width_stride;
+  }
+  ttLibC_MsGlobal_WriteBitmap("test32.bmp", bgr);
+  ttLibC_Bgr_close(&bgr);
+});
+

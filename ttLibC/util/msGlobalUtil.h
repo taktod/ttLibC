@@ -21,8 +21,8 @@ extern "C" {
 #include "../frame/video/bgr.h"
 
 typedef enum ttLibC_MsGlobal_CoInitializeType {
-	CoInitializeType_normal,
-	CoInitializeType_multiThreaded
+  CoInitializeType_normal,
+  CoInitializeType_multiThreaded
 } ttLibC_MsGlobal_CoInitializeType;
 
 bool TT_ATTRIBUTE_API ttLibC_MsGlobal_CoInitialize(ttLibC_MsGlobal_CoInitializeType type);

@@ -28,37 +28,37 @@
 // for auto closing.
 class CloseHandleOnExit {
 public:
-	CloseHandleOnExit(HANDLE h) : m_h(h) {}
-	~CloseHandleOnExit() {
-		if(!CloseHandle(m_h)) {
-			puts("close handle failed.");
-		}
-	}
+  CloseHandleOnExit(HANDLE h) : m_h(h) {}
+  ~CloseHandleOnExit() {
+    if(!CloseHandle(m_h)) {
+      puts("close handle failed.");
+    }
+  }
 private:
-	HANDLE m_h;
+  HANDLE m_h;
 };
 
 class ReleaseOnExit {
 public:
-	ReleaseOnExit(IUnknown *p) : m_p(p) {}
-	~ReleaseOnExit() {
-		if(m_p != NULL) {
-			m_p->Release();
-			m_p = NULL;
-		}
-	}
+  ReleaseOnExit(IUnknown *p) : m_p(p) {}
+  ~ReleaseOnExit() {
+    if(m_p != NULL) {
+      m_p->Release();
+      m_p = NULL;
+    }
+  }
 private:
-	IUnknown *m_p;
+  IUnknown *m_p;
 };
 
 class CoTaskMemFreeOnExit {
 public:
-	CoTaskMemFreeOnExit(PVOID p) : m_p(p) {}
-	~CoTaskMemFreeOnExit() {
-		CoTaskMemFree(m_p);
-	}
+  CoTaskMemFreeOnExit(PVOID p) : m_p(p) {}
+  ~CoTaskMemFreeOnExit() {
+    CoTaskMemFree(m_p);
+  }
 private:
-	PVOID m_p;
+  PVOID m_p;
 };
 
 // utils for windows.
