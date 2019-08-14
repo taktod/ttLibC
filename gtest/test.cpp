@@ -10,8 +10,6 @@ void TTTest::TearDown() {
   ttLibC_Allocator_close();
 }
 
-#pragma warning(disable: 4996)
-
 TEST(System, fopen) {
   FILE *fp = fopen("test.txt", "w");
   if(fp) {
