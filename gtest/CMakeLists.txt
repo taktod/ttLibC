@@ -15,6 +15,7 @@ add_executable(ttLibC-test
   test.cpp
   encoder.cpp
   encoder/fdkaac.cpp
+  encoder/msaac.cpp
   encoder/msh264.cpp
   encoder/openh264.cpp
   encoder/x264.cpp
