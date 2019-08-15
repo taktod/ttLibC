@@ -25,7 +25,7 @@ typedef ttLibC_Util_MmAudioLoopback ttLibC_MmAudioLoopback;
 /**
  * callback function to get device names.
  */
-typedef bool (*ttLibC_MmAudioLoopbackDeviceNameFunc)(void *ptr, const char *name);
+typedef bool (*ttLibC_MmAudioLoopbackDeviceNameFunc)(void *ptr, const wchar_t *name);
 
 /**
  * callback function to get pcmS16Frame.
@@ -38,7 +38,7 @@ bool TT_ATTRIBUTE_API ttLibC_MmAudioLoopback_getDeviceNames(
 
 ttLibC_MmAudioLoopback TT_ATTRIBUTE_API *ttLibC_MmAudioLoopback_make(
   const char *locale,
-  const char *deviceName);
+  const wchar_t *deviceName);
 
 bool TT_ATTRIBUTE_API ttLibC_MmAudioLoopback_queryFrame(
   ttLibC_MmAudioLoopback *device,

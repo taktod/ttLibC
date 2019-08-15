@@ -14,8 +14,10 @@ MSH264(Listup, [this](){
   ttLibC_MsGlobal_CoInitialize(CoInitializeType_normal);
   ttLibC_MsGlobal_MFStartup();
   int counter = 0;
-  ttLibC_MsH264Encoder_listEncoders([](void *ptr, const char *name){
-    cout << name << endl;
+  ttLibC_MsH264Encoder_listEncoders([](void *ptr, const wchar_t *name){
+    char buffer[256];
+    ttLibC_MsGlobal_unicodeToSjis(name, buffer, 256);
+    cout << buffer << endl;
     int *counter = reinterpret_cast<int *>(ptr);
     *counter += 1;
     return true;
@@ -30,19 +32,18 @@ MSH264(EncodeTest, [this](){
   ttLibC_MsGlobal_MFStartup();
   auto yuv = makeGradateYuv(Yuv420Type_semiPlanar, 320, 240);
   int counter = 0;
-  string name("");
-  ttLibC_MsH264Encoder_listEncoders([](void *ptr, const char *name){
-      string *str = reinterpret_cast<string *>(ptr);
-      str->append(name);
-      return false;
+  wstring name(L"");
+  ttLibC_MsH264Encoder_listEncoders([](void *ptr, const wchar_t *name){
+    wstring* str = reinterpret_cast<wstring*>(ptr);
+    str->append(name);
+    return false;
   }, &name);
-  cout << name << endl;
   auto encoder = ttLibC_MsH264Encoder_make(name.c_str(), yuv->inherit_super.width, yuv->inherit_super.height, 960000);
   if (encoder == nullptr) {
-	  cout << "encoder is null" << endl;
+    cout << "encoder is null" << endl;
   }
   for(int i = 0;i < 10;++ i) {
-	  yuv->inherit_super.inherit_super.pts = i * 100;
+    yuv->inherit_super.inherit_super.pts = i * 100;
     ttLibC_MsH264Encoder_encode(encoder, yuv, [](void *ptr, ttLibC_H264 * h264) {
       int *counter = reinterpret_cast<int *>(ptr);
       *counter += 1;

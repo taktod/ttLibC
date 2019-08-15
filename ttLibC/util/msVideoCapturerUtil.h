@@ -16,13 +16,13 @@ typedef struct ttLibC_Util_MsVideoCapturer{
 
 typedef ttLibC_Util_MsVideoCapturer ttLibC_MsVideoCapturer;
 
-typedef bool (* ttLibC_MsVideoCapturerNameFunc)(void *ptr, const char *name);
+typedef bool (* ttLibC_MsVideoCapturerNameFunc)(void *ptr, const wchar_t *name);
 typedef bool (* ttLibC_MsVideoCapturerFrameFunc)(void *ptr, ttLibC_Video *video);
 
 bool TT_ATTRIBUTE_API ttLibC_MsVideoCapturer_getDeviceNames(ttLibC_MsVideoCapturerNameFunc callback, void *ptr);
 
 ttLibC_MsVideoCapturer TT_ATTRIBUTE_API *ttLibC_MsVideoCapturer_make(
-  const char *target,
+  const wchar_t *target,
   uint32_t width,
   uint32_t height);
 

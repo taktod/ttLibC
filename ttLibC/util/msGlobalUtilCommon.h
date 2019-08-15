@@ -61,8 +61,6 @@ private:
   PVOID m_p;
 };
 
-// utils for windows.
-std::string TT_ATTRIBUTE_API ttLibC_MsGlobal_wcharToUtf8string(const wchar_t *src);
 #endif
 
 #endif /* TTLIBC_UTIL_MSGLOBALUTIL_H_ */

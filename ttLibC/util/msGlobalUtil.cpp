@@ -43,30 +43,6 @@ bool TT_ATTRIBUTE_API ttLibC_MsGlobal_setlocale(const char *language) {
   return current != NULL;
 }
 
-static std::wstring MsGlobal_stringToWstring(std::string const& src) {
-  std::size_t converted{};
-  std::vector<wchar_t> dest(src.size() + 1, L'\0');
-  ::mbstowcs_s(&converted, dest.data(), dest.size(), src.data(), -1);
-  return std::wstring(dest.begin(), dest.end());
-}
-
-static std::string MsGlobal_wstringToUtf8string(std::wstring const& src) {
-  std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-  return converter.to_bytes(src);
-}
-
-std::string TT_ATTRIBUTE_API ttLibC_MsGlobal_wcharToUtf8string(const wchar_t *src) {
-  char buf[256];
-  size_t size;
-  wcstombs_s(
-      &size,
-      buf,
-      (wcslen(src) + 1) * sizeof(wchar_t),
-      src,
-      (wcslen(src) + 1) * sizeof(wchar_t));
-  return MsGlobal_wstringToUtf8string(MsGlobal_stringToWstring(std::string(buf)));
-}
-
 void TT_ATTRIBUTE_API ttLibC_MsGlobal_sleep(long time) {
   Sleep(time);
 }

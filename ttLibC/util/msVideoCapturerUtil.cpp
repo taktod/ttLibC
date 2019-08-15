@@ -95,7 +95,7 @@ public:
     }
     return true;
   }
-  TTMsVideoCapturer(string target, uint32_t width, uint32_t height) {
+  TTMsVideoCapturer(const wchar_t *target, uint32_t width, uint32_t height) {
     _image = nullptr;
     _pReader = nullptr;
     isInitialized = false;
@@ -105,7 +105,7 @@ public:
       uint32_t nameLength;
       HRESULT hr = device->GetAllocatedString(MF_DEVSOURCE_ATTRIBUTE_FRIENDLY_NAME, &pszName, &nameLength);
       if (SUCCEEDED(hr)) {
-        if (strcmp(target.c_str(), ttLibC_MsGlobal_wcharToUtf8string(pszName).c_str()) == 0) {
+        if(wcscmp(target, pszName) == 0) {
           IMFMediaSource* pSource = nullptr;
           ReleaseOnExit roeSource(pSource);
 
@@ -285,14 +285,14 @@ bool TT_ATTRIBUTE_API ttLibC_MsVideoCapturer_getDeviceNames(ttLibC_MsVideoCaptur
     uint32_t nameLength;
     HRESULT hr = device->GetAllocatedString(MF_DEVSOURCE_ATTRIBUTE_FRIENDLY_NAME, &pszName, &nameLength);
     if(SUCCEEDED(hr)) {
-        return callback(ptr, ttLibC_MsGlobal_wcharToUtf8string(pszName).c_str());
+      return callback(ptr, pszName);
     }
     return true;
   });
 }
 
 ttLibC_MsVideoCapturer TT_ATTRIBUTE_API *ttLibC_MsVideoCapturer_make(
-  const char *target, uint32_t width, uint32_t height) {
+  const wchar_t *target, uint32_t width, uint32_t height) {
   ttLibC_MsVideoCapturer_ *capturer = (ttLibC_MsVideoCapturer_ *)ttLibC_malloc(sizeof(ttLibC_MsVideoCapturer_));
   if(capturer == nullptr) {
     return nullptr;

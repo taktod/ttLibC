@@ -1,4 +1,4 @@
-/*
+﻿/*
  * mmAudioLoopbackUtil.c
  *
  * Created on: 2017/05/03
@@ -14,7 +14,10 @@
 #include "../frame/audio/pcmS16.h"
 #include "stlListUtil.h"
 //#include "../container/mkv.h"
+#include "hexUtil.h"
 #include <string>
+
+#include <comdef.h>
 
 #include <locale.h>
 #include <stdio.h>
@@ -175,7 +178,7 @@ private:
 typedef struct ttLibC_Util_MmAudioLoopback_ {
   ttLibC_MmAudioLoopback inherit_super;
   char locale[256]; // target locale
-  char deviceName[256]; // target deviceName
+  wchar_t deviceName[256]; // target deviceName
   bool is_running;
   uint64_t totalSampleNum; // generated pcm sampleNum(to make pts.)
   MmAudioLoopback_RingBuffer *ringBuffer;  // ringBuffer to handle between record thread and node thread.
@@ -223,7 +226,7 @@ static DWORD WINAPI MmAudioLoopback_threadCallback(LPVOID pContext) {
 
   IMMDevice *pMMDevice = NULL;
   // here
-  if(std::string(loopback->deviceName) != "") {
+  if(std::wstring(loopback->deviceName) != L"") {
     IMMDeviceCollection *pMMDeviceCollection = NULL;
     hr = pMMDeviceEnumerator->EnumAudioEndpoints(
       eRender, DEVICE_STATE_ACTIVE, &pMMDeviceCollection
@@ -272,18 +275,13 @@ static DWORD WINAPI MmAudioLoopback_threadCallback(LPVOID pContext) {
         }
         continue;
       }
-      // change name into wchar -> char with locale
-      const char *deviceName = ttLibC_MsGlobal_wcharToUtf8string(pv.pwszVal).c_str();
-      if(strcmp(deviceName, loopback->deviceName) == 0) {
-        puts("find same device.");
-        // use this device
-        pMMDevice = pMMDeviceFind;
+      if(wcscmp(pv.pwszVal, loopback->deviceName) == 0) {
+        pMMDevice = pMMDeviceFind;        
       }
       else {
-        // this device is not useful.
-        if(pMMDeviceFind != NULL) {
+        if(pMMDeviceFind != nullptr) {
           pMMDeviceFind->Release();
-          pMMDeviceFind = NULL;
+          pMMDeviceFind = nullptr;
         }
       }
     }
@@ -341,6 +339,10 @@ static DWORD WINAPI MmAudioLoopback_threadCallback(LPVOID pContext) {
   }
   CoTaskMemFreeOnExit ctmfoe(pwfx);
 
+  if(pwfx->nChannels > 2) {
+    pwfx->nChannels = 2;
+  }
+
   // update format for pcmS16.
   switch (pwfx->wFormatTag) {
   case WAVE_FORMAT_IEEE_FLOAT:
@@ -387,7 +389,7 @@ static DWORD WINAPI MmAudioLoopback_threadCallback(LPVOID pContext) {
       pwfx,
       0);
   if(FAILED(hr)) {
-    ERR_PRINT("failed to initialize audioClient.");
+    ERR_PRINT("failed to initialize audioClient. %x %d", hr ,hr);
     return 0;
   }
 
@@ -534,10 +536,8 @@ bool TT_ATTRIBUTE_API ttLibC_MmAudioLoopback_getDeviceNames(
     if(pv.vt != VT_LPWSTR) {
       continue;
     }
-    // change name into wchar -> char with locale
-    const char *deviceName = ttLibC_MsGlobal_wcharToUtf8string(pv.pwszVal).c_str();
     if(callback != NULL) {
-      if(!callback(ptr, deviceName)) {
+      if(!callback(ptr, pv.pwszVal)) {
         return false;
       }
     }
@@ -550,7 +550,7 @@ bool TT_ATTRIBUTE_API ttLibC_MmAudioLoopback_getDeviceNames(
  */
 ttLibC_MmAudioLoopback TT_ATTRIBUTE_API *ttLibC_MmAudioLoopback_make(
     const char *locale,
-    const char *deviceName) {
+    const wchar_t *deviceName) {
   ttLibC_MmAudioLoopback_ *loopback = (ttLibC_MmAudioLoopback_ *)ttLibC_malloc(sizeof(ttLibC_MmAudioLoopback_));
   if(loopback == NULL) {
     return NULL;
@@ -565,10 +565,10 @@ ttLibC_MmAudioLoopback TT_ATTRIBUTE_API *ttLibC_MmAudioLoopback_make(
   }
   // copy device name
   if(deviceName == NULL) {
-    strcpy(loopback->deviceName, "");
+    wcscpy(loopback->deviceName, L"");
   }
   else {
-    strcpy(loopback->deviceName, deviceName);
+	  wcscpy(loopback->deviceName, deviceName);
   }
   loopback->is_running = false;
   // ringBuffer is set in thread.
