@@ -165,4 +165,18 @@ void TT_ATTRIBUTE_API ttLibC_MsGlobal_WriteBitmap(const char *name, ttLibC_Bgr *
   }
 }
 
+int TT_ATTRIBUTE_API ttLibC_MsGlobal_unicodeToUtf8(const wchar_t *unicode, char *utf8, int utf8_length) {
+  return WideCharToMultiByte(CP_UTF8, 0, unicode, -1, utf8, utf8_length, nullptr, nullptr);
+}
+int TT_ATTRIBUTE_API ttLibC_MsGlobal_unicodeToSjis(const wchar_t *unicode, char *sjis, int sjis_length) {
+  return WideCharToMultiByte(CP_ACP, 0, unicode, -1, sjis, sjis_length, nullptr, nullptr);
+}
+int TT_ATTRIBUTE_API ttLibC_MsGlobal_utf8ToUnicode(const char *utf8, wchar_t *unicode, int unicode_length) {
+  return MultiByteToWideChar(CP_UTF8, MB_PRECOMPOSED, utf8, -1, unicode, unicode_length);
+}
+int TT_ATTRIBUTE_API ttLibC_MsGlobal_sjisToUnicode(const char *sjis, wchar_t *unicode, int unicode_length) {
+  return MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, sjis, -1, unicode, unicode_length);
+}
+
+
 #endif

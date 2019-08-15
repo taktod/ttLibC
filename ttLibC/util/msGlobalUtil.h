@@ -33,6 +33,11 @@ void TT_ATTRIBUTE_API ttLibC_MsGlobal_MFShutdown();
 
 bool TT_ATTRIBUTE_API ttLibC_MsGlobal_setlocale(const char *language);
 
+int TT_ATTRIBUTE_API ttLibC_MsGlobal_unicodeToUtf8(const wchar_t *unicode, char *utf8, int utf8_length);
+int TT_ATTRIBUTE_API ttLibC_MsGlobal_unicodeToSjis(const wchar_t *unicode, char *sjis, int sjis_length);
+int TT_ATTRIBUTE_API ttLibC_MsGlobal_utf8ToUnicode(const char *utf8, wchar_t *unicode, int unicode_length);
+int TT_ATTRIBUTE_API ttLibC_MsGlobal_sjisToUnicode(const char *sjis, wchar_t *unicode, int unicode_length);
+
 void TT_ATTRIBUTE_API ttLibC_MsGlobal_sleep(long time);
 
 void TT_ATTRIBUTE_API ttLibC_MsGlobal_WriteBitmap(const char *name, ttLibC_Bgr *bgr);
