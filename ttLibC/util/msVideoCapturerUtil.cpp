@@ -51,8 +51,8 @@ public:
       IMFSample *pSample) {
     if(pSample != nullptr) {
       IMFMediaBuffer *pMediaBuffer = nullptr;
-      ReleaseOnExit roeBuffer(pMediaBuffer);
       HRESULT hr = pSample->ConvertToContiguousBuffer(&pMediaBuffer);
+      ReleaseOnExit roeBuffer(pMediaBuffer);
       if(SUCCEEDED(hr)) {
         if (bufferToVideo(pMediaBuffer)) {
           _callback(_image);
@@ -93,7 +93,7 @@ public:
         ReleaseOnExit roe(ppDevices[i]);
       }
     }
-    return true;
+    return result;
   }
   TTMsVideoCapturer(const wchar_t *target, uint32_t width, uint32_t height) {
     _image = nullptr;
@@ -101,10 +101,10 @@ public:
     isInitialized = false;
     bool result = getDevices([&](auto device) {
       WCHAR* pszName = nullptr;
-      CoTaskMemFreeOnExit ctmfoe(pszName);
       uint32_t nameLength;
       HRESULT hr = device->GetAllocatedString(MF_DEVSOURCE_ATTRIBUTE_FRIENDLY_NAME, &pszName, &nameLength);
       if (SUCCEEDED(hr)) {
+        CoTaskMemFreeOnExit ctmfoe(pszName);
         if(wcscmp(target, pszName) == 0) {
           IMFMediaSource* pSource = nullptr;
           ReleaseOnExit roeSource(pSource);
@@ -298,7 +298,7 @@ ttLibC_MsVideoCapturer TT_ATTRIBUTE_API *ttLibC_MsVideoCapturer_make(
     return nullptr;
   }
   capturer->capturer = new (std::nothrow)TTMsVideoCapturer(target, width, height);
-  if (capturer == nullptr) {
+  if (capturer->capturer == nullptr) {
     return nullptr;
   }
   if (!capturer->capturer->isInitialized) {
@@ -310,16 +310,15 @@ ttLibC_MsVideoCapturer TT_ATTRIBUTE_API *ttLibC_MsVideoCapturer_make(
 }
 
 bool TT_ATTRIBUTE_API ttLibC_MsVideoCapturer_requestFrame(
-  ttLibC_MsVideoCapturer *capturer,
-  ttLibC_MsVideoCapturerFrameFunc callback,
-  void *ptr) {
+    ttLibC_MsVideoCapturer *capturer,
+    ttLibC_MsVideoCapturerFrameFunc callback,
+    void *ptr) {
   if(capturer == nullptr) {
       return false;
   }
   ttLibC_MsVideoCapturer_ *capturer_ = (ttLibC_MsVideoCapturer_ *)capturer;
   return capturer_->capturer->requestFrame([&](ttLibC_Video *video) {
-    callback(ptr, video);
-    return true;
+    return callback(ptr, video);
   });
 }
 

@@ -13,6 +13,8 @@ using namespace std;
 #endif
 
 MSVIDEOCAPTURER(Listup, [this](){
+  ttLibC_MsGlobal_CoInitialize(CoInitializeType_normal);
+  ttLibC_MsGlobal_MFStartup();
   int counter = 0;
   bool result = ttLibC_MsVideoCapturer_getDeviceNames([](void *ptr, const wchar_t *name){
     char buffer[256];
@@ -23,6 +25,8 @@ MSVIDEOCAPTURER(Listup, [this](){
     return true;
   }, &counter);
   ASSERT_GT(counter, 0);
+  ttLibC_MsGlobal_MFShutdown();
+  ttLibC_MsGlobal_CoUninitialize();
 });
 
 MSVIDEOCAPTURER(Capture, [this](){
@@ -53,7 +57,7 @@ MSVIDEOCAPTURER(Capture, [this](){
       ttLibC_MsGlobal_sleep(10);
     }
     ttLibC_MsVideoCapturer_close(&capturer);
-    ttLibC_MsGlobal_MFShutdown();
-    ttLibC_MsGlobal_CoUninitialize();
   }
+  ttLibC_MsGlobal_MFShutdown();
+  ttLibC_MsGlobal_CoUninitialize();
 });
