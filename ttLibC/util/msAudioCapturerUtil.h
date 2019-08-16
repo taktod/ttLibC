@@ -25,10 +25,7 @@ bool TT_ATTRIBUTE_API ttLibC_MsAudioCapturer_getDeviceNames(ttLibC_MsAudioCaptur
 ttLibC_MsAudioCapturer TT_ATTRIBUTE_API *ttLibC_MsAudioCapturer_make(
   const wchar_t *target,
   uint32_t sample_rate,
-  uint32_t channel_num);
-
-bool TT_ATTRIBUTE_API ttLibC_MsAudioCapturer_requestFrame(
-  ttLibC_MsAudioCapturer *capturer,
+  uint32_t channel_num,
   ttLibC_MsAudioCapturerFrameFunc callback,
   void *ptr);
 

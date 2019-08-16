@@ -59,8 +59,15 @@ public:
         }
       }
     }
-    _captureCount --;
-    return S_OK;
+    // here do request.
+    HRESULT hr = _pReader->ReadSample(
+      (DWORD)MF_SOURCE_READER_FIRST_AUDIO_STREAM,
+      0,
+      NULL,
+      NULL,
+      NULL,
+      NULL);
+    return hr;
   }
   STDMETHODIMP OnEvent(DWORD, IMFMediaEvent*) {
     return S_OK;
@@ -94,10 +101,13 @@ public:
     }
     return result;
   }
-  TTMsAudioCapturer(const wchar_t *target, uint32_t sample_rate, uint32_t channel_num) {
+  TTMsAudioCapturer(const wchar_t *target, uint32_t sample_rate, uint32_t channel_num,
+      function<bool(ttLibC_Audio *audio)> callback) {
     _audio = nullptr;
     _pReader = nullptr;
     isInitialized = false;
+    _callback = callback;
+
     bool result = getDevices([&](auto device) {
       WCHAR* pszName = nullptr;
       uint32_t nameLength;
@@ -191,6 +201,16 @@ public:
             }
           }
           if(SUCCEEDED(hr)) {
+            // here do request.
+            hr = _pReader->ReadSample(
+              (DWORD)MF_SOURCE_READER_FIRST_AUDIO_STREAM,
+              0,
+              NULL,
+              NULL,
+              NULL,
+              NULL);
+          }
+          if(SUCCEEDED(hr)) {
             isInitialized = true;
           }
         }
@@ -200,30 +220,10 @@ public:
   }
   ~TTMsAudioCapturer() {
     if (_pReader != nullptr) {
-      while(_captureCount > 0) {
-        Sleep(1);
-      }
       _pReader->Release();
       _pReader = nullptr;
     }
     ttLibC_Audio_close(&_audio);
-  }
-  bool requestFrame(function<bool(ttLibC_Audio *audio)> callback) {
-    _callback = callback;
-    if(_pReader != nullptr) {
-      HRESULT hr = _pReader->ReadSample(
-        (DWORD)MF_SOURCE_READER_FIRST_AUDIO_STREAM,
-        0,
-        NULL,
-        NULL,
-        NULL,
-        NULL);
-      if(SUCCEEDED(hr)) {
-        _captureCount ++;
-        return true;
-      }
-    }
-    return false;
   }
   bool isInitialized;
 private:
@@ -239,12 +239,43 @@ private:
     if(SUCCEEDED(hr)) {
       // here to make ttLibCAudioFrame.
       printf("dataSize:%d\r\n", dataSize);
+      // make audio frame and send callback
+      switch(_type) {
+      case frameType_pcmS16:
+        {
+        }
+        break;
+      case frameType_pcmF32:
+        {
+          auto f = ttLibC_PcmF32_make(
+            (ttLibC_PcmF32 *)_audio,
+            (ttLibC_PcmF32_Type)_subType,
+            _sample_rate,
+            dataSize / _channel_num / 4,
+            _channel_num,
+            buf,
+            dataSize,
+            buf,
+            dataSize,
+            nullptr,
+            0,
+            true,
+            0,
+            1000);
+          if(f != nullptr) {
+            _audio = (ttLibC_Audio *)f;
+            _callback(_audio);
+          }
+        }
+        break;
+      default:
+        break;
+      }
     }
     buffer->Unlock();
     return result;
   }
   long _refCount;
-  long _captureCount = 0;
   IMFSourceReader* _pReader;
   function<bool(ttLibC_Audio *audio)> _callback;
   ttLibC_Frame_Type _type;
@@ -277,12 +308,16 @@ bool TT_ATTRIBUTE_API ttLibC_MsAudioCapturer_getDeviceNames(ttLibC_MsAudioCaptur
 ttLibC_MsAudioCapturer TT_ATTRIBUTE_API *ttLibC_MsAudioCapturer_make(
     const wchar_t *target,
     uint32_t sample_rate,
-    uint32_t channel_num) {
+    uint32_t channel_num,
+    ttLibC_MsAudioCapturerFrameFunc callback,
+    void *ptr) {
   ttLibC_MsAudioCapturer_ *capturer = (ttLibC_MsAudioCapturer_ *)ttLibC_malloc(sizeof(ttLibC_MsAudioCapturer_));
   if(capturer == nullptr) {
     return nullptr;
   }
-  capturer->capturer = new (std::nothrow)TTMsAudioCapturer(target, sample_rate, channel_num);
+  capturer->capturer = new (std::nothrow)TTMsAudioCapturer(target, sample_rate, channel_num, [&](ttLibC_Audio *audio) {
+    return callback(ptr, audio);
+  });
   if (capturer->capturer == nullptr) {
     return nullptr;
   }
@@ -292,19 +327,6 @@ ttLibC_MsAudioCapturer TT_ATTRIBUTE_API *ttLibC_MsAudioCapturer_make(
     return nullptr;
   }
   return (ttLibC_MsAudioCapturer *)capturer;
-}
-
-bool TT_ATTRIBUTE_API ttLibC_MsAudioCapturer_requestFrame(
-    ttLibC_MsAudioCapturer *capturer,
-    ttLibC_MsAudioCapturerFrameFunc callback,
-    void *ptr) {
-  if(capturer == nullptr) {
-      return false;
-  }
-  ttLibC_MsAudioCapturer_ *capturer_ = (ttLibC_MsAudioCapturer_ *)capturer;
-  return capturer_->capturer->requestFrame([&](ttLibC_Audio *audio) {
-    return callback(ptr, audio);
-  });
 }
 
 void TT_ATTRIBUTE_API ttLibC_MsAudioCapturer_close(ttLibC_MsAudioCapturer **capturer) {
