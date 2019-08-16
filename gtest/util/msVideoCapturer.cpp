@@ -39,10 +39,13 @@ MSVIDEOCAPTURER(Capture, [this](){
     str->append(name);
     return false;
   }, &name);
+  int counter = 0;
   auto capturer = ttLibC_MsVideoCapturer_make(name.c_str(), 320, 240);
   if(capturer != nullptr) {
     for(int i = 0;i < 5;++ i) {
       ttLibC_MsVideoCapturer_requestFrame(capturer, [](void *ptr, ttLibC_Video *video){
+        int *counter = reinterpret_cast<int *>(ptr);
+        *counter += 1;
         // capturer ok.
         // try to convert yuv -> bgr, and save it as bitmap.
         auto bgr = ttLibC_Bgr_makeEmptyFrame(BgrType_bgr, video->width, video->height);
@@ -53,11 +56,12 @@ MSVIDEOCAPTURER(Capture, [this](){
           ttLibC_Bgr_close(&bgr);
         }
         return true;
-      }, nullptr);
+      }, &counter);
       ttLibC_MsGlobal_sleep(10);
     }
     ttLibC_MsVideoCapturer_close(&capturer);
   }
+  ASSERT_GT(counter, 0);
   ttLibC_MsGlobal_MFShutdown();
   ttLibC_MsGlobal_CoUninitialize();
 });
