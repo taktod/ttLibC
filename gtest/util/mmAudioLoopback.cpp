@@ -30,7 +30,6 @@ MMAUDIOLOOPBACK(Listup, [this](){
   ttLibC_MsGlobal_CoUninitialize();
 });
 
-/*
 MMAUDIOLOOPBACK(Capture, [this](){
   // try to capture audio actually.
   ttLibC_MsGlobal_CoInitialize(CoInitializeType_normal);
@@ -40,7 +39,7 @@ MMAUDIOLOOPBACK(Capture, [this](){
 
   auto loopback = ttLibC_MmAudioLoopback_make("", L"");
   for(int i = 0;i < 10;++ i) {
-    ttLibC_MsGlobal_sleep(10);
+    ttLibC_MsGlobal_sleep(100);
     ttLibC_MmAudioLoopback_queryFrame(loopback, [](void *ptr, ttLibC_PcmS16 *pcm) {
       int *counter = reinterpret_cast<int *>(ptr);
       *counter += 1;
@@ -55,4 +54,4 @@ MMAUDIOLOOPBACK(Capture, [this](){
   ttLibC_MsGlobal_MFShutdown();
   ttLibC_MsGlobal_CoUninitialize();
 });
-*/
+

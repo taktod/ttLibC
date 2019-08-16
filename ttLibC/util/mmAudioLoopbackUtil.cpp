@@ -107,6 +107,9 @@ public:
     refPointer_ = -2; // refPointer will be enable after 2 steps.
     addPointer_ = -1; // addPointer will be enable after 1 steps.
     is_working_ = true;
+    for(int i = 0;i < 16;++ i) {
+      buffer[i] = nullptr;
+    }
     prepareNextBuffer();
   }
   ~MmAudioLoopback_RingBuffer() {
@@ -469,11 +472,11 @@ static DWORD WINAPI MmAudioLoopback_threadCallback(LPVOID pContext) {
         ERR_PRINT("failed to releaseBuffer.");
         return 0;
       }
-    }
-    // wait for timer.
-    if(WaitForSingleObject(hWakeUp, INFINITE) != WAIT_OBJECT_0) {
-      ERR_PRINT("failed to wait waitableTimer signal.");
-      return 0;
+      // wait for timer.
+      if(WaitForSingleObject(hWakeUp, INFINITE) != WAIT_OBJECT_0) {
+        ERR_PRINT("failed to wait waitableTimer signal.");
+        return 0;
+      }
     }
   }
   return 0;
@@ -644,10 +647,20 @@ void TT_ATTRIBUTE_API ttLibC_MmAudioLoopback_close(ttLibC_MmAudioLoopback **devi
   if(target == NULL) {
     return;
   }
-  if(target->is_running) {
-    target->is_running = false;
-  }
   if(target->hThread != NULL) {
+    // wait until thread done.
+    while(true) {
+      DWORD dwExCode;
+      GetExitCodeThread(target->hThread, &dwExCode);
+      if (dwExCode == STILL_ACTIVE) {
+        Sleep(100);
+        if(target->is_running) {
+          target->is_running = false;
+        }
+      } else {
+        break;
+      }
+    }
     CloseHandle(target->hThread);
     target->hThread = NULL;
   }
