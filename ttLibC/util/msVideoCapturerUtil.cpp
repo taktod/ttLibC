@@ -218,6 +218,7 @@ private:
     if (SUCCEEDED(hr)) {
       switch (_type) {
       case frameType_bgr:
+        break;
       case frameType_yuv420:
         {
           switch (_subType) {
