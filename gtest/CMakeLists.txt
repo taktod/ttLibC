@@ -30,6 +30,7 @@ add_executable(ttLibC-test
   util/crc32.cpp
   util/hex.cpp
   util/mmAudioLoopback.cpp
+  util/msAudioCapturer.cpp
   util/msGlobal.cpp
   util/msVideoCapturer.cpp)
 target_link_libraries(ttLibC-test
