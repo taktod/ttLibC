@@ -21,9 +21,9 @@ ttLibC_Yuv420 *EncoderTest::makeGradateYuv(ttLibC_Yuv420_Type type, uint32_t wid
     uint8_t *v = vd;
     for(int j = 0, jmax = ((width + 1) >> 1);j < jmax;++ j) {
       *u = 128;
-      ++ u;
+      u += yuv->u_step;
       *v = 128;
-      ++ v;
+      v += yuv->v_step;
     }
     ud += yuv->u_stride;
     vd += yuv->v_stride;
