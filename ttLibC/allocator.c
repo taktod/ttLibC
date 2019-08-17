@@ -130,7 +130,7 @@ size_t TT_ATTRIBUTE_API ttLibC_Allocator_dump() {
 		for(it = kh_begin(ttLibC_Allocator_Table);it != kh_end(ttLibC_Allocator_Table); ++ it) {
 			if(kh_exist(ttLibC_Allocator_Table, it)) {
 				ttLibC_Allocator_Info *info = (ttLibC_Allocator_Info *)kh_value(ttLibC_Allocator_Table, it);
-				total_size += info->alloc_size;
+				puts(info->alloc_info);
 			}
 		}
 		printf("total_size:%lu\n", total_size);
