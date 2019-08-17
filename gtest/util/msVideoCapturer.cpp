@@ -3,6 +3,8 @@
 #include <ttLibC/util/msGlobalUtil.h>
 #include <ttLibC/frame/video/bgr.h>
 #include <ttLibC/resampler/imageResampler.h>
+#include <ttLibC/container/flv.h>
+#include <ttLibC/encoder/msH264Encoder.h>
 
 using namespace std;
 
@@ -64,4 +66,71 @@ MSVIDEOCAPTURER(Capture, [this](){
   ASSERT_GT(counter, 0);
   ttLibC_MsGlobal_MFShutdown();
   ttLibC_MsGlobal_CoUninitialize();
+});
+
+MSVIDEOCAPTURER(FlvOutputTest, [this](){
+  ttLibC_MsGlobal_CoInitialize(CoInitializeType_normal);
+  ttLibC_MsGlobal_MFStartup();
+  typedef struct {
+    ttLibC_FlvWriter *writer;
+    ttLibC_MsH264Encoder *encoder;
+    FILE *fp;
+    int counter;
+  } holder_t;
+  holder_t holder;
+  int width = 320;
+  int height = 240;
+  holder.writer = ttLibC_FlvWriter_make(frameType_h264, frameType_unknown);
+  holder.fp = fopen("msVideoCapturer_rec.flv", "wb");
+  holder.counter = 0;
+  if(holder.fp) {
+    {
+      wstring name(L"");
+      // setup encoder
+      ttLibC_MsH264Encoder_listEncoders([](void *ptr, const wchar_t *name){
+        wstring* str = reinterpret_cast<wstring*>(ptr);
+        str->append(name);
+        return false;
+      }, &name);
+      holder.encoder = ttLibC_MsH264Encoder_make(name.c_str(), width, height, 960000);
+    }
+    if(holder.encoder != nullptr) {
+      // for capturer
+      wstring name(L"");
+      bool result = ttLibC_MsVideoCapturer_getDeviceNames([](void *ptr, const wchar_t *name){
+        wstring *str = reinterpret_cast<wstring *>(ptr);
+        str->append(name);
+        return false;
+      }, &name);
+      auto capturer = ttLibC_MsVideoCapturer_make(name.c_str(), width, height);
+      if(capturer != nullptr) {
+        for(int i = 0;i < 200;++ i) {
+          ttLibC_MsVideoCapturer_requestFrame(capturer, [](void *ptr, ttLibC_Video *video){
+            holder_t *holder = reinterpret_cast<holder_t *>(ptr);
+            // capturer ok.
+            return ttLibC_MsH264Encoder_encode(holder->encoder, (ttLibC_Yuv420 *)video, [](void *ptr, ttLibC_H264 *h264){
+              holder_t* holder = reinterpret_cast<holder_t*>(ptr);
+              h264->inherit_super.inherit_super.id = 9;
+              return ttLibC_FlvWriter_write(holder->writer, (ttLibC_Frame*)h264, [](void* ptr, void* data, size_t data_size) {
+                holder_t* holder = reinterpret_cast<holder_t*>(ptr);
+                // write into file.
+                fwrite(data, 1, data_size, holder->fp);
+                holder->counter++;
+                return true;
+              }, ptr);
+            }, ptr);
+          }, &holder);
+          ttLibC_MsGlobal_sleep(100);
+        }
+        ttLibC_MsVideoCapturer_close(&capturer);
+      }
+      ttLibC_MsGlobal_sleep(100);
+      ttLibC_MsH264Encoder_close(&holder.encoder);
+    }
+    fclose(holder.fp);
+  }
+  ttLibC_FlvWriter_close(&holder.writer);
+  ttLibC_MsGlobal_MFShutdown();
+  ttLibC_MsGlobal_CoUninitialize();
+  ASSERT_GT(holder.counter, 0);
 });

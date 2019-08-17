@@ -54,7 +54,7 @@ public:
       HRESULT hr = pSample->ConvertToContiguousBuffer(&pMediaBuffer);
       ReleaseOnExit roeBuffer(pMediaBuffer);
       if(SUCCEEDED(hr)) {
-        if (bufferToVideo(pMediaBuffer)) {
+        if (bufferToVideo(pMediaBuffer, llTimestamp)) {
           _callback(_image);
         }
       }
@@ -205,7 +205,7 @@ public:
   bool isInitialized;
 private:
   // update image with data.
-  bool bufferToVideo(IMFMediaBuffer *buffer) {
+  bool bufferToVideo(IMFMediaBuffer *buffer, LONGLONG llTimestamp) {
     DWORD dataSize = 0;
     bool result = false;
     HRESULT hr = buffer->GetCurrentLength(&dataSize);
@@ -216,6 +216,9 @@ private:
     BYTE* buf = nullptr;
     hr = buffer->Lock(&buf, &dataSize, &dataSize);
     if (SUCCEEDED(hr)) {
+      if(_image == nullptr) {
+        _startPts = llTimestamp;
+      }
       switch (_type) {
       case frameType_bgr:
         break;
@@ -236,8 +239,8 @@ private:
                 yData, yStride,
                 uData, uStride,
                 vData, vStride,
-                false,
-                0, 1000);
+                true,
+                (llTimestamp - _startPts) / 10000, 1000);
               if (y != nullptr) {
                 _image = (ttLibC_Video*)y;
                 result = true;
@@ -260,9 +263,9 @@ private:
     buffer->Unlock();
     return result;
   }
-
   long _refCount;
   long _captureCount = 0;
+  uint64_t _startPts = 0;
   IMFSourceReader* _pReader;
   function<bool(ttLibC_Video *video)> _callback;
   uint32_t _width;

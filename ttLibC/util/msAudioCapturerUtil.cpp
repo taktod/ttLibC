@@ -54,7 +54,7 @@ public:
       HRESULT hr = pSample->ConvertToContiguousBuffer(&pMediaBuffer);
       ReleaseOnExit roeBuffer(pMediaBuffer);
       if(SUCCEEDED(hr)) {
-        if (bufferToAudio(pMediaBuffer)) {
+        if (bufferToAudio(pMediaBuffer, llTimestamp)) {
           _callback(_audio);
         }
       }
@@ -227,7 +227,7 @@ public:
   }
   bool isInitialized;
 private:
-  bool bufferToAudio(IMFMediaBuffer *buffer) {
+  bool bufferToAudio(IMFMediaBuffer *buffer, LONGLONG llTimestamp) {
     DWORD dataSize = 0;
     bool result = false;
     HRESULT hr = buffer->GetCurrentLength(&dataSize);
@@ -238,6 +238,9 @@ private:
     hr = buffer->Lock(&buf, &dataSize, &dataSize);
     if(SUCCEEDED(hr)) {
       // here to make ttLibCAudioFrame.
+      if(_audio == nullptr) {
+        _startPts = llTimestamp;
+      }
       printf("dataSize:%d\r\n", dataSize);
       // make audio frame and send callback
       switch(_type) {
@@ -260,7 +263,7 @@ private:
             nullptr,
             0,
             true,
-            0,
+            (llTimestamp - _startPts) / 10000,
             1000);
           if(f != nullptr) {
             _audio = (ttLibC_Audio *)f;
@@ -276,6 +279,7 @@ private:
     return result;
   }
   long _refCount;
+  uint64_t _startPts = 0;
   IMFSourceReader* _pReader;
   function<bool(ttLibC_Audio *audio)> _callback;
   ttLibC_Frame_Type _type;
