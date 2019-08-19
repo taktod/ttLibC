@@ -189,12 +189,10 @@ public:
               GUID subtype = { 0 };
               hr = pType->GetGUID(MF_MT_SUBTYPE, &subtype);
               if (subtype == MFAudioFormat_PCM) {
-                puts("pcmS16");
                 _type = frameType_pcmS16;
                 _subType = PcmS16Type_littleEndian;
               }
               if(subtype == MFAudioFormat_Float) {
-                puts("pcmF32");
                 _type = frameType_pcmF32;
                 _subType = PcmF32Type_interleave;
               }
@@ -241,11 +239,11 @@ private:
       if(_audio == nullptr) {
         _startPts = llTimestamp;
       }
-      printf("dataSize:%d\r\n", dataSize);
       // make audio frame and send callback
       switch(_type) {
       case frameType_pcmS16:
         {
+          puts("pcmS16");
         }
         break;
       case frameType_pcmF32:
@@ -267,7 +265,6 @@ private:
             1000);
           if(f != nullptr) {
             _audio = (ttLibC_Audio *)f;
-            _callback(_audio);
           }
         }
         break;
