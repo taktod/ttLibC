@@ -677,13 +677,13 @@ static void amfTest() {
 	ttLibC_Amf0_read(buf, size, amfTest_read, NULL);
 
 	LOG_PRINT("generate map");
-	ttLibC_Amf0Object *map = ttLibC_Amf0_map((ttLibC_Amf0MapObject [])
-		{
-			{"test1", ttLibC_Amf0_number(16)},
-			{"test2", ttLibC_Amf0_string("hogehoge")},
-			{"test3", ttLibC_Amf0_boolean(true)},
-			{NULL, NULL},
-		});
+	ttLibC_Amf0MapObject elements[4] = {
+		{"test1", ttLibC_Amf0_number(16)},
+		{"test2", ttLibC_Amf0_string("hogehoge")},
+		{"test3", ttLibC_Amf0_boolean(true)},
+		{NULL, NULL}
+	};
+	ttLibC_Amf0Object *map = ttLibC_Amf0_map(elements);
 	ttLibC_Amf0Object *amf0_obj = ttLibC_Amf0_getElement(map, "test1");
 	if(amf0_obj != NULL) {
 		amfTest_read(NULL, amf0_obj);
