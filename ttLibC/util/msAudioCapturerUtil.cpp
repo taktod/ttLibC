@@ -48,14 +48,13 @@ public:
       DWORD dwStreamFlags,
       LONGLONG llTimestamp,
       IMFSample *pSample) {
-    puts("get sample!");
     if(pSample != nullptr) {
       IMFMediaBuffer *pMediaBuffer = nullptr;
       HRESULT hr = pSample->ConvertToContiguousBuffer(&pMediaBuffer);
       ReleaseOnExit roeBuffer(pMediaBuffer);
       if(SUCCEEDED(hr)) {
         if (bufferToAudio(pMediaBuffer, llTimestamp)) {
-          _callback(_audio);
+          _callback(_ptr, _audio);
         }
       }
     }
@@ -101,12 +100,17 @@ public:
     }
     return result;
   }
-  TTMsAudioCapturer(const wchar_t *target, uint32_t sample_rate, uint32_t channel_num,
-      function<bool(ttLibC_Audio *audio)> callback) {
+  TTMsAudioCapturer(
+      const wchar_t *target,
+      uint32_t sample_rate,
+      uint32_t channel_num,
+      ttLibC_MsAudioCapturerFrameFunc callback,
+      void *ptr) {
     _audio = nullptr;
     _pReader = nullptr;
     isInitialized = false;
     _callback = callback;
+    _ptr = ptr;
 
     bool result = getDevices([&](auto device) {
       WCHAR* pszName = nullptr;
@@ -144,6 +148,7 @@ public:
               &pType);
             if(SUCCEEDED(hr)) {
               puts("now try to set information for pType.");
+              // for to make pcmS16
 //              hr = pType->SetGUID(MF_MT_SUBTYPE, MFAudioFormat_PCM);
 //              hr = pType->SetUINT32(MF_MT_AUDIO_BITS_PER_SAMPLE, 16);
               if(SUCCEEDED(hr)) {
@@ -160,7 +165,6 @@ public:
                   (DWORD)MF_SOURCE_READER_FIRST_AUDIO_STREAM,
                   NULL,
                   pType);
-//              printf("%x %d\r\n", hr, hr);
             }
           }
           if(SUCCEEDED(hr)) {
@@ -265,6 +269,7 @@ private:
             1000);
           if(f != nullptr) {
             _audio = (ttLibC_Audio *)f;
+            result = true;
           }
         }
         break;
@@ -278,7 +283,10 @@ private:
   long _refCount;
   uint64_t _startPts = 0;
   IMFSourceReader* _pReader;
-  function<bool(ttLibC_Audio *audio)> _callback;
+
+  ttLibC_MsAudioCapturerFrameFunc _callback;
+  void *_ptr;
+
   ttLibC_Frame_Type _type;
   uint32_t _subType; // only interleave?
   uint32_t _sample_rate;
@@ -289,6 +297,7 @@ private:
 typedef struct ttLibC_Util_MsAudioCapturer_ {
   ttLibC_MsAudioCapturer inherit_super;
   TTMsAudioCapturer *capturer;
+  ttLibC_MsAudioCapturerFrameFunc callback;
 } ttLibC_Util_MsAudioCapturer_;
 
 typedef ttLibC_Util_MsAudioCapturer_ ttLibC_MsAudioCapturer_;
@@ -316,9 +325,8 @@ ttLibC_MsAudioCapturer TT_ATTRIBUTE_API *ttLibC_MsAudioCapturer_make(
   if(capturer == nullptr) {
     return nullptr;
   }
-  capturer->capturer = new (std::nothrow)TTMsAudioCapturer(target, sample_rate, channel_num, [&](ttLibC_Audio *audio) {
-    return callback(ptr, audio);
-  });
+  capturer->callback = callback;
+  capturer->capturer = new (std::nothrow)TTMsAudioCapturer(target, sample_rate, channel_num, callback, ptr);
   if (capturer->capturer == nullptr) {
     return nullptr;
   }
