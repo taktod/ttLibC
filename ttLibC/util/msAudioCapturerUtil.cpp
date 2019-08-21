@@ -149,8 +149,8 @@ public:
             if(SUCCEEDED(hr)) {
               puts("now try to set information for pType.");
               // for to make pcmS16
-//              hr = pType->SetGUID(MF_MT_SUBTYPE, MFAudioFormat_PCM);
-//              hr = pType->SetUINT32(MF_MT_AUDIO_BITS_PER_SAMPLE, 16);
+              hr = pType->SetGUID(MF_MT_SUBTYPE, MFAudioFormat_PCM);
+              hr = pType->SetUINT32(MF_MT_AUDIO_BITS_PER_SAMPLE, 16);
               if(SUCCEEDED(hr)) {
                 hr = pType->SetUINT32(MF_MT_AUDIO_SAMPLES_PER_SECOND, sample_rate);
               }
@@ -247,7 +247,25 @@ private:
       switch(_type) {
       case frameType_pcmS16:
         {
-          puts("pcmS16");
+          auto s = ttLibC_PcmS16_make(
+            (ttLibC_PcmS16 *)_audio,
+            (ttLibC_PcmS16_Type)_subType,
+            _sample_rate,
+            dataSize / _channel_num / 2,
+            _channel_num,
+            buf,
+            dataSize,
+            buf,
+            dataSize,
+            nullptr,
+            0,
+            true,
+            (llTimestamp - _startPts) / 10000,
+            1000);
+          if(s != nullptr) {
+            _audio = (ttLibC_Audio *)s;
+            result = true;
+          }
         }
         break;
       case frameType_pcmF32:
