@@ -261,23 +261,19 @@ ttLibC_Yuv420 TT_ATTRIBUTE_API *ttLibC_Yuv420_makeEmptyFrame2(
 	ttLibC_Yuv420 *yuv420 = NULL;
 	uint32_t full_stride = GET_ALIGNED_STRIDE(width);
 	uint32_t half_stride = GET_ALIGNED_STRIDE((width + 1) >> 1);
+	uint32_t full_hstride = GET_ALIGNED_STRIDE(height);
 	uint32_t full_wh = full_stride * height;
 	uint32_t half_wh = half_stride * ((height + 1) >> 1);
-	uint32_t buffer_size = full_wh + (half_wh << 1);
+	uint32_t buffer_size = full_stride * full_hstride * 3 / 2;
 	switch(sub_type) {
 	case Yuv420Type_planar:
 	case Yvu420Type_planar:
-		break;
 	case Yuv420Type_semiPlanar:
 	case Yvu420Type_semiPlanar:
-		buffer_size = full_wh + full_stride * ((height + 1) >> 1);
 		break;
 	default:
 		ERR_PRINT("unknown yuv420 type.%d", sub_type);
 		return NULL;
-	}
-	if(buffer_size < 65536) {
-		buffer_size = 65536;
 	}
 	uint32_t data_size = buffer_size;
 
