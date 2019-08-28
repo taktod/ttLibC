@@ -205,14 +205,16 @@ ttLibC_Bgr *ttLibC_Bgr_makeEmptyFrame2(
 	ttLibC_Bgr *bgr = NULL;
 	uint32_t stride = GET_ALIGNED_STRIDE(width * 3);
 	uint32_t hstride = GET_ALIGNED_STRIDE(height);
-	uint32_t buffer_size = stride * hstride;
+	uint32_t buffer_size = stride * height;
+	uint32_t data_size = stride * hstride;
 	switch(sub_type) {
 	case BgrType_abgr:
 	case BgrType_bgra:
 	case BgrType_argb:
 	case BgrType_rgba:
 		stride = GET_ALIGNED_STRIDE(width * 4);
-		buffer_size = stride * hstride;
+		buffer_size = stride * height;
+		data_size = stride * hstride;
 		break;
 	case BgrType_bgr:
 	case BgrType_rgb:
@@ -220,7 +222,6 @@ ttLibC_Bgr *ttLibC_Bgr_makeEmptyFrame2(
 	default:
 		return NULL;
 	}
-	uint32_t data_size = buffer_size;
 
 	if(prev_frame != NULL && prev_frame->inherit_super.inherit_super.type != frameType_bgr) {
 		ERR_PRINT("prev_frame with incompatible frame.");

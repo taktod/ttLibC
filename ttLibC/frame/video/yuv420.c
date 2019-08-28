@@ -265,18 +265,20 @@ ttLibC_Yuv420 TT_VISIBILITY_DEFAULT *ttLibC_Yuv420_makeEmptyFrame2(
 	uint32_t full_hstride = GET_ALIGNED_STRIDE(height);
 	uint32_t full_wh = full_stride * height;
 	uint32_t half_wh = half_stride * ((height + 1) >> 1);
-	uint32_t buffer_size = full_stride * full_hstride * 3 / 2;
+	uint32_t buffer_size = full_wh + (half_wh << 1);
+	uint32_t data_size = full_stride * full_hstride * 3 / 2;
 	switch(sub_type) {
 	case Yuv420Type_planar:
 	case Yvu420Type_planar:
+		break;
 	case Yuv420Type_semiPlanar:
 	case Yvu420Type_semiPlanar:
+		buffer_size = full_wh + full_stride * ((height + 1) >> 1);
 		break;
 	default:
 		ERR_PRINT("unknown yuv420 type.%d", sub_type);
 		return NULL;
 	}
-	uint32_t data_size = buffer_size;
 
 	if(prev_frame != NULL && prev_frame->inherit_super.inherit_super.type != frameType_yuv420) {
 		ERR_PRINT("prev_frame with incompatible frame.");
