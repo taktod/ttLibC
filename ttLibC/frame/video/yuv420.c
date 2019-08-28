@@ -277,6 +277,9 @@ ttLibC_Yuv420 TT_VISIBILITY_DEFAULT *ttLibC_Yuv420_makeEmptyFrame2(
 		ERR_PRINT("unknown yuv420 type.%d", sub_type);
 		return NULL;
 	}
+	if(buffer_size < 65536) {
+		buffer_size = 65536;
+	}
 	uint32_t data_size = buffer_size;
 
 	if(prev_frame != NULL && prev_frame->inherit_super.inherit_super.type != frameType_yuv420) {
