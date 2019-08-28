@@ -238,6 +238,7 @@ if(APPLE)
       ttLibC/encoder/vtCompressSessionEncoder.h)
     set(TTLIBC_UTIL_HEADERS
       ${TTLIBC_UTIL_HEADERS}
+      ttLibC/util/audioUnitRecorderUtil.h
       ttLibC/util/audioUnitUtil.h)
   else()
     message("apple:      off")
@@ -927,6 +928,7 @@ add_library(ttLibC SHARED
   ttLibC/container/mp4/type/trun.c
   ttLibC/container/mp4/mp4Writer.c
   ttLibC/container/container.c
+  ttLibC/util/audioUnitRecorderUtil.cpp
   ttLibC/util/mmAudioLoopbackUtil.cpp
   ttLibC/util/msAudioCapturerUtil.cpp
   ttLibC/util/msGlobalUtil.cpp

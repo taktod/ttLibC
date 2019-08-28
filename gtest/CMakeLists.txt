@@ -27,6 +27,7 @@ add_executable(ttLibC-test
   resampler/libyuv.cpp
   resampler/swscale.cpp
   util.cpp
+  util/audioUnitRecorder.cpp
   util/crc32.cpp
   util/hex.cpp
   util/mmAudioLoopback.cpp
