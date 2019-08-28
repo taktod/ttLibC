@@ -204,23 +204,21 @@ ttLibC_Bgr *ttLibC_Bgr_makeEmptyFrame2(
 #	define GET_ALIGNED_STRIDE(w) (((((w) - 1) >> 4) + 1) << 4)
 	ttLibC_Bgr *bgr = NULL;
 	uint32_t stride = GET_ALIGNED_STRIDE(width * 3);
-	uint32_t buffer_size = stride * height;
+	uint32_t hstride = GET_ALIGNED_STRIDE(height);
+	uint32_t buffer_size = stride * hstride;
 	switch(sub_type) {
 	case BgrType_abgr:
 	case BgrType_bgra:
 	case BgrType_argb:
 	case BgrType_rgba:
 		stride = GET_ALIGNED_STRIDE(width * 4);
-		buffer_size = stride * height;
+		buffer_size = stride * hstride;
 		break;
 	case BgrType_bgr:
 	case BgrType_rgb:
 		break;
 	default:
 		return NULL;
-	}
-	if(buffer_size < 65536) {
-		buffer_size = 65536;
 	}
 	uint32_t data_size = buffer_size;
 
