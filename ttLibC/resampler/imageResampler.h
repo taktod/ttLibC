@@ -26,8 +26,8 @@ extern "C" {
  * @return bool
  */
 bool TT_ATTRIBUTE_API ttLibC_ImageResampler_ToBgr(
-		ttLibC_Bgr   *dest_frame,
-		ttLibC_Video *src_frame);
+    ttLibC_Bgr   *dest_frame,
+    ttLibC_Video *src_frame);
 
 /**
  * convert bgr or yuv to yuv420
@@ -36,8 +36,8 @@ bool TT_ATTRIBUTE_API ttLibC_ImageResampler_ToBgr(
  * @return bool
  */
 bool TT_ATTRIBUTE_API ttLibC_ImageResampler_ToYuv420(
-		ttLibC_Yuv420 *dest_frame,
-		ttLibC_Video  *src_frame);
+    ttLibC_Yuv420 *dest_frame,
+    ttLibC_Video  *src_frame);
 
 /**
  * make yuv420 frame from bgr frame.
@@ -46,9 +46,9 @@ bool TT_ATTRIBUTE_API ttLibC_ImageResampler_ToYuv420(
  * @param src_frame  src bgr frame.
  */
 ttLibC_Yuv420 TT_ATTRIBUTE_API *ttLibC_ImageResampler_makeYuv420FromBgr(
-		ttLibC_Yuv420 *prev_frame,
-		ttLibC_Yuv420_Type type,
-		ttLibC_Bgr *src_frame);
+    ttLibC_Yuv420 *prev_frame,
+    ttLibC_Yuv420_Type type,
+    ttLibC_Bgr *src_frame);
 
 /**
  * make bgr frame from yuv420 frame.
@@ -57,9 +57,9 @@ ttLibC_Yuv420 TT_ATTRIBUTE_API *ttLibC_ImageResampler_makeYuv420FromBgr(
  * @param src_frame  src yuv420 frame.
  */
 ttLibC_Bgr TT_ATTRIBUTE_API *ttLibC_ImageResampler_makeBgrFromYuv420(
-		ttLibC_Bgr *prev_frame,
-		ttLibC_Bgr_Type type,
-		ttLibC_Yuv420 *src_frame);
+    ttLibC_Bgr *prev_frame,
+    ttLibC_Bgr_Type type,
+    ttLibC_Yuv420 *src_frame);
 
 #ifdef __cplusplus
 } /* extern "C" */
