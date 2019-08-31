@@ -427,6 +427,7 @@ AudioUnitRecorder::~AudioUnitRecorder() {
   if(_instance != nullptr) {
     AudioUnitRecorderImpl *impl = reinterpret_cast<AudioUnitRecorderImpl *>(_instance);
     delete impl;
+    _instance = nullptr;
   }
 }
 

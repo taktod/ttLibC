@@ -1,5 +1,9 @@
+#ifndef TTLIBC_UTIL_AUDIOUNITRECORDER_HPP_
+#define TTLIBC_UTIL_AUDIOUNITRECORDER_HPP_
+
 #include <iostream>
 #include <functional>
+#include "../ttLibC_predef.h"
 #include "../frame/audio/audio.h"
 
 namespace ttLibC {
@@ -28,3 +32,5 @@ namespace ttLibC {
     void *_instance;
   };
 }
+
+#endif
