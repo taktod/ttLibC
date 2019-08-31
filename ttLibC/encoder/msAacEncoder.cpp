@@ -29,8 +29,6 @@
 #pragma comment(lib, "mfplat")
 #pragma comment(lib, "mf")
 #pragma comment(lib, "mfuuid")
-#pragma comment(lib, "d3d9")
-#pragma comment(lib, "dxva2")
 #pragma comment(lib, "uuid")
 #pragma comment(lib, "wmcodecdspuuid")
 
