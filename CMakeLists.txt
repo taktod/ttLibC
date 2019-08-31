@@ -46,6 +46,10 @@ if(WIN32)
     ${TTLIBC_ENCODER_HEADERS}
     ttLibC/encoder/msAacEncoder.h
     ttLibC/encoder/msH264Encoders.h)
+  set(TTLIBC_RESAMPLER_HEADERS
+    ${TTLIBC_RESAMPLER_HEADERS}
+    ttLibC/resampler/msImageResampler.h
+    ttLibC/resampler/msImageResampler.hpp)
   set(TTLIBC_UTIL_HEADERS
     ${TTLIBC_UTIL_HEADERS}
     ttLibC/util/mmAudioLoopbackUtil.h
@@ -940,6 +944,7 @@ add_library(ttLibC SHARED
   ttLibC/encoder/msH264Encoder.cpp
   ttLibC/encoder/openh264Encoder.cpp
   ttLibC/decoder/openh264Decoder.cpp
+  ttLibC/resampler/msImageResampler.cpp
   ttLibC/resampler/soundtouchResampler.cpp)
 
 target_link_libraries(ttLibC PRIVATE

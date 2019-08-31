@@ -25,6 +25,7 @@ add_executable(ttLibC-test
   resampler/image.cpp
   resampler/imageResizer.cpp
   resampler/libyuv.cpp
+  resampler/msImage.cpp
   resampler/swscale.cpp
   util.cpp
   util/audioUnitRecorder.cpp
