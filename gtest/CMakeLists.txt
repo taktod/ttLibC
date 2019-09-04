@@ -13,6 +13,8 @@ endif(WIN32)
 include_directories("..")
 add_executable(ttLibC-test
   test.cpp
+  decoder.cpp
+  decoder/audioConverter.cpp
   encoder.cpp
   encoder/fdkaac.cpp
   encoder/msaac.cpp
@@ -40,6 +42,7 @@ target_link_libraries(ttLibC-test
   ttLibC)
 
 enable_testing()
+add_test(NAME decoder   COMMAND ttLibC-test --gtest_filter=DecoderTest.*)
 add_test(NAME encoder   COMMAND ttLibC-test --gtest_filter=EncoderTest.*)
 add_test(NAME frame     COMMAND ttLibC-test --gtest_filter=FrameTest.*)
 add_test(NAME resampler COMMAND ttLibC-test --gtest_filter=ResamplerTest.*)
