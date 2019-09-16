@@ -9,7 +9,7 @@ using namespace std;
 #define X265(A, B) TEST_F(EncoderTest, DISABLED_X265##A){}
 #endif
 
-X265(EnncodeTest, [this](){
+X265(EncodeTest, [this](){
   auto yuv = makeGradateYuv(Yuv420Type_planar, 320, 240);
   auto encoder = ttLibC_X265Encoder_make(yuv->inherit_super.width, yuv->inherit_super.height);
   int counter = 0;
