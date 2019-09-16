@@ -159,11 +159,12 @@ bool TT_ATTRIBUTE_API ttLibC_MsAacEncoder_encode(
 		// timebase should be 100 nsec.
 		uint64_t pts = pcm->inherit_super.inherit_super.pts * 10000 / pcm->inherit_super.inherit_super.timebase;
 		uint32_t duration = pcm->inherit_super.sample_num * 10000 / pcm->inherit_super.sample_rate;
+		uint32_t memorySize = pcm->inherit_super.sample_num * pcm->inherit_super.channel_num * 2;
 		// CreateEmptySample
 		hr = MFCreateSample(&sample);
 		ReleaseOnExit roeSample(sample);
 		if(SUCCEEDED(hr)) {
-			hr = MFCreateMemoryBuffer(pcm->inherit_super.inherit_super.buffer_size, &buffer);
+			hr = MFCreateMemoryBuffer(memorySize, &buffer);
 		}
 		ReleaseOnExit rowBuffer(buffer);
 		if(SUCCEEDED(hr)) {
@@ -173,11 +174,11 @@ bool TT_ATTRIBUTE_API ttLibC_MsAacEncoder_encode(
 		if(SUCCEEDED(hr)) {
 			hr = buffer->Lock(&bufferData, NULL, NULL);
 			if(SUCCEEDED(hr)) {
-				memcpy(bufferData, pcm->l_data, pcm->inherit_super.inherit_super.buffer_size);
+				memcpy(bufferData, pcm->l_data, memorySize);
 				hr = buffer->Unlock();
 			}
 			if(SUCCEEDED(hr)) {
-				hr = buffer->SetCurrentLength(pcm->inherit_super.inherit_super.buffer_size);
+				hr = buffer->SetCurrentLength(memorySize);
 			}
 		}
 		// try to set pts
