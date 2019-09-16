@@ -311,15 +311,16 @@ namespace ttLibC {
       }
       return {0};
     }
-  	IMFTransform *_transform   = nullptr;
-    bool _hasSample = false;
+  	IMFTransform *_transform = nullptr;
   };
 }
 
 TT_ATTRIBUTE_API MsImageResampler::MsImageResampler() {
   MsImageResamplerImpl *impl = new MsImageResamplerImpl();
-  _instance = reinterpret_cast<void *>(impl);
-  isInitialized = impl->isInitialized;
+  if(impl != nullptr) {
+    _instance = reinterpret_cast<void *>(impl);
+    isInitialized = impl->isInitialized;
+  }
 }
 
 TT_ATTRIBUTE_API MsImageResampler::~MsImageResampler() {
@@ -395,6 +396,7 @@ void TT_ATTRIBUTE_API ttLibC_MsImageResampler_close(ttLibC_MsImageResampler **re
   }
   delete target->impl;
   ttLibC_free(target);
+  *resampler = nullptr;
 }
 
 #endif
