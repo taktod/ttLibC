@@ -445,6 +445,7 @@ if(TT_MP3LAME)
         message("mp3lame:    on")
         file(APPEND ${CMAKE_BINARY_DIR}/ttLibC_def.h "#define __ENABLE_MP3LAME__\n")
         add_definitions(-D__ENABLE_MP3LAME__)
+        add_definitions(-D__ENABLE_MP3LAME_ENCODE__)
         set(TTLIBC_ENCODER_HEADERS
           ${TTLIBC_ENCODER_HEADERS}
           ttLibC/encoder/mp3lameEncoder.h)
