@@ -110,11 +110,11 @@ bool TT_ATTRIBUTE_API ttLibC_LibyuvResampler_resize(
 				fmode);
 			ScalePlane_16(
 				(uint16_t *)src_->u_data,
-				src_->u_stride,
+				(src_->u_stride >> 1),
 				((src->width + 1) >> 1),
 				((src->height + 1) >> 1),
 				(uint16_t *)dest_->u_data,
-				dest_->u_stride,
+				(dest_->u_stride >> 1),
 				((dest->width + 1) >> 1),
 				((dest->height + 1) >> 1),
 				fsubmode);
@@ -134,11 +134,11 @@ bool TT_ATTRIBUTE_API ttLibC_LibyuvResampler_resize(
 				fmode);
 			ScalePlane_16(
 				(uint16_t *)src_->v_data,
-				src_->v_stride,
+				(src_->v_stride >> 1),
 				((src->width + 1) >> 1),
 				((src->height + 1) >> 1),
 				(uint16_t *)dest_->v_data,
-				dest_->v_stride,
+				(dest_->v_stride >> 1),
 				((dest->width + 1) >> 1),
 				((dest->height + 1) >> 1),
 				fsubmode);
