@@ -3,7 +3,7 @@
 #include <ttLibC/util/msGlobalUtil.h>
 #include <ttLibC/encoder/msAacEncoder.h>
 #include <ttLibC/container/flv.h>
-#include <ttlibC/resampler/audioResampler.h>
+#include <ttLibC/resampler/audioResampler.h>
 
 using namespace std;
 
