@@ -20,7 +20,7 @@
 #include "../frame/video/h264.h"
 #include "../frame/video/vp6.h"
 #include "../frame/audio/audio.h"
-#include "../frame/audio/aac.h"
+#include "../frame/audio/aac2.h"
 #include "../frame/audio/mp3.h"
 #include "../frame/audio/pcmAlaw.h"
 #include "../frame/audio/pcmMulaw.h"
@@ -427,11 +427,11 @@ bool TT_ATTRIBUTE_API ttLibC_FlvFrameManager_readAudioBinary(
 				return false;
 			}
 			if(manager_->audio_frame != NULL
-			&& (manager_->audio_frame->type != frameType_aac || *(buffer + 1) == 0x00)) {
+			&& (manager_->audio_frame->type != frameType_aac2 || *(buffer + 1) == 0x00)) {
 				ttLibC_Frame_close(&manager_->audio_frame);
 			}
-			audio_frame = (ttLibC_Frame *)ttLibC_Aac_getFrame(
-					(ttLibC_Aac *)manager_->audio_frame,
+			audio_frame = (ttLibC_Frame *)ttLibC_Aac2_getFrame(
+					(ttLibC_Aac2 *)manager_->audio_frame,
 					buffer + 2,
 					data_size - 2,
 					true,
@@ -503,7 +503,7 @@ static bool FlvFrameManager_getAudioCodecByte(
 		return false;
 	}
 	switch(audio_frame->inherit_super.type) {
-	case frameType_aac:
+	case frameType_aac2:
 		byte |= (FlvAudioCodec_aac << 4);
 		break;
 	case frameType_mp3:
@@ -547,25 +547,26 @@ static bool FlvFrameManager_getAudioCodecByte(
 bool TT_ATTRIBUTE_API ttLibC_FlvFrameManager_getAacDsiData(
 		ttLibC_Frame *frame,
 		ttLibC_DynamicBuffer *buffer) {
-	if(frame->type != frameType_aac) {
+	if(frame->type != frameType_aac2) {
 		return false;
 	}
-	ttLibC_Aac *aac = (ttLibC_Aac *)frame;
+	ttLibC_Aac2 *aac = (ttLibC_Aac2 *)frame;
 	if(!FlvFrameManager_getAudioCodecByte(
 			(ttLibC_Audio *)aac,
 			buffer)) {
 		return false;
 	}
-	uint64_t dsi_info = 0;
-	size_t dsi_info_size = ttLibC_Aac_readDsiInfo(aac, (void *)&dsi_info, 8);
+	uint8_t dsi_info[16];
+//	uint64_t dsi_info = 0;
+	size_t dsi_info_size = ttLibC_Aac2_makeAsiHeader(aac, (void *)dsi_info, 16);
 	uint8_t data = 0x00;
 	ttLibC_DynamicBuffer_append(buffer, &data, 1);
-	ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&dsi_info, dsi_info_size);
+	ttLibC_DynamicBuffer_append(buffer, (uint8_t *)dsi_info, dsi_info_size);
 	return true;
 }
 
 static bool FlvFrameManager_getAacData(
-		ttLibC_Aac *aac,
+		ttLibC_Aac2 *aac,
 		ttLibC_DynamicBuffer *buffer) {
 	if(!FlvFrameManager_getAudioCodecByte(
 			(ttLibC_Audio *)aac,
@@ -573,10 +574,9 @@ static bool FlvFrameManager_getAacData(
 		return false;
 	}
 	switch(aac->type) {
-	case AacType_adts:
-	case AacType_raw:
+	case Aac2Type_raw:
 		break;
-	case AacType_dsi:
+	case Aac2Type_asi:
 	default:
 		return true;
 	}
@@ -584,10 +584,6 @@ static bool FlvFrameManager_getAacData(
 	ttLibC_DynamicBuffer_append(buffer, &data, 1);
 	uint8_t *aac_data = aac->inherit_super.inherit_super.data;
 	size_t aac_data_size = aac->inherit_super.inherit_super.buffer_size;
-	if(aac->type == AacType_adts) {
-		aac_data += 7;
-		aac_data_size -= 7;
-	}
 	ttLibC_DynamicBuffer_append(buffer, aac_data, aac_data_size);
 	return true;
 }
@@ -721,9 +717,9 @@ bool TT_ATTRIBUTE_API ttLibC_FlvFrameManager_getData(
 		ttLibC_Frame *frame,
 		ttLibC_DynamicBuffer *buffer) {
 	switch(frame->type) {
-	case frameType_aac:
+	case frameType_aac2:
 		return FlvFrameManager_getAacData(
-				(ttLibC_Aac *)frame,
+				(ttLibC_Aac2 *)frame,
 				buffer);
 	case frameType_flv1:
 		return FlvFrameManager_getFlv1Data(

@@ -56,6 +56,7 @@ typedef enum ttLibC_Frame_Type {
 
 	/** ttLibC_Aac audio frame */
 	frameType_aac,
+	frameType_aac2,
 	/** ttLibC_AdpcmImaWav */
 	frameType_adpcm_ima_wav,
 	/** ttLibC_Mp3 audio frame */

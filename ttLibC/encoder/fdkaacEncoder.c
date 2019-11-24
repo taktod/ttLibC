@@ -19,7 +19,7 @@
 typedef struct ttLibC_Encoder_FdkaacEncoder_ {
   ttLibC_FdkaacEncoder inherit_super;
   HANDLE_AACENCODER handle_;
-  ttLibC_Aac *aac_;
+  ttLibC_Aac2 *aac_;
 	uint8_t    *pcm_buffer_;
 	size_t      pcm_buffer_size_;
 	size_t      pcm_buffer_next_pos_;
@@ -287,7 +287,7 @@ bool TT_ATTRIBUTE_API ttLibC_FdkaacEncoder_encode(
 			return false;
 		}
 		if(out_args.numOutBytes > 0) {
-			ttLibC_Aac *aac = ttLibC_Aac_getFrame(
+			ttLibC_Aac2 *aac = ttLibC_Aac2_getFrame(
 				encoder_->aac_,
 				encoder_->data_,
 				out_args.numOutBytes,
@@ -335,7 +335,7 @@ bool TT_ATTRIBUTE_API ttLibC_FdkaacEncoder_encode(
 			return false;
 		}
 		if(out_args.numOutBytes > 0) {
-			ttLibC_Aac *aac = ttLibC_Aac_getFrame(
+			ttLibC_Aac2 *aac = ttLibC_Aac2_getFrame(
 				encoder_->aac_,
 				encoder_->data_,
 				out_args.numOutBytes,
@@ -380,7 +380,7 @@ void TT_ATTRIBUTE_API ttLibC_FdkaacEncoder_close(ttLibC_FdkaacEncoder **encoder)
     ttLibC_free(target->pcm_buffer_);
     target->pcm_buffer_ = NULL;
   }
-  ttLibC_Aac_close(&target->aac_);
+  ttLibC_Aac2_close(&target->aac_);
   ttLibC_free(target);
   *encoder = NULL;
 }

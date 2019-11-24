@@ -47,7 +47,7 @@ ttLibC_FlvWriter TT_ATTRIBUTE_API *ttLibC_FlvWriter_make(
 		break;
 	}
 	switch(audio_type) {
-	case frameType_aac:
+	case frameType_aac2:
 	case frameType_mp3:
 	case frameType_nellymoser:
 	case frameType_pcm_alaw:
@@ -110,7 +110,7 @@ static bool FlvWriter_queueFrame(
  			return false;
  		}
 		break;
-	case frameType_aac:
+	case frameType_aac2:
 	case frameType_mp3:
 	case frameType_nellymoser:
 	case frameType_pcm_alaw:

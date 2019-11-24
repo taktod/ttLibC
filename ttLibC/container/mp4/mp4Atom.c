@@ -24,7 +24,7 @@
 #include "../../frame/video/h264.h"
 #include "../../frame/video/h265.h"
 #include "../../frame/video/jpeg.h"
-#include "../../frame/audio/aac.h"
+#include "../../frame/audio/aac2.h"
 #include "../../frame/audio/mp3.h"
 #include "../../frame/audio/vorbis.h"
 
@@ -169,12 +169,13 @@ static bool Mp4Atom_getFrame(
 			}
 		}
 		break;
-	case frameType_aac:
+	case frameType_aac2:
 		{
 			// TODO ? make this into getFrame?
-			ttLibC_Aac *aac = ttLibC_Aac_make(
-					(ttLibC_Aac *)track->frame,
-					AacType_raw,
+			ttLibC_Aac2 *prev_frame = (ttLibC_Aac2 *)track->frame;
+			ttLibC_Aac2 *aac = ttLibC_Aac2_make(
+					prev_frame,
+					Aac2Type_raw,
 					track->sample_rate,
 					duration,
 					track->channel_num,
@@ -183,7 +184,7 @@ static bool Mp4Atom_getFrame(
 					true,
 					pts,
 					timebase,
-					track->dsi_info);
+					prev_frame->object_type);
 			if(aac == NULL) {
 				ERR_PRINT("failed to make aac data.");
 				return false;
@@ -524,12 +525,15 @@ static bool Mp4Atom_analyzeStsd(
 			ttLibC_ByteReader_close(&byte_reader);
 		}
 		break;
-	case frameType_aac:
+	case frameType_aac2:
 		{
-			ttLibC_Aac *aac = ttLibC_Aac_getFrame(
-					(ttLibC_Aac *)track->frame,
-					&track->dsi_info,
-					6,
+			uint8_t *private_data = ttLibC_DynamicBuffer_refData(track->private_data);
+			size_t private_data_size = ttLibC_DynamicBuffer_refSize(track->private_data);
+			// restore from private data.
+			ttLibC_Aac2 *aac = ttLibC_Aac2_getFrame(
+					(ttLibC_Aac2 *)track->frame,
+					private_data,
+					private_data_size,
 					true,
 					0,
 					track->timebase);

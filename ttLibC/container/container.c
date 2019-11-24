@@ -25,7 +25,6 @@
 #include "../frame/video/h264.h"
 #include "../frame/video/theora.h"
 #include "../frame/audio/audio.h"
-#include "../frame/audio/aac.h"
 #include "../frame/audio/mp3.h"
 #include "../frame/audio/speex.h"
 #include "../frame/audio/vorbis.h"

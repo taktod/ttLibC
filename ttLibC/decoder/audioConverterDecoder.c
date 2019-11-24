@@ -14,7 +14,7 @@
 #include "../_log.h"
 #include "../allocator.h"
 #include "../frame/audio/pcms16.h"
-#include "../frame/audio/aac.h"
+#include "../frame/audio/aac2.h"
 #include <string.h>
 #include <AudioToolbox/AudioToolbox.h>
 
@@ -139,16 +139,12 @@ static OSStatus AcDecoder_decodeDataProc(
 	switch(audio->inherit_super.type) {
 	case frameType_aac:
 		{
-			ttLibC_Aac *aac = (ttLibC_Aac *)audio;
+			ttLibC_Aac2 *aac = (ttLibC_Aac2 *)audio;
 			// use aac data as raw type.
 			switch(aac->type) {
-			case AacType_adts:
-				data += 7;
-				data_size -= 7;
+			case Aac2Type_raw:
 				break;
-			case AacType_raw:
-				break;
-			case AacType_dsi:
+			case Aac2Type_asi:
 			default:
 				return 0;
 			}
@@ -196,13 +192,12 @@ bool TT_ATTRIBUTE_API ttLibC_AcDecoder_decode(
 	if(audio == NULL) {
 		return true;
 	}
-	if(audio->inherit_super.type == frameType_aac) {
-		ttLibC_Aac *aac = (ttLibC_Aac *)audio;
+	if(audio->inherit_super.type == frameType_aac2) {
+		ttLibC_Aac2 *aac = (ttLibC_Aac2 *)audio;
 		switch(aac->type) {
-		case AacType_raw:
-		case AacType_adts:
+		case Aac2Type_raw:
 			break;
-		case AacType_dsi:
+		case Aac2Type_asi:
 		default:
 			return true;
 		}

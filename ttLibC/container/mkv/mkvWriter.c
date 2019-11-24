@@ -18,7 +18,7 @@
 
 #include "../../frame/frame.h"
 #include "../../frame/audio/audio.h"
-#include "../../frame/audio/aac.h"
+#include "../../frame/audio/aac2.h"
 #include "../../frame/audio/mp3.h"
 #include "../../frame/audio/speex.h"
 #include "../../frame/audio/vorbis.h"
@@ -76,7 +76,7 @@ static bool MkvWriter_makeTrackEntry(void *ptr, void *key, void *item) {
 		case frameType_theora:
 		case frameType_vp8:
 		case frameType_vp9:
-		case frameType_aac:
+		case frameType_aac2:
 		case frameType_adpcm_ima_wav:
 		case frameType_mp3:
 		case frameType_opus:
@@ -283,7 +283,7 @@ static bool MkvWriter_makeTrackEntry(void *ptr, void *key, void *item) {
 				ttLibC_DynamicBuffer_append(trackEntryBuffer, buf, connector->write_size);
 			}
 			break;
-		case frameType_aac:
+		case frameType_aac2:
 			{
 				// codecID
 				ttLibC_ByteConnector_ebml2(connector, MkvType_CodecID, true);
@@ -294,7 +294,7 @@ static bool MkvWriter_makeTrackEntry(void *ptr, void *key, void *item) {
 				ttLibC_ByteConnector_ebml2(connector, 1, false);
 				ttLibC_ByteConnector_bit(connector, 2, 8);
 				// audio information
-				ttLibC_Aac *aac = (ttLibC_Aac *)ttLibC_FrameQueue_ref_first(track->frame_queue);
+				ttLibC_Aac2 *aac = (ttLibC_Aac2 *)ttLibC_FrameQueue_ref_first(track->frame_queue);
 				ttLibC_ByteConnector_ebml2(innerConnector, MkvType_SamplingFrequency, true);
 				ttLibC_ByteConnector_ebml2(innerConnector, 4, false);
 				float sr = aac->inherit_super.sample_rate;
@@ -307,7 +307,8 @@ static bool MkvWriter_makeTrackEntry(void *ptr, void *key, void *item) {
 				ttLibC_ByteConnector_ebml2(connector, innerConnector->write_size, false);
 				ttLibC_ByteConnector_string(connector, (const char *)inner, innerConnector->write_size);
 				// codecPrivate
-				in_size = ttLibC_Aac_readDsiInfo(aac, inner, 256);
+				in_size = ttLibC_Aac2_makeAsiHeader(aac, inner, 256);
+//				in_size = ttLibC_Aac2_readDsiInfo(aac, inner, 256);
 				ttLibC_ByteConnector_ebml2(connector, MkvType_CodecPrivate, true);
 				ttLibC_ByteConnector_ebml2(connector, in_size, false);
 				ttLibC_DynamicBuffer_append(trackEntryBuffer, buf, connector->write_size);
@@ -680,10 +681,10 @@ static bool MkvWriter_makeData(
 		frame = ttLibC_FrameQueue_dequeue_first(track->frame_queue);
 		// check if frame is not written in block.
 		switch(frame->type) {
-		case frameType_aac:
+		case frameType_aac2:
 			{
-				ttLibC_Aac *aac = (ttLibC_Aac *)frame;
-				if(aac->type == AacType_dsi) {
+				ttLibC_Aac2 *aac = (ttLibC_Aac2 *)frame;
+				if(aac->type == Aac2Type_asi) {
 					continue;
 				}
 			}
@@ -858,16 +859,16 @@ static bool MkvWriter_makeData(
 				}
 			}
 			break;
-		case frameType_aac:
+		case frameType_aac2:
 			{
-				ttLibC_Aac *aac = (ttLibC_Aac *)frame;
+				ttLibC_Aac2 *aac = (ttLibC_Aac2 *)frame;
 				uint8_t *aac_data = aac->inherit_super.inherit_super.data;
 				uint32_t aac_size = aac->inherit_super.inherit_super.buffer_size;
-				// use AacType_raw
+/*				// use AacType_raw
 				if(aac->type == AacType_adts) {
 					aac_data += 7;
 					aac_size -= 7;
-				}
+				}*/
 				aac_size += 4;
 				ttLibC_ByteConnector_ebml2(connector, MkvType_SimpleBlock, true);
 				ttLibC_ByteConnector_ebml2(connector, aac_size, false);

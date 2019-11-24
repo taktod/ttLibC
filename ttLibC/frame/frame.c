@@ -23,6 +23,7 @@
 bool TT_ATTRIBUTE_API ttLibC_isAudio(ttLibC_Frame_Type type) {
 	switch(type) {
 	case frameType_aac:
+	case frameType_aac2:
 	case frameType_adpcm_ima_wav:
 	case frameType_mp3:
 	case frameType_nellymoser:

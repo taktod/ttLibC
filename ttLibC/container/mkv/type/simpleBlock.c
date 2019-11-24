@@ -20,7 +20,7 @@
 #include "../../../frame/video/theora.h"
 #include "../../../frame/video/vp8.h"
 #include "../../../frame/video/vp9.h"
-#include "../../../frame/audio/aac.h"
+#include "../../../frame/audio/aac2.h"
 #include "../../../frame/audio/adpcmImaWav.h"
 #include "../../../frame/audio/mp3.h"
 #include "../../../frame/audio/opus.h"
@@ -261,11 +261,12 @@ static void SimpleBlock_getLace0Frame(
 			}
 		}
 		break;
-	case frameType_aac:
+	case frameType_aac2:
 		{
-			ttLibC_Aac *aac = ttLibC_Aac_make(
-					(ttLibC_Aac *)track->frame,
-					AacType_raw,
+			ttLibC_Aac2 *prev_frame = (ttLibC_Aac2 *)track->frame;
+			ttLibC_Aac2 *aac = ttLibC_Aac2_make(
+					prev_frame,
+					Aac2Type_raw,
 					track->sample_rate,
 					1024,
 					track->channel_num,
@@ -274,7 +275,7 @@ static void SimpleBlock_getLace0Frame(
 					true,
 					pts,
 					timebase,
-					track->dsi_info);
+					prev_frame->object_type);
 			if(aac == NULL) {
 				ERR_PRINT("failed to make aac data.");
 				reader->error_number = 5;

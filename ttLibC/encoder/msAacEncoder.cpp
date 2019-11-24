@@ -35,7 +35,7 @@
 typedef struct ttLibC_Encoder_MsAacEncoder_ {
 	ttLibC_MsAacEncoder inherit_super;
 	IMFTransform *transform;
-	ttLibC_Aac *aac;
+	ttLibC_Aac2 *aac;
 	uint32_t sample_rate;
 	uint32_t channel_num;
 	uint32_t bitrate;
@@ -124,13 +124,13 @@ bool TT_ATTRIBUTE_API ttLibC_MsAacEncoder_encode(
 	}
 	if(encoder_->aac == NULL) {
 		// need to make dsi information.
-		uint8_t dsiBuffer[8];
-		size_t dsiSize = ttLibC_Aac_getDsiInfo(
-			AacObject_Low,
+		uint8_t dsiBuffer[16];
+		size_t dsiSize = ttLibC_Aac2_getDsiInfo(
+			2,
 			encoder_->sample_rate,
 			encoder_->channel_num,
 			(void *)dsiBuffer,
-			8);
+			16);
 		if(dsiSize == 0) {
 			return false;
 		}
@@ -251,7 +251,7 @@ bool TT_ATTRIBUTE_API ttLibC_MsAacEncoder_encode(
 			hr = buffer->Lock(&bufferData, NULL, &bufferLength);
 			if(SUCCEEDED(hr)) {
 				// try to make and do callback.
-				ttLibC_Aac *aac = ttLibC_Aac_getFrame(
+				ttLibC_Aac2 *aac = ttLibC_Aac2_getFrame(
 					encoder_->aac,
 					bufferData,
 					bufferLength,
@@ -288,7 +288,7 @@ void TT_ATTRIBUTE_API ttLibC_MsAacEncoder_close(ttLibC_MsAacEncoder **encoder) {
 		target->transform->Release();
 		target->transform = NULL;
 	}
-	ttLibC_Aac_close(&target->aac);
+	ttLibC_Aac2_close(&target->aac);
 	ttLibC_free(target);
 	*encoder = NULL;
 }

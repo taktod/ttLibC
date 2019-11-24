@@ -23,6 +23,11 @@ add_executable(ttLibC-test
   encoder/x264.cpp
   encoder/x265.cpp
   frame.cpp
+  reader.cpp
+  reader/flv.cpp
+  reader/mkv.cpp
+  reader/mp4.cpp
+  reader/mpegts.cpp
   resampler.cpp
   resampler/image.cpp
   resampler/imageResizer.cpp
@@ -37,7 +42,12 @@ add_executable(ttLibC-test
   util/mmAudioLoopback.cpp
   util/msAudioCapturer.cpp
   util/msGlobal.cpp
-  util/msVideoCapturer.cpp)
+  util/msVideoCapturer.cpp
+  writer.cpp
+  writer/flv.cpp
+  writer/mkv.cpp
+  writer/mp4.cpp
+  writer/mpegts.cpp)
 target_link_libraries(ttLibC-test
   gtest_main
   ttLibC)
@@ -46,5 +56,7 @@ enable_testing()
 add_test(NAME decoder   COMMAND ttLibC-test --gtest_filter=DecoderTest.*)
 add_test(NAME encoder   COMMAND ttLibC-test --gtest_filter=EncoderTest.*)
 add_test(NAME frame     COMMAND ttLibC-test --gtest_filter=FrameTest.*)
+add_test(NAME reader    COMMAND ttLibC-test --gtest_filter=ReaderTest.*)
 add_test(NAME resampler COMMAND ttLibC-test --gtest_filter=ResamplerTest.*)
 add_test(NAME util      COMMAND ttLibC-test --gtest_filter=UtilTest.*)
+add_test(NAME writer    COMMAND ttLibC-test --gtest_filter=WriterTest.*)

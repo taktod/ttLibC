@@ -100,6 +100,7 @@ set(TTLIBC_CONTAINER_HEADERS
   ttLibC/container/mpegts.h)
 set(TTLIBC_FRAME_AUDIO_HEADERS
   ttLibC/frame/audio/aac.h
+  ttLibC/frame/audio/aac2.h
   ttLibC/frame/audio/adpcmImaWav.h
   ttLibC/frame/audio/audio.h
   ttLibC/frame/audio/mp3.h
@@ -889,6 +890,7 @@ add_library(ttLibC SHARED
   ttLibC/frame/audio/opus.c
   ttLibC/frame/audio/adpcmImaWav.c
   ttLibC/frame/audio/aac.c
+  ttLibC/frame/audio/aac2.c
   ttLibC/frame/audio/speex.c
   ttLibC/frame/audio/mp3.c
   ttLibC/frame/audio/pcms16.c

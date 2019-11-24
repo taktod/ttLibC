@@ -6,6 +6,7 @@ nobase_include_HEADERS= \
 	ttLibC/container/mp4.h \
 	ttLibC/container/mpegts.h \
 	ttLibC/frame/audio/aac.h \
+	ttLibC/frame/audio/aac2.h \
 	ttLibC/frame/audio/adpcmImaWav.h \
 	ttLibC/frame/audio/audio.h \
 	ttLibC/frame/audio/mp3.h \

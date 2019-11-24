@@ -171,7 +171,7 @@ bool TT_ATTRIBUTE_INNER ttLibC_Pmt_makePacket(
 		case frameType_h264:
 			data[0] = 0x1B;
 			break;
-		case frameType_aac:
+		case frameType_aac2:
 			data[0] = 0x0F;
 			break;
 		case frameType_mp3:

@@ -1,7 +1,7 @@
 #include "../decoder.hpp"
 #include <ttLibC/util/hexUtil.h>
 #include <ttLibC/decoder/audioConverterDecoder.h>
-#include <ttLibC/frame/audio/aac.h>
+#include <ttLibC/frame/audio/aac2.h>
 
 using namespace std;
 
@@ -14,13 +14,13 @@ using namespace std;
 AUDIOCONVERTER(DecodeTest, [this](){
   auto decoder = ttLibC_AcDecoder_make(44100, 2, frameType_aac);
   // これをdecodeしてみることにしよう。
-  ttLibC_Aac *aac = nullptr;
-  ttLibC_Aac *a = nullptr;
+  ttLibC_Aac2 *aac = nullptr;
+  ttLibC_Aac2 *a = nullptr;
   char data[256];
   size_t dataSize;
   int counter = 0;
   dataSize = ttLibC_HexUtil_makeBuffer("12 10 ", data, 256);
-  a = ttLibC_Aac_getFrame(aac, (void *)ttLibC_PcmS16_resetData, dataSize, true, 0, 1000);
+  a = ttLibC_Aac2_getFrame(aac, data, dataSize, true, 0, 1000);
   if(a != nullptr) {
     aac = a;
   }
@@ -31,7 +31,7 @@ AUDIOCONVERTER(DecodeTest, [this](){
     return true;
   }, &counter);
   dataSize = ttLibC_HexUtil_makeBuffer("21 00 49 90 02 19 00 23 80 ", data, 256);
-  a = ttLibC_Aac_getFrame(aac, data, dataSize, true, 0, 1000);
+  a = ttLibC_Aac2_getFrame(aac, data, dataSize, true, 0, 1000);
   if(a != nullptr) {
     aac = a;
   }
@@ -42,7 +42,7 @@ AUDIOCONVERTER(DecodeTest, [this](){
     return true;
   }, &counter);
   dataSize = ttLibC_HexUtil_makeBuffer("21 00 49 90 02 19 00 23 80 ", data, 256);
-  a = ttLibC_Aac_getFrame(aac, data, dataSize, true, 23, 1000);
+  a = ttLibC_Aac2_getFrame(aac, data, dataSize, true, 23, 1000);
   if(a != nullptr) {
     aac = a;
   }
@@ -53,7 +53,7 @@ AUDIOCONVERTER(DecodeTest, [this](){
     return true;
   }, &counter);
   dataSize = ttLibC_HexUtil_makeBuffer("21 00 49 90 02 19 00 23 80 ", data, 256);
-  a = ttLibC_Aac_getFrame(aac, data, dataSize, true, 46, 1000);
+  a = ttLibC_Aac2_getFrame(aac, data, dataSize, true, 46, 1000);
   if(a != nullptr) {
     aac = a;
   }
@@ -64,7 +64,7 @@ AUDIOCONVERTER(DecodeTest, [this](){
     return true;
   }, &counter);
   dataSize = ttLibC_HexUtil_makeBuffer("21 00 49 90 02 19 00 23 80 ", data, 256);
-  a = ttLibC_Aac_getFrame(aac, data, dataSize, true, 70, 1000);
+  a = ttLibC_Aac2_getFrame(aac, data, dataSize, true, 70, 1000);
   if(a != nullptr) {
     aac = a;
   }
@@ -75,7 +75,7 @@ AUDIOCONVERTER(DecodeTest, [this](){
     return true;
   }, &counter);
   dataSize = ttLibC_HexUtil_makeBuffer("21 20 49 90 02 19 00 23 80 ", data, 256);
-  a = ttLibC_Aac_getFrame(aac, data, dataSize, true, 93, 1000);
+  a = ttLibC_Aac2_getFrame(aac, data, dataSize, true, 93, 1000);
   if(a != nullptr) {
     aac = a;
   }
@@ -86,7 +86,7 @@ AUDIOCONVERTER(DecodeTest, [this](){
     return true;
   }, &counter);
   dataSize = ttLibC_HexUtil_makeBuffer("21 41 FE D6 80 85 A0 23 80 ", data, 256);
-  a = ttLibC_Aac_getFrame(aac, data, dataSize, true, 116, 1000);
+  a = ttLibC_Aac2_getFrame(aac, data, dataSize, true, 116, 1000);
   if(a != nullptr) {
     aac = a;
   }
@@ -104,7 +104,9 @@ AUDIOCONVERTER(DecodeTest, [this](){
   "21 00 49 90 02 19 00 23 80 "
   "21 20 49 90 02 19 00 23 80 "
   "21 41 FE D6 80 85 A0 23 80 "*/
-  ttLibC_Aac_close(&aac);
+  ttLibC_Aac2_close(&aac);
   ttLibC_AcDecoder_close(&decoder);
   ASSERT_GT(counter, 0);
 });
+
+#undef AUDIOCONVERTER

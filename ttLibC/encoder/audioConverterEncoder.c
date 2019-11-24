@@ -14,7 +14,7 @@
 #include "../_log.h"
 #include "../allocator.h"
 #include "../util/hexUtil.h"
-#include "../frame/audio/aac.h"
+#include "../frame/audio/aac2.h"
 #include "../frame/audio/pcmAlaw.h"
 #include "../frame/audio/pcmMulaw.h"
 #include <AudioToolbox/AudioToolbox.h>
@@ -37,7 +37,6 @@ typedef struct ttLibC_Encoder_AudioConverter_AcEncoder_ {
 	uint32_t numOutputPackets;
 	uint64_t pts;
 	uint32_t unit_samples;
-	uint64_t aac_dsi_info;
 	bool is_pts_initialized;
 
 	ttLibC_Audio *audio;
@@ -81,12 +80,12 @@ ttLibC_AcEncoder TT_ATTRIBUTE_API *ttLibC_AcEncoder_make(
 
 	// output
 	switch(encoder->frame_type) {
-	case frameType_aac:
+	case frameType_aac2:
 		// use low profile.
 		dstFormat.mFormatID = kAudioFormatMPEG4AAC;
 		dstFormat.mFormatFlags = kMPEG4Object_AAC_LC;
 		// make dsi information for aac.
-		ttLibC_Aac_getDsiInfo(AacObject_Low, sample_rate, channel_num, &encoder->aac_dsi_info, sizeof(uint64_t));
+//		ttLibC_Aac_getDsiInfo(AacObject_Low, sample_rate, channel_num, &encoder->aac_dsi_info, sizeof(uint64_t));
 		break;
 	case frameType_mp3:
 		ERR_PRINT("mp3 encode is not support."); // @see https://developer.apple.com/library/content/documentation/MusicAudio/Conceptual/CoreAudioOverview/SupportedAudioFormatsMacOSX/SupportedAudioFormatsMacOSX.html#//apple_ref/doc/uid/TP40003577-CH7-SW1
@@ -118,7 +117,7 @@ ttLibC_AcEncoder TT_ATTRIBUTE_API *ttLibC_AcEncoder_make(
 	uint32_t size = 0;
 	size = sizeof(target_bitrate);
 	switch(encoder->frame_type) {
-	case frameType_aac:
+	case frameType_aac2:
 		{
 			err = AudioConverterSetProperty(encoder->converter, kAudioConverterEncodeBitRate, size, &target_bitrate);
 			if(err != noErr) {
@@ -195,11 +194,11 @@ static bool AcEncoder_checkEncodedData(
 		ttLibC_AcEncodeFunc callback,
 		void *ptr) {
 	switch(encoder->frame_type) {
-	case frameType_aac:
+	case frameType_aac2:
 		{
-			ttLibC_Aac *aac = ttLibC_Aac_make(
-					(ttLibC_Aac *)encoder->audio,
-					AacType_raw,
+			ttLibC_Aac2 *aac = ttLibC_Aac2_make(
+					(ttLibC_Aac2 *)encoder->audio,
+					Aac2Type_raw,
 					encoder->sample_rate,
 					encoder->unit_samples,
 					encoder->channel_num,
@@ -208,7 +207,7 @@ static bool AcEncoder_checkEncodedData(
 					true,
 					encoder->pts,
 					encoder->sample_rate,
-					encoder->aac_dsi_info);
+					2); // set low type.
 			if(aac == NULL) {
 				ERR_PRINT("failed to make raw aac frame.");
 				return false;

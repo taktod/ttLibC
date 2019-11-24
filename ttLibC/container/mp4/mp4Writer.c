@@ -15,7 +15,7 @@
 #include "../container.h"
 #include "../containerCommon.h"
 #include "../../frame/audio/audio.h"
-#include "../../frame/audio/aac.h"
+#include "../../frame/audio/aac2.h"
 #include "../../frame/audio/mp3.h"
 #include "../../frame/audio/vorbis.h"
 #include "../../frame/video/video.h"
@@ -106,7 +106,7 @@ static bool Mp4Writer_makeTrex(void *ptr, void *key, void *item) {
 				ttLibC_DynamicBuffer_append(buffer, buf, in_size);
 			}
 			break;
-		case frameType_aac:
+		case frameType_aac2:
 			{
 				// aac frame sample num is 1024. = 0x400
 				in_size = ttLibC_HexUtil_makeBuffer("00 00 00 20 74 72 65 78 00 00 00 00", buf, 256);
@@ -197,7 +197,7 @@ static bool Mp4Writer_makeTrak(void *ptr, void *key, void *item) {
 					ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&zero, 2);
 				}
 				break;
-			case frameType_aac:
+			case frameType_aac2:
 			case frameType_mp3:
 			case frameType_vorbis:
 				in_size = ttLibC_HexUtil_makeBuffer("00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 01 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 00 00 00 00 00 00 00 00 00 00 00", buf, 256);
@@ -235,7 +235,7 @@ static bool Mp4Writer_makeTrak(void *ptr, void *key, void *item) {
 					in_size = ttLibC_HexUtil_makeBuffer("00 00 00 20 6D 64 68 64 00 00 00 00 00 00 00 00 00 00 00 00 00 00 03 E8 00 00 00 00 55 C4 00 00", buf, 256);
 					ttLibC_DynamicBuffer_append(buffer, buf, in_size);
 					break;
-				case frameType_aac:
+				case frameType_aac2:
 				case frameType_mp3:
 				case frameType_vorbis:
 					{
@@ -258,7 +258,7 @@ static bool Mp4Writer_makeTrak(void *ptr, void *key, void *item) {
 				case frameType_jpeg:
 					in_size = ttLibC_HexUtil_makeBuffer("00 00 00 21 68 64 6C 72 00 00 00 00 00 00 00 00 76 69 64 65 00 00 00 00 00 00 00 00 00 00 00 00 00", buf, 256);
 					break;
-				case frameType_aac:
+				case frameType_aac2:
 				case frameType_mp3:
 				case frameType_vorbis:
 					in_size = ttLibC_HexUtil_makeBuffer("00 00 00 21 68 64 6C 72 00 00 00 00 00 00 00 00 73 6F 75 6E 00 00 00 00 00 00 00 00 00 00 00 00 00", buf, 256);
@@ -279,7 +279,7 @@ static bool Mp4Writer_makeTrak(void *ptr, void *key, void *item) {
 						in_size = ttLibC_HexUtil_makeBuffer("00 00 00 14 76 6D 68 64 00 00 00 01 00 00 00 00 00 00 00 00", buf, 256);
 						ttLibC_DynamicBuffer_append(buffer, buf, in_size);
 						break;
-					case frameType_aac:
+					case frameType_aac2:
 					case frameType_mp3:
 					case frameType_vorbis:
 						// smhd
@@ -355,7 +355,7 @@ static bool Mp4Writer_makeTrak(void *ptr, void *key, void *item) {
 								Mp4Writer_updateSize(buffer, mp4vSizePos);
 							}
 							break;
-						case frameType_aac:
+						case frameType_aac2:
 							{
 								// mp4a
 								uint32_t mp4aSizePos = ttLibC_DynamicBuffer_refSize(buffer);
@@ -386,8 +386,9 @@ static bool Mp4Writer_makeTrak(void *ptr, void *key, void *item) {
 									uint32_t esTagSizePos = ttLibC_DynamicBuffer_refSize(buffer);
 									in_size = ttLibC_HexUtil_makeBuffer("19 00 00 00 04 11 40 15 00 00 00 00 01 77 00 00 01 77 00 05", buf, 256);
 									ttLibC_DynamicBuffer_append(buffer, buf, in_size);
-									uint8_t aac_buf[4];
-									in_size = ttLibC_Aac_readDsiInfo((ttLibC_Aac *)audio, aac_buf, 4);
+									uint8_t aac_buf[16];
+									in_size = ttLibC_Aac2_makeAsiHeader((ttLibC_Aac2 *)audio, aac_buf, 16);
+//									in_size = ttLibC_Aac_readDsiInfo((ttLibC_Aac *)audio, aac_buf, 4);
 									uint8_t sz = (uint8_t)in_size;
 									ttLibC_DynamicBuffer_append(buffer, &sz, 1);
 									ttLibC_DynamicBuffer_append(buffer, aac_buf, sz);
@@ -656,7 +657,7 @@ static bool Mp4Writer_makeTraf(void *ptr, void *key, void *item) {
 			break;
 		case frameType_jpeg:
 			break;
-		case frameType_aac:
+		case frameType_aac2:
 		case frameType_mp3:
 		case frameType_vorbis:
 			{
@@ -888,7 +889,7 @@ static bool Mp4Writer_makeTraf(void *ptr, void *key, void *item) {
 				Mp4Writer_updateSize(buffer, trunSizePos);
 			}
 			break;
-		case frameType_aac:
+		case frameType_aac2:
 			{
 				uint32_t trunSizePos = ttLibC_DynamicBuffer_refSize(buffer);
 				in_size = ttLibC_HexUtil_makeBuffer("00 00 00 00 74 72 75 6E 00 00 02 01 00 00 00 00 00 00 00 00", buf, 256);
@@ -898,7 +899,7 @@ static bool Mp4Writer_makeTraf(void *ptr, void *key, void *item) {
 				uint32_t frameCount = 0;
 				uint64_t target_pts = 0;
 				while(true) {
-					ttLibC_Aac *aac = (ttLibC_Aac *)ttLibC_FrameQueue_ref_first(track->inherit_super.frame_queue);
+					ttLibC_Aac2 *aac = (ttLibC_Aac2 *)ttLibC_FrameQueue_ref_first(track->inherit_super.frame_queue);
 					if(aac == NULL) {
 						break;
 					}
@@ -906,18 +907,18 @@ static bool Mp4Writer_makeTraf(void *ptr, void *key, void *item) {
 						target_pts = (uint64_t)(1.0 * writer->inherit_super.target_pos * aac->inherit_super.inherit_super.timebase / 1000);
 					}
 					if(aac->inherit_super.inherit_super.pts < target_pts) {
-						ttLibC_Aac *a = (ttLibC_Aac *)ttLibC_FrameQueue_dequeue_first(track->inherit_super.frame_queue);
+						ttLibC_Aac2 *a = (ttLibC_Aac2 *)ttLibC_FrameQueue_dequeue_first(track->inherit_super.frame_queue);
 						if(aac != a) {
 							ERR_PRINT("ref frame is invalid.");
 							return false;
 						}
-						if(aac->type != AacType_dsi) {
+						if(aac->type != Aac2Type_asi) {
 							uint8_t *aac_data = aac->inherit_super.inherit_super.data;
 							uint32_t aac_size = aac->inherit_super.inherit_super.buffer_size;
-							if(aac->type == AacType_adts) {
+/*							if(aac->type == AacType_adts) {
 								aac_data += 7;
 								aac_size -= 7;
-							}
+							}*/
 							ttLibC_DynamicBuffer_append(track->mdat_buffer, aac_data, aac_size);
 							uint32_t be_aac_size = be_uint32_t(aac_size);
 							ttLibC_DynamicBuffer_append(buffer, (uint8_t *)&be_aac_size, 4);

@@ -16,7 +16,7 @@ extern "C" {
 #endif
 
 #include "../ttLibC_predef.h"
-#include "../frame/audio/aac.h"
+#include "../frame/audio/aac2.h"
 #include "../frame/audio/pcms16.h"
 
 typedef struct ttLibC_Encoder_FdkaacEncoder {
@@ -25,7 +25,7 @@ typedef struct ttLibC_Encoder_FdkaacEncoder {
   uint32_t bitrate;
 } ttLibC_Encoder_FdkaacEncoder;
 
-typedef bool (* ttLibC_FdkaacEncodeFunc)(void *ptr, ttLibC_Aac *aac);
+typedef bool (* ttLibC_FdkaacEncodeFunc)(void *ptr, ttLibC_Aac2 *aac);
 
 typedef ttLibC_Encoder_FdkaacEncoder ttLibC_FdkaacEncoder;
 

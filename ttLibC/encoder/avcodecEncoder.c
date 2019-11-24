@@ -21,7 +21,7 @@
 #include "../frame/audio/pcms16.h"
 #include "../frame/audio/pcmf32.h"
 
-#include "../frame/audio/aac.h"
+#include "../frame/audio/aac2.h"
 #include "../frame/audio/adpcmImaWav.h"
 #include "../frame/audio/mp3.h"
 #include "../frame/audio/nellymoser.h"
@@ -107,21 +107,16 @@ static bool AvcodecEncoder_encode_AudioDetail(
 		ttLibC_Frame_close(&encoder->frame);
 	}
 	switch(encoder->inherit_super.frame_type) {
-	case frameType_aac:
+	case frameType_aac2:
 		{
 			// we can get as adts buffer.
-			ttLibC_Aac *aac = ttLibC_Aac_make(
-					(ttLibC_Aac *)encoder->frame,
-					AacType_adts,
-					encoder->inherit_super.sample_rate,
-					encoder->frame_size,
-					encoder->inherit_super.channel_num,
-					encoder->packet.data,
-					encoder->packet.size,
-					true,
-					encoder->packet.pts,
-					encoder->inherit_super.sample_rate,
-					0);
+			ttLibC_Aac2 *aac = ttLibC_Aac2_getFrame(
+				(ttLibC_Aac2 *)encoder->frame,
+				encoder->packet.data,
+				encoder->packet.size,
+				true,
+				encoder->packet.pts,
+				encoder->inherit_super.sample_rate);
 			if(aac != NULL) {
 				encoder->frame = (ttLibC_Frame *)aac;
 				encoder->frame->id = encoder->id;

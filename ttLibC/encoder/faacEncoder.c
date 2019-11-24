@@ -11,7 +11,7 @@
 #ifdef __ENABLE_FAAC_ENCODE__
 
 #include "faacEncoder.h"
-#include "../frame/audio/aac.h"
+#include "../frame/audio/aac2.h"
 #include "../_log.h"
 #include "../allocator.h"
 #include <stdint.h>
@@ -28,7 +28,7 @@ typedef struct {
 	/** handle of faac */
 	faacEncHandle handle;
 	/** reuse aac object. */
-	ttLibC_Aac *aac;
+	ttLibC_Aac2 *aac;
 	/** length of input byte size */
 	uint32_t samples_length;
 	/** samples_input information from faac. */
@@ -201,19 +201,13 @@ static bool FaacEncoder_checkEncodedData(ttLibC_FaacEncoder_ *encoder, uint32_t 
 	// this func is called for each aac frame.
 	// calcurate sample_num from encoder->samples_put. 1024 fixed?
 	uint32_t sample_num = encoder->samples_input / encoder->inherit_super.channel_num;
-	ttLibC_Aac *aac = encoder->aac;
-	aac = ttLibC_Aac_make(
-			aac,
-			AacType_adts,
-			encoder->inherit_super.sample_rate,
-			sample_num,
-			encoder->inherit_super.channel_num,
-			encoder->data,
-			encode_size,
-			true,
-			encoder->pts,
-			encoder->inherit_super.sample_rate,
-			0);
+	ttLibC_Aac2 *aac = ttLibC_Aac2_getFrame(
+		encoder->aac,
+		encoder->data,
+		encode_size,
+		true,
+		encoder->pts,
+		encoder->inherit_super.sample_rate);
 	if(aac != NULL) {
 		encoder->aac = aac;
 		encoder->aac->inherit_super.inherit_super.id = encoder->id;
@@ -324,7 +318,7 @@ void TT_ATTRIBUTE_API ttLibC_FaacEncoder_close(ttLibC_FaacEncoder **encoder) {
 		ttLibC_free(target->data);
 		target->data = NULL;
 	}
-	ttLibC_Aac_close(&target->aac);
+	ttLibC_Aac2_close(&target->aac);
 	ttLibC_free(target);
 	*encoder = NULL;
 }

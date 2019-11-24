@@ -548,7 +548,7 @@ static bool Mp4Reader_readAtom(
 									 */
 									switch(frameType) {
 									case 0x40:
-										reader->track->frame_type = frameType_aac;
+										reader->track->frame_type = frameType_aac2;
 										break;
 									case 0x6B:
 										reader->track->frame_type = frameType_mp3;
@@ -563,7 +563,7 @@ static bool Mp4Reader_readAtom(
 										break;
 									}
 									// for now, aac or vorbis is the only one to analyze more.
-									if(reader->track->frame_type != frameType_aac
+									if(reader->track->frame_type != frameType_aac2
 									&& reader->track->frame_type != frameType_vorbis) {
 										// other codec, stop to analyze.
 										break;
@@ -573,9 +573,7 @@ static bool Mp4Reader_readAtom(
 								else if(esTagType == 5) { // decoderSpecific
 									uint8_t *buf = data + byte_reader->read_size;
 									switch(reader->track->frame_type) {
-									case frameType_aac:
-										memcpy(&reader->track->dsi_info, buf, esTagSize);
-										break;
+									case frameType_aac2:
 									case frameType_vorbis:
 										{
 											reader->track->private_data = ttLibC_DynamicBuffer_make();

@@ -274,7 +274,7 @@ static bool MkvReader_readTag(
 							reader->track->is_video = true;
 						}
 						else if(strstr(codecId, "A_AAC") != 0) {
-							reader->track->type = frameType_aac;
+							reader->track->type = frameType_aac2;
 							reader->track->is_video = false;
 						}
 						else if(strcmp(codecId, "A_OPUS") == 0) {

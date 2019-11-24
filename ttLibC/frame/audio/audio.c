@@ -13,7 +13,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "aac.h"
+#include "aac2.h"
 #include "adpcmImaWav.h"
 #include "mp3.h"
 #include "nellymoser.h"
@@ -63,6 +63,7 @@ ttLibC_Audio TT_ATTRIBUTE_API *ttLibC_Audio_make(
 	size_t data_size_ = data_size;
 	switch(frame_type) {
 	case frameType_aac:
+	case frameType_aac2:
 	case frameType_adpcm_ima_wav:
 	case frameType_mp3:
 	case frameType_nellymoser:
@@ -142,10 +143,10 @@ ttLibC_Audio TT_ATTRIBUTE_API *ttLibC_Audio_clone(
 		return NULL;
 	}
 	switch(src_frame->inherit_super.type) {
-	case frameType_aac:
-		return (ttLibC_Audio *)ttLibC_Aac_clone(
-				(ttLibC_Aac *)prev_frame,
-				(ttLibC_Aac *)src_frame);
+	case frameType_aac2:
+		return (ttLibC_Audio *)ttLibC_Aac2_clone(
+				(ttLibC_Aac2 *)prev_frame,
+				(ttLibC_Aac2 *)src_frame);
 	case frameType_adpcm_ima_wav:
 		return (ttLibC_Audio *)ttLibC_AdpcmImaWav_clone(
 				(ttLibC_AdpcmImaWav *)prev_frame,
@@ -218,8 +219,8 @@ void TT_ATTRIBUTE_API ttLibC_Audio_close(ttLibC_Audio **frame) {
 		return;
 	}
 	switch(target->inherit_super.type) {
-	case frameType_aac:
-		ttLibC_Aac_close((ttLibC_Aac **)frame);
+	case frameType_aac2:
+		ttLibC_Aac2_close((ttLibC_Aac2 **)frame);
 		break;
 	case frameType_adpcm_ima_wav:
 		ttLibC_AdpcmImaWav_close((ttLibC_AdpcmImaWav **)frame);

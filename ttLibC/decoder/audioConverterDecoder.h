@@ -42,7 +42,7 @@ typedef bool (*ttLibC_AcDecodeFunc)(void *ptr, ttLibC_PcmS16 *pcm);
  * make audioConverter decoder.
  * @param sample_rate       target sample rate
  * @param channel_num       target channel num
- * @param target_frame_type target frame type(currently support frameType_aac or frameType_mp3)
+ * @param target_frame_type target frame type(currently support frameType_aac2 or frameType_mp3)
  * @return ttLibC_AcDecoder object.
  */
 ttLibC_AcDecoder TT_ATTRIBUTE_API *ttLibC_AcDecoder_make(

@@ -17,7 +17,7 @@
 
 #include "../../frame/video/h264.h"
 #include "../../frame/audio/mp3.h"
-#include "../../frame/audio/aac.h"
+#include "../../frame/audio/aac2.h"
 
 #include "../../_log.h"
 #include "../../allocator.h"
@@ -165,9 +165,9 @@ static bool MpegtsWriter_makeAacData(
 	bool is_info_update = false;
 	uint64_t current_pts_pos = writer->current_pts_pos;
 	while(true) {
-		ttLibC_Aac *aac = (ttLibC_Aac *)ttLibC_FrameQueue_ref_first(track->inherit_super.frame_queue);
+		ttLibC_Aac2 *aac = (ttLibC_Aac2 *)ttLibC_FrameQueue_ref_first(track->inherit_super.frame_queue);
 		if(aac != NULL && aac->inherit_super.inherit_super.pts < writer->target_pos) {
-			ttLibC_Aac *a = (ttLibC_Aac *)ttLibC_FrameQueue_dequeue_first(track->inherit_super.frame_queue);
+			ttLibC_Aac2 *a = (ttLibC_Aac2 *)ttLibC_FrameQueue_dequeue_first(track->inherit_super.frame_queue);
 			if(aac != a) {
 				ERR_PRINT("data is corrupted. broken?");
 				result = false;
@@ -190,21 +190,21 @@ static bool MpegtsWriter_makeAacData(
 				is_info_update = true;
 			}
 			switch(aac->type) {
-			case AacType_raw:
+			case Aac2Type_raw:
 				{
 					// need to convert to adts format.
 					uint8_t aac_header_buf[7];
-					if(ttLibC_Aac_readAdtsHeader(aac, aac_header_buf, 7) == 0) {
+					if(ttLibC_Aac2_makeAdtsHeader(aac, aac_header_buf, 7) == 0) {
 						ERR_PRINT("failed to get adts header information.");
 					}
 					ttLibC_DynamicBuffer_append(dataBuffer, aac_header_buf, 7);
 					ttLibC_DynamicBuffer_append(dataBuffer, aac->inherit_super.inherit_super.data, aac->inherit_super.inherit_super.buffer_size);
 				}
 				break;
-			case AacType_adts:
+/*			case AacType_adts:
 				ttLibC_DynamicBuffer_append(dataBuffer, aac->inherit_super.inherit_super.data, aac->inherit_super.inherit_super.buffer_size);
-				break;
-			case AacType_dsi:
+				break;*/
+			case Aac2Type_asi:
 			default:
 				break;
 			}
@@ -293,7 +293,7 @@ static bool MpegtsWriter_makeData(ttLibC_MpegtsWriter_ *writer) {
 				result = false;
 			}
 			break;
-		case frameType_aac:
+		case frameType_aac2:
 			if(!MpegtsWriter_makeAacData(
 					(ttLibC_ContainerWriter_ *)writer,
 					(ttLibC_MpegtsWriteTrack *)track,

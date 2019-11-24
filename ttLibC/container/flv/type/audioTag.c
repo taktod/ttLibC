@@ -13,7 +13,7 @@
 #include "../../../_log.h"
 #include "../../../util/hexUtil.h"
 
-#include "../../../frame/audio/aac.h"
+#include "../../../frame/audio/aac2.h"
 #include "../../../frame/audio/mp3.h"
 #include "../../../util/dynamicBufferUtil.h"
 #include "../../../util/ioUtil.h"
@@ -115,7 +115,7 @@ ttLibC_FlvAudioTag TT_ATTRIBUTE_INNER *ttLibC_FlvAudioTag_make(
 			audio_tag->frame_type = frameType_unknown;
 			break;
 		case 10: // aac
-			audio_tag->frame_type = frameType_aac;
+			audio_tag->frame_type = frameType_aac2;
 			break;
 		case 11: // speex 16kHz monoral
 			audio_tag->frame_type = frameType_speex;
@@ -199,9 +199,9 @@ bool TT_ATTRIBUTE_INNER ttLibC_FlvAudioTag_writeTag(
 		ttLibC_Frame *frame,
 		ttLibC_ContainerWriteFunc callback,
 		void *ptr) {
-	if(frame->type == frameType_aac) {
-		ttLibC_Aac *aac = (ttLibC_Aac *)frame;
-		if(aac->type == AacType_dsi) {
+	if(frame->type == frameType_aac2) {
+		ttLibC_Aac2 *aac = (ttLibC_Aac2 *)frame;
+		if(aac->type == Aac2Type_asi) {
 			return true;
 		}
 	}
@@ -222,10 +222,10 @@ bool TT_ATTRIBUTE_INNER ttLibC_FlvAudioTag_writeTag(
 	data[8]  = 0x00;
 	data[9]  = 0x00;
 	data[10] = 0x00;
-	if(frame->type == frameType_aac) {
-		ttLibC_Aac *aac = (ttLibC_Aac *)frame;
+	if(frame->type == frameType_aac2) {
+		ttLibC_Aac2 *aac = (ttLibC_Aac2 *)frame;
 		// check crc32 to decide msh
-		uint32_t crc32_value = ttLibC_Aac_getConfigCrc32(aac);
+		uint32_t crc32_value = ttLibC_Aac2_getConfigCrc32(aac);
 		if(writer->audio_track.crc32 == 0 || writer->audio_track.crc32 != crc32_value) {
 			// add information
 			ttLibC_FlvFrameManager_getAacDsiData(

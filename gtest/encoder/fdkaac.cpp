@@ -18,7 +18,7 @@ FDKAAC(EncodeTest, [this](){
   int counter = 0;
   for(int i = 0;i < 5;++ i) {
     pcm = ttLibC_BeepGenerator_makeBeepBySampleNum(generator, pcm, 1000);
-    ttLibC_FdkaacEncoder_encode(encoder, pcm, [](void *ptr, ttLibC_Aac *aac) {
+    ttLibC_FdkaacEncoder_encode(encoder, pcm, [](void *ptr, ttLibC_Aac2 *aac) {
       int *counter = reinterpret_cast<int *>(ptr);
       *counter += 1;
       return true;
@@ -40,13 +40,13 @@ FDKAAC(FlvOutputTest, [this](){
     int counter;
   } holder_t;
   holder_t holder;
-  holder.writer = ttLibC_FlvWriter_make(frameType_unknown, frameType_aac);
+  holder.writer = ttLibC_FlvWriter_make(frameType_unknown, frameType_aac2);
   holder.fp = fopen("fdkaac_rec.flv", "wb");
   holder.counter = 0;
   if(holder.fp) {
     for(int i = 0;i < 5;++ i) {
       pcm = ttLibC_BeepGenerator_makeBeepBySampleNum(generator, pcm, 1000);
-      ttLibC_FdkaacEncoder_encode(encoder, pcm, [](void *ptr, ttLibC_Aac *aac) {
+      ttLibC_FdkaacEncoder_encode(encoder, pcm, [](void *ptr, ttLibC_Aac2 *aac) {
         holder_t *holder = reinterpret_cast<holder_t *>(ptr);
         aac->inherit_super.inherit_super.id = 8;
         return ttLibC_FlvWriter_write(holder->writer, (ttLibC_Frame *)aac, [](void *ptr, void *data, size_t data_size){

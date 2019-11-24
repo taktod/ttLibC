@@ -16,7 +16,7 @@ extern "C" {
 #endif
 
 #include "../ttLibC_predef.h"
-#include "../frame/audio/aac.h"
+#include "../frame/audio/aac2.h"
 #include "../frame/audio/pcms16.h"
 
 /**
@@ -36,7 +36,7 @@ typedef ttLibC_Encoder_MsAacEncoder ttLibC_MsAacEncoder;
  * @param audio
  * @return true:success false:error
  */
-typedef bool (*ttLibC_MsAacEncodeFunc)(void *ptr, ttLibC_Aac *aac);
+typedef bool (*ttLibC_MsAacEncodeFunc)(void *ptr, ttLibC_Aac2 *aac);
 
 ttLibC_MsAacEncoder TT_ATTRIBUTE_API *ttLibC_MsAacEncoder_make(
 	uint32_t sample_rate,

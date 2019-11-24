@@ -38,7 +38,7 @@ typedef struct ttLibC_MkvTrack {
 	uint32_t sample_rate;
 	uint32_t channel_num;
 
-	uint64_t dsi_info; // dsi_info for aac
+//	uint64_t dsi_info; // dsi_info for aac
 
 	uint32_t size_length; // for h264 / h265 size nal.
 

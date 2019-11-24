@@ -14,7 +14,7 @@
 #include "../../../../allocator.h"
 #include <string.h>
 #include "../../../../util/hexUtil.h"
-#include "../../../../frame/audio/aac.h"
+#include "../../../../frame/audio/aac2.h"
 #include "../../../../frame/audio/mp3.h"
 #include "../../../../util/ioUtil.h"
 #include "../../../../util/flvFrameUtil.h"
@@ -99,14 +99,14 @@ ttLibC_AudioMessage TT_ATTRIBUTE_INNER *ttLibC_AudioMessage_addFrame(
 bool TT_ATTRIBUTE_INNER ttLibC_AudioMessage_getData(
 		ttLibC_AudioMessage *message,
 		ttLibC_DynamicBuffer *buffer) {
-	if(message->audio_frame->inherit_super.type == frameType_aac) {
+	if(message->audio_frame->inherit_super.type == frameType_aac2) {
 		if(message->is_dsi_info) {
 			return ttLibC_FlvFrameManager_getAacDsiData(
 					(ttLibC_Frame *)message->audio_frame,
 					buffer);
 		}
-		ttLibC_Aac *aac = (ttLibC_Aac *)message->audio_frame;
-		if(aac->type == AacType_dsi) {
+		ttLibC_Aac2 *aac = (ttLibC_Aac2 *)message->audio_frame;
+		if(aac->type == Aac2Type_asi) {
 			return true;
 		}
 	}

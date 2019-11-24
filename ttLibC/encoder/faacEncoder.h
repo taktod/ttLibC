@@ -16,7 +16,7 @@ extern "C" {
 #endif
 
 #include "../ttLibC_predef.h"
-#include "../frame/audio/aac.h"
+#include "../frame/audio/aac2.h"
 #include "../frame/audio/pcms16.h"
 
 /**
@@ -45,7 +45,7 @@ typedef ttLibC_Encoder_FaacEncoder ttLibC_FaacEncoder;
  * @param ptr user def value pointer.
  * @param aac encoded aac frame.
  */
-typedef bool (* ttLibC_FaacEncodeFunc)(void *ptr, ttLibC_Aac *aac);
+typedef bool (* ttLibC_FaacEncodeFunc)(void *ptr, ttLibC_Aac2 *aac);
 
 /**
  * make faac encoder

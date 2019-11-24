@@ -85,7 +85,7 @@ static void mp4CodecTest() {
 	LOG_PRINT("h264 / aac");
 	testData.reader = (ttLibC_ContainerReader *)ttLibC_Mp4Reader_make();
 	types[0] = frameType_h264;
-	types[1] = frameType_aac;
+	types[1] = frameType_aac2;
 	testData.writer = (ttLibC_ContainerWriter *)ttLibC_Mp4Writer_make(types, 2);
 	testData.writer->mode = containerWriter_enable_dts;
 	sprintf(file, "%s/tools/data/source/test.h264.aac.mp4", getenv("HOME"));
@@ -173,7 +173,7 @@ static void mp4Test() {
 	testData.reader = (ttLibC_ContainerReader *)ttLibC_Mp4Reader_make();
 	ttLibC_Frame_Type frameTypes[] = {
 			frameType_h264,
-			frameType_aac,
+			frameType_aac2,
 	};
 	testData.writer = (ttLibC_ContainerWriter *)ttLibC_Mp4Writer_make(frameTypes, 2);
 	testData.fp_in = fopen("test.mp4", "rb");
@@ -272,7 +272,7 @@ static void mkvCodecTest() {
 	LOG_PRINT("h264 / aac");
 	testData.reader = (ttLibC_ContainerReader *)ttLibC_MkvReader_make();
 	types[0] = frameType_h264;
-	types[1] = frameType_aac;
+	types[1] = frameType_aac2;
 	testData.writer = (ttLibC_ContainerWriter *)ttLibC_MkvWriter_make(types, 2);
 	sprintf(file, "%s/tools/data/source/test.h264.aac.mkv", getenv("HOME"));
 	testData.fp_in = fopen(file, "rb");
@@ -514,7 +514,7 @@ static void mkvTest() {
 	testData.reader = (ttLibC_ContainerReader *)ttLibC_MkvReader_make();
 	ttLibC_Frame_Type frameTypes[] = {
 			frameType_h264,
-			frameType_aac
+			frameType_aac2
 	};
 	testData.writer = (ttLibC_ContainerWriter *)ttLibC_MkvWriter_make(
 			frameTypes, 2);
@@ -687,7 +687,7 @@ static void mpegtsCodecTest() {
 	LOG_PRINT("h264 / aac");
 	testData.reader = (ttLibC_ContainerReader *)ttLibC_MpegtsReader_make();
 	types[0] = frameType_h264;
-	types[1] = frameType_aac;
+	types[1] = frameType_aac2;
 	testData.writer = (ttLibC_ContainerWriter *)ttLibC_MpegtsWriter_make(types, 2);
 	testData.writer->mode = containerWriter_innerFrame_split | containerWriter_allKeyFrame_split;
 	sprintf(file, "%s/tools/data/source/test.h264.aac.ts", getenv("HOME"));
@@ -771,7 +771,7 @@ static void mpegtsCodecTest() {
 	LOG_PRINT("h264b / aac");
 	testData.reader = (ttLibC_ContainerReader *)ttLibC_MpegtsReader_make();
 	types[0] = frameType_h264;
-	types[1] = frameType_aac;
+	types[1] = frameType_aac2;
 	testData.writer = (ttLibC_ContainerWriter *)ttLibC_MpegtsWriter_make_ex(types, 2, 15000);
 	testData.writer->mode = containerWriter_innerFrame_split | containerWriter_allKeyFrame_split;
 	sprintf(file, "%s/tools/data/source/test.h264b.aac.ts", getenv("HOME"));
@@ -921,7 +921,7 @@ static void flvTest() {
 	containerTest_t testData;
 	testData.write_size = 0;
 	testData.reader = (ttLibC_ContainerReader *)ttLibC_FlvReader_make();
-	testData.writer = (ttLibC_ContainerWriter *)ttLibC_FlvWriter_make(frameType_h264, frameType_aac);
+	testData.writer = (ttLibC_ContainerWriter *)ttLibC_FlvWriter_make(frameType_h264, frameType_aac2);
 	testData.fp_in = fopen("test.flv", "rb");
 	testData.fp_out = fopen("test_out.flv", "wb");
 	do {
@@ -950,7 +950,7 @@ static void flvCodecTest() {
 
 	LOG_PRINT("h264 / aac");
 	testData.reader = (ttLibC_ContainerReader *)ttLibC_FlvReader_make();
-	testData.writer = (ttLibC_ContainerWriter *)ttLibC_FlvWriter_make(frameType_h264, frameType_aac);
+	testData.writer = (ttLibC_ContainerWriter *)ttLibC_FlvWriter_make(frameType_h264, frameType_aac2);
 	sprintf(file, "%s/tools/data/source/test.h264.aac.flv", getenv("HOME"));
 	testData.fp_in = fopen(file, "rb");
 	sprintf(file, "%s/tools/data/c_out/test.h264.aac.flv", getenv("HOME"));
@@ -974,7 +974,7 @@ static void flvCodecTest() {
 
 	LOG_PRINT("h264b / aac");
 	testData.reader = (ttLibC_ContainerReader *)ttLibC_FlvReader_make();
-	testData.writer = (ttLibC_ContainerWriter *)ttLibC_FlvWriter_make(frameType_h264, frameType_aac);
+	testData.writer = (ttLibC_ContainerWriter *)ttLibC_FlvWriter_make(frameType_h264, frameType_aac2);
 	sprintf(file, "%s/tools/data/source/test.h264b.aac.flv", getenv("HOME"));
 	testData.fp_in = fopen(file, "rb");
 	sprintf(file, "%s/tools/data/c_out/test.h264b.aac.flv", getenv("HOME"));
@@ -1003,7 +1003,7 @@ static void flvFlv1AacTest() {
 	containerTest_t testData;
 	testData.write_size = 0;
 	testData.reader = (ttLibC_ContainerReader *)ttLibC_FlvReader_make();
-	testData.writer = (ttLibC_ContainerWriter *)ttLibC_FlvWriter_make(frameType_flv1, frameType_aac);
+	testData.writer = (ttLibC_ContainerWriter *)ttLibC_FlvWriter_make(frameType_flv1, frameType_aac2);
 	testData.fp_in = fopen("test_flv1_aac.flv", "rb");
 	testData.fp_out = fopen("test_flv1_aac_out.flv", "wb");
 	do {

@@ -23,7 +23,7 @@
 #include "../frame/video/theora.h"
 #include "../frame/video/yuv420.h"
 
-#include "../frame/audio/aac.h"
+#include "../frame/audio/aac2.h"
 #include "../frame/audio/pcms16.h"
 #include "../frame/audio/pcmf32.h"
 #include "../frame/audio/speex.h"
@@ -68,10 +68,10 @@ static bool AvcodecDecoder_decodeAudio(
 		ttLibC_AvcodecDecodeFunc callback,
 		void *ptr) {
 	switch(frame->inherit_super.type) {
-	case frameType_aac:
+	case frameType_aac2:
 		{
-			ttLibC_Aac *aac = (ttLibC_Aac *)frame;
-			if(aac->type == AacType_dsi) {
+			ttLibC_Aac2 *aac = (ttLibC_Aac2 *)frame;
+			if(aac->type == Aac2Type_asi) {
 				return true;
 			}
 		}
@@ -801,7 +801,7 @@ void TT_ATTRIBUTE_API *ttLibC_AvcodecDecoder_getAVCodecContext(ttLibC_Frame_Type
 	avcodec_register_all();
 	AVCodec *codec = NULL;
 	switch(frame_type) {
-	case frameType_aac:
+	case frameType_aac2:
 		codec = avcodec_find_decoder(AV_CODEC_ID_AAC);
 		break;
 	case frameType_adpcm_ima_wav:
@@ -889,10 +889,10 @@ ttLibC_AvcodecDecoder TT_ATTRIBUTE_API *ttLibC_AvcodecDecoder_makeWithAVCodecCon
 		return NULL;
 	}
 	AVCodecContext *dec = (AVCodecContext *)dec_context;
-	ttLibC_Frame_Type frame_type = frameType_aac;
+	ttLibC_Frame_Type frame_type = frameType_aac2;
 	switch(dec->codec_id) {
 	case AV_CODEC_ID_AAC:
-		frame_type = frameType_aac;
+		frame_type = frameType_aac2;
 		break;
 	case AV_CODEC_ID_ADPCM_IMA_WAV:
 		frame_type = frameType_adpcm_ima_wav;

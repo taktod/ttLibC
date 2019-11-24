@@ -18,7 +18,7 @@
 #include "../mpegtsWriter.h"
 
 #include "../../../frame/frame.h"
-#include "../../../frame/audio/aac.h"
+#include "../../../frame/audio/aac2.h"
 #include "../../../frame/audio/mp3.h"
 #include "../../../frame/video/h264.h"
 
@@ -74,7 +74,7 @@ ttLibC_Pes TT_ATTRIBUTE_INNER *ttLibC_Pes_make(
 			pes->frame_type = frameType_unknown;
 			break;
 		case 0x0F: // aac
-			pes->frame_type = frameType_aac;
+			pes->frame_type = frameType_aac2;
 			break;
 		case 0x10: // mpeg4 video(h263? wmv?)
 			pes->frame_type = frameType_unknown;
@@ -248,7 +248,7 @@ bool TT_ATTRIBUTE_INNER ttLibC_Pes_getFrame(
 	uint8_t *buffer = ttLibC_DynamicBuffer_refData(pes->buffer);
 	size_t left_size = ttLibC_DynamicBuffer_refSize(pes->buffer);
 	switch(pes->frame_type) {
-	case frameType_aac:
+	case frameType_aac2:
 		{
 			// data should be adts.
 			uint64_t sample_num_count = 0;
@@ -258,8 +258,8 @@ bool TT_ATTRIBUTE_INNER ttLibC_Pes_getFrame(
 				if(sample_rate != 0) {
 					pts = pts + (sample_num_count * 90000 / sample_rate);
 				}
-				ttLibC_Aac *aac = ttLibC_Aac_getFrame(
-						(ttLibC_Aac *)pes->frame,
+				ttLibC_Aac2 *aac = ttLibC_Aac2_getFrame(
+						(ttLibC_Aac2 *)pes->frame,
 						buffer,
 						left_size,
 						true,
@@ -276,8 +276,8 @@ bool TT_ATTRIBUTE_INNER ttLibC_Pes_getFrame(
 				if(!callback(ptr, pes->frame)) {
 					return false;
 				}
-				buffer += aac->inherit_super.inherit_super.buffer_size;
-				left_size -= aac->inherit_super.inherit_super.buffer_size;
+				buffer += (aac->inherit_super.inherit_super.buffer_size + 7);
+				left_size -= (aac->inherit_super.inherit_super.buffer_size + 7);
 			}while(left_size > 0);
 		}
 		return true;

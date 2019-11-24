@@ -17,7 +17,7 @@
 #include "../../frame/video/h264.h"
 #include "../../frame/video/h265.h"
 #include "../../frame/video/theora.h"
-#include "../../frame/audio/aac.h"
+#include "../../frame/audio/aac2.h"
 #include "../../frame/audio/speex.h"
 #include "../../frame/audio/vorbis.h"
 #include "../../util/ioUtil.h"
@@ -210,10 +210,10 @@ void TT_ATTRIBUTE_INNER ttLibC_MkvTag_getPrivateDataFrame(
 			track->frame = (ttLibC_Frame *)theora;
 		}
 		break;
-	case frameType_aac:
+	case frameType_aac2:
 		{
-			memcpy(&track->dsi_info, private_data, private_data_size);
-			ttLibC_Aac *aac = ttLibC_Aac_getFrame(
+//			memcpy(&track->dsi_info, private_data, private_data_size);
+			ttLibC_Aac2 *aac = ttLibC_Aac2_getFrame(
 					NULL,
 					private_data,
 					private_data_size,

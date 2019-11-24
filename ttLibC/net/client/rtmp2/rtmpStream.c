@@ -21,7 +21,7 @@
 
 #include "../../../frame/frame.h"
 #include "../../../frame/video/h264.h"
-#include "../../../frame/audio/aac.h"
+#include "../../../frame/audio/aac2.h"
 #include "../../../frame/audio/mp3.h"
 #include "../../../util/hexUtil.h"
 
@@ -181,7 +181,7 @@ bool TT_ATTRIBUTE_API ttLibC_RtmpStream_addFrame(
 			}
 		}
 		break;
-	case frameType_aac:
+	case frameType_aac2:
 	case frameType_mp3:
 	case frameType_nellymoser:
 	case frameType_pcm_alaw:
@@ -215,7 +215,7 @@ bool TT_ATTRIBUTE_API ttLibC_RtmpStream_addFrame(
 				}
 				if(video->dts > audio->pts) {
 					audio = ttLibC_FrameQueue_dequeue_first(stream_->audio_queue);
-					if(audio->type == frameType_aac) {
+					if(audio->type == frameType_aac2) {
 						ttLibC_AudioMessage *audioMessage = ttLibC_AudioMessage_addFrame(stream_->stream_id, (ttLibC_Audio *)audio);
 						if(audioMessage != NULL) {
 							audioMessage->is_dsi_info = true;
@@ -250,7 +250,7 @@ bool TT_ATTRIBUTE_API ttLibC_RtmpStream_addFrame(
 					break;
 				}
 				audio = ttLibC_FrameQueue_dequeue_first(stream_->audio_queue);
-				if(audio->type == frameType_aac) {
+				if(audio->type == frameType_aac2) {
 					ttLibC_AudioMessage *audioMessage = ttLibC_AudioMessage_addFrame(stream_->stream_id, (ttLibC_Audio *)audio);
 					if(audioMessage != NULL) {
 						audioMessage->is_dsi_info = true;

@@ -63,6 +63,7 @@ libttLibC_a_SOURCES= \
 	encoder/x264Encoder.c \
 	encoder/x265Encoder.c \
 	frame/audio/aac.c \
+	frame/audio/aac2.c \
 	frame/audio/adpcmImaWav.c \
 	frame/audio/audio.c \
 	frame/audio/mp3.c \
