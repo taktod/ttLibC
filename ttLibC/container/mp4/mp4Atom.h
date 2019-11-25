@@ -40,7 +40,7 @@ typedef struct ttLibC_Mp4Track {
 	uint64_t duration;
 	uint64_t pts;
 
-	uint64_t dsi_info; // dsi info for aac.
+//	uint64_t dsi_info; // dsi info for aac.
 	uint32_t size_length; // size for h264 size nal
 	// for vorbis private data.
 	ttLibC_DynamicBuffer *private_data;

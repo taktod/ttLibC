@@ -26,7 +26,7 @@ typedef struct ttLibC_Container_Flv_FlvAudioTag {
 	uint32_t bit_count;
 	uint32_t channel_num;
 	ttLibC_Frame_Type frame_type;
-	uint64_t aac_dsi_info; // aac dsi info will be copy from prev tag.
+//	uint64_t aac_dsi_info; // aac dsi info will be copy from prev tag.
 } ttLibC_Container_Flv_FlvAudioTag;
 
 typedef ttLibC_Container_Flv_FlvAudioTag ttLibC_FlvAudioTag;

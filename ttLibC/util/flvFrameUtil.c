@@ -39,7 +39,7 @@ typedef struct ttLibC_Util_FlvFrameManager_ {
 	/** size length for h264 nal */
 	uint32_t size_length;
 	/** current aac dsi information. */
-	uint64_t dsi_info;
+//	uint64_t dsi_info;
 } ttLibC_Util_FlvFrameManager_;
 
 typedef ttLibC_Util_FlvFrameManager_ ttLibC_FlvFrameManager_;
@@ -56,7 +56,7 @@ ttLibC_FlvFrameManager TT_ATTRIBUTE_API *ttLibC_FlvFrameManager_make() {
 	manager->audio_frame = NULL;
 	manager->video_frame = NULL;
 	manager->size_length = 0;
-	manager->dsi_info = 0;
+//	manager->dsi_info = 0;
 	manager->inherit_super.audio_type = frameType_unknown;
 	manager->inherit_super.video_type = frameType_unknown;
 	return (ttLibC_FlvFrameManager *)manager;
