@@ -68,7 +68,7 @@ ttLibC_AcDecoder TT_ATTRIBUTE_API *ttLibC_AcDecoder_make(
 	AudioStreamBasicDescription srcFormat, dstFormat;
 	// input
 	switch(decoder->frame_type) {
-	case frameType_aac:
+	case frameType_aac2:
 		srcFormat.mFormatID         = kAudioFormatMPEG4AAC;
 		// need flags maybe(default = low?)
 		break;
@@ -137,7 +137,7 @@ static OSStatus AcDecoder_decodeDataProc(
 	uint8_t *data = audio->inherit_super.data;
 	size_t data_size = audio->inherit_super.buffer_size;
 	switch(audio->inherit_super.type) {
-	case frameType_aac:
+	case frameType_aac2:
 		{
 			ttLibC_Aac2 *aac = (ttLibC_Aac2 *)audio;
 			// use aac data as raw type.

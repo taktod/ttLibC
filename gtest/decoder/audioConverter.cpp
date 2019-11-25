@@ -12,7 +12,7 @@ using namespace std;
 #endif
 
 AUDIOCONVERTER(DecodeTest, [this](){
-  auto decoder = ttLibC_AcDecoder_make(44100, 2, frameType_aac);
+  auto decoder = ttLibC_AcDecoder_make(44100, 2, frameType_aac2);
   // これをdecodeしてみることにしよう。
   ttLibC_Aac2 *aac = nullptr;
   ttLibC_Aac2 *a = nullptr;
