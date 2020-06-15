@@ -4,7 +4,7 @@
 
 using namespace std;
 
-#ifdef __ENABLE_APPLE__
+#ifdef __ENABLE_APPLE___
 #define AUDIOUNITRECORDER(A, B) TEST_F(UtilTest, AudioUnitRecorder##A){B();}
 #else
 #define AUDIOUNITRECORDER(A, B) TEST_F(UtilTest, DISABLED_AudioUnitRecorder##A){}
