@@ -125,7 +125,7 @@ bool TT_ATTRIBUTE_API ttLibC_MsAacEncoder_encode(
 	if(encoder_->aac == NULL) {
 		// need to make dsi information.
 		uint8_t dsiBuffer[16];
-		size_t dsiSize = ttLibC_Aac2_getDsiInfo(
+		size_t dsiSize = ttLibC_Aac2_makeAsiHeaderWithParams(
 			2,
 			encoder_->sample_rate,
 			encoder_->channel_num,
@@ -134,7 +134,7 @@ bool TT_ATTRIBUTE_API ttLibC_MsAacEncoder_encode(
 		if(dsiSize == 0) {
 			return false;
 		}
-		encoder_->aac = ttLibC_Aac_getFrame(
+		encoder_->aac = ttLibC_Aac2_getFrame(
 			NULL,
 			dsiBuffer,
 			dsiSize,
