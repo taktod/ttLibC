@@ -632,7 +632,7 @@ ttLibC_H265 TT_ATTRIBUTE_API *ttLibC_H265_getFrame(
 				non_copy_mode,
 				pts,
 				timebase);
-//	case H265NalType_idrNLp:
+	case H265NalType_idrNLp:
 	case H265NalType_craNut:
 		return ttLibC_H265_make(
 				prev_frame,
