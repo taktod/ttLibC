@@ -14,6 +14,7 @@ namespace ttLibCpp {
 class TT_ATTRIBUTE_API MkvWriter {
 public:
   static MkvWriter *create(std::vector<ttLibC_Frame_Type> types);
+  static MkvWriter *create(ttLibC_Frame_Type videoType, ttLibC_Frame_Type audioType);
   MkvWriter();
   virtual ~MkvWriter();
   virtual bool write(ttLibC_Frame *frame, std::function<bool(void *data, size_t data_size)>) = 0;

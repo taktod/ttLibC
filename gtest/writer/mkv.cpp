@@ -112,7 +112,7 @@ MKV(CppH264AacTest, [this](){
   sprintf(file, "%s/tools/data/source/test.h264.aac.mkv", getenv("HOME"));
   DataHolder_t holder = (DataHolder_t{
     ttLibC_MkvReader_make(),
-    MkvWriter::create({frameType_h264, frameType_aac2}),
+    MkvWriter::create(frameType_h264, frameType_aac2),
     fopen(file, "rb"),
     fopen("output.h264.aac.mkv", "wb"),
     0});

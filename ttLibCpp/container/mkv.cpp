@@ -568,7 +568,7 @@ private:
 
 class MkvWriter_ : public MkvWriter {
 public:
-  MkvWriter_(vector<ttLibC_Frame_Type> types) : MkvWriter(), isHeaderWritten(false) {
+  MkvWriter_(vector<ttLibC_Frame_Type> &types) : MkvWriter(), isHeaderWritten(false) {
     uint32_t id = 0;
     for(auto type : types) {
       id ++;
@@ -678,6 +678,10 @@ MkvWriter::MkvWriter() : pts(0), timebase(1000), unitDuration(5000), mode(0) {}
 MkvWriter::~MkvWriter() {}
 MkvWriter *MkvWriter::create(vector<ttLibC_Frame_Type> types) {
   return new MkvWriter_(types);
+}
+MkvWriter *MkvWriter::create(ttLibC_Frame_Type videoType, ttLibC_Frame_Type audioType) {
+  std::vector<ttLibC_Frame_Type> vec(videoType, audioType);
+  return new MkvWriter_(vec);
 }
 
 }
