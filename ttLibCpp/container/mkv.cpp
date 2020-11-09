@@ -680,7 +680,9 @@ MkvWriter *MkvWriter::create(vector<ttLibC_Frame_Type> types) {
   return new MkvWriter_(types);
 }
 MkvWriter *MkvWriter::create(ttLibC_Frame_Type videoType, ttLibC_Frame_Type audioType) {
-  std::vector<ttLibC_Frame_Type> vec(videoType, audioType);
+  std::vector<ttLibC_Frame_Type> vec;
+  vec.push_back(videoType);
+  vec.push_back(audioType);
   return new MkvWriter_(vec);
 }
 
