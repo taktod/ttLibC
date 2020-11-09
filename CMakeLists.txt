@@ -61,7 +61,7 @@ if(WIN32)
     ttLibC/util/msGlobalUtil.h
     ttLibC/util/msVideoCapturerUtil.h)
 else()
-  set(CMAKE_CXX_FLAGS "-std=c++0x")
+  set(CMAKE_CXX_FLAGS "-std=c++11 -fpermissive")
   if(APPLE)
     # for rpath
     set(CMAKE_MACOSX_RPATH 1)

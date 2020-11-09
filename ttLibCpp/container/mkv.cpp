@@ -7,6 +7,7 @@
 #include <iostream>
 #include <map>
 #include <queue>
+#include <memory>
 #include <ttLibC/frame/video/h264.h>
 #include <ttLibC/frame/video/h265.h>
 #include <ttLibC/frame/audio/mp3.h>
