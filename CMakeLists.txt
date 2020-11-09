@@ -38,6 +38,8 @@ option(TT_VORBIS     "enable vorbis"      ${TT_DEFAULT})
 option(TT_X264       "enable x264"        ${TT_DEFAULT})
 option(TT_X265       "enable x265"        ${TT_DEFAULT})
 
+include_directories(".")
+
 file(WRITE ${CMAKE_BINARY_DIR}/ttLibC_def.h "")
 if(WIN32)
   file(APPEND ${CMAKE_BINARY_DIR}/ttLibC_def.h "#define __ENABLE_WIN32__\n")
@@ -97,7 +99,8 @@ set(TTLIBC_CONTAINER_HEADERS
   ttLibC/container/mkv.h
   ttLibC/container/mp3.h
   ttLibC/container/mp4.h
-  ttLibC/container/mpegts.h)
+  ttLibC/container/mpegts.h
+  ttLibCpp/container/mkv.hpp)
 set(TTLIBC_FRAME_AUDIO_HEADERS
   ttLibC/frame/audio/aac.h
   ttLibC/frame/audio/aac2.h
@@ -144,7 +147,9 @@ set(TTLIBC_UTIL_HEADERS
   ttLibC/util/ioUtil.h
   ttLibC/util/stlListUtil.h
   ttLibC/util/stlMapUtil.h
-  ttLibC/util/tetty2.h)
+  ttLibC/util/tetty2.h
+  ttLibCpp/util/byteUtil.hpp
+  ttLibCpp/util/dynamicBufferUtil.hpp)
 
 # License (gpl lgpl bsd)
 message("Result ...")
@@ -177,7 +182,6 @@ configure_file(ttLibC/log.h.in ${CMAKE_CURRENT_SOURCE_DIR}/ttLibC/log.h @ONLY)
 # test(i wanna use gtest...) gpl -> any
 if(TT_TEST)
   message("test:       on")
-  include_directories(".")
 else()
   message("test:       off")
 endif()
@@ -951,7 +955,11 @@ add_library(ttLibC SHARED
   ttLibC/decoder/openh264Decoder.cpp
   ttLibC/resampler/msAudioResampler.cpp
   ttLibC/resampler/msImageResampler.cpp
-  ttLibC/resampler/soundtouchResampler.cpp)
+  ttLibC/resampler/soundtouchResampler.cpp
+  
+  ttLibCpp/container/mkv.cpp
+  ttLibCpp/util/byteUtil.cpp
+  ttLibCpp/util/dynamicBufferUtil.cpp)
 
 target_link_libraries(ttLibC PRIVATE
   ${TT_APPLE_LIBRARIES}
