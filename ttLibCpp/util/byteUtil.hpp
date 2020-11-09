@@ -9,7 +9,7 @@
 
 namespace ttLibCpp {
 
-class ByteConnector {
+class TT_ATTRIBUTE_API ByteConnector {
 public:
   static ByteConnector *create(void *data, size_t dataSize, ttLibC_ByteUtil_Type type);
   ByteConnector();

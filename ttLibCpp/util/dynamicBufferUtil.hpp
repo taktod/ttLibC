@@ -8,7 +8,7 @@
 
 namespace ttLibCpp {
 
-class DynamicBuffer {
+class TT_ATTRIBUTE_API DynamicBuffer {
 public:
   static DynamicBuffer *create();
   DynamicBuffer();

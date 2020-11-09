@@ -11,7 +11,7 @@
 
 namespace ttLibCpp {
 
-class MkvWriter {
+class TT_ATTRIBUTE_API MkvWriter {
 public:
   static MkvWriter *create(std::vector<ttLibC_Frame_Type> types);
   MkvWriter();
