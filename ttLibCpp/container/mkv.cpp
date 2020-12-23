@@ -624,8 +624,8 @@ public:
 
         // tracks
         unique_ptr<DynamicBuffer> tracksBuffer(DynamicBuffer::create());
-        for(uint32_t i = 0, size = tracks.size(); i < size; ++ i) {
-          tracks[i + 1]->writeInit([&](void *data, size_t dataSize){
+        for(auto track : tracks) {
+          track.second->writeInit([&](void *data, size_t dataSize){
             tracksBuffer->append(reinterpret_cast<uint8_t *>(data), dataSize);
             return true;
           });
@@ -653,7 +653,9 @@ public:
     frame->pts = (uint64_t)(1.0 * frame->pts * timebase / frame->timebase);
     frame->timebase = timebase;
     if(result) {
-      result = tracks[1]->makeSegmentHeader(frame, callback);
+      result = doTrack(1, [&](MkvTrack *track) {
+        return track->makeSegmentHeader(frame, callback);
+      });
     }
     if(result) {
       result = doTrack(frame->id, [&](MkvTrack *track){
@@ -666,8 +668,8 @@ public:
   }
 private:
   bool doTrack(uint32_t id, std::function<bool(MkvTrack *track)> callback) {
-    if(tracks[id] != nullptr) {
-      return callback(tracks[id]);
+    if(tracks.find(id) != tracks.end()) {
+      return callback(tracks.at(id));
     }
     return false;
   }
