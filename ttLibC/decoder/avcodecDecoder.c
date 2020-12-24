@@ -160,15 +160,7 @@ static bool AvcodecDecoder_decodeAudio(
 	decoder->packet.size = frame->inherit_super.buffer_size;
 	decoder->packet.pts = frame->inherit_super.pts;
 	int got_frame;
-	int result = avcodec_decode_audio4(decoder->dec, decoder->avframe, &got_frame, &decoder->packet);
-	if(result < 0) {
-		ERR_PRINT("failed to decode:%d", result);
-		return false;
-	}
-	if(got_frame != 1) {
-		return true;
-	}
-#ifdef TT_FF_OLD_AVCODEC
+#if LIBAVCODEC_VERSION_MAJOR >= 58
 	int result = avcodec_send_packet(decoder->dec, &decoder->packet);
 	if(result < 0 || result == AVERROR_EOF) {
 		ERR_PRINT("failed to decoder:%d", result);
@@ -183,6 +175,15 @@ static bool AvcodecDecoder_decodeAudio(
 			ERR_PRINT("failed to receive:%d", result);
 			return false;
 		}
+#else
+	int result = avcodec_decode_audio4(decoder->dec, decoder->avframe, &got_frame, &decoder->packet);
+	if(result < 0) {
+		ERR_PRINT("failed to decode:%d", result);
+		return false;
+	}
+	if(got_frame != 1) {
+		return true;
+	}
 #endif
 	// decode complete, now to make frame and call callback.
 	decoder->inherit_super.sample_rate = decoder->avframe->sample_rate;
@@ -328,7 +329,7 @@ static bool AvcodecDecoder_decodeAudio(
 		ERR_PRINT("unknown sample format:%d", decoder->dec->sample_fmt);
 		return false;
 	}
-#ifdef TT_FF_OLD_AVCODEC
+#if LIBAVCODEC_VERSION_MAJOR >= 58
 	} while(true);
 #endif
 	return false;
@@ -441,15 +442,7 @@ static bool AvcodecDecoder_decodeVideo(
 		break;
 	}
 	int got_picture;
-	int result = avcodec_decode_video2(decoder->dec, decoder->avframe, &got_picture, &decoder->packet);
-	if(result < 0) {
-		ERR_PRINT("failed to decode:%d", result);
-		return false;
-	}
-	if(got_picture != 1) {
-		return true;
-	}
-#ifdef TT_FF_OLD_AVCODEC
+#if LIBAVCODEC_VERSION_MAJOR >= 58
 	int result = avcodec_send_packet(decoder->dec, &decoder->packet);
 	if(result < 0) {
 		ERR_PRINT("failed to decode:%d", result);
@@ -467,6 +460,15 @@ static bool AvcodecDecoder_decodeVideo(
 			ERR_PRINT("failed to receive:%d", result);
 			return false;
 		}
+#else
+	int result = avcodec_decode_video2(decoder->dec, decoder->avframe, &got_picture, &decoder->packet);
+	if(result < 0) {
+		ERR_PRINT("failed to decode:%d", result);
+		return false;
+	}
+	if(got_picture != 1) {
+		return true;
+	}
 #endif
 	// decode complete now make frame and call callback.
 	decoder->inherit_super.width  = decoder->avframe->width;
@@ -787,7 +789,7 @@ static bool AvcodecDecoder_decodeVideo(
 		ERR_PRINT("unknown pixfmt output.%d", decoder->dec->pix_fmt);
 		return false;
 	}
-#ifdef TT_FF_OLD_AVCODEC
+#if LIBAVCODEC_VERSION_MAJOR >= 58
 	}while(true);
 #endif
 	return false;
@@ -798,7 +800,9 @@ static bool AvcodecDecoder_decodeVideo(
  * @param frame_type target ttLibC_Frame_Type
  */
 void TT_ATTRIBUTE_API *ttLibC_AvcodecDecoder_getAVCodecContext(ttLibC_Frame_Type frame_type) {
+#if LIBAVCODEC_VERSION_MAJOR < 58
 	avcodec_register_all();
+#endif
 	AVCodec *codec = NULL;
 	switch(frame_type) {
 	case frameType_aac2:
