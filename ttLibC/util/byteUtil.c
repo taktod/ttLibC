@@ -645,7 +645,7 @@ bool TT_ATTRIBUTE_API ttLibC_ByteConnector_ebml2(
 		return false;
 	}
 	if(!is_tag) {
-		if(value < 0x80) {
+		if(value < 0x7F) {
 			if(connector_->data_size < 1) {
 				connector_->inherit_super.error_number = 1;
 				connector_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_NeedMoreOutput);
@@ -657,7 +657,7 @@ bool TT_ATTRIBUTE_API ttLibC_ByteConnector_ebml2(
 			++ connector_->inherit_super.write_size;
 			return true;
 		}
-		if(value < 0x4000) {
+		if(value < 0x3FFF) {
 			if(connector_->data_size < 2) {
 				connector_->inherit_super.error_number = 1;
 				connector_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_NeedMoreOutput);
@@ -670,7 +670,7 @@ bool TT_ATTRIBUTE_API ttLibC_ByteConnector_ebml2(
 			connector_->inherit_super.write_size += 2;
 			return true;
 		}
-		if(value < 0x200000) {
+		if(value < 0x1FFFFF) {
 			if(connector_->data_size < 3) {
 				connector_->inherit_super.error_number = 1;
 				connector_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_NeedMoreOutput);
@@ -684,7 +684,7 @@ bool TT_ATTRIBUTE_API ttLibC_ByteConnector_ebml2(
 			connector_->inherit_super.write_size += 3;
 			return true;
 		}
-		if(value < 0x10000000L) {
+		if(value < 0x0FFFFFFFL) {
 			if(connector_->data_size < 4) {
 				connector_->inherit_super.error_number = 1;
 				connector_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_NeedMoreOutput);
@@ -699,7 +699,7 @@ bool TT_ATTRIBUTE_API ttLibC_ByteConnector_ebml2(
 			connector_->inherit_super.write_size += 4;
 			return true;
 		}
-		if(value < 0x0800000000L) {
+		if(value < 0x07FFFFFFFFL) {
 			if(connector_->data_size < 5) {
 				connector_->inherit_super.error_number = 1;
 				connector_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_NeedMoreOutput);
@@ -715,7 +715,7 @@ bool TT_ATTRIBUTE_API ttLibC_ByteConnector_ebml2(
 			connector_->inherit_super.write_size += 5;
 			return true;
 		}
-		if(value < 0x040000000000L) {
+		if(value < 0x03FFFFFFFFFFL) {
 			if(connector_->data_size < 6) {
 				connector_->inherit_super.error_number = 1;
 				connector_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_NeedMoreOutput);
@@ -732,7 +732,7 @@ bool TT_ATTRIBUTE_API ttLibC_ByteConnector_ebml2(
 			connector_->inherit_super.write_size += 6;
 			return true;
 		}
-		if(value < 0x02000000000000L) {
+		if(value < 0x01FFFFFFFFFFFFL) {
 			if(connector_->data_size < 7) {
 				connector_->inherit_super.error_number = 1;
 				connector_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_NeedMoreOutput);
@@ -750,7 +750,7 @@ bool TT_ATTRIBUTE_API ttLibC_ByteConnector_ebml2(
 			connector_->inherit_super.write_size += 7;
 			return true;
 		}
-		if(value < 0x0100000000000000L) {
+		if(value < 0x00FFFFFFFFFFFFFFL) {
 			if(connector_->data_size < 8) {
 				connector_->inherit_super.error_number = 1;
 				connector_->inherit_super.error = ttLibC_updateError(Target_On_Util, Error_NeedMoreOutput);
