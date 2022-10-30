@@ -457,6 +457,17 @@ static Error_e H265_analyzeSPSNut(
 	}
 	uint32_t width = ttLibC_ByteReader_expGolomb(reader, false);
 	uint32_t height = ttLibC_ByteReader_expGolomb(reader, false);
+	uint32_t conformance_window_flag = ttLibC_ByteReader_bit(reader, 1);
+	if(conformance_window_flag == 1) {
+		uint32_t conf_win_left_offset = ttLibC_ByteReader_expGolomb(reader, false);
+		uint32_t conf_win_right_offset = ttLibC_ByteReader_expGolomb(reader, false);
+		uint32_t conf_win_top_offset = ttLibC_ByteReader_expGolomb(reader, false);
+		uint32_t conf_win_bottom_offset = ttLibC_ByteReader_expGolomb(reader, false);
+		int subWidth[4] = {1,2,2,1};
+		int subHeight[4] = {1,2,1,1};
+		width = width - subWidth[chroma_format_idc] * (conf_win_left_offset + conf_win_right_offset);
+		height = height - subHeight[chroma_format_idc] * (conf_win_top_offset + conf_win_bottom_offset);
+	}
 	ref->width = width;
 	ref->height = height;
 	ttLibC_ByteReader_close(&reader);
